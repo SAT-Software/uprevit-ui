@@ -1,5 +1,5 @@
 // Function to generate Excel-style column names (A, B, C, ..., Z, AA, AB, etc.)
-const getExcelColumnName = (index) => {
+const getExcelColumnName = (index: number) => {
   let result = "";
   let num = index;
 
