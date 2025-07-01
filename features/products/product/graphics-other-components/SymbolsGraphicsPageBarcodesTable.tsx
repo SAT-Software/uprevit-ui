@@ -80,8 +80,10 @@ const columns: ColumnDef<Item>[] = [
     ),
     size: 60,
   },
+
+  // Use select component to show fixed list if all types of barcodes
   {
-    header: "Component Name",
+    header: "Barcode Type",
     accessorKey: "componentName",
     enableSorting: true,
     cell: ({ row }) => (
@@ -89,8 +91,24 @@ const columns: ColumnDef<Item>[] = [
     ),
     size: 180,
   },
+
+  // Simple input block where user can add their barcode data
   {
-    header: "Description",
+    header: "Barcode Data",
+    accessorKey: "componentDescription",
+    enableSorting: true,
+    cell: ({ row }) => (
+      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+        {row.getValue("componentDescription")}
+      </div>
+    ),
+    size: 220,
+  },
+
+  // use Origin UI MultiSelect component for this column only in each row.
+  // later on we will save the array of strings in database based on selections
+  {
+    header: "Presence on labels",
     accessorKey: "componentDescription",
     enableSorting: true,
     cell: ({ row }) => (
@@ -109,7 +127,7 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-type ProductGraphicsAndOtherCompsTableProps = {
+type SymbolsGraphicsPageBarcodesTableProps = {
   data?: Item[];
 };
 
@@ -156,9 +174,9 @@ import { Label } from "@/components/ui/label";
 
 import { useId } from "react";
 
-export default function ProductGraphicsAndOtherCompsTable({
+export default function SymbolsGraphicsPageBarcodesTable({
   data: dataProp,
-}: ProductGraphicsAndOtherCompsTableProps) {
+}: SymbolsGraphicsPageBarcodesTableProps) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
