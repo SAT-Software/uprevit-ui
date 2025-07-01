@@ -14,9 +14,28 @@ import { UniverSheetsDataValidationPreset } from "@univerjs/presets/preset-sheet
 import UniverPresetSheetsDataValidationEnUS from "@univerjs/presets/preset-sheets-data-validation/locales/en-US";
 import { UniverSheetsFilterPreset } from "@univerjs/presets/preset-sheets-filter";
 import UniverPresetSheetsFilterEnUS from "@univerjs/presets/preset-sheets-filter/locales/en-US";
+import { UniverSheetsFindReplacePreset } from "@univerjs/presets/preset-sheets-find-replace";
+import UniverPresetSheetsFindReplaceEnUS from "@univerjs/presets/preset-sheets-find-replace/locales/en-US";
+import { UniverSheetsDrawingPreset } from "@univerjs/presets/preset-sheets-drawing";
+import UniverPresetSheetsDrawingEnUS from "@univerjs/presets/preset-sheets-drawing/locales/en-US";
+import { UniverSheetsThreadCommentPreset } from "@univerjs/presets/preset-sheets-thread-comment";
+import UniverPresetSheetsThreadCommentEnUS from "@univerjs/presets/preset-sheets-thread-comment/locales/en-US";
+import { UniverSheetsNotePreset } from "@univerjs/presets/preset-sheets-note";
+import UniverPresetSheetsNoteEnUS from "@univerjs/presets/preset-sheets-note/locales/en-US";
+import { UniverSheetsTablePreset } from "@univerjs/presets/preset-sheets-table";
+import UniverPresetSheetsTableEnUS from "@univerjs/presets/preset-sheets-table/locales/en-US";
+import { UniverSheetsSortPreset } from "@univerjs/presets/preset-sheets-sort";
+import SheetsSortEnUS from "@univerjs/presets/preset-sheets-sort/locales/en-US";
 
 import "@univerjs/presets/lib/styles/preset-sheets-data-validation.css";
 import "@univerjs/presets/lib/styles/preset-sheets-filter.css";
+import "@univerjs/presets/lib/styles/preset-sheets-find-replace.css";
+import "@univerjs/presets/lib/styles/preset-sheets-drawing.css";
+import "@univerjs/presets/lib/styles/preset-sheets-thread-comment.css";
+import "@univerjs/presets/lib/styles/preset-sheets-core.css";
+import "@univerjs/presets/lib/styles/preset-sheets-table.css";
+import "@univerjs/presets/lib/styles/preset-sheets-table.css";
+import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
 
 import "@univerjs/presets/lib/styles/preset-sheets-core.css";
 
@@ -51,7 +70,13 @@ const ProductDataGrid = forwardRef<ProductDataGridRef>((_, ref) => {
           {},
           UniverPresetSheetsCoreEnUS,
           UniverPresetSheetsDataValidationEnUS,
-          UniverPresetSheetsFilterEnUS
+          UniverPresetSheetsFilterEnUS,
+          UniverPresetSheetsFindReplaceEnUS,
+          UniverPresetSheetsDrawingEnUS,
+          UniverPresetSheetsThreadCommentEnUS,
+          UniverPresetSheetsNoteEnUS,
+          UniverPresetSheetsTableEnUS,
+          SheetsSortEnUS
         ),
       },
       theme: defaultTheme,
@@ -63,6 +88,12 @@ const ProductDataGrid = forwardRef<ProductDataGridRef>((_, ref) => {
           showEditOnDropdown: true,
         }),
         UniverSheetsFilterPreset(),
+        UniverSheetsFindReplacePreset(),
+        UniverSheetsDrawingPreset(),
+        UniverSheetsThreadCommentPreset(),
+        UniverSheetsNotePreset(),
+        UniverSheetsTablePreset(),
+        UniverSheetsSortPreset(),
       ],
     });
 

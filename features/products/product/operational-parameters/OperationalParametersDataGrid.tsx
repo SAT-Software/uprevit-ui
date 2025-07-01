@@ -1,0 +1,140 @@
+"use client";
+
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import {
+  createUniver,
+  defaultTheme,
+  LocaleType,
+  merge,
+} from "@univerjs/presets";
+import { IWorkbookData } from "@univerjs/core";
+import { UniverSheetsCorePreset } from "@univerjs/presets/preset-sheets-core";
+import UniverPresetSheetsCoreEnUS from "@univerjs/presets/preset-sheets-core/locales/en-US";
+import { UniverSheetsDataValidationPreset } from "@univerjs/presets/preset-sheets-data-validation";
+import UniverPresetSheetsDataValidationEnUS from "@univerjs/presets/preset-sheets-data-validation/locales/en-US";
+import { UniverSheetsFilterPreset } from "@univerjs/presets/preset-sheets-filter";
+import UniverPresetSheetsFilterEnUS from "@univerjs/presets/preset-sheets-filter/locales/en-US";
+import { UniverSheetsFindReplacePreset } from "@univerjs/presets/preset-sheets-find-replace";
+import UniverPresetSheetsFindReplaceEnUS from "@univerjs/presets/preset-sheets-find-replace/locales/en-US";
+import { UniverSheetsDrawingPreset } from "@univerjs/presets/preset-sheets-drawing";
+import UniverPresetSheetsDrawingEnUS from "@univerjs/presets/preset-sheets-drawing/locales/en-US";
+import { UniverSheetsThreadCommentPreset } from "@univerjs/presets/preset-sheets-thread-comment";
+import UniverPresetSheetsThreadCommentEnUS from "@univerjs/presets/preset-sheets-thread-comment/locales/en-US";
+import { UniverSheetsNotePreset } from "@univerjs/presets/preset-sheets-note";
+import UniverPresetSheetsNoteEnUS from "@univerjs/presets/preset-sheets-note/locales/en-US";
+import { UniverSheetsTablePreset } from "@univerjs/presets/preset-sheets-table";
+import UniverPresetSheetsTableEnUS from "@univerjs/presets/preset-sheets-table/locales/en-US";
+import { UniverSheetsSortPreset } from "@univerjs/presets/preset-sheets-sort";
+import SheetsSortEnUS from "@univerjs/presets/preset-sheets-sort/locales/en-US";
+
+import "@univerjs/presets/lib/styles/preset-sheets-data-validation.css";
+import "@univerjs/presets/lib/styles/preset-sheets-filter.css";
+import "@univerjs/presets/lib/styles/preset-sheets-find-replace.css";
+import "@univerjs/presets/lib/styles/preset-sheets-drawing.css";
+import "@univerjs/presets/lib/styles/preset-sheets-thread-comment.css";
+import "@univerjs/presets/lib/styles/preset-sheets-core.css";
+import "@univerjs/presets/lib/styles/preset-sheets-table.css";
+import "@univerjs/presets/lib/styles/preset-sheets-table.css";
+import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
+
+import "@univerjs/presets/lib/styles/preset-sheets-core.css";
+
+export interface OperationalParametersDataGridRefRef {
+  saveData: () => IWorkbookData | null;
+}
+
+const OperationalParametersDataGridRef =
+  forwardRef<OperationalParametersDataGridRefRef>((_, ref) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const univerAPIRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    useImperativeHandle(ref, () => ({
+      saveData: () => {
+        if (!univerAPIRef.current) return null;
+        try {
+          const workbook = univerAPIRef.current.getActiveWorkbook();
+          return workbook.save();
+        } catch (error) {
+          console.error("Error saving data:", error);
+          return null;
+        }
+      },
+    }));
+
+    useEffect(() => {
+      if (!containerRef.current) return;
+
+      const { univerAPI } = createUniver({
+        locale: LocaleType.EN_US,
+        locales: {
+          [LocaleType.EN_US]: merge(
+            {},
+            UniverPresetSheetsCoreEnUS,
+            UniverPresetSheetsDataValidationEnUS,
+            UniverPresetSheetsFilterEnUS,
+            UniverPresetSheetsFindReplaceEnUS,
+            UniverPresetSheetsDrawingEnUS,
+            UniverPresetSheetsThreadCommentEnUS,
+            UniverPresetSheetsNoteEnUS,
+            UniverPresetSheetsTableEnUS,
+            SheetsSortEnUS
+          ),
+        },
+        theme: defaultTheme,
+        presets: [
+          UniverSheetsCorePreset({
+            container: containerRef.current,
+          }),
+          UniverSheetsDataValidationPreset({
+            showEditOnDropdown: true,
+          }),
+          UniverSheetsFilterPreset(),
+          UniverSheetsFindReplacePreset(),
+          UniverSheetsDrawingPreset(),
+          UniverSheetsThreadCommentPreset(),
+          UniverSheetsNotePreset(),
+          UniverSheetsTablePreset(),
+          UniverSheetsSortPreset(),
+        ],
+      });
+
+      univerAPIRef.current = univerAPI;
+
+      // Sample product data
+      const operationalParametersData: IWorkbookData = {
+        id: "operational-parameters-workbook",
+        name: "Operational Parameters",
+        locale: LocaleType.EN_US,
+        appVersion: "0.1.0",
+        styles: {},
+        sheets: {
+          sheet1: {
+            id: "sheet1",
+            name: "Operational Parameters",
+            cellData: {},
+            rowCount: 1000,
+            columnCount: 26,
+          },
+        },
+        sheetOrder: ["sheet1"],
+      };
+
+      univerAPI.createUniverSheet(operationalParametersData);
+
+      return () => {
+        univerAPI.dispose();
+      };
+    }, []);
+
+    return (
+      <div
+        ref={containerRef}
+        className="w-full h-full border border-border rounded-xl overflow-hidden"
+      />
+    );
+  });
+
+OperationalParametersDataGridRef.displayName =
+  "OperationalParametersDataGridRef";
+
+export default OperationalParametersDataGridRef;

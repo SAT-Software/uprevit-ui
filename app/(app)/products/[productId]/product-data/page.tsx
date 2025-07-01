@@ -10,10 +10,15 @@ import ProductDataGrid, {
   ProductDataGridRef,
 } from "@/features/products/product/product-data/ProductDataGrid";
 import { Save } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export default function Page() {
   const productDataGridRef = useRef<ProductDataGridRef>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSave = () => {
     const savedData = productDataGridRef.current?.saveData();
@@ -51,7 +56,13 @@ export default function Page() {
           <Download className="h-4 w-4 " />
         </Button> */}
       </div>
-      <ProductDataGrid ref={productDataGridRef} />
+      {isMounted ? (
+        <ProductDataGrid ref={productDataGridRef} />
+      ) : (
+        <div className="flex items-center justify-center h-full w-full">
+          <div className="text-muted-foreground">Loading spreadsheet...</div>
+        </div>
+      )}
     </div>
   );
 }
