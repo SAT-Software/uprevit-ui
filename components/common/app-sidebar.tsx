@@ -115,14 +115,19 @@ const data = {
       icon: LayoutGrid,
     },
     {
-      title: "Component details",
-      url: "/component-details",
-      icon: LayoutList,
-    },
-    {
       title: "Compliance information",
       url: "/compliance-information",
       icon: BookOpenCheck,
+    },
+    {
+      title: "Label Components",
+      url: "/label-components",
+      icon: LayoutList,
+    },
+    {
+      title: "Symbols & Graphics",
+      url: "/symbols-graphics",
+      icon: ImagePlus,
     },
     {
       title: "Product data",
@@ -138,11 +143,6 @@ const data = {
       title: "Label tags",
       url: "/label-tags",
       icon: Tags,
-    },
-    {
-      title: "Graphics & components",
-      url: "/schematics-symbols",
-      icon: ImagePlus,
     },
   ],
 };

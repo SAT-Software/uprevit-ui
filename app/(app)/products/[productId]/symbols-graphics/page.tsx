@@ -47,7 +47,7 @@ const SymbolsData = [
     componentName: "Electrical Symbols",
     componentDescription: "Standard electrical symbols set.",
     componentImage:
-      "https://images.unsplash.com/photo-1581092921461-39b9d08a9b21?auto=format&fit=crop&w=200&q=80",
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
     note: "Standard electrical symbols set.",
   },
   {
@@ -55,7 +55,7 @@ const SymbolsData = [
     componentName: "Mechanical Symbols",
     componentDescription: "Mechanical engineering symbols.",
     componentImage:
-      "https://images.unsplash.com/photo-1581092921461-39b9d08a9b21?auto=format&fit=crop&w=200&q=80",
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
     note: "Mechanical engineering symbols.",
   },
 ];
