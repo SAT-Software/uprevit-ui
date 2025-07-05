@@ -1,4 +1,4 @@
-import { departments } from "@/app/(app)/departments/page";
+import { departments } from "@/app/(app)/departments/data";
 import { projects } from "@/app/(app)/projects/page";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -17,13 +17,13 @@ import EditProductDialog from "@/features/products/product/product-information/P
 import { PiCirclesThreePlusDuotone, PiKanbanDuotone } from "react-icons/pi";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     productId: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: PageProps) {
-  const { productId } = params;
+export default async function Page({ params }: PageProps) {
+  const { productId } = await params;
 
   const productData = sampleProducts.find(
     (product) => product.productId === productId
