@@ -13,19 +13,20 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { projects as allProjectsData } from "@/app/(app)/projects/page";
 import { PiKanbanDuotone } from "react-icons/pi";
-import { departments } from "../page";
+import { departments } from "../data";
 
 interface DepartmentDetailPageProps {
-  params: { departmentId: string };
+  params: Promise<{ departmentId: string }>;
 }
 
-export default function DepartmentDetailPage({
+export default async function DepartmentDetailPage({
   params,
 }: DepartmentDetailPageProps) {
-  const department = departments.find((d) => d.id === params.departmentId);
+  const { departmentId } = await params;
+  const department = departments.find((d) => d.id === departmentId);
 
   const departmentProjects = allProjectsData.filter(
-    (project) => project.departmentId === params.departmentId
+    (project) => project.departmentId === departmentId
   );
 
   if (!department) return notFound();
@@ -147,10 +148,14 @@ export default function DepartmentDetailPage({
                       {project.name}
                     </h3>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-                      <CalendarClock className="w-3 h-3" />
-                      <span className="whitespace-nowrap">
-                        {project.date?.split(" - ")[0] || "N/A"}
-                      </span>
+                                              <CalendarClock className="w-3 h-3" />
+                        <span className="whitespace-nowrap">
+                          {new Date(project.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
                     </div>
                   </div>
 
