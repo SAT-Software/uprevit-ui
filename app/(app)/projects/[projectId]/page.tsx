@@ -9,15 +9,16 @@ import { Item } from "@/features/products/ProductsPageProductTable";
 import { PiKanbanDuotone } from "react-icons/pi";
 
 interface ProjectDetailPageProps {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const project = projects.find((p) => p.id === params.projectId);
+export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+	const projectId = (await params).projectId;
+  const project = projects.find((p) => p.id === projectId);
 
   // Filter products for the current project
   const projectProducts = productsData.filter(
-    (product: Item) => product.projectId === params.projectId
+    (product: Item) => product.projectId === projectId
   );
 
   if (!project) return notFound();
