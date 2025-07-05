@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CalendarDays, User } from "lucide-react";
 import Link from "next/link";
-import { sampleProducts } from "../../page";
+import { sampleProducts } from "../../data";
 import ProductInformationCard from "@/features/products/product/product-information/ProductInformationCard";
 import EditProductDialog from "@/features/products/product/product-information/ProductInformationEditProductDialog";
 

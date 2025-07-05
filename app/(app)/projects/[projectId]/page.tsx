@@ -2,7 +2,7 @@ import Image from "next/image";
 import { CalendarClock, Text, Edit, Share2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
-import { sampleProducts as productsData } from "@/app/(app)/products/page";
+import { sampleProducts as productsData } from "@/app/(app)/products/data";
 import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
 import { projects } from "../page";
 import { Item } from "@/features/products/ProductsPageProductTable";

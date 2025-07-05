@@ -12,7 +12,7 @@ import {
 } from "react-icons/pi";
 import { projects as allProjectsData } from "@/app/(app)/projects/page";
 import { departments } from "../departments/data";
-import { sampleProducts } from "../products/page";
+import { sampleProducts } from "../products/data";
 
 const departmentsLookup: { [key: string]: string } = {
   uih2gf872y: "Department One",

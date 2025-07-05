@@ -24,7 +24,7 @@ import {
 
 // Import actual data
 import { departments } from "@/app/(app)/departments/data";
-import { sampleProducts } from "@/app/(app)/products/page";
+import { sampleProducts } from "@/app/(app)/products/data";
 import { projects } from "@/app/(app)/projects/page";
 import {
   PiStackPlusDuotone,

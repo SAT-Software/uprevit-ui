@@ -1,6 +1,6 @@
 "use client";
 
-import { sampleProducts } from "@/app/(app)/products/page";
+import { sampleProducts } from "@/app/(app)/products/data";
 import { Button } from "@/components/ui/button";
 import { PiPlusBold } from "react-icons/pi";
 import { BookmarkIcon } from "lucide-react";
