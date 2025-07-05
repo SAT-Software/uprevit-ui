@@ -19,7 +19,7 @@ import { useId, useState } from "react";
 
 // Import actual data from the pages
 import { departments } from "@/app/(app)/departments/data";
-import { projects } from "@/app/(app)/projects/page";
+import { projects } from "@/app/(app)/projects/data";
 import { Item } from "./ProductsPageProductTable";
 
 export interface UpdateProductDialogProps {

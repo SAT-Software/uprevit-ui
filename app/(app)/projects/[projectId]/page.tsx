@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 import { sampleProducts as productsData } from "@/app/(app)/products/data";
 import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
-import { projects } from "../page";
+import { projects } from "../data";
 import { Item } from "@/features/products/ProductsPageProductTable";
 import { PiKanbanDuotone } from "react-icons/pi";
 

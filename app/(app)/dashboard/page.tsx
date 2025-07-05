@@ -10,7 +10,7 @@ import {
   PiKanban,
   PiStackPlus,
 } from "react-icons/pi";
-import { projects as allProjectsData } from "@/app/(app)/projects/page";
+import { projects as allProjectsData } from "@/app/(app)/projects/data";
 import { departments } from "../departments/data";
 import { sampleProducts } from "../products/data";
 

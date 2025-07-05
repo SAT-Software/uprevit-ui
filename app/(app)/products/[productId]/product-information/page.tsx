@@ -1,5 +1,5 @@
 import { departments } from "@/app/(app)/departments/data";
-import { projects } from "@/app/(app)/projects/page";
+import { projects } from "@/app/(app)/projects/data";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {

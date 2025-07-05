@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { projects as allProjectsData } from "@/app/(app)/projects/page";
+import { projects as allProjectsData } from "@/app/(app)/projects/data";
 import { PiKanbanDuotone } from "react-icons/pi";
 import { departments } from "../data";
 
