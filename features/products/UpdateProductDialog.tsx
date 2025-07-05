@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PencilIcon } from "lucide-react";
 
 // Import actual data from the pages
-import { departments } from "@/app/(app)/departments/page";
+import { departments } from "@/app/(app)/departments/data";
 import { projects } from "@/app/(app)/projects/page";
 import { Item } from "./ProductsPageProductTable";
 

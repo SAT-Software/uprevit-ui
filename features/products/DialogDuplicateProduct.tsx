@@ -18,7 +18,7 @@ import { CopyIcon } from "lucide-react";
 import { useId, useState } from "react";
 
 // Import actual data from the pages
-import { departments } from "@/app/(app)/departments/page";
+import { departments } from "@/app/(app)/departments/data";
 import { projects } from "@/app/(app)/projects/page";
 import { Item } from "./ProductsPageProductTable";
 
