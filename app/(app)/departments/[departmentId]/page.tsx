@@ -149,7 +149,7 @@ export default function DepartmentDetailPage({
                     <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
                       <CalendarClock className="w-3 h-3" />
                       <span className="whitespace-nowrap">
-                        {project.date?.split(" - ")[0] || "N/A"}
+                        {new Date(project.date).toLocaleDateString() : "N/A"}
                       </span>
                     </div>
                   </div>

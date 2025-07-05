@@ -49,7 +49,7 @@ type DashboardProject = {
 };
 
 // Map the recent projects to the required structure
-export const projects: DashboardProject[] = recentProjectsData.map((p) => ({
+const projects: DashboardProject[] = recentProjectsData.map((p) => ({
   id: p.id,
   image: p.image,
   projectNumber: p.id, // Use project ID as project number for now

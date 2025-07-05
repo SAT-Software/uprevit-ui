@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { LoginButton } from "@/components/auth/login-button";
 
 export default function Home() {
   return (
@@ -12,11 +11,7 @@ export default function Home() {
         ease. Collaborate seamlessly across teams and effortlessly track your
         departments, projects and products - all in one place.
       </p>
-      <Link href="/dashboard">
-        <Button variant="default" className="w-fit mt-4">
-          Get Started
-        </Button>
-      </Link>
+      <LoginButton />
     </div>
   );
 }
