@@ -129,7 +129,7 @@ const OperationalParametersDataGridRef =
     return (
       <div
         ref={containerRef}
-        className="w-full h-full border border-border rounded-xl overflow-hidden"
+        className="w-full h-[calc(100vh-10rem)] border border-border rounded-xl overflow-hidden"
       />
     );
   });

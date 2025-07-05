@@ -173,7 +173,7 @@ const ProductDataGrid = forwardRef<ProductDataGridRef>((_, ref) => {
       sheetOrder: ["sheet1"],
     };
 
-    univerAPI.createUniverSheet(productData);
+    univerAPI.createWorkbook(productData);
 
     return () => {
       univerAPI.dispose();
@@ -183,7 +183,7 @@ const ProductDataGrid = forwardRef<ProductDataGridRef>((_, ref) => {
   return (
     <div
       ref={containerRef}
-      className="w-full h-full border border-border rounded-xl overflow-hidden"
+      className="w-full h-[calc(100vh-10rem)] border border-border rounded-xl overflow-hidden"
     />
   );
 });
