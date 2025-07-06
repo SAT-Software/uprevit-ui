@@ -1,9 +1,8 @@
 import { Share2Icon, LinkIcon, CopyIcon, CheckIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -24,14 +23,21 @@ export default function DialogShareProduct({
 }: {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  product?: any;
+  product?: { productId: string; productName?: string };
   children?: React.ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
+  const [productLink, setProductLink] = useState("/products/sample-id");
 
-  const productLink = product?.productId
-    ? `${window.location.origin}/products/${product.productId}`
-    : "/products/sample-id";
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setProductLink(
+        product?.productId
+          ? `${window.location.origin}/products/${product.productId}`
+          : "/products/sample-id"
+      );
+    }
+  }, [product?.productId]);
 
   const handleCopyLink = async () => {
     try {

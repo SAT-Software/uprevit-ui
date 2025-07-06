@@ -26,7 +26,7 @@ import {
 } from "react-icons/pi";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { sampleProducts } from "@/app/(app)/products/page";
+import { sampleProducts } from "@/app/(app)/products/data";
 import { Button } from "../ui/button";
 
 const pathData = [

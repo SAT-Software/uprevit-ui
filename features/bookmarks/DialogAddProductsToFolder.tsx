@@ -23,9 +23,9 @@ import {
 } from "@/components/ui/select";
 
 // Import actual data
-import { departments } from "@/app/(app)/departments/page";
-import { sampleProducts } from "@/app/(app)/products/page";
-import { projects } from "@/app/(app)/projects/page";
+import { departments } from "@/app/(app)/departments/data";
+import { sampleProducts } from "@/app/(app)/products/data";
+import { projects } from "@/app/(app)/projects/data";
 import {
   PiStackPlusDuotone,
   PiCirclesThreePlusDuotone,

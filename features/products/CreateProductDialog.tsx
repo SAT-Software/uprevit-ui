@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select";
 
 // Import actual data from the pages
-import { departments } from "@/app/(app)/departments/page";
-import { projects } from "@/app/(app)/projects/page";
+import { departments } from "@/app/(app)/departments/data";
+import { projects } from "@/app/(app)/projects/data";
 
 export default function CreateProductDialog() {
   const id = useId();

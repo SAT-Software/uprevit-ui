@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
-import { sampleProducts } from "@/app/(app)/products/page";
+import { sampleProducts } from "@/app/(app)/products/data";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Link from "next/link";

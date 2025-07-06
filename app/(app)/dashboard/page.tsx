@@ -10,9 +10,9 @@ import {
   PiKanban,
   PiStackPlus,
 } from "react-icons/pi";
-import { projects as allProjectsData } from "@/app/(app)/projects/page";
-import { departments } from "../departments/page";
-import { sampleProducts } from "../products/page";
+import { projects as allProjectsData } from "@/app/(app)/projects/data";
+import { departments } from "../departments/data";
+import { sampleProducts } from "../products/data";
 
 const departmentsLookup: { [key: string]: string } = {
   uih2gf872y: "Department One",
@@ -49,7 +49,7 @@ type DashboardProject = {
 };
 
 // Map the recent projects to the required structure
-export const projects: DashboardProject[] = recentProjectsData.map((p) => ({
+const projects: DashboardProject[] = recentProjectsData.map((p) => ({
   id: p.id,
   image: p.image,
   projectNumber: p.id, // Use project ID as project number for now
