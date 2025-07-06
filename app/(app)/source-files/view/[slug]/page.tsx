@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { PiPlusBold } from "react-icons/pi";
 import { FolderIcon } from "lucide-react";
-import { sampleProducts } from "@/app/(app)/products/page";
+import { sampleProducts } from "@/app/(app)/products/data";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import UploadSourceFiles from "@/features/source-files/UploadSourceFiles";

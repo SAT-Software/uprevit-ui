@@ -1,49 +1,17 @@
 "use client";
 
+import { Fragment, useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  PaginationState,
-  Row,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  EllipsisIcon,
-} from "lucide-react";
-import { Fragment, useId, useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import NextImage from "next/image";
 import {
   Table,
   TableBody,
@@ -52,24 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import { Label } from "@/components/ui/label";
 
-type ComponentItem = {
+type Item = {
   id: string;
   componentName: string;
   componentDescription: string;
-  componentNumber: string;
   componentImage: string;
   note?: string;
 };
 
-const columns: ColumnDef<ComponentItem>[] = [
+const columns: ColumnDef<Item>[] = [
   {
     id: "expander",
     header: () => null,
@@ -103,40 +63,34 @@ const columns: ColumnDef<ComponentItem>[] = [
         </Button>
       ) : undefined;
     },
+    size: 40,
   },
   {
     header: "Image",
     accessorKey: "componentImage",
     cell: ({ row }) => (
-      <Image
+      <NextImage
         src={row.original.componentImage}
         alt={row.original.componentName}
         width={50}
         height={50}
         className="object-cover rounded border"
+        style={{ maxWidth: 50, maxHeight: 50 }}
       />
     ),
+    size: 60,
   },
   {
-    header: "Component Name",
+    header: "Schematic Name",
     accessorKey: "componentName",
     enableSorting: true,
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue("componentName")}</div>
     ),
+    size: 180,
   },
   {
-    header: "Component #",
-    accessorKey: "componentNumber",
-    enableSorting: true,
-    cell: ({ row }) => (
-      <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-        {row.getValue("componentNumber")}
-      </span>
-    ),
-  },
-  {
-    header: "Specification details",
+    header: "Description",
     accessorKey: "componentDescription",
     enableSorting: true,
     cell: ({ row }) => (
@@ -144,18 +98,80 @@ const columns: ColumnDef<ComponentItem>[] = [
         {row.getValue("componentDescription")}
       </div>
     ),
+    size: 220,
   },
-
+  // use Origin UI MultiSelect component for this column only in each row.
+  // later on we will save the array of strings in database based on selections
+  {
+    header: "Presence on labels",
+    accessorKey: "componentDescription",
+    enableSorting: true,
+    cell: ({ row }) => (
+      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+        {row.getValue("componentDescription")}
+      </div>
+    ),
+    size: 220,
+  },
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions row={row} />,
+    cell: ({ row }) => <RowActions row={row} />, // Implement RowActions below
     size: 80,
     enableHiding: false,
   },
 ];
 
-export default function ProductComponentDetailsTable() {
+type SymbolsGraphicsPageSchematicsTableProps = {
+  data?: Item[];
+};
+
+import {
+  getPaginationRowModel,
+  PaginationState,
+  Row,
+  SortingState,
+  getSortedRowModel,
+} from "@tanstack/react-table";
+import {
+  ChevronFirstIcon,
+  ChevronLastIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import { Label } from "@/components/ui/label";
+
+import { useId } from "react";
+
+export default function SymbolsGraphicsPageSchematicsTable({
+  data: dataProp,
+}: SymbolsGraphicsPageSchematicsTableProps) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -167,92 +183,38 @@ export default function ProductComponentDetailsTable() {
       desc: false,
     },
   ]);
-  const [data] = useState<ComponentItem[]>([
-    {
-      id: "1",
-      componentName: "Hydraulic Pump",
-      componentDescription:
-        "High-pressure hydraulic pump for industrial machinery.",
-      componentNumber: "HP-1001",
-      componentImage:
-        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-      note: "This pump is suitable for continuous operation in harsh environments.",
-    },
-    {
-      id: "2",
-      componentName: "Control Valve",
-      componentDescription: "Precision control valve for fluid regulation.",
-      componentNumber: "CV-2020",
-      componentImage:
-        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=200&q=80",
-      note: "Ensure regular maintenance for optimal performance.",
-    },
-    {
-      id: "3",
-      componentName: "Pressure Sensor",
-      componentDescription: "Digital sensor for accurate pressure measurement.",
-      componentNumber: "PS-3303",
-      componentImage:
-        "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80",
-      note: "Calibrate annually for best results.",
-    },
-    {
-      id: "4",
-      componentName: "Gearbox",
-      componentDescription: "Heavy-duty gearbox for torque transmission.",
-      componentNumber: "GB-4404",
-      componentImage:
-        "https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=200&q=80",
-      note: "Lubricate every 6 months.",
-    },
-    {
-      id: "5",
-      componentName: "Cooling Fan",
-      componentDescription: "Efficient cooling fan with low noise.",
-      componentNumber: "CF-5505",
-      componentImage:
-        "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=200&q=80",
-      note: "Replace blades if vibration detected.",
-    },
-    {
-      id: "6",
-      componentName: "Relay Switch",
-      componentDescription: "High-current relay switch for safety circuits.",
-      componentNumber: "RS-6606",
-      componentImage:
-        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=200&q=80",
-      note: "Test before each production cycle.",
-    },
-    {
-      id: "7",
-      componentName: "Display Module",
-      componentDescription: "LCD display module for real-time data.",
-      componentNumber: "DM-7707",
-      componentImage:
-        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=200&q=80",
-      note: "Protect from direct sunlight.",
-    },
-    {
-      id: "8",
-      componentName: "Power Supply",
-      componentDescription: "Stable power supply for sensitive electronics.",
-      componentNumber: "PS-8808",
-      componentImage:
-        "https://images.unsplash.com/photo-1461344577544-4e5dc9487184?auto=format&fit=crop&w=200&q=80",
-      note: "Check voltage before connecting devices.",
-    },
-  ]);
+  const [data, setData] = useState<Item[]>(dataProp ?? []);
+
+  useEffect(() => {
+    if (!dataProp) {
+      async function fetchPosts() {
+        // fallback demo data
+        setData([
+          {
+            id: "1",
+            componentName: "Demo Component",
+            componentDescription: "Description for demo component.",
+            componentImage:
+              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
+            note: "This is a demo note for the component.",
+          },
+        ]);
+      }
+      fetchPosts();
+    }
+  }, [dataProp]);
 
   const table = useReactTable({
     data,
     columns,
-    getRowCanExpand: (row) => Boolean(row.original.note),
+    getRowCanExpand: (row) =>
+      Boolean(row.original.note || row.original.componentImage),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
-    getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: { sorting, pagination },
   });
@@ -260,7 +222,7 @@ export default function ProductComponentDetailsTable() {
   return (
     <div className="space-y-4">
       <div className="bg-background overflow-hidden rounded-xl border">
-        <Table className="">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="bg-muted/60" key={headerGroup.id}>
@@ -351,12 +313,11 @@ export default function ProductComponentDetailsTable() {
                       </TableCell>
                     ))}
                   </TableRow>
-
                   {row.getIsExpanded() && (
                     <TableRow>
                       <TableCell colSpan={row.getVisibleCells().length}>
                         <div className="flex flex-col items-center py-4">
-                          <Image
+                          <NextImage
                             src={row.original.componentImage}
                             alt={row.original.componentName}
                             width={200}
@@ -440,7 +401,6 @@ export default function ProductComponentDetailsTable() {
             </span>
           </p>
         </div>
-
         {/* Pagination buttons */}
         <div>
           <Pagination>
@@ -505,7 +465,7 @@ export default function ProductComponentDetailsTable() {
   );
 }
 
-function RowActions({ row }: { row: Row<ComponentItem> }) {
+function RowActions({ row }: { row: Row<Item> }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="mr-2" asChild>

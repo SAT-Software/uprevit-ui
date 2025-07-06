@@ -1,5 +1,5 @@
-import { departments } from "@/app/(app)/departments/page";
-import { projects } from "@/app/(app)/projects/page";
+import { departments } from "@/app/(app)/departments/data";
+import { projects } from "@/app/(app)/projects/data";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -10,20 +10,20 @@ import {
 } from "@/components/ui/tooltip";
 import { CalendarDays, User } from "lucide-react";
 import Link from "next/link";
-import { sampleProducts } from "../../page";
+import { sampleProducts } from "../../data";
 import ProductInformationCard from "@/features/products/product/product-information/ProductInformationCard";
 import EditProductDialog from "@/features/products/product/product-information/ProductInformationEditProductDialog";
 
 import { PiCirclesThreePlusDuotone, PiKanbanDuotone } from "react-icons/pi";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     productId: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: PageProps) {
-  const { productId } = params;
+export default async function Page({ params }: PageProps) {
+  const { productId } = await params;
 
   const productData = sampleProducts.find(
     (product) => product.productId === productId

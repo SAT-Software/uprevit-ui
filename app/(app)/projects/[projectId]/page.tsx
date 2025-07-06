@@ -2,22 +2,23 @@ import Image from "next/image";
 import { CalendarClock, Text, Edit, Share2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
-import { sampleProducts as productsData } from "@/app/(app)/products/page";
+import { sampleProducts as productsData } from "@/app/(app)/products/data";
 import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
-import { projects } from "../page";
+import { projects } from "../data";
 import { Item } from "@/features/products/ProductsPageProductTable";
 import { PiKanbanDuotone } from "react-icons/pi";
 
 interface ProjectDetailPageProps {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const project = projects.find((p) => p.id === params.projectId);
+export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+	const projectId = (await params).projectId;
+  const project = projects.find((p) => p.id === projectId);
 
   // Filter products for the current project
   const projectProducts = productsData.filter(
-    (product: Item) => product.projectId === params.projectId
+    (product: Item) => product.projectId === projectId
   );
 
   if (!project) return notFound();
@@ -75,7 +76,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {/* Date */}
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <CalendarClock className="w-4 h-4" />
-            <span>{project.date}</span>
+            <span> {new Date(project.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}</span>
           </div>
 
           {/* Members */}

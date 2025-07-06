@@ -12,7 +12,7 @@ import { CheckCircle, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { sampleProducts } from "@/app/(app)/products/page";
+import { sampleProducts } from "@/app/(app)/products/data";
 
 export type Item = {
   productId: string;

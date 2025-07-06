@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SymbolsGraphicsPageBarcodesTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageBarcodesTable";
+import SymbolsGraphicsPageSchematicsTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageSchematicsTable";
+import SymbolsGraphicsPageSymbolsTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageSymbolsTable";
 import {
+  BarcodeIcon,
   BoxIcon,
   CircuitBoardIcon,
-  BarcodeIcon,
   ShapesIcon,
 } from "lucide-react";
-import ProductGraphicsAndOtherCompsTable from "@/features/products/product/graphics-other-components/ProductGraphicsAndOtherCompsTable";
+import { useState } from "react";
+import SymbolsGraphicsPageOtherComponentsTable from "./SymbolsGraphicsPageOtherComponentsTable";
 
 interface ComponentData {
   id: string;
@@ -56,7 +59,7 @@ export default function SchematicsSymbolsTabs({
         <ScrollArea className="flex-1">
           <TabsList className="bg-background h-auto -space-x-px p-0 shadow-none rtl:space-x-reverse">
             <TabsTrigger
-              value="tab-4"
+              value="tab-1"
               className="cursor-pointer  data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s-lg last:rounded-e-lg"
             >
               <ShapesIcon
@@ -66,7 +69,7 @@ export default function SchematicsSymbolsTabs({
               Symbols
             </TabsTrigger>
             <TabsTrigger
-              value="tab-1"
+              value="tab-2"
               className="cursor-pointer data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
             >
               <CircuitBoardIcon
@@ -76,7 +79,7 @@ export default function SchematicsSymbolsTabs({
               Schematics
             </TabsTrigger>
             <TabsTrigger
-              value="tab-2"
+              value="tab-3"
               className="cursor-pointer data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
             >
               <BarcodeIcon
@@ -86,7 +89,7 @@ export default function SchematicsSymbolsTabs({
               Barcodes
             </TabsTrigger>
             <TabsTrigger
-              value="tab-3"
+              value="tab-4"
               className="cursor-pointer  data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e-lg"
             >
               <BoxIcon
@@ -103,16 +106,16 @@ export default function SchematicsSymbolsTabs({
         </Button>
       </div>
       <TabsContent value="tab-1">
-        <ProductGraphicsAndOtherCompsTable data={symbolsData} />
+        <SymbolsGraphicsPageSymbolsTable data={symbolsData} />
       </TabsContent>
       <TabsContent value="tab-2">
-        <ProductGraphicsAndOtherCompsTable data={schematicData} />
+        <SymbolsGraphicsPageSchematicsTable data={schematicData} />
       </TabsContent>
       <TabsContent value="tab-3">
-        <ProductGraphicsAndOtherCompsTable data={barcodesData} />
+        <SymbolsGraphicsPageBarcodesTable data={barcodesData} />
       </TabsContent>
       <TabsContent value="tab-4">
-        <ProductGraphicsAndOtherCompsTable data={otherComponentsData} />
+        <SymbolsGraphicsPageOtherComponentsTable data={otherComponentsData} />
       </TabsContent>
     </Tabs>
   );
