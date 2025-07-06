@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useImperativeHandle, forwardRef } from "react";
+import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import dynamic from "next/dynamic";
 import { IWorkbookData } from "@univerjs/core";
 
@@ -20,7 +20,11 @@ const ProductDataGrid = forwardRef<ProductDataGridRef>((_, ref) => {
   }));
 
   // Forward the ref to the dynamic component
-  return <DynamicUniverComponent ref={univerRef as any} />;
+  return (
+    <DynamicUniverComponent
+      ref={univerRef as React.RefObject<ProductDataGridRef>}
+    />
+  );
 });
 
 ProductDataGrid.displayName = "ProductDataGrid";
