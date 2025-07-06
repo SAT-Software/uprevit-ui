@@ -76,7 +76,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           {/* Date */}
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <CalendarClock className="w-4 h-4" />
-            <span>{project.date}</span>
+            <span> {new Date(project.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}</span>
           </div>
 
           {/* Members */}
