@@ -102,7 +102,7 @@ export function ProductHeader() {
   return (
     <header
       className={cn(
-        "flex  w-full shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height] ease-linear ",
+        "flex w-full shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height] ease-linear ",
         "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       )}
     >
@@ -110,17 +110,9 @@ export function ProductHeader() {
         <Button variant="outline" size="sm">
           Create new version
         </Button>
-        <Select>
-          <SelectTrigger className="w-40 h-9">
-            <SelectValue placeholder="Export" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="pdf">Export as PDF</SelectItem>
-            <SelectItem value="excel">Export as Excel</SelectItem>
-            <SelectItem value="csv">Export as CSV</SelectItem>
-            <SelectItem value="json">Export as JSON</SelectItem>
-          </SelectContent>
-        </Select>
+        <Button variant="outline" size="sm">
+          Export Product Plan
+        </Button>
         <Select>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="View Versions" />
@@ -130,17 +122,6 @@ export function ProductHeader() {
             <SelectItem value="v1.1">Version 1.1</SelectItem>
             <SelectItem value="v1.2">Version 1.2</SelectItem>
             <SelectItem value="v2.0">Version 2.0 (Current)</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select>
-          <SelectTrigger className="w-40 h-9">
-            <SelectValue placeholder="View Redlines" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Redlines</SelectItem>
-            <SelectItem value="pending">Pending Review</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>
       </div>

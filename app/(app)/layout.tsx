@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/common/app-header";
 import { AppSidebar } from "@/components/common/app-sidebar";
+import { MainContentWrapper } from "@/components/common/main-content-wrapper";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -14,9 +15,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <AppHeader />
-        <div className="flex flex-1 flex-col gap-4 bg-muted h-full">
-          {children}
-        </div>
+        <MainContentWrapper>{children}</MainContentWrapper>
       </SidebarInset>
     </SidebarProvider>
   );
