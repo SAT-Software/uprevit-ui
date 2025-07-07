@@ -227,10 +227,10 @@ export default function SymbolsGraphicsPageSymbolsTable({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="bg-muted/60" key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, index) => {
                   return (
                     <TableHead
-                      key={header.id}
+                      key={`${header.id}-${index}`}
                       colSpan={header.colSpan}
                       tabIndex={header.column.getCanSort() ? 0 : undefined}
                       className={
