@@ -26,6 +26,7 @@ type Item = {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  symbolTextPresent: boolean;
   note?: string;
 };
 
@@ -94,9 +95,9 @@ const columns: ColumnDef<Item>[] = [
   // Later on we will save boolean value in database based on checkbox
   {
     header: "Symbol Text Present",
-    accessorKey: "componentName",
+    accessorKey: "symbolTextPresent",
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("componentName")}</div>
+      <div className="font-medium">{row.getValue("symbolTextPresent")}</div>
     ),
     size: 180,
   },
@@ -198,6 +199,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
             componentImage:
               "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
             note: "This is a demo note for the component.",
+            symbolTextPresent: true,
           },
         ]);
       }
@@ -227,10 +229,10 @@ export default function SymbolsGraphicsPageSymbolsTable({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="bg-muted/60" key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => {
+                {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      key={`${header.id}-${index}`}
+                      key={`${header.id}`}
                       colSpan={header.colSpan}
                       tabIndex={header.column.getCanSort() ? 0 : undefined}
                       className={

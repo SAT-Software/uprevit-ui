@@ -27,18 +27,6 @@ import UniverPresetSheetsTableEnUS from "@univerjs/presets/preset-sheets-table/l
 import { UniverSheetsSortPreset } from "@univerjs/presets/preset-sheets-sort";
 import SheetsSortEnUS from "@univerjs/presets/preset-sheets-sort/locales/en-US";
 
-import "@univerjs/presets/lib/styles/preset-sheets-data-validation.css";
-import "@univerjs/presets/lib/styles/preset-sheets-filter.css";
-import "@univerjs/presets/lib/styles/preset-sheets-find-replace.css";
-import "@univerjs/presets/lib/styles/preset-sheets-drawing.css";
-import "@univerjs/presets/lib/styles/preset-sheets-thread-comment.css";
-import "@univerjs/presets/lib/styles/preset-sheets-core.css";
-import "@univerjs/presets/lib/styles/preset-sheets-table.css";
-import "@univerjs/presets/lib/styles/preset-sheets-table.css";
-import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
-
-import "@univerjs/presets/lib/styles/preset-sheets-core.css";
-
 export interface ProductDataGridRef {
   saveData: () => IWorkbookData | null;
 }

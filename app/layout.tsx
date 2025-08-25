@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import "@univerjs/presets/lib/styles/preset-sheets-data-validation.css";
+import "@univerjs/presets/lib/styles/preset-sheets-filter.css";
+import "@univerjs/presets/lib/styles/preset-sheets-find-replace.css";
+import "@univerjs/presets/lib/styles/preset-sheets-drawing.css";
+import "@univerjs/presets/lib/styles/preset-sheets-thread-comment.css";
+import "@univerjs/presets/lib/styles/preset-sheets-core.css";
+import "@univerjs/presets/lib/styles/preset-sheets-table.css";
+import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
 
 const poppins = Poppins({
   variable: "--font-poppins",
