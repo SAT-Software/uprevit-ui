@@ -1,3 +1,5 @@
+"use client";
+
 export default function FeedbackPage() {
   return (
     <div className="flex flex-col items-center  w-full h-full p-4">

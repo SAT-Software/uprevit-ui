@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { CalendarClock, Text, Edit, Share2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,11 +11,11 @@ import { Item } from "@/features/products/ProductsPageProductTable";
 import { PiKanbanDuotone } from "react-icons/pi";
 
 interface ProjectDetailPageProps {
-  params: Promise<{ projectId: string }>;
+  params: { projectId: string };
 }
 
-export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-	const projectId = (await params).projectId;
+export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+  const projectId = params.projectId;
   const project = projects.find((p) => p.id === projectId);
 
   // Filter products for the current project
@@ -76,11 +78,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           {/* Date */}
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <CalendarClock className="w-4 h-4" />
-            <span> {new Date(project.date).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}</span>
+            <span>
+              {" "}
+              {new Date(project.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
           </div>
 
           {/* Members */}

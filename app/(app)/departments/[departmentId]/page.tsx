@@ -1,3 +1,5 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import {
@@ -16,13 +18,13 @@ import { PiKanbanDuotone } from "react-icons/pi";
 import { departments } from "../data";
 
 interface DepartmentDetailPageProps {
-  params: Promise<{ departmentId: string }>;
+  params: { departmentId: string };
 }
 
-export default async function DepartmentDetailPage({
+export default function DepartmentDetailPage({
   params,
 }: DepartmentDetailPageProps) {
-  const { departmentId } = await params;
+  const { departmentId } = params;
   const department = departments.find((d) => d.id === departmentId);
 
   const departmentProjects = allProjectsData.filter(
@@ -148,14 +150,14 @@ export default async function DepartmentDetailPage({
                       {project.name}
                     </h3>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-                                              <CalendarClock className="w-3 h-3" />
-                        <span className="whitespace-nowrap">
-                          {new Date(project.date).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </span>
+                      <CalendarClock className="w-3 h-3" />
+                      <span className="whitespace-nowrap">
+                        {new Date(project.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
                     </div>
                   </div>
 

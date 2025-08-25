@@ -1,3 +1,5 @@
+"use client";
+
 import CreateDepartmentDialog from "@/features/departments/CreateDepartmentDialog";
 import Departments from "@/features/departments/DepartmentsCard";
 import { departments } from "./data";

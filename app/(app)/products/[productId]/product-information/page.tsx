@@ -1,3 +1,5 @@
+"use client";
+
 import { departments } from "@/app/(app)/departments/data";
 import { projects } from "@/app/(app)/projects/data";
 import { Button } from "@/components/ui/button";
@@ -17,13 +19,13 @@ import EditProductDialog from "@/features/products/product/product-information/P
 import { PiCirclesThreePlusDuotone, PiKanbanDuotone } from "react-icons/pi";
 
 interface PageProps {
-  params: Promise<{
+  params: {
     productId: string;
-  }>;
+  };
 }
 
-export default async function Page({ params }: PageProps) {
-  const { productId } = await params;
+export default function Page({ params }: PageProps) {
+  const { productId } = params;
 
   const productData = sampleProducts.find(
     (product) => product.productId === productId

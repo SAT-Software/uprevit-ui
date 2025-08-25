@@ -1,3 +1,5 @@
+"use client";
+
 import SchematicsSymbolsTabs from "../../../../../features/products/product/graphics-other-components/SchematicsSymbolsTabs";
 
 const SchematicData = [

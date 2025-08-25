@@ -1,3 +1,5 @@
+"use client";
+
 import ProductsPageProductTable from "@/features/products/ProductsPageProductTable";
 import CreateProductDialog from "@/features/products/CreateProductDialog";
 import { sampleProducts } from "./data";
