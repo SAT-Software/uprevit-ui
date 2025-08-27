@@ -15,16 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Recent Changes
 
-### 2025-08-27 - Changelog Creation and Project Documentation
+### 2025-08-27 - API Integration and Department Management, Changelog doc
 
 - **docs**: Created comprehensive changelog file following Keep a Changelog standards
-- **docs**: Added project change tracking with proper categorization (feat, fix, chore)
-- **docs**: Organized recent git commits by date with detailed descriptions
-- **docs**: Established changelog structure for future development tracking
-- **docs**: Documented API integration, UI improvements, and bug fixes from recent commits
-
-### 2025-08-27 - API Integration and Department Management Enhancements
-
 - **feat**: Updated API proxy configuration for better backend communication
 - **feat**: Enhanced department and project pages with improved routing structure
 - **feat**: Added new UI components for better user experience
