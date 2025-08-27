@@ -1,19 +1,27 @@
 "use client";
 
-import CreateDepartmentDialog from "@/features/departments/CreateDepartmentDialog";
+import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
 import Departments from "@/features/departments/DepartmentsCard";
-import { departments } from "./data";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 
 function DepartmentsPage() {
+  const { data, isLoading } = useGetAllDepartments();
+
+  const allDepartments = data?.result?.departments ?? [];
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col gap-4 p-4 h-full">
       <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full h-full">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <p className="text-base font-semibold">All Departments</p>
 
-          <CreateDepartmentDialog />
+          <MutateDepartmentDialog mode="create" />
         </div>
-        <Departments departments={departments} />
+        <Departments departments={allDepartments} />
       </div>
     </div>
   );

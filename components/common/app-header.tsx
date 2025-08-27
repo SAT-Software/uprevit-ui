@@ -105,8 +105,6 @@ export function AppHeader() {
     ? sampleProducts.find((p) => p.productId === productId)
     : null;
 
-  console.log(currentProduct);
-
   const isProductComplete = currentProduct?.completionPercentage === 100;
 
   // if (isProductPage) return null;
