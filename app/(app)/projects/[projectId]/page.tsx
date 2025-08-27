@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { CalendarClock, Text, Edit, Share2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { notFound } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { sampleProducts as productsData } from "@/app/(app)/products/data";
 import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
 import { projects } from "../data";
 import { Item } from "@/features/products/ProductsPageProductTable";
 import { PiKanbanDuotone } from "react-icons/pi";
+import { useEffect } from "react";
 
 interface ProjectDetailPageProps {
   params: { projectId: string };
@@ -16,6 +17,7 @@ interface ProjectDetailPageProps {
 
 export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const projectId = params.projectId;
+  const router = useRouter();
   const project = projects.find((p) => p.id === projectId);
 
   // Filter products for the current project
@@ -23,7 +25,13 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     (product: Item) => product.projectId === projectId
   );
 
-  if (!project) return notFound();
+  useEffect(() => {
+    if (!project) {
+      router.replace("/404");
+    }
+  }, [project, router]);
+
+  if (!project) return null;
 
   // TODO: Add logic to fetch department name based on project.departmentId if needed
   // const departmentName = departments.find(d => d.id === project.departmentId)?.name;

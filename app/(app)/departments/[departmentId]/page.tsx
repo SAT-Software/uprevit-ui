@@ -1,23 +1,23 @@
 "use client";
 
-import { notFound } from "next/navigation";
-import { useParams } from "next/navigation";
-import Image from "next/image";
-import {
-  CalendarClock,
-  Text,
-  User,
-  Share2,
-  Archive,
-  Users,
-} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
-import { PiKanbanDuotone } from "react-icons/pi";
-import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
+import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
+import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound, useParams } from "next/navigation";
+import {
+  PiArchiveDuotone,
+  PiCalendarDuotone,
+  PiKanbanDuotone,
+  PiPencilCircleDuotone,
+  PiShareNetworkDuotone,
+  PiTextAlignJustifyDuotone,
+  PiUserDuotone,
+  PiUsersDuotone,
+} from "react-icons/pi";
 
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
@@ -26,8 +26,6 @@ export default function DepartmentDetailPage() {
   const { data, isLoading, isError } = useGetDepartmentById(departmentId ?? "");
 
   const department = data?.result;
-
-  console.log(department);
 
   if (isLoading) {
     return (
@@ -60,9 +58,18 @@ export default function DepartmentDetailPage() {
             </div>
           )}
           <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 p-1 rounded">
-            <MutateDepartmentDialog mode="update" department={department} />
+            <MutateDepartmentDialog
+              mode="update"
+              department={department}
+              trigger={
+                <Button variant="ghost" size="sm">
+                  <PiPencilCircleDuotone className="h-4 w-4" />
+                  <span className="sr-only">Edit</span>
+                </Button>
+              }
+            />
             <Button variant="ghost" size="sm">
-              <Share2 className="h-4 w-4" />
+              <PiShareNetworkDuotone className="h-4 w-4" />
               <span className="sr-only">Share</span>
             </Button>
 
@@ -72,7 +79,7 @@ export default function DepartmentDetailPage() {
               entityType="department"
               trigger={
                 <Button variant="ghost" size="sm">
-                  <Archive className="h-4 w-4" />
+                  <PiArchiveDuotone className="h-4 w-4" />
                   <span className="sr-only">Archive</span>
                 </Button>
               }
@@ -86,7 +93,7 @@ export default function DepartmentDetailPage() {
 
           {/* Manager Name */}
           <div className="flex items-center space-x-2">
-            <User className="h-5 w-5 text-gray-500" />
+            <PiUserDuotone className="h-5 w-5 text-gray-500" />
             <p className="text-sm text-gray-600">
               Manager: <span className="font-medium">{department.manager}</span>
             </p>
@@ -94,13 +101,13 @@ export default function DepartmentDetailPage() {
 
           {/* Description */}
           <p className="flex items-center gap-2 text-muted-foreground">
-            <Text className="w-5 h-5" />
+            <PiTextAlignJustifyDuotone className="w-5 h-5" />
             {department.department_description}
           </p>
 
           {/* Date */}
           <div className="flex items-center space-x-2">
-            <CalendarClock className="w-4 h-4" />
+            <PiCalendarDuotone className="w-5 h-5" />
             {department.date}
           </div>
 
@@ -169,7 +176,7 @@ export default function DepartmentDetailPage() {
                       {project.name}
                     </h3>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-                      <CalendarClock className="w-3 h-3" />
+                      <PiCalendarDuotone className="w-3 h-3" />
                       <span className="whitespace-nowrap">
                         {new Date(project.date).toLocaleDateString("en-US", {
                           year: "numeric",
@@ -190,7 +197,7 @@ export default function DepartmentDetailPage() {
 
                   {/* Bottom Row: Members */}
                   <div className="flex items-center justify-start gap-2 mt-1">
-                    <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                    <PiUsersDuotone className="w-3.5 h-3.5 text-muted-foreground" />
                     <div className="flex -space-x-2 rtl:space-x-reverse flex-shrink-0">
                       {project.members
                         ?.slice(0, 3)

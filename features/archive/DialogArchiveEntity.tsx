@@ -93,7 +93,7 @@ export default function DialogArchiveEntity({
             </Link>
             .
           </p>
-          <div className="*:not-first:mt-2">
+          <div className="space-y-2">
             <Label htmlFor={inputId}>
               {entityType.charAt(0).toUpperCase() + entityType.slice(1)} name
             </Label>
