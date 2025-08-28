@@ -6,8 +6,8 @@ import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
+import DepartmentPageProductsTable from "@/features/departments/DepartmentPageProductsTable";
 import {
   PiArchiveDuotone,
   PiCalendarDuotone,
@@ -16,7 +16,6 @@ import {
   PiShareNetworkDuotone,
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
-  PiUsersDuotone,
 } from "react-icons/pi";
 
 export default function DepartmentDetailPage() {
@@ -25,7 +24,7 @@ export default function DepartmentDetailPage() {
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId ?? "");
 
-  const department = data?.result;
+  const department = data?.department;
 
   if (isLoading) {
     return (
@@ -36,8 +35,6 @@ export default function DepartmentDetailPage() {
       </div>
     );
   }
-
-  const departmentProjects = department?.projects ?? [];
 
   if (isError || !department) return notFound();
 
@@ -139,112 +136,10 @@ export default function DepartmentDetailPage() {
           </div>
         </div>
 
-        {/* Projects Section */}
-        <div className="my-4 px-4 flex flex-col gap-4">
-          {departmentProjects && departmentProjects.length > 0 ? (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            departmentProjects.map((project: any) => (
-              <Link
-                key={project.id}
-                href={`/projects/${project.id}`}
-                className="flex flex-row items-start w-full border border-input rounded-xl bg-card p-3 gap-4 hover:bg-accent/50 transition-colors duration-150"
-              >
-                {/* Image */}
-                <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden border border-input">
-                  {project.image ? (
-                    <Image
-                      src={project.image}
-                      alt={project.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-                      <PiKanbanDuotone className="w-8 h-8 text-muted-foreground/60" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Details Section */}
-                <div className="flex flex-col justify-between h-full flex-1 min-w-0 gap-1">
-                  {/* Top Row: Name & Date */}
-                  <div className="flex justify-between items-center gap-2">
-                    <h3
-                      className="font-semibold text-base text-foreground truncate"
-                      title={project.name}
-                    >
-                      {project.name}
-                    </h3>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-                      <PiCalendarDuotone className="w-3 h-3" />
-                      <span className="whitespace-nowrap">
-                        {new Date(project.date).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p
-                    className="text-xs text-muted-foreground line-clamp-2"
-                    title={project.description}
-                  >
-                    {project.description}
-                  </p>
-
-                  {/* Bottom Row: Members */}
-                  <div className="flex items-center justify-start gap-2 mt-1">
-                    <PiUsersDuotone className="w-3.5 h-3.5 text-muted-foreground" />
-                    <div className="flex -space-x-2 rtl:space-x-reverse flex-shrink-0">
-                      {project.members
-                        ?.slice(0, 3)
-                        .map(
-                          (
-                            member: { src: string; name: string },
-                            index: number
-                          ) => (
-                            <Avatar
-                              key={index}
-                              className="h-5 w-5 ring ring-white dark:ring-gray-800"
-                            >
-                              <AvatarImage src={member.src} alt={member.name} />
-                              <AvatarFallback className="text-[10px] font-medium">
-                                {member.name
-                                  ?.split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .slice(0, 2)
-                                  .toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                          )
-                        )}
-                      {(project.membersCount || 0) > 3 && (
-                        <div
-                          className="flex items-center justify-center w-5 h-5 text-[10px] font-medium text-white bg-gray-700 border border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
-                          title={`${project.membersCount} members total`}
-                        >
-                          +{(project.membersCount || 0) - 3}
-                        </div>
-                      )}
-                      {(project.membersCount || 0) === 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          No members
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <div className="text-center text-muted-foreground py-10">
-              No projects found for this department.
-            </div>
-          )}
+        {/* Associated Products Section */}
+        <div className="px-4 pb-4 mt-6">
+          <h2 className="text-xl font-semibold mt-6">Products</h2>
+          <DepartmentPageProductsTable data={department?.projects || []} />
         </div>
       </div>
     </div>

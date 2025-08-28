@@ -1,5 +1,6 @@
 import { Department } from "@/types/department";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function useUpdateDepartment() {
   const queryClient = useQueryClient();
@@ -19,11 +20,15 @@ export function useUpdateDepartment() {
       }
       return res.json().catch(() => null);
     },
-    onSuccess: async (data, variables) => {
-      console.log("Department updated successfully", data, variables);
+    onSuccess: (data, variables) => {
+      toast.success("Department updated successfully");
       queryClient.invalidateQueries({
         queryKey: ["department", variables._id],
       });
+    },
+    onError: (error) => {
+      console.error(error.message || "Failed to update department");
+      toast.error("Failed to update department");
     },
   });
 }

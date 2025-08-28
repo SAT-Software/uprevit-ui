@@ -1,32 +1,18 @@
 import { Button } from "@/components/ui/button";
+import { Project } from "@/types/project";
 import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PiKanbanDuotone, PiPlusBold } from "react-icons/pi";
 
-// Define ProjectsProps interface
-export interface ProjectsProps {
-  id: string;
-  image: string;
-  name: string;
-  description: string;
-  date: number;
-  targetDate: number;
-  completionDate: number | null;
-  delayReason: string | null;
-  manager: string;
-  members: { name: string; src: string }[];
-  membersCount: number;
-}
-
 // Update component to accept projects prop and use ProjectsProps
-function Projects({ projects }: { projects: ProjectsProps[] }) {
+function Projects({ projects }: { projects: Project[] }) {
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {projects?.map((project) => (
         <Link
-          key={project.id}
-          href={`/projects/${project.id}`}
+          key={project._id}
+          href={`/projects/${project._id}`}
           className="flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4"
         >
           <div className="flex items-center relative w-full h-27 md:w-40 ">
@@ -45,12 +31,12 @@ function Projects({ projects }: { projects: ProjectsProps[] }) {
           </div>
           <div className="flex flex-col items-start justify-between w-full gap-4">
             <div className="flex flex-col items-start gap-1">
-              <p className="text-base font-semibold">{project.name}</p>
+              <p className="text-base font-semibold">{project.project_name}</p>
               <p className="flex items-start gap-1 text-xs text-muted-foreground">
                 <span>
                   <Text className="mr-1 w-4 h-4" />
                 </span>
-                {project.description}
+                {project.project_description}
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-between w-full gap-4">
@@ -59,28 +45,24 @@ function Projects({ projects }: { projects: ProjectsProps[] }) {
                   <CalendarClock className="mr-1 w-4 h-4" />
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(project.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {project.actionAt
+                    ? new Date(project.actionAt).toLocaleDateString()
+                    : "N/A"}
                 </p>
               </div>
               <div className="flex items-center -space-x-[0.525rem]">
-                {project.members.map((member) => (
+                {project?.users?.map((user: string) => (
                   <Image
-                    key={member.name}
+                    key={user}
                     className="ring-background rounded-full ring-2"
-                    src={member.src}
+                    src={user}
                     width={28}
                     height={28}
-                    alt={member.name}
+                    alt={user}
                   />
                 ))}
                 <p className="text-xs text-muted-foreground ml-4">
-                  {project.membersCount} Members
+                  {project?.users?.length} Members
                 </p>
               </div>
             </div>
