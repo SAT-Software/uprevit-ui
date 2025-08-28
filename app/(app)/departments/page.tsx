@@ -5,10 +5,23 @@ import Departments from "@/features/departments/DepartmentsCard";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 
 function DepartmentsPage() {
-  const { data, isLoading } = useGetAllDepartments();
+  const { data, isLoading, error } = useGetAllDepartments();
 
   const allDepartments = data?.result?.departments ?? [];
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-500">
+          Failed to load departments. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   if (isLoading) {
     return <div>Loading...</div>;
   }

@@ -53,7 +53,7 @@ export default function DialogArchiveEntity({
       case "product":
         return productArchive;
       default:
-        return departmentArchive;
+        throw new Error(`Invalid entity type: ${entityType}`);
     }
   }, [entityType, departmentArchive, projectArchive, productArchive]);
 

@@ -124,14 +124,14 @@ export default function DepartmentDetailPage() {
                     </AvatarFallback>
                   </Avatar>
                 ))}
-              {department.membersCount && department.membersCount > 4 && (
+              {department.users && department.users.length > 4 && (
                 <a
                   className="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
                   href="#"
                 >
-                  +{department.membersCount - 4 || 0}
+                  {department.users.length - 4}
                 </a>
-              )}
+              )}{" "}
             </div>
           </div>
         </div>

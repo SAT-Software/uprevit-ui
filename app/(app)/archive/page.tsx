@@ -22,12 +22,7 @@ function ArchivePage() {
           <TabsTrigger value="project">Projects</TabsTrigger>
           <TabsTrigger value="product">Products</TabsTrigger>
         </TabsList>
-        <TabsContent value="product">
-          <ArchivedItems
-            type="product"
-            onRowClick={(row) => console.log(row)}
-          />
-        </TabsContent>
+
         <TabsContent value="department">
           <ArchivedItems
             type="department"
@@ -37,6 +32,12 @@ function ArchivePage() {
         <TabsContent value="project">
           <ArchivedItems
             type="project"
+            onRowClick={(row) => console.log(row)}
+          />
+        </TabsContent>
+        <TabsContent value="product">
+          <ArchivedItems
+            type="product"
             onRowClick={(row) => console.log(row)}
           />
         </TabsContent>

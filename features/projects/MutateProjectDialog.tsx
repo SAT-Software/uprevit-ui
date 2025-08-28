@@ -219,7 +219,7 @@ export default function MutateProjectDialog({
                 </div>
               </div>
               <div className="space-y-4">
-                <Label htmlFor={`${id}-manager-name`}>Project Number</Label>
+                <Label htmlFor={`${id}-project-number`}>Project Number</Label>
                 <div className="flex flex-col gap-2">
                   <Input
                     id={`${id}-project-number`}

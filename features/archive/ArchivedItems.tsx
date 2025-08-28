@@ -45,6 +45,10 @@ export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
     if (type === "project") {
       return archivedProjects?.result?.projects ?? [];
     }
+    if (type === "product") {
+      // TODO: Add useGetArchivedProducts hook and fetch archived products
+      return [];
+    }
     return [];
   }, [type, archivedDepartments, archivedProjects]);
 

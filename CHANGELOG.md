@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Recent Changes
 
+### 2025-08-28 - Project Pages Refactor and Sonner Toast Integration
+
+- **refactor**: Updated project pages to utilize new hooks and replace deprecated components
+- **feat**: Added sonner toast notifications for user actions (create, update, archive)
+- **feat**: Updated UI with product tables for better data visualization
+- **fix**: Improved error handling in department and project hooks with proper toast messages
+- **refactor**: Replaced department and project page components with more efficient implementations
+
 ### 2025-08-27 - API Integration and Department Management, Changelog doc
 
 - **docs**: Created comprehensive changelog file following Keep a Changelog standards

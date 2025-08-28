@@ -77,7 +77,7 @@ export default function ProjectDetailPage() {
               <span className="sr-only">Share Project</span>
             </Button>
             <DialogArchiveEntity
-              id={projectId ?? ""}
+              id={projectId}
               entityName={project.project_name}
               entityType="project"
               trigger={
@@ -86,7 +86,7 @@ export default function ProjectDetailPage() {
                   <span className="sr-only">Archive Project</span>
                 </Button>
               }
-            />
+            />{" "}
           </div>
         </div>
 
