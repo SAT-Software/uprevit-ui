@@ -4,17 +4,38 @@ import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PiKanbanDuotone, PiPlusBold } from "react-icons/pi";
+import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { PiArrowSquareOutDuotone } from "react-icons/pi";
 
 // Update component to accept projects prop and use ProjectsProps
-function Projects({ projects }: { projects: Project[] }) {
+function ProjectsCard({ projects }: { projects: Project[] }) {
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {projects?.map((project) => (
-        <Link
+        <div
           key={project._id}
-          href={`/projects/${project._id}`}
-          className="flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4"
+          className="relative flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4"
         >
+          <div className="absolute right-2 top-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/projects/${project._id}`}
+                  aria-label="Open project details"
+                >
+                  <Button variant="ghost" size="icon">
+                    <PiArrowSquareOutDuotone className="h-5 w-5" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Open project details</TooltipContent>
+            </Tooltip>
+          </div>
           <div className="flex items-center relative w-full h-27 md:w-40 ">
             {project.image ? (
               <Image
@@ -50,24 +71,28 @@ function Projects({ projects }: { projects: Project[] }) {
                     : "N/A"}
                 </p>
               </div>
-              <div className="flex items-center -space-x-[0.525rem]">
-                {project?.users?.map((user: string) => (
-                  <Image
-                    key={user}
-                    className="ring-background rounded-full ring-2"
-                    src={user}
-                    width={28}
-                    height={28}
-                    alt={user}
-                  />
-                ))}
-                <p className="text-xs text-muted-foreground ml-4">
-                  {project?.users?.length} Members
-                </p>
+              <div className="flex items-center -space-x-[0.525rem] mr-3">
+                {(() => {
+                  const members = (project.users || []).map(
+                    (u: string, i: number) => ({
+                      id: String(u ?? i),
+                      name: `User ${i + 1}`,
+                      email: `user${i + 1}@example.com`,
+                      role: "Member",
+                      avatarUrl: u,
+                    })
+                  );
+                  return (
+                    <MembersInlineTrigger
+                      members={members}
+                      titlePrefix={project.project_name}
+                    />
+                  );
+                })()}
               </div>
             </div>
           </div>
-        </Link>
+        </div>
       ))}
       {/* Add empty state for projects */}
       {projects?.length === 0 && (
@@ -83,4 +108,4 @@ function Projects({ projects }: { projects: Project[] }) {
     </div>
   );
 }
-export default Projects; // Ensure default export matches component name
+export default ProjectsCard; // Ensure default export matches component name

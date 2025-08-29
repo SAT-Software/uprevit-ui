@@ -3,7 +3,13 @@ import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PiPlusBold, PiCirclesThreePlusDuotone } from "react-icons/pi";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { PiArrowSquareOutDuotone } from "react-icons/pi";
 
 export interface DepartmentsProps {
   _id: string;
@@ -17,73 +23,88 @@ export interface DepartmentsProps {
   membersCount?: number;
 }
 
-function Departments({ departments }: { departments: DepartmentsProps[] }) {
+function DepartmentsCard({ departments }: { departments: DepartmentsProps[] }) {
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {departments?.map((department: DepartmentsProps) => (
-        <Link
+        <div
           key={department._id}
-          href={`/departments/${department._id}`}
-          className="w-full"
+          className="relative flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4"
         >
-          <div className="flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4">
-            <div className="flex items-center relative w-full h-27 md:w-40">
-              {department.image ? (
-                <Image
-                  src={department.image}
-                  fill
-                  alt="Department"
-                  className="object-cover rounded-md border border-input"
-                />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-                  <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground" />
-                </div>
-              )}
+          <div className="absolute right-2 top-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/departments/${department._id}`}
+                  aria-label="Open department details"
+                >
+                  <Button variant="ghost" size="icon">
+                    <PiArrowSquareOutDuotone className="h-5 w-5" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Open department details</TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="flex items-center relative w-full h-27 md:w-40">
+            {department.image ? (
+              <Image
+                src={department.image}
+                fill
+                alt="Department"
+                className="object-cover rounded-md border border-input"
+              />
+            ) : (
+              <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
+                <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col items-start justify-between w-full gap-4">
+            <div className="flex flex-col items-start gap-1">
+              <p className="text-base font-semibold">
+                {department.department_name}
+              </p>
+              <p className="flex items-start gap-1 text-xs text-muted-foreground">
+                <span>
+                  <Text className="mr-1 w-4 h-4" />
+                </span>
+                {department.department_description}
+              </p>
             </div>
-            <div className="flex flex-col items-start justify-between w-full gap-4">
-              <div className="flex flex-col items-start gap-1">
-                <p className="text-base font-semibold">
-                  {department.department_name}
-                </p>
-                <p className="flex items-start gap-1 text-xs text-muted-foreground">
-                  <span>
-                    <Text className="mr-1 w-4 h-4" />
-                  </span>
-                  {department.department_description}
+            <div className="flex flex-wrap items-center justify-between w-full gap-4">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <span>
+                  <CalendarClock className="mr-1 w-4 h-4" />
+                </span>
+                <p className="text-xs text-muted-foreground">
+                  {department.date
+                    ? new Date(department.date).toLocaleDateString()
+                    : "No date"}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center justify-between w-full gap-4">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <span>
-                    <CalendarClock className="mr-1 w-4 h-4" />
-                  </span>
-                  <p className="text-xs text-muted-foreground">
-                    {department.date
-                      ? new Date(department.date).toLocaleDateString()
-                      : "No date"}
-                  </p>
-                </div>
-                <div className="flex items-center -space-x-[0.525rem]">
-                  {department.users?.map((user, index) => (
-                    <Avatar
-                      key={index}
-                      className="h-7 w-7 ring-background ring-2"
-                    >
-                      <AvatarImage src={user} alt={user} />
-                      <AvatarFallback className="text-[10px] font-medium">
-                        {user?.slice(0, 1).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-                  <p className="text-xs text-muted-foreground ml-4">
-                    {department?.users?.length} Members
-                  </p>
-                </div>
+              <div className="flex items-center -space-x-[0.525rem] mr-3">
+                {(() => {
+                  const members = (department.users || []).map(
+                    (u: string, i: number) => ({
+                      id: String(u ?? i),
+                      name: `User ${i + 1}`,
+                      email: `user${i + 1}@example.com`,
+                      role: "Member",
+                      avatarUrl: u,
+                    })
+                  );
+                  return (
+                    <MembersInlineTrigger
+                      members={members}
+                      titlePrefix={department.department_name}
+                    />
+                  );
+                })()}
               </div>
             </div>
           </div>
-        </Link>
+        </div>
       ))}
       {departments?.length === 0 && (
         <div className="flex flex-col gap-4 items-center justify-center w-full h-100">
@@ -98,4 +119,4 @@ function Departments({ departments }: { departments: DepartmentsProps[] }) {
     </div>
   );
 }
-export default Departments;
+export default DepartmentsCard;

@@ -18,6 +18,7 @@ import {
 } from "react-icons/pi";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
+import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
@@ -127,34 +128,23 @@ export default function ProjectDetailPage() {
 
           {/* Members */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">Members:</span>
-            <div className="flex -space-x-4 rtl:space-x-reverse">
-              {project?.users
-                ?.slice(0, 4)
-                .map((user: string, index: number) => (
-                  <Image
-                    key={index}
-                    className="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
-                    src={user}
-                    alt={user}
-                    width={40}
-                    height={40}
-                  />
-                ))}
-              {project?.users?.length > 4 && (
-                <a
-                  className="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
-                  href="#" // Link to a members page or modal
-                >
-                  +{(project?.users?.length || 0) - 4}
-                </a>
-              )}
-            </div>
-            {(!project?.users || project?.users?.length === 0) && (
-              <span className="text-sm text-muted-foreground">
-                No members yet.
-              </span>
-            )}
+            {(() => {
+              const membersForDialog = (project?.users || []).map(
+                (u: string, i: number) => ({
+                  id: String(u ?? i),
+                  name: `User ${i + 1}`,
+                  email: `user${i + 1}@example.com`,
+                  role: "Member",
+                  avatarUrl: u,
+                })
+              );
+              return (
+                <MembersInlineTrigger
+                  members={membersForDialog}
+                  titlePrefix={project.project_name}
+                />
+              );
+            })()}
           </div>
         </div>
 

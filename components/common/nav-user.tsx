@@ -24,11 +24,11 @@ export function NavUser() {
           <SidebarMenuButton
             size="lg"
             variant="default"
-            className="group hover:text-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            className="group hover:bg-accent hover:text-foreground duration-300 delay-300 ease-in-out data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <Avatar className="h-8 w-8 rounded-full">
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-full group-hover:bg-primary">
+              <AvatarFallback className="rounded-full group-hover:bg-accent">
                 CN
               </AvatarFallback>
             </Avatar>

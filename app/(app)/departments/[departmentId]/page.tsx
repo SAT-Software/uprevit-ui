@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
@@ -8,6 +7,7 @@ import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import DepartmentPageProductsTable from "@/features/departments/DepartmentPageProductsTable";
+import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
   PiArchiveDuotone,
   PiCalendarDuotone,
@@ -110,29 +110,23 @@ export default function DepartmentDetailPage() {
 
           {/* Members */}
           <div className="flex items-center space-x-2">
-            <div className="flex -space-x-4 rtl:space-x-reverse">
-              {department.users
-                ?.slice(0, 4)
-                .map((member: string, index: number) => (
-                  <Avatar
-                    key={index}
-                    className="h-6 w-6 ring-2 ring-white dark:ring-gray-800"
-                  >
-                    <AvatarImage src={member} alt={member} />
-                    <AvatarFallback className="text-xs font-medium">
-                      {member?.slice(0, 1).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-              {department.users && department.users.length > 4 && (
-                <a
-                  className="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
-                  href="#"
-                >
-                  {department.users.length - 4}
-                </a>
-              )}{" "}
-            </div>
+            {(() => {
+              const membersForDialog = (department.users || []).map(
+                (u: string, i: number) => ({
+                  id: String(u ?? i),
+                  name: `User ${i + 1}`,
+                  email: `user${i + 1}@example.com`,
+                  role: "Member",
+                  avatarUrl: u,
+                })
+              );
+              return (
+                <MembersInlineTrigger
+                  members={membersForDialog}
+                  titlePrefix={department.department_name}
+                />
+              );
+            })()}
           </div>
         </div>
 

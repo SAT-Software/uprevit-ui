@@ -1,6 +1,6 @@
 "use client";
 
-import Projects from "@/features/projects/ProjectsCard";
+import ProjectsCard from "@/features/projects/ProjectsCard";
 import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 
@@ -22,7 +22,7 @@ function ProjectsPage() {
           <p className="text-base font-semibold">All Projects</p>
           <MutateProjectDialog mode="create" />
         </div>
-        <Projects projects={allProjects} />
+        <ProjectsCard projects={allProjects} />
       </div>
     </div>
   );
