@@ -8,7 +8,6 @@ function DepartmentsPage() {
   const { data, isLoading, error } = useGetAllDepartments();
 
   const allDepartments = data?.result?.departments ?? [];
-  console.log(allDepartments);
 
   if (error) {
     return (
