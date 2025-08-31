@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Recent Changes
 
+### 2025-08-31 - UI Redesign and Code Organization
+
+- **feat**: Redesigned dashboard with new card components and pulse animations for better UX
+- **refactor**: Reorganized hooks structure and updated file upload components with new import paths
+- **feat**: Enhanced department/project pages with improved member management and inline triggers
+- **feat**: Added workspace data integration and branding improvements to sidebar
+- **refactor**: Streamlined code organization and removed deprecated components
+
 ### 2025-08-28 - Project Pages Refactor and Sonner Toast Integration
 
 - **refactor**: Updated project pages to utilize new hooks and replace deprecated components
