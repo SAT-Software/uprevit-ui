@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
-import { useFileUpload } from "@/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

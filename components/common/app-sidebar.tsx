@@ -45,6 +45,7 @@ import {
   Sheet,
   Tags,
 } from "lucide-react";
+import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 
 const data = {
   navMain: [
@@ -155,6 +156,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const params = useParams();
   const pathname = usePathname();
   const { open } = useSidebar();
+  const { data: workspaceData, isLoading } = useGetWorkspace(
+    "68b1d3fc5ee2852c8f93ecc1"
+  ); // Get the actual workspace id from user session when we implement auth
+
+  const workspace = workspaceData?.workspace;
 
   const productId =
     typeof params.productId === "string"
@@ -213,6 +219,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             isProductPage={isProductPage}
           />
         </SidebarContent>
+
+        {/* Workspace */}
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem className="px-1 ">
@@ -231,9 +239,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     />
                   </div>
                   <div className="grid flex-1 text-left leading-tight">
-                    <span className="truncate font-medium">{team.name}</span>
+                    <span className="truncate font-medium">
+                      {isLoading ? "Loading..." : workspace.workspaceName}
+                    </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {team.company}
+                      {isLoading ? "Loading..." : workspace.companyName}
                     </span>
                   </div>
                 </button>

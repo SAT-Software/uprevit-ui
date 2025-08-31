@@ -13,7 +13,7 @@ import {
   XIcon,
 } from "lucide-react";
 
-import { formatBytes, useFileUpload } from "@/hooks/use-file-upload";
+import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 
 // Create some dummy initial files

@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
-import { useFileUpload } from "@/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +24,7 @@ import AddDepartmentDropdown from "./AddMemberInDepartmentDropdown";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";
-import type { FileMetadata } from "@/hooks/use-file-upload";
+import type { FileMetadata } from "@/hooks/general/use-file-upload";
 
 type Mode = "create" | "update";
 

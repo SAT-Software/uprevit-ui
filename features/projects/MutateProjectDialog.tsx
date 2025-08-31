@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
-import { useFileUpload } from "@/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +24,7 @@ import AddProjectDropdown from "./AddMemberInProjectDropdown";
 import { useCreateProject } from "@/hooks/project/useCreateProject";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import type { Project } from "@/types/project";
-import type { FileMetadata } from "@/hooks/use-file-upload";
+import type { FileMetadata } from "@/hooks/general/use-file-upload";
 
 type Mode = "create" | "update";
 
