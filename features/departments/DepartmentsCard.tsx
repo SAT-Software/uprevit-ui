@@ -3,25 +3,27 @@ import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PiPlusBold, PiCirclesThreePlusDuotone } from "react-icons/pi";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export interface DepartmentsProps {
-  id: string;
+  _id: string;
   image?: string;
-  name: string;
-  description: string;
-  date: string;
-  manager: string;
-  members: { name: string; src: string }[];
-  membersCount: number;
+  department_name: string;
+  department_description: string;
+  date?: string;
+  manager?: string;
+  users?: string[];
+  members?: { name: string; src: string }[];
+  membersCount?: number;
 }
 
 function Departments({ departments }: { departments: DepartmentsProps[] }) {
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
-      {departments?.map((department) => (
+      {departments?.map((department: DepartmentsProps) => (
         <Link
-          key={department.id}
-          href={`/departments/${department.id}`}
+          key={department._id}
+          href={`/departments/${department._id}`}
           className="w-full"
         >
           <div className="flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4">
@@ -41,12 +43,14 @@ function Departments({ departments }: { departments: DepartmentsProps[] }) {
             </div>
             <div className="flex flex-col items-start justify-between w-full gap-4">
               <div className="flex flex-col items-start gap-1">
-                <p className="text-base font-semibold">{department.name}</p>
+                <p className="text-base font-semibold">
+                  {department.department_name}
+                </p>
                 <p className="flex items-start gap-1 text-xs text-muted-foreground">
                   <span>
                     <Text className="mr-1 w-4 h-4" />
                   </span>
-                  {department.description}
+                  {department.department_description}
                 </p>
               </div>
               <div className="flex flex-wrap items-center justify-between w-full gap-4">
@@ -55,22 +59,25 @@ function Departments({ departments }: { departments: DepartmentsProps[] }) {
                     <CalendarClock className="mr-1 w-4 h-4" />
                   </span>
                   <p className="text-xs text-muted-foreground">
-                    {department.date}
+                    {department.date
+                      ? new Date(department.date).toLocaleDateString()
+                      : "No date"}
                   </p>
                 </div>
                 <div className="flex items-center -space-x-[0.525rem]">
-                  {department.members.map((member) => (
-                    <Image
-                      key={member.name}
-                      className="ring-background rounded-full ring-2"
-                      src={member.src}
-                      width={28}
-                      height={28}
-                      alt={member.name}
-                    />
+                  {department.users?.map((user, index) => (
+                    <Avatar
+                      key={index}
+                      className="h-7 w-7 ring-background ring-2"
+                    >
+                      <AvatarImage src={user} alt={user} />
+                      <AvatarFallback className="text-[10px] font-medium">
+                        {user?.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                   ))}
                   <p className="text-xs text-muted-foreground ml-4">
-                    {department.membersCount} Members
+                    {department?.users?.length} Members
                   </p>
                 </div>
               </div>

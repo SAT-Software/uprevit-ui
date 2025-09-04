@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/lib/providers";
+import { Toaster } from "@/components/ui/sonner";
 import "@univerjs/presets/lib/styles/preset-sheets-data-validation.css";
 import "@univerjs/presets/lib/styles/preset-sheets-filter.css";
 import "@univerjs/presets/lib/styles/preset-sheets-find-replace.css";
@@ -29,7 +31,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>{children}</body>
+      <body className={`${poppins.variable} antialiased`}>
+        <Providers>{children}</Providers>
+        <Toaster />
+      </body>
     </html>
   );
 }

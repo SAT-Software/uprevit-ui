@@ -1,3 +1,5 @@
+"use client";
+
 import ProductComponentDetailsTable from "@/features/products/product/component-details/ProductComponentDetailsTable";
 import AddComponentDialog from "@/features/products/product/component-details/AddComponentDialog";
 

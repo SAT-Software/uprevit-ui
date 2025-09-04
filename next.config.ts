@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["images.unsplash.com"],
   },
+  async rewrites() {
+    const target = process.env.NEXT_PUBLIC_API_PROXY_TARGET; // e.g. http://localhost:4000 or https://api.example.com
+    if (!target) return [];
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${target}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

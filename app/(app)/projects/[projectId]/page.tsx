@@ -1,19 +1,23 @@
+"use client";
+
 import Image from "next/image";
 import { CalendarClock, Text, Edit, Share2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { notFound } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { sampleProducts as productsData } from "@/app/(app)/products/data";
 import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
 import { projects } from "../data";
 import { Item } from "@/features/products/ProductsPageProductTable";
 import { PiKanbanDuotone } from "react-icons/pi";
+import { useEffect } from "react";
 
 interface ProjectDetailPageProps {
-  params: Promise<{ projectId: string }>;
+  params: { projectId: string };
 }
 
-export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-	const projectId = (await params).projectId;
+export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+  const projectId = params.projectId;
+  const router = useRouter();
   const project = projects.find((p) => p.id === projectId);
 
   // Filter products for the current project
@@ -21,7 +25,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     (product: Item) => product.projectId === projectId
   );
 
-  if (!project) return notFound();
+  useEffect(() => {
+    if (!project) {
+      router.replace("/404");
+    }
+  }, [project, router]);
+
+  if (!project) return null;
 
   // TODO: Add logic to fetch department name based on project.departmentId if needed
   // const departmentName = departments.find(d => d.id === project.departmentId)?.name;
@@ -76,11 +86,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           {/* Date */}
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <CalendarClock className="w-4 h-4" />
-            <span> {new Date(project.date).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}</span>
+            <span>
+              {" "}
+              {new Date(project.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
           </div>
 
           {/* Members */}

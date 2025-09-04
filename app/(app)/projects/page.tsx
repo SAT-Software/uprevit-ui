@@ -1,3 +1,5 @@
+"use client";
+
 import Projects from "@/features/projects/ProjectsCard";
 import CreateProjectDialog from "@/features/projects/CreateProjectDialog";
 import { projects } from "./data";

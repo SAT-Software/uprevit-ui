@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import DashboardProductsTable from "@/features/dashboard/DashboardProductsTable";
 import Departments from "@/features/dashboard/DepartmentsCard";
