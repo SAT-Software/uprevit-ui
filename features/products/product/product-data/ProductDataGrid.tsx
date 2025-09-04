@@ -8,7 +8,7 @@ export interface ProductDataGridRef {
   saveData: () => IWorkbookData | null;
 }
 
-const DynamicUniverComponent = dynamic(() => import("./UniverComponent"), {
+const DynamicUniverComponent = dynamic(() => import("../UniverComponent"), {
   ssr: false,
 });
 
