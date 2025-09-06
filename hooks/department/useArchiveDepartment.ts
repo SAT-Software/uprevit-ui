@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function useArchiveDepartment() {
   const queryClient = useQueryClient();
@@ -20,10 +21,14 @@ export function useArchiveDepartment() {
       }
       return res.json().catch(() => null);
     },
-    onSuccess: async (data) => {
+    onSuccess: () => {
+      toast.success("Department archived successfully");
       queryClient.invalidateQueries({ queryKey: ["all-departments"] });
-      console.log("Department archived successfully", data);
       router.push("/archive");
+    },
+    onError: (error) => {
+      console.error(error.message || "Failed to archive department");
+      toast.error("Failed to archive department");
     },
   });
 }

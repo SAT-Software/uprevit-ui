@@ -24,13 +24,12 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 For a detailed list of changes, updates, and improvements made to this project, please refer to our [CHANGELOG.md](./CHANGELOG.md) file.
 
-The changelog follows the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format and includes:
+Recent updates include:
 
-- Recent feature additions and enhancements
-- Bug fixes and improvements
-- API integrations and updates
-- UI/UX improvements
-- Performance optimizations
+- Project pages refactor and sonner toast integration (2025-08-28)
+- API integration and department management enhancements (2025-08-27)
+- Client-side rendering improvements (2025-08-25)
+- Product spreadsheet functionality (2025-10-25)
 
 ## Learn More
 

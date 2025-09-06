@@ -53,7 +53,7 @@ export default function DialogArchiveEntity({
       case "product":
         return productArchive;
       default:
-        return departmentArchive;
+        throw new Error(`Invalid entity type: ${entityType}`);
     }
   }, [entityType, departmentArchive, projectArchive, productArchive]);
 
@@ -93,8 +93,8 @@ export default function DialogArchiveEntity({
             </Link>
             .
           </p>
-          <div className="space-y-2">
-            <Label htmlFor={inputId}>
+          <div className="space-y-4">
+            <Label htmlFor={inputId} className="mb-1">
               {entityType.charAt(0).toUpperCase() + entityType.slice(1)} name
             </Label>
             <Input

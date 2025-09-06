@@ -3,8 +3,11 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PiArrowLeft, PiHouseLine } from "react-icons/pi";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[oklch(0.97_0_0)] p-4">
       <div className="max-w-md w-full text-center">
@@ -29,14 +32,13 @@ export default function NotFound() {
               Go to Dashboard
             </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link
-              href="javascript:history.back()"
-              className="flex items-center gap-2"
-            >
-              <PiArrowLeft className="text-base" />
-              Go Back
-            </Link>
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            className="flex items-center gap-2"
+          >
+            <PiArrowLeft className="text-base" />
+            Go Back
           </Button>
         </div>
       </div>

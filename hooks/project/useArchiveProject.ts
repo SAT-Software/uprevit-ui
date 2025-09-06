@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function useArchiveProject() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (projectId: string) => {
@@ -18,10 +21,14 @@ export function useArchiveProject() {
       }
       return res.json().catch(() => null);
     },
-    onSuccess: async (data) => {
-      console.log("Project archived successfully", data);
-      queryClient.invalidateQueries({ queryKey: ["projects"] }); // Need to review this in projects integration time
-      queryClient.invalidateQueries({ queryKey: ["project-list"] }); // Need to review this in projects integration time
+    onSuccess: () => {
+      toast.success("Project archived successfully");
+      queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      router.push("/archive");
+    },
+    onError: (error) => {
+      console.error(error.message || "Failed to archive project");
+      toast.error("Failed to archive project");
     },
   });
 }

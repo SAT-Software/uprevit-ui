@@ -1,5 +1,6 @@
 import { Department } from "@/types/department";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function useCreateDepartment() {
   const queryClient = useQueryClient();
@@ -19,9 +20,13 @@ export function useCreateDepartment() {
       }
       return res.json().catch(() => null);
     },
-    onSuccess: async (data) => {
-      console.log("Department created successfully", data);
+    onSuccess: () => {
+      toast.success("Department created successfully");
       queryClient.invalidateQueries({ queryKey: ["all-departments"] });
+    },
+    onError: (error) => {
+      console.error(error.message || "Failed to create department");
+      toast.error("Failed to create department");
     },
   });
 }
