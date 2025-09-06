@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils";
 import { IconType } from "react-icons";
-import {
-  // PiArrowBendRightUp,
-  PiArrowUpRightBold,
-  PiArrowDownRightBold,
-} from "react-icons/pi";
 
 export interface StatsCardProps {
   title: string;
@@ -17,21 +12,12 @@ export interface StatsCardProps {
   location: string;
 }
 
-export function StatsCard({
-  title,
-  value,
-  change,
-  icon,
-  location,
-}: StatsCardProps) {
-  const isPositive = change.trend === "up";
-  const trendColor = isPositive ? "text-emerald-500" : "text-red-500";
-
+export function StatsCard({ title, value, icon, location }: StatsCardProps) {
   return (
     <div className="relative p-4 lg:p-5 group before:absolute before:inset-y-8 before:right-0 before:w-px before:bg-gradient-to-b before:from-input/30 before:via-input before:to-input/30 last:before:hidden">
       <div className="relative flex items-center gap-4">
         {/* <PiArrowBendRightUp
-          className="absolute right-0 top-0 opacity-0 group-has-[a:hover]:opacity-100 transition-opacity text-emerald-500"
+          className="absolute right-0 top-0 opacity-0 group-has-[a:hover]:opacity-100 transition-opacity text-neutral-500"
           size={20}
           aria-hidden="true"
         /> */}
@@ -40,29 +26,17 @@ export function StatsCard({
           className={
             location === "archive"
               ? "max-[480px]:hidden size-10 shrink-0 rounded-full bg-muted border border-input flex items-center justify-center text-black dark:text-white"
-              : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-emerald-600/25 border border-emerald-600/50 flex items-center justify-center text-emerald-500"
+              : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
           }
         >
           {icon({ size: 20, strokeWidth: 4 })}
         </div>
         {/* Content */}
         <div>
-          <a
-            href="#"
-            className="font-medium text-xs uppercase text-muted-foreground before:absolute before:inset-0"
-          >
+          <div className="font-medium text-xs uppercase text-muted-foreground before:absolute before:inset-0">
             {title}
-          </a>
-          <div className="text-2xl font-semibold mb-2">{value}</div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground/60">
-            <span
-              className={cn("font-medium flex items-center gap-1", trendColor)}
-            >
-              {isPositive ? <PiArrowUpRightBold /> : <PiArrowDownRightBold />}
-              {change?.value || "00"}
-            </span>{" "}
-            vs last week
           </div>
+          <div className="text-2xl font-semibold mb-2">{value}</div>
         </div>
       </div>
     </div>

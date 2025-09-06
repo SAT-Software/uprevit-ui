@@ -2,62 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import DashboardProductsTable from "@/features/dashboard/DashboardProductsTable";
-import Departments from "@/features/dashboard/DepartmentsCard";
-import ProjectsCard from "@/features/dashboard/ProjectsCard";
+import DashboardDepartmentsCard from "@/features/dashboard/DashboardDepartmentsCard";
+import DashboardProjectsCard from "@/features/dashboard/DashboardProjectsCard";
 import { StatsCardProps, StatsGrid } from "@/features/dashboard/StatsGrid";
 import Link from "next/link";
 import {
-  PiCirclesThreePlus,
-  PiFolderOpen,
-  PiKanban,
-  PiStackPlus,
+  PiCirclesThreePlusDuotone,
+  PiKanbanDuotone,
+  PiStackPlusDuotone,
+  PiFolderOpenDuotone,
 } from "react-icons/pi";
-import { projects as allProjectsData } from "@/app/(app)/projects/data";
-import { departments } from "../departments/data";
 import { sampleProducts } from "../products/data";
-
-const departmentsLookup: { [key: string]: string } = {
-  uih2gf872y: "Department One",
-  uh2t38787gce8: "Department Two",
-};
-
-const parseDate = (dateString: number): Date => {
-  try {
-    const parsed = new Date(dateString);
-    if (isNaN(parsed.getTime())) {
-      console.warn("Could not parse date:", dateString);
-      return new Date(0);
-    }
-    return parsed;
-  } catch (e) {
-    console.error("Error parsing date:", dateString, e);
-    return new Date(0);
-  }
-};
-
-const sortedProjects = [...allProjectsData].sort(
-  (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()
-);
-
-const recentProjectsData = sortedProjects.slice(0, 3);
-
-// Define DashboardProject type expected by RecentProjects component (Renamed from Project)
-type DashboardProject = {
-  id: string;
-  image: string;
-  projectNumber: string; // Using project ID
-  projectName: string;
-  department: string;
-};
-
-// Map the recent projects to the required structure
-const projects: DashboardProject[] = recentProjectsData.map((p) => ({
-  id: p.id,
-  image: p.image,
-  projectNumber: p.id, // Use project ID as project number for now
-  projectName: p.name,
-  department: departmentsLookup[p.departmentId] || "Unknown Dept",
-}));
 
 const stats: StatsCardProps[] = [
   {
@@ -67,7 +22,7 @@ const stats: StatsCardProps[] = [
       value: "+12%",
       trend: "up",
     },
-    icon: PiCirclesThreePlus,
+    icon: PiCirclesThreePlusDuotone,
     location: "dashboard",
   },
   {
@@ -77,7 +32,7 @@ const stats: StatsCardProps[] = [
       value: "+42%",
       trend: "up",
     },
-    icon: PiKanban,
+    icon: PiKanbanDuotone,
     location: "dashboard",
   },
   {
@@ -87,7 +42,7 @@ const stats: StatsCardProps[] = [
       value: "+37%",
       trend: "up",
     },
-    icon: PiStackPlus,
+    icon: PiStackPlusDuotone,
     location: "dashboard",
   },
   {
@@ -97,7 +52,7 @@ const stats: StatsCardProps[] = [
       value: "-17%",
       trend: "down",
     },
-    icon: PiFolderOpen,
+    icon: PiFolderOpenDuotone,
     location: "dashboard",
   },
 ];
@@ -112,16 +67,8 @@ function DashboardPage() {
 
       {/* Departments and Projects */}
       <div className="flex flex-col xl:flex-row w-full justify-between gap-4">
-        <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
-          <div className="flex items-center w-full justify-between">
-            <p className="text-base font-semibold">Recent Departments</p>
-            <Link href="/departments">
-              <Button variant="outline">All Departments</Button>
-            </Link>
-          </div>
-          <Departments departments={departments} />
-        </div>
-        <ProjectsCard projects={projects} />
+        <DashboardDepartmentsCard />
+        <DashboardProjectsCard />
       </div>
 
       {/* Products */}

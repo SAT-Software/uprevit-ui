@@ -25,7 +25,6 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
@@ -39,7 +38,6 @@ import Link from "next/link";
 import {
   ArrowLeftIcon,
   BookOpenCheck,
-  GalleryVerticalEnd,
   Grid2X2,
   ImagePlus,
   LayoutGrid,
@@ -47,6 +45,7 @@ import {
   Sheet,
   Tags,
 } from "lucide-react";
+import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 
 const data = {
   navMain: [
@@ -148,15 +147,20 @@ const data = {
 };
 
 const team = {
-  name: "Acme Inc",
-  logo: GalleryVerticalEnd,
-  plan: "Enterprise",
+  name: "Uprevit",
+  company: "Uprevit Inc",
+  logoSrc: "/avatars/workspace-logo.png",
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const params = useParams();
   const pathname = usePathname();
   const { open } = useSidebar();
+  const { data: workspaceData, isLoading } = useGetWorkspace(
+    "68b1d3fc5ee2852c8f93ecc1"
+  ); // Get the actual workspace id from user session when we implement auth
+
+  const workspace = workspaceData?.workspace;
 
   const productId =
     typeof params.productId === "string"
@@ -215,20 +219,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             isProductPage={isProductPage}
           />
         </SidebarContent>
+
+        {/* Workspace */}
         <SidebarGroup>
           <SidebarMenu>
-            <SidebarMenuItem className="px-1 py-1">
+            <SidebarMenuItem className="px-1 ">
               <Link href={"/settings"}>
-                <SidebarMenuButton
+                <button
                   className={cn(
-                    "hover:bg-sidebar-primary text-background hover:text-sidebar-primary-foreground"
+                    "cursor-pointer hover:text-sidebar-primary-foreground rounded-lg py-1 flex items-center gap-2 w-full "
                   )}
                 >
-                  <div>
-                    <team.logo className="size-4" />
+                  <div className="relative flex size-8 min-w-8 items-center justify-center overflow-hidden rounded-md bg-muted">
+                    <Image
+                      src={team.logoSrc}
+                      alt="Workspace logo"
+                      fill
+                      className="object-cover p-1"
+                    />
                   </div>
-                  <span className="truncate font-medium">{team.name}</span>
-                </SidebarMenuButton>
+                  <div className="grid flex-1 text-left leading-tight">
+                    <span className="truncate font-medium">
+                      {isLoading ? "Loading..." : workspace.workspaceName}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {isLoading ? "Loading..." : workspace.companyName}
+                    </span>
+                  </div>
+                </button>
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>

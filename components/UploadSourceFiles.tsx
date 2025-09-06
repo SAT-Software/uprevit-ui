@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   AlertCircleIcon,
@@ -11,13 +11,10 @@ import {
   ImageIcon,
   VideoIcon,
   XIcon,
-} from "lucide-react"
+} from "lucide-react";
 
-import {
-  formatBytes,
-  useFileUpload,
-} from "@/hooks/use-file-upload"
-import { Button } from "@/components/ui/button"
+import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
+import { Button } from "@/components/ui/button";
 
 // Create some dummy initial files
 const initialFiles = [
@@ -42,11 +39,11 @@ const initialFiles = [
     url: "https://example.com/conclusion.xlsx",
     id: "conclusion.xlsx-1744638436563-8u5xuls",
   },
-]
+];
 
 const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
-  const fileType = file.file instanceof File ? file.file.type : file.file.type
-  const fileName = file.file instanceof File ? file.file.name : file.file.name
+  const fileType = file.file instanceof File ? file.file.type : file.file.type;
+  const fileName = file.file instanceof File ? file.file.name : file.file.name;
 
   if (
     fileType.includes("pdf") ||
@@ -55,33 +52,33 @@ const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
     fileName.endsWith(".doc") ||
     fileName.endsWith(".docx")
   ) {
-    return <FileTextIcon className="size-4 opacity-60" />
+    return <FileTextIcon className="size-4 opacity-60" />;
   } else if (
     fileType.includes("zip") ||
     fileType.includes("archive") ||
     fileName.endsWith(".zip") ||
     fileName.endsWith(".rar")
   ) {
-    return <FileArchiveIcon className="size-4 opacity-60" />
+    return <FileArchiveIcon className="size-4 opacity-60" />;
   } else if (
     fileType.includes("excel") ||
     fileName.endsWith(".xls") ||
     fileName.endsWith(".xlsx")
   ) {
-    return <FileSpreadsheetIcon className="size-4 opacity-60" />
+    return <FileSpreadsheetIcon className="size-4 opacity-60" />;
   } else if (fileType.includes("video/")) {
-    return <VideoIcon className="size-4 opacity-60" />
+    return <VideoIcon className="size-4 opacity-60" />;
   } else if (fileType.includes("audio/")) {
-    return <HeadphonesIcon className="size-4 opacity-60" />
+    return <HeadphonesIcon className="size-4 opacity-60" />;
   } else if (fileType.startsWith("image/")) {
-    return <ImageIcon className="size-4 opacity-60" />
+    return <ImageIcon className="size-4 opacity-60" />;
   }
-  return <FileIcon className="size-4 opacity-60" />
-}
+  return <FileIcon className="size-4 opacity-60" />;
+};
 
 export default function Component() {
-  const maxSize = 100 * 1024 * 1024 // 10MB default
-  const maxFiles = 10
+  const maxSize = 100 * 1024 * 1024; // 10MB default
+  const maxFiles = 10;
 
   const [
     { files, isDragging, errors },
@@ -100,7 +97,7 @@ export default function Component() {
     maxFiles,
     maxSize,
     initialFiles,
-  })
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -217,5 +214,5 @@ export default function Component() {
         </a>
       </p>
     </div>
-  )
+  );
 }

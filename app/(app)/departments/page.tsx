@@ -1,7 +1,7 @@
 "use client";
 
 import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
-import Departments from "@/features/departments/DepartmentsCard";
+import DepartmentsCard from "@/features/departments/DepartmentsCard";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 
 function DepartmentsPage() {
@@ -34,7 +34,7 @@ function DepartmentsPage() {
 
           <MutateDepartmentDialog mode="create" />
         </div>
-        <Departments departments={allDepartments} />
+        <DepartmentsCard departments={allDepartments} />
       </div>
     </div>
   );
