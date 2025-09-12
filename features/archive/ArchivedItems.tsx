@@ -119,28 +119,30 @@ export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
       const prodExtras: ColumnDef<ArchiveRow>[] = [
         {
           header: "Archived By",
-          accessorKey: "archivedBy",
+          accessorKey: "action_by",
           size: 160,
           cell: ({ row }) => (
-            <div className="text-xs">{row.getValue("archivedBy")}</div>
+            <div className="text-xs">{row.getValue("action_by")}</div>
           ),
         },
         {
           header: "Archived On",
-          accessorKey: "archivedOn",
+          accessorKey: "action_at",
           size: 140,
           cell: ({ row }) => (
             <div className="text-xs text-muted-foreground">
-              {row.getValue("archivedOn")}
+              {row.getValue("action_at")}
             </div>
           ),
         },
         {
           header: "Version",
-          accessorKey: "version",
+          accessorKey: "master_version",
           size: 120,
           cell: ({ row }) => (
-            <div className="text-xs font-medium">{row.getValue("version")}</div>
+            <div className="text-xs font-medium">
+              {row.getValue("master_version")}
+            </div>
           ),
         },
       ];

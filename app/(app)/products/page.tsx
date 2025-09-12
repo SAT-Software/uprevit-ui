@@ -2,7 +2,6 @@
 
 import ProductsPageProductTable from "@/features/products/ProductsPageProductTable";
 import CreateProductDialog from "@/features/products/CreateProductDialog";
-import { sampleProducts } from "./data";
 
 function ProductsPage() {
   return (
@@ -13,7 +12,7 @@ function ProductsPage() {
           <CreateProductDialog />
         </div>
         {/* <Departments departments={departments} /> */}
-        <ProductsPageProductTable sampleProducts={sampleProducts} />
+        <ProductsPageProductTable />
       </div>
     </div>
   );

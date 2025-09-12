@@ -1,10 +1,10 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -24,23 +24,95 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Import actual data from the pages
-import { departments } from "@/app/(app)/departments/data";
-import { projects } from "@/app/(app)/projects/data";
+// Import hooks for real data
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import { Department } from "@/types/department";
+import { Project } from "@/types/project";
+import { useCreateProduct } from "@/hooks/product/useCreateProduct";
+
+interface FormValues {
+  ppn: string;
+  productName: string;
+  description: string;
+  department: string;
+  project: string;
+  version: string;
+  status: string;
+}
 
 export default function CreateProductDialog() {
   const id = useId();
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [ppn, setPpn] = useState<string>("");
+  const [open, setOpen] = useState(false);
+
+  // Get real data from backend
+  const { data: departmentsData = [] } = useGetAllDepartments();
+  const { data: projectsData = [] } = useGetAllProjects();
+
+  const updateDepartmentsProjects = useMemo(() => {
+    return {
+      departments: departmentsData?.result?.departments ?? [],
+      projects: projectsData?.result?.projects ?? [],
+    };
+  }, [departmentsData, projectsData]);
+
+  const departments = updateDepartmentsProjects.departments;
+  const projects = updateDepartmentsProjects.projects;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<FormValues>({
+    defaultValues: {
+      ppn: "",
+      productName: "",
+      description: "",
+      department: "",
+      project: "",
+      version: "1.0",
+      status: "draft",
+    },
+    mode: "onSubmit",
+  });
+
+  const selectedDepartment = watch("department");
+  const selectedProject = watch("project");
+
+  const createMutation = useCreateProduct();
 
   // Filter projects based on selected department
-  const filteredProjects = selectedDepartment
-    ? projects.filter((project) => project.departmentId === selectedDepartment)
-    : projects;
+  const filteredProjects = useMemo(() => {
+    return selectedDepartment
+      ? projects.filter(
+          (project: Project) => project.department_id === selectedDepartment
+        )
+      : projects;
+  }, [selectedDepartment, projects]);
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      await createMutation.mutateAsync({
+        product_plan_number: data.ppn,
+        product_name: data.productName,
+        product_description: data.description,
+        department_id: data.department,
+        project_id: data.project,
+        master_version: data.version,
+        status: data.status.toLowerCase(),
+      });
+
+      reset();
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="flex items-center gap-2">
           Create New Product <PiPlusBold />
@@ -57,16 +129,31 @@ export default function CreateProductDialog() {
         </DialogDescription>
         <div className="overflow-y-auto">
           <div className="px-6 pt-4 pb-6">
-            <form className="space-y-4">
+            <form
+              id="create-product-form"
+              className="space-y-4"
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+            >
               <div className="space-y-2">
                 <Label htmlFor={`${id}-ppn`}>Product Plan Number (PPN)</Label>
                 <Input
                   id={`${id}-ppn`}
                   placeholder="Enter PPN"
                   type="text"
-                  value={ppn}
-                  onChange={(e) => setPpn(e.target.value)}
-                  required
+                  {...register("ppn", {
+                    required: "PPN is required",
+                    minLength: {
+                      value: 10,
+                      message:
+                        "PPN must be at least 10 alphanumeric characters",
+                    },
+                    pattern: {
+                      value: /^[a-zA-Z0-9]/,
+                      message:
+                        "PPN must be at least 10 alphanumeric characters",
+                    },
+                  })}
                 />
                 <div className="rounded-md bg-emerald-50 p-3 text-xs">
                   <h4 className="mb-2 font-medium text-emerald-700">
@@ -79,6 +166,11 @@ export default function CreateProductDialog() {
                     <li>Example: PPN1234567</li>
                   </ul>
                 </div>
+                {errors.ppn && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.ppn.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -87,8 +179,15 @@ export default function CreateProductDialog() {
                   id={`${id}-product-name`}
                   placeholder="Enter product name"
                   type="text"
-                  required
+                  {...register("productName", {
+                    required: "Product name is required",
+                  })}
                 />
+                {errors.productName && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.productName.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -97,52 +196,82 @@ export default function CreateProductDialog() {
                   id={`${id}-description`}
                   placeholder="Enter product description"
                   className="min-h-[100px] resize-none"
+                  {...register("description", {
+                    maxLength: {
+                      value: 220,
+                      message: "Description must be at most 220 characters",
+                    },
+                  })}
                 />
+                {errors.description && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-department`}>Department</Label>
                   <Select
-                    required
                     value={selectedDepartment}
                     onValueChange={(value) => {
-                      setSelectedDepartment(value);
-                      setSelectedProject(""); // Reset project when department changes
+                      // This is a workaround to update the form value
+                      const event = { target: { name: "department", value } };
+
+                      register("department", {
+                        required: "Department is required",
+                      }).onChange(event);
                     }}
                   >
                     <SelectTrigger id={`${id}-department`}>
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
-                      {departments.map((dept) => (
-                        <SelectItem key={dept.id} value={dept.id}>
-                          {dept.name}
+                      {departments.map((dept: Department) => (
+                        <SelectItem key={dept._id} value={dept._id || ""}>
+                          {dept.department_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.department && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.department.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-project`}>Project</Label>
                   <Select
-                    required
                     value={selectedProject}
-                    onValueChange={setSelectedProject}
+                    onValueChange={(value) => {
+                      // This is a workaround to update the form value
+                      const event = { target: { name: "project", value } };
+
+                      register("project", {
+                        required: "Project is required",
+                      }).onChange(event);
+                    }}
                     disabled={!selectedDepartment}
                   >
                     <SelectTrigger id={`${id}-project`}>
                       <SelectValue placeholder="Select project" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredProjects.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.name}
+                      {filteredProjects?.map((project: Project) => (
+                        <SelectItem key={project._id} value={project._id || ""}>
+                          {project.project_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.project && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.project.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -155,6 +284,7 @@ export default function CreateProductDialog() {
                     type="text"
                     disabled
                     className="bg-muted"
+                    {...register("version")}
                   />
                 </div>
 
@@ -166,6 +296,7 @@ export default function CreateProductDialog() {
                     type="text"
                     disabled
                     className="bg-muted"
+                    {...register("status")}
                   />
                 </div>
               </div>
@@ -173,14 +304,12 @@ export default function CreateProductDialog() {
           </div>
         </div>
         <DialogFooter className="border-t px-6 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="button">Create Product</Button>
-          </DialogClose>
+          <Button type="button" variant="outline">
+            Cancel
+          </Button>
+          <Button type="submit" form="create-product-form">
+            Create Product
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

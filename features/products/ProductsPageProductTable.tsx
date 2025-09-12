@@ -72,26 +72,21 @@ import DialogDuplicateProduct from "./DialogDuplicateProduct";
 import DialogShareProduct from "./DialogShareProduct";
 import FilterBuilder from "./tableFilter";
 import UpdateProductDialog from "./UpdateProductDialog";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 
 // Define the type for the table data
 export type Item = {
-  // id: string;
-  productId: string;
-  createdOn: string;
-  createdBy: string;
-  modifiedOn: string;
-  modifiedBy: string;
-  productName: string;
-  description: string;
-  projectId: string;
-  departmentId: string;
-  version: string;
-  status: "Submitted" | "Draft" | "Archived";
-  targetDate: number;
-  completionDate: number | null;
-  delayReason: string | null;
-  tabsCompleted: string[];
-  completionPercentage: number;
+  _id: string;
+  productId?: string;
+  action: string;
+  action_at: string;
+  action_by: string;
+  department_id: string;
+  master_version: string;
+  product_name: string;
+  product_plan_number: string;
+  project_id: string;
+  status: string;
 };
 
 interface AdvancedFilter {
@@ -143,42 +138,35 @@ const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
 
 const columns: ColumnDef<Item>[] = [
   {
-    header: "Product Id",
-    accessorKey: "productId",
-    cell: ({ row }) => (
-      <div className="text-xs  font-medium">{row.getValue("productId")}</div>
-    ),
-    size: 120,
-    maxSize: 150,
-  },
-  {
-    header: "Created By-On",
-    accessorKey: "createdBy",
+    header: "ID",
+    accessorKey: "_id",
     cell: ({ row }) => {
-      const createdBy = row.original.createdBy;
-      const createdOn = row.original.createdOn;
+      const id = row.getValue("_id") as string;
+      const truncatedId = id?.length > 7 ? `${id.slice(0, 7)}...` : id;
       return (
-        <div className="">
-          <p className="text-xs  font-medium">{createdBy}</p>
-          <p className="text-xs text-muted-foreground">
-            {createdOn.slice(0, 10)}
-          </p>
+        <div className="text-xs font-medium" title={id}>
+          {truncatedId}
         </div>
       );
     },
     size: 120,
+    maxSize: 150,
   },
   {
-    header: "Modified By-On",
-    accessorKey: "modifiedBy",
+    header: "Action By-At",
+    accessorKey: "action_by",
     cell: ({ row }) => {
-      const modifiedBy = row.original.modifiedBy;
-      const modifiedOn = row.original.modifiedOn;
+      const actionBy = row.original.action_by;
+      const actionAt = row.original.action_at;
+      const truncatedActionBy =
+        actionBy?.length > 6 ? `${actionBy.slice(0, 6)}...` : actionBy;
       return (
         <div className="">
-          <p className="text-xs  font-medium">{modifiedBy}</p>
+          <p className="text-xs font-medium" title={actionBy}>
+            {truncatedActionBy}
+          </p>
           <p className="text-xs text-muted-foreground">
-            {modifiedOn.slice(0, 10)}
+            {actionAt?.slice(0, 10)}
           </p>
         </div>
       );
@@ -187,33 +175,61 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     header: "Product Name",
-    accessorKey: "productName",
+    accessorKey: "product_name",
     cell: ({ row }) => {
-      return <p className="text-xs ">{row.getValue("productName")}</p>;
+      return <p className="text-xs">{row.getValue("product_name")}</p>;
     },
     size: 200,
   },
   {
-    header: "Project Id",
-    accessorKey: "projectId",
+    header: "Plan Number",
+    accessorKey: "product_plan_number",
     cell: ({ row }) => (
-      <div className="text-xs  font-medium">{row.getValue("projectId")}</div>
+      <div className="text-xs font-medium">
+        {row.getValue("product_plan_number")}
+      </div>
     ),
     size: 120,
   },
   {
-    header: "Department Id",
-    accessorKey: "departmentId",
-    cell: ({ row }) => (
-      <div className="text-xs  font-medium">{row.getValue("departmentId")}</div>
-    ),
+    header: "Project ID",
+    accessorKey: "project_id",
+    cell: ({ row }) => {
+      const projectId = row.getValue("project_id") as string;
+      const truncatedProjectId =
+        projectId?.length > 6 ? `${projectId.slice(0, 6)}...` : projectId;
+      return (
+        <div className="text-xs font-medium" title={projectId}>
+          {truncatedProjectId}
+        </div>
+      );
+    },
+    size: 120,
+  },
+  {
+    header: "Department ID",
+    accessorKey: "department_id",
+    cell: ({ row }) => {
+      const departmentId = row.getValue("department_id") as string;
+      const truncatedDepartmentId =
+        departmentId?.length > 6
+          ? `${departmentId.slice(0, 6)}...`
+          : departmentId;
+      return (
+        <div className="text-xs font-medium" title={departmentId}>
+          {truncatedDepartmentId}
+        </div>
+      );
+    },
     size: 120,
   },
   {
     header: "Version",
-    accessorKey: "version",
+    accessorKey: "master_version",
     cell: ({ row }) => (
-      <div className="text-xs  font-medium">{row.getValue("version")}</div>
+      <div className="text-xs font-medium">
+        {row.getValue("master_version")}
+      </div>
     ),
     size: 80,
   },
@@ -236,7 +252,6 @@ const columns: ColumnDef<Item>[] = [
     ),
     size: 100,
   },
-
   {
     id: "edit",
     header: () => <span className="sr-only">Edit</span>,
@@ -248,7 +263,6 @@ const columns: ColumnDef<Item>[] = [
     size: 30,
     enableHiding: false,
   },
-
   {
     id: "duplicate",
     header: () => <span className="sr-only">Duplicate</span>,
@@ -260,7 +274,6 @@ const columns: ColumnDef<Item>[] = [
     size: 30,
     enableHiding: false,
   },
-
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
@@ -270,13 +283,10 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-export default function ProductsPageProductTable({
-  sampleProducts,
-}: {
-  sampleProducts: Item[];
-}) {
+export default function ProductsPageProductTable() {
   const id = useId();
   // const router = useRouter();
+  const { data } = useGetAllProducts();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [pagination, setPagination] = useState<PaginationState>({
@@ -286,13 +296,15 @@ export default function ProductsPageProductTable({
 
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: "productId",
+      id: "_id",
       desc: false,
     },
   ]);
 
+  console.log(data?.result.products);
+
   const table = useReactTable({
-    data: sampleProducts,
+    data: data?.result.products ?? [],
     columns,
     defaultColumn: { filterFn: advancedFilterFn },
     getCoreRowModel: getCoreRowModel(),
@@ -423,7 +435,7 @@ export default function ProductsPageProductTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table?.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -431,7 +443,7 @@ export default function ProductsPageProductTable({
                   className="cursor-pointer"
                   // onClick={() => {
                   //   router.push(
-                  //     `/products/${row.original.productId}/product-information`
+                  //     `/products/${row.original._id}/product-information`
                   //   );
                   // }}
                 >
@@ -585,7 +597,7 @@ function RowActions({ row }: { row: { original: Item } }) {
 
   const handleOpen = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/products/${row.original.productId}/product-information`);
+    router.push(`/products/${row.original._id}/product-information`);
   };
 
   return (
@@ -614,7 +626,8 @@ function RowActions({ row }: { row: { original: Item } }) {
           <DropdownMenuGroup>
             <DropdownMenuItem
               onSelect={() => {
-                setShowArchiveDialog(true);
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowArchiveDialog(true), 100);
               }}
             >
               <ArchiveIcon className="mr-2 h-4 w-4" />
@@ -625,7 +638,8 @@ function RowActions({ row }: { row: { original: Item } }) {
           <DropdownMenuGroup>
             <DropdownMenuItem
               onSelect={() => {
-                setShowShareDialog(true);
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowShareDialog(true), 100);
               }}
             >
               <Share2Icon className="mr-2 h-4 w-4" />
@@ -633,7 +647,8 @@ function RowActions({ row }: { row: { original: Item } }) {
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
-                setShowBookmarkDialog(true);
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowBookmarkDialog(true), 100);
               }}
             >
               <StarIcon className="mr-2 h-4 w-4" />

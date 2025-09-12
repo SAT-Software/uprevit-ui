@@ -23,7 +23,7 @@ export default function DialogShareProduct({
 }: {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  product?: { productId: string; productName?: string };
+  product?: { _id: string; product_name?: string };
   children?: React.ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
@@ -32,12 +32,12 @@ export default function DialogShareProduct({
   useEffect(() => {
     if (typeof window !== "undefined") {
       setProductLink(
-        product?.productId
-          ? `${window.location.origin}/products/${product.productId}`
+        product?._id
+          ? `${window.location.origin}/products/${product._id}`
           : "/products/sample-id"
       );
     }
-  }, [product?.productId]);
+  }, [product?._id]);
 
   const handleCopyLink = async () => {
     try {
@@ -96,11 +96,11 @@ export default function DialogShareProduct({
               </div>
             </div>
 
-            {product?.productName && (
+            {product?.product_name && (
               <div className="rounded-lg border p-3 bg-muted/50">
-                <h4 className="font-medium text-sm">{product.productName}</h4>
+                <h4 className="font-medium text-sm">{product.product_name}</h4>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Product ID: {product.productId}
+                  Product ID: {product._id}
                 </p>
               </div>
             )}
@@ -168,11 +168,11 @@ export default function DialogShareProduct({
             </div>
           </div>
 
-          {product?.productName && (
+          {product?.product_name && (
             <div className="rounded-lg border p-3 bg-muted/50">
-              <h4 className="font-medium text-sm">{product.productName}</h4>
+              <h4 className="font-medium text-sm">{product.product_name}</h4>
               <p className="text-xs text-muted-foreground mt-1">
-                Product ID: {product.productId}
+                Product ID: {product._id}
               </p>
             </div>
           )}

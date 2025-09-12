@@ -1,9 +1,8 @@
-import { StarIcon, FolderIcon, PlusIcon, CheckIcon } from "lucide-react";
-import { useState } from "react";
+import { StarIcon, FolderIcon } from "lucide-react";
+import { useForm, SubmitHandler } from "react-hook-form";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -22,15 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
+import { useBookmarkProduct } from "@/hooks/product/useBookmarkProduct";
 
-// Mock bookmark folders - replace with real data later
-const mockBookmarkFolders = [
-  { id: "1", name: "Favorites", count: 12 },
-  { id: "2", name: "Current Projects", count: 8 },
-  { id: "3", name: "Archive Review", count: 5 },
-  { id: "4", name: "Team Shared", count: 15 },
-  { id: "5", name: "Personal Collection", count: 3 },
-];
+interface FormValues {
+  folderId: string;
+}
 
 export default function DialogBookmarkProduct({
   open,
@@ -40,26 +35,67 @@ export default function DialogBookmarkProduct({
 }: {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  product?: any;
+  product?: {
+    _id: string;
+    product_name?: string;
+  };
   children?: React.ReactNode;
 }) {
-  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const { data, isLoading, error } = useGetAllUserBookmarkFolders();
+  const bookmarkFolders = data?.bookmarked_product_folders ?? [];
+  const bookmarkProduct = useBookmarkProduct();
 
-  const handleAddToBookmark = () => {
-    if (selectedFolder) {
-      // TODO: Implement bookmark functionality
-      console.log(
-        `Adding product ${product?.productId} to folder ${selectedFolder}`
-      );
+  const {
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues: {
+      folderId: "",
+    },
+    mode: "onSubmit",
+  });
+
+  const selectedFolderId = watch("folderId");
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (!product?._id) return;
+    console.log(data);
+    try {
+      await bookmarkProduct.mutateAsync({
+        id: product._id,
+        folder_id: data.folderId,
+      });
+      console.log("success bookmark product");
+      // Reset form and close dialog on success
+      reset();
       onOpenChange?.(false);
+    } catch (error) {
+      // Error is handled by the mutation's onError callback
+      console.error("Failed to bookmark product:", error);
     }
   };
 
-  // If external state control is provided, use controlled mode
-  if (open !== undefined && onOpenChange !== undefined) {
-    return (
-      <AlertDialog open={open} onOpenChange={onOpenChange}>
-        <AlertDialogContent>
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // Reset form when dialog closes
+      reset();
+    }
+    onOpenChange?.(open);
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+      {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
+      <AlertDialogContent>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault(); // Prevent default form submission
+            handleSubmit(onSubmit)(e); // Call our custom submit handler
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <StarIcon size={20} />
@@ -71,11 +107,11 @@ export default function DialogBookmarkProduct({
           </AlertDialogHeader>
 
           <div className="space-y-4">
-            {product?.productName && (
+            {product?.product_name && (
               <div className="rounded-lg border p-3 bg-muted/50">
-                <h4 className="font-medium text-sm">{product.productName}</h4>
+                <h4 className="font-medium text-sm">{product.product_name}</h4>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Product ID: {product.productId}
+                  Product ID: {product._id}
                 </p>
               </div>
             )}
@@ -84,201 +120,68 @@ export default function DialogBookmarkProduct({
               <Label className="text-sm font-medium">
                 Select Bookmark Folder
               </Label>
-              <Select value={selectedFolder} onValueChange={setSelectedFolder}>
+              <Select
+                value={selectedFolderId}
+                onValueChange={(value) => setValue("folderId", value)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Choose a folder..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockBookmarkFolders.map((folder) => (
-                    <SelectItem key={folder.id} value={folder.id}>
-                      <div className="flex items-center gap-2 w-full">
-                        <FolderIcon
-                          size={16}
-                          className="text-muted-foreground"
-                        />
-                        <span className="flex-1">{folder.name}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {folder.count} items
-                        </span>
-                      </div>
+                  {isLoading ? (
+                    <SelectItem disabled value="loading">
+                      Loading folders...
                     </SelectItem>
-                  ))}
+                  ) : error ? (
+                    <SelectItem disabled value="error">
+                      Error loading folders
+                    </SelectItem>
+                  ) : bookmarkFolders.length === 0 ? (
+                    <SelectItem disabled value="empty">
+                      No folders available
+                    </SelectItem>
+                  ) : (
+                    bookmarkFolders?.map(
+                      (folder: {
+                        _id: string;
+                        folder_name: string;
+                        products: string[];
+                      }) => (
+                        <SelectItem key={folder._id} value={folder._id}>
+                          <div className="flex items-center gap-2 w-full">
+                            <FolderIcon
+                              size={16}
+                              className="text-muted-foreground"
+                            />
+                            <span className="flex-1">{folder.folder_name}</span>
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              {folder.products.length || 0} items
+                            </span>
+                          </div>
+                        </SelectItem>
+                      )
+                    )
+                  )}
                 </SelectContent>
               </Select>
+              {errors.folderId && (
+                <p className="text-sm text-destructive">
+                  {errors.folderId.message}
+                </p>
+              )}
             </div>
-
-            {/* Alternative: Show folders as clickable cards */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Or browse folders:</Label>
-              <ScrollArea className="h-32 w-full rounded-md border p-2">
-                <div className="space-y-2">
-                  {mockBookmarkFolders.map((folder) => (
-                    <Button
-                      key={folder.id}
-                      variant={
-                        selectedFolder === folder.id ? "default" : "ghost"
-                      }
-                      className="w-full justify-start h-auto p-3"
-                      onClick={() => setSelectedFolder(folder.id)}
-                    >
-                      <div className="flex items-center gap-2 w-full">
-                        <FolderIcon
-                          size={16}
-                          className="text-muted-foreground"
-                        />
-                        <div className="flex-1 text-left">
-                          <div className="font-medium text-sm">
-                            {folder.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {folder.count} items
-                          </div>
-                        </div>
-                        {selectedFolder === folder.id && (
-                          <CheckIcon size={16} className="text-primary" />
-                        )}
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                // TODO: Implement create new folder functionality
-                console.log("Create new folder");
-              }}
-            >
-              <PlusIcon size={16} className="mr-2" />
-              Create New Folder
-            </Button>
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleAddToBookmark}
-              disabled={!selectedFolder}
+            <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+            <Button
+              type="submit"
+              disabled={!selectedFolderId || bookmarkProduct.isPending}
             >
-              Add to Bookmarks
-            </AlertDialogAction>
+              {bookmarkProduct.isPending ? "Adding..." : "Add to Bookmarks"}
+            </Button>
           </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  }
-
-  // Original trigger-based mode
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        {children || (
-          <div className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-accent text-foreground cursor-pointer focus:bg-accent focus:text-accent-foreground">
-            <StarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-            <span>Add to Bookmarks</span>
-          </div>
-        )}
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <StarIcon size={20} />
-            Add to Bookmarks
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Choose a folder to save this product to your bookmarks.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <div className="space-y-4">
-          {product?.productName && (
-            <div className="rounded-lg border p-3 bg-muted/50">
-              <h4 className="font-medium text-sm">{product.productName}</h4>
-              <p className="text-xs text-muted-foreground mt-1">
-                Product ID: {product.productId}
-              </p>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">
-              Select Bookmark Folder
-            </Label>
-            <Select value={selectedFolder} onValueChange={setSelectedFolder}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a folder..." />
-              </SelectTrigger>
-              <SelectContent>
-                {mockBookmarkFolders.map((folder) => (
-                  <SelectItem key={folder.id} value={folder.id}>
-                    <div className="flex items-center gap-2 w-full">
-                      <FolderIcon size={16} className="text-muted-foreground" />
-                      <span className="flex-1">{folder.name}</span>
-                      <span className="text-xs text-muted-foreground ml-auto">
-                        {folder.count} items
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Alternative: Show folders as clickable cards */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Or browse folders:</Label>
-            <ScrollArea className="h-32 w-full rounded-md border p-2">
-              <div className="space-y-2">
-                {mockBookmarkFolders.map((folder) => (
-                  <Button
-                    key={folder.id}
-                    variant={selectedFolder === folder.id ? "default" : "ghost"}
-                    className="w-full justify-start h-auto p-3"
-                    onClick={() => setSelectedFolder(folder.id)}
-                  >
-                    <div className="flex items-center gap-2 w-full">
-                      <FolderIcon size={16} className="text-muted-foreground" />
-                      <div className="flex-1 text-left">
-                        <div className="font-medium text-sm">{folder.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {folder.count} items
-                        </div>
-                      </div>
-                      {selectedFolder === folder.id && (
-                        <CheckIcon size={16} className="text-primary" />
-                      )}
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              // TODO: Implement create new folder functionality
-              console.log("Create new folder");
-            }}
-          >
-            <PlusIcon size={16} className="mr-2" />
-            Create New Folder
-          </Button>
-        </div>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleAddToBookmark}
-            disabled={!selectedFolder}
-          >
-            Add to Bookmarks
-          </AlertDialogAction>
-        </AlertDialogFooter>
+        </form>
       </AlertDialogContent>
     </AlertDialog>
   );
