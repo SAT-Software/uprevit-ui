@@ -11,12 +11,6 @@ import {
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
 
-const userDummy = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
-};
-
 export function NavUser() {
   const { data: userData } = useGetUser("68a1cf8c2cb63e45ad511688"); // Get the actual user id from user session when we implement auth
 
@@ -33,7 +27,7 @@ export function NavUser() {
             className="group hover:bg-accent hover:text-foreground duration-300 delay-300 ease-in-out data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <Avatar className="h-8 w-8 rounded-full">
-              <AvatarImage src={userDummy.avatar} alt={user?.name} />
+              <AvatarImage src={user?.avatar} alt={user?.name} />
               <AvatarFallback className="rounded-full group-hover:bg-accent">
                 {user?.name.charAt(0)}
               </AvatarFallback>

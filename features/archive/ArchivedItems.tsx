@@ -15,6 +15,7 @@ import { ArchiveTable } from "@/features/archive/ArchiveTable";
 import type { ArchiveEntityType } from "@/features/archive/DialogArchiveEntity";
 import { useGetArchivedDepartments } from "@/hooks/archive/useGetArchivedDepartments";
 import { useGetArchivedProjects } from "@/hooks/archive/useGetArchivedProjects";
+import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
 
 type ArchiveRow = {
   _id: string;
@@ -37,6 +38,7 @@ export type ArchivedItemsProps = {
 export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
   const { data: archivedDepartments } = useGetArchivedDepartments();
   const { data: archivedProjects } = useGetArchivedProjects();
+  const { data: archivedProducts } = useGetArchivedProducts();
 
   const items: ArchiveRow[] = useMemo(() => {
     if (type === "department") {
@@ -47,10 +49,11 @@ export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
     }
     if (type === "product") {
       // TODO: Add useGetArchivedProducts hook and fetch archived products
+      return archivedProducts?.result?.products ?? [];
       return [];
     }
     return [];
-  }, [type, archivedDepartments, archivedProjects]);
+  }, [type, archivedDepartments, archivedProjects, archivedProducts]);
 
   // Unified column configuration based on type
   const columns: ColumnDef<ArchiveRow>[] = useMemo(() => {
@@ -119,28 +122,30 @@ export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
       const prodExtras: ColumnDef<ArchiveRow>[] = [
         {
           header: "Archived By",
-          accessorKey: "archivedBy",
+          accessorKey: "action_by",
           size: 160,
           cell: ({ row }) => (
-            <div className="text-xs">{row.getValue("archivedBy")}</div>
+            <div className="text-xs">{row.getValue("action_by")}</div>
           ),
         },
         {
           header: "Archived On",
-          accessorKey: "archivedOn",
+          accessorKey: "action_at",
           size: 140,
           cell: ({ row }) => (
             <div className="text-xs text-muted-foreground">
-              {row.getValue("archivedOn")}
+              {row.getValue("action_at")}
             </div>
           ),
         },
         {
           header: "Version",
-          accessorKey: "version",
+          accessorKey: "master_version",
           size: 120,
           cell: ({ row }) => (
-            <div className="text-xs font-medium">{row.getValue("version")}</div>
+            <div className="text-xs font-medium">
+              {row.getValue("master_version")}
+            </div>
           ),
         },
       ];

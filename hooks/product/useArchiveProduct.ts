@@ -6,9 +6,9 @@ export function useArchiveProduct() {
 
   return useMutation({
     mutationFn: async (productId: string) => {
-      const res = await fetch(`/api/products/${productId}`, {
+      const res = await fetch(`/api/products`, {
         method: "PATCH",
-        body: JSON.stringify({ isArchived: true }),
+        body: JSON.stringify({ id: productId }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -21,8 +21,7 @@ export function useArchiveProduct() {
     },
     onSuccess: () => {
       toast.success("Product archived successfully");
-      queryClient.invalidateQueries({ queryKey: ["products"] }); // Need to review this in products integration time
-      queryClient.invalidateQueries({ queryKey: ["product-list"] }); // Need to review this in products integration time
+      queryClient.invalidateQueries({ queryKey: ["all-products"] }); // Need to review this in products integration time
     },
     onError: (error) => {
       console.error(error.message || "Failed to archive product");

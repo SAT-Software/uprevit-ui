@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getProjectById(id: string) {
-  const response = await fetch(`/api/projects/${id}`);
+async function getProjectById(id: string, { signal }: { signal: AbortSignal }) {
+  const response = await fetch(`/api/projects/${id}`, { signal });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch project");
@@ -13,6 +13,6 @@ async function getProjectById(id: string) {
 export function useGetProjectById(id: string) {
   return useQuery({
     queryKey: ["project", id],
-    queryFn: () => getProjectById(id),
+    queryFn: ({ signal }) => getProjectById(id, { signal }),
   });
 }

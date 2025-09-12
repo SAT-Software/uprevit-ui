@@ -1,67 +1,97 @@
 "use client";
 
-import { sampleProducts } from "@/app/(app)/products/data";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FolderIcon, PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { FolderIcon } from "lucide-react";
 import DialogAddProductsToFolder from "@/features/bookmarks/DialogAddProductsToFolder";
+import DialogEditBookmarkFolder from "@/features/bookmarks/DialogEditBookmarkFolder";
+import DialogDeleteBookmarkFolder from "@/features/bookmarks/DialogDeleteBookmarkFolder";
+import DialogRemoveProductBookmark from "@/features/bookmarks/DialogRemoveProductBookmark";
+import { useGetProductsInABookmarkFolder } from "@/hooks/bookmark/useGetProductsInABookmarkFolder";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { LinkIcon } from "lucide-react";
 
-// Mock data for folders
-const mockFolders = [
-  {
-    id: "folder-1",
-    name: "Engineering Projects",
-    description: "Core engineering projects and components",
-    productCount: 12,
-    createdAt: "2024-03-15T10:00:00Z",
-    updatedAt: "2024-03-20T15:30:00Z",
-    products: sampleProducts.slice(0, 3),
-  },
-  {
-    id: "folder-2",
-    name: "Design Resources",
-    description: "UI/UX design assets and templates",
-    productCount: 5,
-    createdAt: "2024-03-10T09:00:00Z",
-    updatedAt: "2024-03-18T11:20:00Z",
-    products: sampleProducts.slice(3, 6),
-  },
-  {
-    id: "folder-3",
-    name: "Marketing Assets",
-    description: "Marketing materials and campaigns",
-    productCount: 8,
-    createdAt: "2024-03-05T14:00:00Z",
-    updatedAt: "2024-03-19T16:45:00Z",
-    products: sampleProducts.slice(6, 9),
-  },
-];
+// Interface for product data from the bookmark folder API
+interface BookmarkProduct {
+  _id: string;
+  name: string;
+  master_version: string;
+  status: string;
+}
 
 export default function FolderPage() {
   const router = useRouter();
   const params = useParams();
   const folderId = params.folderId as string;
-  const [isAddProductsOpen, setIsAddProductsOpen] = useState(false);
 
-  // Find the folder by ID
-  const folder = mockFolders.find((f) => f.id === folderId) || {
-    id: "unknown",
-    name: "Unknown Folder",
-    description: "This folder could not be found",
-    productCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    products: [],
+  // Get products in the bookmark folder using the custom hook
+  const {
+    data: folderData,
+    isLoading,
+    error,
+  } = useGetProductsInABookmarkFolder(folderId) as {
+    data: { folder_name: string; products: BookmarkProduct[] } | undefined;
+    isLoading: boolean;
+    error: Error | null;
   };
 
-  const handleAddProducts = (productIds: string[]) => {
-    // TODO: Implement add products to folder logic
-    console.log("Adding products to folder:", { folderId, productIds });
-    // For now, just log the product IDs
-    // Later this would integrate with your state management/API
-  };
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-8 p-4 h-full">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-6 h-6" />
+              <Skeleton className="h-8 w-48" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <Skeleton className="h-4 w-64 ml-9" />
+        </div>
+
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <div className="flex gap-4">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="flex gap-4 mt-2">
+                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col gap-8 p-4 h-full">
+        <div className="text-center text-red-600 py-8">
+          <p>Error loading bookmarked products</p>
+          <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Use real data from the API
+  const folderName = folderData?.folder_name || "Bookmarked Products";
+  const products = folderData?.products || [];
 
   return (
     <div className="flex flex-col gap-8 p-4 h-full">
@@ -69,57 +99,68 @@ export default function FolderPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FolderIcon className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-semibold">{folder.name}</h1>
+            <h1 className="text-2xl font-semibold">{folderName}</h1>
+            <div className="flex items-center gap-1">
+              <DialogEditBookmarkFolder
+                folderId={folderId}
+                currentFolderName={folderName}
+              />
+              <DialogDeleteBookmarkFolder
+                folderId={folderId}
+                folderName={folderName}
+              />
+            </div>
           </div>
-          <Button
-            variant="default"
-            className="flex items-center gap-2"
-            onClick={() => setIsAddProductsOpen(true)}
-          >
-            <PlusIcon size={16} />
-            Add Products
-          </Button>
+          <DialogAddProductsToFolder
+            folderName={folderName}
+            folderId={folderId}
+          />
         </div>
         <p className="text-sm text-muted-foreground ml-9">
-          {folder.description}
+          Products saved in this bookmark folder
         </p>
       </div>
 
       <div className="flex flex-col gap-4">
-        {folder.products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             No products in this folder yet.
           </div>
         ) : (
           <div className="grid gap-4">
-            {folder.products.map((product) => (
+            {products.map((product: BookmarkProduct) => (
               <Card
-                key={product.productId}
+                key={product._id}
                 className="hover:bg-muted/50 transition-colors cursor-pointer"
-                onClick={() =>
-                  router.push(
-                    `/products/${product.productId}/product-information`
-                  )
-                }
               >
                 <CardContent className="p-6">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium">{product.productName}</h3>
-                      <span className="text-sm text-muted-foreground">
-                        v{product.version}
-                      </span>
+                      <h3 className="font-medium">{product.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          v{product.master_version}
+                        </span>
+                        <DialogRemoveProductBookmark
+                          productId={product._id}
+                          productName={product.name}
+                          folderId={folderId}
+                        />
+                        <Button
+                          onClick={() =>
+                            router.push(
+                              `/products/${product._id}/product-information`
+                            )
+                          }
+                          variant="ghost"
+                          size="icon"
+                        >
+                          <LinkIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span>Project: {product.projectId}</span>
                       <span>Status: {product.status}</span>
-                    </div>
-                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>
-                        Last modified:{" "}
-                        {new Date(product.modifiedOn).toLocaleDateString()}
-                      </span>
-                      <span>by {product.modifiedBy}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -128,13 +169,6 @@ export default function FolderPage() {
           </div>
         )}
       </div>
-
-      <DialogAddProductsToFolder
-        open={isAddProductsOpen}
-        onOpenChange={setIsAddProductsOpen}
-        folderName={folder.name}
-        onAddProducts={handleAddProducts}
-      />
     </div>
   );
 }

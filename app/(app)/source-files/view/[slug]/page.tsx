@@ -3,6 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -11,28 +20,150 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PiPlusBold } from "react-icons/pi";
+import UploadSourceFiles from "@/features/source-files/UploadSourceFiles";
+import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles";
+import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
+import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
+import type {
+  SourceFilesFolder,
+  SourceFilesFolderResponse,
+} from "@/types/source-files";
+import { uploadFiles } from "@/utils/uploadthing";
 import { FolderIcon } from "lucide-react";
-import { sampleProducts } from "@/app/(app)/products/data";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import UploadSourceFiles from "@/features/source-files/UploadSourceFiles";
+import {
+  PiFileDocDuotone,
+  PiFileDuotone,
+  PiFilePdfDuotone,
+  PiPlusBold,
+  PiTrashDuotone,
+} from "react-icons/pi";
+
+type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
+
+function getFileKind(fileNameOrUrl: string): FileKind {
+  const name = (fileNameOrUrl || "").toLowerCase();
+  if (
+    name.endsWith(".png") ||
+    name.endsWith(".jpg") ||
+    name.endsWith(".jpeg") ||
+    name.endsWith(".webp") ||
+    name.endsWith(".gif") ||
+    name.endsWith(".bmp") ||
+    name.endsWith(".tif") ||
+    name.endsWith(".tiff")
+  ) {
+    return "image";
+  }
+  if (name.endsWith(".pdf") || name.includes("application/pdf")) return "pdf";
+  if (
+    name.endsWith(".doc") ||
+    name.endsWith(".docx") ||
+    name.includes("application/msword") ||
+    name.includes(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+  ) {
+    return "word";
+  }
+
+  return "other";
+}
 
 export default function ProductSourceFilesPage() {
-  const params = useParams();
-  const slug = params.product as string;
+  const params = useParams<{ slug: string }>();
+  const slug = params?.slug as string;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const uploadToBackend = useUploadSourceFiles();
+  const deleteSourceFile = useDeleteSourceFiles();
 
-  const product = sampleProducts.find((p) => p.productId === slug);
+  const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
 
-  // For now, we'll assume there are no source files
-  const hasSourceFiles = false;
+  const { data, isLoading, isError } = useGetSourceFilesFolderById(slug ?? "");
 
-  const handleUploadComplete = () => {
-    // This function will be called when upload is complete
-    // For now, we'll just close the dialog
-    setIsDialogOpen(false);
-    // TODO: Refresh the source files list
+  const folderData = data as SourceFilesFolderResponse | undefined;
+  const folder: SourceFilesFolder | undefined =
+    folderData?.data ?? folderData?.folder;
+
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6">
+          Loading folder...
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4">
+        <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6 text-destructive">
+          Failed to load folder. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  if (!folder || !folder?._id) {
+    return (
+      <div className="p-4">
+        <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6">
+          Loading folder...
+        </div>
+      </div>
+    );
+  }
+
+  const handleUploadClick = async () => {
+    if (!selectedFiles.length) return;
+    try {
+      console.log("selectedFiles", selectedFiles);
+      setIsUploading(true);
+      const utRes = await uploadFiles("imageUploader", {
+        files: selectedFiles,
+      });
+
+      // Map UploadThing response to backend format
+      type UploadThingFile = {
+        name?: string;
+        fileName?: string;
+        key?: string;
+        url?: string;
+        ufsUrl?: string;
+        fileUrl?: string;
+      };
+      const filesPayload = (
+        Array.isArray(utRes) ? (utRes as UploadThingFile[]) : []
+      )
+        .map((f) => {
+          const name = f?.name ?? f?.fileName ?? f?.key ?? "file";
+          const url = f?.url ?? f?.ufsUrl ?? f?.fileUrl;
+          if (!url) return null;
+          return { file_name: name as string, url: url as string };
+        })
+        .filter(Boolean) as { file_name: string; url: string }[];
+
+      if (!filesPayload.length) {
+        throw new Error("No uploaded file URLs returned");
+      }
+
+      await uploadToBackend.mutateAsync({
+        folderId: slug,
+        files: filesPayload,
+      });
+
+      setIsDialogOpen(false);
+      setSelectedFiles([]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -41,9 +172,12 @@ export default function ProductSourceFilesPage() {
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <FolderIcon className="w-6 h-6 text-primary" />
-            <p className="text-base font-semibold">
-              {product?.productName || "Product"} Source Files
-            </p>
+            <div className="flex flex-col">
+              <p className="text-base font-semibold">{folder?.folder_name}</p>
+              <p className="text-xs text-muted-foreground">
+                Product ID: {folder?.product_id}
+              </p>
+            </div>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -56,7 +190,7 @@ export default function ProductSourceFilesPage() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <FolderIcon className="w-5 h-5" />
-                  Upload Source Files for {product?.productName || "Product"}
+                  Upload Source Files for {folder?.folder_name}
                 </DialogTitle>
                 <DialogDescription>
                   Upload source files for this product. You can drag and drop
@@ -65,7 +199,7 @@ export default function ProductSourceFilesPage() {
               </DialogHeader>
 
               <div className="py-4">
-                <UploadSourceFiles />
+                <UploadSourceFiles onSelectionChange={setSelectedFiles} />
               </div>
 
               <DialogFooter className="flex gap-2">
@@ -75,13 +209,18 @@ export default function ProductSourceFilesPage() {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleUploadComplete}>Upload Files</Button>
+                <Button
+                  onClick={handleUploadClick}
+                  disabled={!selectedFiles.length || isUploading}
+                >
+                  {isUploading ? "Uploading..." : "Upload Files"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
 
-        {!hasSourceFiles && (
+        {folder?.folder.length === 0 ? (
           <Card className="w-full h-[calc(100vh-12rem)] flex items-center justify-center bg-background">
             <CardContent className="flex flex-col items-center gap-4 text-muted-foreground">
               <FolderIcon className="w-16 h-16" />
@@ -91,8 +230,116 @@ export default function ProductSourceFilesPage() {
               </p>
             </CardContent>
           </Card>
+        ) : (
+          <div className="w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {folder?.folder?.map((file) => (
+                <div
+                  key={file._id}
+                  className="relative flex flex-col w-full max-w-[220px] border border-input bg-accent/80 rounded-2xl p-2 mx-auto"
+                >
+                  <Card className="shadow-none hover:bg-muted/50 transition-colors w-full">
+                    <CardContent className="p-2">
+                      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg border border-input">
+                        {(() => {
+                          const kind = getFileKind(
+                            file.file_name || file.url || ""
+                          );
+                          if (kind === "image") {
+                            return (
+                              <Image
+                                src={file.url}
+                                alt={file.file_name}
+                                fill
+                                sizes="(min-width: 1024px) 20vw, 33vw"
+                                className="object-cover"
+                              />
+                            );
+                          }
+                          if (kind === "pdf") {
+                            return (
+                              <div className="flex items-center justify-center w-full h-full bg-accent">
+                                <PiFilePdfDuotone className="w-15 h-15 text-accent-foreground/40" />
+                              </div>
+                            );
+                          }
+                          if (
+                            kind === "word" ||
+                            kind === "docx" ||
+                            kind === "doc"
+                          ) {
+                            return (
+                              <div className="flex items-center justify-center w-full h-full bg-accent">
+                                <PiFileDocDuotone className="w-15 h-15 text-accent-foreground/40" />
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="flex items-center justify-center w-full h-full bg-accent">
+                              <PiFileDuotone className="w-15 h-15 text-accent-foreground/40" />
+                            </div>
+                          );
+                        })()}
+                        <button
+                          type="button"
+                          aria-label="Delete file"
+                          onClick={() => setFileIdToDelete(file._id)}
+                          className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md p-1.5 bg-background/80 hover:bg-background text-muted-foreground border border-input shadow-sm"
+                        >
+                          <PiTrashDuotone className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p
+                        className="mt-2 text-xs font-medium truncate"
+                        title={file.file_name}
+                      >
+                        {file.file_name}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
+      <AlertDialog
+        open={!!fileIdToDelete}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setFileIdToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this file?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              file.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (!fileIdToDelete) return;
+                deleteSourceFile.mutate(fileIdToDelete, {
+                  onSuccess: () => {
+                    setFileIdToDelete(null);
+                  },
+                });
+              }}
+              disabled={deleteSourceFile.isPending}
+            >
+              {deleteSourceFile.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

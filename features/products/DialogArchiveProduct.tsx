@@ -1,4 +1,5 @@
 import { ArchiveIcon, CircleAlertIcon } from "lucide-react";
+import { useState } from "react";
 
 import {
   AlertDialog,
@@ -11,6 +12,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Product } from "@/types/product";
+import { useArchiveProduct } from "@/hooks/product/useArchiveProduct";
+
+type ArchiveProductProps = Pick<
+  Product,
+  | "_id"
+  | "product_name"
+  | "product_plan_number"
+  | "department_id"
+  | "project_id"
+  | "master_version"
+  | "status"
+>;
 
 export default function DialogArchiveProduct({
   open,
@@ -20,9 +34,26 @@ export default function DialogArchiveProduct({
 }: {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  product?: any;
+  product?: ArchiveProductProps;
   children?: React.ReactNode;
 }) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const archiveProduct = useArchiveProduct();
+
+  async function handleArchiveProduct(e: React.MouseEvent) {
+    e.preventDefault(); // Prevent AlertDialogAction's auto-close
+    if (!product?._id) return;
+
+    try {
+      await archiveProduct.mutateAsync(product._id);
+      // Close dialog in both controlled and uncontrolled modes
+      onOpenChange?.(false);
+      setInternalOpen(false);
+    } catch (error) {
+      console.error("Failed to archive product:", error);
+    }
+  }
+
   // If external state control is provided, use controlled mode
   if (open !== undefined && onOpenChange !== undefined) {
     return (
@@ -44,8 +75,15 @@ export default function DialogArchiveProduct({
             </AlertDialogHeader>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction>Archive Product</AlertDialogAction>
+            <AlertDialogCancel disabled={archiveProduct.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleArchiveProduct}
+              disabled={archiveProduct.isPending}
+            >
+              {archiveProduct.isPending ? "Archiving..." : "Archive Product"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -54,7 +92,7 @@ export default function DialogArchiveProduct({
 
   // Original trigger-based mode
   return (
-    <AlertDialog>
+    <AlertDialog open={internalOpen} onOpenChange={setInternalOpen}>
       <AlertDialogTrigger asChild>
         {children || (
           <div className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-accent text-foreground cursor-pointer focus:bg-accent focus:text-accent-foreground">
@@ -80,8 +118,15 @@ export default function DialogArchiveProduct({
           </AlertDialogHeader>
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Archive Product</AlertDialogAction>
+          <AlertDialogCancel disabled={archiveProduct.isPending}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleArchiveProduct}
+            disabled={archiveProduct.isPending}
+          >
+            {archiveProduct.isPending ? "Archiving..." : "Archive Product"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

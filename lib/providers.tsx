@@ -13,6 +13,8 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
+        retry: 3,
+        retryDelay: 1000,
       },
     },
   });

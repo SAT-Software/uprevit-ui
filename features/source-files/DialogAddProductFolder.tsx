@@ -1,9 +1,8 @@
-import { CheckIcon, FolderPlusIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { PlusIcon, PackageIcon } from "lucide-react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -22,87 +20,78 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useAddSourceFilesFolder } from "@/hooks/source-files/useAddSourceFilesFolder";
 
-// Import actual data
-import { departments } from "@/app/(app)/departments/data";
-import { sampleProducts } from "@/app/(app)/products/data";
-import { projects } from "@/app/(app)/projects/data";
-import {
-  PiStackPlusDuotone,
-  PiCirclesThreePlusDuotone,
-  PiKanbanDuotone,
-} from "react-icons/pi";
+interface FormValues {
+  productId: string;
+}
+
+interface DialogAddProductFolderProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children?: React.ReactNode;
+}
 
 export default function DialogAddProductFolder({
   open,
   onOpenChange,
   children,
-}: {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  children?: React.ReactNode;
-}) {
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [internalOpen, setInternalOpen] = useState<boolean>(false);
+}: DialogAddProductFolderProps) {
+  const { data: productsData, isLoading, error } = useGetAllProducts();
+  const products = productsData?.result?.products ?? [];
+  const addSourceFilesFolder = useAddSourceFilesFolder();
+  const [internalOpen, setInternalOpen] = useState(false);
 
-  // Transform departments data to include project count
-  const departmentsWithProjectCount = useMemo(() => {
-    return departments.map((dept) => ({
-      ...dept,
-      projectCount: projects.filter(
-        (project) => project.departmentId === dept.id
-      ).length,
-    }));
-  }, []);
+  const {
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues: {
+      productId: "",
+    },
+    mode: "onSubmit",
+  });
 
-  // Get projects for selected department
-  const availableProjects = useMemo(() => {
-    if (!selectedDepartment) return [];
-    return projects
-      .filter((project) => project.departmentId === selectedDepartment)
-      .map((project) => ({
-        ...project,
-        productCount: sampleProducts.filter(
-          (product) => product.projectId === project.id
-        ).length,
-      }));
-  }, [selectedDepartment]);
+  const selectedProductId = watch("productId");
+  const selectedProduct = products.find(
+    (product: {
+      _id: string;
+      product_name?: string;
+      product_plan_number?: string;
+      status?: string;
+    }) => product._id === selectedProductId
+  );
 
-  // Get products for selected project
-  const availableProducts = useMemo(() => {
-    if (!selectedProject) return [];
-    return sampleProducts.filter(
-      (product) => product.projectId === selectedProject
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (!data.productId) return;
+
+    const product = products.find(
+      (p: { _id: string; product_name?: string }) => p._id === data.productId
     );
-  }, [selectedProject]);
+    if (!product) return;
 
-  const handleReset = () => {
-    setSelectedDepartment("");
-    setSelectedProject("");
-    setSelectedProducts([]);
-  };
-
-  const handleAddProductFolder = () => {
-    if (selectedDepartment && selectedProject && selectedProducts.length > 0) {
-      // TODO: Implement add product folder functionality
-      console.log("Adding product folder:", {
-        department: selectedDepartment,
-        project: selectedProject,
-        products: selectedProducts,
+    try {
+      await addSourceFilesFolder.mutateAsync({
+        product_id: data.productId,
+        name: product.product_name || "Unnamed Product",
       });
-      onOpenChange?.(false);
-      handleReset();
-    }
-  };
 
-  const handleProductToggle = (productId: string) => {
-    setSelectedProducts((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+      console.log("Successfully added product to source files folder");
+      // Reset form and close dialog on success
+      reset();
+      if (onOpenChange) {
+        onOpenChange(false);
+      } else {
+        setInternalOpen(false);
+      }
+    } catch (error) {
+      // Error is handled by the mutation's onError callback
+      console.error("Failed to add product to source files folder:", error);
+    }
   };
 
   // If external state control is provided, use controlled mode
@@ -112,197 +101,126 @@ export default function DialogAddProductFolder({
         open={open}
         onOpenChange={(newOpen) => {
           onOpenChange(newOpen);
-          if (!newOpen) handleReset();
+          if (!newOpen) reset();
         }}
       >
-        <DialogContent className="max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FolderPlusIcon size={20} />
-              Add Product Folder
-            </DialogTitle>
-            <DialogDescription>
-              Select a department and project to view available products, then
-              choose which products to add to your source files.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(onSubmit)(e);
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlusIcon size={20} />
+                Add Product to Source Files
+              </DialogTitle>
+              <DialogDescription>
+                Choose a product to add to your source files folder.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-6 flex-1 overflow-hidden">
-            {/* Department and Project Selection - Side by Side */}
-            <div className="grid grid-cols-2 gap-6">
-              {/* Department Selection */}
+            <div className="space-y-4">
               <div className="space-y-3">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <PiCirclesThreePlusDuotone size={16} />
-                  Department
-                </Label>
+                <Label className="text-sm font-medium">Select Product</Label>
                 <Select
-                  value={selectedDepartment}
-                  onValueChange={(value) => {
-                    setSelectedDepartment(value);
-                    setSelectedProject("");
-                    setSelectedProducts([]);
-                  }}
+                  value={selectedProductId}
+                  onValueChange={(value) => setValue("productId", value)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose a department..." />
+                    <SelectValue placeholder="Choose a product..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {departmentsWithProjectCount.map((department) => (
-                      <SelectItem key={department.id} value={department.id}>
-                        <div className="flex items-center gap-2 w-full">
-                          <PiCirclesThreePlusDuotone
-                            size={16}
-                            className="text-muted-foreground"
-                          />
-                          <span className="flex-1">{department.name}</span>
-                          <span className="text-xs text-muted-foreground ml-auto">
-                            {department.projectCount} projects
-                          </span>
-                        </div>
+                    {isLoading ? (
+                      <SelectItem disabled value="loading">
+                        Loading products...
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Project Selection */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <PiKanbanDuotone size={16} />
-                  Project
-                </Label>
-                <Select
-                  value={selectedProject}
-                  onValueChange={(value) => {
-                    setSelectedProject(value);
-                    setSelectedProducts([]);
-                  }}
-                  disabled={!selectedDepartment}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose a project..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableProjects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        <div className="flex items-center gap-2 w-full">
-                          <PiKanbanDuotone
-                            size={16}
-                            className="text-muted-foreground"
-                          />
-                          <span className="flex-1">{project.name}</span>
-                          <span className="text-xs text-muted-foreground ml-auto">
-                            {project.productCount} products
-                          </span>
-                        </div>
+                    ) : error ? (
+                      <SelectItem disabled value="error">
+                        Error loading products
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Products Selection - 2 Columns Grid */}
-            {selectedProject && availableProducts.length > 0 && (
-              <div className="space-y-3 flex-1 overflow-hidden flex flex-col">
-                <Label className="text-sm font-medium">
-                  Select Products ({selectedProducts.length} selected)
-                </Label>
-                <ScrollArea className="flex-1 w-full rounded-md border p-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    {availableProducts.map((product) => (
-                      <Card
-                        key={product.productId}
-                        className={`cursor-pointer transition-colors ${
-                          selectedProducts.includes(product.productId)
-                            ? "border-primary bg-primary/5"
-                            : "hover:bg-muted/50"
-                        }`}
-                        onClick={() => handleProductToggle(product.productId)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="flex items-start gap-3">
-                            <Checkbox
-                              checked={selectedProducts.includes(
-                                product.productId
-                              )}
-                              onChange={() =>
-                                handleProductToggle(product.productId)
-                              }
-                              className="mt-1 flex-shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h4 className="font-medium text-sm truncate">
-                                  {product.productName}
-                                </h4>
-                                <span className="text-xs bg-muted px-2 py-1 rounded flex-shrink-0">
-                                  v{product.version}
-                                </span>
-                              </div>
-                              <div className="mt-1">
-                                <span
-                                  className={`text-xs px-2 py-1 rounded inline-block ${
-                                    product.status === "Draft"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : product.status === "Submitted"
-                                      ? "bg-blue-100 text-blue-800"
-                                      : product.status === "Archived"
-                                      ? "bg-gray-100 text-gray-800"
-                                      : "bg-green-100 text-green-800"
-                                  }`}
-                                >
+                    ) : products.length === 0 ? (
+                      <SelectItem disabled value="empty">
+                        No products available
+                      </SelectItem>
+                    ) : (
+                      products?.map(
+                        (product: {
+                          _id: string;
+                          product_name?: string;
+                          product_plan_number?: string;
+                          status?: string;
+                        }) => (
+                          <SelectItem key={product._id} value={product._id}>
+                            <div className="flex items-center gap-2 w-full">
+                              <PackageIcon
+                                size={16}
+                                className="text-muted-foreground"
+                              />
+                              <span className="flex-1">
+                                {product.product_name || "Unnamed Product"}
+                              </span>
+                              {product.status && (
+                                <span className="text-xs text-muted-foreground ml-auto">
                                   {product.status}
                                 </span>
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                                {product.description}
-                              </p>
+                              )}
                             </div>
-                            {selectedProducts.includes(product.productId) && (
-                              <CheckIcon
-                                size={16}
-                                className="text-primary mt-1 flex-shrink-0"
-                              />
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </SelectItem>
+                        )
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+                {errors.productId && (
+                  <p className="text-sm text-destructive">
+                    {errors.productId.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Selected Product Preview */}
+              {selectedProduct && (
+                <div className="rounded-lg border p-3 bg-primary/5">
+                  <div className="flex items-center gap-2">
+                    <PackageIcon size={16} className="text-primary" />
+                    <h4 className="font-medium text-sm">
+                      {selectedProduct.product_name || "Unnamed Product"}
+                    </h4>
                   </div>
-                </ScrollArea>
-              </div>
-            )}
+                  {selectedProduct.product_plan_number && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Plan: {selectedProduct.product_plan_number}
+                    </p>
+                  )}
+                  {selectedProduct.status && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Status: {selectedProduct.status}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
 
-            {selectedProject && availableProducts.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <PiStackPlusDuotone
-                  size={48}
-                  className="mx-auto mb-2 opacity-50"
-                />
-                <p>No products available in this project</p>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange?.(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddProductFolder}
-              disabled={
-                !selectedDepartment ||
-                !selectedProject ||
-                selectedProducts.length === 0
-              }
-            >
-              Add{" "}
-              {selectedProducts.length > 0 ? `${selectedProducts.length} ` : ""}
-              Product{selectedProducts.length !== 1 ? "s" : ""}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => onOpenChange?.(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!selectedProductId || addSourceFilesFolder.isPending}
+              >
+                {addSourceFilesFolder.isPending
+                  ? "Adding..."
+                  : "Add to Source Files"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     );
@@ -314,213 +232,128 @@ export default function DialogAddProductFolder({
       <DialogTrigger asChild>
         {children || (
           <Button variant="default" className="flex items-center gap-2">
-            <FolderPlusIcon size={16} />
+            <PlusIcon size={16} />
             Add Product Folder
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl w-full max-h-[85vh] h-full overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FolderPlusIcon size={20} />
-            Add Product Folder
-          </DialogTitle>
-          <DialogDescription>
-            Select a department and project to view available products, then
-            choose which products to add to your source files.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(onSubmit)(e);
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PlusIcon size={20} />
+              Add Product to Source Files
+            </DialogTitle>
+            <DialogDescription>
+              Choose a product to add to your source files folder.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6 flex-1 overflow-hidden">
-          {/* Department and Project Selection - Side by Side */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* Department Selection */}
+          <div className="space-y-4">
             <div className="space-y-3">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <PiCirclesThreePlusDuotone size={16} />
-                Department
-              </Label>
+              <Label className="text-sm font-medium">Select Product</Label>
               <Select
-                value={selectedDepartment}
-                onValueChange={(value) => {
-                  setSelectedDepartment(value);
-                  setSelectedProject("");
-                  setSelectedProducts([]);
-                }}
+                value={selectedProductId}
+                onValueChange={(value) => setValue("productId", value)}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose a department..." />
+                  <SelectValue placeholder="Choose a product..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {departmentsWithProjectCount.map((department) => (
-                    <SelectItem key={department.id} value={department.id}>
-                      <div className="flex items-center gap-2 w-full">
-                        <PiCirclesThreePlusDuotone
-                          size={16}
-                          className="text-muted-foreground"
-                        />
-                        <span className="flex-1">{department.name}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {department.projectCount} projects
-                        </span>
-                      </div>
+                  {isLoading ? (
+                    <SelectItem disabled value="loading">
+                      Loading products...
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Project Selection */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <PiKanbanDuotone size={16} />
-                Project
-              </Label>
-              <Select
-                value={selectedProject}
-                onValueChange={(value) => {
-                  setSelectedProject(value);
-                  setSelectedProducts([]);
-                }}
-                disabled={!selectedDepartment}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose a project..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableProjects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      <div className="flex items-center gap-2 w-full">
-                        <PiKanbanDuotone
-                          size={16}
-                          className="text-muted-foreground"
-                        />
-                        <span className="flex-1">{project.name}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {project.productCount} products
-                        </span>
-                      </div>
+                  ) : error ? (
+                    <SelectItem disabled value="error">
+                      Error loading products
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Products Selection - 2 Columns Grid */}
-          {selectedProject && availableProducts.length > 0 ? (
-            <div className="space-y-3 flex-1 overflow-y-scroll flex flex-col">
-              <Label className="text-sm font-medium">
-                Select Products ({selectedProducts.length} selected)
-              </Label>
-              <ScrollArea className="flex-1 w-full rounded-md border p-4">
-                <div className="grid grid-cols-2 gap-3">
-                  {availableProducts.map((product) => (
-                    <Card
-                      key={product.productId}
-                      className={`cursor-pointer transition-colors ${
-                        selectedProducts.includes(product.productId)
-                          ? "border-primary bg-primary/5"
-                          : "hover:bg-muted/50"
-                      }`}
-                      onClick={() => handleProductToggle(product.productId)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-start gap-3">
-                          <Checkbox
-                            checked={selectedProducts.includes(
-                              product.productId
-                            )}
-                            onChange={() =>
-                              handleProductToggle(product.productId)
-                            }
-                            className="mt-1 flex-shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-medium text-sm truncate">
-                                {product.productName}
-                              </h4>
-                              <span className="text-xs bg-muted px-2 py-1 rounded flex-shrink-0">
-                                v{product.version}
-                              </span>
-                            </div>
-                            <div className="mt-1">
-                              <span
-                                className={`text-xs px-2 py-1 rounded inline-block ${
-                                  product.status === "Draft"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : product.status === "Submitted"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : product.status === "Archived"
-                                    ? "bg-gray-100 text-gray-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
+                  ) : products.length === 0 ? (
+                    <SelectItem disabled value="empty">
+                      No products available
+                    </SelectItem>
+                  ) : (
+                    products?.map(
+                      (product: {
+                        _id: string;
+                        product_name?: string;
+                        product_plan_number?: string;
+                        status?: string;
+                      }) => (
+                        <SelectItem key={product._id} value={product._id}>
+                          <div className="flex items-center gap-2 w-full">
+                            <PackageIcon
+                              size={16}
+                              className="text-muted-foreground"
+                            />
+                            <span className="flex-1">
+                              {product.product_name || "Unnamed Product"}
+                            </span>
+                            {product.status && (
+                              <span className="text-xs text-muted-foreground ml-auto">
                                 {product.status}
                               </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                              {product.description}
-                            </p>
+                            )}
                           </div>
-                          {selectedProducts.includes(product.productId) && (
-                            <CheckIcon
-                              size={16}
-                              className="text-primary mt-1 flex-shrink-0"
-                            />
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </SelectItem>
+                      )
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.productId && (
+                <p className="text-sm text-destructive">
+                  {errors.productId.message}
+                </p>
+              )}
+            </div>
+
+            {/* Selected Product Preview */}
+            {selectedProduct && (
+              <div className="rounded-lg border p-3 bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <PackageIcon size={16} className="text-primary" />
+                  <h4 className="font-medium text-sm">
+                    {selectedProduct.product_name || "Unnamed Product"}
+                  </h4>
                 </div>
-              </ScrollArea>
-            </div>
-          ) : (
-            <div className="text-center py-16 border border-dashed border-border rounded-md text-muted-foreground">
-              <PiStackPlusDuotone
-                size={48}
-                className="mx-auto mb-2 opacity-50"
-              />
-              <p>
-                No products selected. Please select a department and project to
-                view available products.
-              </p>
-            </div>
-          )}
+                {selectedProduct.product_plan_number && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Plan: {selectedProduct.product_plan_number}
+                  </p>
+                )}
+                {selectedProduct.status && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Status: {selectedProduct.status}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
-          {selectedProject && availableProducts.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <PiStackPlusDuotone
-                size={48}
-                className="mx-auto mb-2 opacity-50"
-              />
-              <p>No products available in this project</p>
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setInternalOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              handleAddProductFolder();
-              setInternalOpen(false);
-            }}
-            disabled={
-              !selectedDepartment ||
-              !selectedProject ||
-              selectedProducts.length === 0
-            }
-          >
-            Add{" "}
-            {selectedProducts.length > 0 ? `${selectedProducts.length} ` : ""}
-            Product{selectedProducts.length !== 1 ? "s" : ""}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setInternalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!selectedProductId || addSourceFilesFolder.isPending}
+            >
+              {addSourceFilesFolder.isPending
+                ? "Adding..."
+                : "Add to Source Files"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -240,10 +240,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </div>
                   <div className="grid flex-1 text-left leading-tight">
                     <span className="truncate font-medium">
-                      {isLoading ? "Loading..." : workspace.workspaceName}
+                      {isLoading ? "Loading..." : workspace?.workspaceName}
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {isLoading ? "Loading..." : workspace.companyName}
+                      {isLoading ? "Loading..." : workspace?.companyName}
                     </span>
                   </div>
                 </button>
@@ -265,7 +265,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="flex flex-col w-full items-start">
               <p className="text-xs">{product?.productId || "Id"}</p>
               <div className="text-sm font-semibold text-foreground">
-                {product?.productName || "Product"}
+                {product?.product_name || "Product"}
               </div>
             </div>
             <div className="flex gap-2 w-full justify-between">

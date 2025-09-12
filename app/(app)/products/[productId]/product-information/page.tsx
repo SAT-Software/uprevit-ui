@@ -1,7 +1,7 @@
 "use client";
 
-import { departments } from "@/app/(app)/departments/data";
-import { projects } from "@/app/(app)/projects/data";
+import { useMemo } from "react";
+import { notFound, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -12,42 +12,45 @@ import {
 } from "@/components/ui/tooltip";
 import { CalendarDays, User } from "lucide-react";
 import Link from "next/link";
-import { sampleProducts } from "../../data";
 import ProductInformationCard from "@/features/products/product/product-information/ProductInformationCard";
 import EditProductDialog from "@/features/products/product/product-information/ProductInformationEditProductDialog";
+import { useGetProductDataTab } from "@/hooks/product/useGetProductDataTab";
 
 import { PiCirclesThreePlusDuotone, PiKanbanDuotone } from "react-icons/pi";
 
-interface PageProps {
-  params: {
-    productId: string;
-  };
-}
+export default function Page() {
+  const params = useParams<{ productId: string }>();
+  const productId = params?.productId;
 
-export default function Page({ params }: PageProps) {
-  const { productId } = params;
-
-  const productData = sampleProducts.find(
-    (product) => product.productId === productId
+  const { data, isLoading, isError } = useGetProductDataTab(
+    productId,
+    "product-information"
   );
 
-  const departmentData = departments.find(
-    (department) => department.id === productData?.departmentId
-  );
+  console.log("Product Info Data:", data);
 
-  const projectData = projects.find(
-    (project) => project.id === productData?.projectId
-  );
+  const productData = useMemo(() => data?.data, [data]);
 
-  // console.log(departmentData);
-  // console.log(projectData);
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="flex flex-col mb-8">
+          <div className="flex justify-between items-start">
+            <h1 className="text-xl font-semibold mb-4">Loading...</h1>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !productData) return notFound();
 
   return (
     <div className="w-full">
       <div className="flex flex-col mb-8">
         <div className="flex justify-between items-start">
           <h1 className="text-xl font-semibold mb-4">
-            {productData?.productName}
+            {productData?.product_name}
           </h1>
           <div className="flex items-center gap-2">
             <TooltipProvider>
@@ -55,7 +58,9 @@ export default function Page({ params }: PageProps) {
                 <TooltipTrigger asChild>
                   <Link
                     href={
-                      departmentData ? `/departments/${departmentData.id}` : "#"
+                      productData?.department_id
+                        ? `/departments/${productData.department_id}`
+                        : "#"
                     }
                   >
                     <Button size="icon" variant="ghost">
@@ -64,7 +69,7 @@ export default function Page({ params }: PageProps) {
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{departmentData?.name}</p>
+                  <p>Department</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -73,7 +78,11 @@ export default function Page({ params }: PageProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={projectData ? `/projects/${projectData.id}` : "#"}
+                    href={
+                      productData?.project_id
+                        ? `/projects/${productData.project_id}`
+                        : "#"
+                    }
                   >
                     <Button size="icon" variant="ghost">
                       <PiKanbanDuotone className="h-4 w-4" />
@@ -81,7 +90,7 @@ export default function Page({ params }: PageProps) {
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{projectData?.name}</p>
+                  <p>Project</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -99,37 +108,42 @@ export default function Page({ params }: PageProps) {
           <div className="flex flex-col gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />{" "}
-              <span>Created On: {productData?.createdOn}</span>
+              <span>Target Date: {productData?.target_date || "N/A"}</span>
             </div>
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4" />{" "}
-              <span>Created By: {productData?.createdBy}</span>
+              <CalendarDays className="w-4 h-4" />{" "}
+              <span>
+                Actual Completion:{" "}
+                {productData?.actual_completion_date || "N/A"}
+              </span>
             </div>
           </div>
           <Separator orientation="vertical" />
           <div className="flex flex-col gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4" />{" "}
-              <span>Updated On: {productData?.modifiedOn}</span>
+              <User className="w-4 h-4" />{" "}
+              <span>Status: {productData?.status || "N/A"}</span>
             </div>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4" />{" "}
-              <span>Updated By: {productData?.modifiedBy}</span>
+              <span>Complete Count: {productData?.complete_count || "0"}</span>
             </div>
           </div>
         </div>
         <div className="mt-8">
           <h2 className="text-base font-medium mb-1">Description</h2>
           <p className="text-sm text-muted-foreground">
-            The Echo Beats Festival brings together a stellar lineup of artists
-            across EDM, pop, and hip-hop genres. Prepare to experience a night
-            of electrifying music, vibrant light shows, and unforgettable
-            performances under the stars. Explore food trucks, art
-            installations, and VIP lounges for an elevated experience.
+            {productData?.product_description || "No description available."}
           </p>
         </div>
       </div>
-      <ProductInformationCard />
+      <ProductInformationCard
+        marketGeography={productData?.market_geography}
+        countryOfOrigin={productData?.country_of_origin}
+        oemContractManufacturer={productData?.oem_contract_manufacturer}
+        commercialClinical={productData?.commercial_clinical}
+        customFields={productData?.custom_fields}
+      />
     </div>
   );
 }
