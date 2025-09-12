@@ -15,6 +15,7 @@ import { ArchiveTable } from "@/features/archive/ArchiveTable";
 import type { ArchiveEntityType } from "@/features/archive/DialogArchiveEntity";
 import { useGetArchivedDepartments } from "@/hooks/archive/useGetArchivedDepartments";
 import { useGetArchivedProjects } from "@/hooks/archive/useGetArchivedProjects";
+import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
 
 type ArchiveRow = {
   _id: string;
@@ -37,6 +38,7 @@ export type ArchivedItemsProps = {
 export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
   const { data: archivedDepartments } = useGetArchivedDepartments();
   const { data: archivedProjects } = useGetArchivedProjects();
+  const { data: archivedProducts } = useGetArchivedProducts();
 
   const items: ArchiveRow[] = useMemo(() => {
     if (type === "department") {
@@ -47,10 +49,11 @@ export function ArchivedItems({ type, onRowClick }: ArchivedItemsProps) {
     }
     if (type === "product") {
       // TODO: Add useGetArchivedProducts hook and fetch archived products
+      return archivedProducts?.result?.products ?? [];
       return [];
     }
     return [];
-  }, [type, archivedDepartments, archivedProjects]);
+  }, [type, archivedDepartments, archivedProjects, archivedProducts]);
 
   // Unified column configuration based on type
   const columns: ColumnDef<ArchiveRow>[] = useMemo(() => {

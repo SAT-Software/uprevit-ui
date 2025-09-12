@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getAllProjects() {
-  const response = await fetch("/api/projects");
+async function getAllProjects({ signal }: { signal: AbortSignal }) {
+  const response = await fetch("/api/projects", { signal });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch projects");
@@ -13,6 +13,6 @@ async function getAllProjects() {
 export function useGetAllProjects() {
   return useQuery({
     queryKey: ["all-projects"],
-    queryFn: getAllProjects,
+    queryFn: ({ signal }) => getAllProjects({ signal }),
   });
 }

@@ -120,3 +120,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+}

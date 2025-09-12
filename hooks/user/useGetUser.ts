@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getUserById(id: string) {
-  const response = await fetch(`/api/users/${id}`);
+async function getUserById(id: string, { signal }: { signal: AbortSignal }) {
+  const response = await fetch(`/api/users/${id}`, { signal });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch user");
@@ -13,6 +13,6 @@ async function getUserById(id: string) {
 export function useGetUser(id: string) {
   return useQuery({
     queryKey: ["user", id],
-    queryFn: () => getUserById(id),
+    queryFn: ({ signal }) => getUserById(id, { signal }),
   });
 }

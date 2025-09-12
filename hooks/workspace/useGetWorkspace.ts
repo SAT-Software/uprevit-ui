@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getWorkspaceById(id: string) {
-  const response = await fetch(`/api/workspace/${id}`);
+async function getWorkspaceById(
+  id: string,
+  { signal }: { signal: AbortSignal }
+) {
+  const response = await fetch(`/api/workspace/${id}`, { signal });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch workspace");
@@ -13,6 +16,6 @@ async function getWorkspaceById(id: string) {
 export function useGetWorkspace(id: string) {
   return useQuery({
     queryKey: ["workspace", id],
-    queryFn: () => getWorkspaceById(id),
+    queryFn: ({ signal }) => getWorkspaceById(id, { signal }),
   });
 }

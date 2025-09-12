@@ -1,34 +1,48 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useMemo } from "react";
 
 interface ProductInformationCardProps {
-  initialFields?: { label: string; value: string }[];
+  marketGeography?: string;
+  countryOfOrigin?: string;
+  oemContractManufacturer?: string;
+  commercialClinical?: string;
+  customFields?: { label: string; value: string }[];
 }
 
 export default function ProductInformationCard({
-  initialFields = [
-    { label: "Market / Geography", value: "US, EU" },
-    { label: "Country of Origin", value: "Australia" },
-    { label: "OEM / Contract manufactured", value: "OEM" },
-    { label: "Commercial / Clinical", value: "Commercial" },
-  ],
+  marketGeography,
+  countryOfOrigin,
+  oemContractManufacturer,
+  commercialClinical,
+  customFields = [],
 }: ProductInformationCardProps) {
-  // Dynamic info fields state
-  const [fields, setFields] = useState(initialFields);
-  const [showAddField, setShowAddField] = useState(false);
-  const [newField, setNewField] = useState({ label: "", value: "" });
+  // Build fields from API data
+  const fields = useMemo(() => {
+    const baseFields = [
+      { label: "Market / Geography", value: marketGeography || "N/A" },
+      { label: "Country of Origin", value: countryOfOrigin || "N/A" },
+      {
+        label: "OEM / Contract manufactured",
+        value: oemContractManufacturer || "N/A",
+      },
+      { label: "Commercial / Clinical", value: commercialClinical || "N/A" },
+    ];
+
+    // Add custom fields if they exist
+    if (customFields && customFields.length > 0) {
+      return [...baseFields, ...customFields];
+    }
+
+    return baseFields;
+  }, [
+    marketGeography,
+    countryOfOrigin,
+    oemContractManufacturer,
+    commercialClinical,
+    customFields,
+  ]);
 
   return (
     <Card className="rounded-xl shadow-none">

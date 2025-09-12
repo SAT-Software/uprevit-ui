@@ -15,6 +15,7 @@ import {
 
 import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
 
 // Create some dummy initial files
 // const initialFiles = [
@@ -76,9 +77,22 @@ const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
   return <FileIcon className="size-4 opacity-60" />;
 };
 
-export default function Component() {
-  const maxSize = 100 * 1024 * 1024; // 10MB default
-  const maxFiles = 10;
+type UploadSourceFilesProps = {
+  onSelectionChange?: (files: File[]) => void;
+  accept?: string;
+  maxFiles?: number;
+  maxSize?: number; // bytes
+};
+
+export default function Component({
+  onSelectionChange,
+  accept,
+  maxFiles: maxFilesProp,
+  maxSize: maxSizeProp,
+}: UploadSourceFilesProps) {
+  // Match server route constraints by default: image only, 1 file, 8MB
+  const maxSize = useMemo(() => maxSizeProp ?? 8 * 1024 * 1024, [maxSizeProp]);
+  const maxFiles = useMemo(() => maxFilesProp ?? 5, [maxFilesProp]);
 
   const [
     { files, isDragging, errors },
@@ -93,9 +107,18 @@ export default function Component() {
       getInputProps,
     },
   ] = useFileUpload({
-    multiple: true,
+    multiple: maxFiles > 1,
     maxFiles,
     maxSize,
+    accept:
+      accept ??
+      "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    onFilesChange: (list) => {
+      const onlyFiles = list
+        .map((f) => f.file)
+        .filter((f): f is File => f instanceof File);
+      onSelectionChange?.(onlyFiles);
+    },
     // initialFiles,
   });
 
@@ -130,7 +153,7 @@ export default function Component() {
             Drag & drop or click to browse
           </p>
           <div className="text-muted-foreground/70 flex flex-wrap justify-center gap-1 text-xs">
-            <span>All files</span>
+            <span>Images only</span>
             <span>∙</span>
             <span>Max {maxFiles} files</span>
             <span>∙</span>
@@ -148,6 +171,8 @@ export default function Component() {
           <span>{errors[0]}</span>
         </div>
       )}
+
+      {/* Upload status and actions are handled by parent */}
 
       {/* File list */}
       {files.length > 0 && (
@@ -189,30 +214,16 @@ export default function Component() {
             </div>
           ))}
 
-          {/* Remove all files button */}
-          {files.length > 1 && (
+          {/* Remove file / reset */}
+          {files.length >= 1 && (
             <div>
               <Button size="sm" variant="outline" onClick={clearFiles}>
-                Remove all files
+                Remove file
               </Button>
             </div>
           )}
         </div>
       )}
-
-      <p
-        aria-live="polite"
-        role="region"
-        className="text-muted-foreground mt-2 text-center text-xs"
-      >
-        Multiple files uploader w/ list ∙{" "}
-        <a
-          href="https://github.com/origin-space/originui/tree/main/docs/use-file-upload.md"
-          className="hover:text-foreground underline"
-        >
-          API
-        </a>
-      </p>
     </div>
   );
 }
