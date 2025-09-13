@@ -53,3 +53,14 @@ export interface Product {
     entity: "Symbols" | "Schematics" | "Barcodes" | "Other Components";
   }>;
 }
+
+export interface ProductApiResponse {
+  _id?: string;
+  action_at?: string;
+  action_by?: string;
+  product_name?: string;
+  project_id?: string;
+  department_id?: string;
+  master_version?: string;
+  status?: string;
+}
