@@ -16,47 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CheckCircle2Icon, EllipsisIcon } from "lucide-react";
 import AddStandardDialog from "@/features/products/product/compliance-information/AddStandardDialog";
+import { useParams } from "next/navigation";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
-const complianceStandards = [
-  {
-    id: "iso9001",
-    name: "ISO 9001",
-    description: "Quality management systems standard for organizations.",
-  },
-  {
-    id: "iso14001",
-    name: "ISO 14001",
-    description: "Environmental management systems standard.",
-  },
-  {
-    id: "iso45001",
-    name: "ISO 45001",
-    description: "Occupational health and safety management systems standard.",
-  },
-  {
-    id: "iso13485",
-    name: "ISO 13485",
-    description: "Quality management systems standard for medical devices.",
-  },
-  {
-    id: "iec60601",
-    name: "IEC 60601",
-    description:
-      "International standard for safety and performance of medical electrical equipment.",
-  },
-  {
-    id: "mdr2017745",
-    name: "MDR (EU 2017/745)",
-    description:
-      "European Union Medical Device Regulation for placing devices on the EU market.",
-  },
-  {
-    id: "fda21cfr820",
-    name: "FDA 21 CFR Part 820",
-    description:
-      "US FDA Quality System Regulation for medical device manufacturers.",
-  },
-];
+interface ComplianceItem {
+  _id: string;
+  standard: string;
+  standard_description: string;
+}
 
 function RowActions({ id }: { id: string }) {
   return (
@@ -118,6 +85,32 @@ function RowActions({ id }: { id: string }) {
 }
 
 export default function Page() {
+  const { productId } = useParams();
+  const { data, isLoading, error } = useGetProductTabData(
+    productId as string,
+    "compliance-information"
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3 p-4">
+        Loading compliance standards...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-3 p-4 text-destructive">
+        Error loading compliance standards: {error.message}
+      </div>
+    );
+  }
+
+  const standards = (data?.data?.data as ComplianceItem[]) || [];
+
+  console.log("standards", standards);
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-2 justify-end">
@@ -129,9 +122,9 @@ export default function Page() {
           </Button>
         </Link> */}
       </div>
-      {complianceStandards.map((item) => (
+      {standards.map((item) => (
         <div
-          key={item.id}
+          key={item._id}
           className="flex items-center bg-card border rounded-md px-4 py-2 min-h-[64px] w-full"
         >
           <CheckCircle2Icon
@@ -139,13 +132,15 @@ export default function Page() {
             size={16}
           />
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="font-medium text-base truncate">{item.name}</span>
+            <span className="font-medium text-base truncate">
+              {item.standard}
+            </span>
             <span className="text-muted-foreground text-xs truncate">
-              {item.description}
+              {item.standard_description}
             </span>
           </div>
           <div className="ml-4 flex-shrink-0">
-            <RowActions id={item.id} />
+            <RowActions id={item._id} />
           </div>
         </div>
       ))}

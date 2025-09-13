@@ -104,13 +104,30 @@ const columns: ColumnDef<Item>[] = [
   // later on we will save the array of strings in database based on selections
   {
     header: "Presence on labels",
-    accessorKey: "componentDescription",
+    accessorKey: "presentOnLabels",
     enableSorting: true,
-    cell: ({ row }) => (
-      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("componentDescription")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      console.log("row", row);
+      const labels = row.getValue("presentOnLabels") as string[];
+
+      console.log("present on labels", labels);
+
+      return (
+        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+          {labels && labels.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {labels.map((symbol, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {symbol}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            "None"
+          )}
+        </div>
+      );
+    },
     size: 220,
   },
   {
@@ -168,6 +185,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 import { useId } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export default function SymbolsGraphicsPageOtherComponentsTable({
   data: dataProp,

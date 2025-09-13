@@ -15,23 +15,48 @@ import {
 import { useState } from "react";
 import SymbolsGraphicsPageOtherComponentsTable from "./SymbolsGraphicsPageOtherComponentsTable";
 
-interface ComponentData {
+interface SymbolData {
   id: string;
   componentName: string;
   componentDescription: string;
   componentImage: string;
-  note: string;
+  symbolsTextPresent: string[];
+  textPresent: boolean;
+}
+
+interface SchematicData {
+  id: string;
+  componentName: string;
+  componentDescription: string;
+  componentImage: string;
+  presentOnLabels: string[];
+}
+
+interface BarcodesData {
+  id: string;
+  componentName: string;
+  componentDescription: string;
+  componentImage: string;
+  presentOnLabels: string[];
+}
+
+interface OtherComponentData {
+  id: string;
+  componentName: string;
+  componentDescription: string;
+  componentImage: string;
+  presentOnLabels: string[];
 }
 
 interface SchematicsSymbolsTabsProps {
-  schematicData: ComponentData[];
-  barcodesData: ComponentData[];
-  otherComponentsData: ComponentData[];
-  symbolsData: ComponentData[];
+  schematicsData: SchematicData[];
+  barcodesData: BarcodesData[];
+  otherComponentsData: OtherComponentData[];
+  symbolsData: SymbolData[];
 }
 
 export default function SchematicsSymbolsTabs({
-  schematicData,
+  schematicsData,
   barcodesData,
   otherComponentsData,
   symbolsData,
@@ -109,7 +134,7 @@ export default function SchematicsSymbolsTabs({
         <SymbolsGraphicsPageSymbolsTable data={symbolsData} />
       </TabsContent>
       <TabsContent value="tab-2">
-        <SymbolsGraphicsPageSchematicsTable data={schematicData} />
+        <SymbolsGraphicsPageSchematicsTable data={schematicsData} />
       </TabsContent>
       <TabsContent value="tab-3">
         <SymbolsGraphicsPageBarcodesTable data={barcodesData} />

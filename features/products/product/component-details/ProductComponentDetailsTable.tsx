@@ -155,7 +155,11 @@ const columns: ColumnDef<ComponentItem>[] = [
   },
 ];
 
-export default function ProductComponentDetailsTable() {
+export default function ProductComponentDetailsTable({
+  data,
+}: {
+  data: ComponentItem[];
+}) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -165,81 +169,6 @@ export default function ProductComponentDetailsTable() {
     {
       id: "componentName",
       desc: false,
-    },
-  ]);
-  const [data] = useState<ComponentItem[]>([
-    {
-      id: "1",
-      componentName: "Hydraulic Pump",
-      componentDescription:
-        "High-pressure hydraulic pump for industrial machinery.",
-      componentNumber: "HP-1001",
-      componentImage:
-        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-      note: "This pump is suitable for continuous operation in harsh environments.",
-    },
-    {
-      id: "2",
-      componentName: "Control Valve",
-      componentDescription: "Precision control valve for fluid regulation.",
-      componentNumber: "CV-2020",
-      componentImage:
-        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=200&q=80",
-      note: "Ensure regular maintenance for optimal performance.",
-    },
-    {
-      id: "3",
-      componentName: "Pressure Sensor",
-      componentDescription: "Digital sensor for accurate pressure measurement.",
-      componentNumber: "PS-3303",
-      componentImage:
-        "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80",
-      note: "Calibrate annually for best results.",
-    },
-    {
-      id: "4",
-      componentName: "Gearbox",
-      componentDescription: "Heavy-duty gearbox for torque transmission.",
-      componentNumber: "GB-4404",
-      componentImage:
-        "https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=200&q=80",
-      note: "Lubricate every 6 months.",
-    },
-    {
-      id: "5",
-      componentName: "Cooling Fan",
-      componentDescription: "Efficient cooling fan with low noise.",
-      componentNumber: "CF-5505",
-      componentImage:
-        "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=200&q=80",
-      note: "Replace blades if vibration detected.",
-    },
-    {
-      id: "6",
-      componentName: "Relay Switch",
-      componentDescription: "High-current relay switch for safety circuits.",
-      componentNumber: "RS-6606",
-      componentImage:
-        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=200&q=80",
-      note: "Test before each production cycle.",
-    },
-    {
-      id: "7",
-      componentName: "Display Module",
-      componentDescription: "LCD display module for real-time data.",
-      componentNumber: "DM-7707",
-      componentImage:
-        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=200&q=80",
-      note: "Protect from direct sunlight.",
-    },
-    {
-      id: "8",
-      componentName: "Power Supply",
-      componentDescription: "Stable power supply for sensitive electronics.",
-      componentNumber: "PS-8808",
-      componentImage:
-        "https://images.unsplash.com/photo-1461344577544-4e5dc9487184?auto=format&fit=crop&w=200&q=80",
-      note: "Check voltage before connecting devices.",
     },
   ]);
 

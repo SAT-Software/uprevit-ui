@@ -58,8 +58,8 @@ export default function EditProductDialog({
   const id = useId();
 
   // Basic product information state
-  const [productName, setProductName] = useState(product.productName);
-  const [description, setDescription] = useState(product.description);
+  const [productName, setProductName] = useState(product?.productName);
+  const [description, setDescription] = useState(product?.description);
 
   // Product information fields state
   const [informationFields, setInformationFields] = useState(
@@ -69,9 +69,9 @@ export default function EditProductDialog({
 
   // Find the department and project names based on IDs
   const department = departments.find(
-    (dept) => dept.id === product.departmentId
+    (dept) => dept.id === product?.departmentId
   );
-  const project = projects.find((proj) => proj.id === product.projectId);
+  const project = projects.find((proj) => proj.id === product?.projectId);
 
   const handleUpdateField = (
     index: number,
@@ -126,7 +126,7 @@ export default function EditProductDialog({
                       </Label>
                       <Input
                         id={`${id}-ppn`}
-                        value={product.productId}
+                        value={product?.productId}
                         type="text"
                         disabled
                         className="bg-muted"
@@ -161,7 +161,7 @@ export default function EditProductDialog({
                         <Label htmlFor={`${id}-department`}>Department</Label>
                         <Input
                           id={`${id}-department`}
-                          value={department?.name || product.departmentId}
+                          value={department?.name || product?.departmentId}
                           type="text"
                           disabled
                           className="bg-muted"
@@ -172,7 +172,7 @@ export default function EditProductDialog({
                         <Label htmlFor={`${id}-project`}>Project</Label>
                         <Input
                           id={`${id}-project`}
-                          value={project?.name || product.projectId}
+                          value={project?.name || product?.projectId}
                           type="text"
                           disabled
                           className="bg-muted"
@@ -185,7 +185,7 @@ export default function EditProductDialog({
                         <Label htmlFor={`${id}-version`}>Version</Label>
                         <Input
                           id={`${id}-version`}
-                          value={product.version}
+                          value={product?.version}
                           type="text"
                           disabled
                           className="bg-muted"
@@ -196,7 +196,7 @@ export default function EditProductDialog({
                         <Label htmlFor={`${id}-status`}>Status</Label>
                         <Input
                           id={`${id}-status`}
-                          value={product.status}
+                          value={product?.status}
                           type="text"
                           disabled
                           className="bg-muted"

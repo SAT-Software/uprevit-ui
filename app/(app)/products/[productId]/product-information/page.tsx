@@ -31,6 +31,10 @@ export default function Page() {
 
   const productData = useMemo(() => data?.data, [data]);
 
+  if (!productId) {
+    return notFound();
+  }
+
   if (isLoading) {
     return (
       <div className="w-full">
@@ -43,7 +47,7 @@ export default function Page() {
     );
   }
 
-  if (isError || !productData) return notFound();
+  if (isError) return notFound();
 
   return (
     <div className="w-full">

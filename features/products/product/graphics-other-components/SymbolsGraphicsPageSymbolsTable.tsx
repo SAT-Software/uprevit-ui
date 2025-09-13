@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -11,6 +11,7 @@ import {
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import NextImage from "next/image";
 import {
   Table,
@@ -26,8 +27,8 @@ type Item = {
   componentName: string;
   componentDescription: string;
   componentImage: string;
-  symbolTextPresent: boolean;
-  note?: string;
+  symbolsTextPresent: string[];
+  textPresent: boolean;
 };
 
 const columns: ColumnDef<Item>[] = [
@@ -95,10 +96,14 @@ const columns: ColumnDef<Item>[] = [
   // Later on we will save boolean value in database based on checkbox
   {
     header: "Symbol Text Present",
-    accessorKey: "symbolTextPresent",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("symbolTextPresent")}</div>
-    ),
+    accessorKey: "textPresent",
+    cell: ({ row }) => {
+      return (
+        <div className="font-medium">
+          {row.getValue("textPresent") ? "Yes" : "No"}
+        </div>
+      );
+    },
     size: 180,
   },
 
@@ -106,13 +111,26 @@ const columns: ColumnDef<Item>[] = [
   // later on we will save the array of strings in database based on selections
   {
     header: "Presence on labels",
-    accessorKey: "componentDescription",
+    accessorKey: "symbolsTextPresent",
     enableSorting: true,
-    cell: ({ row }) => (
-      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("componentDescription")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const symbols = row.getValue("symbolsTextPresent") as string[];
+      return (
+        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+          {symbols && symbols.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {symbols.map((symbol, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {symbol}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            "None"
+          )}
+        </div>
+      );
+    },
     size: 220,
   },
   {
@@ -172,7 +190,7 @@ import { Label } from "@/components/ui/label";
 import { useId } from "react";
 
 export default function SymbolsGraphicsPageSymbolsTable({
-  data: dataProp,
+  data,
 }: SymbolsGraphicsPageSymbolsTableProps) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -185,33 +203,11 @@ export default function SymbolsGraphicsPageSymbolsTable({
       desc: false,
     },
   ]);
-  const [data, setData] = useState<Item[]>(dataProp ?? []);
-
-  useEffect(() => {
-    if (!dataProp) {
-      async function fetchPosts() {
-        // fallback demo data
-        setData([
-          {
-            id: "1",
-            componentName: "Demo Component",
-            componentDescription: "Description for demo component.",
-            componentImage:
-              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-            note: "This is a demo note for the component.",
-            symbolTextPresent: true,
-          },
-        ]);
-      }
-      fetchPosts();
-    }
-  }, [dataProp]);
 
   const table = useReactTable({
-    data,
+    data: data || [],
     columns,
-    getRowCanExpand: (row) =>
-      Boolean(row.original.note || row.original.componentImage),
+    getRowCanExpand: (row) => Boolean(row.original.componentImage),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),

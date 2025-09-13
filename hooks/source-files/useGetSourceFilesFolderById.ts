@@ -4,7 +4,7 @@ async function getSourceFilesFolderById(
   folderId: string,
   { signal }: { signal: AbortSignal }
 ) {
-  const response = await fetch(`/api/sourceFiles/folders/${folderId}`, {
+  const response = await fetch(`/api/sourceFiles/folder?folderId=${folderId}`, {
     signal,
   });
   if (!response.ok) {

@@ -26,7 +26,6 @@ type Item = {
   componentName: string;
   componentDescription: string;
   componentImage: string;
-  note?: string;
 };
 
 const columns: ColumnDef<Item>[] = [
@@ -104,13 +103,27 @@ const columns: ColumnDef<Item>[] = [
   // later on we will save the array of strings in database based on selections
   {
     header: "Presence on labels",
-    accessorKey: "componentDescription",
+    accessorKey: "presentOnLabels",
     enableSorting: true,
-    cell: ({ row }) => (
-      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("componentDescription")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const labels = row.getValue("presentOnLabels") as string[];
+
+      return (
+        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+          {labels && labels.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {labels.map((symbol, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {symbol}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            "None"
+          )}
+        </div>
+      );
+    },
     size: 220,
   },
   {
@@ -168,6 +181,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 import { useId } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export default function SymbolsGraphicsPageSchematicsTable({
   data: dataProp,
@@ -196,7 +210,6 @@ export default function SymbolsGraphicsPageSchematicsTable({
             componentDescription: "Description for demo component.",
             componentImage:
               "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-            note: "This is a demo note for the component.",
           },
         ]);
       }
@@ -207,8 +220,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
   const table = useReactTable({
     data,
     columns,
-    getRowCanExpand: (row) =>
-      Boolean(row.original.note || row.original.componentImage),
+    getRowCanExpand: (row) => Boolean(row.original.componentImage),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
