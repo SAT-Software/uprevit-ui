@@ -20,8 +20,10 @@ import {
   ChevronRightIcon,
   ChevronUpIcon,
   EllipsisIcon,
+  LayoutList,
 } from "lucide-react";
 import { Fragment, useId, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,14 +31,15 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -53,12 +56,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import { Label } from "@/components/ui/label";
+import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
+import EditComponentDialog from "./EditComponentDialog";
+import DeleteComponentDialog from "./DeleteComponentDialog";
 
 type ComponentItem = {
   id: string;
@@ -107,15 +107,21 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     header: "Image",
     accessorKey: "componentImage",
-    cell: ({ row }) => (
-      <Image
-        src={row.original.componentImage}
-        alt={row.original.componentName}
-        width={50}
-        height={50}
-        className="object-cover rounded border"
-      />
-    ),
+    cell: ({ row }) =>
+      row.original.componentImage &&
+      row.original.componentImage.trim() !== "" ? (
+        <Image
+          src={row.original.componentImage.trim()}
+          alt={row.original.componentName}
+          width={48}
+          height={48}
+          className="object-cover rounded-md border min-h-12"
+        />
+      ) : (
+        <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
+          <LayoutList className="w-full h-full p-3" />
+        </div>
+      ),
   },
   {
     header: "Component Name",
@@ -264,10 +270,7 @@ export default function ProductComponentDetailsTable({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <Fragment key={row.id}>
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
+                  <TableRow data-state={row.getIsSelected() && "selected"}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
@@ -326,9 +329,7 @@ export default function ProductComponentDetailsTable({
           </Label>
           <Select
             value={table.getState().pagination.pageSize.toString()}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
+            onValueChange={(value) => table.setPageSize(Number(value))}
           >
             <SelectTrigger id={id} className="w-fit whitespace-nowrap">
               <SelectValue placeholder="Select number of results" />
@@ -435,60 +436,70 @@ export default function ProductComponentDetailsTable({
 }
 
 function RowActions({ row }: { row: Row<ComponentItem> }) {
+  console.log("row", row);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Get productId from the current URL using usePathname
+  const pathname = usePathname();
+  const getProductId = () => {
+    const match = pathname.match(/\/products\/([^\/]+)/);
+    return match ? match[1] : "";
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="mr-2" asChild>
-        <div className="flex justify-end ">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="shadow-none"
-            aria-label="Edit item"
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="mr-2" asChild>
+          <div className="flex justify-end ">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="shadow-none"
+              aria-label="Edit item"
+            >
+              <EllipsisIcon size={16} aria-hidden="true" />
+            </Button>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onSelect={() => {
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowEditDialog(true), 100);
+              }}
+            >
+              <PiPencilSimpleDuotone />
+              <span>Edit</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={() => {
+              // Add small delay to allow dropdown to close first
+              setTimeout(() => setShowDeleteDialog(true), 100);
+            }}
+            className="text-destructive focus:text-destructive"
           >
-            <EllipsisIcon size={16} aria-hidden="true" />
-          </Button>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Edit - {row.original.id}</span>
-            <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+            <PiTrashDuotone className="text-destructive" />
+            <span>Delete</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <span>Duplicate</span>
-            <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Archive</span>
-            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>Move to project</DropdownMenuItem>
-                <DropdownMenuItem>Move to folder</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Advanced options</DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Share</DropdownMenuItem>
-          <DropdownMenuItem>Add to favorites</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <span>Delete</span>
-          <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <EditComponentDialog
+        productId={getProductId()}
+        component={row.original}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
+      <DeleteComponentDialog
+        productId={getProductId()}
+        component={row.original}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+      />
+    </>
   );
 }
