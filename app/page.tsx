@@ -2,8 +2,20 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useAuth } from "react-oidc-context";
 
 export default function Home() {
+	const auth = useAuth();
+
+  if (auth.isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-4 h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-4 h-screen">
       <h1 className="text-6xl font-bold text-center">
@@ -14,11 +26,11 @@ export default function Home() {
         ease. Collaborate seamlessly across teams and effortlessly track your
         departments, projects and products - all in one place.
       </p>
-      <Link href="/dashboard">
-        <Button variant="default" className="w-fit mt-4">
-          Get Started
-        </Button>
-      </Link>
+			<Link href="/dashboard">
+          <Button variant="default" className="w-fit mt-4">
+            Go to Dashboard
+          </Button>
+        </Link>
     </div>
   );
 }

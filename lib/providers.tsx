@@ -6,6 +6,7 @@ import {
   isServer,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { AuthProvider } from "react-oidc-context";
 import * as React from "react";
 
 function makeQueryClient() {
@@ -31,12 +32,28 @@ function getQueryClient() {
   }
 }
 
+const authConfig = {
+  authority: process.env.NEXT_PUBLIC_COGNITO_AUTHORITY!,
+  client_id: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!,
+  redirect_uri: process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI!,
+  response_type: "code",
+  scope: "email openid phone",
+};
+
+console.log(authConfig.authority);
+console.log(authConfig.client_id);
+console.log(authConfig.redirect_uri);
+console.log(authConfig.response_type);
+console.log(authConfig.scope);
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthProvider {...authConfig}>
+        {children}
+      </AuthProvider>
       <ReactQueryDevtools />
     </QueryClientProvider>
   );
