@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -9,9 +8,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import NextImage from "next/image";
 import {
   Table,
   TableBody,
@@ -20,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import NextImage from "next/image";
 
 type Item = {
   id: string;
@@ -140,32 +140,19 @@ type SymbolsGraphicsPageSchematicsTableProps = {
 };
 
 import {
-  getPaginationRowModel,
-  PaginationState,
-  Row,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table";
-import {
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisIcon,
-} from "lucide-react";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -174,14 +161,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import { Label } from "@/components/ui/label";
+  getPaginationRowModel,
+  getSortedRowModel,
+  PaginationState,
+  Row,
+  SortingState,
+} from "@tanstack/react-table";
+import {
+  ChevronFirstIcon,
+  ChevronLastIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
+} from "lucide-react";
 
-import { useId } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useId } from "react";
+import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
 
 export default function SymbolsGraphicsPageSchematicsTable({
   data: dataProp,
@@ -478,6 +474,8 @@ export default function SymbolsGraphicsPageSchematicsTable({
 }
 
 function RowActions({ row }: { row: Row<Item> }) {
+  const item = row.original;
+  console.log(item);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="mr-2" asChild>
@@ -495,41 +493,14 @@ function RowActions({ row }: { row: Row<Item> }) {
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <span>Edit - {row.original.id}</span>
-            <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+            <PiPencilSimpleDuotone />
+            <span>Edit</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <span>Duplicate</span>
-            <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Archive</span>
-            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>Move to project</DropdownMenuItem>
-                <DropdownMenuItem>Move to folder</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Advanced options</DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Share</DropdownMenuItem>
-          <DropdownMenuItem>Add to favorites</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-destructive focus:text-destructive">
+          <PiTrashDuotone className="text-destructive" />
           <span>Delete</span>
-          <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

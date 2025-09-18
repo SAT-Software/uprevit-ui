@@ -1,6 +1,6 @@
 "use client";
 
-import SchematicsSymbolsTabs from "../../../../../features/products/product/graphics-other-components/SchematicsSymbolsTabs";
+import SchematicsSymbolsTabs from "@/features/products/product/graphics-other-components/SchematicsSymbolsTabs";
 import { useParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
@@ -19,8 +19,6 @@ export default function Page() {
     productId as string,
     "symbols-graphics"
   );
-
-  console.log("symbols graphics raw data", data);
 
   if (!productId) {
     return <div className="flex flex-col gap-4 p-4">Loading product...</div>;
@@ -44,7 +42,7 @@ export default function Page() {
 
   const symbolsGraphics = (data?.data as SymbolGraphicItem[]) || [];
 
-  console.log("symbols graphics data", symbolsGraphics);
+  console.log("symbolsGraphics", symbolsGraphics);
 
   // Group items by normalized entity (lowercase)
   const entityGroups: Record<string, SymbolGraphicItem[]> = {};
@@ -55,6 +53,8 @@ export default function Page() {
     }
     entityGroups[key].push(item);
   });
+
+  console.log("entityGroups", entityGroups);
 
   // Map grouped data to expected prop names for SchematicsSymbolsTabs
   const schematicsData = (entityGroups["schematics"] || []).map(
@@ -85,8 +85,6 @@ export default function Page() {
     })
   );
 
-  console.log("other components data", otherComponentsData);
-
   // Merge "symbol" and "graphics" entities into symbolsData
   const symbolsData = [...(entityGroups["symbols"] || [])].map(
     (item, index) => ({
@@ -105,6 +103,7 @@ export default function Page() {
       barcodesData={barcodesData}
       otherComponentsData={otherComponentsData}
       symbolsData={symbolsData}
+      productId={productId as string}
     />
   );
 }

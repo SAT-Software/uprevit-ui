@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -9,10 +8,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { Fragment, useState } from "react";
+import { usePathname } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NextImage from "next/image";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,6 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import NextImage from "next/image";
+import EditSymbolsDialog from "./EditSymbolsDialog";
 
 type Item = {
   id: string;
@@ -147,32 +149,19 @@ type SymbolsGraphicsPageSymbolsTableProps = {
 };
 
 import {
-  getPaginationRowModel,
-  PaginationState,
-  Row,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table";
-import {
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisIcon,
-} from "lucide-react";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -181,13 +170,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import { Label } from "@/components/ui/label";
+  getPaginationRowModel,
+  getSortedRowModel,
+  PaginationState,
+  Row,
+  SortingState,
+} from "@tanstack/react-table";
+import {
+  ChevronFirstIcon,
+  ChevronLastIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
+} from "lucide-react";
 
 import { useId } from "react";
+import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
 
 export default function SymbolsGraphicsPageSymbolsTable({
   data,
@@ -465,60 +463,57 @@ export default function SymbolsGraphicsPageSymbolsTable({
 }
 
 function RowActions({ row }: { row: Row<Item> }) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const item = row.original;
+
+  // Get productId from the current URL using usePathname
+  const pathname = usePathname();
+  const getProductId = () => {
+    const match = pathname.match(/\/products\/([^\/]+)/);
+    return match ? match[1] : "";
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="mr-2" asChild>
-        <div className="flex justify-end ">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="shadow-none"
-            aria-label="Edit item"
-          >
-            <EllipsisIcon size={16} aria-hidden="true" />
-          </Button>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Edit - {row.original.id}</span>
-            <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="mr-2" asChild>
+          <div className="flex justify-end ">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="shadow-none"
+              aria-label="Edit item"
+            >
+              <EllipsisIcon size={16} aria-hidden="true" />
+            </Button>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onSelect={() => {
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowEditDialog(true), 100);
+              }}
+            >
+              <PiPencilSimpleDuotone />
+              <span>Edit</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <PiTrashDuotone className="text-destructive" />
+            <span>Delete</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <span>Duplicate</span>
-            <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Archive</span>
-            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>Move to project</DropdownMenuItem>
-                <DropdownMenuItem>Move to folder</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Advanced options</DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Share</DropdownMenuItem>
-          <DropdownMenuItem>Add to favorites</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <span>Delete</span>
-          <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <EditSymbolsDialog
+        productId={getProductId()}
+        symbol={item}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
+    </>
   );
 }
