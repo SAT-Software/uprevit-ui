@@ -157,7 +157,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { open } = useSidebar();
   const { data: workspaceData, isLoading } = useGetWorkspace(
-    "68b1d3fc5ee2852c8f93ecc1"
+    "68d2be511ad93c69d6e39e51"
   ); // Get the actual workspace id from user session when we implement auth
 
   const workspace = workspaceData?.workspace;
