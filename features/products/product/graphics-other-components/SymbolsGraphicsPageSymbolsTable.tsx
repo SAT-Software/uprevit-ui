@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -9,9 +8,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { Fragment, useState } from "react";
+import { usePathname } from "next/navigation";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import NextImage from "next/image";
 import {
   Table,
   TableBody,
@@ -20,14 +21,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import NextImage from "next/image";
+import EditSymbolsDialog from "./EditSymbolsDialog";
 
 type Item = {
   id: string;
   componentName: string;
   componentDescription: string;
   componentImage: string;
-  symbolTextPresent: boolean;
-  note?: string;
+  symbolsTextPresent: string[];
+  textPresent: boolean;
 };
 
 const columns: ColumnDef<Item>[] = [
@@ -95,10 +98,14 @@ const columns: ColumnDef<Item>[] = [
   // Later on we will save boolean value in database based on checkbox
   {
     header: "Symbol Text Present",
-    accessorKey: "symbolTextPresent",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("symbolTextPresent")}</div>
-    ),
+    accessorKey: "textPresent",
+    cell: ({ row }) => {
+      return (
+        <div className="font-medium">
+          {row.getValue("textPresent") ? "Yes" : "No"}
+        </div>
+      );
+    },
     size: 180,
   },
 
@@ -106,13 +113,26 @@ const columns: ColumnDef<Item>[] = [
   // later on we will save the array of strings in database based on selections
   {
     header: "Presence on labels",
-    accessorKey: "componentDescription",
+    accessorKey: "symbolsTextPresent",
     enableSorting: true,
-    cell: ({ row }) => (
-      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("componentDescription")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const symbols = row.getValue("symbolsTextPresent") as string[];
+      return (
+        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+          {symbols && symbols.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {symbols.map((symbol, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {symbol}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            "None"
+          )}
+        </div>
+      );
+    },
     size: 220,
   },
   {
@@ -129,32 +149,19 @@ type SymbolsGraphicsPageSymbolsTableProps = {
 };
 
 import {
-  getPaginationRowModel,
-  PaginationState,
-  Row,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table";
-import {
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisIcon,
-} from "lucide-react";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -163,16 +170,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import { Label } from "@/components/ui/label";
+  getPaginationRowModel,
+  getSortedRowModel,
+  PaginationState,
+  Row,
+  SortingState,
+} from "@tanstack/react-table";
+import {
+  ChevronFirstIcon,
+  ChevronLastIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
+} from "lucide-react";
 
 import { useId } from "react";
+import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
 
 export default function SymbolsGraphicsPageSymbolsTable({
-  data: dataProp,
+  data,
 }: SymbolsGraphicsPageSymbolsTableProps) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -185,33 +201,11 @@ export default function SymbolsGraphicsPageSymbolsTable({
       desc: false,
     },
   ]);
-  const [data, setData] = useState<Item[]>(dataProp ?? []);
-
-  useEffect(() => {
-    if (!dataProp) {
-      async function fetchPosts() {
-        // fallback demo data
-        setData([
-          {
-            id: "1",
-            componentName: "Demo Component",
-            componentDescription: "Description for demo component.",
-            componentImage:
-              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-            note: "This is a demo note for the component.",
-            symbolTextPresent: true,
-          },
-        ]);
-      }
-      fetchPosts();
-    }
-  }, [dataProp]);
 
   const table = useReactTable({
-    data,
+    data: data || [],
     columns,
-    getRowCanExpand: (row) =>
-      Boolean(row.original.note || row.original.componentImage),
+    getRowCanExpand: (row) => Boolean(row.original.componentImage),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -469,60 +463,57 @@ export default function SymbolsGraphicsPageSymbolsTable({
 }
 
 function RowActions({ row }: { row: Row<Item> }) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const item = row.original;
+
+  // Get productId from the current URL using usePathname
+  const pathname = usePathname();
+  const getProductId = () => {
+    const match = pathname.match(/\/products\/([^\/]+)/);
+    return match ? match[1] : "";
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="mr-2" asChild>
-        <div className="flex justify-end ">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="shadow-none"
-            aria-label="Edit item"
-          >
-            <EllipsisIcon size={16} aria-hidden="true" />
-          </Button>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Edit - {row.original.id}</span>
-            <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="mr-2" asChild>
+          <div className="flex justify-end ">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="shadow-none"
+              aria-label="Edit item"
+            >
+              <EllipsisIcon size={16} aria-hidden="true" />
+            </Button>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onSelect={() => {
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowEditDialog(true), 100);
+              }}
+            >
+              <PiPencilSimpleDuotone />
+              <span>Edit</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <PiTrashDuotone className="text-destructive" />
+            <span>Delete</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <span>Duplicate</span>
-            <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Archive</span>
-            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>Move to project</DropdownMenuItem>
-                <DropdownMenuItem>Move to folder</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Advanced options</DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Share</DropdownMenuItem>
-          <DropdownMenuItem>Add to favorites</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <span>Delete</span>
-          <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <EditSymbolsDialog
+        productId={getProductId()}
+        symbol={item}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
+    </>
   );
 }

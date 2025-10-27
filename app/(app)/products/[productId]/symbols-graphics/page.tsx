@@ -1,74 +1,109 @@
 "use client";
 
-import SchematicsSymbolsTabs from "../../../../../features/products/product/graphics-other-components/SchematicsSymbolsTabs";
+import SchematicsSymbolsTabs from "@/features/products/product/graphics-other-components/SchematicsSymbolsTabs";
+import { useParams } from "next/navigation";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
-const SchematicData = [
-  {
-    id: "1",
-    componentName: "Main Schematic",
-    componentDescription: "Main power distribution schematic.",
-    componentImage:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-    note: "Main power distribution schematic.",
-  },
-  {
-    id: "2",
-    componentName: "Auxiliary Schematic",
-    componentDescription: "Auxiliary systems wiring.",
-    componentImage:
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=200&q=80",
-    note: "Auxiliary systems wiring.",
-  },
-];
-
-const BarcodesData = [
-  {
-    id: "3",
-    componentName: "Project Alpha Barcode",
-    componentDescription: "Legacy project barcode schematic.",
-    componentImage:
-      "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80",
-    note: "Legacy project barcode.",
-  },
-];
-
-const otherComponentsData = [
-  {
-    id: "4",
-    componentName: "Package A",
-    componentDescription: "Medical device symbol set.",
-    componentImage:
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=200&q=80",
-    note: "Medical device symbol set.",
-  },
-];
-
-const SymbolsData = [
-  {
-    id: "5",
-    componentName: "Electrical Symbols",
-    componentDescription: "Standard electrical symbols set.",
-    componentImage:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-    note: "Standard electrical symbols set.",
-  },
-  {
-    id: "6",
-    componentName: "Mechanical Symbols",
-    componentDescription: "Mechanical engineering symbols.",
-    componentImage:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-    note: "Mechanical engineering symbols.",
-  },
-];
+interface SymbolGraphicItem {
+  image: string;
+  text: string;
+  description: string;
+  text_present: boolean;
+  label_presence: string[];
+  entity: string;
+}
 
 export default function Page() {
+  const { productId } = useParams();
+  const { data, isLoading, error } = useGetProductTabData(
+    productId as string,
+    "symbols-graphics"
+  );
+
+  if (!productId) {
+    return <div className="flex flex-col gap-4 p-4">Loading product...</div>;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        Loading symbols and graphics...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-4 p-4 text-destructive">
+        Error loading symbols and graphics: {error.message}
+      </div>
+    );
+  }
+
+  const symbolsGraphics = (data?.data as SymbolGraphicItem[]) || [];
+
+  console.log("symbolsGraphics", symbolsGraphics);
+
+  // Group items by normalized entity (lowercase)
+  const entityGroups: Record<string, SymbolGraphicItem[]> = {};
+  symbolsGraphics.forEach((item) => {
+    const key = item.entity.toLowerCase();
+    if (!entityGroups[key]) {
+      entityGroups[key] = [];
+    }
+    entityGroups[key].push(item);
+  });
+
+  console.log("entityGroups", entityGroups);
+
+  // Map grouped data to expected prop names for SchematicsSymbolsTabs
+  const schematicsData = (entityGroups["schematics"] || []).map(
+    (item, index) => ({
+      id: item.text || item.image || `schematics-${index}`,
+      componentName: item.text || "Schematics",
+      componentDescription: item.description || "",
+      componentImage: item.image || "",
+      presentOnLabels: item.label_presence,
+    })
+  );
+
+  const barcodesData = (entityGroups["barcodes"] || []).map((item, index) => ({
+    id: item.text || item.image || `barcodes-${index}`,
+    componentName: item.text || "Barcode",
+    componentDescription: item.description || "",
+    componentImage: item.image || "",
+    presentOnLabels: item.label_presence,
+  }));
+
+  const otherComponentsData = (entityGroups["other components"] || []).map(
+    (item, index) => ({
+      id: item.text || item.image || `other-${index}`,
+      componentName: item.text || "Other Component",
+      componentDescription: item.description || "",
+      componentImage: item.image || "",
+      presentOnLabels: item.label_presence,
+    })
+  );
+
+  // Merge "symbol" and "graphics" entities into symbolsData
+  const symbolsData = [...(entityGroups["symbols"] || [])].map(
+    (item, index) => ({
+      id: item.text || item.image || `symbols-${index}`,
+      componentName: item.text || "Symbols",
+      componentDescription: item.description || "",
+      componentImage: item.image || "",
+      symbolsTextPresent: item.label_presence,
+      textPresent: item.text_present || false,
+    })
+  );
+
   return (
     <SchematicsSymbolsTabs
-      schematicData={SchematicData}
-      barcodesData={BarcodesData}
+      schematicsData={schematicsData}
+      barcodesData={barcodesData}
       otherComponentsData={otherComponentsData}
-      symbolsData={SymbolsData}
+      symbolsData={symbolsData}
+      productId={productId as string}
     />
   );
 }

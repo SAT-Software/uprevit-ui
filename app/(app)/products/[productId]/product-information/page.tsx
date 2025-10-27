@@ -14,7 +14,8 @@ import { CalendarDays, User } from "lucide-react";
 import Link from "next/link";
 import ProductInformationCard from "@/features/products/product/product-information/ProductInformationCard";
 import EditProductDialog from "@/features/products/product/product-information/ProductInformationEditProductDialog";
-import { useGetProductDataTab } from "@/hooks/product/useGetProductDataTab";
+import ProductInformationCustomFieldEditDialog from "@/features/products/product/product-information/ProductInformationCustomFieldEditDialog";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
 import { PiCirclesThreePlusDuotone, PiKanbanDuotone } from "react-icons/pi";
 
@@ -22,7 +23,7 @@ export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
 
-  const { data, isLoading, isError } = useGetProductDataTab(
+  const { data, isLoading, isError } = useGetProductTabData(
     productId,
     "product-information"
   );
@@ -30,6 +31,10 @@ export default function Page() {
   console.log("Product Info Data:", data);
 
   const productData = useMemo(() => data?.data, [data]);
+
+  if (!productId) {
+    return notFound();
+  }
 
   if (isLoading) {
     return (
@@ -43,14 +48,14 @@ export default function Page() {
     );
   }
 
-  if (isError || !productData) return notFound();
+  if (isError) return notFound();
 
   return (
     <div className="w-full">
       <div className="flex flex-col mb-8">
         <div className="flex justify-between items-start">
           <h1 className="text-xl font-semibold mb-4">
-            {productData?.product_name}
+            {productData?.product_name || "N/A"}
           </h1>
           <div className="flex items-center gap-2">
             <TooltipProvider>
@@ -73,7 +78,6 @@ export default function Page() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -94,22 +98,17 @@ export default function Page() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
             <EditProductDialog product={productData!} />
-            {/* <Link href={`/products/${productId}/component-details`}>
-              <Button size="sm" variant="outline" className="text-xs">
-                Next Page
-                <ChevronRightIcon className="h-4 w-4" />
-              </Button>
-            </Link> */}
+            <ProductInformationCustomFieldEditDialog product={productData!} />
           </div>
         </div>
-        <div className="flex  gap-4">
+        <div className="flex gap-4">
           <div className="flex flex-col gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />{" "}
               <span>Target Date: {productData?.target_date || "N/A"}</span>
             </div>
+
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />{" "}
               <span>
@@ -124,6 +123,7 @@ export default function Page() {
               <User className="w-4 h-4" />{" "}
               <span>Status: {productData?.status || "N/A"}</span>
             </div>
+
             <div className="flex items-center gap-2">
               <User className="w-4 h-4" />{" "}
               <span>Complete Count: {productData?.complete_count || "0"}</span>
@@ -147,7 +147,3 @@ export default function Page() {
     </div>
   );
 }
-
-// TODO
-// 1. Edit option open new modal and can edit directly
-// 2. Give form to add new inputs in product info tab (can add label and then later on can add the value). This will be apart from what we are giving in Project info tab.

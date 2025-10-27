@@ -16,6 +16,7 @@ export function useAddSourceFilesFolder() {
         body: JSON.stringify(sourceFilesFolder),
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
         },
       });
       if (!res.ok) {

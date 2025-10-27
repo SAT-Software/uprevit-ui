@@ -21,20 +21,17 @@ import {
 import { useRouter } from "next/navigation";
 
 export type Item = {
-  // id: string;
-  productId: string;
-  createdOn: string;
-  createdBy: string;
-  modifiedOn: string;
-  modifiedBy: string;
-  productName: string;
-  projectId: string;
-  departmentId: string;
-  version: string;
-  status: "Submitted" | "Draft" | "Archived";
-  targetDate: number;
-  completionDate: number | null;
-  delayReason: string | null;
+  _id: string;
+  productId?: string;
+  action: string;
+  action_at: string;
+  action_by: string;
+  department_id: string;
+  master_version: string;
+  product_name: string;
+  product_plan_number: string;
+  project_id: string;
+  status: string;
 };
 
 const columns: ColumnDef<Item>[] = [
@@ -69,8 +66,8 @@ const columns: ColumnDef<Item>[] = [
     header: "Created by - on",
     accessorKey: "createdOn",
     cell: ({ row }) => {
-      const createdBy = row.original.createdBy;
-      const createdOn = row.original.createdOn;
+      const createdBy = row.original.action_by;
+      const createdOn = row.original.action_at;
       return (
         <div className="">
           <p className="text-xs  font-medium">{createdBy}</p>
@@ -83,8 +80,8 @@ const columns: ColumnDef<Item>[] = [
     header: "Modified by - on",
     accessorKey: "modifiedOn",
     cell: ({ row }) => {
-      const modifiedBy = row.original.modifiedBy;
-      const modifiedOn = row.original.modifiedOn;
+      const modifiedBy = row.original.action_by;
+      const modifiedOn = row.original.action_at;
       return (
         <div className="">
           <p className="text-xs  font-medium">{modifiedBy}</p>

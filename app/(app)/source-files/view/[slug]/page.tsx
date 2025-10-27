@@ -85,6 +85,8 @@ export default function ProductSourceFilesPage() {
 
   const { data, isLoading, isError } = useGetSourceFilesFolderById(slug ?? "");
 
+  console.log("source file folder data", data);
+
   const folderData = data as SourceFilesFolderResponse | undefined;
   const folder: SourceFilesFolder | undefined =
     folderData?.data ?? folderData?.folder;

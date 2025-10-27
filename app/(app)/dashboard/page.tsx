@@ -12,7 +12,8 @@ import {
   PiStackPlusDuotone,
   PiFolderOpenDuotone,
 } from "react-icons/pi";
-import { sampleProducts } from "../products/data";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { ProductApiResponse } from "@/types/product";
 
 const stats: StatsCardProps[] = [
   {
@@ -57,9 +58,39 @@ const stats: StatsCardProps[] = [
   },
 ];
 
-const recentProductsData = sampleProducts.slice(0, 3);
-
 function DashboardPage() {
+  const { data, isLoading, error } = useGetAllProducts();
+
+  console.log(data);
+
+  if (isLoading) return <div>Loading products...</div>;
+  if (error) return <div>Error loading products: {error.message}</div>;
+
+  // Helper function to truncate strings
+  const truncateString = (str: string, length: number = 6) => {
+    if (!str) return "";
+    return str.length > length ? `${str.substring(0, length)}...` : str;
+  };
+
+  // Map API data structure to the expected structure for DashboardProductsTable
+  const products =
+    data?.result?.products?.map((product: ProductApiResponse) => ({
+      productId: truncateString(product._id || ""),
+      createdOn: product.action_at?.slice(0, 10) || "",
+      createdBy: truncateString(product.action_by || ""),
+      modifiedOn: product.action_at?.slice(0, 10) || "",
+      modifiedBy: truncateString(product.action_by || ""),
+      productName: product.product_name || "",
+      projectId: truncateString(product.project_id || ""),
+      departmentId: truncateString(product.department_id || ""),
+      version: product.master_version || "",
+      status: product.status || "Draft",
+      targetDate: 0,
+      completionDate: null,
+      delayReason: null,
+    })) || [];
+
+  const recentProductsData = products.slice(0, 3);
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Summary stats cards */}
