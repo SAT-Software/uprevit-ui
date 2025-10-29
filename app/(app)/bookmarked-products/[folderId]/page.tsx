@@ -15,7 +15,7 @@ import { LinkIcon } from "lucide-react";
 // Interface for product data from the bookmark folder API
 interface BookmarkProduct {
   _id: string;
-  name: string;
+  product_name: string;
   master_version: string;
   status: string;
 }
@@ -136,14 +136,14 @@ export default function FolderPage() {
                 <CardContent className="p-6">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium">{product.name}</h3>
+                      <h3 className="font-medium">{product.product_name}</h3>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
                           v{product.master_version}
                         </span>
                         <DialogRemoveProductBookmark
                           productId={product._id}
-                          productName={product.name}
+                          productName={product.product_name}
                           folderId={folderId}
                         />
                         <Button
