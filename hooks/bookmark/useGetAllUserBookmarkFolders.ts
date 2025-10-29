@@ -2,8 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 
 async function getAllUserBookmarkFolders({ signal }: { signal: AbortSignal }) {
   const response = await fetch(
-    "/api/bookmarks/products?userId=68a1cf8c2cb63e45ad511688",
-    { signal }
+    "/api/bookmarks/products?userId=68d2b37127794dcb43a32425",
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+        "Content-Type": "application/json", // Example of another header
+      },
+      signal,
+    }
   );
   if (!response.ok) {
     const text = await response.text().catch(() => "");
