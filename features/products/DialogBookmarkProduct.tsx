@@ -42,7 +42,7 @@ export default function DialogBookmarkProduct({
   children?: React.ReactNode;
 }) {
   const { data, isLoading, error } = useGetAllUserBookmarkFolders();
-  const bookmarkFolders = data?.bookmarked_product_folders ?? [];
+  const bookmarkFolders = data?.result?.bookmarked_product_folders ?? [];
   const bookmarkProduct = useBookmarkProduct();
 
   const {
@@ -65,7 +65,8 @@ export default function DialogBookmarkProduct({
     console.log(data);
     try {
       await bookmarkProduct.mutateAsync({
-        id: product._id,
+        user_id: "68d2b37127794dcb43a32425", // Replace with actual user ID in future
+        product_id: product._id,
         folder_id: data.folderId,
       });
       console.log("success bookmark product");

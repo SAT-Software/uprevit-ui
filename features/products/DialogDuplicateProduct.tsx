@@ -90,10 +90,6 @@ export default function DialogDuplicateProduct({
         label_tags: allProductTabData.result.data.label_tags,
       };
 
-      console.log("Product to dupli", product);
-      console.log("Product data to duplicate:", productData);
-      console.log("All Tabs", allProductTabData);
-
       await createMutation.mutateAsync(productData);
 
       reset();
