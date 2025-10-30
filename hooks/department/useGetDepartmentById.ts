@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 async function getDepartmentById(
-  id: string,
+  departmentId: string,
   { signal }: { signal: AbortSignal }
 ) {
-  const response = await fetch(`/api/departments/${id}`, {
+  const response = await fetch(`/api/departments/${departmentId}`, {
     headers: {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
       "Content-Type": "application/json", // Example of another header
@@ -19,9 +19,9 @@ async function getDepartmentById(
   return data;
 }
 
-export function useGetDepartmentById(id: string) {
+export function useGetDepartmentById(departmentId: string) {
   return useQuery({
-    queryKey: ["department", id],
-    queryFn: ({ signal }) => getDepartmentById(id, { signal }),
+    queryKey: ["department", departmentId],
+    queryFn: ({ signal }) => getDepartmentById(departmentId, { signal }),
   });
 }

@@ -22,11 +22,11 @@ export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
   const departmentId = params?.departmentId;
 
-  const { data, isLoading, isError } = useGetDepartmentById(departmentId ?? "");
+  const { data, isLoading, isError } = useGetDepartmentById(departmentId);
 
   const department = data?.department;
 
-  if (isLoading) {
+  if (isLoading || !department) {
     return (
       <div className="p-4">
         <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6">
@@ -36,7 +36,7 @@ export default function DepartmentDetailPage() {
     );
   }
 
-  if (isError || !department) return notFound();
+  if (isError) return notFound();
 
   return (
     <div className="p-4">

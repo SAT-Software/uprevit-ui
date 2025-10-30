@@ -4,8 +4,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { notFound, useParams } from "next/navigation";
 import { sampleProducts as productsData } from "@/app/(app)/products/data";
-import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
-import { Item } from "@/features/products/ProductsPageProductTable";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import {
   PiKanbanDuotone,
@@ -19,21 +17,23 @@ import {
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { Item } from "@/features/products/ProductsPageProductTable";
+import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
   const projectId = params?.projectId;
 
-  const { data, isLoading, isError } = useGetProjectById(projectId ?? "");
+  const { data, isLoading, isError } = useGetProjectById(projectId);
 
   const project = data?.project;
 
   // Filter products for the current project
   const projectProducts = productsData.filter(
-    (product: Item) => product.projectId === projectId
+    (product: Item) => product.project_id === projectId
   );
 
-  if (isLoading) {
+  if (isLoading || !project) {
     return (
       <div className="p-4">
         <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6">
@@ -43,7 +43,7 @@ export default function ProjectDetailPage() {
     );
   }
 
-  if (isError || !project) return notFound();
+  if (isError) return notFound();
 
   return (
     <div className="p-4">

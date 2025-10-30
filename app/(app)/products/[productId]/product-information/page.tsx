@@ -28,15 +28,9 @@ export default function Page() {
     "product-information"
   );
 
-  console.log("Product Info Data:", data);
+  const productData = useMemo(() => data?.result?.data?.data, [data]);
 
-  const productData = useMemo(() => data?.data, [data]);
-
-  if (!productId) {
-    return notFound();
-  }
-
-  if (isLoading) {
+  if (isLoading || !productData) {
     return (
       <div className="w-full">
         <div className="flex flex-col mb-8">
