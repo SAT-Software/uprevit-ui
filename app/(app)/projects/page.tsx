@@ -7,8 +7,6 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 function ProjectsPage() {
   const { data, isLoading } = useGetAllProjects();
 
-  console.log(data);
-
   const allProjects = data?.result?.projects ?? [];
 
   if (isLoading) {
