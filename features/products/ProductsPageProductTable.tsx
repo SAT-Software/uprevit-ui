@@ -78,6 +78,7 @@ import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 export type Item = {
   _id: string;
   productId?: string;
+  description: string;
   action: string;
   action_at: string;
   action_by: string;
@@ -87,6 +88,13 @@ export type Item = {
   product_plan_number: string;
   project_id: string;
   status: string;
+  product_information?: object;
+  compliance_information?: object;
+  label_components?: object;
+  symbols_graphics?: object;
+  product_data?: object;
+  operational_parameters?: object;
+  label_tags?: object;
 };
 
 interface AdvancedFilter {

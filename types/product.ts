@@ -43,15 +43,42 @@ export interface Product {
     }>;
     tab_completed?: boolean;
   };
-  symbols_graphics?: Array<{
-    _id?: string;
-    image: string;
-    text: string;
-    description?: string;
-    text_present?: boolean;
-    label_presence: string[];
-    entity: "Symbols" | "Schematics" | "Barcodes" | "Other Components";
-  }>;
+  symbols_graphics?: {
+    data?: Array<{
+      _id?: string;
+      image: string;
+      text: string;
+      description?: string;
+      text_present?: boolean;
+      label_presence: string[];
+      entity: "Symbols" | "Schematics" | "Barcodes" | "Other Components";
+    }>;
+    tab_completed?: boolean;
+  };
+  product_data?: {
+    data?: {
+      _id?: string;
+      workbook_data: object;
+    };
+    tab_completed?: boolean;
+  };
+  operational_parameters?: {
+    data?: {
+      _id?: string;
+      workbook_data: object;
+    };
+    tab_completed?: boolean;
+  };
+  label_tags?: {
+    data?: Array<{
+      _id: string;
+      name?: string;
+      description?: string;
+      type?: string;
+      image?: string;
+    }>;
+    tab_completed?: boolean;
+  };
 }
 
 export interface ProductApiResponse {

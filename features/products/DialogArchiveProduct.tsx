@@ -13,18 +13,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Product } from "@/types/product";
-import { useArchiveProduct } from "@/hooks/product/useArchiveProduct";
+import { useUpdateProduct } from "@/hooks/product/useUpdateproduct";
 
-type ArchiveProductProps = Pick<
-  Product,
-  | "_id"
-  | "product_name"
-  | "product_plan_number"
-  | "department_id"
-  | "project_id"
-  | "master_version"
-  | "status"
->;
+type ArchiveProductProps = Pick<Product, "_id">;
 
 export default function DialogArchiveProduct({
   open,
@@ -38,14 +29,22 @@ export default function DialogArchiveProduct({
   children?: React.ReactNode;
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const archiveProduct = useArchiveProduct();
+  const archiveProduct = useUpdateProduct();
 
   async function handleArchiveProduct(e: React.MouseEvent) {
     e.preventDefault(); // Prevent AlertDialogAction's auto-close
     if (!product?._id) return;
 
     try {
-      await archiveProduct.mutateAsync(product._id);
+      const updatedProductStatus = {
+        ...product,
+        action: "update-status",
+        data: {
+          status: "archived",
+        },
+      } as Product & { action: string; data: { status: string } };
+
+      await archiveProduct.mutateAsync(updatedProductStatus);
       // Close dialog in both controlled and uncontrolled modes
       onOpenChange?.(false);
       setInternalOpen(false);

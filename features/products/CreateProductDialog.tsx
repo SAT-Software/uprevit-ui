@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Import hooks for real data
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Department } from "@/types/department";
@@ -82,7 +81,6 @@ export default function CreateProductDialog() {
 
   const createMutation = useCreateProduct();
 
-  // Filter projects based on selected department
   const filteredProjects = useMemo(() => {
     return selectedDepartment
       ? projects.filter(
