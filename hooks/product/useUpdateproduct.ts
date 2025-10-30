@@ -7,10 +7,11 @@ export function useUpdateProduct() {
 
   return useMutation({
     mutationFn: async (updatedProduct: Product) => {
-      const res = await fetch("/api/products", {
-        method: "PUT",
+      const res = await fetch(`/api/products/${updatedProduct._id}`, {
+        method: "PATCH",
         body: JSON.stringify(updatedProduct),
         headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
           "Content-Type": "application/json",
         },
       });

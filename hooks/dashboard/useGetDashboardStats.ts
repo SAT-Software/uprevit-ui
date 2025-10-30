@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getArchivedProjects({ signal }: { signal: AbortSignal }) {
-  const response = await fetch("/api/projects?isArchive=true", {
+async function getDashboardStats({ signal }: { signal: AbortSignal }) {
+  const response = await fetch("/api/dashboard?id=68d2be511ad93c69d6e39e51", {
     headers: {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
       "Content-Type": "application/json", // Example of another header
@@ -10,15 +10,15 @@ async function getArchivedProjects({ signal }: { signal: AbortSignal }) {
   });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch archived projects");
+    throw new Error(text || "Failed to fetch dashboard stats");
   }
   const data = await response.json();
   return data;
 }
 
-export function useGetArchivedProjects() {
+export function useGetDashboardStats() {
   return useQuery({
-    queryKey: ["archived-projects"],
-    queryFn: ({ signal }) => getArchivedProjects({ signal }),
+    queryKey: ["dashboard-stats"],
+    queryFn: getDashboardStats,
   });
 }

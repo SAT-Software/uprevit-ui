@@ -4,64 +4,13 @@ import { Button } from "@/components/ui/button";
 import DashboardProductsTable from "@/features/dashboard/DashboardProductsTable";
 import DashboardDepartmentsCard from "@/features/dashboard/DashboardDepartmentsCard";
 import DashboardProjectsCard from "@/features/dashboard/DashboardProjectsCard";
-import { StatsCardProps, StatsGrid } from "@/features/dashboard/StatsGrid";
+import { StatsGrid } from "@/features/dashboard/StatsGrid";
 import Link from "next/link";
-import {
-  PiCirclesThreePlusDuotone,
-  PiKanbanDuotone,
-  PiStackPlusDuotone,
-  PiFolderOpenDuotone,
-} from "react-icons/pi";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { ProductApiResponse } from "@/types/product";
 
-const stats: StatsCardProps[] = [
-  {
-    title: "Departments",
-    value: "04",
-    change: {
-      value: "+12%",
-      trend: "up",
-    },
-    icon: PiCirclesThreePlusDuotone,
-    location: "dashboard",
-  },
-  {
-    title: "Projects",
-    value: "22",
-    change: {
-      value: "+42%",
-      trend: "up",
-    },
-    icon: PiKanbanDuotone,
-    location: "dashboard",
-  },
-  {
-    title: "Products",
-    value: "82",
-    change: {
-      value: "+37%",
-      trend: "up",
-    },
-    icon: PiStackPlusDuotone,
-    location: "dashboard",
-  },
-  {
-    title: "Source Files",
-    value: "3,497",
-    change: {
-      value: "-17%",
-      trend: "down",
-    },
-    icon: PiFolderOpenDuotone,
-    location: "dashboard",
-  },
-];
-
 function DashboardPage() {
   const { data, isLoading, error } = useGetAllProducts();
-
-  console.log(data);
 
   if (isLoading) return <div>Loading products...</div>;
   if (error) return <div>Error loading products: {error.message}</div>;
@@ -94,7 +43,7 @@ function DashboardPage() {
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Summary stats cards */}
-      <StatsGrid stats={stats} location="dashboard" />
+      <StatsGrid location="dashboard" />
 
       {/* Departments and Projects */}
       <div className="flex flex-col xl:flex-row w-full justify-between gap-4">

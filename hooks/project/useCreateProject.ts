@@ -11,6 +11,7 @@ export function useCreateProject() {
         method: "POST",
         body: JSON.stringify(newProject),
         headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
           "Content-Type": "application/json",
         },
       });

@@ -27,7 +27,7 @@ export type Item = {
   modifiedOn: string;
   modifiedBy: string;
   productName: string;
-  projectId: string; // Needed for filtering, but not displayed
+  project_id: string; // Needed for filtering, but not displayed
   departmentId: string; // Needed for context, but not displayed
   version: string;
   status: "Submitted" | "Draft" | "Archived";

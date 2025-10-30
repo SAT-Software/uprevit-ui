@@ -126,8 +126,8 @@ export default function MutateDepartmentDialog({
           manager: data.manager,
           users: members.map((member) => member.name),
           image: "",
-          admin_id: "68a1cf8c2cb63e45ad511688", // TODO: replace from auth context
-          workspace_id: "68a1ce212cb63e45ad511684", // TODO: replace from workspace context
+          admin_id: "68d2b37127794dcb43a32425", // TODO: replace from auth context
+          workspace_id: "68d2be511ad93c69d6e39e51", // TODO: replace from workspace context
         });
         onSuccess?.(res);
         setOpen(false);

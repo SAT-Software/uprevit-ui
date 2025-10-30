@@ -22,9 +22,6 @@ function DepartmentsPage() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex flex-col gap-4 p-4 h-full">

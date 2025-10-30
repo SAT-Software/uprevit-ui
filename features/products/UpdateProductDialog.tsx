@@ -66,9 +66,12 @@ export default function UpdateProductDialog({
 
       const updatedProduct: Product = {
         ...product,
-        id: product._id,
-        name: data.product_name,
-        product_description: data.product_description,
+        action: "update-product",
+        data: {
+          _id: product._id,
+          name: data.product_name,
+          product_description: data.product_description,
+        },
       };
 
       await updateMutation.mutateAsync(updatedProduct);
