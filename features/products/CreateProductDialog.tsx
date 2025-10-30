@@ -45,7 +45,6 @@ export default function CreateProductDialog() {
   const id = useId();
   const [open, setOpen] = useState(false);
 
-  // Get real data from backend
   const { data: departmentsData = [] } = useGetAllDepartments();
   const { data: projectsData = [] } = useGetAllProjects();
 
