@@ -38,7 +38,7 @@ export default function Page() {
     );
   }
 
-  const standards = (data?.data?.data as ComplianceItem[]) || [];
+  const standards = (data?.result?.data?.data as ComplianceItem[]) || [];
 
   return (
     <div className="flex flex-col gap-3">

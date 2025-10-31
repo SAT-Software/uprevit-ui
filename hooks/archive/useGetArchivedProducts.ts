@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 async function getArchivedProducts({ signal }: { signal: AbortSignal }) {
-  const response = await fetch("/api/products?status=archive", {
+  const response = await fetch("/api/products?status=archived", {
     headers: {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
       "Content-Type": "application/json", // Example of another header

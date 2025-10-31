@@ -40,7 +40,8 @@ export default function Page() {
     );
   }
 
-  const symbolsGraphics = (data?.data as SymbolGraphicItem[]) || [];
+  const symbolsGraphics =
+    (data?.result?.data?.data as SymbolGraphicItem[]) || [];
 
   console.log("symbolsGraphics", symbolsGraphics);
 

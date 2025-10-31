@@ -6,20 +6,19 @@ import { useParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
 interface ComponentItem {
-  id: string;
-  componentName: string;
-  componentDescription: string;
-  componentNumber: string;
-  componentImage: string;
-  note?: string;
+  _id: string;
+  name: string;
+  specification_details: string;
+  number: string;
+  image: string;
 }
 
 interface LabelComponentItem {
   _id: string;
-  component_name: string;
-  component_number: string;
-  component_image: string;
+  name: string;
   specification_details: string;
+  number: string;
+  image: string;
 }
 
 export default function Page() {
@@ -47,13 +46,15 @@ export default function Page() {
     );
   }
 
-  const components = (data?.data?.data || []).map(
+  console.log("component data", data?.result);
+
+  const components = (data?.result?.data?.data || []).map(
     (item: LabelComponentItem) => ({
-      id: item._id,
-      componentName: item.component_name || "",
-      componentNumber: item.component_number || "",
-      componentImage: item.component_image || "",
-      componentDescription: item.specification_details || "",
+      _id: item._id,
+      name: item.name || "",
+      number: item.number || "",
+      image: item.image || "",
+      specification_details: item.specification_details || "",
     })
   ) as ComponentItem[];
 

@@ -14,6 +14,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 export default function DialogShareProduct({
   open,
@@ -33,7 +38,7 @@ export default function DialogShareProduct({
     if (typeof window !== "undefined") {
       setProductLink(
         product?._id
-          ? `${window.location.origin}/products/${product._id}`
+          ? `${window.location.origin}/products/${product._id}/product-information`
           : "/products/sample-id"
       );
     }
@@ -68,9 +73,9 @@ export default function DialogShareProduct({
             <div className="space-y-2">
               <Label htmlFor="product-link">Product Link</Label>
               <div className="flex items-center space-x-2">
-                <div className="relative flex-1">
+                {/* <div className="relative flex-1">
                   <LinkIcon
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    className="absolute left-3 top-1/2 transform -translate-1/2 text-muted-foreground"
                     size={16}
                   />
                   <Input
@@ -79,7 +84,18 @@ export default function DialogShareProduct({
                     readOnly
                     className="pl-10"
                   />
-                </div>
+                </div> */}
+                <InputGroup>
+                  <InputGroupInput
+                    id="product-link"
+                    value={productLink}
+                    readOnly
+                    className="pl-10"
+                  />
+                  <InputGroupAddon>
+                    <LinkIcon size={16} />
+                  </InputGroupAddon>
+                </InputGroup>
                 <Button size="sm" onClick={handleCopyLink} className="shrink-0">
                   {copied ? (
                     <>
