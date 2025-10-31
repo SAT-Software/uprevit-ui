@@ -8,24 +8,37 @@ export interface OperationalParametersDataGridRefRef {
   saveData: () => IWorkbookData | null;
 }
 
-const DynamicUniverComponent = dynamic(() => import("../UniverComponent"), {
-  ssr: false,
+interface OperationalParametersDataGridProps {
+  operationalParametersData?: {
+    id: string;
+    workbook_data: IWorkbookData;
+  }; // Type this according to your API response structure
+}
+
+const DynamicUniverComponent = dynamic(
+  () => import("./UniverComponentOpsParams"),
+  {
+    ssr: false,
+  }
+);
+
+const OperationalParametersDataGridRef = forwardRef<
+  OperationalParametersDataGridRefRef,
+  OperationalParametersDataGridProps
+>(({ operationalParametersData }, ref) => {
+  const univerRef = useRef<OperationalParametersDataGridRefRef>(null);
+
+  useImperativeHandle(ref, () => ({
+    saveData: () => univerRef.current?.saveData() || null,
+  }));
+
+  return (
+    <DynamicUniverComponent
+      operationalParametersData={operationalParametersData}
+      ref={univerRef as React.RefObject<OperationalParametersDataGridRefRef>}
+    />
+  );
 });
-
-const OperationalParametersDataGridRef =
-  forwardRef<OperationalParametersDataGridRefRef>((_, ref) => {
-    const univerRef = useRef<OperationalParametersDataGridRefRef>(null);
-
-    useImperativeHandle(ref, () => ({
-      saveData: () => univerRef.current?.saveData() || null,
-    }));
-
-    return (
-      <DynamicUniverComponent
-        ref={univerRef as React.RefObject<OperationalParametersDataGridRefRef>}
-      />
-    );
-  });
 
 OperationalParametersDataGridRef.displayName =
   "OperationalParametersDataGridRef";

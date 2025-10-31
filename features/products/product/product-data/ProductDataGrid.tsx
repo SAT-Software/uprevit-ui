@@ -8,24 +8,37 @@ export interface ProductDataGridRef {
   saveData: () => IWorkbookData | null;
 }
 
-const DynamicUniverComponent = dynamic(() => import("../UniverComponent"), {
-  ssr: false,
-});
+interface ProductTabDataGridProps {
+  productTabData?: {
+    id: string;
+    workbook_data: IWorkbookData;
+  }; // Type this according to your API response structure
+}
 
-const ProductDataGrid = forwardRef<ProductDataGridRef>((_, ref) => {
-  const univerRef = useRef<ProductDataGridRef>(null);
+const DynamicUniverComponent = dynamic(
+  () => import("./UniverComponentProductData"),
+  {
+    ssr: false,
+  }
+);
 
-  useImperativeHandle(ref, () => ({
-    saveData: () => univerRef.current?.saveData() || null,
-  }));
+const ProductDataGrid = forwardRef<ProductDataGridRef, ProductTabDataGridProps>(
+  ({ productTabData }, ref) => {
+    const univerRef = useRef<ProductDataGridRef>(null);
 
-  // Forward the ref to the dynamic component
-  return (
-    <DynamicUniverComponent
-      ref={univerRef as React.RefObject<ProductDataGridRef>}
-    />
-  );
-});
+    useImperativeHandle(ref, () => ({
+      saveData: () => univerRef.current?.saveData() || null,
+    }));
+
+    // Forward the ref to the dynamic component
+    return (
+      <DynamicUniverComponent
+        productTabData={productTabData}
+        ref={univerRef as React.RefObject<ProductDataGridRef>}
+      />
+    );
+  }
+);
 
 ProductDataGrid.displayName = "ProductDataGrid";
 

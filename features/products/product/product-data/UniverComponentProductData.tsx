@@ -31,7 +31,17 @@ export interface ProductDataGridRef {
   saveData: () => IWorkbookData | null;
 }
 
-const UniverComponent = forwardRef<ProductDataGridRef>((_, ref) => {
+interface UniverComponentProps {
+  productTabData?: {
+    id: string;
+    workbook_data: IWorkbookData;
+  }; // Type this according to your API response structure
+}
+
+const UniverComponentOpsParams = forwardRef<
+  ProductDataGridRef,
+  UniverComponentProps
+>(({ productTabData }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -88,30 +98,31 @@ const UniverComponent = forwardRef<ProductDataGridRef>((_, ref) => {
 
     univerAPIRef.current = univerAPI;
 
-    // Sample product data
-    const productData: IWorkbookData = {
-      id: "product-data-workbook",
-      name: "Product Data",
-      locale: LocaleType.EN_US,
-      appVersion: "0.1.0",
-      styles: {},
-      sheets: {
-        sheet1: {
-          id: "sheet1",
-          name: "sheet1",
-          rowCount: 1000,
-          columnCount: 26,
+    // Use passed data or fallback to sample data
+    const workbookData: IWorkbookData =
+      (productTabData?.workbook_data as IWorkbookData) || {
+        id: "product-data-workbook",
+        name: "Product Data",
+        locale: LocaleType.EN_US,
+        appVersion: "0.1.0",
+        styles: {},
+        sheets: {
+          sheet1: {
+            id: "sheet1",
+            name: "sheet1",
+            rowCount: 1000,
+            columnCount: 26,
+          },
         },
-      },
-      sheetOrder: ["sheet1"],
-    };
+        sheetOrder: ["sheet1"],
+      };
 
-    univerAPI.createUniverSheet(productData);
+    univerAPI.createUniverSheet(workbookData);
 
     return () => {
       univerAPI.dispose();
     };
-  }, []);
+  }, [productTabData]); // Re-create when data changes
 
   return (
     <div
@@ -121,6 +132,6 @@ const UniverComponent = forwardRef<ProductDataGridRef>((_, ref) => {
   );
 });
 
-UniverComponent.displayName = "UniverComponent";
+UniverComponentOpsParams.displayName = "UniverComponent";
 
-export default UniverComponent;
+export default UniverComponentOpsParams;
