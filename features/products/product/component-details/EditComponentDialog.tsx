@@ -25,12 +25,11 @@ import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData
 import { uploadFiles } from "@/utils/uploadthing";
 
 type ComponentItem = {
-  id: string;
-  componentName: string;
-  componentDescription: string;
-  componentNumber: string;
-  componentImage: string;
-  note?: string;
+  _id: string;
+  name: string;
+  specification_details: string;
+  number: string;
+  image: string;
 };
 
 type FormData = {

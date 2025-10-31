@@ -61,12 +61,11 @@ import EditComponentDialog from "./EditComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 
 type ComponentItem = {
-  id: string;
-  componentName: string;
-  componentDescription: string;
-  componentNumber: string;
-  componentImage: string;
-  note?: string;
+  _id: string;
+  name: string;
+  specification_details: string;
+  number: string;
+  image: string;
 };
 
 const columns: ColumnDef<ComponentItem>[] = [
@@ -81,8 +80,8 @@ const columns: ColumnDef<ComponentItem>[] = [
             onClick: row.getToggleExpandedHandler(),
             "aria-expanded": row.getIsExpanded(),
             "aria-label": row.getIsExpanded()
-              ? `Collapse details for ${row.original.componentName}`
-              : `Expand details for ${row.original.componentName}`,
+              ? `Collapse details for ${row.original.name}`
+              : `Expand details for ${row.original.name}`,
             size: "icon",
             variant: "ghost",
           }}
@@ -106,13 +105,12 @@ const columns: ColumnDef<ComponentItem>[] = [
   },
   {
     header: "Image",
-    accessorKey: "componentImage",
+    accessorKey: "image",
     cell: ({ row }) =>
-      row.original.componentImage &&
-      row.original.componentImage.trim() !== "" ? (
+      row.original.image !== "" ? (
         <Image
-          src={row.original.componentImage.trim()}
-          alt={row.original.componentName}
+          src={row.original.image}
+          alt={row.original.name}
           width={48}
           height={48}
           className="object-cover rounded-md border min-h-12"
@@ -125,29 +123,29 @@ const columns: ColumnDef<ComponentItem>[] = [
   },
   {
     header: "Component Name",
-    accessorKey: "componentName",
+    accessorKey: "name",
     enableSorting: true,
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("componentName")}</div>
+      <div className="font-medium">{row.getValue("name")}</div>
     ),
   },
   {
     header: "Component #",
-    accessorKey: "componentNumber",
+    accessorKey: "number",
     enableSorting: true,
     cell: ({ row }) => (
       <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-        {row.getValue("componentNumber")}
+        {row.getValue("number")}
       </span>
     ),
   },
   {
     header: "Specification details",
-    accessorKey: "componentDescription",
+    accessorKey: "specification_details",
     enableSorting: true,
     cell: ({ row }) => (
       <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("componentDescription")}
+        {row.getValue("specification_details")}
       </div>
     ),
   },
@@ -173,7 +171,7 @@ export default function ProductComponentDetailsTable({
   });
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: "componentName",
+      id: "name",
       desc: false,
     },
   ]);
@@ -181,7 +179,7 @@ export default function ProductComponentDetailsTable({
   const table = useReactTable({
     data,
     columns,
-    getRowCanExpand: (row) => Boolean(row.original.note),
+    getRowCanExpand: (row) => Boolean(row.original.name),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -288,19 +286,25 @@ export default function ProductComponentDetailsTable({
                     <TableRow>
                       <TableCell colSpan={row.getVisibleCells().length}>
                         <div className="flex flex-col items-center py-4">
-                          <Image
-                            src={row.original.componentImage}
-                            alt={row.original.componentName}
-                            width={200}
-                            height={200}
-                            className="rounded mb-3"
-                            style={{
-                              width: "70%",
-                              height: "auto",
-                              maxWidth: 280,
-                            }}
-                            priority={true}
-                          />
+                          {row.original.image !== "" ? (
+                            <Image
+                              src={row.original.image}
+                              alt={row.original.name}
+                              width={200}
+                              height={200}
+                              className="rounded mb-3"
+                              style={{
+                                width: "70%",
+                                height: "auto",
+                                maxWidth: 280,
+                              }}
+                              priority={true}
+                            />
+                          ) : (
+                            <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
+                              <LayoutList className="w-full h-full p-3" />
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

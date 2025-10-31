@@ -7,7 +7,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, LayoutList } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import NextImage from "next/image";
+import Image from "next/image";
 
 type Item = {
   id: string;
@@ -68,16 +68,21 @@ const columns: ColumnDef<Item>[] = [
   {
     header: "Image",
     accessorKey: "componentImage",
-    cell: ({ row }) => (
-      <NextImage
-        src={row.original.componentImage}
-        alt={row.original.componentName}
-        width={50}
-        height={50}
-        className="object-cover rounded border"
-        style={{ maxWidth: 50, maxHeight: 50 }}
-      />
-    ),
+    cell: ({ row }) =>
+      row.original.componentImage !== "" ? (
+        <Image
+          src={row.original.componentImage}
+          alt={row.original.componentName}
+          width={50}
+          height={50}
+          className="object-cover rounded border"
+          style={{ maxWidth: 50, maxHeight: 50 }}
+        />
+      ) : (
+        <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
+          <LayoutList className="w-full h-full p-3" />
+        </div>
+      ),
     size: 60,
   },
   {
@@ -221,8 +226,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
   const table = useReactTable({
     data,
     columns,
-    getRowCanExpand: (row) =>
-      Boolean(row.original.note || row.original.componentImage),
+    getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -331,19 +335,25 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                     <TableRow>
                       <TableCell colSpan={row.getVisibleCells().length}>
                         <div className="flex flex-col items-center py-4">
-                          <NextImage
-                            src={row.original.componentImage}
-                            alt={row.original.componentName}
-                            width={200}
-                            height={200}
-                            className="rounded mb-3"
-                            style={{
-                              width: "70%",
-                              height: "auto",
-                              maxWidth: 280,
-                            }}
-                            priority={true}
-                          />
+                          {row.original.componentImage !== "" ? (
+                            <Image
+                              src={row.original.componentImage}
+                              alt={row.original.componentName}
+                              width={200}
+                              height={200}
+                              className="rounded mb-3"
+                              style={{
+                                width: "70%",
+                                height: "auto",
+                                maxWidth: 280,
+                              }}
+                              priority={true}
+                            />
+                          ) : (
+                            <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
+                              <LayoutList className="w-full h-full p-3" />
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

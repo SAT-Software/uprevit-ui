@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 type ComponentItem = {
-  id: string;
-  componentName: string;
-  componentDescription: string;
-  componentNumber: string;
-  componentImage: string;
-  note?: string;
+  _id: string;
+  name: string;
+  specification_details: string;
+  number: string;
+  image: string;
 };
 
 export default function DeleteComponentDialog({
@@ -38,7 +37,7 @@ export default function DeleteComponentDialog({
         action: "delete_label_component",
         tab: "label-components",
         data: {
-          component_id: component.id,
+          component_id: component._id,
         },
       };
 
