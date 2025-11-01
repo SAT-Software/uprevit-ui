@@ -26,7 +26,6 @@ export default function DeleteStandardDialog({
   productId,
   standardId,
   standardName,
-  onDeleted,
 }: DeleteStandardDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate: deleteStandard, isPending } = useUpdateProductTabData();
@@ -38,12 +37,11 @@ export default function DeleteStandardDialog({
         action: "delete_compliance_standard",
         tab: "compliance-information",
         data: {
-          standard_id: standardId,
+          id: standardId,
         },
       };
 
-      await deleteStandard(deleteStandardData);
-      onDeleted?.();
+      deleteStandard(deleteStandardData);
     } catch (error) {
       console.error("Failed to delete standard:", error);
     }

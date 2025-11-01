@@ -73,12 +73,14 @@ export default function AddComponentDialog({
         id: productId,
         action: "add_label_component",
         tab: "label-components",
-        data: {
-          component_name: data.componentName,
-          component_number: data.componentNumber,
-          component_image: utRes?.[0]?.ufsUrl || null,
-          specification_details: data.description,
-        },
+        data: [
+          {
+            name: data.componentName,
+            number: data.componentNumber,
+            image: utRes?.[0]?.ufsUrl || null,
+            specification_details: data.description,
+          },
+        ],
       };
 
       addComponent(newComponentData);

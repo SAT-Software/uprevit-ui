@@ -33,9 +33,9 @@ type ComponentItem = {
 };
 
 type FormData = {
-  componentName: string;
-  componentNumber: string;
-  description: string;
+  name: string;
+  number: string;
+  specification_details: string;
   image: FileWithPreview | null;
 };
 
@@ -61,9 +61,9 @@ export default function EditComponentDialog({
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      componentName: "",
-      componentNumber: "",
-      description: "",
+      name: "",
+      number: "",
+      specification_details: "",
       image: null,
     },
   });
@@ -73,9 +73,9 @@ export default function EditComponentDialog({
   useEffect(() => {
     if (component && open) {
       reset({
-        componentName: component.componentName,
-        componentNumber: component.componentNumber,
-        description: component.componentDescription,
+        name: component.name,
+        number: component.number,
+        specification_details: component.specification_details,
         image: null,
       });
     }
@@ -102,11 +102,11 @@ export default function EditComponentDialog({
         action: "update_label_component",
         tab: "label-components",
         data: {
-          component_id: component.id,
-          component_name: data.componentName,
-          component_number: data.componentNumber,
-          component_image: utRes?.[0]?.ufsUrl || component.componentImage,
-          specification_details: data.description,
+          id: component._id,
+          name: data.name,
+          number: data.number,
+          image: utRes?.[0]?.ufsUrl || component.image,
+          specification_details: data.specification_details,
         },
       };
 
@@ -143,7 +143,7 @@ export default function EditComponentDialog({
                 control={control}
                 render={({ field }) => (
                   <ComponentImage
-                    currentImage={component.componentImage}
+                    currentImage={component.image}
                     value={field.value}
                     onChange={(file) => {
                       field.onChange(file);
@@ -160,14 +160,12 @@ export default function EditComponentDialog({
                   id={`${id}-component-name`}
                   placeholder="Enter component name"
                   type="text"
-                  {...register("componentName", {
+                  {...register("name", {
                     required: "Component name is required",
                   })}
                 />
-                {errors.componentName && (
-                  <p className="text-xs text-red-500">
-                    {errors.componentName.message}
-                  </p>
+                {errors.name && (
+                  <p className="text-xs text-red-500">{errors.name.message}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -178,7 +176,7 @@ export default function EditComponentDialog({
                   id={`${id}-component-number`}
                   placeholder="Enter component number"
                   type="text"
-                  {...register("componentNumber")}
+                  {...register("number")}
                 />
               </div>
             </div>
@@ -187,11 +185,13 @@ export default function EditComponentDialog({
           <div className="px-6 pt-4 pb-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
+                <Label htmlFor={`${id}-specification_details`}>
+                  specification_details
+                </Label>
                 <Textarea
-                  id={`${id}-description`}
+                  id={`${id}-specification_details`}
                   placeholder="Describe the component's purpose and specifications"
-                  {...register("description")}
+                  {...register("specification_details")}
                   className="min-h-[100px] resize-none"
                 />
               </div>
