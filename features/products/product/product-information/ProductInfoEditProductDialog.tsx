@@ -19,7 +19,7 @@ import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData
 
 // Interface that matches the actual API response structure
 interface ProductData {
-  _id?: string;
+  id?: string;
   market_geography?: string;
   country_of_origin?: string;
   oem_contract_manufacturer?: string;
@@ -39,11 +39,11 @@ interface FormValues {
   commercialClinical: string;
 }
 
-interface EditProductDialogProps {
+export default function EditProductDialog({
+  product,
+}: {
   product: ProductData;
-}
-
-export default function EditProductDialog({ product }: EditProductDialogProps) {
+}) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
@@ -70,13 +70,14 @@ export default function EditProductDialog({ product }: EditProductDialogProps) {
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!product?._id) {
+    console.log("Product data we get:", product);
+    if (!product?.id) {
       console.error("Product ID is missing");
       return;
     }
 
     const updateData = {
-      id: product._id,
+      id: product.id,
       action: "update_product_information",
       tab: "product-information",
       data: {

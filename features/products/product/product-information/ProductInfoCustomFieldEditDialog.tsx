@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, X, Edit, Trash2, Save } from "lucide-react";
@@ -21,7 +31,7 @@ import { toast } from "sonner";
 
 // Interface that matches the actual API response structure
 interface ProductData {
-  _id?: string;
+  id?: string;
   custom_fields?: Array<{
     _id?: string;
     label: string;
@@ -51,6 +61,8 @@ export default function ProductInformationCustomFieldEditDialog({
   const [localCustomFields, setLocalCustomFields] = useState(
     product?.custom_fields || []
   );
+  const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null);
+  const [deleteFieldOpen, setDeleteFieldOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
 
   // Initialize form with react-hook-form and field array for new fields
@@ -72,13 +84,8 @@ export default function ProductInformationCustomFieldEditDialog({
     name: "customFields",
   });
 
-  // Update local state when product data changes
-  useEffect(() => {
-    setLocalCustomFields(product?.custom_fields || []);
-  }, [product?.custom_fields]);
-
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!product?._id) {
+    if (!product?.id) {
       toast.error("Product ID is missing");
       return;
     }
@@ -94,24 +101,29 @@ export default function ProductInformationCustomFieldEditDialog({
     }
 
     const updateData = {
-      id: product._id,
+      id: product.id,
       action: "add_custom_field",
       tab: "product-information",
-      data: {
-        label: validFields[0].label,
-        value: validFields[0].value,
-      },
+      data: [
+        {
+          label: validFields[0].label,
+          value: validFields[0].value,
+        },
+      ],
     };
 
     updateProductTabData(updateData, {
       onSuccess: () => {
         reset();
+        setOpen(false);
         // Reset to single empty field
         remove(fields.length - 1);
         append({ label: "", value: "" });
       },
       onError: () => {
         toast.error("Failed to create custom field");
+        reset();
+        setOpen(false);
       },
     });
   };
@@ -121,51 +133,57 @@ export default function ProductInformationCustomFieldEditDialog({
     label: string,
     value: string
   ) => {
-    if (!product?._id) {
+    if (!product?.id) {
       toast.error("Product ID is missing");
       return;
     }
 
+    // Send all custom fields data instead of just the updated field
+    const allCustomFields = localCustomFields.map((field) =>
+      field._id === fieldId ? { ...field, label: label, value: value } : field
+    );
+
     const updateData = {
-      id: product._id,
+      id: product.id,
       action: "update_custom_field",
       tab: "product-information",
-      data: {
-        field_id: fieldId,
-        label: label,
-        value: value,
-      },
+      data: allCustomFields.map((field) => ({
+        field_id: field._id!,
+        label: field.label,
+        value: field.value,
+      })),
     };
 
     updateProductTabData(updateData, {
       onSuccess: () => {
         // Update local state immediately for better UX
-        setLocalCustomFields((prev) =>
-          prev.map((field) =>
-            field._id === fieldId
-              ? { ...field, label: label, value: value }
-              : field
-          )
-        );
+        setLocalCustomFields(allCustomFields);
+        toast.success("Custom field updated successfully");
+        reset();
+        setOpen(false);
       },
       onError: () => {
         toast.error("Failed to update custom field");
+        reset();
+        setOpen(false);
       },
     });
   };
 
   const handleDeleteCustomField = async (fieldId: string) => {
-    if (!product?._id) {
+    if (!product?.id) {
       toast.error("Product ID is missing");
       return;
     }
 
+    console.log("Deleting custom field with ID:", fieldId);
+
     const deleteData = {
-      id: product._id,
+      id: product.id,
       action: "delete_custom_field",
       tab: "product-information",
       data: {
-        field_id: fieldId,
+        id: fieldId,
       },
     };
 
@@ -175,15 +193,16 @@ export default function ProductInformationCustomFieldEditDialog({
         setLocalCustomFields((prev) =>
           prev.filter((field) => field._id !== fieldId)
         );
+        toast.success("Custom field deleted successfully");
+        reset();
+        setOpen(false);
       },
       onError: () => {
         toast.error("Failed to delete custom field");
+        reset();
+        setOpen(false);
       },
     });
-  };
-
-  const addCustomField = () => {
-    append({ label: "", value: "" });
   };
 
   const removeCustomField = (index: number) => {
@@ -329,17 +348,6 @@ export default function ProductInformationCustomFieldEditDialog({
                     </div>
                   </div>
                 ))}
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addCustomField}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Another Field
-                </Button>
               </div>
             </form>
           ) : (
@@ -406,13 +414,8 @@ export default function ProductInformationCustomFieldEditDialog({
                           variant="destructive"
                           size="sm"
                           onClick={() => {
-                            if (
-                              confirm(
-                                "Are you sure you want to delete this field?"
-                              )
-                            ) {
-                              handleDeleteCustomField(field._id!);
-                            }
+                            setDeleteFieldId(field._id!);
+                            setDeleteFieldOpen(true);
                           }}
                           disabled={isPending}
                         >
@@ -456,6 +459,35 @@ export default function ProductInformationCustomFieldEditDialog({
             </Button>
           )}
         </DialogFooter>
+
+        {/* Delete Confirmation Alert Dialog */}
+        <AlertDialog open={deleteFieldOpen} onOpenChange={setDeleteFieldOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this custom field? This action
+                cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (deleteFieldId) {
+                    handleDeleteCustomField(deleteFieldId);
+                    setDeleteFieldOpen(false);
+                    setDeleteFieldId(null);
+                  }
+                }}
+                disabled={isPending}
+                className="bg-destructive text-white hover:bg-destructive/90"
+              >
+                {isPending ? "Deleting..." : "Delete Field"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
