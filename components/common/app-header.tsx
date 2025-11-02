@@ -26,8 +26,9 @@ import {
 } from "react-icons/pi";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { sampleProducts } from "@/app/(app)/products/data";
 import { Button } from "../ui/button";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { Product } from "@/types/product";
 
 const pathData = [
   {
@@ -101,11 +102,12 @@ export function AppHeader() {
   const isProductPage = Boolean(productId);
 
   // Get current product and check completion status
+  const { data } = useGetAllProducts();
   const currentProduct = productId
-    ? sampleProducts.find((p) => p.productId === productId)
+    ? data?.result.products?.find((p: Product) => p._id === productId)
     : null;
 
-  const isProductComplete = currentProduct?.completionPercentage === 100;
+  const isProductComplete = currentProduct?.status === "Submitted";
 
   // if (isProductPage) return null;
 
@@ -132,13 +134,12 @@ export function AppHeader() {
             <Separator orientation="vertical" className=" h-4" />
 
             <div className="flex w-full items-center justify-between gap-4">
-              <p className="text-sm font-semibold">{productId}</p>
               <p className="text-sm font-semibold">
-                {currentProduct?.productName}
+                {currentProduct?.product_name}
               </p>
               <div className="flex gap-4 items-center">
                 <p className="text-sm text-muted-foreground">
-                  Master-{currentProduct?.version}
+                  Master-{currentProduct?.master_version}
                 </p>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary">

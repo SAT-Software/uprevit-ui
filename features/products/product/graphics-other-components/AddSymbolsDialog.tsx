@@ -76,18 +76,20 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
       setUploadingImage(false);
       const newSymbolsData = {
         id: productId,
-        action: "add_symbols_graphics_item",
+        action: "add_symbols_graphics",
         tab: "symbols-graphics",
-        data: {
-          text: data.componentName,
-          image: utRes?.[0]?.ufsUrl || null,
-          entity: "Symbols",
-          text_present: data.textPresent === "yes",
-          label_presence: (Array.isArray(labelPresence)
-            ? labelPresence
-            : JSON.parse(labelPresence || "[]")
-          ).map((tag: Tag) => tag.text),
-        },
+        data: [
+          {
+            text: data.componentName,
+            image: utRes?.[0]?.ufsUrl || null,
+            entity: "Symbols",
+            text_present: data.textPresent === "yes",
+            label_presence: (Array.isArray(labelPresence)
+              ? labelPresence
+              : JSON.parse(labelPresence || "[]")
+            ).map((tag: Tag) => tag.text),
+          },
+        ],
       };
 
       console.log("Symbols data", newSymbolsData);

@@ -68,7 +68,7 @@ import {
 import { cn } from "@/lib/utils";
 import DialogArchiveProduct from "./DialogArchiveProduct";
 import DialogBookmarkProduct from "./DialogBookmarkProduct";
-import DialogDuplicateProduct from "./DialogDuplicateProduct";
+// import DialogDuplicateProduct from "./DialogDuplicateProduct";
 import DialogShareProduct from "./DialogShareProduct";
 import FilterBuilder from "./tableFilter";
 import UpdateProductDialog from "./UpdateProductDialog";
@@ -271,17 +271,17 @@ const columns: ColumnDef<Item>[] = [
     size: 30,
     enableHiding: false,
   },
-  {
-    id: "duplicate",
-    header: () => <span className="sr-only">Duplicate</span>,
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <DialogDuplicateProduct product={row.original} />
-      </div>
-    ),
-    size: 30,
-    enableHiding: false,
-  },
+  // {
+  //   id: "duplicate",
+  //   header: () => <span className="sr-only">Duplicate</span>,
+  //   cell: ({ row }) => (
+  //     <div className="flex items-center justify-center">
+  //       <DialogDuplicateProduct product={row.original} />
+  //     </div>
+  //   ),
+  //   size: 30,
+  //   enableHiding: false,
+  // },
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,

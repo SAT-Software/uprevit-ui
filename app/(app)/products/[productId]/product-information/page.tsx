@@ -1,23 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import { notFound, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { CalendarDays, User } from "lucide-react";
-import Link from "next/link";
-import ProductInformationCard from "@/features/products/product/product-information/ProductInformationCard";
-import EditProductDialog from "@/features/products/product/product-information/ProductInformationEditProductDialog";
-import ProductInformationCustomFieldEditDialog from "@/features/products/product/product-information/ProductInformationCustomFieldEditDialog";
+import ProductInformationCard from "@/features/products/product/product-information/ProductInfoCard";
+import ProductInformationCustomFieldEditDialog from "@/features/products/product/product-information/ProductInfoCustomFieldEditDialog";
+import EditProductDialog from "@/features/products/product/product-information/ProductInfoEditProductDialog";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-
-import { PiCirclesThreePlusDuotone, PiKanbanDuotone } from "react-icons/pi";
+import { CalendarDays, User } from "lucide-react";
+import { notFound, useParams } from "next/navigation";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
@@ -28,7 +17,9 @@ export default function Page() {
     "product-information"
   );
 
-  const productData = useMemo(() => data?.result?.data?.data, [data]);
+  console.log("data", data);
+
+  const productData = { ...data?.result?.data?.data, id: productId };
 
   if (isLoading || !productData) {
     return (
@@ -52,46 +43,6 @@ export default function Page() {
             {productData?.product_name || "N/A"}
           </h1>
           <div className="flex items-center gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={
-                      productData?.department_id
-                        ? `/departments/${productData.department_id}`
-                        : "#"
-                    }
-                  >
-                    <Button size="icon" variant="ghost">
-                      <PiCirclesThreePlusDuotone className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Department</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={
-                      productData?.project_id
-                        ? `/projects/${productData.project_id}`
-                        : "#"
-                    }
-                  >
-                    <Button size="icon" variant="ghost">
-                      <PiKanbanDuotone className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Project</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
             <EditProductDialog product={productData!} />
             <ProductInformationCustomFieldEditDialog product={productData!} />
           </div>

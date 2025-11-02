@@ -11,8 +11,8 @@ import {
 import { CheckCircle, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { sampleProducts } from "@/app/(app)/products/data";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { Product } from "@/types/product";
 
 export type Item = {
   productId: string;
@@ -38,7 +38,7 @@ const TOTAL_TABS = 7;
 export function ProductHeader() {
   const params = useParams();
   const pathname = usePathname();
-  const [product, setProduct] = useState<Item | null>(null);
+  const { data: productsData } = useGetAllProducts();
 
   // Get current tab from pathname
   const getCurrentTab = () => {
@@ -49,15 +49,35 @@ export function ProductHeader() {
   const currentTab = getCurrentTab();
   const productId = params.productId as string;
 
-  // Load product data
-  useEffect(() => {
-    if (productId) {
-      const foundProduct = sampleProducts.find(
-        (p) => p.productId === productId
-      );
-      setProduct(foundProduct || null);
-    }
-  }, [productId]);
+  // Get current product directly from the API data
+  const foundProduct =
+    productId && productsData?.result.products
+      ? productsData.result.products.find((p: Product) => p._id === productId)
+      : null;
+
+  // Map the real API product to our local Item type for compatibility
+  const product: Item | null = foundProduct
+    ? {
+        productId: foundProduct._id || "",
+        createdOn: foundProduct.action_at || "",
+        createdBy: foundProduct.action_by || "",
+        modifiedOn: foundProduct.action_at || "",
+        modifiedBy: foundProduct.action_by || "",
+        productName: foundProduct.product_name || "",
+        description: "",
+        projectId: foundProduct.project_id || "",
+        departmentId: foundProduct.department_id || "",
+        version: foundProduct.master_version || "1.0",
+        status:
+          (foundProduct.status as "Submitted" | "Draft" | "Archived") ||
+          "Draft",
+        targetDate: foundProduct.target_date || "N/A",
+        completionDate: foundProduct.target_date || "N/A",
+        delayReason: null,
+        tabsCompleted: [], // This would need to be calculated from the actual product data
+        completionPercentage: 0, // This would need to be calculated from the actual product data
+      }
+    : null;
 
   // Use stored completion percentage, fallback to calculation if not available
   const completionPercentage =
@@ -80,14 +100,6 @@ export function ProductHeader() {
     const newCompletionPercentage = Math.round(
       (updatedTabsCompleted.length / TOTAL_TABS) * 100
     );
-
-    const updatedProduct = {
-      ...product,
-      tabsCompleted: updatedTabsCompleted,
-      completionPercentage: newCompletionPercentage,
-    };
-
-    setProduct(updatedProduct);
 
     // Here you would typically also update the data source (API call, etc.)
     // For now, we'll just update local state

@@ -26,7 +26,6 @@ import EditSymbolsDialog from "./EditSymbolsDialog";
 type Item = {
   id: string;
   componentName: string;
-  componentDescription: string;
   componentImage: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
@@ -191,6 +190,7 @@ import {
 import { useId } from "react";
 import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
 import Image from "next/image";
+import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 
 export default function SymbolsGraphicsPageSymbolsTable({
   data,
@@ -475,6 +475,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
 
 function RowActions({ row }: { row: Row<Item> }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
 
   // Get productId from the current URL using usePathname
@@ -512,7 +513,13 @@ function RowActions({ row }: { row: Row<Item> }) {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onSelect={() => {
+              // Add small delay to allow dropdown to close first
+              setTimeout(() => setShowDeleteDialog(true), 100);
+            }}
+          >
             <PiTrashDuotone className="text-destructive" />
             <span>Delete</span>
           </DropdownMenuItem>
@@ -524,6 +531,12 @@ function RowActions({ row }: { row: Row<Item> }) {
         symbol={item}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+      />
+      <DeleteSymbolsSchematicsDialog
+        productId={getProductId()}
+        graphics={item}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
       />
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -20,38 +20,46 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { uploadFiles } from "@/utils/uploadthing";
 
-type ComponentItem = {
-  _id: string;
-  name: string;
-  specification_details: string;
-  number: string;
-  image: string;
+type Item = {
+  id: string;
+  componentName: string;
+  componentImage: string;
+  description: string;
+  labelPresence: string[];
 };
 
 type FormData = {
-  name: string;
-  number: string;
-  specification_details: string;
+  componentName: string;
+  componentDescription: string;
+  labelPresence: Tag[];
   image: FileWithPreview | null;
 };
 
-export default function EditComponentDialog({
+export default function EditOtherComponentsDialog({
   productId,
-  component,
+  otherComponent,
   open,
   onOpenChange,
 }: {
   productId: string;
-  component: ComponentItem;
+  otherComponent: Item;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [labelPresence, setLabelPresence] = useState<Tag[]>(
+    otherComponent.labelPresence.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }))
+  );
+
   const {
     register,
     handleSubmit,
@@ -61,25 +69,23 @@ export default function EditComponentDialog({
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      name: "",
-      number: "",
-      specification_details: "",
-      image: null,
+      componentName: otherComponent.componentName,
+      componentDescription: otherComponent.description,
+      labelPresence: otherComponent.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      })),
+      image: otherComponent.componentImage
+        ? { preview: otherComponent.componentImage }
+        : null,
     },
   });
-  const { mutate: updateComponent, isPending } = useUpdateProductTabData();
-
-  // Set form values when component data changes
-  useEffect(() => {
-    if (component && open) {
-      reset({
-        name: component.name,
-        number: component.number,
-        specification_details: component.specification_details,
-        image: null,
-      });
-    }
-  }, [component, open, reset]);
+  const {
+    mutate: updateOtherCompsData,
+    isPending,
+    isSuccess,
+    isError,
+  } = useUpdateProductTabData();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -87,8 +93,8 @@ export default function EditComponentDialog({
       setUploadingImage(true);
       let utRes;
 
-      // Only upload if there's a new image file
       if (data.image && data.image.file instanceof File) {
+        console.log("Uploading file:", data.image.file);
         utRes = await uploadFiles("imageUploader", {
           files: [data.image.file],
         });
@@ -97,25 +103,38 @@ export default function EditComponentDialog({
       }
       setUploadingImage(false);
 
-      const updatedComponentData = {
+      const updatedOtherCompsData = {
         id: productId,
-        action: "update_label_component",
-        tab: "label-components",
+        action: "update_symbols_graphics",
+        tab: "symbols-graphics",
         data: {
-          id: component._id,
-          name: data.name,
-          number: data.number,
-          image: utRes?.[0]?.ufsUrl || component.image,
-          specification_details: data.specification_details,
+          id: otherComponent.id,
+          text: data.componentName,
+          image: utRes?.[0]?.ufsUrl || otherComponent.componentImage,
+          entity: "Other Components",
+          description: data.componentDescription,
+          label_presence: (Array.isArray(labelPresence)
+            ? labelPresence
+            : JSON.parse(labelPresence || "[]")
+          ).map((tag: Tag) => tag.text),
         },
       };
 
-      updateComponent(updatedComponentData);
+      updateOtherCompsData(updatedOtherCompsData);
+
+      if (isSuccess) {
+        onOpenChange(false);
+        reset();
+        setLabelPresence([]);
+      }
+
+      if (isError) throw new Error("Failed to update other components item:");
+    } catch (error) {
+      console.error("Failed to update other components item:", error);
+      setUploadingImage(false);
       onOpenChange(false);
       reset();
-    } catch (error) {
-      console.error("Failed to update component:", error);
-      setUploadingImage(false);
+      setLabelPresence([]);
     }
   };
 
@@ -124,16 +143,16 @@ export default function EditComponentDialog({
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Edit Component
+            Edit Other Components Item
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Edit component by updating component details and uploading a new
+          Edit other components item by updating details and uploading a new
           image.
         </DialogDescription>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          id="edit-component-form"
+          id="edit-other-comps-form"
           className="overflow-y-auto"
         >
           <div className="flex gap-4 px-6 pt-4">
@@ -143,7 +162,7 @@ export default function EditComponentDialog({
                 control={control}
                 render={({ field }) => (
                   <ComponentImage
-                    currentImage={component.image}
+                    currentImage={otherComponent.componentImage}
                     value={field.value}
                     onChange={(file) => {
                       field.onChange(file);
@@ -160,39 +179,44 @@ export default function EditComponentDialog({
                   id={`${id}-component-name`}
                   placeholder="Enter component name"
                   type="text"
-                  {...register("name", {
+                  {...register("componentName", {
                     required: "Component name is required",
                   })}
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name.message}</p>
+                {errors.componentName && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentName.message}
+                  </p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-component-number`}>
-                  Component Number
-                </Label>
-                <Input
-                  id={`${id}-component-number`}
-                  placeholder="Enter component number"
-                  type="text"
-                  {...register("number")}
-                />
-              </div>
+            </div>
+          </div>
+
+          <div className="px-6 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-description`}>Description</Label>
+              <Textarea
+                id={`${id}-description`}
+                placeholder="Describe the component's purpose and specifications"
+                {...register("componentDescription")}
+                className="min-h-[100px] resize-none"
+              />
             </div>
           </div>
 
           <div className="px-6 pt-4 pb-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-specification_details`}>
-                  specification_details
-                </Label>
-                <Textarea
-                  id={`${id}-specification_details`}
-                  placeholder="Describe the component's purpose and specifications"
-                  {...register("specification_details")}
-                  className="min-h-[100px] resize-none"
+                <TagInput
+                  label="Presence on labels"
+                  tags={labelPresence}
+                  setTags={setLabelPresence}
+                  placeholder="Add label and press Enter"
+                />
+                <input
+                  type="hidden"
+                  {...register("labelPresence")}
+                  value={JSON.stringify(labelPresence)}
                 />
               </div>
             </div>
@@ -206,8 +230,8 @@ export default function EditComponentDialog({
           </DialogClose>
           <DialogClose asChild>
             <Button
-              form="edit-component-form"
-              type="button"
+              form="edit-other-comps-form"
+              type="submit"
               onClick={handleSubmit(onSubmit)}
               disabled={isPending}
             >
@@ -215,7 +239,7 @@ export default function EditComponentDialog({
                 ? "Updating..."
                 : uploadingImage
                 ? "Uploading..."
-                : "Update Component"}
+                : "Update Other Components Item"}
             </Button>
           </DialogClose>
         </DialogFooter>
@@ -247,7 +271,6 @@ function ComponentImage({
       },
     });
 
-  // Show current image if no new file is selected
   const displayImage = value?.preview || files[0]?.preview || currentImage;
 
   return (

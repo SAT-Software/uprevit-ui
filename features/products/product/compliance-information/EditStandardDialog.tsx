@@ -63,7 +63,7 @@ export default function EditStandardDialog({
         action: "update_compliance_standard",
         tab: "compliance-information",
         data: {
-          standard_id: standards._id,
+          id: standards._id,
           standard: data.standard,
           standard_description: data.description,
         },
@@ -95,17 +95,17 @@ export default function EditStandardDialog({
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Add New Standard
+            Update the Standard Details
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Add a new compliance standard by providing standard details.
+          Update this current compliance standard by providing standard details.
         </DialogDescription>
         <div className="overflow-y-auto">
           <div className="px-6 pt-4 pb-6">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              id="add-standard-form"
+              id="update-standard-form"
               className="space-y-4"
             >
               <div className="space-y-2">
@@ -172,8 +172,12 @@ export default function EditStandardDialog({
               Cancel
             </Button>
           </DialogClose>
-          <Button form="add-standard-form" disabled={isPending} type="submit">
-            {isPending ? "Adding..." : "Add Standard"}
+          <Button
+            form="update-standard-form"
+            disabled={isPending}
+            type="submit"
+          >
+            {isPending ? "Updating..." : "Update Standard"}
           </Button>
         </DialogFooter>
       </DialogContent>

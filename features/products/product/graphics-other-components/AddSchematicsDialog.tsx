@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -16,42 +16,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { uploadFiles } from "@/utils/uploadthing";
 
-type ComponentItem = {
-  _id: string;
-  name: string;
-  specification_details: string;
-  number: string;
-  image: string;
-};
-
 type FormData = {
-  name: string;
-  number: string;
-  specification_details: string;
+  componentName: string;
+  componentDescription: string;
+  textPresent: string;
+  labelPresence: Tag[];
   image: FileWithPreview | null;
 };
 
-export default function EditComponentDialog({
+export default function AddSchematicsDialog({
   productId,
-  component,
-  open,
-  onOpenChange,
 }: {
   productId: string;
-  component: ComponentItem;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
+  const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [labelPresence, setLabelPresence] = useState<Tag[]>([]);
   const {
     register,
     handleSubmit,
@@ -61,34 +52,27 @@ export default function EditComponentDialog({
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      name: "",
-      number: "",
-      specification_details: "",
+      labelPresence: [],
       image: null,
     },
   });
-  const { mutate: updateComponent, isPending } = useUpdateProductTabData();
-
-  // Set form values when component data changes
-  useEffect(() => {
-    if (component && open) {
-      reset({
-        name: component.name,
-        number: component.number,
-        specification_details: component.specification_details,
-        image: null,
-      });
-    }
-  }, [component, open, reset]);
+  const {
+    mutate: addSchematicsData,
+    isPending,
+    isSuccess,
+    isError,
+  } = useUpdateProductTabData();
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Edit form data:", data);
+      console.log("Form data:", data);
       setUploadingImage(true);
       let utRes;
 
-      // Only upload if there's a new image file
+      // Only upload if there's an image file
+      console.log("Image data:", data.image);
       if (data.image && data.image.file instanceof File) {
+        console.log("Uploading file:", data.image.file);
         utRes = await uploadFiles("imageUploader", {
           files: [data.image.file],
         });
@@ -96,44 +80,63 @@ export default function EditComponentDialog({
         console.log("UploadThing response:", utRes);
       }
       setUploadingImage(false);
-
-      const updatedComponentData = {
+      const newSchematicsData = {
         id: productId,
-        action: "update_label_component",
-        tab: "label-components",
-        data: {
-          id: component._id,
-          name: data.name,
-          number: data.number,
-          image: utRes?.[0]?.ufsUrl || component.image,
-          specification_details: data.specification_details,
-        },
+        action: "add_symbols_graphics",
+        tab: "symbols-graphics",
+        data: [
+          {
+            text: data.componentName,
+            image: utRes?.[0]?.ufsUrl || null,
+            entity: "Schematics",
+            label_presence: (Array.isArray(labelPresence)
+              ? labelPresence
+              : JSON.parse(labelPresence || "[]")
+            ).map((tag: Tag) => tag.text),
+            description: data.componentDescription,
+          },
+        ],
       };
 
-      updateComponent(updatedComponentData);
-      onOpenChange(false);
-      reset();
+      console.log("Schematics data", newSchematicsData);
+
+      addSchematicsData(newSchematicsData);
+
+      if (isSuccess) {
+        setOpen(false);
+        reset();
+        setLabelPresence([]);
+      }
+
+      if (isError) throw new Error("Failed to add schematics item:");
     } catch (error) {
-      console.error("Failed to update component:", error);
+      console.error("Failed to add schematics item:", error);
       setUploadingImage(false);
+      setOpen(false);
+      reset();
+      setLabelPresence([]);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="secondary" className="text-xs">
+          Add Schematics Item
+        </Button>
+      </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Edit Component
+            Add New Schematics Item
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Edit component by updating component details and uploading a new
-          image.
+          Add a new schematics item by providing details and uploading an image.
         </DialogDescription>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          id="edit-component-form"
+          id="add-schematics-form"
           className="overflow-y-auto"
         >
           <div className="flex gap-4 px-6 pt-4">
@@ -143,7 +146,6 @@ export default function EditComponentDialog({
                 control={control}
                 render={({ field }) => (
                   <ComponentImage
-                    currentImage={component.image}
                     value={field.value}
                     onChange={(file) => {
                       field.onChange(file);
@@ -155,29 +157,20 @@ export default function EditComponentDialog({
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-component-name`}>Component Name</Label>
+                <Label htmlFor={`${id}-component-name`}>Schematic Name</Label>
                 <Input
                   id={`${id}-component-name`}
-                  placeholder="Enter component name"
+                  placeholder="Enter schematic name"
                   type="text"
-                  {...register("name", {
-                    required: "Component name is required",
+                  {...register("componentName", {
+                    required: "Schematic name is required",
                   })}
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name.message}</p>
+                {errors.componentName && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentName.message}
+                  </p>
                 )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-component-number`}>
-                  Component Number
-                </Label>
-                <Input
-                  id={`${id}-component-number`}
-                  placeholder="Enter component number"
-                  type="text"
-                  {...register("number")}
-                />
               </div>
             </div>
           </div>
@@ -185,14 +178,26 @@ export default function EditComponentDialog({
           <div className="px-6 pt-4 pb-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-specification_details`}>
-                  specification_details
-                </Label>
+                <Label htmlFor={`${id}-description`}>Description</Label>
                 <Textarea
-                  id={`${id}-specification_details`}
-                  placeholder="Describe the component's purpose and specifications"
-                  {...register("specification_details")}
+                  id={`${id}-description`}
+                  placeholder="Describe the schematic's purpose and specifications"
+                  {...register("componentDescription")}
                   className="min-h-[100px] resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <TagInput
+                  label="Presence on labels"
+                  tags={labelPresence}
+                  setTags={setLabelPresence}
+                  placeholder="Add label and press Enter"
+                />
+                <input
+                  type="hidden"
+                  {...register("labelPresence")}
+                  value={JSON.stringify(labelPresence)}
                 />
               </div>
             </div>
@@ -200,22 +205,29 @@ export default function EditComponentDialog({
         </form>
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => reset()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset();
+                setLabelPresence([]);
+              }}
+            >
               Cancel
             </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
-              form="edit-component-form"
-              type="button"
+              form="add-schematics-form"
+              type="submit"
               onClick={handleSubmit(onSubmit)}
               disabled={isPending}
             >
               {isPending
-                ? "Updating..."
+                ? "Adding..."
                 : uploadingImage
                 ? "Uploading..."
-                : "Update Component"}
+                : "Add Schematics Item"}
             </Button>
           </DialogClose>
         </DialogFooter>
@@ -225,16 +237,11 @@ export default function EditComponentDialog({
 }
 
 interface ComponentImageProps {
-  currentImage: string;
   value: FileWithPreview | null;
   onChange: (file: FileWithPreview | null) => void;
 }
 
-function ComponentImage({
-  currentImage,
-  value,
-  onChange,
-}: ComponentImageProps) {
+function ComponentImage({ value, onChange }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
       accept: "image/*",
@@ -247,16 +254,20 @@ function ComponentImage({
       },
     });
 
-  // Show current image if no new file is selected
-  const displayImage = value?.preview || files[0]?.preview || currentImage;
+  // Sync external value with internal state
+  const currentImage = value?.preview || files[0]?.preview || null;
 
   return (
     <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
-      {displayImage ? (
+      {currentImage ? (
         <Image
           className="size-full object-cover rounded-xl"
-          src={displayImage}
-          alt="Component image"
+          src={currentImage}
+          alt={
+            value?.file.name || files[0]?.file.name
+              ? "Preview of uploaded schematics image"
+              : "Default schematics image"
+          }
           width={512}
           height={96}
         />
@@ -264,7 +275,7 @@ function ComponentImage({
         <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
           <div className="flex flex-col items-center text-muted-foreground/60">
             <ImagePlusIcon className="w-8 h-8 mb-2" />
-            <span className="text-xs">Component Image</span>
+            <span className="text-xs">Schematic Image</span>
           </div>
         </div>
       )}
@@ -274,11 +285,11 @@ function ComponentImage({
           type="button"
           className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
           onClick={openFileDialog}
-          aria-label={displayImage ? "Change image" : "Upload image"}
+          aria-label={currentImage ? "Change image" : "Upload image"}
         >
           <ImagePlusIcon size={16} aria-hidden="true" />
         </button>
-        {displayImage && (
+        {currentImage && (
           <button
             type="button"
             className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
@@ -298,7 +309,7 @@ function ComponentImage({
       <input
         {...getInputProps()}
         className="sr-only"
-        aria-label="Upload component image"
+        aria-label="Upload schematics image"
       />
     </div>
   );

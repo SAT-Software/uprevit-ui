@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
-import { sampleProducts } from "@/app/(app)/products/data";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Link from "next/link";
@@ -46,6 +45,8 @@ import {
   Tags,
 } from "lucide-react";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { Product } from "@/types/product";
 
 const data = {
   navMain: [
@@ -171,8 +172,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isProductPage = Boolean(productId);
 
+  const { data: productsData } = useGetAllProducts();
   const product = productId
-    ? sampleProducts.find((p) => p.productId === productId)
+    ? productsData?.result.products?.find((p: Product) => p._id === productId)
     : undefined;
 
   return (
@@ -263,7 +265,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         >
           <SidebarHeader className="gap-4 border-b p-3">
             <div className="flex flex-col w-full items-start">
-              <p className="text-xs">{product?.productId || "Id"}</p>
               <div className="text-sm font-semibold text-foreground">
                 {product?.product_name || "Product"}
               </div>
