@@ -8,7 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon, LayoutList } from "lucide-react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,7 @@ type Item = {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  presentOnLabels: string[];
 };
 
 const columns: ColumnDef<Item>[] = [
@@ -183,6 +184,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useId } from "react";
 import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
+import EditSchematicsDialog from "./EditSchematicsDialog";
+import { usePathname } from "next/navigation";
+import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 
 export default function SymbolsGraphicsPageSchematicsTable({
   data: dataProp,
@@ -198,25 +202,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
       desc: false,
     },
   ]);
-  const [data, setData] = useState<Item[]>(dataProp ?? []);
-
-  useEffect(() => {
-    if (!dataProp) {
-      async function fetchPosts() {
-        // fallback demo data
-        setData([
-          {
-            id: "1",
-            componentName: "Demo Component",
-            componentDescription: "Description for demo component.",
-            componentImage:
-              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-          },
-        ]);
-      }
-      fetchPosts();
-    }
-  }, [dataProp]);
+  const [data] = useState<Item[]>(dataProp ?? []);
 
   const table = useReactTable({
     data,
@@ -485,35 +471,78 @@ export default function SymbolsGraphicsPageSchematicsTable({
 }
 
 function RowActions({ row }: { row: Row<Item> }) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
-  console.log(item);
+
+  // Get productId from the current URL using usePathname
+  const pathname = usePathname();
+  const getProductId = () => {
+    const match = pathname.match(/\/products\/([^\/]+)/);
+    return match ? match[1] : "";
+  };
+
+  const schematicItem = {
+    id: item.id,
+    componentName: item.componentName,
+    description: item.componentDescription,
+    componentImage: item.componentImage,
+    labelPresence: item.presentOnLabels,
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="mr-2" asChild>
-        <div className="flex justify-end ">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="shadow-none"
-            aria-label="Edit item"
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="mr-2" asChild>
+          <div className="flex justify-end ">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="shadow-none"
+              aria-label="Edit item"
+            >
+              <EllipsisIcon size={16} aria-hidden="true" />
+            </Button>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onSelect={() => {
+                setTimeout(() => setShowEditDialog(true), 100);
+              }}
+            >
+              <PiPencilSimpleDuotone />
+              <span>Edit</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onSelect={() => {
+              // Add small delay to allow dropdown to close first
+              setTimeout(() => setShowDeleteDialog(true), 100);
+            }}
           >
-            <EllipsisIcon size={16} aria-hidden="true" />
-          </Button>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <PiPencilSimpleDuotone />
-            <span>Edit</span>
+            <PiTrashDuotone className="text-destructive" />
+            <span>Delete</span>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <PiTrashDuotone className="text-destructive" />
-          <span>Delete</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <EditSchematicsDialog
+        productId={getProductId()}
+        schematic={schematicItem}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
+
+      <DeleteSymbolsSchematicsDialog
+        productId={getProductId()}
+        graphics={schematicItem}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+      />
+    </>
   );
 }

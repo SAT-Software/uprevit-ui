@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
 interface SymbolGraphicItem {
+  _id: string;
   image: string;
   text: string;
   description: string;
@@ -43,8 +44,6 @@ export default function Page() {
   const symbolsGraphics =
     (data?.result?.data?.data as SymbolGraphicItem[]) || [];
 
-  console.log("symbolsGraphics", symbolsGraphics);
-
   // Group items by normalized entity (lowercase)
   const entityGroups: Record<string, SymbolGraphicItem[]> = {};
   symbolsGraphics.forEach((item) => {
@@ -55,48 +54,45 @@ export default function Page() {
     entityGroups[key].push(item);
   });
 
-  console.log("entityGroups", entityGroups);
+  console.log("Entity groups:", entityGroups);
 
   // Map grouped data to expected prop names for SchematicsSymbolsTabs
-  const schematicsData = (entityGroups["schematics"] || []).map(
-    (item, index) => ({
-      id: item.text || item.image || `schematics-${index}`,
-      componentName: item.text || "Schematics",
-      componentDescription: item.description || "",
-      componentImage: item.image || "",
-      presentOnLabels: item.label_presence,
-    })
-  );
-
-  const barcodesData = (entityGroups["barcodes"] || []).map((item, index) => ({
-    id: item.text || item.image || `barcodes-${index}`,
-    componentName: item.text || "Barcode",
-    componentDescription: item.description || "",
-    componentImage: item.image || "",
+  const schematicsData = (entityGroups["schematics"] || []).map((item) => ({
+    id: item._id,
+    componentName: item.text,
+    componentDescription: item.description,
+    componentImage: item.image,
     presentOnLabels: item.label_presence,
   }));
 
-  const otherComponentsData = (entityGroups["other components"] || []).map(
-    (item, index) => ({
-      id: item.text || item.image || `other-${index}`,
-      componentName: item.text || "Other Component",
-      componentDescription: item.description || "",
-      componentImage: item.image || "",
+  const barcodesData = (entityGroups["barcodes"] || []).map((item) => ({
+    id: item._id,
+    componentName: item.text,
+    componentDescription: item.description,
+    componentImage: item.image,
+    presentOnLabels: item.label_presence,
+  }));
+
+  const otherComponentsData = (entityGroups["othercomponents"] || []).map(
+    (item) => ({
+      id: item._id,
+      componentName: item.text,
+      componentDescription: item.description,
+      componentImage: item.image,
       presentOnLabels: item.label_presence,
     })
   );
 
+  console.log("Other components data:", otherComponentsData);
+
   // Merge "symbol" and "graphics" entities into symbolsData
-  const symbolsData = [...(entityGroups["symbols"] || [])].map(
-    (item, index) => ({
-      id: item.text || item.image || `symbols-${index}`,
-      componentName: item.text || "Symbols",
-      componentDescription: item.description || "",
-      componentImage: item.image || "",
-      symbolsTextPresent: item.label_presence,
-      textPresent: item.text_present || false,
-    })
-  );
+  const symbolsData = [...(entityGroups["symbols"] || [])].map((item) => ({
+    id: item._id,
+    componentName: item.text,
+    componentImage: item.image,
+    symbolsTextPresent: item.label_presence,
+    textPresent: item.text_present,
+  }));
 
   return (
     <SchematicsSymbolsTabs

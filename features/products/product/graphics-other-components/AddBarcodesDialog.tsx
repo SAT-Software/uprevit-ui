@@ -21,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
@@ -35,11 +34,14 @@ type FormData = {
   image: FileWithPreview | null;
 };
 
-export default function AddSymbolsDialog({ productId }: { productId: string }) {
+export default function AddBarcodesDialog({
+  productId,
+}: {
+  productId: string;
+}) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [textPresent, setTextPresent] = useState("yes");
   const [labelPresence, setLabelPresence] = useState<Tag[]>([]);
   const {
     register,
@@ -50,12 +52,11 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      textPresent: "yes",
       labelPresence: [],
       image: null,
     },
   });
-  const { mutate: addSymbolsData, isPending } = useUpdateProductTabData();
+  const { mutate: addBarcodesData, isPending } = useUpdateProductTabData();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -74,7 +75,7 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
         console.log("UploadThing response:", utRes);
       }
       setUploadingImage(false);
-      const newSymbolsData = {
+      const newBarcodesData = {
         id: productId,
         action: "add_symbols_graphics",
         tab: "symbols-graphics",
@@ -82,26 +83,25 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
           {
             text: data.componentName,
             image: utRes?.[0]?.ufsUrl || null,
-            entity: "Symbols",
-            text_present: data.textPresent === "yes",
+            entity: "Barcodes",
             label_presence: (Array.isArray(labelPresence)
               ? labelPresence
               : JSON.parse(labelPresence || "[]")
             ).map((tag: Tag) => tag.text),
+            description: data.componentDescription,
           },
         ],
       };
 
-      console.log("Symbols data", newSymbolsData);
+      console.log("Barcodes data", newBarcodesData);
 
-      addSymbolsData(newSymbolsData);
+      addBarcodesData(newBarcodesData);
       setOpen(false);
       reset();
       // Reset local state
-      setTextPresent("yes");
       setLabelPresence([]);
     } catch (error) {
-      console.error("Failed to add symbols item:", error);
+      console.error("Failed to add barcodes item:", error);
       setUploadingImage(false);
     }
   };
@@ -110,21 +110,21 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="secondary" className="text-xs">
-          Add Symbols Item
+          Add Barcodes Item
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Add New Symbols Item
+            Add New Barcodes Item
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Add a new symbols item by providing details and uploading an image.
+          Add a new barcodes item by providing details and uploading an image.
         </DialogDescription>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          id="add-symbols-form"
+          id="add-barcodes-form"
           className="overflow-y-auto"
         >
           <div className="flex gap-4 px-6 pt-4">
@@ -145,13 +145,13 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-component-name`}>Symbol Text</Label>
+                <Label htmlFor={`${id}-component-name`}>Barcode Type</Label>
                 <Input
                   id={`${id}-component-name`}
-                  placeholder="Enter symbol text"
+                  placeholder="Enter barcode type (e.g., QR Code, UPC, Code 128)"
                   type="text"
                   {...register("componentName", {
-                    required: "Symbol text is required",
+                    required: "Barcode type is required",
                   })}
                 />
                 {errors.componentName && (
@@ -160,33 +160,30 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label>Symbol text present</Label>
-                <RadioGroup
-                  value={textPresent}
-                  onValueChange={setTextPresent}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id={`${id}-text-present-yes`} />
-                    <Label htmlFor={`${id}-text-present-yes`}>Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id={`${id}-text-present-no`} />
-                    <Label htmlFor={`${id}-text-present-no`}>No</Label>
-                  </div>
-                </RadioGroup>
-                <input
-                  type="hidden"
-                  {...register("textPresent")}
-                  value={textPresent}
-                />
-              </div>
             </div>
           </div>
 
           <div className="px-6 pt-4 pb-6">
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-component-description`}>
+                  Barcode Data
+                </Label>
+                <Textarea
+                  id={`${id}-component-description`}
+                  placeholder="Enter barcode data/content"
+                  {...register("componentDescription", {
+                    required: "Barcode data is required",
+                  })}
+                  className="min-h-[80px] resize-none"
+                />
+                {errors.componentDescription && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentDescription.message}
+                  </p>
+                )}
+              </div>
+
               <div className="space-y-2">
                 <TagInput
                   label="Presence on labels"
@@ -200,16 +197,6 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
                   value={JSON.stringify(labelPresence)}
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
-                <Textarea
-                  id={`${id}-description`}
-                  placeholder="Describe the symbol's purpose and specifications"
-                  {...register("componentDescription")}
-                  className="min-h-[100px] resize-none"
-                />
-              </div>
             </div>
           </div>
         </form>
@@ -220,7 +207,6 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
               variant="outline"
               onClick={() => {
                 reset();
-                setTextPresent("yes");
                 setLabelPresence([]);
               }}
             >
@@ -229,7 +215,7 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
           </DialogClose>
           <DialogClose asChild>
             <Button
-              form="add-symbols-form"
+              form="add-barcodes-form"
               type="submit"
               onClick={handleSubmit(onSubmit)}
               disabled={isPending}
@@ -238,7 +224,7 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
                 ? "Adding..."
                 : uploadingImage
                 ? "Uploading..."
-                : "Add Symbols Item"}
+                : "Add Barcodes Item"}
             </Button>
           </DialogClose>
         </DialogFooter>
@@ -276,8 +262,8 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
           src={currentImage}
           alt={
             value?.file.name || files[0]?.file.name
-              ? "Preview of uploaded symbol image"
-              : "Default symbol image"
+              ? "Preview of uploaded barcode image"
+              : "Default barcode image"
           }
           width={512}
           height={96}
@@ -286,7 +272,7 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
         <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
           <div className="flex flex-col items-center text-muted-foreground/60">
             <ImagePlusIcon className="w-8 h-8 mb-2" />
-            <span className="text-xs">Symbol Image</span>
+            <span className="text-xs">Barcode Image</span>
           </div>
         </div>
       )}
@@ -320,7 +306,7 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
       <input
         {...getInputProps()}
         className="sr-only"
-        aria-label="Upload symbol image"
+        aria-label="Upload barcode image"
       />
     </div>
   );

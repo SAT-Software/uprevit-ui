@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
@@ -29,7 +28,6 @@ import { uploadFiles } from "@/utils/uploadthing";
 type Item = {
   id: string;
   componentName: string;
-  componentDescription: string;
   componentImage: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
@@ -37,7 +35,6 @@ type Item = {
 
 type FormData = {
   componentName: string;
-  componentDescription: string;
   textPresent: string;
   labelPresence: Tag[];
   image: FileWithPreview | null;
@@ -56,8 +53,16 @@ export default function EditSymbolsDialog({
 }) {
   const id = useId();
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [textPresent, setTextPresent] = useState("yes");
-  const [labelPresence, setLabelPresence] = useState<Tag[]>([]);
+  const [textPresent, setTextPresent] = useState(
+    symbol.textPresent ? "yes" : "no"
+  );
+  const [labelPresence, setLabelPresence] = useState<Tag[]>(
+    symbol.symbolsTextPresent.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }))
+  );
+
   const {
     register,
     handleSubmit,
@@ -67,36 +72,21 @@ export default function EditSymbolsDialog({
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      componentName: "",
-      componentDescription: "",
-      textPresent: "yes",
-      labelPresence: [],
-      image: null,
+      componentName: symbol.componentName,
+      textPresent: symbol.textPresent ? "yes" : "no",
+      labelPresence: symbol.symbolsTextPresent.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      })),
+      image: symbol.componentImage ? { preview: symbol.componentImage } : null,
     },
   });
-  const { mutate: updateSymbolsData, isPending } = useUpdateProductTabData();
-
-  // Set form values when symbol data changes
-  useEffect(() => {
-    if (symbol && open) {
-      const textPresentValue = symbol.textPresent ? "yes" : "no";
-      const labelTags = symbol.symbolsTextPresent.map((label, index) => ({
-        id: `tag-${index}-${Date.now()}`,
-        text: label,
-      }));
-
-      reset({
-        componentName: symbol.componentName,
-        componentDescription: symbol.componentDescription,
-        textPresent: textPresentValue,
-        labelPresence: labelTags,
-        image: null,
-      });
-
-      setTextPresent(textPresentValue);
-      setLabelPresence(labelTags);
-    }
-  }, [symbol, open, reset]);
+  const {
+    mutate: updateSymbolsData,
+    isPending,
+    isSuccess,
+    isError,
+  } = useUpdateProductTabData();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -117,10 +107,10 @@ export default function EditSymbolsDialog({
 
       const updatedSymbolsData = {
         id: productId,
-        action: "update_symbols_graphics_item",
+        action: "update_symbols_graphics",
         tab: "symbols-graphics",
         data: {
-          graphics_id: symbol.id,
+          id: symbol.id,
           text: data.componentName,
           image: utRes?.[0]?.ufsUrl || symbol.componentImage,
           entity: "Symbols",
@@ -132,17 +122,23 @@ export default function EditSymbolsDialog({
         },
       };
 
-      console.log("Updated symbols data", updatedSymbolsData);
-
       updateSymbolsData(updatedSymbolsData);
-      onOpenChange(false);
-      reset();
-      // Reset local state
-      setTextPresent("yes");
-      setLabelPresence([]);
+
+      if (isSuccess) {
+        onOpenChange(false);
+        reset();
+        setTextPresent("yes");
+        setLabelPresence([]);
+      }
+
+      if (isError) throw new Error("Failed to update symbols item:");
     } catch (error) {
       console.error("Failed to update symbols item:", error);
       setUploadingImage(false);
+      onOpenChange(false);
+      reset();
+      setTextPresent("yes");
+      setLabelPresence([]);
     }
   };
 
@@ -234,16 +230,6 @@ export default function EditSymbolsDialog({
                   type="hidden"
                   {...register("labelPresence")}
                   value={JSON.stringify(labelPresence)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
-                <Textarea
-                  id={`${id}-description`}
-                  placeholder="Describe the symbol's purpose and specifications"
-                  {...register("componentDescription")}
-                  className="min-h-[100px] resize-none"
                 />
               </div>
             </div>

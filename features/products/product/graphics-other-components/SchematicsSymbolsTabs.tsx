@@ -1,12 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SymbolsGraphicsPageBarcodesTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageBarcodesTable";
 import SymbolsGraphicsPageSchematicsTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageSchematicsTable";
 import SymbolsGraphicsPageSymbolsTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageSymbolsTable";
 import AddSymbolsDialog from "@/features/products/product/graphics-other-components/AddSymbolsDialog";
+import AddSchematicsDialog from "@/features/products/product/graphics-other-components/AddSchematicsDialog";
+import AddBarcodesDialog from "@/features/products/product/graphics-other-components/AddBarcodesDialog";
+import AddOtherCompsDialog from "@/features/products/product/graphics-other-components/AddOtherCompsDialog";
 import {
   BarcodeIcon,
   BoxIcon,
@@ -19,7 +21,6 @@ import SymbolsGraphicsPageOtherComponentsTable from "./SymbolsGraphicsPageOtherC
 interface SymbolData {
   id: string;
   componentName: string;
-  componentDescription: string;
   componentImage: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
@@ -66,22 +67,7 @@ export default function SchematicsSymbolsTabs({
 }: SchematicsSymbolsTabsProps) {
   const [activeTab, setActiveTab] = useState("tab-1");
 
-  const getButtonText = (tab: string) => {
-    switch (tab) {
-      case "tab-1":
-        return "Add Symbols";
-      case "tab-2":
-        return "Add Schematics";
-      case "tab-3":
-        return "Add Barcodes";
-      case "tab-4":
-        return "Add Other Components";
-      default:
-        return "Add Item";
-    }
-  };
-
-  console.log("Symbols Data", symbolsData);
+  console.log("other comp data in Tabs", otherComponentsData);
 
   return (
     <Tabs defaultValue="tab-1" value={activeTab} onValueChange={setActiveTab}>
@@ -133,10 +119,12 @@ export default function SchematicsSymbolsTabs({
         </ScrollArea>
         {activeTab === "tab-1" ? (
           <AddSymbolsDialog productId={productId} />
+        ) : activeTab === "tab-2" ? (
+          <AddSchematicsDialog productId={productId} />
+        ) : activeTab === "tab-3" ? (
+          <AddBarcodesDialog productId={productId} />
         ) : (
-          <Button size="sm" variant="secondary" className="text-xs ml-4">
-            {getButtonText(activeTab)}
-          </Button>
+          activeTab === "tab-4" && <AddOtherCompsDialog productId={productId} />
         )}
       </div>
       <TabsContent value="tab-1">
