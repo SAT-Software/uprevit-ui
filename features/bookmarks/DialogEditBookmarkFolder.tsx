@@ -36,7 +36,7 @@ export default function DialogEditBookmarkFolder({
   const id = useId();
   const [open, setOpen] = useState(false);
 
-  const editMutation = useEditBookmarkFolder();
+  const { mutate: editFolder, isPending } = useEditBookmarkFolder();
 
   const {
     register,
@@ -50,18 +50,23 @@ export default function DialogEditBookmarkFolder({
     mode: "onSubmit",
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      await editMutation.mutateAsync({
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    editFolder(
+      {
         folderId,
         folder_name: data.folder_name.trim(),
-      });
-
-      reset();
-      setOpen(false);
-    } catch (error) {
-      console.error(error);
-    }
+      },
+      {
+        onSuccess: () => {
+          reset();
+          setOpen(false);
+        },
+        onError: (error) => {
+          // You can handle errors here, e.g., show a toast notification
+          console.error("Failed to edit bookmark folder:", error);
+        },
+      }
+    );
   };
 
   return (
@@ -132,9 +137,9 @@ export default function DialogEditBookmarkFolder({
           <Button
             type="submit"
             form={`edit-folder-form-${id}`}
-            disabled={editMutation.isPending}
+            disabled={isPending}
           >
-            {editMutation.isPending ? "Saving..." : "Save Changes"}
+            {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>

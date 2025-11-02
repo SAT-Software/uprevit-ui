@@ -41,8 +41,10 @@ export default function DialogAddProductsToFolder({
 }: DialogAddProductsToFolderProps) {
   const { data: productsData, isLoading, error } = useGetAllProducts();
   const products = productsData?.result?.products ?? [];
-  const addProductToFolder = useAddProductInBookmarkFolder();
   const [open, setOpen] = useState(false);
+
+  const { mutate: addProductToFolder, isPending } =
+    useAddProductInBookmarkFolder();
 
   const {
     handleSubmit,
@@ -68,21 +70,24 @@ export default function DialogAddProductsToFolder({
   );
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!data.productId || !folderId) return;
-    console.log(data);
-    try {
-      await addProductToFolder.mutateAsync({
-        id: data.productId,
+    addProductToFolder(
+      {
+        user_id: "68d2b37127794dcb43a32425",
+        product_id: data.productId,
         folder_id: folderId,
-      });
-      console.log("Successfully added product to folder");
-      // Reset form and close dialog on success
-      reset();
-      setOpen(false);
-    } catch (error) {
-      // Error is handled by the mutation's onError callback
-      console.error("Failed to add product to folder:", error);
-    }
+      },
+      {
+        onSuccess: () => {
+          reset();
+          setOpen(false);
+        },
+        onError: (error) => {
+          reset();
+          setOpen(false);
+          console.error("Failed to add product to folder:", error);
+        },
+      }
+    );
   };
 
   return (
@@ -211,11 +216,8 @@ export default function DialogAddProductsToFolder({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!selectedProductId || addProductToFolder.isPending}
-            >
-              {addProductToFolder.isPending ? "Adding..." : "Add to Folder"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Bookmarking..." : "Bookmark Product"}
             </Button>
           </DialogFooter>
         </form>

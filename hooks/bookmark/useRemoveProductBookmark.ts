@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface RemoveProductBookmark {
-  productId: string;
-  folderId: string;
+  user_id: string;
+  product_id: string;
+  folder_id: string;
 }
 
 export function useRemoveProductBookmark() {
@@ -12,10 +13,15 @@ export function useRemoveProductBookmark() {
   return useMutation({
     mutationFn: async (bookmarkData: RemoveProductBookmark) => {
       const res = await fetch(
-        `/api/bookmarks/products/${bookmarkData.folderId}/${bookmarkData.productId}`,
+        `/api/bookmarks/products/delete/${bookmarkData.folder_id}`,
         {
-          method: "DELETE",
+          method: "PATCH",
+          body: JSON.stringify({
+            user_id: bookmarkData.user_id,
+            product_id: bookmarkData.product_id,
+          }),
           headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
             "Content-Type": "application/json",
           },
         }
