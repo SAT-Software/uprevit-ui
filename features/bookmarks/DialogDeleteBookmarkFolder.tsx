@@ -22,37 +22,26 @@ interface DialogDeleteBookmarkFolderProps {
   folderId: string;
   folderName: string;
   trigger?: React.ReactElement;
-  onSuccess?: () => void;
 }
 
 export default function DialogDeleteBookmarkFolder({
   folderId,
   folderName,
   trigger,
-  onSuccess,
 }: DialogDeleteBookmarkFolderProps) {
   const inputId = useId();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const deleteMutation = useDeleteBookmarkFolder();
+  const { mutate: deleteFolder, isPending } = useDeleteBookmarkFolder();
 
-  const disabled = value !== folderName || deleteMutation.isPending;
-
-  async function handleConfirm() {
-    if (disabled) return;
-
-    try {
-      await deleteMutation.mutateAsync(folderId);
-      setOpen(false);
-      setValue("");
-      onSuccess?.();
-      // Navigate back to bookmarked products page after deletion
-      router.push("/bookmarked-products");
-    } catch (error) {
-      console.error("Failed to delete bookmark folder:", error);
-    }
+  function handleConfirm() {
+    deleteFolder(folderId, {
+      onSuccess: () => {
+        router.push("/bookmarked-products");
+      },
+    });
   }
 
   return (
@@ -107,7 +96,7 @@ export default function DialogDeleteBookmarkFolder({
                 type="button"
                 variant="outline"
                 className="flex-1"
-                disabled={deleteMutation.isPending}
+                disabled={isPending}
               >
                 Cancel
               </Button>
@@ -115,11 +104,11 @@ export default function DialogDeleteBookmarkFolder({
             <Button
               type="button"
               className="flex-1"
-              disabled={disabled}
+              disabled={isPending}
               onClick={handleConfirm}
               variant="destructive"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete Folder"}
+              {isPending ? "Deleting..." : "Delete Folder"}
             </Button>
           </DialogFooter>
         </form>

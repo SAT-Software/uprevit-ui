@@ -28,68 +28,36 @@ export default function DialogRemoveProductBookmark({
   productId,
   productName,
   folderId,
-  open,
-  onOpenChange,
 }: DialogRemoveProductBookmarkProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const removeProductBookmark = useRemoveProductBookmark();
+  const [isOpen, setIsOpen] = useState(false);
+  const { mutate: removeProductBookmark, isPending } =
+    useRemoveProductBookmark();
 
-  async function handleRemoveProductBookmark(e: React.MouseEvent) {
-    e.preventDefault(); // Prevent AlertDialogAction's auto-close
-    if (!productId || !folderId) return;
-
-    try {
-      await removeProductBookmark.mutateAsync({
-        productId,
-        folderId,
-      });
-      // Close dialog in both controlled and uncontrolled modes
-      onOpenChange?.(false);
-      setInternalOpen(false);
-    } catch (error) {
-      console.error("Failed to remove product from bookmark:", error);
-    }
-  }
-
-  // If external state control is provided, use controlled mode
-  if (open !== undefined && onOpenChange !== undefined) {
-    return (
-      <AlertDialog open={open} onOpenChange={onOpenChange}>
-        <AlertDialogContent>
-          <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
-            <div
-              className="flex size-9 shrink-0 items-center justify-center rounded-full border"
-              aria-hidden="true"
-            >
-              <CircleAlertIcon className="opacity-80" size={16} />
-            </div>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Remove from bookmarks?</AlertDialogTitle>
-              <AlertDialogDescription>
-                {`Are you sure you want to remove "${productName}" from this
-                bookmark folder? This action cannot be undone.`}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={removeProductBookmark.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRemoveProductBookmark}
-              disabled={removeProductBookmark.isPending}
-            >
-              {removeProductBookmark.isPending ? "Removing..." : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+  async function handleRemoveProductBookmark() {
+    removeProductBookmark(
+      {
+        user_id: "68d2b37127794dcb43a32425",
+        product_id: productId,
+        folder_id: folderId,
+      },
+      {
+        onSuccess() {
+          setIsOpen(false);
+        },
+        onError(error) {
+          setIsOpen(false);
+          console.error(
+            "Failed to remove product from bookmark folder:",
+            error
+          );
+        },
+      }
     );
   }
 
   // Original trigger-based mode
   return (
-    <AlertDialog open={internalOpen} onOpenChange={setInternalOpen}>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
         <Button
           variant="ghost"
@@ -116,14 +84,12 @@ export default function DialogRemoveProductBookmark({
           </AlertDialogHeader>
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={removeProductBookmark.isPending}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleRemoveProductBookmark}
-            disabled={removeProductBookmark.isPending}
+            disabled={isPending}
           >
-            {removeProductBookmark.isPending ? "Removing..." : "Remove"}
+            {isPending ? "Removing..." : "Remove"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

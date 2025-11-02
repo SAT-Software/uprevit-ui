@@ -16,7 +16,7 @@ function BookmarkedProductsPage() {
   const router = useRouter();
   const { data } = useGetAllUserBookmarkFolders();
 
-  const allBookmarkFolders = data?.result?.bookmarked_product_folders ?? [];
+  const allBookmarkFolders = data?.result?.bookmarked_product_folders;
 
   return (
     <div className="flex flex-col gap-8 p-4 h-full">
@@ -25,7 +25,7 @@ function BookmarkedProductsPage() {
           <h2 className="text-lg font-semibold">Bookmarked Products</h2>
           <DialogCreateFolder />
         </div>
-        {allBookmarkFolders.length === 0 ? (
+        {allBookmarkFolders?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[400px] gap-4 text-muted-foreground">
             <BookmarkIcon className="w-16 h-16" />
             <p className="text-lg">
@@ -34,7 +34,7 @@ function BookmarkedProductsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-4 gap-4">
-            {allBookmarkFolders.map((folder: BookmarkFolder) => (
+            {allBookmarkFolders?.map((folder: BookmarkFolder) => (
               <Card
                 key={folder._id}
                 className="cursor-pointer shadow-none hover:shadow-none transition-all duration-200 hover:bg-muted/50"

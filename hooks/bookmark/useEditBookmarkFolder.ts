@@ -15,8 +15,12 @@ export function useEditBookmarkFolder() {
         `/api/bookmarks/products/${folderData.folderId}`,
         {
           method: "PATCH",
-          body: JSON.stringify({ folder_name: folderData.folder_name }),
+          body: JSON.stringify({
+            user_id: "68d2b37127794dcb43a32425",
+            folder_name: folderData.folder_name,
+          }),
           headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
             "Content-Type": "application/json",
           },
         }

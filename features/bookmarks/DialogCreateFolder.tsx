@@ -39,23 +39,25 @@ export default function DialogCreateFolder() {
     mode: "onSubmit",
   });
 
-  const createMutation = useCreateBookmarkFolder();
+  const { mutate: createBookmarkFolder, isPending } = useCreateBookmarkFolder();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      // Create bookmark folder request data
-      const bookmarkFolderData = {
-        id: "68a1cf8c2cb63e45ad511688",
-        folder_name: data.folderName.trim(),
-      };
+    const bookmarkFolderData = {
+      user_id: "68d2b37127794dcb43a32425",
+      workspace_id: "68d2be511ad93c69d6e39e51",
+      folder_name: data.folderName.trim(),
+    };
 
-      await createMutation.mutateAsync(bookmarkFolderData);
-
-      reset();
-      setOpen(false);
-    } catch (error) {
-      console.error(error);
-    }
+    createBookmarkFolder(bookmarkFolderData, {
+      onSuccess: () => {
+        reset();
+        setOpen(false);
+      },
+      onError: () => {
+        reset();
+        setOpen(false);
+      },
+    });
   };
 
   return (
@@ -119,12 +121,8 @@ export default function DialogCreateFolder() {
             Cancel
           </Button>
 
-          <Button
-            type="submit"
-            form="create-folder-form"
-            disabled={createMutation.isPending}
-          >
-            {createMutation.isPending ? "Creating..." : "Create Folder"}
+          <Button type="submit" form="create-folder-form" disabled={isPending}>
+            {isPending ? "Creating..." : "Create Folder"}
           </Button>
         </DialogFooter>
       </DialogContent>

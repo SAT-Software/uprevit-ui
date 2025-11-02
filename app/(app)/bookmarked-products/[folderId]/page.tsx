@@ -11,8 +11,8 @@ import { useGetProductsInABookmarkFolder } from "@/hooks/bookmark/useGetProducts
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { LinkIcon } from "lucide-react";
+import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
 
-// Interface for product data from the bookmark folder API
 interface BookmarkProduct {
   _id: string;
   product_name: string;
@@ -25,18 +25,18 @@ export default function FolderPage() {
   const params = useParams();
   const folderId = params.folderId as string;
 
-  // Get products in the bookmark folder using the custom hook
+  const { data: foldersData } = useGetAllUserBookmarkFolders();
+  const bookmarkFolderName =
+    foldersData?.result?.bookmarked_product_folders?.filter(
+      (folder: BookmarkProduct) => folder._id === folderId
+    )?.[0]?.folder_name;
+
   const {
     data: folderData,
     isLoading,
     error,
-  } = useGetProductsInABookmarkFolder(folderId) as {
-    data: { folder_name: string; products: BookmarkProduct[] } | undefined;
-    isLoading: boolean;
-    error: Error | null;
-  };
+  } = useGetProductsInABookmarkFolder(folderId);
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex flex-col gap-8 p-4 h-full">
@@ -77,7 +77,6 @@ export default function FolderPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="flex flex-col gap-8 p-4 h-full">
@@ -89,8 +88,6 @@ export default function FolderPage() {
     );
   }
 
-  // Use real data from the API
-  const folderName = folderData?.folder_name || "Bookmarked Products";
   const products = folderData?.products || [];
 
   return (
@@ -99,20 +96,20 @@ export default function FolderPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FolderIcon className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-semibold">{folderName}</h1>
+            <h1 className="text-2xl font-semibold">{bookmarkFolderName}</h1>
             <div className="flex items-center gap-1">
               <DialogEditBookmarkFolder
                 folderId={folderId}
-                currentFolderName={folderName}
+                currentFolderName={bookmarkFolderName}
               />
               <DialogDeleteBookmarkFolder
                 folderId={folderId}
-                folderName={folderName}
+                folderName={bookmarkFolderName}
               />
             </div>
           </div>
           <DialogAddProductsToFolder
-            folderName={folderName}
+            folderName={bookmarkFolderName}
             folderId={folderId}
           />
         </div>
