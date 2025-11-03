@@ -5,7 +5,7 @@ export function useDeleteSourceFiles() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (fileIds: string[]) => {
+    mutationFn: async (fileIds: string) => {
       const res = await fetch(`/api/sourceFiles`, {
         method: "DELETE",
         headers: {

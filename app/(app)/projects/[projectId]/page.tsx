@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { notFound, useParams } from "next/navigation";
-import { sampleProducts as productsData } from "@/app/(app)/products/data";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import {
   PiKanbanDuotone,
@@ -15,21 +14,24 @@ import {
   PiCalendarDuotone,
 } from "react-icons/pi";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import { Item } from "@/features/products/ProductsPageProductTable";
-import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
+import ProjectPageProductsTable, {
+  Item,
+} from "@/features/projects/ProjectPageProductsTable";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
   const projectId = params?.projectId;
 
   const { data, isLoading, isError } = useGetProjectById(projectId);
+  const { data: productsData } = useGetAllProducts();
 
   const project = data?.project;
 
-  // Filter products for the current project
-  const projectProducts = productsData.filter(
+  // Transform products data to match ProjectPageProductsTable format
+  const projectProducts = (productsData?.result?.products || []).filter(
     (product: Item) => product.project_id === projectId
   );
 
