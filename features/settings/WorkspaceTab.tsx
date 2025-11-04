@@ -99,7 +99,7 @@ function WorkspaceTab() {
       </div>
 
       {/* Usage Statistics */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <div className="font-medium">Usage Statistics</div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -127,10 +127,10 @@ function WorkspaceTab() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Workspace Settings */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <div className="font-medium">Workspace Settings</div>
 
         <div className="space-y-4">
@@ -180,7 +180,7 @@ function WorkspaceTab() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -42,8 +42,8 @@ function SettingsPage() {
         <Tabs defaultValue="profile" className="w-full">
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="workspace">Workspace</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="billing">Billing</TabsTrigger>
           </TabsList>
 
@@ -51,12 +51,12 @@ function SettingsPage() {
             <ProfileTab />
           </TabsContent>
 
-          <TabsContent value="security" className="mt-6">
-            <SecurityTab />
-          </TabsContent>
-
           <TabsContent value="workspace" className="mt-6">
             <WorkspaceTab />
+          </TabsContent>
+
+          <TabsContent value="security" className="mt-6">
+            <SecurityTab />
           </TabsContent>
 
           <TabsContent value="billing" className="mt-6">
