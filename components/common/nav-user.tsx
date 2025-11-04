@@ -15,7 +15,6 @@ export function NavUser() {
   const { data: userData } = useGetUser("68d2b37127794dcb43a32425"); // Get the actual user id from user session when we implement auth
 
   const user = userData?.user;
-  console.log("user", user);
 
   return (
     <SidebarMenu className="w-52">
@@ -27,7 +26,7 @@ export function NavUser() {
             className="group hover:bg-accent hover:text-foreground duration-300 delay-300 ease-in-out data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <Avatar className="h-8 w-8 rounded-full">
-              <AvatarImage src={user?.avatar} alt={user?.name} />
+              <AvatarImage src={user?.profileAvatar} alt={user?.name} />
               <AvatarFallback className="rounded-full group-hover:bg-accent">
                 {user?.name.charAt(0)}
               </AvatarFallback>
