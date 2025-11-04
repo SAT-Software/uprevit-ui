@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,11 +10,15 @@ import { useUpdateUser } from "@/hooks/user/useUpdateUser";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useId } from "react";
 import { User } from "@/types/user";
+import { uploadFiles } from "@/utils/uploadthing";
+import { ImagePlusIcon, XIcon } from "lucide-react";
 
 function ProfileTab() {
   const id = useId();
   const { data, isLoading, error } = useGetUser("68d2b37127794dcb43a32425"); // The id should come from user session token
   const { mutate: updateUserMutation, isPending } = useUpdateUser();
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
 
   const userProfile = data?.user;
 
@@ -21,16 +26,9 @@ function ProfileTab() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<User>({
-    defaultValues: {
-      name: userProfile?.name || "",
-      profileAvatar: userProfile?.profile_avatar || "",
-      designation: userProfile?.designation || "",
-      email: userProfile?.email || "",
-      phone: userProfile?.phone || "",
-      location: userProfile?.location || "",
-      organization: userProfile?.organization || "",
-    },
     mode: "onSubmit",
   });
 
@@ -38,7 +36,7 @@ function ProfileTab() {
 
   if (error) return <div>Error: {error?.message}</div>;
 
-  const onSubmit: SubmitHandler<User> = (formData) => {
+  const onSubmit: SubmitHandler<User> = async (formData) => {
     try {
       updateUserMutation(formData);
     } catch (error) {
@@ -46,16 +44,50 @@ function ProfileTab() {
     }
   };
 
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingAvatar(true);
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+
+      // Upload the file
+      const utRes = await uploadFiles("imageUploader", {
+        files: [file],
+      });
+
+      if (utRes && utRes[0]?.ufsUrl) {
+        setValue("profileAvatar", utRes[0].ufsUrl);
+      }
+    } catch (error) {
+      console.error("Failed to upload avatar:", error);
+      // Reset preview on error
+      setAvatarPreview("");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = () => {
+    setValue("profileAvatar", "");
+    setAvatarPreview("");
+  };
+
+  const currentAvatar = avatarPreview || userProfile?.profileAvatar;
+
   return (
     <div className="space-y-6">
       {/* Profile Header */}
       <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
         <div className="relative">
           <Avatar className="w-20 h-20">
-            <AvatarImage
-              src="/avatars/profile-avatar.png"
-              alt={userProfile.name}
-            />
+            <AvatarImage src={currentAvatar} alt={userProfile.name} />
             <AvatarFallback className="text-lg border">{`${userProfile.name
               .split(" ")[0]
               .slice(0, 1)}${userProfile.name
@@ -63,25 +95,11 @@ function ProfileTab() {
               .slice(0, 1)
               .toUpperCase()}`}</AvatarFallback>
           </Avatar>
-          <Button
-            size="sm"
-            variant="outline"
-            className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 16v-4m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Button>
+          {uploadingAvatar && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
@@ -103,6 +121,62 @@ function ProfileTab() {
       >
         <div className="font-medium">Personal Information</div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Profile Avatar</label>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Avatar className="w-12 h-12">
+                <AvatarImage src={currentAvatar} alt="Profile avatar" />
+                <AvatarFallback className="text-lg border">AV</AvatarFallback>
+              </Avatar>
+              {uploadingAvatar && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  disabled={uploadingAvatar}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  aria-label="Upload profile avatar"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploadingAvatar}
+                  className="w-fit cursor-pointer"
+                  asChild
+                >
+                  <span>
+                    <ImagePlusIcon className="w-4 h-4 mr-2" />
+                    {uploadingAvatar ? "Uploading..." : "Change Avatar"}
+                  </span>
+                </Button>
+              </div>
+
+              {watch("profileAvatar") && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeAvatar}
+                  disabled={uploadingAvatar}
+                  className="w-fit text-destructive hover:text-destructive"
+                >
+                  <XIcon className="w-4 h-4 mr-2" />
+                  Remove
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Full Name</label>
@@ -110,6 +184,7 @@ function ProfileTab() {
               id={`${id}-name`}
               type="text"
               placeholder="Enter your full name"
+              defaultValue={userProfile?.name}
               className="w-full"
               {...register("name", {
                 required: "Full name is required",
@@ -127,6 +202,7 @@ function ProfileTab() {
             <Input
               type="email"
               placeholder="Enter your email"
+              defaultValue={userProfile?.email}
               className="w-full"
               {...register("email", {
                 required: "Email is required",
@@ -148,6 +224,7 @@ function ProfileTab() {
             <Input
               type="text"
               placeholder="Enter your role"
+              defaultValue={userProfile?.designation}
               className="w-full"
               {...register("designation", {
                 required: "Designation is required",
@@ -165,6 +242,7 @@ function ProfileTab() {
             <Input
               type="text"
               placeholder="Enter your organization"
+              defaultValue={userProfile?.organization}
               className="w-full"
               {...register("organization", {
                 required: "Organization is required",
@@ -182,6 +260,7 @@ function ProfileTab() {
             <Input
               type="text"
               placeholder="Enter your location"
+              defaultValue={userProfile?.location}
               className="w-full"
               {...register("location")}
             />
@@ -192,6 +271,7 @@ function ProfileTab() {
             <Input
               type="tel"
               placeholder="Enter your phone number"
+              defaultValue={userProfile?.phone}
               className="w-full"
               {...register("phone")}
             />
@@ -245,7 +325,7 @@ function ProfileTab() {
             <div>
               <div className="font-medium">Activity Status</div>
               <div className="text-sm text-muted-foreground">
-                Show when you&apos;re active and available.
+                Show when you're active and available.
               </div>
             </div>
             <div className="flex items-center gap-2">
