@@ -15,17 +15,17 @@ function SourceFilesPage() {
     error: foldersError,
   } = useGetAllSourceFileFolders();
 
-  const sourceFilesFolders = foldersData?.data ?? [];
+  const sourceFilesFolders = foldersData?.result ?? [];
 
   console.log("Source Files Folders", sourceFilesFolders);
 
-  const userId = "68a1cf8c2cb63e45ad511688";
-  const {
-    data: bookmarkedData,
-    isLoading: bookmarkedLoading,
-    error: bookmarkedError,
-  } = useGetBookmakredSourceFilesFoldersByUserId(userId);
-  const bookmarkedFolders = bookmarkedData?.data ?? [];
+  // const userId = "68a1cf8c2cb63e45ad511688";
+  // const {
+  //   data: bookmarkedData,
+  //   isLoading: bookmarkedLoading,
+  //   error: bookmarkedError,
+  // } = useGetBookmakredSourceFilesFoldersByUserId(userId);
+  // const bookmarkedFolders = bookmarkedData?.data ?? [];
 
   if (foldersLoading) {
     return (
@@ -53,7 +53,7 @@ function SourceFilesPage() {
       </div>
 
       {/* Bookmarked Folders Section */}
-      <div className="flex flex-col gap-4">
+      {/* <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Bookmarked Folders</h2>
         </div>
@@ -74,7 +74,7 @@ function SourceFilesPage() {
         ) : (
           <SourceFilesFoldersCard folders={bookmarkedFolders} />
         )}
-      </div>
+      </div> */}
 
       {/* All Folders Section */}
       <div className="flex flex-col gap-4">

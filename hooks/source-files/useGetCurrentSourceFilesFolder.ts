@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getSourceFilesFolderById(
+async function getCurrentSourceFilesFolder(
   folderId: string,
   { signal }: { signal: AbortSignal }
 ) {
+  console.log("Folder id in hook", folderId);
   const response = await fetch(
-    `/api/source-files/folder?workspaceId=68d2be511ad93c69d6e39e51&parentId=${folderId}`,
+    `/api/source-files/current-folder?workspaceId=68d2be511ad93c69d6e39e51&id=${folderId}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
@@ -22,10 +23,10 @@ async function getSourceFilesFolderById(
   return data;
 }
 
-export function useGetSourceFilesFolderById(folderId: string) {
+export function useGetCurrentSourceFilesFolder(folderId: string) {
   return useQuery({
-    queryKey: ["source-files-folder", folderId],
-    queryFn: ({ signal }) => getSourceFilesFolderById(folderId, { signal }),
+    queryKey: ["current-source-files-folder", folderId],
+    queryFn: ({ signal }) => getCurrentSourceFilesFolder(folderId, { signal }),
     enabled: Boolean(folderId),
   });
 }

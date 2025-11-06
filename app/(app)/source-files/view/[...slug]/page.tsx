@@ -24,22 +24,23 @@ import UploadSourceFiles from "@/features/source-files/UploadSourceFiles";
 import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles";
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
-import type {
-  SourceFilesFolder,
-  SourceFilesFolderResponse,
-} from "@/types/source-files";
+import type { SourceFilesFolder } from "@/types/source-files";
 import { uploadFiles } from "@/utils/uploadthing";
 import { FolderIcon } from "lucide-react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  PiBookmarkSimpleDuotone,
   PiFileDocDuotone,
   PiFileDuotone,
   PiFilePdfDuotone,
+  PiImageDuotone,
   PiPlusBold,
   PiTrashDuotone,
 } from "react-icons/pi";
+import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
+import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 
 type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
 
@@ -80,16 +81,17 @@ export default function ProductSourceFilesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const uploadToBackend = useUploadSourceFiles();
   const deleteSourceFile = useDeleteSourceFiles();
+  const router = useRouter();
 
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useGetSourceFilesFolderById(slug ?? "");
+  const { data: currentFolderData } = useGetCurrentSourceFilesFolder(
+    slug ?? ""
+  );
 
-  console.log("source file folder data", data);
-
-  const folderData = data as SourceFilesFolderResponse | undefined;
-  const folder: SourceFilesFolder | undefined =
-    folderData?.data ?? folderData?.folder;
+  const folder = data?.result;
+  const currentFolder = currentFolderData?.result; // TODO - Need to fix this in backend and here
 
   if (isLoading) {
     return (
@@ -106,16 +108,6 @@ export default function ProductSourceFilesPage() {
       <div className="p-4">
         <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6 text-destructive">
           Failed to load folder. Please try again.
-        </div>
-      </div>
-    );
-  }
-
-  if (!folder || !folder?._id) {
-    return (
-      <div className="p-4">
-        <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6">
-          Loading folder...
         </div>
       </div>
     );
@@ -175,10 +167,7 @@ export default function ProductSourceFilesPage() {
           <div className="flex items-center gap-2">
             <FolderIcon className="w-6 h-6 text-primary" />
             <div className="flex flex-col">
-              <p className="text-base font-semibold">{folder?.folder_name}</p>
-              <p className="text-xs text-muted-foreground">
-                Product ID: {folder?.product_id}
-              </p>
+              <p className="text-base font-semibold">{currentFolder?.name}</p>
             </div>
           </div>
 
@@ -222,7 +211,7 @@ export default function ProductSourceFilesPage() {
           </Dialog>
         </div>
 
-        {folder?.folder.length === 0 ? (
+        {folder?.length === 0 ? (
           <Card className="w-full h-[calc(100vh-12rem)] flex items-center justify-center bg-background">
             <CardContent className="flex flex-col items-center gap-4 text-muted-foreground">
               <FolderIcon className="w-16 h-16" />
@@ -234,73 +223,129 @@ export default function ProductSourceFilesPage() {
           </Card>
         ) : (
           <div className="w-full">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {folder?.folder?.map((file) => (
-                <div
-                  key={file._id}
-                  className="relative flex flex-col w-full max-w-[220px] border border-input bg-accent/80 rounded-2xl p-2 mx-auto"
-                >
-                  <Card className="shadow-none hover:bg-muted/50 transition-colors w-full">
-                    <CardContent className="p-2">
-                      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg border border-input">
-                        {(() => {
-                          const kind = getFileKind(
-                            file.file_name || file.url || ""
-                          );
-                          if (kind === "image") {
-                            return (
-                              <Image
-                                src={file.url}
-                                alt={file.file_name}
-                                fill
-                                sizes="(min-width: 1024px) 20vw, 33vw"
-                                className="object-cover"
-                              />
-                            );
-                          }
-                          if (kind === "pdf") {
-                            return (
-                              <div className="flex items-center justify-center w-full h-full bg-accent">
-                                <PiFilePdfDuotone className="w-15 h-15 text-accent-foreground/40" />
-                              </div>
-                            );
-                          }
-                          if (
-                            kind === "word" ||
-                            kind === "docx" ||
-                            kind === "doc"
-                          ) {
-                            return (
-                              <div className="flex items-center justify-center w-full h-full bg-accent">
-                                <PiFileDocDuotone className="w-15 h-15 text-accent-foreground/40" />
-                              </div>
-                            );
-                          }
-                          return (
-                            <div className="flex items-center justify-center w-full h-full bg-accent">
-                              <PiFileDuotone className="w-15 h-15 text-accent-foreground/40" />
-                            </div>
-                          );
-                        })()}
-                        <button
-                          type="button"
-                          aria-label="Delete file"
-                          onClick={() => setFileIdToDelete(file._id)}
-                          className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md p-1.5 bg-background/80 hover:bg-background text-muted-foreground border border-input shadow-sm"
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {folder?.map((file: SourceFilesFolder) => {
+                if (file.type === "file")
+                  return (
+                    <div
+                      key={file._id}
+                      className="relative flex flex-col w-full max-w-40 bg-accent/80 rounded-xl mx-auto"
+                    >
+                      <Card className="shadow-none hover:bg-muted/50 transition-colors w-full">
+                        <CardContent className="p-2">
+                          <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg border border-input">
+                            {(() => {
+                              const kind = getFileKind(file.url || "");
+                              if (kind === "image" && file.url) {
+                                return (
+                                  <Image
+                                    src={file.url}
+                                    alt={file.name}
+                                    fill
+                                    sizes="10vw, 23vw"
+                                    className="object-cover"
+                                  />
+                                );
+                              } else {
+                                <div className="flex items-center justify-center w-full h-full bg-accent">
+                                  <PiImageDuotone className="w-15 h-15 text-accent-foreground/40" />
+                                </div>;
+                              }
+                              if (kind === "pdf") {
+                                return (
+                                  <div className="flex items-center justify-center w-full h-full bg-accent">
+                                    <PiFilePdfDuotone className="w-15 h-15 text-accent-foreground/40" />
+                                  </div>
+                                );
+                              }
+                              if (
+                                kind === "word" ||
+                                kind === "docx" ||
+                                kind === "doc"
+                              ) {
+                                return (
+                                  <div className="flex items-center justify-center w-full h-full bg-accent">
+                                    <PiFileDocDuotone className="w-15 h-15 text-accent-foreground/40" />
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="flex items-center justify-center w-full h-full bg-accent">
+                                  <PiFileDuotone className="w-15 h-15 text-accent-foreground/40" />
+                                </div>
+                              );
+                            })()}
+                            <button
+                              type="button"
+                              aria-label="Delete file"
+                              onClick={() => setFileIdToDelete(file._id)}
+                              className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md p-1.5 bg-background/80 hover:bg-background text-muted-foreground border border-input shadow-sm"
+                            >
+                              <PiTrashDuotone className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <p
+                            className="mt-2 text-xs font-medium truncate px-2"
+                            title={file.name}
+                          >
+                            {file.name}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  );
+              })}
+              {folder?.map((folder: SourceFilesFolder) => {
+                if (folder.type === "folder")
+                  return (
+                    <div
+                      key={folder._id}
+                      className="relative flex flex-col w-full max-w-xs rounded-2xl"
+                    >
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Toggle bookmark folder"
+                          // onClick={(e) => {
+                          //   e.stopPropagation();
+                          //   toggleBookmark.mutate({
+                          //     folderId: folder._id,
+                          //     userId,
+                          //   });
+                          // }}
+                          // disabled={toggleBookmark.isPending}
+                          title="Bookmark folder"
                         >
-                          <PiTrashDuotone className="w-4 h-4" />
-                        </button>
+                          <PiBookmarkSimpleDuotone className="h-5 w-5" />
+                        </Button>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <DialogDeleteSourceFilesFolder
+                            id={folder._id}
+                            folderName={folder.name}
+                          />
+                        </div>
                       </div>
-                      <p
-                        className="mt-2 text-xs font-medium truncate"
-                        title={file.file_name}
+                      <Card
+                        className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full"
+                        onClick={() =>
+                          router.push(`/source-files/view/${folder._id}`)
+                        }
                       >
-                        {file.file_name}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+                        <CardContent className="p-4 flex flex-row items-center gap-3">
+                          <div className="w-16 h-16 rounded-lg bg-muted border border-input flex items-center justify-center">
+                            <FolderIcon className="w-10 h-10 text-muted-foreground" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-sm mb-1 truncate">
+                              {folder.name}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  );
+              })}
             </div>
           </div>
         )}

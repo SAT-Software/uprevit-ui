@@ -8,7 +8,7 @@ import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteS
 
 interface SourceFilesFolder {
   _id: string;
-  folder_name: string;
+  name: string;
   product_id: string;
   created_at?: string;
 }
@@ -29,7 +29,7 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
           {folders?.map((folder) => (
             <div
               key={folder._id}
-              className="relative flex flex-col w-full max-w-sm border border-input rounded-2xl p-2"
+              className="relative flex flex-col w-full max-w-xs rounded-2xl"
             >
               <div className="absolute top-2 right-2 flex gap-2">
                 <Button
@@ -48,7 +48,7 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                 <div onClick={(e) => e.stopPropagation()}>
                   <DialogDeleteSourceFilesFolder
                     id={folder._id}
-                    folderName={folder.folder_name}
+                    folderName={folder.name}
                   />
                 </div>
               </div>
@@ -62,11 +62,11 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-sm mb-1 truncate">
-                      {folder.folder_name}
+                      {folder.name}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    {/* <p className="text-xs text-muted-foreground truncate">
                       Product ID: {folder.product_id}
-                    </p>
+                    </p> */}
                     {folder.created_at && (
                       <p className="text-xs text-muted-foreground">
                         Created:{" "}
