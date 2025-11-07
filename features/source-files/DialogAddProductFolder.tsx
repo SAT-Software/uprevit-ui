@@ -15,18 +15,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useAddSourceFilesFolder } from "@/hooks/source-files/useAddSourceFilesFolder";
+import { PiPlusBold } from "react-icons/pi";
 
 interface FormValues {
   folderName: string;
 }
 
-interface DialogAddProductFolderProps {
-  children?: React.ReactNode;
-}
-
 export default function DialogAddProductFolder({
-  children,
-}: DialogAddProductFolderProps) {
+  parentId,
+}: {
+  parentId: string;
+}) {
   const { mutate: addSourceFilesFolder, isPending } = useAddSourceFilesFolder();
   const [open, setOpen] = useState(false);
 
@@ -52,6 +51,7 @@ export default function DialogAddProductFolder({
         workspace_id: "68d2be511ad93c69d6e39e51",
         name: data.folderName,
         type: "folder",
+        parentId: parentId,
       },
       {
         onSuccess: () => {
@@ -71,12 +71,10 @@ export default function DialogAddProductFolder({
       }}
     >
       <DialogTrigger asChild>
-        {children || (
-          <Button variant="default" className="flex items-center gap-2">
-            <PlusIcon size={16} />
-            Add New Folder
-          </Button>
-        )}
+        <Button variant="outline" className="flex items-center gap-2">
+          <PiPlusBold />
+          Add Product Folder
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form

@@ -5,6 +5,7 @@ interface AddSourceFilesFolderRequest {
   workspace_id: string;
   name: string;
   type: string;
+  parentId?: string;
 }
 
 export function useAddSourceFilesFolder() {

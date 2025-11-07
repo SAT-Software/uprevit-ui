@@ -6,12 +6,12 @@ export function useDeleteSourceFiles() {
 
   return useMutation({
     mutationFn: async (fileIds: string) => {
-      const res = await fetch(`/api/sourceFiles`, {
+      const res = await fetch(`/api/source-files/${fileIds}`, {
         method: "DELETE",
         headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ fileIds }),
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");

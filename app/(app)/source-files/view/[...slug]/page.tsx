@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,21 +9,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import UploadSourceFiles from "@/features/source-files/UploadSourceFiles";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
+import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
+import DialogEditSourceFilesFolder from "@/features/source-files/DialogEditSourceFilesFolder";
+import DialogUploadSourceFiles from "@/features/source-files/DialogUploadSourceFiles";
 import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles";
+import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
-import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
+import { cn } from "@/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
-import { uploadFiles } from "@/utils/uploadthing";
 import { FolderIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -36,13 +30,8 @@ import {
   PiFileDuotone,
   PiFilePdfDuotone,
   PiImageDuotone,
-  PiPlusBold,
   PiTrashDuotone,
 } from "react-icons/pi";
-import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
-import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
-import { cn } from "@/lib/utils";
-import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
 
 type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
 
@@ -78,13 +67,8 @@ function getFileKind(fileNameOrUrl: string): FileKind {
 export default function ProductSourceFilesPage() {
   const params = useParams<{ slug: string }>();
   const slug = params?.slug as string;
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const { mutateAsync: uploadToBackend } = useUploadSourceFiles();
   const deleteSourceFile = useDeleteSourceFiles();
   const router = useRouter();
-
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useGetSourceFilesFolderById(slug ?? "");
@@ -115,69 +99,19 @@ export default function ProductSourceFilesPage() {
     );
   }
 
-  const handleUploadClick = async () => {
-    if (!selectedFiles.length) return;
-    try {
-      console.log("selectedFiles", selectedFiles);
-      setIsUploading(true);
-      const utRes = await uploadFiles("imageUploader", {
-        files: selectedFiles,
-      });
-
-      // Map UploadThing response to backend format
-      type UploadThingFile = {
-        name?: string;
-        fileName?: string;
-        key?: string;
-        url?: string;
-        ufsUrl?: string;
-        fileUrl?: string;
-      };
-      const filesPayload = (
-        Array.isArray(utRes) ? (utRes as UploadThingFile[]) : []
-      )
-        .map((f) => {
-          const name = f?.name ?? f?.fileName ?? f?.key ?? "file";
-          const url = f?.url ?? f?.ufsUrl ?? f?.fileUrl;
-          if (!url) return null;
-          return { file_name: name as string, url: url as string };
-        })
-        .filter(Boolean) as { file_name: string; url: string }[];
-
-      if (!filesPayload.length) {
-        throw new Error("No uploaded file URLs returned");
-      }
-
-      for (const file of filesPayload) {
-        await uploadToBackend({
-          workspace_id: "68d2be511ad93c69d6e39e51",
-          name: file.file_name,
-          type: "file",
-          url: file.url,
-          folderId: folder._id,
-          parentId: currentFolder._id,
-        });
-      }
-
-      setIsDialogOpen(false);
-      setSelectedFiles([]);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4 p-4 h-full">
       <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full h-full">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <div className="flex items-center gap-2">
-            <FolderIcon className="w-6 h-6 text-primary" />
+            <div className="w-8 h-8 rounded-md bg-muted border border-input flex items-center justify-center">
+              <FolderIcon className="w-4 h-4 text-muted-foreground" />
+            </div>
             <div className="flex flex-col">
               <p className="text-base font-semibold">{currentFolder?.name}</p>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
+              <DialogEditSourceFilesFolder currentFolder={currentFolder} />
               <DialogDeleteSourceFilesFolder
                 id={currentFolder?._id}
                 folderName={currentFolder?.name}
@@ -185,50 +119,11 @@ export default function ProductSourceFilesPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <DialogAddProductFolder>
-              <Button variant="outline" className="flex items-center gap-2">
-                <PiPlusBold />
-                Add Product Folder
-              </Button>
-            </DialogAddProductFolder>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="default" className="flex items-center gap-2">
-                  Upload Source File <PiPlusBold />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <FolderIcon className="w-5 h-5" />
-                    Upload Source Files for {folder?.folder_name}
-                  </DialogTitle>
-                  <DialogDescription>
-                    Upload source files for this product. You can drag and drop
-                    files or click to browse.
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="py-4">
-                  <UploadSourceFiles onSelectionChange={setSelectedFiles} />
-                </div>
-
-                <DialogFooter className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleUploadClick}
-                    disabled={!selectedFiles.length || isUploading}
-                  >
-                    {isUploading ? "Uploading..." : "Upload Files"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DialogAddProductFolder parentId={currentFolder?._id} />
+            <DialogUploadSourceFiles
+              folder={folder}
+              currentFolder={currentFolder}
+            />
           </div>
         </div>
 
@@ -279,12 +174,6 @@ export default function ProductSourceFilesPage() {
                           >
                             <PiBookmarkSimpleDuotone className="h-5 w-5" />
                           </Button>
-                          <div onClick={(e) => e.stopPropagation()}>
-                            <DialogDeleteSourceFilesFolder
-                              id={folder._id}
-                              folderName={folder.name}
-                            />
-                          </div>
                         </div>
                         <Card
                           className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full"
