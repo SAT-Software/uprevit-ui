@@ -1,12 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { PiPlusBold } from "react-icons/pi";
 import { BookmarkIcon } from "lucide-react";
 import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import SourceFilesFoldersCard from "@/features/source-files/SourceFilesFoldersCard";
-import { useGetBookmakredSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmakredSourceFilesFoldersByUserId";
+import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
+import { SourceFilesFolder } from "@/types/source-files";
+
+interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
+  isBookmarked?: boolean;
+  parentId?: string;
+}
 
 function SourceFilesPage() {
   const {
@@ -17,15 +21,16 @@ function SourceFilesPage() {
 
   const sourceFilesFolders = foldersData?.result ?? [];
 
-  console.log("Source Files Folders", sourceFilesFolders);
+  const userId = "68d2b37127794dcb43a32425";
+  const {
+    data: bookmarkedData,
+    isLoading: bookmarkedLoading,
+    isError: bookmarkedError,
+  } = useGetBookmarkedSourceFilesFoldersByUserId(userId);
 
-  // const userId = "68a1cf8c2cb63e45ad511688";
-  // const {
-  //   data: bookmarkedData,
-  //   isLoading: bookmarkedLoading,
-  //   error: bookmarkedError,
-  // } = useGetBookmakredSourceFilesFoldersByUserId(userId);
-  // const bookmarkedFolders = bookmarkedData?.data ?? [];
+  const bookmarkedFolders = bookmarkedData?.result.filter(
+    (folder: BookmarkedSourceFilesFolder) => folder.parentId === null
+  );
 
   if (foldersLoading) {
     return (
@@ -53,7 +58,7 @@ function SourceFilesPage() {
       </div>
 
       {/* Bookmarked Folders Section */}
-      {/* <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Bookmarked Folders</h2>
         </div>
@@ -65,7 +70,7 @@ function SourceFilesPage() {
           <div className="flex items-center justify-center h-[200px] gap-4 text-red-500">
             <div>Failed to load bookmarked folders.</div>
           </div>
-        ) : bookmarkedFolders.length === 0 ? (
+        ) : bookmarkedFolders?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[200px] gap-4 text-muted-foreground">
             <BookmarkIcon className="w-16 h-16" />
             <p className="text-lg">No bookmarked folders yet.</p>
@@ -74,18 +79,13 @@ function SourceFilesPage() {
         ) : (
           <SourceFilesFoldersCard folders={bookmarkedFolders} />
         )}
-      </div> */}
+      </div>
 
       {/* All Folders Section */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">All Folders</h2>
-          <DialogAddProductFolder>
-            <Button variant="default" className="flex items-center gap-2">
-              <PiPlusBold />
-              Add Product Folder
-            </Button>
-          </DialogAddProductFolder>
+          <DialogAddProductFolder />
         </div>
         <SourceFilesFoldersCard folders={sourceFilesFolders} />
       </div>

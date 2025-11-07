@@ -11,19 +11,18 @@ export function useToggleBookmarkSourceFilesFolder() {
 
   return useMutation({
     mutationFn: async (payload: ToggleBookmarkSourceFilesFolderRequest) => {
-      const res = await fetch(
-        `/api/bookmarks/sourceFiles/${payload.folderId}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            user_id: payload.userId,
-            workspace_id: "68a1ce212cb63e45ad511684",
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await fetch(`/api/bookmarks/source-files`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: payload.userId,
+          workspace_id: "68d2be511ad93c69d6e39e51",
+          folder_id: payload.folderId,
+        }),
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+          "Content-Type": "application/json",
+        },
+      });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(

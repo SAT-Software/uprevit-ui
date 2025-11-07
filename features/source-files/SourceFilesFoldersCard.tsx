@@ -18,8 +18,9 @@ interface SourceFilesFoldersCardProps {
 
 function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
   const router = useRouter();
-  const toggleBookmark = useToggleBookmarkSourceFilesFolder();
-  const userId = "68a1cf8c2cb63e45ad511688";
+  const { mutate: toggleBookmark, isPending } =
+    useToggleBookmarkSourceFilesFolder();
+  const userId = "68d2b37127794dcb43a32425";
 
   return (
     <div className="w-full h-full">
@@ -35,11 +36,10 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                   variant="ghost"
                   size="icon"
                   aria-label="Toggle bookmark folder"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleBookmark.mutate({ folderId: folder._id, userId });
-                  }}
-                  disabled={toggleBookmark.isPending}
+                  onClick={() =>
+                    toggleBookmark({ folderId: folder._id, userId })
+                  }
+                  disabled={isPending}
                   title="Bookmark folder"
                 >
                   <PiBookmarkSimpleDuotone className="h-5 w-5" />

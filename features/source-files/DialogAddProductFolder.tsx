@@ -25,8 +25,8 @@ export default function DialogAddProductFolder({
   parentId,
   folderId,
 }: {
-  parentId: string;
-  folderId: string;
+  parentId?: string;
+  folderId?: string;
 }) {
   const { mutate: addSourceFilesFolder, isPending } =
     useAddSourceFilesFolder(folderId);
