@@ -1,14 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 
-async function getBookmakredSourceFilesFoldersByUserId(
+async function getBookmarkedSourceFilesFoldersByUserId(
   userId: string,
   { signal }: { signal: AbortSignal }
 ) {
-  console.log("User ID", userId);
-  const response = await fetch(
-    `/api/bookmarks/sourceFiles?userId=68a1cf8c2cb63e45ad511688`,
-    { signal }
-  );
+  const response = await fetch(`/api/bookmarks/source-files?userId=${userId}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    signal,
+  });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(
@@ -19,11 +21,11 @@ async function getBookmakredSourceFilesFoldersByUserId(
   return data;
 }
 
-export function useGetBookmakredSourceFilesFoldersByUserId(userId: string) {
+export function useGetBookmarkedSourceFilesFoldersByUserId(userId: string) {
   return useQuery({
     queryKey: ["bookmarked-source-files-folders", userId],
     queryFn: ({ signal }) =>
-      getBookmakredSourceFilesFoldersByUserId(userId, { signal }),
+      getBookmarkedSourceFilesFoldersByUserId(userId, { signal }),
     enabled: Boolean(userId),
   });
 }

@@ -15,12 +15,14 @@ import DialogAddProductFolder from "@/features/source-files/DialogAddProductFold
 import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
 import DialogEditSourceFilesFolder from "@/features/source-files/DialogEditSourceFilesFolder";
 import DialogUploadSourceFiles from "@/features/source-files/DialogUploadSourceFiles";
+import SourceFilesFoldersCard from "@/features/source-files/SourceFilesFoldersCard";
 import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles";
+import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
 import { cn } from "@/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
-import { FolderIcon } from "lucide-react";
+import { BookmarkIcon, FolderIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,6 +34,11 @@ import {
   PiImageDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
+
+interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
+  isBookmarked?: boolean;
+  parentId?: string;
+}
 
 type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
 
@@ -75,6 +82,22 @@ export default function ProductSourceFilesPage() {
   const { data: currentFolderData } = useGetCurrentSourceFilesFolder(
     slug ?? ""
   );
+
+  const userId = "68d2b37127794dcb43a32425";
+  const {
+    data: bookmarkedData,
+    isLoading: bookmarkedLoading,
+    isError: bookmarkedError,
+  } = useGetBookmarkedSourceFilesFoldersByUserId(userId);
+
+  console.log("Bookmark data", bookmarkedData);
+  console.log("slug", slug);
+
+  const bookmarkedFolders = bookmarkedData?.result.filter(
+    (folder: BookmarkedSourceFilesFolder) => folder.parentId === slug[0]
+  );
+
+  console.log("Bookmark folder", bookmarkedFolders);
 
   const folder = data?.result;
   const currentFolder = currentFolderData?.result; // TODO - Need to fix this in backend and here
@@ -133,6 +156,30 @@ export default function ProductSourceFilesPage() {
               folderId={slug}
             />
           </div>
+        </div>
+
+        {/* Bookmarked Folders Section */}
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Bookmarked Folders</h2>
+          </div>
+          {bookmarkedLoading ? (
+            <div className="flex items-center justify-center h-[200px] gap-4 text-muted-foreground">
+              <div>Loading...</div>
+            </div>
+          ) : bookmarkedError ? (
+            <div className="flex items-center justify-center h-[200px] gap-4 text-red-500">
+              <div>Failed to load bookmarked folders.</div>
+            </div>
+          ) : bookmarkedFolders?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[200px] gap-4 text-muted-foreground">
+              <BookmarkIcon className="w-16 h-16" />
+              <p className="text-lg">No bookmarked folders yet.</p>
+              <p className="text-sm">Use the bookmark button on any folder.</p>
+            </div>
+          ) : (
+            <SourceFilesFoldersCard folders={bookmarkedFolders} />
+          )}
         </div>
 
         {folder?.length === 0 ? (
