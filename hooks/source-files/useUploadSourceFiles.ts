@@ -1,25 +1,27 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-type UploadSourceFile = {
-  file_name: string;
-  url: string;
-};
-
 type UploadSourceFilesRequest = {
+  workspace_id: string;
+  name: string;
+  type: string;
+  url: string;
   folderId: string;
-  files: UploadSourceFile[];
+  parentId: string;
 };
 
 export function useUploadSourceFiles() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ folderId, files }: UploadSourceFilesRequest) => {
-      const res = await fetch(`/api/sourceFiles/folders/${folderId}`, {
+    mutationFn: async (data: UploadSourceFilesRequest) => {
+      const res = await fetch(`/api/source-files`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ files }),
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
 
       if (!res.ok) {
@@ -29,11 +31,11 @@ export function useUploadSourceFiles() {
 
       return res.json().catch(() => null);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (_, data) => {
       toast.success("Files uploaded successfully");
       // Invalidate folder details so UI can refresh
       queryClient.invalidateQueries({
-        queryKey: ["source-files-folder", variables.folderId],
+        queryKey: ["source-files-folder", data.folderId],
       });
     },
     onError: (error) => {

@@ -40,7 +40,7 @@ export default function DialogAddProductFolder({
 }: DialogAddProductFolderProps) {
   const { data: productsData, isLoading, error } = useGetAllProducts();
   const products = productsData?.result?.products ?? [];
-  const addSourceFilesFolder = useAddSourceFilesFolder();
+  const { mutate: addSourceFilesFolder, isPending } = useAddSourceFilesFolder();
   const [internalOpen, setInternalOpen] = useState(false);
 
   const {
@@ -75,9 +75,10 @@ export default function DialogAddProductFolder({
     if (!product) return;
 
     try {
-      await addSourceFilesFolder.mutateAsync({
-        product_id: data.productId,
+      await addSourceFilesFolder({
+        workspace_id: "68d2be511ad93c69d6e39e51",
         name: product.product_name || "Unnamed Product",
+        type: "folder",
       });
 
       console.log("Successfully added product to source files folder");
@@ -211,13 +212,8 @@ export default function DialogAddProductFolder({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={!selectedProductId || addSourceFilesFolder.isPending}
-              >
-                {addSourceFilesFolder.isPending
-                  ? "Adding..."
-                  : "Add to Source Files"}
+              <Button type="submit" disabled={!selectedProductId || isPending}>
+                {isPending ? "Adding..." : "Add to Source Files"}
               </Button>
             </DialogFooter>
           </form>
@@ -344,13 +340,8 @@ export default function DialogAddProductFolder({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!selectedProductId || addSourceFilesFolder.isPending}
-            >
-              {addSourceFilesFolder.isPending
-                ? "Adding..."
-                : "Add to Source Files"}
+            <Button type="submit" disabled={!selectedProductId || isPending}>
+              {isPending ? "Adding..." : "Add to Source Files"}
             </Button>
           </DialogFooter>
         </form>

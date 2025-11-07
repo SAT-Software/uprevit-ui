@@ -25,7 +25,7 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
   return (
     <div className="w-full h-full">
       {folders?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
           {folders?.map((folder) => (
             <div
               key={folder._id}

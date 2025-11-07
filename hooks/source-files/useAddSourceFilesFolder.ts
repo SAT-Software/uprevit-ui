@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface AddSourceFilesFolderRequest {
-  product_id: string;
+  workspace_id: string;
   name: string;
+  type: string;
 }
 
 export function useAddSourceFilesFolder() {
@@ -11,12 +12,12 @@ export function useAddSourceFilesFolder() {
 
   return useMutation({
     mutationFn: async (sourceFilesFolder: AddSourceFilesFolderRequest) => {
-      const res = await fetch("/api/sourceFiles/folders", {
+      const res = await fetch("/api/source-files", {
         method: "POST",
         body: JSON.stringify(sourceFilesFolder),
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+          "Content-Type": "application/json",
         },
       });
       if (!res.ok) {
