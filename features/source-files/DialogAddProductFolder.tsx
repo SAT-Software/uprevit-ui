@@ -23,10 +23,13 @@ interface FormValues {
 
 export default function DialogAddProductFolder({
   parentId,
+  folderId,
 }: {
   parentId: string;
+  folderId: string;
 }) {
-  const { mutate: addSourceFilesFolder, isPending } = useAddSourceFilesFolder();
+  const { mutate: addSourceFilesFolder, isPending } =
+    useAddSourceFilesFolder(folderId);
   const [open, setOpen] = useState(false);
 
   const {

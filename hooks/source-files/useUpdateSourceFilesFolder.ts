@@ -6,7 +6,7 @@ interface UpdateSourceFilesFolderRequest {
   id: string;
 }
 
-export function useUpdateSourceFilesFolder() {
+export function useUpdateSourceFilesFolder(folderId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -29,11 +29,9 @@ export function useUpdateSourceFilesFolder() {
     },
     onSuccess: () => {
       toast.success("Source files folder updated successfully");
+
       queryClient.invalidateQueries({
-        queryKey: ["source-files-folders"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["source-files-folder-by-id"],
+        queryKey: ["current-source-files-folder", folderId],
       });
     },
     onError: (error) => {

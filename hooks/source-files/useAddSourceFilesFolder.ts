@@ -8,7 +8,7 @@ interface AddSourceFilesFolderRequest {
   parentId?: string;
 }
 
-export function useAddSourceFilesFolder() {
+export function useAddSourceFilesFolder(folderId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -29,8 +29,13 @@ export function useAddSourceFilesFolder() {
     },
     onSuccess: () => {
       toast.success("Source files folder added successfully");
+
       queryClient.invalidateQueries({
         queryKey: ["source-files-folders"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folder", folderId],
       });
     },
     onError: (error) => {

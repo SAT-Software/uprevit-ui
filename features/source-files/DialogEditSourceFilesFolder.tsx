@@ -24,11 +24,13 @@ interface FormValues {
 
 export default function DialogEditSourceFilesFolder({
   currentFolder,
+  folderId,
 }: {
   currentFolder: SourceFilesFolder;
+  folderId: string;
 }) {
   const { mutate: updateSourceFilesFolder, isPending } =
-    useUpdateSourceFilesFolder();
+    useUpdateSourceFilesFolder(folderId);
   const [open, setOpen] = useState(false);
 
   const {

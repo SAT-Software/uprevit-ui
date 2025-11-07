@@ -23,17 +23,19 @@ import { useDeleteSourceFilesFolder } from "@/hooks/source-files/useDeleteSource
 interface DialogDeleteSourceFilesFolderProps {
   id: string;
   folderName: string;
+  folderId?: string;
 }
 
 export default function DialogDeleteSourceFilesFolder({
   id,
   folderName,
+  folderId,
 }: DialogDeleteSourceFilesFolderProps) {
   const inputId = useId();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
 
-  const deleteFolder = useDeleteSourceFilesFolder();
+  const deleteFolder = useDeleteSourceFilesFolder(folderId);
   const disabled = value !== folderName || deleteFolder.isPending;
 
   async function handleConfirm() {

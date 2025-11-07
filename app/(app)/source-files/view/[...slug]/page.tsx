@@ -67,7 +67,7 @@ function getFileKind(fileNameOrUrl: string): FileKind {
 export default function ProductSourceFilesPage() {
   const params = useParams<{ slug: string }>();
   const slug = params?.slug as string;
-  const deleteSourceFile = useDeleteSourceFiles();
+  const deleteSourceFile = useDeleteSourceFiles(slug);
   const router = useRouter();
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
 
@@ -111,18 +111,26 @@ export default function ProductSourceFilesPage() {
               <p className="text-base font-semibold">{currentFolder?.name}</p>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
-              <DialogEditSourceFilesFolder currentFolder={currentFolder} />
+              <DialogEditSourceFilesFolder
+                currentFolder={currentFolder}
+                folderId={slug}
+              />
               <DialogDeleteSourceFilesFolder
                 id={currentFolder?._id}
                 folderName={currentFolder?.name}
+                folderId={slug}
               />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <DialogAddProductFolder parentId={currentFolder?._id} />
+            <DialogAddProductFolder
+              parentId={currentFolder?._id}
+              folderId={slug}
+            />
             <DialogUploadSourceFiles
               folder={folder}
               currentFolder={currentFolder}
+              folderId={slug}
             />
           </div>
         </div>

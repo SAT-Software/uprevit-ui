@@ -19,14 +19,16 @@ import { PiPlusBold } from "react-icons/pi";
 export default function DialogUploadSourceFiles({
   folder,
   currentFolder,
+  folderId,
 }: {
   folder: SourceFilesFolder;
   currentFolder: SourceFilesFolder;
+  folderId: string;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const { mutateAsync: uploadToBackend } = useUploadSourceFiles();
+  const { mutateAsync: uploadToBackend } = useUploadSourceFiles(folderId);
 
   const handleUploadClick = async () => {
     if (!selectedFiles.length) return;

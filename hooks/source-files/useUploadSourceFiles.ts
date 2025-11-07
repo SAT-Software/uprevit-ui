@@ -10,7 +10,7 @@ type UploadSourceFilesRequest = {
   parentId: string;
 };
 
-export function useUploadSourceFiles() {
+export function useUploadSourceFiles(currentFolderId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -31,11 +31,11 @@ export function useUploadSourceFiles() {
 
       return res.json().catch(() => null);
     },
-    onSuccess: (_, data) => {
+    onSuccess: () => {
       toast.success("Files uploaded successfully");
-      // Invalidate folder details so UI can refresh
+
       queryClient.invalidateQueries({
-        queryKey: ["source-files-folder", data.folderId],
+        queryKey: ["source-files-folder", currentFolderId],
       });
     },
     onError: (error) => {
