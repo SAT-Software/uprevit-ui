@@ -4,11 +4,10 @@ import { FolderIcon } from "lucide-react";
 import { PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
-import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
 
 interface SourceFilesFolder {
   _id: string;
-  folder_name: string;
+  name: string;
   product_id: string;
   created_at?: string;
 }
@@ -25,11 +24,11 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
   return (
     <div className="w-full h-full">
       {folders?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
           {folders?.map((folder) => (
             <div
               key={folder._id}
-              className="relative flex flex-col w-full max-w-sm border border-input rounded-2xl p-2"
+              className="relative flex flex-col w-full max-w-xs rounded-2xl"
             >
               <div className="absolute top-2 right-2 flex gap-2">
                 <Button
@@ -45,12 +44,6 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                 >
                   <PiBookmarkSimpleDuotone className="h-5 w-5" />
                 </Button>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <DialogDeleteSourceFilesFolder
-                    id={folder._id}
-                    folderName={folder.folder_name}
-                  />
-                </div>
               </div>
               <Card
                 className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full"
@@ -62,11 +55,11 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-sm mb-1 truncate">
-                      {folder.folder_name}
+                      {folder.name}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    {/* <p className="text-xs text-muted-foreground truncate">
                       Product ID: {folder.product_id}
-                    </p>
+                    </p> */}
                     {folder.created_at && (
                       <p className="text-xs text-muted-foreground">
                         Created:{" "}
