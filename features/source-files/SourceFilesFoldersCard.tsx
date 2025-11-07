@@ -4,7 +4,6 @@ import { FolderIcon } from "lucide-react";
 import { PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
-import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
 
 interface SourceFilesFolder {
   _id: string;
@@ -45,12 +44,6 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                 >
                   <PiBookmarkSimpleDuotone className="h-5 w-5" />
                 </Button>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <DialogDeleteSourceFilesFolder
-                    id={folder._id}
-                    folderName={folder.name}
-                  />
-                </div>
               </div>
               <Card
                 className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full"

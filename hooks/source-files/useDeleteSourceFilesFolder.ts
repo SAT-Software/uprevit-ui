@@ -1,13 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function useDeleteSourceFilesFolder() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (folderId: string) => {
-      const res = await fetch(`/api/sourceFiles/folders/${folderId}`, {
+      const res = await fetch(`/api/source-files/${folderId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+          "Content-Type": "application/json",
+        },
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
@@ -16,6 +22,7 @@ export function useDeleteSourceFilesFolder() {
       return res.json().catch(() => null);
     },
     onSuccess: () => {
+      router.push("/source-files");
       toast.success("Source files folder deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["source-files-folders"] });
       // Also invalidate any bookmarked source-file folders queries regardless of user id

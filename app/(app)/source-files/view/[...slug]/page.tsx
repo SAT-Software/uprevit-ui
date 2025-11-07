@@ -42,6 +42,7 @@ import {
 import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 import { cn } from "@/lib/utils";
+import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
 
 type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
 
@@ -176,46 +177,59 @@ export default function ProductSourceFilesPage() {
             <div className="flex flex-col">
               <p className="text-base font-semibold">{currentFolder?.name}</p>
             </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <DialogDeleteSourceFilesFolder
+                id={currentFolder?._id}
+                folderName={currentFolder?.name}
+              />
+            </div>
           </div>
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="default" className="flex items-center gap-2">
-                Upload Source File <PiPlusBold />
+          <div className="flex items-center gap-2">
+            <DialogAddProductFolder>
+              <Button variant="outline" className="flex items-center gap-2">
+                <PiPlusBold />
+                Add Product Folder
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <FolderIcon className="w-5 h-5" />
-                  Upload Source Files for {folder?.folder_name}
-                </DialogTitle>
-                <DialogDescription>
-                  Upload source files for this product. You can drag and drop
-                  files or click to browse.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="py-4">
-                <UploadSourceFiles onSelectionChange={setSelectedFiles} />
-              </div>
-
-              <DialogFooter className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancel
+            </DialogAddProductFolder>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="default" className="flex items-center gap-2">
+                  Upload Source File <PiPlusBold />
                 </Button>
-                <Button
-                  onClick={handleUploadClick}
-                  disabled={!selectedFiles.length || isUploading}
-                >
-                  {isUploading ? "Uploading..." : "Upload Files"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <FolderIcon className="w-5 h-5" />
+                    Upload Source Files for {folder?.folder_name}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Upload source files for this product. You can drag and drop
+                    files or click to browse.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="py-4">
+                  <UploadSourceFiles onSelectionChange={setSelectedFiles} />
+                </div>
+
+                <DialogFooter className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleUploadClick}
+                    disabled={!selectedFiles.length || isUploading}
+                  >
+                    {isUploading ? "Uploading..." : "Upload Files"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {folder?.length === 0 ? (
