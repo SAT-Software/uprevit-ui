@@ -20,6 +20,7 @@ import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles"
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
+import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { cn } from "@/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
 import { BookmarkIcon, FolderIcon } from "lucide-react";
@@ -90,14 +91,12 @@ export default function ProductSourceFilesPage() {
     isError: bookmarkedError,
   } = useGetBookmarkedSourceFilesFoldersByUserId(userId);
 
-  console.log("Bookmark data", bookmarkedData);
-  console.log("slug", slug);
-
   const bookmarkedFolders = bookmarkedData?.result.filter(
     (folder: BookmarkedSourceFilesFolder) => folder.parentId === slug[0]
   );
 
-  console.log("Bookmark folder", bookmarkedFolders);
+  const { mutate: toggleBookmark, isPending } =
+    useToggleBookmarkSourceFilesFolder();
 
   const folder = data?.result;
   const currentFolder = currentFolderData?.result; // TODO - Need to fix this in backend and here
@@ -217,14 +216,14 @@ export default function ProductSourceFilesPage() {
                             variant="ghost"
                             size="icon"
                             aria-label="Toggle bookmark folder"
-                            // onClick={(e) => {
-                            //   e.stopPropagation();
-                            //   toggleBookmark.mutate({
-                            //     folderId: folder._id,
-                            //     userId,
-                            //   });
-                            // }}
-                            // disabled={toggleBookmark.isPending}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleBookmark({
+                                folderId: folder._id,
+                                userId,
+                              });
+                            }}
+                            disabled={isPending}
                             title="Bookmark folder"
                           >
                             <PiBookmarkSimpleDuotone className="h-5 w-5" />

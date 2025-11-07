@@ -14,7 +14,6 @@ import {
   PiGearDuotone,
   PiKanbanDuotone,
   PiLifebuoyDuotone,
-  PiPresentationChartDuotone,
   PiStackPlusDuotone,
 } from "react-icons/pi";
 
@@ -29,11 +28,10 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Image from "next/image";
-import { useParams, usePathname } from "next/navigation";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
-import Link from "next/link";
+import { Product } from "@/types/product";
 import {
   ArrowLeftIcon,
   BookOpenCheck,
@@ -44,9 +42,10 @@ import {
   Sheet,
   Tags,
 } from "lucide-react";
-import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { Product } from "@/types/product";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
+import { Button } from "../ui/button";
 
 const data = {
   navMain: [
@@ -79,11 +78,6 @@ const data = {
       title: "Bookmarked Products",
       url: "/bookmarked-products",
       icon: PiBookmarkSimpleDuotone,
-    },
-    {
-      title: "Analytics",
-      url: "/analytics",
-      icon: PiPresentationChartDuotone,
     },
     {
       title: "Archive",
