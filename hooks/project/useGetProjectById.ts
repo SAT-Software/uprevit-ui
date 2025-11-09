@@ -1,10 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getProjectById(id: string, { signal }: { signal: AbortSignal }) {
+async function getProjectById(
+  id: string,
+  {
+    signal,
+    auth,
+  }: {
+    signal: AbortSignal;
+    auth: AuthContextProps;
+  }
+) {
   const response = await fetch(`/api/projects/${id}`, {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-      "Content-Type": "application/json", // Example of another header
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
     },
     signal,
   });
@@ -17,8 +27,11 @@ async function getProjectById(id: string, { signal }: { signal: AbortSignal }) {
 }
 
 export function useGetProjectById(id: string) {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["project", id],
-    queryFn: ({ signal }) => getProjectById(id, { signal }),
+    queryFn: ({ signal }) => getProjectById(id, { signal, auth }),
+    enabled: auth.isAuthenticated,
   });
 }
