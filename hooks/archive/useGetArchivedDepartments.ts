@@ -1,10 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getArchivedDepartments({ signal }: { signal: AbortSignal }) {
+async function getArchivedDepartments({
+  signal,
+  auth,
+}: {
+  signal: AbortSignal;
+  auth: AuthContextProps;
+}) {
   const response = await fetch("/api/departments?isArchive=true", {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-      "Content-Type": "application/json", // Example of another header
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
     },
     signal,
   });
@@ -17,8 +24,11 @@ async function getArchivedDepartments({ signal }: { signal: AbortSignal }) {
 }
 
 export function useGetArchivedDepartments() {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["archived-departments"],
-    queryFn: ({ signal }) => getArchivedDepartments({ signal }),
+    queryFn: ({ signal }) => getArchivedDepartments({ signal, auth }),
+    enabled: auth.isAuthenticated,
   });
 }

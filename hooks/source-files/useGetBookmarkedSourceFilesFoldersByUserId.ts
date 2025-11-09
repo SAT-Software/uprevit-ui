@@ -1,12 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
 async function getBookmarkedSourceFilesFoldersByUserId(
   userId: string,
-  { signal }: { signal: AbortSignal }
+  {
+    signal,
+    auth,
+  }: {
+    signal: AbortSignal;
+    auth: AuthContextProps;
+  }
 ) {
   const response = await fetch(`/api/bookmarks/source-files?userId=${userId}`, {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+      Authorization: `Bearer ${auth?.user?.access_token}`,
       "Content-Type": "application/json",
     },
     signal,
@@ -22,10 +29,12 @@ async function getBookmarkedSourceFilesFoldersByUserId(
 }
 
 export function useGetBookmarkedSourceFilesFoldersByUserId(userId: string) {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["bookmarked-source-files-folders", userId],
     queryFn: ({ signal }) =>
-      getBookmarkedSourceFilesFoldersByUserId(userId, { signal }),
-    enabled: Boolean(userId),
+      getBookmarkedSourceFilesFoldersByUserId(userId, { signal, auth }),
+    enabled: Boolean(userId) && auth.isAuthenticated,
   });
 }

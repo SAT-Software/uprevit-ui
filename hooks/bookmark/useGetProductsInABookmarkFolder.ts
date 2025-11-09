@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 
 async function getProductsInABookmarkFolder(
   folderId: string,
-  { signal }: { signal: AbortSignal }
+  { signal, accessToken }: { signal: AbortSignal; accessToken: string }
 ) {
   const response = await fetch(
     `/api/bookmarks/products/${folderId}?userId=68d2b37127794dcb43a32425`,
     {
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-        "Content-Type": "application/json", // Example of another header
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
       signal,
     }
@@ -23,8 +24,16 @@ async function getProductsInABookmarkFolder(
 }
 
 export function useGetProductsInABookmarkFolder(folderId: string) {
+  const auth = useAuth();
+  const accessToken = auth.user?.access_token;
+
   return useQuery({
     queryKey: ["products-in-bookmark-folder", folderId],
-    queryFn: ({ signal }) => getProductsInABookmarkFolder(folderId, { signal }),
+    queryFn: ({ signal }) =>
+      getProductsInABookmarkFolder(folderId, {
+        signal,
+        accessToken: accessToken as string,
+      }),
+    enabled: Boolean(folderId) && Boolean(accessToken),
   });
 }
