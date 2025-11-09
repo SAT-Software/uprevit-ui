@@ -1,17 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 export function useDeleteSourceFilesFolder(folderId?: string) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (folderId: string) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(`/api/source-files/${folderId}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });

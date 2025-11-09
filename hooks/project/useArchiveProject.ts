@@ -1,18 +1,25 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 export function useArchiveProject() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (projectId: string) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "PATCH",
         body: JSON.stringify({ isArchived: true }),
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });

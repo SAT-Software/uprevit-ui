@@ -1,17 +1,24 @@
 import { Department } from "@/types/department";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 export function useCreateDepartment() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (newDepartment: Department) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch("/api/departments", {
         method: "POST",
         body: JSON.stringify(newDepartment),
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });

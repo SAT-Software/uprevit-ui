@@ -1,5 +1,6 @@
 "use client";
 
+import { ButtonLogin } from "@/components/common/button-login";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -18,6 +19,7 @@ export default function Home() {
         <Button variant="default" className="w-fit mt-4">
           Get Started
         </Button>
+        <ButtonLogin />
       </Link>
     </div>
   );

@@ -1,17 +1,23 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 export function useDeleteBookmarkFolder() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (folderId: string) => {
+      if (!auth.isAuthenticated || !auth.user?.access_token) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(
         `/api/bookmarks/products/${folderId}?user_id=68d2b37127794dcb43a32425`,
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+            Authorization: `Bearer ${auth.user.access_token}`,
             "Content-Type": "application/json",
           },
         }

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface ProductBookmark {
@@ -9,16 +10,22 @@ interface ProductBookmark {
 
 export function useBookmarkProduct() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (productBookmark: ProductBookmark) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(
         `/api/bookmarks/products/add/${productBookmark.folder_id}`,
         {
           method: "PATCH",
           body: JSON.stringify(productBookmark),
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         }

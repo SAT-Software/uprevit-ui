@@ -1,10 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllProducts({ signal }: { signal: AbortSignal }) {
+async function getAllProducts({
+  signal,
+  auth,
+}: {
+  signal: AbortSignal;
+  auth: AuthContextProps;
+}) {
   const response = await fetch("/api/products", {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-      "Content-Type": "application/json", // Example of another header
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
     },
     signal,
   });
@@ -18,8 +25,11 @@ async function getAllProducts({ signal }: { signal: AbortSignal }) {
 }
 
 export function useGetAllProducts() {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["all-products"],
-    queryFn: ({ signal }) => getAllProducts({ signal }),
+    queryFn: ({ signal }) => getAllProducts({ signal, auth }),
+    enabled: auth.isAuthenticated,
   });
 }

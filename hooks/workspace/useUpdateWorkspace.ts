@@ -1,15 +1,22 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Workspace } from "@/types/workspace";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 async function updateWorkspace(
   workspaceData: Workspace,
-  { signal }: { signal: AbortSignal }
+  {
+    signal,
+    accessToken,
+  }: {
+    signal: AbortSignal;
+    accessToken: string;
+  }
 ) {
   const response = await fetch(`/api/workspace`, {
     method: "PUT",
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(workspaceData),
@@ -27,13 +34,26 @@ async function updateWorkspace(
 
 export function useUpdateWorkspace() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
-    mutationFn: (workspaceData: Workspace) =>
-      updateWorkspace(workspaceData, { signal: new AbortController().signal }),
+    mutationFn: async (workspaceData: Workspace) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
+      const controller = new AbortController();
+      return updateWorkspace(workspaceData, {
+        signal: controller.signal,
+        accessToken,
+      });
+    },
     onSuccess: (_, data) => {
       toast.success("Workspace updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["workspace", data._id] });
+      if (data?._id) {
+        queryClient.invalidateQueries({ queryKey: ["workspace", data._id] });
+      }
     },
     onError: (error) => {
       console.error(error.message || "Failed to update workspace");

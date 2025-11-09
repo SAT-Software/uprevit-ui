@@ -1,9 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getDashboardStats({ signal }: { signal: AbortSignal }) {
+async function getDashboardStats({
+  auth,
+  signal,
+}: {
+  auth: AuthContextProps;
+  signal: AbortSignal;
+}) {
   const response = await fetch("/api/dashboard?id=68d2be511ad93c69d6e39e51", {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+      Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
       "Content-Type": "application/json", // Example of another header
     },
     signal,
@@ -17,8 +24,11 @@ async function getDashboardStats({ signal }: { signal: AbortSignal }) {
 }
 
 export function useGetDashboardStats() {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["dashboard-stats"],
-    queryFn: getDashboardStats,
+    queryFn: ({ signal }) => getDashboardStats({ auth, signal }),
+    enabled: auth.isAuthenticated,
   });
 }

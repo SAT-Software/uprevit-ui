@@ -1,15 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
 async function getSourceFilesFolderById(
   folderId: string,
-  { signal }: { signal: AbortSignal }
+  {
+    signal,
+    auth,
+  }: {
+    signal: AbortSignal;
+    auth: AuthContextProps;
+  }
 ) {
   const response = await fetch(
     `/api/source-files/folder?workspaceId=68d2be511ad93c69d6e39e51&parentId=${folderId}`,
     {
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-        "Content-Type": "application/json", // Example of another header
+        Authorization: `Bearer ${auth?.user?.access_token}`,
+        "Content-Type": "application/json",
       },
       signal,
     }
@@ -23,9 +30,12 @@ async function getSourceFilesFolderById(
 }
 
 export function useGetSourceFilesFolderById(folderId: string) {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["source-files-folder", folderId],
-    queryFn: ({ signal }) => getSourceFilesFolderById(folderId, { signal }),
-    enabled: Boolean(folderId),
+    queryFn: ({ signal }) =>
+      getSourceFilesFolderById(folderId, { signal, auth }),
+    enabled: Boolean(folderId) && auth.isAuthenticated,
   });
 }

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface EditBookmarkFolderRequest {
@@ -8,9 +9,14 @@ interface EditBookmarkFolderRequest {
 
 export function useEditBookmarkFolder() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (folderData: EditBookmarkFolderRequest) => {
+      if (!auth.isAuthenticated || !auth.user?.access_token) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(
         `/api/bookmarks/products/${folderData.folderId}`,
         {
@@ -20,7 +26,7 @@ export function useEditBookmarkFolder() {
             folder_name: folderData.folder_name,
           }),
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+            Authorization: `Bearer ${auth.user.access_token}`,
             "Content-Type": "application/json",
           },
         }

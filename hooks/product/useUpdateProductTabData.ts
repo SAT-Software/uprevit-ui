@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface UpdateProductTabDataParams {
@@ -10,14 +11,20 @@ interface UpdateProductTabDataParams {
 
 export function useUpdateProductTabData() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (params: UpdateProductTabDataParams) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch("/api/products/productData", {
         method: "PATCH",
         body: JSON.stringify(params),
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });

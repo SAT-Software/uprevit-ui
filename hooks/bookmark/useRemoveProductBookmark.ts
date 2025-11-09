@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface RemoveProductBookmark {
@@ -9,9 +10,14 @@ interface RemoveProductBookmark {
 
 export function useRemoveProductBookmark() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (bookmarkData: RemoveProductBookmark) => {
+      if (!auth.user?.access_token) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(
         `/api/bookmarks/products/delete/${bookmarkData.folder_id}`,
         {
@@ -21,7 +27,7 @@ export function useRemoveProductBookmark() {
             product_id: bookmarkData.product_id,
           }),
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+            Authorization: `Bearer ${auth.user.access_token}`,
             "Content-Type": "application/json",
           },
         }
