@@ -1,10 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllProjects({ signal }: { signal: AbortSignal }) {
+async function getAllProjects({
+  signal,
+  auth,
+}: {
+  signal: AbortSignal;
+  auth: AuthContextProps;
+}) {
   const response = await fetch("/api/projects", {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-      "Content-Type": "application/json", // Example of another header
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
     },
     signal,
   });
@@ -17,8 +24,11 @@ async function getAllProjects({ signal }: { signal: AbortSignal }) {
 }
 
 export function useGetAllProjects() {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["all-projects"],
-    queryFn: ({ signal }) => getAllProjects({ signal }),
+    queryFn: ({ signal }) => getAllProjects({ signal, auth }),
+    enabled: auth.isAuthenticated,
   });
 }

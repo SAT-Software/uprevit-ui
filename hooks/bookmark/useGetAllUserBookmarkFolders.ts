@@ -1,12 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllUserBookmarkFolders({ signal }: { signal: AbortSignal }) {
+async function getAllUserBookmarkFolders({
+  signal,
+  auth,
+}: {
+  signal: AbortSignal;
+  auth: AuthContextProps;
+}) {
   const response = await fetch(
     "/api/bookmarks/products?userId=68d2b37127794dcb43a32425",
     {
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
-        "Content-Type": "application/json", // Example of another header
+        Authorization: `Bearer ${auth?.user?.access_token}`,
+        "Content-Type": "application/json",
       },
       signal,
     }
@@ -20,8 +27,11 @@ async function getAllUserBookmarkFolders({ signal }: { signal: AbortSignal }) {
 }
 
 export function useGetAllUserBookmarkFolders() {
+  const auth = useAuth();
+
   return useQuery({
     queryKey: ["all-user-bookmark-folders"],
-    queryFn: ({ signal }) => getAllUserBookmarkFolders({ signal }),
+    queryFn: ({ signal }) => getAllUserBookmarkFolders({ signal, auth }),
+    enabled: auth.isAuthenticated,
   });
 }

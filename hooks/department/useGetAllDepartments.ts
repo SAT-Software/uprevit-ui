@@ -1,9 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllDepartments({ signal }: { signal: AbortSignal }) {
+async function getAllDepartments({
+  signal,
+  auth,
+}: {
+  signal: AbortSignal;
+  auth: AuthContextProps;
+}) {
   const response = await fetch("/api/departments", {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+      Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
       "Content-Type": "application/json", // Example of another header
     },
     signal,
@@ -17,8 +24,10 @@ async function getAllDepartments({ signal }: { signal: AbortSignal }) {
 }
 
 export function useGetAllDepartments() {
+  const auth = useAuth();
   return useQuery({
     queryKey: ["all-departments"],
-    queryFn: getAllDepartments,
+    queryFn: ({ signal }) => getAllDepartments({ signal, auth }),
+    enabled: auth.isAuthenticated,
   });
 }
