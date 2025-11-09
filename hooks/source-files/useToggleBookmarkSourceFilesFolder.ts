@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface ToggleBookmarkSourceFilesFolderRequest {
@@ -8,9 +9,15 @@ interface ToggleBookmarkSourceFilesFolderRequest {
 
 export function useToggleBookmarkSourceFilesFolder() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (payload: ToggleBookmarkSourceFilesFolderRequest) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(`/api/bookmarks/source-files`, {
         method: "POST",
         body: JSON.stringify({
@@ -19,7 +26,7 @@ export function useToggleBookmarkSourceFilesFolder() {
           folder_id: payload.folderId,
         }),
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`, // Add your authorization header here
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });

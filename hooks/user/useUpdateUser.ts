@@ -1,15 +1,22 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 async function updateUser(
   userData: Partial<User>,
-  { signal }: { signal: AbortSignal }
+  {
+    signal,
+    accessToken,
+  }: {
+    signal: AbortSignal;
+    accessToken: string;
+  }
 ) {
   const response = await fetch(`/api/users`, {
     method: "PUT",
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(userData),
@@ -27,14 +34,27 @@ async function updateUser(
 
 export function useUpdateUser() {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
-    mutationFn: (userData: Partial<User>) =>
-      updateUser(userData, { signal: new AbortController().signal }),
+    mutationFn: async (userData: Partial<User>) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
+      const controller = new AbortController();
+      return updateUser(userData, {
+        signal: controller.signal,
+        accessToken,
+      });
+    },
     onSuccess: (data) => {
       toast.success("User updated successfully");
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      queryClient.setQueryData(["user", data.user?.id], data);
+      if (data?.user?.id) {
+        queryClient.setQueryData(["user", data.user.id], data);
+      }
     },
     onError: (error) => {
       console.error(error.message || "Failed to update user profile");

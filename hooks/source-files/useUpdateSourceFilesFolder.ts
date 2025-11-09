@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface UpdateSourceFilesFolderRequest {
@@ -8,16 +9,22 @@ interface UpdateSourceFilesFolderRequest {
 
 export function useUpdateSourceFilesFolder(folderId: string) {
   const queryClient = useQueryClient();
+  const auth = useAuth();
 
   return useMutation({
     mutationFn: async (sourceFilesFolder: UpdateSourceFilesFolderRequest) => {
+      const accessToken = auth.user?.access_token;
+      if (!accessToken) {
+        throw new Error("User is not authenticated");
+      }
+
       const res = await fetch(`/api/source-files/${sourceFilesFolder.id}`, {
         method: "PATCH",
         body: JSON.stringify({
           name: sourceFilesFolder.name,
         }),
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });
