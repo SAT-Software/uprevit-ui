@@ -26,12 +26,14 @@ async function getWorkspaceById(
   return data;
 }
 
-export function useGetWorkspace(id: string) {
+export function useGetWorkspace() {
   const auth = useAuth();
+  const workspaceId = auth.user?.profile.workspace;
 
   return useQuery({
-    queryKey: ["workspace", id],
-    queryFn: ({ signal }) => getWorkspaceById(id, { signal, auth }),
+    queryKey: ["workspace", workspaceId],
+    queryFn: ({ signal }) =>
+      getWorkspaceById(workspaceId as string, { signal, auth }),
     enabled: auth.isAuthenticated,
   });
 }

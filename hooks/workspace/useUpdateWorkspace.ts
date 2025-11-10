@@ -35,6 +35,7 @@ async function updateWorkspace(
 export function useUpdateWorkspace() {
   const queryClient = useQueryClient();
   const auth = useAuth();
+  const workspaceId = auth.user?.profile.workspace;
 
   return useMutation({
     mutationFn: async (workspaceData: Workspace) => {
@@ -44,16 +45,17 @@ export function useUpdateWorkspace() {
       }
 
       const controller = new AbortController();
-      return updateWorkspace(workspaceData, {
-        signal: controller.signal,
-        accessToken,
-      });
+      return updateWorkspace(
+        { ...workspaceData, _id: workspaceId as string },
+        {
+          signal: controller.signal,
+          accessToken,
+        }
+      );
     },
-    onSuccess: (_, data) => {
+    onSuccess: () => {
       toast.success("Workspace updated successfully");
-      if (data?._id) {
-        queryClient.invalidateQueries({ queryKey: ["workspace", data._id] });
-      }
+      queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId] });
     },
     onError: (error) => {
       console.error(error.message || "Failed to update workspace");

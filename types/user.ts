@@ -1,11 +1,12 @@
 export interface User {
   name: string;
+  email: string;
   profileAvatar: string;
   designation: string;
-  email: string;
   phone?: string;
-  confirmed?: string;
-  userType?: string;
-  organization: string;
+  userType?: "user" | "admin";
   location?: string;
+  cognitoSub: string;
+  workspaceId: string | null;
+  status: "invited" | "active";
 }

@@ -15,7 +15,7 @@ import { ImagePlusIcon, XIcon } from "lucide-react";
 
 function ProfileTab() {
   const id = useId();
-  const { data, isLoading, error } = useGetUser("68d2b37127794dcb43a32425"); // The id should come from user session token
+  const { data, isLoading, error } = useGetUser();
   const { mutate: updateUserMutation, isPending } = useUpdateUser();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
@@ -87,13 +87,14 @@ function ProfileTab() {
       <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
         <div className="relative">
           <Avatar className="w-20 h-20">
-            <AvatarImage src={currentAvatar} alt={userProfile.name} />
-            <AvatarFallback className="text-lg border">{`${userProfile.name
-              .split(" ")[0]
-              .slice(0, 1)}${userProfile.name
-              .split(" ")[1]
-              .slice(0, 1)
-              .toUpperCase()}`}</AvatarFallback>
+            <AvatarImage src={currentAvatar} alt={userProfile?.name} />
+            <AvatarFallback className="text-lg border">{`${userProfile?.name
+              ?.split(" ")[0]
+              ?.slice(0, 1)}${
+              userProfile?.name?.split(" ")[1]
+                ? userProfile?.name?.split(" ")[1]?.slice(0, 1)?.toUpperCase()
+                : ""
+            }`}</AvatarFallback>
           </Avatar>
           {uploadingAvatar && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
@@ -103,8 +104,8 @@ function ProfileTab() {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold">{userProfile.name}</h2>
-            <Badge variant="default">{userProfile.userType}</Badge>
+            <h2 className="text-xl font-semibold">{userProfile?.name}</h2>
+            <Badge variant="default">{userProfile?.userType}</Badge>
           </div>
           <p className="text-muted-foreground">
             Update your profile information and preferences.
@@ -233,24 +234,6 @@ function ProfileTab() {
             {errors.designation && (
               <p role="alert" className="text-xs text-destructive">
                 {errors.designation.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Organization</label>
-            <Input
-              type="text"
-              placeholder="Enter your organization"
-              defaultValue={userProfile?.organization}
-              className="w-full"
-              {...register("organization", {
-                required: "Organization is required",
-              })}
-            />
-            {errors.organization && (
-              <p role="alert" className="text-xs text-destructive">
-                {errors.organization.message}
               </p>
             )}
           </div>
