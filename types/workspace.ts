@@ -8,9 +8,9 @@ export interface Workspace {
   plan?: string;
   planName?: string;
   planId?: string;
-  planStart?: string;
-  planEnd?: string;
+  planStart?: string | null;
+  planEnd?: string | null;
   cost?: number;
+  adminIds?: string[];
   userIds?: string[];
-  userCount?: number;
 }

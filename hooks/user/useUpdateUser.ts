@@ -35,6 +35,7 @@ async function updateUser(
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   const auth = useAuth();
+  const userId = auth.user?.profile?.dbUserId as string;
 
   return useMutation({
     mutationFn: async (userData: Partial<User>) => {
@@ -53,7 +54,7 @@ export function useUpdateUser() {
       toast.success("User updated successfully");
       queryClient.invalidateQueries({ queryKey: ["user"] });
       if (data?.user?.id) {
-        queryClient.setQueryData(["user", data.user.id], data);
+        queryClient.setQueryData(["user", userId], data);
       }
     },
     onError: (error) => {

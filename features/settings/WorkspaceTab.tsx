@@ -16,8 +16,7 @@ import { ImagePlusIcon, XIcon } from "lucide-react";
 
 function WorkspaceTab() {
   const id = useId();
-  const workspaceId = "68d2be511ad93c69d6e39e51";
-  const { data, isLoading, error } = useGetWorkspace(workspaceId);
+  const { data, isLoading, error } = useGetWorkspace();
   const { mutate: updateWorkspaceMutation, isPending } = useUpdateWorkspace();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
@@ -44,7 +43,7 @@ function WorkspaceTab() {
         ...formData,
         _id: workspaceData._id,
       });
-      updateWorkspaceMutation({ ...formData, _id: workspaceData._id });
+      updateWorkspaceMutation({ ...formData });
     } catch (error) {
       console.error("Failed to update workspace:", error);
     }
@@ -274,7 +273,7 @@ function WorkspaceTab() {
             <Textarea
               placeholder="Enter workspace description"
               defaultValue={workspaceData?.description}
-              className="w-full min-h-[80px]"
+              className="w-full min-h-20"
               {...register("description", {
                 required: "Workspace description is required",
               })}

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
 async function getUserById(
-  id: string,
+  userId: string,
   {
     signal,
     auth,
@@ -11,7 +11,7 @@ async function getUserById(
     auth: AuthContextProps;
   }
 ) {
-  const response = await fetch(`/api/users/${id}`, {
+  const response = await fetch(`/api/users/${userId}`, {
     headers: {
       Authorization: `Bearer ${auth?.user?.access_token}`,
       "Content-Type": "application/json",
@@ -26,12 +26,13 @@ async function getUserById(
   return data;
 }
 
-export function useGetUser(id: string) {
+export function useGetUser() {
   const auth = useAuth();
+  const userId = auth?.user?.profile?.dbUserId;
 
   return useQuery({
-    queryKey: ["user", id],
-    queryFn: ({ signal }) => getUserById(id, { signal, auth }),
+    queryKey: ["user", userId],
+    queryFn: ({ signal }) => getUserById(userId as string, { signal, auth }),
     enabled: auth.isAuthenticated,
   });
 }

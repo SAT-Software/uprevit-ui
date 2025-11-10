@@ -8,6 +8,7 @@ async function getAllProducts({
   signal: AbortSignal;
   auth: AuthContextProps;
 }) {
+  console.log("auth", auth);
   const response = await fetch("/api/products", {
     headers: {
       Authorization: `Bearer ${auth?.user?.access_token}`,

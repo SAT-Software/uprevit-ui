@@ -1,10 +1,27 @@
 "use client";
 
-import { ButtonLogin } from "@/components/common/button-login";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "react-oidc-context";
 
 export default function Home() {
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (!auth.isLoading && auth.isAuthenticated) {
+      const claims = auth.user?.profile;
+      const workspaceId = claims?.workspace;
+      if (!workspaceId) {
+        router.replace("/onboarding/create-workspace");
+      } else {
+        router.push("/dashboard");
+      }
+    } else {
+      auth.signinRedirect();
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-4 h-screen">
       <h1 className="text-6xl font-bold text-center">
@@ -15,12 +32,14 @@ export default function Home() {
         ease. Collaborate seamlessly across teams and effortlessly track your
         departments, projects and products - all in one place.
       </p>
-      <Link href="/dashboard">
-        <Button variant="default" className="w-fit mt-4">
-          Get Started
+      <div className="flex items-center gap-4">
+        <Button variant="default" className="w-fit" onClick={handleGetStarted}>
+          {auth.isAuthenticated ? "Go to Dashboard" : "Get Started"}
         </Button>
-        <ButtonLogin />
-      </Link>
+        <Button onClick={() => auth.removeUser()} variant="destructive">
+          Sign Out
+        </Button>
+      </div>
     </div>
   );
 }

@@ -151,10 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const params = useParams();
   const pathname = usePathname();
   const { open } = useSidebar();
-  const { data: workspaceData, isLoading } = useGetWorkspace(
-    "68d2be511ad93c69d6e39e51"
-  ); // Get the actual workspace id from user session when we implement auth
-
+  const { data: workspaceData, isLoading } = useGetWorkspace();
   const workspace = workspaceData?.workspace;
 
   const productId =
@@ -174,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       collapsible="icon"
-      className={cn("overflow-hidden [&>[data-sidebar=sidebar]]:flex-row")}
+      className={cn("overflow-hidden *:[data-sidebar=sidebar]:flex-row")}
       {...props}
     >
       {/* This is the first sidebar */}
@@ -183,11 +180,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Sidebar
         collapsible={isProductPage ? "none" : "icon"}
         className={cn(
-          isProductPage && "!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
+          isProductPage && "w-[calc(var(--sidebar-width-icon)+1px)]! border-r"
         )}
       >
         <SidebarHeader>
-          <div className="flex items-center gap-4 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+          <Link
+            href="/"
+            className="flex items-center gap-4 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          >
             <div className="relative flex aspect-square mb-1 size-6 items-center justify-center">
               <Image
                 src="/log-no-bg-white.svg"
@@ -201,7 +201,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 UPREVIT
               </span>
             </div>
-          </div>
+          </Link>
         </SidebarHeader>
         <SidebarContent>
           <NavMain
