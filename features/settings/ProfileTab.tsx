@@ -88,7 +88,7 @@ function ProfileTab() {
         <div className="relative">
           <Avatar className="w-20 h-20">
             <AvatarImage src={currentAvatar} alt={userProfile?.name} />
-            <AvatarFallback className="text-lg border">{`${userProfile?.name
+            <AvatarFallback className="text-lg bg-white border border-border">{`${userProfile?.name
               ?.split(" ")[0]
               ?.slice(0, 1)}${
               userProfile?.name?.split(" ")[1]

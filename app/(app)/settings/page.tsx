@@ -9,6 +9,7 @@ import SecurityTab from "@/features/settings/SecurityTab";
 import ProfileTab from "@/features/settings/ProfileTab";
 import WorkspaceTab from "@/features/settings/WorkspaceTab";
 import BillingTab from "@/features/settings/BillingTab";
+import MembersTab from "@/features/settings/MembersTab";
 
 function SettingsPage() {
   return (
@@ -43,6 +44,7 @@ function SettingsPage() {
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="workspace">Workspace</TabsTrigger>
+            <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="billing">Billing</TabsTrigger>
           </TabsList>
@@ -53,6 +55,10 @@ function SettingsPage() {
 
           <TabsContent value="workspace" className="mt-6">
             <WorkspaceTab />
+          </TabsContent>
+
+          <TabsContent value="members" className="mt-6">
+            <MembersTab />
           </TabsContent>
 
           <TabsContent value="security" className="mt-6">

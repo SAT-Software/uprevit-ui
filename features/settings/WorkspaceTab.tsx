@@ -93,7 +93,7 @@ function WorkspaceTab() {
         <div className="relative">
           <Avatar className="w-20 h-20">
             <AvatarImage src={currentLogo} alt={workspaceData?.workspaceName} />
-            <AvatarFallback className="text-lg border">
+            <AvatarFallback className="text-lg bg-white border border-border">
               {workspaceData?.workspaceName
                 ?.split(" ")
                 .map((word: string) => word[0])

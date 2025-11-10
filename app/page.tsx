@@ -36,9 +36,11 @@ export default function Home() {
         <Button variant="default" className="w-fit" onClick={handleGetStarted}>
           {auth.isAuthenticated ? "Go to Dashboard" : "Get Started"}
         </Button>
-        <Button onClick={() => auth.removeUser()} variant="destructive">
-          Sign Out
-        </Button>
+        {auth.isAuthenticated && (
+          <Button onClick={() => auth.removeUser()} variant="destructive">
+            Sign Out
+          </Button>
+        )}
       </div>
     </div>
   );
