@@ -10,13 +10,7 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (!auth.isLoading && auth.isAuthenticated) {
-      const claims = auth.user?.profile;
-      const workspaceId = claims?.workspace;
-      if (!workspaceId) {
-        router.replace("/onboarding/create-workspace");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/dashboard");
     } else {
       auth.signinRedirect();
     }

@@ -22,6 +22,8 @@ function ProfileTab() {
 
   const userProfile = data?.user;
 
+  console.log("user data", data);
+
   const {
     register,
     handleSubmit,

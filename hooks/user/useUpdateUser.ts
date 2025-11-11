@@ -35,7 +35,7 @@ async function updateUser(
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   const auth = useAuth();
-  const userId = auth.user?.profile?.dbUserId as string;
+  const userId = auth.user?.profile?.userId as string;
 
   return useMutation({
     mutationFn: async (userData: Partial<User>) => {

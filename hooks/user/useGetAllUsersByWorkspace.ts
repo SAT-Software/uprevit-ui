@@ -31,7 +31,7 @@ async function getAllUsersByWorkspace(
 
 export function useGetAllUsersByWorkspace() {
   const auth = useAuth();
-  const workspaceId = auth.user?.profile.workspace;
+  const workspaceId = auth.user?.profile.workspaceId;
 
   return useQuery({
     queryKey: ["workspace-users", workspaceId],

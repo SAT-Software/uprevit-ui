@@ -25,13 +25,16 @@ import { cn } from "@/lib/utils";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/types/user";
+import DialogRemoveUser from "./DialogRemoveUser";
 
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "_id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="font-mono text-xs">{row.getValue("_id")}</div>
+      <div className="font-mono text-xs">
+        {String(row.getValue("_id") ?? "").slice(0, 8)}
+      </div>
     ),
   },
   {
@@ -51,6 +54,16 @@ export const columns: ColumnDef<User>[] = [
           </div>
         </div>
       );
+    },
+  },
+  {
+    accessorKey: "userType",
+    header: "User Type",
+    cell: ({ row }) => {
+      const userType = row.getValue("userType") as string;
+      if (userType) return <Badge variant="outline">{userType}</Badge>;
+
+      return <p className="text-muted-foreground">N/A</p>;
     },
   },
   {
@@ -77,32 +90,43 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = row.getValue("status") as "active" | "invited";
       const statusClasses = {
-        Active:
-          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-        Invited:
-          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-        Inactive: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+        active: "bg-green-50/90 text-green-600 border border-green-500",
+        invited: "bg-yellow-50/90 text-yellow-600 border border-yellow-500",
       };
-      return (
-        <Badge
-          className={cn(statusClasses[status as keyof typeof statusClasses])}
-        >
-          {status}
-        </Badge>
-      );
+      const displayText = status === "active" ? "Active" : "Invited";
+      return <Badge className={cn(statusClasses[status])}>{displayText}</Badge>;
     },
   },
   {
     id: "remove",
-    cell: () => {
+    cell: ({ row }) => {
+      const { _id, name } = row.original;
+      // Only show remove button if user has an ID and is not the current user
+      if (!_id) {
+        return (
+          <div className="text-right">
+            <Button variant="ghost" size="icon" disabled>
+              <PiTrashDuotone className="h-4 w-4" />
+              <span className="sr-only">Cannot remove user without ID</span>
+            </Button>
+          </div>
+        );
+      }
+
       return (
         <div className="text-right">
-          <Button variant="ghost" size="icon">
-            <PiTrashDuotone className="h-4 w-4" />
-            <span className="sr-only">Remove user</span>
-          </Button>
+          <DialogRemoveUser
+            userId={_id}
+            userName={name}
+            trigger={
+              <Button variant="ghost" size="icon">
+                <PiTrashDuotone className="h-4 w-4" />
+                <span className="sr-only">Remove user</span>
+              </Button>
+            }
+          />
         </div>
       );
     },
