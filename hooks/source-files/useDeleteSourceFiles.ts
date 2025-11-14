@@ -13,7 +13,7 @@ export function useDeleteSourceFiles(slug: string) {
         throw new Error("User is not authenticated");
       }
 
-      const res = await fetch(`/api/source-files/${fileIds}`, {
+      const res = await fetch(`/api/source-files/file/${fileIds}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${accessToken}`,
