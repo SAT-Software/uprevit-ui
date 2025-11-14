@@ -18,7 +18,9 @@ export default function Home() {
 
   const signOutRedirect = () => {
     const clientId = "7vvr577cmdnbbo1qjv8e0m40nd";
-    const logoutUri = "http://localhost:8080";
+    // const logoutUri = "http://localhost:8080";
+    const logoutUri =
+      "https://uprevit-ui-git-develop-amit-tambulkars-projects.vercel.app";
     const cognitoDomain =
       "https://us-east-1mpuqjaol2.auth.us-east-1.amazoncognito.com";
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(

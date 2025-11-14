@@ -117,13 +117,13 @@ export function AppHeader() {
         "fixed top-0 z-50 bg-background flex shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height,left] ease-linear duration-200",
         // Width and positioning that accounts for sidebar
         "left-0 right-0",
-        "md:left-var(--sidebar-width) md:w-[calc(100%-var(--sidebar-width))]",
-        "md:group-has-[data-collapsible=icon]/sidebar-wrapper:left-var(--sidebar-width-icon) md:group-has-[data-collapsible=icon]/sidebar-wrapper:w-[calc(100%-var(--sidebar-width-icon))]",
-        "md:group-has-[data-collapsible=offcanvas]/sidebar-wrapper:left-0 md:group-has-[data-collapsible=offcanvas]/sidebar-wrapper:w-full",
+        "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",
+        "md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:left-[var(--sidebar-width-icon)] md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:w-[calc(100%-var(--sidebar-width-icon))]",
+        "md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:left-0 md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:w-full",
         // Height
         isProductPage
-          ? "h-12 group-has-[data-collapsible=icon]/sidebar-wrapper:h-12"
-          : "h-16 group-has-[data-collapsible=icon]/sidebar-wrapper:h-16"
+          ? "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+          : "h-16 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
       )}
     >
       {isProductPage ? (
