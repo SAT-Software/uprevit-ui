@@ -40,12 +40,12 @@ export function useOnboardUser() {
 
       return response.json().catch(() => null);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Profile updated successfully");
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["user", auth.user?.profile.userId],
       });
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
       router.push("/dashboard");
     },
     onError: (error) => {

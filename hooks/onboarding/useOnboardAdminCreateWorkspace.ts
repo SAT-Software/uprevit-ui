@@ -48,7 +48,7 @@ export function useOnboardAdminCreateWorkspace() {
       toast.success("Workspace created successfully");
       queryClient.invalidateQueries({ queryKey: ["workspace"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/dashboard");
+      router.push("/");
     },
     onError: (error) => {
       console.error(error.message || "Failed to create workspace");
