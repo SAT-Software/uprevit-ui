@@ -18,16 +18,19 @@ export function useUpdateSourceFilesFolder(folderId: string) {
         throw new Error("User is not authenticated");
       }
 
-      const res = await fetch(`/api/source-files/${sourceFilesFolder.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          name: sourceFilesFolder.name,
-        }),
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch(
+        `/api/source-files/folder/${sourceFilesFolder.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            name: sourceFilesFolder.name,
+          }),
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(text || "Failed to update source files folder");

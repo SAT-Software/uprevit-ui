@@ -4,6 +4,8 @@ import { FolderIcon } from "lucide-react";
 import { PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
+import { useAuth } from "react-oidc-context";
+import { toast } from "sonner";
 
 interface SourceFilesFolder {
   _id: string;
@@ -20,7 +22,8 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
   const router = useRouter();
   const { mutate: toggleBookmark, isPending } =
     useToggleBookmarkSourceFilesFolder();
-  const userId = "68d2b37127794dcb43a32425";
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
 
   return (
     <div className="w-full h-full">
@@ -36,9 +39,18 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                   variant="ghost"
                   size="icon"
                   aria-label="Toggle bookmark folder"
-                  onClick={() =>
-                    toggleBookmark({ folderId: folder._id, userId })
-                  }
+                  onClick={() => {
+                    if (userId) {
+                      toggleBookmark({
+                        folderId: folder._id,
+                        userId: userId as string,
+                      });
+                    } else {
+                      toast.error(
+                        "User ID not available. Please log in again."
+                      );
+                    }
+                  }}
                   disabled={isPending}
                   title="Bookmark folder"
                 >
@@ -86,5 +98,4 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
     </div>
   );
 }
-
 export default SourceFilesFoldersCard;

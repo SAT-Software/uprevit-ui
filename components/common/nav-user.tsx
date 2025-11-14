@@ -12,8 +12,7 @@ import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
 
 export function NavUser() {
-  const { data: userData } = useGetUser("68d2b37127794dcb43a32425"); // Get the actual user id from user session when we implement auth
-
+  const { data: userData } = useGetUser();
   const user = userData?.user;
 
   return (

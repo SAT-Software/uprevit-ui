@@ -1,6 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
+import { useAuth } from "react-oidc-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,8 @@ export default function DialogAddProductFolder({
   const { mutate: addSourceFilesFolder, isPending } =
     useAddSourceFilesFolder(folderId);
   const [open, setOpen] = useState(false);
+  const auth = useAuth();
+  const workspaceId = auth?.user?.profile?.workspaceId;
 
   const {
     register,
@@ -51,7 +54,7 @@ export default function DialogAddProductFolder({
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     addSourceFilesFolder(
       {
-        workspace_id: "68d2be511ad93c69d6e39e51",
+        workspace_id: workspaceId as string,
         name: data.folderName,
         type: "folder",
         parentId: parentId,

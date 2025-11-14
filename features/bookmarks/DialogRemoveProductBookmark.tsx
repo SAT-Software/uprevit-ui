@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CircleAlertIcon } from "lucide-react";
 import { PiBookmarkSimpleDuotone } from "react-icons/pi";
+import { useAuth } from "react-oidc-context";
 
 import {
   AlertDialog,
@@ -32,11 +33,13 @@ export default function DialogRemoveProductBookmark({
   const [isOpen, setIsOpen] = useState(false);
   const { mutate: removeProductBookmark, isPending } =
     useRemoveProductBookmark();
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
 
   async function handleRemoveProductBookmark() {
     removeProductBookmark(
       {
-        user_id: "68d2b37127794dcb43a32425",
+        user_id: userId as string,
         product_id: productId,
         folder_id: folderId,
       },

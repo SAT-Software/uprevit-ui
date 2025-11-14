@@ -3,6 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
+import { useAuth } from "react-oidc-context";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,6 +65,9 @@ export default function MutateProjectDialog({
 
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
+  const workspaceId = auth?.user?.profile?.workspaceId;
 
   type FormValues = {
     project_name: string;
@@ -129,8 +133,8 @@ export default function MutateProjectDialog({
           project_number: data.project_number,
           users: members.map((member) => member.name),
           image: "",
-          admin_id: "68d2b37127794dcb43a32425", // TODO: replace from auth context
-          workspace_id: "68d2be511ad93c69d6e39e51", // TODO: replace from workspace context
+          admin_id: userId,
+          workspace_id: workspaceId,
           department_id: "68d2bfbee20298cdc7141afe", // TODO: implement department selection
         } as Project);
         onSuccess?.(res);

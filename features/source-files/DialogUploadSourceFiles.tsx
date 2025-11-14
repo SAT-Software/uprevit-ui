@@ -15,6 +15,7 @@ import { uploadFiles } from "@/utils/uploadthing";
 import { FolderIcon } from "lucide-react";
 import { useState } from "react";
 import { PiPlusBold } from "react-icons/pi";
+import { useAuth } from "react-oidc-context";
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -29,6 +30,8 @@ export default function DialogUploadSourceFiles({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadToBackend } = useUploadSourceFiles(folderId);
+  const auth = useAuth();
+  const workspaceId = auth?.user?.profile?.workspaceId;
 
   const handleUploadClick = async () => {
     if (!selectedFiles.length) return;
@@ -65,7 +68,7 @@ export default function DialogUploadSourceFiles({
 
       for (const file of filesPayload) {
         await uploadToBackend({
-          workspace_id: "68d2be511ad93c69d6e39e51",
+          workspace_id: workspaceId as string,
           name: file.file_name,
           type: "file",
           url: file.url,
