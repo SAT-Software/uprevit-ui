@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "react-oidc-context";
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -27,6 +29,7 @@ import { BookmarkIcon, FolderIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   PiBookmarkSimpleDuotone,
   PiFileDocDuotone,
@@ -83,13 +86,14 @@ export default function ProductSourceFilesPage() {
   const { data: currentFolderData } = useGetCurrentSourceFilesFolder(
     slug ?? ""
   );
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
 
-  const userId = "68d2b37127794dcb43a32425";
   const {
     data: bookmarkedData,
     isLoading: bookmarkedLoading,
     isError: bookmarkedError,
-  } = useGetBookmarkedSourceFilesFoldersByUserId(userId);
+  } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
 
   const bookmarkedFolders = bookmarkedData?.result.filter(
     (folder: BookmarkedSourceFilesFolder) => folder.parentId === slug[0]
@@ -218,10 +222,16 @@ export default function ProductSourceFilesPage() {
                             aria-label="Toggle bookmark folder"
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleBookmark({
-                                folderId: folder._id,
-                                userId,
-                              });
+                              if (userId) {
+                                toggleBookmark({
+                                  folderId: folder._id,
+                                  userId: userId as string,
+                                });
+                              } else {
+                                toast.error(
+                                  "User ID not available. Please log in again."
+                                );
+                              }
                             }}
                             disabled={isPending}
                             title="Bookmark folder"
@@ -265,7 +275,7 @@ export default function ProductSourceFilesPage() {
                       >
                         <Card className="shadow-none hover:bg-muted/50 transition-colors w-full">
                           <CardContent className="p-2">
-                            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg border border-input">
+                            <div className="relative w-full aspect-3/4 overflow-hidden rounded-lg border border-input">
                               {(() => {
                                 const kind = getFileKind(file.url || "");
                                 if (file.url) {

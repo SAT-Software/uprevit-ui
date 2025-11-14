@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "react-oidc-context";
+
 import { BookmarkIcon } from "lucide-react";
 import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
@@ -21,12 +23,13 @@ function SourceFilesPage() {
 
   const sourceFilesFolders = foldersData?.result ?? [];
 
-  const userId = "68d2b37127794dcb43a32425";
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
   const {
     data: bookmarkedData,
     isLoading: bookmarkedLoading,
     isError: bookmarkedError,
-  } = useGetBookmarkedSourceFilesFoldersByUserId(userId);
+  } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
 
   const bookmarkedFolders = bookmarkedData?.result.filter(
     (folder: BookmarkedSourceFilesFolder) => folder.parentId === null

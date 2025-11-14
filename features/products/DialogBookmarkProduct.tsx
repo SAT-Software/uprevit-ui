@@ -1,5 +1,6 @@
 import { StarIcon, FolderIcon } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useAuth } from "react-oidc-context";
 
 import {
   AlertDialog,
@@ -44,6 +45,8 @@ export default function DialogBookmarkProduct({
   const { data, isLoading, error } = useGetAllUserBookmarkFolders();
   const bookmarkFolders = data?.result?.bookmarked_product_folders ?? [];
   const bookmarkProduct = useBookmarkProduct();
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
 
   const {
     handleSubmit,
@@ -65,7 +68,7 @@ export default function DialogBookmarkProduct({
     console.log(data);
     try {
       await bookmarkProduct.mutateAsync({
-        user_id: "68d2b37127794dcb43a32425", // Replace with actual user ID in future
+        user_id: userId as string,
         product_id: product._id,
         folder_id: data.folderId,
       });

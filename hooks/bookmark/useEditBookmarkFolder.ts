@@ -22,7 +22,7 @@ export function useEditBookmarkFolder() {
         {
           method: "PATCH",
           body: JSON.stringify({
-            user_id: "68d2b37127794dcb43a32425",
+            user_id: auth?.user?.profile.userId,
             folder_name: folderData.folder_name,
           }),
           headers: {

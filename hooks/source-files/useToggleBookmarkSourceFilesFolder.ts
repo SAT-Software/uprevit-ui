@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
+import { useGetUser } from "../user/useGetUser";
+import { useGetWorkspace } from "../workspace/useGetWorkspace";
 import { toast } from "sonner";
 
 interface ToggleBookmarkSourceFilesFolderRequest {
@@ -10,6 +12,8 @@ interface ToggleBookmarkSourceFilesFolderRequest {
 export function useToggleBookmarkSourceFilesFolder() {
   const queryClient = useQueryClient();
   const auth = useAuth();
+  const { data: userData } = useGetUser();
+  const { data: workspaceData } = useGetWorkspace();
 
   return useMutation({
     mutationFn: async (payload: ToggleBookmarkSourceFilesFolderRequest) => {
@@ -21,8 +25,8 @@ export function useToggleBookmarkSourceFilesFolder() {
       const res = await fetch(`/api/bookmarks/source-files`, {
         method: "POST",
         body: JSON.stringify({
-          user_id: payload.userId,
-          workspace_id: "68d2be511ad93c69d6e39e51",
+          user_id: userData?.user?._id,
+          workspace_id: workspaceData?.workspace?._id,
           folder_id: payload.folderId,
         }),
         headers: {

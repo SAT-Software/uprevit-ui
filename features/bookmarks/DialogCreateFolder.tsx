@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { FolderPlusIcon } from "lucide-react";
+import { useAuth } from "react-oidc-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,11 +41,14 @@ export default function DialogCreateFolder() {
   });
 
   const { mutate: createBookmarkFolder, isPending } = useCreateBookmarkFolder();
+  const auth = useAuth();
+  const userId = auth?.user?.profile?.userId;
+  const workspaceId = auth?.user?.profile?.workspaceId;
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     const bookmarkFolderData = {
-      user_id: "68d2b37127794dcb43a32425",
-      workspace_id: "68d2be511ad93c69d6e39e51",
+      user_id: userId,
+      workspace_id: workspaceId,
       folder_name: data.folderName.trim(),
     };
 
