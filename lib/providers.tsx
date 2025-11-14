@@ -10,14 +10,11 @@ import * as React from "react";
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_xm2ArIQfi",
-  client_id: "14i0uhs6h96lktgs53c6tp9jla",
+  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_mpuQjaoL2",
+  client_id: "7vvr577cmdnbbo1qjv8e0m40nd",
   redirect_uri: "http://localhost:8080",
-  post_logout_redirect_uri: "http://localhost:8080",
-  silent_redirect_uri: "http://localhost:8080",
   response_type: "code",
   scope: "email openid phone",
-  automaticSilentRenew: true,
 };
 
 function makeQueryClient() {

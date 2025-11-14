@@ -35,7 +35,7 @@ async function updateWorkspace(
 export function useUpdateWorkspace() {
   const queryClient = useQueryClient();
   const auth = useAuth();
-  const workspaceId = auth.user?.profile.workspace;
+  const workspaceId = auth.user?.profile.workspaceId;
 
   return useMutation({
     mutationFn: async (workspaceData: Workspace) => {

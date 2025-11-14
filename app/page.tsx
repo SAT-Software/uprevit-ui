@@ -10,17 +10,25 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (!auth.isLoading && auth.isAuthenticated) {
-      const claims = auth.user?.profile;
-      const workspaceId = claims?.workspace;
-      if (!workspaceId) {
-        router.replace("/onboarding/create-workspace");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/dashboard");
     } else {
       auth.signinRedirect();
     }
   };
+
+  const signOutRedirect = () => {
+    const clientId = "7vvr577cmdnbbo1qjv8e0m40nd";
+    const logoutUri = "http://localhost:8080";
+    const cognitoDomain =
+      "https://us-east-1mpuqjaol2.auth.us-east-1.amazoncognito.com";
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
+      logoutUri
+    )}`;
+  };
+
+  if (auth.error) {
+    return <div>Encountering error... {auth.error.message}</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-4 h-screen">
@@ -36,9 +44,17 @@ export default function Home() {
         <Button variant="default" className="w-fit" onClick={handleGetStarted}>
           {auth.isAuthenticated ? "Go to Dashboard" : "Get Started"}
         </Button>
-        <Button onClick={() => auth.removeUser()} variant="destructive">
-          Sign Out
-        </Button>
+        {auth.isAuthenticated && (
+          <Button
+            onClick={async () => {
+              await auth.removeUser();
+              signOutRedirect();
+            }}
+            variant="destructive"
+          >
+            Sign Out
+          </Button>
+        )}
       </div>
     </div>
   );

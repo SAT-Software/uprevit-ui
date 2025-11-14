@@ -28,7 +28,7 @@ async function getUserById(
 
 export function useGetUser() {
   const auth = useAuth();
-  const userId = auth?.user?.profile?.dbUserId;
+  const userId = auth?.user?.profile?.userId;
 
   return useQuery({
     queryKey: ["user", userId],

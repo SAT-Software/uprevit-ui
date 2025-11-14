@@ -28,7 +28,7 @@ async function getWorkspaceById(
 
 export function useGetWorkspace() {
   const auth = useAuth();
-  const workspaceId = auth.user?.profile.workspace;
+  const workspaceId = auth.user?.profile.workspaceId;
 
   return useQuery({
     queryKey: ["workspace", workspaceId],
