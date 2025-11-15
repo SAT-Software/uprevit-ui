@@ -171,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       collapsible="icon"
-      className={cn("overflow-hidden *:[data-sidebar=sidebar]:flex-row")}
+      className={cn("overflow-hidden [&>[data-sidebar=sidebar]]:flex-row")}
       {...props}
     >
       {/* This is the first sidebar */}
@@ -180,7 +180,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Sidebar
         collapsible={isProductPage ? "none" : "icon"}
         className={cn(
-          isProductPage && "w-[calc(var(--sidebar-width-icon)+1px)]! border-r"
+          isProductPage && "!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
         )}
       >
         <SidebarHeader>
