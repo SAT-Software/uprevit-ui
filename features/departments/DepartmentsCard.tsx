@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PiArrowSquareOutDuotone } from "react-icons/pi";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 
 export interface DepartmentsProps {
   _id: string;
@@ -23,7 +24,24 @@ export interface DepartmentsProps {
   membersCount?: number;
 }
 
-function DepartmentsCard({ departments }: { departments: DepartmentsProps[] }) {
+function DepartmentsCard() {
+  const { data, isLoading, error } = useGetAllDepartments();
+  const departments = data?.result?.departments ?? [];
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-500">
+          Failed to load departments. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {departments?.map((department: DepartmentsProps) => (
