@@ -6,7 +6,6 @@ import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialo
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
-import DepartmentPageProductsTable from "@/features/departments/DepartmentPageProductsTable";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
   PiArchiveDuotone,
@@ -17,14 +16,23 @@ import {
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
+import DepartmentPageProjectsTable from "@/features/departments/DepartmentPageProjectsTable";
+import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import { Project } from "@/types/project";
 
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
   const departmentId = params?.departmentId;
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId);
+  const { data: projectsData } = useGetAllProjects();
 
   const department = data?.department;
+  const projects = projectsData?.result?.projects?.filter(
+    (p: Project) => p.department_id === departmentId
+  );
+
+  console.log("Projects for department:", projects);
 
   if (isLoading || !department) {
     return (
@@ -130,10 +138,9 @@ export default function DepartmentDetailPage() {
           </div>
         </div>
 
-        {/* Associated Products Section */}
         <div className="px-4 pb-4 mt-6">
-          <h2 className="text-xl font-semibold mt-6">Products</h2>
-          <DepartmentPageProductsTable data={department?.projects || []} />
+          <h2 className="text-xl font-semibold mt-6">Projects</h2>
+          <DepartmentPageProjectsTable data={projects} />
         </div>
       </div>
     </div>

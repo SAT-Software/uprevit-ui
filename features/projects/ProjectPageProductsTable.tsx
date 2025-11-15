@@ -18,72 +18,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
+import { Product } from "@/types/product";
 
-// Re-using the Item type definition (ensure it matches product structure)
-export type Item = {
-  productId: string;
-  createdOn: string;
-  createdBy: string;
-  modifiedOn: string;
-  modifiedBy: string;
-  productName: string;
-  project_id: string; // Needed for filtering, but not displayed
-  departmentId: string; // Needed for context, but not displayed
-  version: string;
-  status: "Submitted" | "Draft" | "Archived";
-  targetDate: number;
-  completionDate: number | null;
-  delayReason: string | null;
-};
-
-const columns: ColumnDef<Item>[] = [
+const columns: ColumnDef<Product>[] = [
   {
     header: "Product Id",
-    accessorKey: "productId",
+    accessorKey: "_id",
     cell: ({ row }) => (
-      <div className="text-xs font-medium">{row.getValue("productId")}</div>
+      <div className="text-xs font-medium">{row.getValue("_id")}</div>
     ),
   },
   {
-    header: "Created by - on",
-    accessorKey: "createdOn",
-    cell: ({ row }) => {
-      const createdBy = row.original.createdBy;
-      const createdOn = row.original.createdOn;
-      return (
-        <div className="">
-          <p className="text-xs font-medium">{createdBy}</p>
-          <p className="text-xs text-muted-foreground">{createdOn}</p>
-        </div>
-      );
-    },
-  },
-  {
-    header: "Modified by - on",
-    accessorKey: "modifiedOn",
-    cell: ({ row }) => {
-      const modifiedBy = row.original.modifiedBy;
-      const modifiedOn = row.original.modifiedOn;
-      return (
-        <div className="">
-          <p className="text-xs font-medium">{modifiedBy}</p>
-          <p className="text-xs text-muted-foreground">{modifiedOn}</p>
-        </div>
-      );
-    },
-  },
-  {
     header: "Product Name",
-    accessorKey: "productName",
+    accessorKey: "product_name",
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("productName")}</p>;
+      return <p className="text-xs">{row.getValue("product_name")}</p>;
+    },
+  },
+  {
+    header: "PPN",
+    accessorKey: "product_plan_number",
+    cell: ({ row }) => {
+      return <p className="text-xs">{row.getValue("product_plan_number")}</p>;
     },
   },
   {
     header: "Version",
-    accessorKey: "version",
+    accessorKey: "master_version",
     cell: ({ row }) => (
-      <div className="text-xs font-medium">{row.getValue("version")}</div>
+      <div className="text-xs font-medium">
+        {row.getValue("master_version")}
+      </div>
     ),
   },
   {
@@ -106,8 +71,14 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
+export default function ProjectPageProductsTable({
+  data,
+}: {
+  data: Product[];
+}) {
+  console.log("Products Table Data:", data);
   const router = useRouter();
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -144,7 +115,7 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() =>
                   router.push(
-                    `/products/${row.original.productId}/product-information`
+                    `/products/${row.original._id}/product-information`
                   )
                 }
               >
