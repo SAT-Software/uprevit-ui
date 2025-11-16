@@ -8,13 +8,16 @@ async function getDashboardStats({
   auth: AuthContextProps;
   signal: AbortSignal;
 }) {
-  const response = await fetch("/api/dashboard?id=68d2be511ad93c69d6e39e51", {
-    headers: {
-      Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
-      "Content-Type": "application/json", // Example of another header
-    },
-    signal,
-  });
+  const response = await fetch(
+    `/api/dashboard?id=${auth?.user?.profile.workspaceId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
+        "Content-Type": "application/json", // Example of another header
+      },
+      signal,
+    }
+  );
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch dashboard stats");
