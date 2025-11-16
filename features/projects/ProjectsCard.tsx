@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Project } from "@/types/project";
 import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,8 +11,27 @@ import {
 } from "@/components/ui/tooltip";
 import { PiArrowSquareOutDuotone } from "react-icons/pi";
 
+interface ProjectUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+export interface DepartmentsProps {
+  _id: string;
+  image?: string;
+  project_name: string;
+  project_description: string;
+  date?: string;
+  project_manager?: string;
+  users?: ProjectUser[];
+  members?: { name: string; src: string }[];
+  membersCount?: number;
+}
+
 // Update component to accept projects prop and use ProjectsProps
-function ProjectsCard({ projects }: { projects: Project[] }) {
+function ProjectsCard({ projects }: { projects: DepartmentsProps[] }) {
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {projects?.map((project) => (
@@ -66,26 +84,24 @@ function ProjectsCard({ projects }: { projects: Project[] }) {
                   <CalendarClock className="mr-1 w-4 h-4" />
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  {project.actionAt
-                    ? new Date(project.actionAt).toLocaleDateString()
-                    : "N/A"}
+                  {project.date
+                    ? new Date(project.date).toLocaleDateString()
+                    : "No date"}
                 </p>
               </div>
               <div className="flex items-center -space-x-[0.525rem] mr-3">
                 {(() => {
-                  const users = (project.users || []).map(
-                    (u: string, i: number) => ({
-                      _id: String(u ?? i),
-                      id: String(u ?? i),
-                      name: `User ${i + 1}`,
-                      email: `user${i + 1}@example.com`,
-                      role: "Member",
-                      avatarUrl: u,
-                    })
-                  );
+                  const usersData = project?.users;
+
+                  const users = usersData?.map((user) => ({
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    profileAvatar: user.profileAvatar,
+                  }));
                   return (
                     <MembersInlineTrigger
-                      users={users}
+                      users={users || []}
                       titlePrefix={project.project_name}
                     />
                   );

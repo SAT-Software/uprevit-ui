@@ -1,8 +1,8 @@
 "use client";
 
 import ProjectsCard from "@/features/projects/ProjectsCard";
-import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import DialogCreateProject from "@/features/projects/DialogCreateProject";
 
 function ProjectsPage() {
   const { data, isLoading } = useGetAllProjects();
@@ -18,7 +18,7 @@ function ProjectsPage() {
       <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full h-full">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <p className="text-base font-semibold">All Projects</p>
-          <MutateProjectDialog mode="create" />
+          <DialogCreateProject />
         </div>
         <ProjectsCard projects={allProjects} />
       </div>

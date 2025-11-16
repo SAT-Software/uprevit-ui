@@ -1,9 +1,8 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
-import { useAuth } from "react-oidc-context";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +18,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PiPlusCircleDuotone } from "react-icons/pi";
+import {
+  PiCirclesThreePlusDuotone,
+  PiPencilCircleDuotone,
+} from "react-icons/pi";
 import Image from "next/image";
-import AddProjectDropdown from "./AddMemberInProjectDropdown";
-import { useCreateProject } from "@/hooks/project/useCreateProject";
+import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
+import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import type { Project } from "@/types/project";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import {
@@ -35,51 +37,41 @@ import {
 } from "@/components/ui/select";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { Department } from "@/types/department";
+import { uploadFiles } from "@/utils/uploadthing";
 
-type Mode = "create" | "update";
-
-interface Member {
+interface User {
+  _id: string;
   name: string;
-  src: string;
+  profileAvatar: string;
+  src?: string;
 }
 
-interface MutateProjectDialogProps {
-  mode: Mode;
-  project?: Project | null;
-  trigger?: React.ReactElement;
-  onSuccess?: (result: unknown) => void;
+interface ProjectWithUsers extends Omit<Project, "users"> {
+  users?: User[];
 }
 
-// Pretend we have initial image files, remove this after S3 storage is implemented
-const fallbackBgImage = [
-  {
-    name: "department.jpg",
-    size: 1528737,
-    type: "image/jpeg",
-    url: "/department.jpg",
-    id: "project-123456789",
-  },
-];
+interface DialogUpdateProjectProps {
+  project: ProjectWithUsers;
+}
 
-export default function MutateProjectDialog({
-  mode,
+export default function DialogUpdateProject({
   project,
-  trigger,
-  onSuccess,
-}: MutateProjectDialogProps) {
-  const id = useId();
+}: DialogUpdateProjectProps) {
   const { data: departmentsData } = useGetAllDepartments();
+  const departments = departmentsData?.result?.departments || [];
+  const { data: usersData } = useGetAllUsersByWorkspace();
+  const users = usersData?.result?.users || [];
+  const id = useId();
 
   const [open, setOpen] = useState(false);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+    project?.users ?? []
+  );
+  const [newProjectImage, setNewProjectImage] = useState<File | null>(null);
+  const [removeProjectImage, setRemoveProjectImage] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  const createMutation = useCreateProject();
-  const updateMutation = useUpdateProject();
-  const auth = useAuth();
-  const userId = auth?.user?.profile?.userId;
-  const workspaceId = auth?.user?.profile?.workspaceId;
-
-  const departments = departmentsData?.result?.departments || [];
+  const { mutate: updateProject, isPending } = useUpdateProject();
 
   type FormValues = {
     project_name: string;
@@ -89,17 +81,6 @@ export default function MutateProjectDialog({
     department: string;
   };
 
-  const initialValues: FormValues = useMemo(
-    () => ({
-      project_name: project?.project_name || "",
-      project_number: project?.project_number || "",
-      project_manager: project?.project_manager || "",
-      project_description: project?.project_description || "",
-      department: project?.department_id || "",
-    }),
-    [project]
-  );
-
   const {
     register,
     handleSubmit,
@@ -107,105 +88,79 @@ export default function MutateProjectDialog({
     reset,
     watch,
   } = useForm<FormValues>({
-    defaultValues: initialValues,
     mode: "onSubmit",
-    values: initialValues,
   });
 
-  const selectedDepartment = watch("department");
-  const maxLength = 220;
+  // eslint-disable-next-line react-hooks/incompatible-library
   const descriptionText = watch("project_description") || "";
 
-  const handleAddMember = (member: Member) => {
-    if (!members.some((m) => m.name === member.name)) {
-      setMembers([...members, member]);
+  const handleAddUser = (user: User) => {
+    if (!selectedUsers.some((u) => u._id === user._id)) {
+      setSelectedUsers([...selectedUsers, user]);
     }
   };
 
-  const handleRemoveMember = (member: Member) => {
-    setMembers(members.filter((m) => m.name !== member.name));
+  const handleRemoveUser = (user: User) => {
+    setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
   };
-
-  const isPending =
-    mode === "create" ? createMutation.isPending : updateMutation.isPending;
-  const dialogTitle =
-    mode === "create" ? "Create New Project" : "Update Project";
-  const submitLabel = isPending
-    ? mode === "create"
-      ? "Creating..."
-      : "Updating..."
-    : mode === "create"
-    ? "Create Project"
-    : "Update Project";
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      if (mode === "create") {
-        const res = await createMutation.mutateAsync({
-          project_name: data.project_name,
-          project_description: data.project_description,
-          project_manager: data.project_manager,
-          project_number: data.project_number,
-          department_id: data.department,
-          users: members.map((member) => member.name),
-          image: "",
-          admin_id: userId,
-          workspace_id: workspaceId,
-        } as Project);
-        onSuccess?.(res);
-        setOpen(false);
-      } else {
-        if (!project?._id) throw new Error("Project id missing for update");
-        const res = await updateMutation.mutateAsync({
-          _id: project._id,
-          project_name: data.project_name,
-          project_description: data.project_description,
-          project_manager: data.project_manager,
-          project_number: data.project_number,
-          users: members.map((member) => member.name),
-          image: project.image || "",
-          admin_id: project.admin_id,
-          workspace_id: project.workspace_id,
-          department_id: project.department_id,
-        } as Project);
-        onSuccess?.(res);
-        setOpen(false);
+    let imageUrlToSend: string;
+    if (removeProjectImage) {
+      imageUrlToSend = "";
+    } else if (newProjectImage) {
+      setUploadingImage(true);
+      const utRes = await uploadFiles("imageUploader", {
+        files: [newProjectImage],
+      });
+      setUploadingImage(false);
+      if (!utRes?.[0]?.ufsUrl) {
+        throw new Error("Image upload failed");
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      reset();
-      setMembers([]);
+      imageUrlToSend = utRes[0].ufsUrl;
+    } else {
+      imageUrlToSend = project?.image || "";
     }
+
+    updateProject(
+      {
+        _id: project!._id,
+        project_name: data.project_name,
+        project_description: data.project_description,
+        project_manager: data.project_manager,
+        project_number: data.project_number,
+        users: selectedUsers.map((user) => user._id),
+        image: imageUrlToSend,
+        admin_id: project!.admin_id,
+        workspace_id: project!.workspace_id,
+        department_id: project!.department_id,
+      },
+      {
+        onSuccess: () => {
+          reset();
+          setNewProjectImage(null);
+          setRemoveProjectImage(false);
+          setOpen(false);
+        },
+      }
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ? (
-          trigger
-        ) : (
-          <Button variant="default" className="flex items-center gap-2">
-            {mode === "create" ? (
-              <>
-                Create New Project <PiPlusCircleDuotone />
-              </>
-            ) : (
-              "Update Project"
-            )}
-          </Button>
-        )}
+        <Button variant="ghost" className="flex items-center gap-2">
+          <PiPencilCircleDuotone size={18} />
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            {dialogTitle}
+            Update Project
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          {mode === "create"
-            ? "Create a new project by providing details and adding members."
-            : "Update this project's details and members."}
+          Update this project&apos;s details and members.
         </DialogDescription>
         <form
           id={`mutate-project-form-${id}`}
@@ -215,7 +170,11 @@ export default function MutateProjectDialog({
         >
           <div className="flex gap-4 px-6 pt-4">
             <div className="w-1/3">
-              <ProfileBg imageUrl={project?.image} />
+              <ProfileBg
+                setNewProjectImage={setNewProjectImage}
+                setRemoveProjectImage={setRemoveProjectImage}
+                imageUrl={project?.image}
+              />
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-4">
@@ -225,6 +184,7 @@ export default function MutateProjectDialog({
                     id={`${id}-project-name`}
                     placeholder="Enter project name"
                     type="text"
+                    defaultValue={project?.project_name}
                     aria-invalid={errors.project_name ? "true" : "false"}
                     {...register("project_name", {
                       required: "Project name is required",
@@ -244,6 +204,7 @@ export default function MutateProjectDialog({
                     id={`${id}-project-number`}
                     placeholder="Enter project number"
                     type="text"
+                    defaultValue={project?.project_number}
                     aria-invalid={errors.project_number ? "true" : "false"}
                     {...register("project_number", {
                       required: "Project number is required",
@@ -262,10 +223,9 @@ export default function MutateProjectDialog({
             <div className="space-y-2 w-1/2">
               <Label htmlFor={`${id}-department`}>Department</Label>
               <Select
-                value={selectedDepartment}
+                defaultValue={project?.department_id}
                 onValueChange={(value) => {
                   const event = { target: { name: "department", value } };
-
                   register("department", {
                     required: "Department is required",
                   }).onChange(event);
@@ -290,10 +250,10 @@ export default function MutateProjectDialog({
             </div>
             <div className="space-y-4 w-1/2">
               <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
-
               <Input
                 id={`${id}-manager-name`}
                 placeholder="Enter manager's name"
+                defaultValue={project?.project_manager}
                 type="text"
                 aria-invalid={errors.project_manager ? "true" : "false"}
                 {...register("project_manager")}
@@ -308,15 +268,16 @@ export default function MutateProjectDialog({
                 <Textarea
                   id={`${id}-description`}
                   placeholder="Describe the project's purpose and goals"
-                  maxLength={maxLength}
+                  maxLength={220}
+                  defaultValue={project?.project_description}
                   aria-describedby={`${id}-description`}
                   className="h-24 resize-none"
                   aria-invalid={errors.project_description ? "true" : "false"}
                   {...register("project_description", {
                     required: "Description is required",
                     maxLength: {
-                      value: maxLength,
-                      message: `Description must be at most ${maxLength} characters`,
+                      value: 220,
+                      message: `Description must be at most ${220} characters`,
                     },
                   })}
                 />
@@ -332,33 +293,45 @@ export default function MutateProjectDialog({
                   aria-live="polite"
                 >
                   <span className="tabular-nums">
-                    {maxLength - descriptionText.length}
+                    {220 - descriptionText.length}
                   </span>{" "}
                   characters left
                 </p>
               </div>
 
               <div className="flex items-center gap-4 justify-between w-full space-y-4">
-                <AddProjectDropdown
-                  onAddMember={handleAddMember}
-                  onRemoveMember={handleRemoveMember}
-                  selectedMembers={members}
+                <AddUsersInProjectDropdown
+                  onAddUser={handleAddUser}
+                  onRemoveUser={handleRemoveUser}
+                  selectedUsers={selectedUsers}
+                  users={users}
                 />
                 <div className="mb-4 items-center justify-between w-1/2">
-                  {members.length > 0 && (
+                  {selectedUsers.length > 0 && (
                     <div className="flex items-center -space-x-[0.525rem]">
-                      {members.slice(0, 4).map((member) => (
-                        <Image
-                          key={member.name}
-                          className="ring-background rounded-full ring-2"
-                          src={member.src}
-                          width={28}
-                          height={28}
-                          alt={member.name}
-                        />
-                      ))}
+                      {selectedUsers.slice(0, 4).map((user) => {
+                        if (user.profileAvatar)
+                          return (
+                            <Image
+                              key={user._id}
+                              className="ring-background rounded-full ring-2"
+                              src={user.profileAvatar}
+                              width={28}
+                              height={28}
+                              alt={user.name}
+                            />
+                          );
+                        return (
+                          <div
+                            key={user._id}
+                            className="flex h-8 w-8 items-center justify-center border-2 border-white rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                          >
+                            {user?.name?.charAt(0).toUpperCase()}
+                          </div>
+                        );
+                      })}
                       <p className="text-xs text-muted-foreground ml-4">
-                        {members.length} Members
+                        {selectedUsers.length} Members
                       </p>
                     </div>
                   )}
@@ -376,10 +349,13 @@ export default function MutateProjectDialog({
           <Button
             type="submit"
             form={`mutate-project-form-${id}`}
-            disabled={isPending}
-            aria-busy={isPending}
+            disabled={uploadingImage || isPending}
           >
-            {submitLabel}
+            {uploadingImage
+              ? "Uploading Image..."
+              : isPending
+              ? "Updating Project..."
+              : "Update Project"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -387,7 +363,15 @@ export default function MutateProjectDialog({
   );
 }
 
-function ProfileBg({ imageUrl }: { imageUrl?: string }) {
+function ProfileBg({
+  setNewProjectImage,
+  setRemoveProjectImage,
+  imageUrl,
+}: {
+  setNewProjectImage: (file: File | null) => void;
+  setRemoveProjectImage: (removed: boolean) => void;
+  imageUrl?: string;
+}) {
   const initialFiles = imageUrl
     ? [
         {
@@ -398,7 +382,7 @@ function ProfileBg({ imageUrl }: { imageUrl?: string }) {
           id: `bg-${imageUrl}`,
         },
       ]
-    : fallbackBgImage;
+    : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
@@ -406,9 +390,30 @@ function ProfileBg({ imageUrl }: { imageUrl?: string }) {
       initialFiles,
     });
 
-  const file0 = files[0]?.file as File | FileMetadata | undefined;
+  const fileItem = files[0];
+  const ImageFile = fileItem?.file;
   const currentImage =
-    files[0]?.preview || (file0 && !(file0 instanceof File) ? file0.url : null);
+    fileItem?.preview ||
+    (ImageFile && !(ImageFile instanceof File)
+      ? (ImageFile as FileMetadata).url
+      : null);
+
+  useEffect(() => {
+    const hadInitialImage = !!imageUrl;
+    if (files.length === 0) {
+      setNewProjectImage(null);
+      setRemoveProjectImage(hadInitialImage);
+    } else {
+      const file = files[0]?.file;
+      if (file instanceof File) {
+        setNewProjectImage(file);
+        setRemoveProjectImage(false);
+      } else {
+        setNewProjectImage(null);
+        setRemoveProjectImage(false);
+      }
+    }
+  }, [files, imageUrl, setNewProjectImage, setRemoveProjectImage]);
 
   return (
     <div className="h-32">
@@ -427,7 +432,7 @@ function ProfileBg({ imageUrl }: { imageUrl?: string }) {
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-            <PiPlusCircleDuotone className="w-24 h-24 text-muted-foreground/60" />
+            <PiCirclesThreePlusDuotone className="w-24 h-24 text-muted-foreground/60" />
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center gap-2">

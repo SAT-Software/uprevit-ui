@@ -1,10 +1,5 @@
 "use client";
 
-import { useId, useState } from "react";
-import { useForm } from "react-hook-form";
-import { ImagePlusIcon, XIcon } from "lucide-react";
-import { useAuth } from "react-oidc-context";
-import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,14 +13,28 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PiCirclesThreePlusDuotone } from "react-icons/pi";
-import Image from "next/image";
-import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import { useFileUpload } from "@/hooks/general/use-file-upload";
+import { useCreateProject } from "@/hooks/project/useCreateProject";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
-import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
+import { Department } from "@/types/department";
 import { uploadFiles } from "@/utils/uploadthing";
+import { ImagePlusIcon, XIcon } from "lucide-react";
+import Image from "next/image";
+import { useId, useState } from "react";
+import { useForm } from "react-hook-form";
+import { PiKanbanDuotone, PiPlusCircleDuotone } from "react-icons/pi";
+import { useAuth } from "react-oidc-context";
+import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 
 interface User {
   _id: string;
@@ -33,27 +42,38 @@ interface User {
   profileAvatar: string;
 }
 
+interface DialogCreateProjectProps {
+  trigger?: React.ReactElement;
+}
+
 type FormValues = {
-  department_name: string;
-  manager?: string;
-  department_description: string;
+  project_name: string;
+  project_number: string;
+  project_manager: string;
+  project_description: string;
+  department: string;
 };
 
-export default function DialogAddDepartment() {
+export default function DialogCreateProject({
+  trigger,
+}: DialogCreateProjectProps) {
   const id = useId();
 
   const [open, setOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
-  const [departmentImage, setDepartmentImage] = useState<
-    File | FileMetadata | null
-  >(null);
+  const [projectImage, setProjectImage] = useState<File | FileMetadata | null>(
+    null
+  );
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  const { mutate: createDepartment, isPending } = useCreateDepartment();
+  const { data: departmentsData } = useGetAllDepartments();
   const { data: usersData } = useGetAllUsersByWorkspace();
+  const { mutate: createProject, isPending } = useCreateProject();
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
+
+  const departments = departmentsData?.result?.departments || [];
   const users = usersData?.data;
 
   const {
@@ -62,11 +82,14 @@ export default function DialogAddDepartment() {
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      department_name: "",
-      manager: "",
-      department_description: "",
+      project_name: "",
+      project_number: "",
+      project_manager: "",
+      project_description: "",
+      department: "",
     },
     mode: "onSubmit",
   });
@@ -84,21 +107,26 @@ export default function DialogAddDepartment() {
   async function onSubmit(data: FormValues) {
     try {
       let utRes;
-      if (departmentImage) {
+      console.log("image in project:", projectImage);
+      if (projectImage) {
         setUploadingImage(true);
         utRes = await uploadFiles("imageUploader", {
-          files: [departmentImage as File],
+          files: [projectImage as File],
         });
         setUploadingImage(false);
       }
 
-      if (!utRes && departmentImage) throw new Error("Image upload failed");
+      if (!utRes && projectImage) {
+        throw new Error("Image upload failed");
+      }
 
-      createDepartment(
+      createProject(
         {
-          department_name: data.department_name,
-          department_description: data.department_description,
-          manager: data.manager,
+          project_name: data.project_name,
+          project_description: data.project_description,
+          project_manager: data.project_manager,
+          project_number: data.project_number,
+          department_id: data.department,
           users: selectedUsers.map((user) => user._id),
           image: utRes?.[0]?.ufsUrl || "",
           admin_id: userId as string,
@@ -112,90 +140,135 @@ export default function DialogAddDepartment() {
           },
           onError: (error) => {
             setSelectedUsers([]);
-            console.error("Error creating department:", error);
+            console.error("Error creating project:", error);
           },
         }
       );
     } catch (error) {
-      console.error("Error uploading department image:", error);
+      console.error("Error uploading project image:", error);
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="flex items-center gap-2">
-          Create New Department
-        </Button>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button variant="default" className="flex items-center gap-2">
+            Create New Project <PiPlusCircleDuotone />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Create New Department
+            Create New Project
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Create a new department by providing details and adding members.
+          Create a new project by providing details and adding members.
         </DialogDescription>
         <form
-          id={`mutate-department-form-${id}`}
+          id={`mutate-project-form-${id}`}
           className="overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
           <div className="flex gap-4 px-6 pt-4">
             <div className="w-1/3">
-              <ProfileBg setDepartmentImage={setDepartmentImage} />
+              <ProfileBg setProjectImage={setProjectImage} />
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-4">
-                <Label htmlFor={`${id}-department-name`}>Department Name</Label>
+                <Label htmlFor={`${id}-project-name`}>Project Name</Label>
                 <div className="flex flex-col gap-2">
                   <Input
-                    id={`${id}-department-name`}
-                    placeholder="Enter department name"
+                    id={`${id}-project-name`}
+                    placeholder="Enter project name"
                     type="text"
-                    aria-invalid={errors.department_name ? "true" : "false"}
-                    {...register("department_name", {
-                      required: "Department name is required",
+                    aria-invalid={errors.project_name ? "true" : "false"}
+                    {...register("project_name", {
+                      required: "Project name is required",
                     })}
                   />
-                  {errors.department_name && (
+                  {errors.project_name && (
                     <p role="alert" className="text-xs text-destructive">
-                      {errors.department_name.message}
+                      {errors.project_name.message}
                     </p>
                   )}
                 </div>
               </div>
               <div className="space-y-4">
-                <Label htmlFor={`${id}-manager-name`}>Department Manager</Label>
-                <Input
-                  id={`${id}-manager-name`}
-                  placeholder="Enter manager's name"
-                  type="text"
-                  aria-invalid={errors.manager ? "true" : "false"}
-                  {...register("manager")}
-                />
+                <Label htmlFor={`${id}-project-number`}>Project Number</Label>
+                <div className="flex flex-col gap-2">
+                  <Input
+                    id={`${id}-project-number`}
+                    placeholder="Enter project number"
+                    type="text"
+                    aria-invalid={errors.project_number ? "true" : "false"}
+                    {...register("project_number", {
+                      required: "Project number is required",
+                    })}
+                  />
+                  {errors.project_number && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.project_number.message}
+                    </p>
+                  )}
+                </div>
               </div>
+            </div>
+          </div>
+          <div className="flex gap-4 w-full px-6 pt-4">
+            <div className="space-y-2 w-1/2">
+              <Label htmlFor={`${id}-department`}>Department</Label>
+              <Select
+                value={watch("department")}
+                onValueChange={(value) => setValue("department", value)}
+              >
+                <SelectTrigger id={`${id}-department`}>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept: Department) => (
+                    <SelectItem key={dept._id} value={dept._id || ""}>
+                      {dept.department_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.department && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.department.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-4 w-1/2">
+              <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
+
+              <Input
+                id={`${id}-manager-name`}
+                placeholder="Enter manager's name"
+                type="text"
+                aria-invalid={errors.project_manager ? "true" : "false"}
+                {...register("project_manager")}
+              />
             </div>
           </div>
 
           <div className="px-6 pt-4 pb-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>
-                  Department Description
-                </Label>
+                <Label htmlFor={`${id}-description`}>Project Description</Label>
                 <Textarea
                   id={`${id}-description`}
-                  placeholder="Describe the department's purpose and responsibilities"
+                  placeholder="Describe the project's purpose and goals"
                   maxLength={220}
                   aria-describedby={`${id}-description`}
                   className="h-24 resize-none"
-                  aria-invalid={
-                    errors.department_description ? "true" : "false"
-                  }
-                  {...register("department_description", {
+                  aria-invalid={errors.project_description ? "true" : "false"}
+                  {...register("project_description", {
                     required: "Description is required",
                     maxLength: {
                       value: 220,
@@ -203,9 +276,9 @@ export default function DialogAddDepartment() {
                     },
                   })}
                 />
-                {errors.department_description && (
+                {errors.project_description && (
                   <p role="alert" className="text-xs text-destructive">
-                    {errors.department_description.message}
+                    {errors.project_description.message}
                   </p>
                 )}
                 <p
@@ -215,14 +288,14 @@ export default function DialogAddDepartment() {
                   aria-live="polite"
                 >
                   <span className="tabular-nums">
-                    {220 - (watch("department_description") || "").length}
+                    {220 - (watch("project_description") || "").length}
                   </span>{" "}
                   characters left
                 </p>
               </div>
 
               <div className="flex items-center gap-4 justify-between w-full space-y-4">
-                <AddUsersInDepartmentDropdown
+                <AddUsersInProjectDropdown
                   users={users?.map((user: User) => ({
                     _id: user._id,
                     name: user.name,
@@ -274,15 +347,15 @@ export default function DialogAddDepartment() {
           </DialogClose>
           <Button
             type="submit"
-            form={`mutate-department-form-${id}`}
+            form={`mutate-project-form-${id}`}
             disabled={uploadingImage || isPending}
             aria-busy={uploadingImage || isPending}
           >
             {uploadingImage
               ? "Uploading Image..."
               : isPending
-              ? "Creating Department..."
-              : "Create Department"}
+              ? "Creating Project..."
+              : "Create Project"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -291,9 +364,9 @@ export default function DialogAddDepartment() {
 }
 
 function ProfileBg({
-  setDepartmentImage,
+  setProjectImage,
 }: {
-  setDepartmentImage: (file: File | FileMetadata) => void;
+  setProjectImage: (file: File | FileMetadata) => void;
 }) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
@@ -306,7 +379,7 @@ function ProfileBg({
     files[0]?.preview ||
     (ImageFile && !(ImageFile instanceof File) ? ImageFile.url : null);
 
-  setDepartmentImage(ImageFile);
+  setProjectImage(ImageFile);
 
   return (
     <div className="h-32">
@@ -325,7 +398,7 @@ function ProfileBg({
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-            <PiCirclesThreePlusDuotone className="w-24 h-24 text-muted-foreground/60" />
+            <PiKanbanDuotone className="w-24 h-24 text-muted-foreground/60" />
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center gap-2">

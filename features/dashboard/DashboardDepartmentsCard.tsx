@@ -8,7 +8,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
-import { Department } from "@/types/department";
 import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +15,26 @@ import {
   PiArrowSquareOutDuotone,
   PiCirclesThreePlusDuotone,
 } from "react-icons/pi";
+
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+export interface DepartmentsProps {
+  _id: string;
+  image?: string;
+  department_name: string;
+  department_description: string;
+  date?: string;
+  manager?: string;
+  users?: DepartmentUser[];
+  members?: { name: string; src: string }[];
+  membersCount?: number;
+  auditLogs?: { actionAt: string }[];
+}
 
 // Loading State Component
 function DepartmentLoadingCard() {
@@ -79,7 +98,8 @@ function DepartmentErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 // Department Card Component
-function DepartmentCard({ department }: { department: Department }) {
+function DepartmentCard({ department }: { department: DepartmentsProps }) {
+  console.log("Department in Card:", department);
   return (
     <div className="relative flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4">
       <div className="absolute right-2 top-2">
@@ -132,25 +152,27 @@ function DepartmentCard({ department }: { department: Department }) {
               <CalendarClock className="mr-1 w-4 h-4" />
             </span>
             <p className="text-xs text-muted-foreground">
-              {department.actionAt
-                ? new Date(department.actionAt).toLocaleDateString()
+              {department?.auditLogs?.[0]?.actionAt
+                ? new Date(
+                    department?.auditLogs?.[0].actionAt
+                  ).toLocaleDateString()
                 : "No date"}
             </p>
           </div>
 
           <div className="flex items-center -space-x-[0.525rem] mr-3">
             {(() => {
-              const users = (department.users || []).map(
-                (u: string, i: number) => ({
-                  _id: String(u ?? i),
-                  name: `User ${i + 1}`,
-                  email: `user${i + 1}@example.com`,
-                  profileAvatar: u,
-                })
-              );
+              const usersData = department?.users;
+
+              const users = usersData?.map((user) => ({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                profileAvatar: user.profileAvatar,
+              }));
               return (
                 <MembersInlineTrigger
-                  users={users}
+                  users={users || []}
                   titlePrefix={department.department_name}
                 />
               );
@@ -225,7 +247,7 @@ function DashboardDepartmentsCard() {
         {filteredDepartments.length === 0 ? (
           <DepartmentEmptyState />
         ) : (
-          filteredDepartments.map((department: Department) => (
+          filteredDepartments.map((department: DepartmentsProps) => (
             <DepartmentCard key={department._id} department={department} />
           ))
         )}
