@@ -29,6 +29,7 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Department } from "@/types/department";
 import { Project } from "@/types/project";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
+import { useAuth } from "react-oidc-context";
 
 interface FormValues {
   ppn: string;
@@ -43,6 +44,8 @@ interface FormValues {
 export default function CreateProductDialog() {
   const id = useId();
   const [open, setOpen] = useState(false);
+  const auth = useAuth();
+  const user = auth?.user?.profile;
 
   const { data: departmentsData = [] } = useGetAllDepartments();
   const { data: projectsData = [] } = useGetAllProjects();
@@ -76,6 +79,7 @@ export default function CreateProductDialog() {
     mode: "onSubmit",
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedDepartment = watch("department");
   const selectedProject = watch("project");
 
@@ -96,6 +100,7 @@ export default function CreateProductDialog() {
         product_name: data.productName,
         product_description: data.description,
         department_id: data.department,
+        workspace_id: user?.workspaceId as string,
         project_id: data.project,
         master_version: data.version,
         status: data.status.toLowerCase(),

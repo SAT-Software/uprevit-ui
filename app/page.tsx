@@ -17,12 +17,9 @@ export default function Home() {
   };
 
   const signOutRedirect = () => {
-    const clientId = "7vvr577cmdnbbo1qjv8e0m40nd";
-    // const logoutUri = "http://localhost:8080";
-    const logoutUri =
-      "https://uprevit-ui-git-develop-amit-tambulkars-projects.vercel.app";
-    const cognitoDomain =
-      "https://us-east-1mpuqjaol2.auth.us-east-1.amazoncognito.com";
+    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
+    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
+    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
       logoutUri
     )}`;

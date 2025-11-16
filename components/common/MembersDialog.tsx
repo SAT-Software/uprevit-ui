@@ -12,21 +12,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 
-export type Member = {
-  id: string;
+export type User = {
+  _id: string;
   name: string;
   email?: string;
-  role: string;
-  avatarUrl?: string;
-  isCurrentUser?: boolean;
+  profileAvatar?: string;
 };
 
 export interface MembersDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  members: Member[];
+  users: User[];
   titlePrefix?: string; // e.g. Department / Project name
 }
 
@@ -60,7 +57,7 @@ function MembersSearchBar({
   );
 }
 
-function MemberRow({ member }: { member: Member }) {
+function MemberRow({ member }: { member: User }) {
   const initials = useMemo(() => {
     return member.name
       .split(" ")
@@ -71,8 +68,8 @@ function MemberRow({ member }: { member: Member }) {
   return (
     <div className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
       <Avatar className="h-10 w-10">
-        {member.avatarUrl ? (
-          <AvatarImage src={member.avatarUrl} alt={member.name} />
+        {member.profileAvatar ? (
+          <AvatarImage src={member.profileAvatar} alt={member.name} />
         ) : null}
         <AvatarFallback className="bg-muted text-muted-foreground">
           {initials}
@@ -80,22 +77,13 @@ function MemberRow({ member }: { member: Member }) {
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-foreground">
-          {member.name}
-          {member.isCurrentUser ? (
-            <span className="font-normal text-muted-foreground"> (You)</span>
-          ) : null}
-        </p>
+        <p className="truncate font-medium text-foreground">{member.name}</p>
         {member.email ? (
           <p className="truncate text-sm text-muted-foreground">
             {member.email}
           </p>
         ) : null}
       </div>
-
-      <Badge variant="outline" className="text-xs font-medium">
-        {member.role}
-      </Badge>
     </div>
   );
 }
@@ -103,18 +91,18 @@ function MemberRow({ member }: { member: Member }) {
 export function MembersDialog({
   open,
   onOpenChange,
-  members,
+  users,
   titlePrefix,
 }: MembersDialogProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    if (!q) return members;
-    return members.filter((m) =>
+    if (!q) return users;
+    return users.filter((m: User) =>
       [m.name, m.email ?? ""].some((v) => v.toLowerCase().includes(q))
     );
-  }, [members, query]);
+  }, [users, query]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -124,7 +112,7 @@ export function MembersDialog({
             <DialogTitle className="text-xl font-semibold flex flex-row items-center gap-2">
               <p>{titlePrefix ? `${titlePrefix} ` : ""}Members</p>
               <span className="text-xs font-normal text-muted-foreground/80">
-                Total users - {members.length}
+                Total users - {users?.length}
               </span>
             </DialogTitle>
           </DialogHeader>
@@ -140,8 +128,8 @@ export function MembersDialog({
 
         <div className="px-6 pb-6">
           <div className="mt-3 max-h-[420px] space-y-1 overflow-y-auto">
-            {filtered.length ? (
-              filtered.map((m) => <MemberRow key={m.id} member={m} />)
+            {filtered?.length ? (
+              filtered?.map((m: User) => <MemberRow key={m._id} member={m} />)
             ) : (
               <div className="py-8 text-center text-muted-foreground">
                 No members found
@@ -155,16 +143,16 @@ export function MembersDialog({
 }
 
 export function MembersInlineTrigger({
-  members,
+  users,
   titlePrefix,
 }: {
-  members: Member[];
+  users: User[];
   titlePrefix?: string;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const topFour = members.slice(0, 4);
-  const extra = Math.max(members.length - 4, 0);
+  const topFour = users?.slice(0, 4);
+  const extra = Math.max((users?.length ?? 0) - 4, 0);
 
   return (
     <>
@@ -178,10 +166,10 @@ export function MembersInlineTrigger({
         }}
       >
         <div className="flex items-center -space-x-2">
-          {topFour.map((m) => (
-            <Avatar key={m.id} className="h-7 w-7 ring-2 ring-background">
-              {m.avatarUrl ? (
-                <AvatarImage src={m.avatarUrl} alt={m.name} />
+          {topFour?.map((m) => (
+            <Avatar key={m._id} className="h-7 w-7 ring-2 ring-background">
+              {m.profileAvatar ? (
+                <AvatarImage src={m.profileAvatar} alt={m.name} />
               ) : null}
               <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
                 {m.name
@@ -200,7 +188,7 @@ export function MembersInlineTrigger({
             </Avatar>
           ) : null}
 
-          {members.length === 0 ? (
+          {users?.length === 0 ? (
             <Avatar className="h-7 w-7 ring-2 ring-background">
               <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
                 0
@@ -218,7 +206,7 @@ export function MembersInlineTrigger({
       <MembersDialog
         open={open}
         onOpenChange={setOpen}
-        members={members}
+        users={users}
         titlePrefix={titlePrefix}
       />
     </>

@@ -10,11 +10,9 @@ import * as React from "react";
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_mpuQjaoL2",
-  client_id: "7vvr577cmdnbbo1qjv8e0m40nd",
-  // redirect_uri: "http://localhost:8080",
-  redirect_uri:
-    "https://uprevit-ui-git-develop-amit-tambulkars-projects.vercel.app",
+  authority: process.env.NEXT_PUBLIC_COGNITO_AUTHORITY!,
+  client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
+  redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI!,
   response_type: "code",
   scope: "email openid phone",
 };

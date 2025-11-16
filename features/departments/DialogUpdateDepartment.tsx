@@ -1,9 +1,8 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
-import { useAuth } from "react-oidc-context";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,70 +18,55 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PiCirclesThreePlusDuotone } from "react-icons/pi";
+import {
+  PiCirclesThreePlusDuotone,
+  PiPencilCircleDuotone,
+} from "react-icons/pi";
 import Image from "next/image";
-import AddDepartmentDropdown from "./AddMemberInDepartmentDropdown";
-import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
+import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
+import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import { uploadFiles } from "@/utils/uploadthing";
 
-type Mode = "create" | "update";
-
-interface Member {
+interface User {
+  _id: string;
   name: string;
-  src: string;
+  profileAvatar: string;
+  src?: string;
 }
 
-interface MutateDepartmentDialogProps {
-  mode: Mode;
-  department?: Department | null;
-  trigger?: React.ReactElement;
-  onSuccess?: (result: unknown) => void;
-}
+type FormValues = {
+  department_name: string;
+  manager?: string;
+  department_description: string;
+};
 
-// Pretend we have initial image files, remove this after S3 storage is implemented
-const fallbackBgImage = [
-  {
-    name: "department.jpg",
-    size: 1528737,
-    type: "image/jpeg",
-    url: "/department.jpg",
-    id: "department-123456789",
-  },
-];
+type DepartmentWithUsers = Omit<Department, "users"> & {
+  users?: User[];
+};
 
-export default function MutateDepartmentDialog({
-  mode,
+export default function DialogUpdateDepartment({
   department,
-  trigger,
-  onSuccess,
-}: MutateDepartmentDialogProps) {
+}: {
+  department?: DepartmentWithUsers;
+}) {
+  const { data: usersData } = useGetAllUsersByWorkspace();
+  const users = usersData?.data;
   const id = useId();
 
   const [open, setOpen] = useState(false);
-  const [members, setMembers] = useState<Member[]>([]);
-
-  const createMutation = useCreateDepartment();
-  const updateMutation = useUpdateDepartment();
-  const auth = useAuth();
-  const userId = auth?.user?.profile?.userId;
-  const workspaceId = auth?.user?.profile?.workspaceId;
-
-  type FormValues = {
-    department_name: string;
-    manager?: string;
-    department_description: string;
-  };
-
-  const initialValues: FormValues = useMemo(
-    () => ({
-      department_name: department?.department_name || "",
-      manager: department?.manager || "",
-      department_description: department?.department_description || "",
-    }),
-    [department]
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+    department?.users ?? []
   );
+  const [newDepartmentImage, setNewDepartmentImage] = useState<File | null>(
+    null
+  );
+  const [removeDepartmentImage, setRemoveDepartmentImage] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const { mutate: updateDepartment, isPending } = useUpdateDepartment();
 
   const {
     register,
@@ -91,95 +75,77 @@ export default function MutateDepartmentDialog({
     reset,
     watch,
   } = useForm<FormValues>({
-    defaultValues: initialValues,
     mode: "onSubmit",
-    values: initialValues,
   });
 
-  const maxLength = 220;
+  // eslint-disable-next-line react-hooks/incompatible-library
   const descriptionText = watch("department_description") || "";
 
-  const handleAddMember = (member: Member) => {
-    if (!members.some((m) => m.name === member.name)) {
-      setMembers([...members, member]);
+  const handleAddUser = (user: User) => {
+    if (!selectedUsers.some((u) => u._id === user._id)) {
+      setSelectedUsers([...selectedUsers, user]);
     }
   };
 
-  const handleRemoveMember = (member: Member) => {
-    setMembers(members.filter((m) => m.name !== member.name));
+  const handleRemoveUser = (user: User) => {
+    setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
   };
-
-  const isPending =
-    mode === "create" ? createMutation.isPending : updateMutation.isPending;
-  const dialogTitle =
-    mode === "create" ? "Create New Department" : "Update Department";
-  const submitLabel = isPending
-    ? mode === "create"
-      ? "Creating..."
-      : "Updating..."
-    : mode === "create"
-    ? "Create Department"
-    : "Update Department";
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      if (mode === "create") {
-        const res = await createMutation.mutateAsync({
-          department_name: data.department_name,
-          department_description: data.department_description,
-          manager: data.manager,
-          users: members.map((member) => member.name),
-          image: "",
-          admin_id: userId as string,
-          workspace_id: workspaceId as string,
-        });
-        onSuccess?.(res);
-        setOpen(false);
-      } else {
-        if (!department?._id)
-          throw new Error("Department id missing for update");
-        const res = await updateMutation.mutateAsync({
-          _id: department._id,
-          department_name: data.department_name,
-          department_description: data.department_description,
-          manager: data.manager,
-          users: members.map((member) => member.name),
-          image: department.image || "",
-          admin_id: department.admin_id,
-          workspace_id: department.workspace_id,
-        } as Department);
-        onSuccess?.(res);
-        setOpen(false);
+    let imageUrlToSend: string;
+    if (removeDepartmentImage) {
+      imageUrlToSend = "";
+    } else if (newDepartmentImage) {
+      setUploadingImage(true);
+      const utRes = await uploadFiles("imageUploader", {
+        files: [newDepartmentImage],
+      });
+      setUploadingImage(false);
+      if (!utRes?.[0]?.ufsUrl) {
+        throw new Error("Image upload failed");
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      reset();
-      setMembers([]);
+      imageUrlToSend = utRes[0].ufsUrl;
+    } else {
+      imageUrlToSend = department?.image || "";
     }
+
+    updateDepartment(
+      {
+        _id: department!._id,
+        department_name: data.department_name,
+        department_description: data.department_description,
+        manager: data.manager,
+        users: selectedUsers.map((user) => user._id),
+        image: imageUrlToSend,
+        admin_id: department!.admin_id,
+        workspace_id: department!.workspace_id,
+      },
+      {
+        onSuccess: () => {
+          reset();
+          setNewDepartmentImage(null);
+          setRemoveDepartmentImage(false);
+          setOpen(false);
+        },
+      }
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ? (
-          trigger
-        ) : (
-          <Button variant="default" className="flex items-center gap-2">
-            {mode === "create" ? "Create New Department" : "Update Department"}
-          </Button>
-        )}
+        <Button variant="ghost" className="flex items-center gap-2">
+          <PiPencilCircleDuotone size={18} />
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            {dialogTitle}
+            Update Department
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          {mode === "create"
-            ? "Create a new department by providing details and adding members."
-            : "Update this department's details and members."}
+          Update this department&apos;s details and members.
         </DialogDescription>
         <form
           id={`mutate-department-form-${id}`}
@@ -189,7 +155,11 @@ export default function MutateDepartmentDialog({
         >
           <div className="flex gap-4 px-6 pt-4">
             <div className="w-1/3">
-              <ProfileBg imageUrl={department?.image} />
+              <ProfileBg
+                setNewDepartmentImage={setNewDepartmentImage}
+                setRemoveDepartmentImage={setRemoveDepartmentImage}
+                imageUrl={department?.image}
+              />
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-4">
@@ -199,6 +169,7 @@ export default function MutateDepartmentDialog({
                     id={`${id}-department-name`}
                     placeholder="Enter department name"
                     type="text"
+                    defaultValue={department?.department_name}
                     aria-invalid={errors.department_name ? "true" : "false"}
                     {...register("department_name", {
                       required: "Department name is required",
@@ -216,6 +187,7 @@ export default function MutateDepartmentDialog({
                 <Input
                   id={`${id}-manager-name`}
                   placeholder="Enter manager's name"
+                  defaultValue={department?.manager}
                   type="text"
                   aria-invalid={errors.manager ? "true" : "false"}
                   {...register("manager")}
@@ -233,7 +205,8 @@ export default function MutateDepartmentDialog({
                 <Textarea
                   id={`${id}-description`}
                   placeholder="Describe the department's purpose and responsibilities"
-                  maxLength={maxLength}
+                  maxLength={220}
+                  defaultValue={department?.department_description}
                   aria-describedby={`${id}-description`}
                   className="h-24 resize-none"
                   aria-invalid={
@@ -242,8 +215,8 @@ export default function MutateDepartmentDialog({
                   {...register("department_description", {
                     required: "Description is required",
                     maxLength: {
-                      value: maxLength,
-                      message: `Description must be at most ${maxLength} characters`,
+                      value: 220,
+                      message: `Description must be at most ${220} characters`,
                     },
                   })}
                 />
@@ -259,33 +232,49 @@ export default function MutateDepartmentDialog({
                   aria-live="polite"
                 >
                   <span className="tabular-nums">
-                    {maxLength - descriptionText.length}
+                    {220 - descriptionText.length}
                   </span>{" "}
                   characters left
                 </p>
               </div>
 
               <div className="flex items-center gap-4 justify-between w-full space-y-4">
-                <AddDepartmentDropdown
-                  onAddMember={handleAddMember}
-                  onRemoveMember={handleRemoveMember}
-                  selectedMembers={members}
+                <AddUsersInDepartmentDropdown
+                  users={users?.map((user: User) => ({
+                    _id: user._id,
+                    name: user.name,
+                    profileAvatar: user.profileAvatar,
+                  }))}
+                  onAddUser={handleAddUser}
+                  onRemoveUser={handleRemoveUser}
+                  selectedUsers={selectedUsers}
                 />
                 <div className="mb-4 items-center justify-between w-1/2">
-                  {members.length > 0 && (
+                  {selectedUsers.length > 0 && (
                     <div className="flex items-center -space-x-[0.525rem]">
-                      {members.slice(0, 4).map((member) => (
-                        <Image
-                          key={member.name}
-                          className="ring-background rounded-full ring-2"
-                          src={member.src}
-                          width={28}
-                          height={28}
-                          alt={member.name}
-                        />
-                      ))}
+                      {selectedUsers.slice(0, 4).map((user) => {
+                        if (user.profileAvatar)
+                          return (
+                            <Image
+                              key={user._id}
+                              className="ring-background rounded-full ring-2"
+                              src={user.profileAvatar}
+                              width={28}
+                              height={28}
+                              alt={user.name}
+                            />
+                          );
+                        return (
+                          <div
+                            key={user._id}
+                            className="flex h-8 w-8 items-center justify-center border-2 border-white rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                          >
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                        );
+                      })}
                       <p className="text-xs text-muted-foreground ml-4">
-                        {members.length} Members
+                        {selectedUsers.length} Members
                       </p>
                     </div>
                   )}
@@ -303,10 +292,13 @@ export default function MutateDepartmentDialog({
           <Button
             type="submit"
             form={`mutate-department-form-${id}`}
-            disabled={isPending}
-            aria-busy={isPending}
+            disabled={uploadingImage || isPending}
           >
-            {submitLabel}
+            {uploadingImage
+              ? "Uploading Image..."
+              : isPending
+              ? "Updating Department..."
+              : "Update Department"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -314,7 +306,15 @@ export default function MutateDepartmentDialog({
   );
 }
 
-function ProfileBg({ imageUrl }: { imageUrl?: string }) {
+function ProfileBg({
+  setNewDepartmentImage,
+  setRemoveDepartmentImage,
+  imageUrl,
+}: {
+  setNewDepartmentImage: (file: File | null) => void;
+  setRemoveDepartmentImage: (removed: boolean) => void;
+  imageUrl?: string;
+}) {
   const initialFiles = imageUrl
     ? [
         {
@@ -325,7 +325,7 @@ function ProfileBg({ imageUrl }: { imageUrl?: string }) {
           id: `bg-${imageUrl}`,
         },
       ]
-    : fallbackBgImage;
+    : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
@@ -333,9 +333,30 @@ function ProfileBg({ imageUrl }: { imageUrl?: string }) {
       initialFiles,
     });
 
-  const file0 = files[0]?.file as File | FileMetadata | undefined;
+  const fileItem = files[0];
+  const ImageFile = fileItem?.file;
   const currentImage =
-    files[0]?.preview || (file0 && !(file0 instanceof File) ? file0.url : null);
+    fileItem?.preview ||
+    (ImageFile && !(ImageFile instanceof File)
+      ? (ImageFile as FileMetadata).url
+      : null);
+
+  useEffect(() => {
+    const hadInitialImage = !!imageUrl;
+    if (files.length === 0) {
+      setNewDepartmentImage(null);
+      setRemoveDepartmentImage(hadInitialImage);
+    } else {
+      const file = files[0]?.file;
+      if (file instanceof File) {
+        setNewDepartmentImage(file);
+        setRemoveDepartmentImage(false);
+      } else {
+        setNewDepartmentImage(null);
+        setRemoveDepartmentImage(false);
+      }
+    }
+  }, [files, imageUrl, setNewDepartmentImage, setRemoveDepartmentImage]);
 
   return (
     <div className="h-32">

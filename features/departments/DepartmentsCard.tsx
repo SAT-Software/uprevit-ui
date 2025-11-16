@@ -10,6 +10,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PiArrowSquareOutDuotone } from "react-icons/pi";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
 
 export interface DepartmentsProps {
   _id: string;
@@ -18,12 +26,31 @@ export interface DepartmentsProps {
   department_description: string;
   date?: string;
   manager?: string;
-  users?: string[];
+  users?: DepartmentUser[];
   members?: { name: string; src: string }[];
   membersCount?: number;
 }
 
-function DepartmentsCard({ departments }: { departments: DepartmentsProps[] }) {
+function DepartmentsCard() {
+  const { data, isLoading, error } = useGetAllDepartments();
+  const departments = data?.result?.departments ?? [];
+
+  console.log("All departments:", departments);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-500">
+          Failed to load departments. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {departments?.map((department: DepartmentsProps) => (
@@ -85,18 +112,17 @@ function DepartmentsCard({ departments }: { departments: DepartmentsProps[] }) {
               </div>
               <div className="flex items-center -space-x-[0.525rem] mr-3">
                 {(() => {
-                  const members = (department.users || []).map(
-                    (u: string, i: number) => ({
-                      id: String(u ?? i),
-                      name: `User ${i + 1}`,
-                      email: `user${i + 1}@example.com`,
-                      role: "Member",
-                      avatarUrl: u,
-                    })
-                  );
+                  const usersData = department?.users;
+
+                  const users = usersData?.map((user) => ({
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    profileAvatar: user.profileAvatar,
+                  }));
                   return (
                     <MembersInlineTrigger
-                      members={members}
+                      users={users || []}
                       titlePrefix={department.department_name}
                     />
                   );

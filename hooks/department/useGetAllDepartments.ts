@@ -8,13 +8,16 @@ async function getAllDepartments({
   signal: AbortSignal;
   auth: AuthContextProps;
 }) {
-  const response = await fetch("/api/departments", {
-    headers: {
-      Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
-      "Content-Type": "application/json", // Example of another header
-    },
-    signal,
-  });
+  const response = await fetch(
+    `/api/departments?workspaceId=${auth?.user?.profile?.workspaceId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
+        "Content-Type": "application/json", // Example of another header
+      },
+      signal,
+    }
+  );
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch departments");
@@ -25,6 +28,7 @@ async function getAllDepartments({
 
 export function useGetAllDepartments() {
   const auth = useAuth();
+
   return useQuery({
     queryKey: ["all-departments"],
     queryFn: ({ signal }) => getAllDepartments({ signal, auth }),

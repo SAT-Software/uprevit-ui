@@ -125,18 +125,15 @@ function ProjectCard({ project }: { project: Project }) {
 
         <div className="absolute bottom-2 right-3 items-center -space-x-[0.525rem]">
           {(() => {
-            const members = (project.users || []).map(
-              (u: string, i: number) => ({
-                id: String(u ?? i),
-                name: `User ${i + 1}`,
-                email: `user${i + 1}@example.com`,
-                role: "Member",
-                avatarUrl: u,
-              })
-            );
+            const users = (project.users || []).map((u: string, i: number) => ({
+              _id: String(u ?? i),
+              name: `User ${i + 1}`,
+              email: `user${i + 1}@example.com`,
+              profileAvatar: u,
+            }));
             return (
               <MembersInlineTrigger
-                members={members}
+                users={users}
                 titlePrefix={project.project_name}
               />
             );

@@ -26,6 +26,15 @@ import { useCreateProject } from "@/hooks/project/useCreateProject";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import type { Project } from "@/types/project";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { Department } from "@/types/department";
 
 type Mode = "create" | "update";
 
@@ -59,6 +68,7 @@ export default function MutateProjectDialog({
   onSuccess,
 }: MutateProjectDialogProps) {
   const id = useId();
+  const { data: departmentsData } = useGetAllDepartments();
 
   const [open, setOpen] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
@@ -69,11 +79,14 @@ export default function MutateProjectDialog({
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
 
+  const departments = departmentsData?.result?.departments || [];
+
   type FormValues = {
     project_name: string;
     project_number: string;
     project_manager: string;
     project_description: string;
+    department: string;
   };
 
   const initialValues: FormValues = useMemo(
@@ -82,6 +95,7 @@ export default function MutateProjectDialog({
       project_number: project?.project_number || "",
       project_manager: project?.project_manager || "",
       project_description: project?.project_description || "",
+      department: project?.department_id || "",
     }),
     [project]
   );
@@ -98,6 +112,7 @@ export default function MutateProjectDialog({
     values: initialValues,
   });
 
+  const selectedDepartment = watch("department");
   const maxLength = 220;
   const descriptionText = watch("project_description") || "";
 
@@ -131,11 +146,11 @@ export default function MutateProjectDialog({
           project_description: data.project_description,
           project_manager: data.project_manager,
           project_number: data.project_number,
+          department_id: data.department,
           users: members.map((member) => member.name),
           image: "",
           admin_id: userId,
           workspace_id: workspaceId,
-          department_id: "68d2bfbee20298cdc7141afe", // TODO: implement department selection
         } as Project);
         onSuccess?.(res);
         setOpen(false);
@@ -230,21 +245,59 @@ export default function MutateProjectDialog({
                     placeholder="Enter project number"
                     type="text"
                     aria-invalid={errors.project_number ? "true" : "false"}
-                    {...register("project_number")}
+                    {...register("project_number", {
+                      required: "Project number is required",
+                    })}
                   />
+                  {errors.project_number && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.project_number.message}
+                    </p>
+                  )}
                 </div>
               </div>
-              <div className="space-y-4">
-                <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
+            </div>
+          </div>
+          <div className="flex gap-4 w-full px-6 pt-4">
+            <div className="space-y-2 w-1/2">
+              <Label htmlFor={`${id}-department`}>Department</Label>
+              <Select
+                value={selectedDepartment}
+                onValueChange={(value) => {
+                  const event = { target: { name: "department", value } };
 
-                <Input
-                  id={`${id}-manager-name`}
-                  placeholder="Enter manager's name"
-                  type="text"
-                  aria-invalid={errors.project_manager ? "true" : "false"}
-                  {...register("project_manager")}
-                />
-              </div>
+                  register("department", {
+                    required: "Department is required",
+                  }).onChange(event);
+                }}
+              >
+                <SelectTrigger id={`${id}-department`}>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept: Department) => (
+                    <SelectItem key={dept._id} value={dept._id || ""}>
+                      {dept.department_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.department && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.department.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-4 w-1/2">
+              <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
+
+              <Input
+                id={`${id}-manager-name`}
+                placeholder="Enter manager's name"
+                type="text"
+                aria-invalid={errors.project_manager ? "true" : "false"}
+                {...register("project_manager")}
+              />
             </div>
           </div>
 

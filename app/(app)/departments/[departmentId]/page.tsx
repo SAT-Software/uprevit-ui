@@ -2,29 +2,54 @@
 
 import { Button } from "@/components/ui/button";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
-import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
-import DepartmentPageProductsTable from "@/features/departments/DepartmentPageProductsTable";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
   PiArchiveDuotone,
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiPencilCircleDuotone,
   PiShareNetworkDuotone,
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
+import DepartmentPageProjectsTable from "@/features/departments/DepartmentPageProjectsTable";
+import DialogShareDepartment from "@/features/departments/DialogShareDepartment";
+import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import { Project } from "@/types/project";
+import { AuditLog } from "@/types/audit-log";
+import DialogUpdateDepartment from "@/features/departments/DialogUpdateDepartment";
+
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
 
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
   const departmentId = params?.departmentId;
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId);
+  const { data: projectsData } = useGetAllProjects();
 
   const department = data?.department;
+  const projects =
+    projectsData?.result?.projects?.filter(
+      (p: Project) => p.department_id === departmentId
+    ) || [];
+
+  console.log("Department by Id:", data);
+  console.log("Projects for department:", projectsData);
 
   if (isLoading || !department) {
     return (
@@ -55,20 +80,13 @@ export default function DepartmentDetailPage() {
             </div>
           )}
           <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 p-1 rounded">
-            <MutateDepartmentDialog
-              mode="update"
-              department={department}
-              trigger={
-                <Button variant="ghost" size="sm">
-                  <PiPencilCircleDuotone className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-              }
-            />
-            <Button variant="ghost" size="sm">
-              <PiShareNetworkDuotone className="h-4 w-4" />
-              <span className="sr-only">Share</span>
-            </Button>
+            <DialogUpdateDepartment department={department} />
+            <DialogShareDepartment department={department}>
+              <Button variant="ghost" size="sm">
+                <PiShareNetworkDuotone className="h-4 w-4" />
+                <span className="sr-only">Share</span>
+              </Button>
+            </DialogShareDepartment>
 
             <DialogArchiveEntity
               id={departmentId ?? ""}
@@ -102,27 +120,35 @@ export default function DepartmentDetailPage() {
             {department.department_description}
           </p>
 
-          {/* Date */}
-          <div className="flex items-center space-x-2">
-            <PiCalendarDuotone className="w-5 h-5" />
-            {department.date}
-          </div>
+          {department?.auditLogs &&
+            department?.auditLogs.map((log: AuditLog) => (
+              <div
+                key={log._id}
+                className="flex items-center space-x-2 text-sm"
+              >
+                <PiCalendarDuotone className="w-5 h-5" />
+                <p className="text-sm text-gray-600">
+                  {log.actionAt.slice(0, 10)}
+                </p>
+                <div className="w-0.5 h-6 bg-border" />
+                <p>{log.actionBy}</p>
+              </div>
+            ))}
 
-          {/* Members */}
+          {/* Users */}
           <div className="flex items-center space-x-2">
             {(() => {
-              const membersForDialog = (department.users || []).map(
-                (u: string, i: number) => ({
-                  id: String(u ?? i),
-                  name: `User ${i + 1}`,
-                  email: `user${i + 1}@example.com`,
-                  role: "Member",
-                  avatarUrl: u,
-                })
-              );
+              const usersForDialog = (
+                (department.users as DepartmentUser[]) || []
+              ).map((u: DepartmentUser) => ({
+                _id: u._id,
+                name: u.name,
+                email: u.email,
+                profileAvatar: u.profileAvatar,
+              }));
               return (
                 <MembersInlineTrigger
-                  members={membersForDialog}
+                  users={usersForDialog}
                   titlePrefix={department.department_name}
                 />
               );
@@ -130,10 +156,9 @@ export default function DepartmentDetailPage() {
           </div>
         </div>
 
-        {/* Associated Products Section */}
         <div className="px-4 pb-4 mt-6">
-          <h2 className="text-xl font-semibold mt-6">Products</h2>
-          <DepartmentPageProductsTable data={department?.projects || []} />
+          <h2 className="text-xl font-semibold mt-6">Projects</h2>
+          <DepartmentPageProjectsTable data={projects} />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 export interface Product {
   _id?: string;
+  workspace_id?: string;
   product_plan_number: string;
   product_name: string;
   product_description: string;
