@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
-import MutateDepartmentDialog from "@/features/departments/MutateDepartmentDialog";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
@@ -11,15 +10,16 @@ import {
   PiArchiveDuotone,
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiPencilCircleDuotone,
   PiShareNetworkDuotone,
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
 import DepartmentPageProjectsTable from "@/features/departments/DepartmentPageProjectsTable";
+import DialogShareDepartment from "@/features/departments/DialogShareDepartment";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
+import DialogUpdateDepartment from "@/features/departments/DialogUpdateDepartment";
 
 interface DepartmentUser {
   _id: string;
@@ -80,20 +80,13 @@ export default function DepartmentDetailPage() {
             </div>
           )}
           <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 p-1 rounded">
-            <MutateDepartmentDialog
-              mode="update"
-              department={department}
-              trigger={
-                <Button variant="ghost" size="sm">
-                  <PiPencilCircleDuotone className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-              }
-            />
-            <Button variant="ghost" size="sm">
-              <PiShareNetworkDuotone className="h-4 w-4" />
-              <span className="sr-only">Share</span>
-            </Button>
+            <DialogUpdateDepartment department={department} />
+            <DialogShareDepartment department={department}>
+              <Button variant="ghost" size="sm">
+                <PiShareNetworkDuotone className="h-4 w-4" />
+                <span className="sr-only">Share</span>
+              </Button>
+            </DialogShareDepartment>
 
             <DialogArchiveEntity
               id={departmentId ?? ""}

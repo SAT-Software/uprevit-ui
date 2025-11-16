@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { useId, useState } from "react";
@@ -26,6 +25,7 @@ import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
+import { uploadFiles } from "@/utils/uploadthing";
 
 interface User {
   _id: string;
@@ -44,6 +44,10 @@ export default function DialogAddDepartment() {
 
   const [open, setOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [departmentImage, setDepartmentImage] = useState<
+    File | FileMetadata | null
+  >(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const { mutate: createDepartment, isPending } = useCreateDepartment();
   const { data: usersData } = useGetAllUsersByWorkspace();
@@ -51,8 +55,6 @@ export default function DialogAddDepartment() {
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
   const users = usersData?.data;
-
-  console.log("All users data:", users);
 
   const {
     register,
@@ -79,34 +81,44 @@ export default function DialogAddDepartment() {
     setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
   };
 
-  function onSubmit(data: FormValues) {
-    console.log("Selected user Data:", selectedUsers);
-    console.log(
-      "Submitting users:",
-      selectedUsers.map((user) => user._id)
-    );
-    createDepartment(
-      {
-        department_name: data.department_name,
-        department_description: data.department_description,
-        manager: data.manager,
-        users: selectedUsers.map((user) => user._id),
-        image: "",
-        admin_id: userId as string,
-        workspace_id: workspaceId as string,
-      },
-      {
-        onSuccess: () => {
-          reset();
-          setSelectedUsers([]);
-          setOpen(false);
-        },
-        onError: (error) => {
-          setSelectedUsers([]);
-          console.error("Error creating department:", error);
-        },
+  async function onSubmit(data: FormValues) {
+    try {
+      let utRes;
+      if (departmentImage) {
+        setUploadingImage(true);
+        utRes = await uploadFiles("imageUploader", {
+          files: [departmentImage as File],
+        });
+        setUploadingImage(false);
       }
-    );
+
+      if (!utRes) throw new Error("Image upload failed");
+
+      createDepartment(
+        {
+          department_name: data.department_name,
+          department_description: data.department_description,
+          manager: data.manager,
+          users: selectedUsers.map((user) => user._id),
+          image: utRes[0]?.ufsUrl || "",
+          admin_id: userId as string,
+          workspace_id: workspaceId as string,
+        },
+        {
+          onSuccess: () => {
+            reset();
+            setSelectedUsers([]);
+            setOpen(false);
+          },
+          onError: (error) => {
+            setSelectedUsers([]);
+            console.error("Error creating department:", error);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error uploading department image:", error);
+    }
   }
 
   return (
@@ -133,7 +145,7 @@ export default function DialogAddDepartment() {
         >
           <div className="flex gap-4 px-6 pt-4">
             <div className="w-1/3">
-              <ProfileBg />
+              <ProfileBg setDepartmentImage={setDepartmentImage} />
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-4">
@@ -263,10 +275,14 @@ export default function DialogAddDepartment() {
           <Button
             type="submit"
             form={`mutate-department-form-${id}`}
-            disabled={isPending}
-            aria-busy={isPending}
+            disabled={uploadingImage || isPending}
+            aria-busy={uploadingImage || isPending}
           >
-            {isPending ? "Creating..." : "Create Department"}
+            {uploadingImage
+              ? "Uploading Image..."
+              : isPending
+              ? "Creating Department..."
+              : "Create Department"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -274,15 +290,23 @@ export default function DialogAddDepartment() {
   );
 }
 
-function ProfileBg() {
+function ProfileBg({
+  setDepartmentImage,
+}: {
+  setDepartmentImage: (file: File | FileMetadata) => void;
+}) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
       accept: "image/*",
     });
 
-  const file0 = files[0]?.file as File | FileMetadata | undefined;
+  const ImageFile = files[0]?.file;
+
   const currentImage =
-    files[0]?.preview || (file0 && !(file0 instanceof File) ? file0.url : null);
+    files[0]?.preview ||
+    (ImageFile && !(ImageFile instanceof File) ? ImageFile.url : null);
+
+  setDepartmentImage(ImageFile);
 
   return (
     <div className="h-32">
