@@ -19,6 +19,21 @@ import {
 import DepartmentPageProjectsTable from "@/features/departments/DepartmentPageProjectsTable";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
+import { AuditLog } from "@/types/audit-log";
+
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
 
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
@@ -28,11 +43,13 @@ export default function DepartmentDetailPage() {
   const { data: projectsData } = useGetAllProjects();
 
   const department = data?.department;
-  const projects = projectsData?.result?.projects?.filter(
-    (p: Project) => p.department_id === departmentId
-  );
+  const projects =
+    projectsData?.result?.projects?.filter(
+      (p: Project) => p.department_id === departmentId
+    ) || [];
 
-  console.log("Projects for department:", projects);
+  console.log("Department by Id:", data);
+  console.log("Projects for department:", projectsData);
 
   if (isLoading || !department) {
     return (
@@ -110,27 +127,35 @@ export default function DepartmentDetailPage() {
             {department.department_description}
           </p>
 
-          {/* Date */}
-          <div className="flex items-center space-x-2">
-            <PiCalendarDuotone className="w-5 h-5" />
-            {department.date}
-          </div>
+          {department?.auditLogs &&
+            department?.auditLogs.map((log: AuditLog) => (
+              <div
+                key={log._id}
+                className="flex items-center space-x-2 text-sm"
+              >
+                <PiCalendarDuotone className="w-5 h-5" />
+                <p className="text-sm text-gray-600">
+                  {log.actionAt.slice(0, 10)}
+                </p>
+                <div className="w-0.5 h-6 bg-border" />
+                <p>{log.actionBy}</p>
+              </div>
+            ))}
 
-          {/* Members */}
+          {/* Users */}
           <div className="flex items-center space-x-2">
             {(() => {
-              const membersForDialog = (department.users || []).map(
-                (u: string, i: number) => ({
-                  id: String(u ?? i),
-                  name: `User ${i + 1}`,
-                  email: `user${i + 1}@example.com`,
-                  role: "Member",
-                  avatarUrl: u,
-                })
-              );
+              const usersForDialog = (
+                (department.users as DepartmentUser[]) || []
+              ).map((u: DepartmentUser) => ({
+                _id: u._id,
+                name: u.name,
+                email: u.email,
+                profileAvatar: u.profileAvatar,
+              }));
               return (
                 <MembersInlineTrigger
-                  members={membersForDialog}
+                  users={usersForDialog}
                   titlePrefix={department.department_name}
                 />
               );

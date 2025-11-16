@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PiCirclesThreePlusDuotone } from "react-icons/pi";
 import Image from "next/image";
-import AddDepartmentDropdown from "./AddMemberInDepartmentDropdown";
+import AddDepartmentDropdown from "./AddUsersInDepartmentDropdown";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";

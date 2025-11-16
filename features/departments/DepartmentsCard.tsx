@@ -12,6 +12,13 @@ import {
 import { PiArrowSquareOutDuotone } from "react-icons/pi";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 
+interface DepartmentUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
 export interface DepartmentsProps {
   _id: string;
   image?: string;
@@ -19,7 +26,7 @@ export interface DepartmentsProps {
   department_description: string;
   date?: string;
   manager?: string;
-  users?: string[];
+  users?: DepartmentUser[];
   members?: { name: string; src: string }[];
   membersCount?: number;
 }
@@ -27,6 +34,8 @@ export interface DepartmentsProps {
 function DepartmentsCard() {
   const { data, isLoading, error } = useGetAllDepartments();
   const departments = data?.result?.departments ?? [];
+
+  console.log("All departments:", departments);
 
   if (error) {
     return (
@@ -103,18 +112,17 @@ function DepartmentsCard() {
               </div>
               <div className="flex items-center -space-x-[0.525rem] mr-3">
                 {(() => {
-                  const members = (department.users || []).map(
-                    (u: string, i: number) => ({
-                      id: String(u ?? i),
-                      name: `User ${i + 1}`,
-                      email: `user${i + 1}@example.com`,
-                      role: "Member",
-                      avatarUrl: u,
-                    })
-                  );
+                  const usersData = department?.users;
+
+                  const users = usersData?.map((user) => ({
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    profileAvatar: user.profileAvatar,
+                  }));
                   return (
                     <MembersInlineTrigger
-                      members={members}
+                      users={users || []}
                       titlePrefix={department.department_name}
                     />
                   );

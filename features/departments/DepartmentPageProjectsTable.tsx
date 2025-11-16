@@ -112,7 +112,7 @@ export default function DepartmentPageProjectsTable({
                 colSpan={columns.length}
                 className="h-24 text-center text-muted-foreground"
               >
-                No products associated with this department yet.
+                No projects in this department yet.
               </TableCell>
             </TableRow>
           )}

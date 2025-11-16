@@ -22,13 +22,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PiCirclesThreePlusDuotone } from "react-icons/pi";
 import Image from "next/image";
-import AddDepartmentDropdown from "./AddMemberInDepartmentDropdown";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
 
-interface Member {
+interface User {
+  _id: string;
   name: string;
-  src: string;
+  profileAvatar: string;
 }
 
 type FormValues = {
@@ -41,12 +43,16 @@ export default function DialogAddDepartment() {
   const id = useId();
 
   const [open, setOpen] = useState(false);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
   const { mutate: createDepartment, isPending } = useCreateDepartment();
+  const { data: usersData } = useGetAllUsersByWorkspace();
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
+  const users = usersData?.data;
+
+  console.log("All users data:", users);
 
   const {
     register,
@@ -63,23 +69,28 @@ export default function DialogAddDepartment() {
     mode: "onSubmit",
   });
 
-  const handleAddMember = (member: Member) => {
-    if (!members.some((m) => m.name === member.name)) {
-      setMembers([...members, member]);
+  const handleAddUser = (user: User) => {
+    if (!selectedUsers.some((u) => u._id === user._id)) {
+      setSelectedUsers([...selectedUsers, user]);
     }
   };
 
-  const handleRemoveMember = (member: Member) => {
-    setMembers(members.filter((m) => m.name !== member.name));
+  const handleRemoveUser = (user: User) => {
+    setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
   };
 
   function onSubmit(data: FormValues) {
+    console.log("Selected user Data:", selectedUsers);
+    console.log(
+      "Submitting users:",
+      selectedUsers.map((user) => user._id)
+    );
     createDepartment(
       {
         department_name: data.department_name,
         department_description: data.department_description,
         manager: data.manager,
-        users: members.map((member) => member.name),
+        users: selectedUsers.map((user) => user._id),
         image: "",
         admin_id: userId as string,
         workspace_id: workspaceId as string,
@@ -87,10 +98,11 @@ export default function DialogAddDepartment() {
       {
         onSuccess: () => {
           reset();
-          setMembers([]);
+          setSelectedUsers([]);
           setOpen(false);
         },
         onError: (error) => {
+          setSelectedUsers([]);
           console.error("Error creating department:", error);
         },
       }
@@ -198,26 +210,42 @@ export default function DialogAddDepartment() {
               </div>
 
               <div className="flex items-center gap-4 justify-between w-full space-y-4">
-                <AddDepartmentDropdown
-                  onAddMember={handleAddMember}
-                  onRemoveMember={handleRemoveMember}
-                  selectedMembers={members}
+                <AddUsersInDepartmentDropdown
+                  users={users?.map((user: User) => ({
+                    _id: user._id,
+                    name: user.name,
+                    profileAvatar: user.profileAvatar,
+                  }))}
+                  onAddUser={handleAddUser}
+                  onRemoveUser={handleRemoveUser}
+                  selectedUsers={selectedUsers}
                 />
                 <div className="mb-4 items-center justify-between w-1/2">
-                  {members.length > 0 && (
+                  {selectedUsers.length > 0 && (
                     <div className="flex items-center -space-x-[0.525rem]">
-                      {members.slice(0, 4).map((member) => (
-                        <Image
-                          key={member.name}
-                          className="ring-background rounded-full ring-2"
-                          src={member.src}
-                          width={28}
-                          height={28}
-                          alt={member.name}
-                        />
-                      ))}
+                      {selectedUsers.slice(0, 4).map((user) => {
+                        if (user.profileAvatar)
+                          return (
+                            <Image
+                              key={user._id}
+                              className="ring-background rounded-full ring-2"
+                              src={user.profileAvatar}
+                              width={32}
+                              height={32}
+                              alt={user.name}
+                            />
+                          );
+                        return (
+                          <div
+                            key={user._id}
+                            className="flex h-8 w-8 items-center justify-center border-2 border-white rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                          >
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                        );
+                      })}
                       <p className="text-xs text-muted-foreground ml-4">
-                        {members.length} Members
+                        {selectedUsers.length} Users
                       </p>
                     </div>
                   )}

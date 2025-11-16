@@ -34,7 +34,7 @@ export function useGetAllUsersByWorkspace() {
   const workspaceId = auth.user?.profile.workspaceId;
 
   return useQuery({
-    queryKey: ["workspace-users", workspaceId],
+    queryKey: ["users", workspaceId],
     queryFn: ({ signal }) =>
       getAllUsersByWorkspace(workspaceId as string, { signal, auth }),
     enabled: auth.isAuthenticated && !!workspaceId,
