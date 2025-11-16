@@ -73,8 +73,9 @@ function ProjectsCard({ projects }: { projects: Project[] }) {
               </div>
               <div className="flex items-center -space-x-[0.525rem] mr-3">
                 {(() => {
-                  const members = (project.users || []).map(
+                  const users = (project.users || []).map(
                     (u: string, i: number) => ({
+                      _id: String(u ?? i),
                       id: String(u ?? i),
                       name: `User ${i + 1}`,
                       email: `user${i + 1}@example.com`,
@@ -84,7 +85,7 @@ function ProjectsCard({ projects }: { projects: Project[] }) {
                   );
                   return (
                     <MembersInlineTrigger
-                      members={members}
+                      users={users}
                       titlePrefix={project.project_name}
                     />
                   );

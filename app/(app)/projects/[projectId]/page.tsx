@@ -17,9 +17,8 @@ import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import ProjectPageProductsTable, {
-  Item,
-} from "@/features/projects/ProjectPageProductsTable";
+import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
+import { Item } from "@/features/products/ProductsPageProductTable";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
@@ -131,18 +130,17 @@ export default function ProjectDetailPage() {
           {/* Members */}
           <div className="flex items-center space-x-2">
             {(() => {
-              const membersForDialog = (project?.users || []).map(
+              const usersForDialog = (project?.users || []).map(
                 (u: string, i: number) => ({
-                  id: String(u ?? i),
+                  _id: String(u ?? i),
                   name: `User ${i + 1}`,
                   email: `user${i + 1}@example.com`,
-                  role: "Member",
-                  avatarUrl: u,
+                  profileAvatar: u,
                 })
               );
               return (
                 <MembersInlineTrigger
-                  members={membersForDialog}
+                  users={usersForDialog}
                   titlePrefix={project.project_name}
                 />
               );

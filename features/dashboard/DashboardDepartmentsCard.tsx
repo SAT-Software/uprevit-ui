@@ -140,18 +140,17 @@ function DepartmentCard({ department }: { department: Department }) {
 
           <div className="flex items-center -space-x-[0.525rem] mr-3">
             {(() => {
-              const members = (department.users || []).map(
+              const users = (department.users || []).map(
                 (u: string, i: number) => ({
-                  id: String(u ?? i),
+                  _id: String(u ?? i),
                   name: `User ${i + 1}`,
                   email: `user${i + 1}@example.com`,
-                  role: "Member",
-                  avatarUrl: u,
+                  profileAvatar: u,
                 })
               );
               return (
                 <MembersInlineTrigger
-                  members={members}
+                  users={users}
                   titlePrefix={department.department_name}
                 />
               );
