@@ -33,7 +33,7 @@ export interface DepartmentsProps {
   users?: DepartmentUser[];
   members?: { name: string; src: string }[];
   membersCount?: number;
-  auditLogs?: { actionAt: string }[];
+  auditLogs?: { actionAt: string; action: string }[];
 }
 
 // Loading State Component
@@ -99,7 +99,6 @@ function DepartmentErrorState({ onRetry }: { onRetry: () => void }) {
 
 // Department Card Component
 function DepartmentCard({ department }: { department: DepartmentsProps }) {
-  console.log("Department in Card:", department);
   return (
     <div className="relative flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4">
       <div className="absolute right-2 top-2">

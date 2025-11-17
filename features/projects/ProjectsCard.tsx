@@ -18,7 +18,7 @@ interface ProjectUser {
   profileAvatar?: string;
 }
 
-export interface DepartmentsProps {
+export interface ProjectProps {
   _id: string;
   image?: string;
   project_name: string;
@@ -31,7 +31,7 @@ export interface DepartmentsProps {
 }
 
 // Update component to accept projects prop and use ProjectsProps
-function ProjectsCard({ projects }: { projects: DepartmentsProps[] }) {
+function ProjectsCard({ projects }: { projects: ProjectProps[] }) {
   return (
     <div className="flex flex-col items-start w-full gap-2 h-full">
       {projects?.map((project) => (

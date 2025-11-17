@@ -179,7 +179,7 @@ export function MembersInlineTrigger({
                 <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
                   {m?.name
                     ?.split(" ")
-                    ?.map((p) => p[0])
+                    ?.map((p) => p[0]?.toUpperCase())
                     ?.join("")}
                 </AvatarFallback>
               </Avatar>

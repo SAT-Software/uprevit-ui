@@ -19,10 +19,13 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { AuditLog } from "@/types/product";
+import { useMemo } from "react";
 
 export type Item = {
   _id: string;
   productId?: string;
+  auditLogs?: Array<AuditLog>;
   action: string;
   action_at: string;
   action_by: string;
@@ -50,12 +53,18 @@ const columns: ColumnDef<Item>[] = [
     header: "Created by - on",
     accessorKey: "createdOn",
     cell: ({ row }) => {
-      const createdBy = row.original.action_by;
-      const createdOn = row.original.action_at;
+      const createdBy = row.original.auditLogs?.filter(
+        (log) => log.action === "create"
+      )[0]?.actionBy;
+      const createdAt = row.original.auditLogs?.filter(
+        (log) => log.action === "create"
+      )[0]?.actionAt;
       return (
         <div className="">
           <p className="text-xs  font-medium">{createdBy}</p>
-          <p className="text-xs text-muted-foreground">{createdOn}</p>
+          <p className="text-xs text-muted-foreground">
+            {createdAt ? createdAt.toLocaleString().slice(0, 10) : "N/A"}
+          </p>
         </div>
       );
     },
@@ -64,12 +73,18 @@ const columns: ColumnDef<Item>[] = [
     header: "Modified by - on",
     accessorKey: "modifiedOn",
     cell: ({ row }) => {
-      const modifiedBy = row.original.action_by;
-      const modifiedOn = row.original.action_at;
+      const modifiedBy = row.original.auditLogs?.filter(
+        (log) => log.action === "update"
+      )[0]?.actionBy;
+      const modifiedAt = row.original.auditLogs?.filter(
+        (log) => log.action === "update"
+      )[0]?.actionAt;
       return (
         <div className="">
           <p className="text-xs  font-medium">{modifiedBy}</p>
-          <p className="text-xs text-muted-foreground">{modifiedOn}</p>
+          <p className="text-xs text-muted-foreground">
+            {modifiedAt ? modifiedAt.toLocaleString().slice(0, 10) : "N/A"}
+          </p>
         </div>
       );
     },
@@ -140,9 +155,15 @@ const columns: ColumnDef<Item>[] = [
 
 export default function DashboardProductsTable() {
   const { data, isLoading, error } = useGetAllProducts();
-  const recentProductsData = Array.isArray(data?.result?.products)
-    ? data.result.products.slice(0, 3)
-    : [];
+  const recentProductsData = useMemo(
+    () =>
+      Array.isArray(data?.result?.products)
+        ? data.result.products.slice(0, 3)
+        : [],
+    [data]
+  );
+
+  console.log("Recent Products Data:", recentProductsData);
   const router = useRouter();
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -225,8 +246,6 @@ export default function DashboardProductsTable() {
   }
   if (error) return <div>Error loading products: {error.message}</div>;
 
-  console.log("Recent Products Data:", recentProductsData);
-
   return (
     <div className="border border-input rounded-2xl">
       <Table>
@@ -256,7 +275,7 @@ export default function DashboardProductsTable() {
                 data-state={row.getIsSelected() && "selected"}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() =>
-                  row.original.productId &&
+                  row.original._id &&
                   router.push(
                     `/products/${row.original._id}/product-information`
                   )

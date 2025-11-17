@@ -11,6 +11,7 @@ export interface Product {
   target_date?: string | null;
   actual_completion_date?: string | null;
   complete_count?: number;
+  auditLogs?: Array<AuditLog>;
   product_information?: {
     market_geography?: string;
     country_of_origin?: string;
@@ -84,11 +85,20 @@ export interface Product {
 
 export interface ProductApiResponse {
   _id?: string;
-  action_at?: string;
-  action_by?: string;
+  auditLogs?: Array<AuditLog>;
   product_name?: string;
   project_id?: string;
   department_id?: string;
   master_version?: string;
   status?: string;
+}
+
+export interface AuditLog {
+  _id?: string;
+  entity: string;
+  entityId: string;
+  action: string;
+  actionBy: string;
+  actionAt: Date;
+  active: boolean;
 }

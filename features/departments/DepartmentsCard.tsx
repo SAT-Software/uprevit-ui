@@ -29,6 +29,7 @@ export interface DepartmentsProps {
   users?: DepartmentUser[];
   members?: { name: string; src: string }[];
   membersCount?: number;
+  auditLogs?: { actionAt: string; action: string }[];
 }
 
 function DepartmentsCard() {
@@ -105,8 +106,10 @@ function DepartmentsCard() {
                   <CalendarClock className="mr-1 w-4 h-4" />
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  {department.date
-                    ? new Date(department.date).toLocaleDateString()
+                  {department?.auditLogs?.[0]?.actionAt
+                    ? new Date(
+                        department?.auditLogs?.[0].actionAt
+                      ).toLocaleDateString()
                     : "No date"}
                 </p>
               </div>
