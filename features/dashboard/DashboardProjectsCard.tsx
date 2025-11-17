@@ -7,11 +7,30 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
-import { Project } from "@/types/project";
 import Image from "next/image";
 import Link from "next/link";
 import { PiArrowSquareOutDuotone, PiKanbanDuotone } from "react-icons/pi";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+
+interface ProjectUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+export interface ProjectProps {
+  _id: string;
+  image?: string;
+  project_name: string;
+  project_number?: string;
+  project_description: string;
+  date?: string;
+  project_manager?: string;
+  users?: ProjectUser[];
+  members?: { name: string; src: string }[];
+  membersCount?: number;
+}
 
 // Loading State Component
 function ProjectLoadingCard() {
@@ -79,7 +98,7 @@ function ProjectErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 // Project Card Component
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project }: { project: ProjectProps }) {
   return (
     <div className="relative flex flex-col md:flex-row items-center w-full border border-input rounded-xl p-2 justify-between gap-4">
       <div className="absolute right-2 top-2">
@@ -125,15 +144,17 @@ function ProjectCard({ project }: { project: Project }) {
 
         <div className="absolute bottom-2 right-3 items-center -space-x-[0.525rem]">
           {(() => {
-            const users = (project.users || []).map((u: string, i: number) => ({
-              _id: String(u ?? i),
-              name: `User ${i + 1}`,
-              email: `user${i + 1}@example.com`,
-              profileAvatar: u,
+            const usersData = project?.users;
+
+            const users = usersData?.map((user) => ({
+              _id: user._id,
+              name: user.name,
+              email: user.email,
+              profileAvatar: user.profileAvatar,
             }));
             return (
               <MembersInlineTrigger
-                users={users}
+                users={users || []}
                 titlePrefix={project.project_name}
               />
             );
@@ -207,7 +228,7 @@ function DashboardProjectsCard() {
         {filteredProjects.length === 0 ? (
           <ProjectEmptyState />
         ) : (
-          filteredProjects.map((project: Project) => (
+          filteredProjects.map((project: ProjectProps) => (
             <ProjectCard key={project._id} project={project} />
           ))
         )}

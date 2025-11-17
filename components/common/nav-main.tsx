@@ -45,7 +45,7 @@ export function NavMain({
   return (
     <SidebarGroup>
       {!isProductPage && open && (
-        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarGroupLabel>Workspace</SidebarGroupLabel>
       )}
       <SidebarMenu>
         {items.map((item) => (

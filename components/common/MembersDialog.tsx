@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import {
   Dialog,
@@ -12,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ButtonGroup } from "../ui/button-group";
+import { PiMagnifyingGlassDuotone } from "react-icons/pi";
 
 export type User = {
   _id: string;
@@ -24,7 +25,7 @@ export interface MembersDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   users: User[];
-  titlePrefix?: string; // e.g. Department / Project name
+  titlePrefix?: string;
 }
 
 function MembersSearchBar({
@@ -38,18 +39,21 @@ function MembersSearchBar({
 }) {
   return (
     <div className="flex gap-2">
-      <div className="relative flex-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <ButtonGroup className="w-full">
+        <Button variant="outline" aria-label="Search">
+          <PiMagnifyingGlassDuotone size={18} />
+        </Button>
         <Input
           placeholder="Search by name"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onClick={onSearch}
           className="pl-10"
           onKeyDown={(e) => {
             if (e.key === "Enter") onSearch();
           }}
         />
-      </div>
+      </ButtonGroup>
       <Button variant="outline" onClick={onSearch}>
         Search
       </Button>
@@ -59,10 +63,10 @@ function MembersSearchBar({
 
 function MemberRow({ member }: { member: User }) {
   const initials = useMemo(() => {
-    return member.name
-      .split(" ")
-      .map((p) => p[0])
-      .join("");
+    return member?.name
+      ?.split(" ")
+      ?.map((p) => p[0])
+      ?.join("");
   }, [member.name]);
 
   return (
@@ -110,20 +114,20 @@ export function MembersDialog({
         <div className="p-6 pb-0">
           <DialogHeader className="flex flex-row items-center justify-between space-y-0">
             <DialogTitle className="text-xl font-semibold flex flex-row items-center gap-2">
-              <p>{titlePrefix ? `${titlePrefix} ` : ""}Members</p>
+              <p>{titlePrefix ? `${titlePrefix} ` : ""}Users</p>
               <span className="text-xs font-normal text-muted-foreground/80">
                 Total users - {users?.length}
               </span>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="mt-2">
+          {/* <div className="mt-2">
             <MembersSearchBar
               value={query}
               onChange={setQuery}
               onSearch={() => {}}
             />
-          </div>
+          </div> */}
         </div>
 
         <div className="px-6 pb-6">
@@ -166,19 +170,21 @@ export function MembersInlineTrigger({
         }}
       >
         <div className="flex items-center -space-x-2">
-          {topFour?.map((m) => (
-            <Avatar key={m._id} className="h-7 w-7 ring-2 ring-background">
-              {m.profileAvatar ? (
-                <AvatarImage src={m.profileAvatar} alt={m.name} />
-              ) : null}
-              <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
-                {m.name
-                  .split(" ")
-                  .map((p) => p[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-          ))}
+          {topFour?.map((m) => {
+            return (
+              <Avatar key={m._id} className="h-7 w-7 ring-2 ring-background">
+                {m?.profileAvatar ? (
+                  <AvatarImage src={m.profileAvatar} alt={m.name} />
+                ) : null}
+                <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
+                  {m?.name
+                    ?.split(" ")
+                    ?.map((p) => p[0]?.toUpperCase())
+                    ?.join("")}
+                </AvatarFallback>
+              </Avatar>
+            );
+          })}
 
           {extra > 0 ? (
             <Avatar className="h-7 w-7 ring-2 ring-background">
@@ -196,11 +202,7 @@ export function MembersInlineTrigger({
             </Avatar>
           ) : null}
         </div>
-        <span className="text-xs text-muted-foreground">
-          {/* {members.length}  */}
-          members
-          {/* {extra > 0 ? "" : ""} */}
-        </span>
+        <span className="text-xs text-muted-foreground">users</span>
       </button>
 
       <MembersDialog

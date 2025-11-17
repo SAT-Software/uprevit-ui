@@ -32,7 +32,7 @@ export function useGetAllProducts() {
   const auth = useAuth();
 
   return useQuery({
-    queryKey: ["all-products"],
+    queryKey: ["all-products", auth.user?.profile?.workspaceId],
     queryFn: ({ signal }) => getAllProducts({ signal, auth }),
     enabled: auth.isAuthenticated,
   });

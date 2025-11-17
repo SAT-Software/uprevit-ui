@@ -1,24 +1,31 @@
 "use client";
 
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { notFound, useParams } from "next/navigation";
-import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
-import {
-  PiKanbanDuotone,
-  PiPencilCircleDuotone,
-  PiShareNetworkDuotone,
-  PiArchiveDuotone,
-  PiUserDuotone,
-  PiTextAlignJustifyDuotone,
-  PiCalendarDuotone,
-} from "react-icons/pi";
-import { useGetProjectById } from "@/hooks/project/useGetProjectById";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import MutateProjectDialog from "@/features/projects/MutateProjectDialog";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
+import { Button } from "@/components/ui/button";
+import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import { Item } from "@/features/products/ProductsPageProductTable";
+import DialogUpdateProject from "@/features/projects/DialogUpdateProject";
+import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useGetProjectById } from "@/hooks/project/useGetProjectById";
+import { AuditLog } from "@/types/audit-log";
+import Image from "next/image";
+import { notFound, useParams } from "next/navigation";
+import {
+  PiArchiveDuotone,
+  PiCalendarDuotone,
+  PiKanbanDuotone,
+  PiShareNetworkDuotone,
+  PiTextAlignJustifyDuotone,
+  PiUserDuotone,
+} from "react-icons/pi";
+
+interface ProjectUser {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
 
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
@@ -64,16 +71,7 @@ export default function ProjectDetailPage() {
             </div>
           )}
           <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 p-1 rounded">
-            <MutateProjectDialog
-              mode="update"
-              project={project}
-              trigger={
-                <Button variant="ghost" size="sm">
-                  <PiPencilCircleDuotone className="h-4 w-4" />
-                  <span className="sr-only">Edit Project</span>
-                </Button>
-              }
-            />
+            <DialogUpdateProject project={project} />
             <Button variant="ghost" size="sm">
               <PiShareNetworkDuotone className="h-4 w-4" />
               <span className="sr-only">Share Project</span>
@@ -112,31 +110,33 @@ export default function ProjectDetailPage() {
             {project.project_description}
           </p>
 
-          {/* Date */}
-          <div className="flex items-center space-x-2">
-            <PiCalendarDuotone className="w-5 h-5" />
-            <span>
-              {" "}
-              {project.actionAt
-                ? new Date(project.actionAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })
-                : "N/A"}
-            </span>
-          </div>
+          {project?.auditLogs &&
+            project?.auditLogs.map((log: AuditLog) => (
+              <div
+                key={log._id}
+                className="flex items-center space-x-2 text-sm"
+              >
+                <PiCalendarDuotone className="w-5 h-5" />
+                <p className="text-sm text-gray-600">
+                  {log.actionAt.slice(0, 10)}
+                </p>
+                <div className="w-0.5 h-6 bg-border" />
+                <p>{log.actionBy}</p>
+              </div>
+            ))}
 
-          {/* Members */}
           <div className="flex items-center space-x-2">
             {(() => {
-              const usersForDialog = (project?.users || []).map(
-                (u: string, i: number) => ({
-                  _id: String(u ?? i),
-                  name: `User ${i + 1}`,
-                  email: `user${i + 1}@example.com`,
-                  profileAvatar: u,
-                })
+              console.log("ProjectDetailPage: project users:", project);
+              const usersForDialog = project.users.map((u: ProjectUser) => ({
+                _id: u._id,
+                name: u.name,
+                email: u.email,
+                profileAvatar: u.profileAvatar,
+              }));
+              console.log(
+                "ProjectDetailPage: users for dialog:",
+                usersForDialog
               );
               return (
                 <MembersInlineTrigger

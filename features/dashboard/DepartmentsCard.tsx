@@ -5,6 +5,8 @@ import { PiCirclesThreePlusDuotone } from "react-icons/pi";
 import { DepartmentsProps } from "../departments/DepartmentsCard";
 
 function Departments({ departments }: { departments: DepartmentsProps[] }) {
+  console.log("departments", departments);
+
   return (
     <div className="flex flex-col items-start w-full gap-2">
       {departments?.map((department) => (
