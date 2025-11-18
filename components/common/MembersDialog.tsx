@@ -202,7 +202,14 @@ export function MembersInlineTrigger({
             </Avatar>
           ) : null}
         </div>
-        <span className="text-xs text-muted-foreground">users</span>
+        {users?.length <= 4 && extra === 0 && (
+          <div className="flex gap-1">
+            <span className="text-xs text-muted-foreground">
+              {users?.length}
+            </span>
+            <span className="text-xs text-muted-foreground">users</span>
+          </div>
+        )}
       </button>
 
       <MembersDialog

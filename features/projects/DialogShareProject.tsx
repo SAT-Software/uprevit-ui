@@ -25,26 +25,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export default function DialogShareDepartment({
-  department,
+export default function DialogShareProject({
+  project,
 }: {
-  department?: { _id: string; department_name?: string };
+  project?: { _id: string; project_name?: string };
   children?: React.ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
 
-  const departmentLink = useMemo(() => {
+  const projectLink = useMemo(() => {
     if (typeof window === "undefined") {
-      return "/departments/sample-id";
+      return "/projects/sample-id";
     }
-    return department?._id
-      ? `${window.location.origin}/departments/${department._id}`
-      : "/departments/sample-id";
-  }, [department?._id]);
+    return project?._id
+      ? `${window.location.origin}/projects/${project._id}`
+      : "/projects/sample-id";
+  }, [project?._id]);
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(departmentLink);
+      await navigator.clipboard.writeText(projectLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -63,7 +63,7 @@ export default function DialogShareDepartment({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Share Department</p>
+            <p>Share Project</p>
           </TooltipContent>
         </Tooltip>
       </AlertDialogTrigger>
@@ -71,21 +71,21 @@ export default function DialogShareDepartment({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <PiShareNetworkDuotone size={20} />
-            Share Department
+            Share Project
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Share this department with others by copying the link below.
+            Share this project with others by copying the link below.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="department-link">Department Link</Label>
+            <Label htmlFor="project-link">Project Link</Label>
             <div className="flex items-center space-x-2">
               <InputGroup>
                 <InputGroupInput
-                  id="department-link"
-                  value={departmentLink}
+                  id="project-link"
+                  value={projectLink}
                   readOnly
                   className="pl-10"
                 />
@@ -109,13 +109,11 @@ export default function DialogShareDepartment({
             </div>
           </div>
 
-          {department?.department_name && (
+          {project?.project_name && (
             <div className="rounded-lg border p-3 bg-muted/50">
-              <h4 className="font-medium text-sm">
-                {department.department_name}
-              </h4>
+              <h4 className="font-medium text-sm">{project.project_name}</h4>
               <p className="text-xs text-muted-foreground mt-1">
-                Department ID: {department._id}
+                Project ID: {project._id}
               </p>
             </div>
           )}

@@ -19,6 +19,12 @@ import Link from "next/link";
 import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
 import { useArchiveProduct } from "@/hooks/product/useArchiveProduct";
+import { PiArchiveDuotone } from "react-icons/pi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type ArchiveEntityType = "project" | "department" | "product";
 
@@ -26,14 +32,12 @@ export interface DialogArchiveEntityProps {
   id: string;
   entityName: string;
   entityType: ArchiveEntityType;
-  trigger: React.ReactNode;
 }
 
 export default function DialogArchiveEntity({
   id,
   entityName,
   entityType,
-  trigger,
 }: DialogArchiveEntityProps) {
   const inputId = useId();
   const [value, setValue] = useState("");
@@ -68,7 +72,22 @@ export default function DialogArchiveEntity({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <PiArchiveDuotone className="h-4 w-4" />
+              <span className="sr-only">Archive</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              Archive{" "}
+              {entityType.slice(0, 1).toUpperCase() + entityType.slice(1)}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </DialogTrigger>
       <DialogContent>
         <div className="flex flex-col items-start gap-2">
           <div

@@ -20,10 +20,12 @@ import { Project } from "@/types/project";
 
 const columns: ColumnDef<Project>[] = [
   {
-    header: "Project Id",
-    accessorKey: "_id",
+    header: "Project Number",
+    accessorKey: "project_number",
     cell: ({ row }) => (
-      <div className="text-xs font-medium">{row.getValue("_id")}</div>
+      <div className="text-xs font-medium">
+        {row.getValue("project_number")}
+      </div>
     ),
   },
   {
@@ -34,10 +36,10 @@ const columns: ColumnDef<Project>[] = [
     },
   },
   {
-    header: "Project Number",
-    accessorKey: "project_number",
+    header: "Project Description",
+    accessorKey: "project_description",
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("project_number")}</p>;
+      return <p className="text-xs">{row.getValue("project_description")}</p>;
     },
   },
   {
@@ -52,6 +54,58 @@ const columns: ColumnDef<Project>[] = [
     accessorKey: "project_manager",
     cell: ({ row }) => {
       return <p className="text-xs">{row.getValue("project_manager")}</p>;
+    },
+  },
+  {
+    header: "Created by - on",
+    accessorKey: "createdOn",
+    cell: ({ row }) => {
+      const createdBy = row.original.auditLogs?.filter(
+        (log) => log.action === "create"
+      )[0]?.actionBy;
+      const createdAt = row.original.auditLogs?.filter(
+        (log) => log.action === "create"
+      )[0]?.actionAt;
+      if (createdBy && createdAt)
+        return (
+          <div className="">
+            <p className="text-xs  font-medium">{createdBy}</p>
+            <p className="text-xs text-muted-foreground">
+              {createdAt &&
+                Intl.DateTimeFormat("en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }).format(new Date(createdAt))}
+            </p>
+          </div>
+        );
+      return <span className="text-xs text-muted-foreground">N/A</span>;
+    },
+  },
+  {
+    header: "Modified by - on",
+    accessorKey: "modifiedOn",
+    cell: ({ row }) => {
+      const modifiedBy = row.original.auditLogs?.filter(
+        (log) => log.action === "update"
+      )[0]?.actionBy;
+      const modifiedAt = row.original.auditLogs?.filter(
+        (log) => log.action === "update"
+      )[0]?.actionAt;
+      if (modifiedBy && modifiedAt)
+        return (
+          <div className="">
+            <p className="text-xs  font-medium">{modifiedBy}</p>
+            <p className="text-xs text-muted-foreground">
+              {modifiedAt &&
+                Intl.DateTimeFormat("en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }).format(new Date(modifiedAt))}
+            </p>
+          </div>
+        );
+      return <span className="text-xs text-muted-foreground">N/A</span>;
     },
   },
 ];

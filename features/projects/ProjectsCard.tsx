@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PiKanbanDuotone, PiPlusBold } from "react-icons/pi";
+import { PiKanbanDuotone } from "react-icons/pi";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
   Tooltip,
@@ -28,6 +28,7 @@ export interface ProjectProps {
   users?: ProjectUser[];
   members?: { name: string; src: string }[];
   membersCount?: number;
+  auditLogs?: { actionAt: string; action: string }[];
 }
 
 // Update component to accept projects prop and use ProjectsProps
@@ -54,7 +55,10 @@ function ProjectsCard({ projects }: { projects: ProjectProps[] }) {
               <TooltipContent>Open project details</TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex items-center relative w-full h-27 md:w-40 ">
+          <Link
+            href={`/projects/${project._id}`}
+            className="flex items-center relative w-full h-27 md:w-40 "
+          >
             {project.image ? (
               <Image
                 src={project.image}
@@ -67,9 +71,12 @@ function ProjectsCard({ projects }: { projects: ProjectProps[] }) {
                 <PiKanbanDuotone className="w-8 h-8 text-muted-foreground/60" />
               </div>
             )}
-          </div>
+          </Link>
           <div className="flex flex-col items-start justify-between w-full gap-4">
-            <div className="flex flex-col items-start gap-1">
+            <Link
+              href={`/projects/${project._id}`}
+              className="flex flex-col items-start gap-1"
+            >
               <p className="text-base font-semibold">{project.project_name}</p>
               <p className="flex items-start gap-1 text-xs text-muted-foreground">
                 <span>
@@ -77,15 +84,18 @@ function ProjectsCard({ projects }: { projects: ProjectProps[] }) {
                 </span>
                 {project.project_description}
               </p>
-            </div>
+            </Link>
             <div className="flex flex-wrap items-center justify-between w-full gap-4">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span>
                   <CalendarClock className="mr-1 w-4 h-4" />
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  {project.date
-                    ? new Date(project.date).toLocaleDateString()
+                  {project?.auditLogs?.[0]?.actionAt
+                    ? Intl.DateTimeFormat("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(project?.auditLogs?.[0]?.actionAt))
                     : "No date"}
                 </p>
               </div>
@@ -117,9 +127,6 @@ function ProjectsCard({ projects }: { projects: ProjectProps[] }) {
           <p className="text-base md:text-xl font-semibold text-foreground">
             There are no projects to display. Create your first project
           </p>
-          <Button variant="default" className="flex items-center gap-2">
-            Create new Project <PiPlusBold />
-          </Button>
         </div>
       )}
     </div>

@@ -38,6 +38,11 @@ import {
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { Department } from "@/types/department";
 import { uploadFiles } from "@/utils/uploadthing";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface User {
   _id: string;
@@ -148,10 +153,17 @@ export default function DialogUpdateProject({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2">
-          <PiPencilCircleDuotone size={18} />
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2">
+              <PiPencilCircleDuotone size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Update Project</p>
+          </TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
