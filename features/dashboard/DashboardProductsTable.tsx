@@ -35,58 +35,24 @@ export type Item = {
   product_plan_number: string;
   project_id: string;
   status: string;
+  department: Array<{
+    _id: string;
+    department_name: string;
+  }>;
+  project: Array<{
+    _id: string;
+    project_name: string;
+  }>;
+  complete_count: number;
 };
 
 const columns: ColumnDef<Item>[] = [
   {
-    header: "Product Id",
-    accessorKey: "_id",
+    header: "PPN",
+    accessorKey: "product_plan_number",
     cell: ({ row }) => {
-      const id = row.getValue("_id");
-      const idString = typeof id === "string" ? id : String(id);
-      return (
-        <div className="text-xs  font-medium">{idString.slice(0, 10)}</div>
-      );
-    },
-  },
-  {
-    header: "Created by - on",
-    accessorKey: "createdOn",
-    cell: ({ row }) => {
-      const createdBy = row.original.auditLogs?.filter(
-        (log) => log.action === "create"
-      )[0]?.actionBy;
-      const createdAt = row.original.auditLogs?.filter(
-        (log) => log.action === "create"
-      )[0]?.actionAt;
-      return (
-        <div className="">
-          <p className="text-xs  font-medium">{createdBy}</p>
-          <p className="text-xs text-muted-foreground">
-            {createdAt ? createdAt.toLocaleString().slice(0, 10) : "N/A"}
-          </p>
-        </div>
-      );
-    },
-  },
-  {
-    header: "Modified by - on",
-    accessorKey: "modifiedOn",
-    cell: ({ row }) => {
-      const modifiedBy = row.original.auditLogs?.filter(
-        (log) => log.action === "update"
-      )[0]?.actionBy;
-      const modifiedAt = row.original.auditLogs?.filter(
-        (log) => log.action === "update"
-      )[0]?.actionAt;
-      return (
-        <div className="">
-          <p className="text-xs  font-medium">{modifiedBy}</p>
-          <p className="text-xs text-muted-foreground">
-            {modifiedAt ? modifiedAt.toLocaleString().slice(0, 10) : "N/A"}
-          </p>
-        </div>
-      );
+      const ppn = row.getValue("product_plan_number");
+      return <div className="text-xs  font-medium">{ppn as string}</div>;
     },
   },
   {
@@ -97,41 +63,22 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
-    header: "Project Id",
-    accessorKey: "project_id",
+    header: "Project Name",
+    accessorKey: "project_name",
     cell: ({ row }) => {
-      const projectId = row.getValue("project_id");
-      const projectIdString =
-        typeof projectId === "string" ? projectId : String(projectId);
-      return (
-        <div className="text-xs  font-medium">
-          {projectIdString.slice(0, 10)}
-        </div>
-      );
+      const project_name = row.original?.project[0]?.project_name;
+
+      return <div className="text-xs  font-medium">{project_name}</div>;
     },
   },
   {
-    header: "Department Id",
-    accessorKey: "department_id",
+    header: "Department Name",
+    accessorKey: "department_name",
     cell: ({ row }) => {
-      const departmentId = row.getValue("department_id");
-      const departmentIdString =
-        typeof departmentId === "string" ? departmentId : String(departmentId);
-      return (
-        <div className="text-xs  font-medium">
-          {departmentIdString.slice(0, 10)}
-        </div>
-      );
+      const departmentName = row.original?.department[0]?.department_name;
+
+      return <div className="text-xs  font-medium">{departmentName}</div>;
     },
-  },
-  {
-    header: "Version",
-    accessorKey: "master_version",
-    cell: ({ row }) => (
-      <div className="text-xs  font-medium">
-        {row.getValue("master_version")}
-      </div>
-    ),
   },
   {
     header: "Status",
@@ -151,6 +98,64 @@ const columns: ColumnDef<Item>[] = [
       </Badge>
     ),
   },
+  {
+    header: "Version",
+    accessorKey: "master_version",
+    cell: ({ row }) => (
+      <div className="text-xs  font-medium">
+        {row.getValue("master_version")}
+      </div>
+    ),
+  },
+  {
+    header: "Completion %",
+    accessorKey: "complete_count",
+    cell: ({ row }) => (
+      <div className="text-xs  font-medium">
+        {row.getValue("complete_count")}
+      </div>
+    ),
+  },
+  // {
+  //   header: "Created by - on",
+  //   accessorKey: "createdOn",
+  //   cell: ({ row }) => {
+  //     const createdBy = row.original.auditLogs?.filter(
+  //       (log) => log.action === "create"
+  //     )[0]?.actionBy;
+  //     const createdAt = row.original.auditLogs?.filter(
+  //       (log) => log.action === "create"
+  //     )[0]?.actionAt;
+  //     return (
+  //       <div className="">
+  //         <p className="text-xs  font-medium">{createdBy}</p>
+  //         <p className="text-xs text-muted-foreground">
+  //           {createdAt ? createdAt.toLocaleString().slice(0, 10) : "N/A"}
+  //         </p>
+  //       </div>
+  //     );
+  //   },
+  // },
+  // {
+  //   header: "Modified by - on",
+  //   accessorKey: "modifiedOn",
+  //   cell: ({ row }) => {
+  //     const modifiedBy = row.original.auditLogs?.filter(
+  //       (log) => log.action === "update"
+  //     )[0]?.actionBy;
+  //     const modifiedAt = row.original.auditLogs?.filter(
+  //       (log) => log.action === "update"
+  //     )[0]?.actionAt;
+  //     return (
+  //       <div className="">
+  //         <p className="text-xs  font-medium">{modifiedBy}</p>
+  //         <p className="text-xs text-muted-foreground">
+  //           {modifiedAt ? modifiedAt.toLocaleString().slice(0, 10) : "N/A"}
+  //         </p>
+  //       </div>
+  //     );
+  //   },
+  // },
 ];
 
 export default function DashboardProductsTable() {

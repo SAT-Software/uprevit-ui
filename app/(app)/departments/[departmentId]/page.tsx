@@ -1,16 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
-  PiArchiveDuotone,
+  PiArrowLeftDuotone,
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiShareNetworkDuotone,
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
@@ -20,6 +18,12 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
 import DialogUpdateDepartment from "@/features/departments/DialogUpdateDepartment";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DepartmentUser {
   _id: string;
@@ -79,25 +83,23 @@ export default function DepartmentDetailPage() {
               <PiKanbanDuotone className="w-24 h-24 text-muted-foreground/60" />
             </div>
           )}
-          <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 p-1 rounded">
+          <div className="absolute top-2 left-2 flex space-x-1 bg-background/80 rounded">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={() => window.history.back()} variant="ghost">
+                  <PiArrowLeftDuotone size={18} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Go Back</TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 rounded">
             <DialogUpdateDepartment department={department} />
-            <DialogShareDepartment department={department}>
-              <Button variant="ghost" size="sm">
-                <PiShareNetworkDuotone className="h-4 w-4" />
-                <span className="sr-only">Share</span>
-              </Button>
-            </DialogShareDepartment>
-
+            <DialogShareDepartment department={department} />
             <DialogArchiveEntity
               id={departmentId ?? ""}
               entityName={department.department_name}
               entityType="department"
-              trigger={
-                <Button variant="ghost" size="sm">
-                  <PiArchiveDuotone className="h-4 w-4" />
-                  <span className="sr-only">Archive</span>
-                </Button>
-              }
             />
           </div>
         </div>

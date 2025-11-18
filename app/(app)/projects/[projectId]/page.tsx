@@ -1,10 +1,10 @@
 "use client";
 
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import { Button } from "@/components/ui/button";
 import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
 import { Item } from "@/features/products/ProductsPageProductTable";
 import DialogUpdateProject from "@/features/projects/DialogUpdateProject";
+import DialogShareProject from "@/features/projects/DialogShareProject";
 import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
@@ -12,13 +12,18 @@ import { AuditLog } from "@/types/audit-log";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import {
-  PiArchiveDuotone,
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiShareNetworkDuotone,
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { PiArrowLeftDuotone } from "react-icons/pi";
 
 interface ProjectUser {
   _id: string;
@@ -70,23 +75,24 @@ export default function ProjectDetailPage() {
               <PiKanbanDuotone className="w-24 h-24 text-muted-foreground/60" />
             </div>
           )}
-          <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 p-1 rounded">
+          <div className="absolute top-2 left-2 flex space-x-1 bg-background/80 rounded">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={() => window.history.back()} variant="ghost">
+                  <PiArrowLeftDuotone size={18} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Go Back</TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 rounded">
             <DialogUpdateProject project={project} />
-            <Button variant="ghost" size="sm">
-              <PiShareNetworkDuotone className="h-4 w-4" />
-              <span className="sr-only">Share Project</span>
-            </Button>
+            <DialogShareProject project={project} />
             <DialogArchiveEntity
               id={projectId}
               entityName={project.project_name}
               entityType="project"
-              trigger={
-                <Button variant="ghost" size="sm">
-                  <PiArchiveDuotone className="h-4 w-4" />
-                  <span className="sr-only">Archive Project</span>
-                </Button>
-              }
-            />{" "}
+            />
           </div>
         </div>
 
