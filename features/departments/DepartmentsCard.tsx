@@ -1,16 +1,18 @@
-import { Button } from "@/components/ui/button";
-import { CalendarClock, Text } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { PiPlusBold, PiCirclesThreePlusDuotone } from "react-icons/pi";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PiArrowSquareOutDuotone } from "react-icons/pi";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { CalendarClock, Text } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  PiArrowSquareOutDuotone,
+  PiCirclesThreePlusDuotone,
+} from "react-icons/pi";
 
 interface DepartmentUser {
   _id: string;
@@ -35,8 +37,6 @@ export interface DepartmentsProps {
 function DepartmentsCard() {
   const { data, isLoading, error } = useGetAllDepartments();
   const departments = data?.result?.departments ?? [];
-
-  console.log("All departments:", departments);
 
   if (error) {
     return (
@@ -74,7 +74,10 @@ function DepartmentsCard() {
               <TooltipContent>Open department details</TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex items-center relative w-full h-27 md:w-40">
+          <Link
+            href={`/departments/${department._id}`}
+            className="flex items-center relative w-full h-27 md:w-40"
+          >
             {department.image ? (
               <Image
                 src={department.image}
@@ -87,9 +90,12 @@ function DepartmentsCard() {
                 <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground" />
               </div>
             )}
-          </div>
+          </Link>
           <div className="flex flex-col items-start justify-between w-full gap-4">
-            <div className="flex flex-col items-start gap-1">
+            <Link
+              href={`/departments/${department._id}`}
+              className="flex flex-col items-start gap-1"
+            >
               <p className="text-base font-semibold">
                 {department.department_name}
               </p>
@@ -99,7 +105,7 @@ function DepartmentsCard() {
                 </span>
                 {department.department_description}
               </p>
-            </div>
+            </Link>
             <div className="flex flex-wrap items-center justify-between w-full gap-4">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <span>
@@ -107,9 +113,10 @@ function DepartmentsCard() {
                 </span>
                 <p className="text-xs text-muted-foreground">
                   {department?.auditLogs?.[0]?.actionAt
-                    ? new Date(
-                        department?.auditLogs?.[0].actionAt
-                      ).toLocaleDateString()
+                    ? Intl.DateTimeFormat("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(department?.auditLogs?.[0]?.actionAt))
                     : "No date"}
                 </p>
               </div>
@@ -140,9 +147,6 @@ function DepartmentsCard() {
           <p className="text-base md:text-xl font-semibold text-foreground">
             There are no departments to display. Create your first department
           </p>
-          <Button variant="default" className="flex items-center gap-2">
-            Create new Department <PiPlusBold />
-          </Button>
         </div>
       )}
     </div>

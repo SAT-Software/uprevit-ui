@@ -52,14 +52,16 @@ const columns: ColumnDef<Item>[] = [
     accessorKey: "product_plan_number",
     cell: ({ row }) => {
       const ppn = row.getValue("product_plan_number");
-      return <div className="text-xs  font-medium">{ppn as string}</div>;
+      return <div className="text-sm font-medium">{ppn as string}</div>;
     },
   },
   {
     header: "Product Name",
     accessorKey: "product_name",
     cell: ({ row }) => {
-      return <p className="text-xs ">{row.getValue("product_name")}</p>;
+      return (
+        <p className="text-sm font-medium">{row.getValue("product_name")}</p>
+      );
     },
   },
   {
@@ -68,7 +70,7 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row }) => {
       const project_name = row.original?.project[0]?.project_name;
 
-      return <div className="text-xs  font-medium">{project_name}</div>;
+      return <div className="text-sm font-medium">{project_name}</div>;
     },
   },
   {
@@ -77,7 +79,7 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row }) => {
       const departmentName = row.original?.department[0]?.department_name;
 
-      return <div className="text-xs  font-medium">{departmentName}</div>;
+      return <div className="text-sm font-medium">{departmentName}</div>;
     },
   },
   {
@@ -102,17 +104,17 @@ const columns: ColumnDef<Item>[] = [
     header: "Version",
     accessorKey: "master_version",
     cell: ({ row }) => (
-      <div className="text-xs  font-medium">
+      <div className="text-sm font-medium">
         {row.getValue("master_version")}
       </div>
     ),
   },
   {
-    header: "Completion %",
+    header: "Progress",
     accessorKey: "complete_count",
     cell: ({ row }) => (
-      <div className="text-xs  font-medium">
-        {row.getValue("complete_count")}
+      <div className="text-sm font-medium">
+        {row.getValue("complete_count")} %
       </div>
     ),
   },

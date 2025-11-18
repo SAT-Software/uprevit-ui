@@ -24,6 +24,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface DepartmentUser {
   _id: string;
@@ -67,6 +68,25 @@ export default function DepartmentDetailPage() {
 
   if (isError) return notFound();
 
+  const auditLogs = (department.auditLogs as AuditLog[]) || [];
+  const creationLog = auditLogs.find((log) => log.action === "create");
+  const latestUpdateLog = auditLogs
+    .filter((log) => log.action === "update")
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
+    )[0];
+  const formatAuditDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    if (Number.isNaN(date.getTime())) {
+      return isoDate;
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  };
+
   return (
     <div className="p-4">
       <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg">
@@ -103,61 +123,107 @@ export default function DepartmentDetailPage() {
             />
           </div>
         </div>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 px-4 py-4">
+          <div className="flex flex-col gap-4">
+            <h1 className="text-2xl font-bold">{department.department_name}</h1>
 
-        {/* Department Name */}
-        <div className="flex flex-col gap-4 px-4 py-4">
-          <h1 className="text-2xl font-bold">{department.department_name}</h1>
+            {/* Manager Name */}
+            <div className="flex items-center space-x-2">
+              <PiUserDuotone className="h-5 w-5 text-gray-500" />
+              <p className="text-sm text-gray-600">
+                Manager:{" "}
+                <span className="font-medium">{department.manager}</span>
+              </p>
+            </div>
 
-          {/* Manager Name */}
-          <div className="flex items-center space-x-2">
-            <PiUserDuotone className="h-5 w-5 text-gray-500" />
-            <p className="text-sm text-gray-600">
-              Manager: <span className="font-medium">{department.manager}</span>
+            {/* Description */}
+            <p className="flex items-center gap-2 text-muted-foreground">
+              <PiTextAlignJustifyDuotone className="w-5 h-5" />
+              {department.department_description}
             </p>
+
+            <div className="flex items-center space-x-2">
+              {(() => {
+                const usersForDialog = (
+                  (department.users as DepartmentUser[]) || []
+                ).map((u: DepartmentUser) => ({
+                  _id: u._id,
+                  name: u.name,
+                  email: u.email,
+                  profileAvatar: u.profileAvatar,
+                }));
+                return (
+                  <MembersInlineTrigger
+                    users={usersForDialog}
+                    titlePrefix={department.department_name}
+                  />
+                );
+              })()}
+            </div>
           </div>
-
-          {/* Description */}
-          <p className="flex items-center gap-2 text-muted-foreground">
-            <PiTextAlignJustifyDuotone className="w-5 h-5" />
-            {department.department_description}
-          </p>
-
-          {department?.auditLogs &&
-            department?.auditLogs.map((log: AuditLog) => (
-              <div
-                key={log._id}
-                className="flex items-center space-x-2 text-sm"
-              >
-                <PiCalendarDuotone className="w-5 h-5" />
-                <p className="text-sm text-gray-600">
-                  {log.actionAt.slice(0, 10)}
-                </p>
-                <div className="w-0.5 h-6 bg-border" />
-                <p>{log.actionBy}</p>
-              </div>
-            ))}
-
-          {/* Users */}
-          <div className="flex items-center space-x-2">
-            {(() => {
-              const usersForDialog = (
-                (department.users as DepartmentUser[]) || []
-              ).map((u: DepartmentUser) => ({
-                _id: u._id,
-                name: u.name,
-                email: u.email,
-                profileAvatar: u.profileAvatar,
-              }));
-              return (
-                <MembersInlineTrigger
-                  users={usersForDialog}
-                  titlePrefix={department.department_name}
-                />
-              );
-            })()}
+          <div className="flex flex-col items-end gap-4">
+            <div className="flex w-full max-w-md flex-col items-end gap-3">
+              {creationLog || latestUpdateLog ? (
+                <div className="flex w-full flex-col gap-3">
+                  {creationLog && (
+                    <div className="flex flex-col items-end rounded-xl  bg-background/90 p-4 text-right shadow-sm">
+                      <Badge variant="outline">Created</Badge>
+                      <div className="mt-3 flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <PiUserDuotone className="h-4 w-4 text-muted-foreground" />
+                          <p>
+                            <span className="text-muted-foreground">By</span>{" "}
+                            <span className="font-medium">
+                              {creationLog.actionBy}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <PiCalendarDuotone className="h-4 w-4" />
+                          <p>
+                            <span className="text-muted-foreground">At</span>{" "}
+                            <time dateTime={creationLog.actionAt}>
+                              {formatAuditDate(creationLog.actionAt)}
+                            </time>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {latestUpdateLog && (
+                    <div className="flex flex-col items-end rounded-xl  bg-background/90 p-4 text-right shadow-sm">
+                      <Badge variant="secondary">Last Updated</Badge>
+                      <div className="mt-3 flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <PiUserDuotone className="h-4 w-4 text-muted-foreground" />
+                          <p>
+                            <span className="text-muted-foreground">By</span>{" "}
+                            <span className="font-medium">
+                              {latestUpdateLog.actionBy}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <PiCalendarDuotone className="h-4 w-4" />
+                          <p>
+                            <span className="text-muted-foreground">At</span>{" "}
+                            <time dateTime={latestUpdateLog.actionAt}>
+                              {formatAuditDate(latestUpdateLog.actionAt)}
+                            </time>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
+                  No audit history available yet.
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
         <div className="px-4 pb-4 mt-6">
           <h2 className="text-xl font-semibold mt-6">Projects</h2>
           <DepartmentPageProjectsTable data={projects} />

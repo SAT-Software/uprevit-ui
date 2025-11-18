@@ -1,3 +1,5 @@
+import { AuditLog } from "./audit-log";
+
 export interface Project {
   _id?: string;
   project_name: string;
@@ -10,7 +12,5 @@ export interface Project {
   workspace_id: string;
   users?: string[];
   isArchived?: boolean | null;
-  actionBy?: string;
-  actionAt?: Date;
-  actionType?: string;
+  auditLogs: AuditLog[];
 }

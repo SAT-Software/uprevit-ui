@@ -174,7 +174,11 @@ const columns: ColumnDef<Item>[] = [
             {truncatedActionBy}
           </p>
           <p className="text-xs text-muted-foreground">
-            {actionAt?.slice(0, 10)}
+            {actionAt &&
+              Intl.DateTimeFormat("en-US", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              }).format(new Date(actionAt))}
           </p>
         </div>
       );
@@ -308,8 +312,6 @@ export default function ProductsPageProductTable() {
       desc: false,
     },
   ]);
-
-  console.log(data?.result.products);
 
   const table = useReactTable({
     data: data?.result.products ?? [],
