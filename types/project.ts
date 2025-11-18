@@ -12,5 +12,5 @@ export interface Project {
   workspace_id: string;
   users?: string[];
   isArchived?: boolean | null;
-  auditLogs: AuditLog[];
+  auditLogs?: AuditLog[];
 }

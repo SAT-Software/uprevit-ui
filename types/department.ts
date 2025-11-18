@@ -1,3 +1,5 @@
+import { AuditLog } from "./audit-log";
+
 export interface Department {
   _id?: string;
   department_name: string;
@@ -8,7 +10,5 @@ export interface Department {
   workspace_id: string;
   users?: string[];
   isArchived?: boolean | null;
-  actionBy?: string;
-  actionAt?: string;
-  actionType?: string;
+  auditLogs?: AuditLog[];
 }
