@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +66,7 @@ export default function CreateProductDialog() {
     formState: { errors },
     watch,
     reset,
+    setValue,
   } = useForm<FormValues>({
     defaultValues: {
       ppn: "",
@@ -83,7 +84,12 @@ export default function CreateProductDialog() {
   const selectedDepartment = watch("department");
   const selectedProject = watch("project");
 
-  const createMutation = useCreateProduct();
+  useEffect(() => {
+    register("department", { required: "Department is required" });
+    register("project", { required: "Project is required" });
+  }, [register]);
+
+  const { mutate: createMutation, isPending } = useCreateProduct();
 
   const filteredProjects = useMemo(() => {
     return selectedDepartment
@@ -93,9 +99,9 @@ export default function CreateProductDialog() {
       : projects;
   }, [selectedDepartment, projects]);
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
     try {
-      await createMutation.mutateAsync({
+      createMutation({
         product_plan_number: data.ppn,
         product_name: data.productName,
         product_description: data.description,
@@ -218,12 +224,7 @@ export default function CreateProductDialog() {
                   <Select
                     value={selectedDepartment}
                     onValueChange={(value) => {
-                      // This is a workaround to update the form value
-                      const event = { target: { name: "department", value } };
-
-                      register("department", {
-                        required: "Department is required",
-                      }).onChange(event);
+                      setValue("department", value, { shouldValidate: true });
                     }}
                   >
                     <SelectTrigger id={`${id}-department`}>
@@ -249,12 +250,7 @@ export default function CreateProductDialog() {
                   <Select
                     value={selectedProject}
                     onValueChange={(value) => {
-                      // This is a workaround to update the form value
-                      const event = { target: { name: "project", value } };
-
-                      register("project", {
-                        required: "Project is required",
-                      }).onChange(event);
+                      setValue("project", value, { shouldValidate: true });
                     }}
                     disabled={!selectedDepartment}
                   >
@@ -306,11 +302,15 @@ export default function CreateProductDialog() {
           </div>
         </div>
         <DialogFooter className="border-t px-6 py-4">
-          <Button type="button" variant="outline">
+          <Button
+            onClick={() => setOpen(false)}
+            type="button"
+            variant="outline"
+          >
             Cancel
           </Button>
-          <Button type="submit" form="create-product-form">
-            Create Product
+          <Button disabled={isPending} type="submit" form="create-product-form">
+            {isPending ? "Creating..." : "Create Product"}
           </Button>
         </DialogFooter>
       </DialogContent>

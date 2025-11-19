@@ -32,7 +32,7 @@ export default function DialogArchiveProduct({
   const archiveProduct = useUpdateProduct();
 
   async function handleArchiveProduct(e: React.MouseEvent) {
-    e.preventDefault(); // Prevent AlertDialogAction's auto-close
+    e.preventDefault();
     if (!product?._id) return;
 
     try {
@@ -45,7 +45,6 @@ export default function DialogArchiveProduct({
       } as Product & { action: string; data: { status: string } };
 
       await archiveProduct.mutateAsync(updatedProductStatus);
-      // Close dialog in both controlled and uncontrolled modes
       onOpenChange?.(false);
       setInternalOpen(false);
     } catch (error) {
@@ -53,7 +52,6 @@ export default function DialogArchiveProduct({
     }
   }
 
-  // If external state control is provided, use controlled mode
   if (open !== undefined && onOpenChange !== undefined) {
     return (
       <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -89,7 +87,6 @@ export default function DialogArchiveProduct({
     );
   }
 
-  // Original trigger-based mode
   return (
     <AlertDialog open={internalOpen} onOpenChange={setInternalOpen}>
       <AlertDialogTrigger asChild>
