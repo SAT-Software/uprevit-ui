@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,30 +11,29 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PencilIcon } from "lucide-react";
 import { Item } from "./ProductsPageProductTable";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateproduct";
 import { Product } from "@/types/product";
 
-export interface UpdateProductDialogProps {
-  product: Item;
-}
-
 export default function UpdateProductDialog({
   product: productData,
-}: UpdateProductDialogProps) {
+  open,
+  onOpenChange,
+}: {
+  product: Item;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const id = useId();
-  const [open, setOpen] = useState(false);
   const { data: productsData } = useGetAllProducts();
   const products = productsData?.result?.products ?? [];
   const product = products.find((p: Product) => p._id === productData._id);
-  const updateMutation = useUpdateProduct();
+  const { mutate: updateProduct, isPending } = useUpdateProduct();
 
   type FormValues = {
     product_name: string;
@@ -61,38 +60,30 @@ export default function UpdateProductDialog({
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      if (!product?._id) throw new Error("Product id missing for update");
+    const updatedProduct: Product = {
+      ...product,
+      action: "update-product",
+      data: {
+        _id: product._id,
+        name: data.product_name,
+        product_description: data.product_description,
+      },
+    };
 
-      const updatedProduct: Product = {
-        ...product,
-        action: "update-product",
-        data: {
-          _id: product._id,
-          name: data.product_name,
-          product_description: data.product_description,
-        },
-      };
-
-      await updateMutation.mutateAsync(updatedProduct);
-      setOpen(false);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      reset();
-    }
+    updateProduct(updatedProduct, {
+      onSuccess: () => {
+        onOpenChange(false);
+        reset();
+      },
+      onError: () => {
+        onOpenChange(false);
+        reset();
+      },
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <div
-          className="focus:bg-accent hover:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-          key={product._id}
-        >
-          <PencilIcon className=" h-4 w-4" />
-        </div>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
@@ -209,10 +200,10 @@ export default function UpdateProductDialog({
           <Button
             type="submit"
             form={`update-product-form-${id}`}
-            disabled={updateMutation.isPending}
-            aria-busy={updateMutation.isPending}
+            disabled={isPending}
+            aria-busy={isPending}
           >
-            {updateMutation.isPending ? "Updating..." : "Update Product"}
+            {isPending ? "Updating..." : "Update Product"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -16,7 +16,6 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import {
-  ArchiveIcon,
   ChevronDownIcon,
   ChevronFirstIcon,
   ChevronLastIcon,
@@ -25,9 +24,6 @@ import {
   ChevronUpIcon,
   Columns3Icon,
   EllipsisIcon,
-  ExternalLinkIcon,
-  Share2Icon,
-  StarIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
@@ -69,10 +65,17 @@ import { cn } from "@/lib/utils";
 import DialogArchiveProduct from "./DialogArchiveProduct";
 import DialogBookmarkProduct from "./DialogBookmarkProduct";
 // import DialogDuplicateProduct from "./DialogDuplicateProduct";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import {
+  PiArchiveDuotone,
+  PiBookmarkDuotone,
+  PiPencilCircleDuotone,
+  PiShareDuotone,
+} from "react-icons/pi";
 import DialogShareProduct from "./DialogShareProduct";
 import FilterBuilder from "./tableFilter";
 import UpdateProductDialog from "./UpdateProductDialog";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { AuditLog } from "@/types/product";
 
 // Define the type for the table data
 export type Item = {
@@ -95,6 +98,16 @@ export type Item = {
   product_data?: object;
   operational_parameters?: object;
   label_tags?: object;
+  auditLogs?: Array<AuditLog>;
+  department: Array<{
+    _id: string;
+    department_name: string;
+  }>;
+  project: Array<{
+    _id: string;
+    project_name: string;
+  }>;
+  complete_count: number;
 };
 
 interface AdvancedFilter {
@@ -146,42 +159,11 @@ const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
 
 const columns: ColumnDef<Item>[] = [
   {
-    header: "ID",
-    accessorKey: "_id",
+    header: "PPN",
+    accessorKey: "product_plan_number",
     cell: ({ row }) => {
-      const id = row.getValue("_id") as string;
-      const truncatedId = id?.length > 7 ? `${id.slice(0, 7)}...` : id;
-      return (
-        <div className="text-xs font-medium" title={id}>
-          {truncatedId}
-        </div>
-      );
-    },
-    size: 120,
-    maxSize: 150,
-  },
-  {
-    header: "Action By-At",
-    accessorKey: "action_by",
-    cell: ({ row }) => {
-      const actionBy = row.original.action_by;
-      const actionAt = row.original.action_at;
-      const truncatedActionBy =
-        actionBy?.length > 6 ? `${actionBy.slice(0, 6)}...` : actionBy;
-      return (
-        <div className="">
-          <p className="text-xs font-medium" title={actionBy}>
-            {truncatedActionBy}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {actionAt &&
-              Intl.DateTimeFormat("en-US", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              }).format(new Date(actionAt))}
-          </p>
-        </div>
-      );
+      const ppn = row.getValue("product_plan_number");
+      return <div className="text-xs font-medium">{ppn as string}</div>;
     },
     size: 120,
   },
@@ -189,61 +171,29 @@ const columns: ColumnDef<Item>[] = [
     header: "Product Name",
     accessorKey: "product_name",
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("product_name")}</p>;
+      return (
+        <p className="text-xs font-medium">{row.getValue("product_name")}</p>
+      );
     },
     size: 200,
   },
   {
-    header: "Plan Number",
-    accessorKey: "product_plan_number",
-    cell: ({ row }) => (
-      <div className="text-xs font-medium">
-        {row.getValue("product_plan_number")}
-      </div>
-    ),
-    size: 120,
-  },
-  {
-    header: "Project ID",
-    accessorKey: "project_id",
+    header: "Project Name",
+    accessorKey: "project_name",
     cell: ({ row }) => {
-      const projectId = row.getValue("project_id") as string;
-      const truncatedProjectId =
-        projectId?.length > 6 ? `${projectId.slice(0, 6)}...` : projectId;
-      return (
-        <div className="text-xs font-medium" title={projectId}>
-          {truncatedProjectId}
-        </div>
-      );
+      const project_name = row.original?.project?.[0]?.project_name;
+      return <div className="text-xs font-medium">{project_name}</div>;
     },
-    size: 120,
+    size: 150,
   },
   {
-    header: "Department ID",
-    accessorKey: "department_id",
+    header: "Department Name",
+    accessorKey: "department_name",
     cell: ({ row }) => {
-      const departmentId = row.getValue("department_id") as string;
-      const truncatedDepartmentId =
-        departmentId?.length > 6
-          ? `${departmentId.slice(0, 6)}...`
-          : departmentId;
-      return (
-        <div className="text-xs font-medium" title={departmentId}>
-          {truncatedDepartmentId}
-        </div>
-      );
+      const departmentName = row.original?.department?.[0]?.department_name;
+      return <div className="text-xs font-medium">{departmentName}</div>;
     },
-    size: 120,
-  },
-  {
-    header: "Version",
-    accessorKey: "master_version",
-    cell: ({ row }) => (
-      <div className="text-xs font-medium">
-        {row.getValue("master_version")}
-      </div>
-    ),
-    size: 80,
+    size: 150,
   },
   {
     header: "Status",
@@ -265,26 +215,66 @@ const columns: ColumnDef<Item>[] = [
     size: 100,
   },
   {
-    id: "edit",
-    header: () => <span className="sr-only">Edit</span>,
+    header: "Version",
+    accessorKey: "master_version",
     cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <UpdateProductDialog product={row.original} />
+      <div className="text-xs font-medium">
+        {row.getValue("master_version")}
       </div>
     ),
-    size: 30,
-    enableHiding: false,
+    size: 80,
+  },
+  {
+    header: "Progress",
+    accessorKey: "complete_count",
+    cell: ({ row }) => (
+      <div className="text-xs font-medium">
+        {row.getValue("complete_count")} %
+      </div>
+    ),
+    size: 80,
   },
   // {
-  //   id: "duplicate",
-  //   header: () => <span className="sr-only">Duplicate</span>,
-  //   cell: ({ row }) => (
-  //     <div className="flex items-center justify-center">
-  //       <DialogDuplicateProduct product={row.original} />
-  //     </div>
-  //   ),
-  //   size: 30,
-  //   enableHiding: false,
+  //   header: "Created by - on",
+  //   accessorKey: "createdOn",
+  //   cell: ({ row }) => {
+  //     const createdBy = row.original.auditLogs?.filter(
+  //       (log) => log.action === "create"
+  //     )[0]?.actionBy;
+  //     const createdAt = row.original.auditLogs?.filter(
+  //       (log) => log.action === "create"
+  //     )[0]?.actionAt;
+  //     return (
+  //       <div className="">
+  //         <p className="text-xs font-medium">{createdBy}</p>
+  //         <p className="text-xs text-muted-foreground">
+  //           {createdAt ? new Date(createdAt).toLocaleDateString() : "N/A"}
+  //         </p>
+  //       </div>
+  //     );
+  //   },
+  //   size: 150,
+  // },
+  // {
+  //   header: "Modified by - on",
+  //   accessorKey: "modifiedOn",
+  //   cell: ({ row }) => {
+  //     const modifiedBy = row.original.auditLogs?.filter(
+  //       (log) => log.action === "update"
+  //     )[0]?.actionBy;
+  //     const modifiedAt = row.original.auditLogs?.filter(
+  //       (log) => log.action === "update"
+  //     )[0]?.actionAt;
+  //     return (
+  //       <div className="">
+  //         <p className="text-xs font-medium">{modifiedBy}</p>
+  //         <p className="text-xs text-muted-foreground">
+  //           {modifiedAt ? new Date(modifiedAt).toLocaleDateString() : "N/A"}
+  //         </p>
+  //       </div>
+  //     );
+  //   },
+  //   size: 150,
   // },
   {
     id: "actions",
@@ -297,7 +287,7 @@ const columns: ColumnDef<Item>[] = [
 
 export default function ProductsPageProductTable() {
   const id = useId();
-  // const router = useRouter();
+  const router = useRouter();
   const { data } = useGetAllProducts();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -451,11 +441,11 @@ export default function ProductsPageProductTable() {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className="cursor-pointer"
-                  // onClick={() => {
-                  //   router.push(
-                  //     `/products/${row.original._id}/product-information`
-                  //   );
-                  // }}
+                  onClick={() => {
+                    router.push(
+                      `/products/${row.original._id}/product-information`
+                    );
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="last:py-0">
@@ -604,6 +594,7 @@ function RowActions({ row }: { row: { original: Item } }) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
 
   const handleOpen = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -611,7 +602,10 @@ function RowActions({ row }: { row: { original: Item } }) {
   };
 
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div
+      className="flex items-center justify-end gap-2"
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* <UpdateProductDialog product={row.original} /> */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -627,48 +621,61 @@ function RowActions({ row }: { row: { original: Item } }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={handleOpen}>
-              <ExternalLinkIcon className="mr-2 h-4 w-4" />
-              <span>Open</span>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                // Add small delay to allow dropdown to close first
+                setTimeout(() => setShowUpdateDialog(true), 100);
+              }}
+            >
+              <PiPencilCircleDuotone className="mr-2 h-4 w-4" />
+              <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
               onSelect={() => {
                 // Add small delay to allow dropdown to close first
                 setTimeout(() => setShowArchiveDialog(true), 100);
               }}
             >
-              <ArchiveIcon className="mr-2 h-4 w-4" />
+              <PiArchiveDuotone className="mr-2 h-4 w-4" />
               <span>Archive</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
               onSelect={() => {
                 // Add small delay to allow dropdown to close first
                 setTimeout(() => setShowShareDialog(true), 100);
               }}
             >
-              <Share2Icon className="mr-2 h-4 w-4" />
+              <PiShareDuotone className="mr-2 h-4 w-4" />
               <span>Share</span>
             </DropdownMenuItem>
             <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
               onSelect={() => {
                 // Add small delay to allow dropdown to close first
                 setTimeout(() => setShowBookmarkDialog(true), 100);
               }}
             >
-              <StarIcon className="mr-2 h-4 w-4" />
+              <PiBookmarkDuotone className="mr-2 h-4 w-4" />
               <span>Add to Bookmarks</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Dialogs outside dropdown */}
+      <UpdateProductDialog
+        open={showUpdateDialog}
+        onOpenChange={setShowUpdateDialog}
+        product={row.original}
+      />
       <DialogArchiveProduct
         open={showArchiveDialog}
         onOpenChange={setShowArchiveDialog}
