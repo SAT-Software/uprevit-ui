@@ -1,10 +1,10 @@
 "use client";
 
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import { MembersTable } from "./MembersTable";
+import { UsersTable } from "./UsersTable";
 import { InviteMembersDialog } from "./InviteMembersDialog";
 
-const MembersTab = () => {
+const UsersTab = () => {
   const { data: workspaceData } = useGetWorkspace();
   const workspace = workspaceData?.workspace;
 
@@ -26,9 +26,9 @@ const MembersTab = () => {
         <InviteMembersDialog />
       </div>
 
-      <MembersTable />
+      <UsersTable />
     </div>
   );
 };
 
-export default MembersTab;
+export default UsersTab;

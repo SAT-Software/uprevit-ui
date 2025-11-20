@@ -61,7 +61,12 @@ export const columns: ColumnDef<User>[] = [
     header: "User Type",
     cell: ({ row }) => {
       const userType = row.getValue("userType") as string;
-      if (userType) return <Badge variant="outline">{userType}</Badge>;
+      if (userType)
+        return (
+          <Badge variant={userType === "admin" ? "secondary" : "outline"}>
+            {userType}
+          </Badge>
+        );
 
       return <p className="text-muted-foreground">N/A</p>;
     },
@@ -133,7 +138,7 @@ export const columns: ColumnDef<User>[] = [
   },
 ];
 
-export function MembersTable() {
+export function UsersTable() {
   const {
     data: responseData,
     isLoading,
