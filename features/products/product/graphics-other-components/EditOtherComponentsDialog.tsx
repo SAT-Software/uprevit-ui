@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -80,6 +80,29 @@ export default function EditOtherComponentsDialog({
         : null,
     },
   });
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+
+  useEffect(() => {
+    reset({
+      componentName: otherComponent.componentName,
+      componentDescription: otherComponent.description,
+      labelPresence: otherComponent.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      })),
+      image: otherComponent.componentImage
+        ? { preview: otherComponent.componentImage }
+        : null,
+    });
+    setLabelPresence(
+      otherComponent.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      }))
+    );
+    setIsImageRemoved(false);
+  }, [otherComponent, reset]);
+
   const {
     mutate: updateOtherCompsData,
     isPending,
@@ -103,6 +126,14 @@ export default function EditOtherComponentsDialog({
       }
       setUploadingImage(false);
 
+      let finalImage: string = otherComponent.componentImage;
+      if (isImageRemoved) {
+        finalImage = "";
+      }
+      if (utRes?.[0]?.ufsUrl) {
+        finalImage = utRes[0].ufsUrl;
+      }
+
       const updatedOtherCompsData = {
         id: productId,
         action: "update_symbols_graphics",
@@ -110,7 +141,7 @@ export default function EditOtherComponentsDialog({
         data: {
           id: otherComponent.id,
           text: data.componentName,
-          image: utRes?.[0]?.ufsUrl || otherComponent.componentImage,
+          image: finalImage,
           entity: "Other Components",
           description: data.componentDescription,
           label_presence: (Array.isArray(labelPresence)
@@ -120,21 +151,25 @@ export default function EditOtherComponentsDialog({
         },
       };
 
-      updateOtherCompsData(updatedOtherCompsData);
-
-      if (isSuccess) {
-        onOpenChange(false);
-        reset();
-        setLabelPresence([]);
-      }
-
-      if (isError) throw new Error("Failed to update other components item:");
+      updateOtherCompsData(updatedOtherCompsData, {
+        onSuccess: () => {
+          onOpenChange(false);
+          reset();
+          setLabelPresence([]);
+          setIsImageRemoved(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update other components item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to update other components item:", error);
       setUploadingImage(false);
       onOpenChange(false);
       reset();
       setLabelPresence([]);
+      setIsImageRemoved(false);
     }
   };
 
@@ -164,6 +199,8 @@ export default function EditOtherComponentsDialog({
                   <ComponentImage
                     currentImage={otherComponent.componentImage}
                     value={field.value}
+                    isRemoved={isImageRemoved}
+                    onRemove={() => setIsImageRemoved(true)}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -224,24 +261,29 @@ export default function EditOtherComponentsDialog({
         </form>
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => reset()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset();
+                setIsImageRemoved(false);
+              }}
+            >
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="edit-other-comps-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Updating..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Update Other Components Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="edit-other-comps-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Updating..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Update Other Components Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -251,12 +293,16 @@ export default function EditOtherComponentsDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
+  isRemoved: boolean;
+  onRemove: () => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
+  isRemoved,
+  onRemove,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -271,7 +317,8 @@ function ComponentImage({
       },
     });
 
-  const displayImage = value?.preview || files[0]?.preview || currentImage;
+  const displayImage =
+    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
 
   return (
     <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
@@ -309,8 +356,11 @@ function ComponentImage({
               const fileId = value?.id || files[0]?.id;
               if (fileId) {
                 removeFile(fileId);
+                onChange(null);
+              } else {
+                onRemove();
+                onChange(null);
               }
-              onChange(null);
             }}
             aria-label="Remove image"
           >

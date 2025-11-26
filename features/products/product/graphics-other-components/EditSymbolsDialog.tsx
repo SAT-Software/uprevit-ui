@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -53,9 +53,7 @@ export default function EditSymbolsDialog({
 }) {
   const id = useId();
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [textPresent, setTextPresent] = useState(
-    symbol.textPresent ? "yes" : "no"
-  );
+
   const [labelPresence, setLabelPresence] = useState<Tag[]>(
     symbol.symbolsTextPresent.map((label, index) => ({
       id: `tag-${index}-${label}`,
@@ -81,6 +79,28 @@ export default function EditSymbolsDialog({
       image: symbol.componentImage ? { preview: symbol.componentImage } : null,
     },
   });
+
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+
+  useEffect(() => {
+    reset({
+      componentName: symbol.componentName,
+      textPresent: symbol.textPresent ? "yes" : "no",
+      labelPresence: symbol.symbolsTextPresent.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      })),
+      image: symbol.componentImage ? { preview: symbol.componentImage } : null,
+    });
+    setLabelPresence(
+      symbol.symbolsTextPresent.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      }))
+    );
+    setIsImageRemoved(false);
+  }, [symbol, reset]);
+
   const {
     mutate: updateSymbolsData,
     isPending,
@@ -105,6 +125,14 @@ export default function EditSymbolsDialog({
       }
       setUploadingImage(false);
 
+      let finalImage: string = symbol.componentImage;
+      if (isImageRemoved) {
+        finalImage = "";
+      }
+      if (utRes?.[0]?.ufsUrl) {
+        finalImage = utRes[0].ufsUrl;
+      }
+
       const updatedSymbolsData = {
         id: productId,
         action: "update_symbols_graphics",
@@ -112,7 +140,7 @@ export default function EditSymbolsDialog({
         data: {
           id: symbol.id,
           text: data.componentName,
-          image: utRes?.[0]?.ufsUrl || symbol.componentImage,
+          image: finalImage,
           entity: "Symbols",
           text_present: data.textPresent === "yes",
           label_presence: (Array.isArray(labelPresence)
@@ -122,23 +150,25 @@ export default function EditSymbolsDialog({
         },
       };
 
-      updateSymbolsData(updatedSymbolsData);
-
-      if (isSuccess) {
-        onOpenChange(false);
-        reset();
-        setTextPresent("yes");
-        setLabelPresence([]);
-      }
-
-      if (isError) throw new Error("Failed to update symbols item:");
+      updateSymbolsData(updatedSymbolsData, {
+        onSuccess: () => {
+          onOpenChange(false);
+          reset();
+          setLabelPresence([]);
+          setIsImageRemoved(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update symbols item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to update symbols item:", error);
       setUploadingImage(false);
       onOpenChange(false);
       reset();
-      setTextPresent("yes");
       setLabelPresence([]);
+      setIsImageRemoved(false);
     }
   };
 
@@ -167,6 +197,8 @@ export default function EditSymbolsDialog({
                   <ComponentImage
                     currentImage={symbol.componentImage}
                     value={field.value}
+                    isRemoved={isImageRemoved}
+                    onRemove={() => setIsImageRemoved(true)}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -194,24 +226,31 @@ export default function EditSymbolsDialog({
               </div>
               <div className="space-y-2">
                 <Label>Symbol text present</Label>
-                <RadioGroup
-                  value={textPresent}
-                  onValueChange={setTextPresent}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id={`${id}-text-present-yes`} />
-                    <Label htmlFor={`${id}-text-present-yes`}>Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id={`${id}-text-present-no`} />
-                    <Label htmlFor={`${id}-text-present-no`}>No</Label>
-                  </div>
-                </RadioGroup>
-                <input
-                  type="hidden"
-                  {...register("textPresent")}
-                  value={textPresent}
+                <Controller
+                  name="textPresent"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="yes"
+                          id={`${id}-text-present-yes`}
+                        />
+                        <Label htmlFor={`${id}-text-present-yes`}>Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="no"
+                          id={`${id}-text-present-no`}
+                        />
+                        <Label htmlFor={`${id}-text-present-no`}>No</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
                 />
               </div>
             </div>
@@ -237,24 +276,29 @@ export default function EditSymbolsDialog({
         </form>
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => reset()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset();
+                setIsImageRemoved(false);
+              }}
+            >
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="edit-symbols-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Updating..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Update Symbols Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="edit-symbols-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Updating..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Update Symbols Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -264,12 +308,16 @@ export default function EditSymbolsDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
+  isRemoved: boolean;
+  onRemove: () => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
+  isRemoved,
+  onRemove,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -284,8 +332,9 @@ function ComponentImage({
       },
     });
 
-  // Show current image if no new file is selected
-  const displayImage = value?.preview || files[0]?.preview || currentImage;
+  // Show current image if no new file is selected and it hasn't been removed
+  const displayImage =
+    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
 
   return (
     <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
@@ -323,8 +372,11 @@ function ComponentImage({
               const fileId = value?.id || files[0]?.id;
               if (fileId) {
                 removeFile(fileId);
+                onChange(null);
+              } else {
+                onRemove();
+                onChange(null);
               }
-              onChange(null);
             }}
             aria-label="Remove image"
           >

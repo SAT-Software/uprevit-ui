@@ -95,11 +95,18 @@ export default function AddBarcodesDialog({
 
       console.log("Barcodes data", newBarcodesData);
 
-      addBarcodesData(newBarcodesData);
-      setOpen(false);
-      reset();
-      // Reset local state
-      setLabelPresence([]);
+      addBarcodesData(newBarcodesData, {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+          // Reset local state
+          setLabelPresence([]);
+        },
+        onError: (error) => {
+          console.error("Failed to add barcodes item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to add barcodes item:", error);
       setUploadingImage(false);
@@ -213,20 +220,18 @@ export default function AddBarcodesDialog({
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="add-barcodes-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Adding..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Add Barcodes Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="add-barcodes-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Adding..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Add Barcodes Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

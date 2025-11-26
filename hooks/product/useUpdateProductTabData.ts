@@ -35,13 +35,12 @@ export function useUpdateProductTabData() {
       return res.json().catch(() => null);
     },
     onSuccess: () => {
-      toast.success("Product data updated successfully");
-      // Invalidate the product tab data query to refresh the data
+      toast.success("Changes in Product data saved successfully");
       queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to update product data");
-      toast.error("Failed to update product data");
+      console.error(error.message || "Failed to make changes in product data");
+      toast.error("Failed to make changes in product data");
     },
   });
 }

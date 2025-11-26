@@ -72,17 +72,15 @@ export default function DialogDeleteLabelTag({
             <CircleAlertIcon className="opacity-80" size={16} />
           </div>
           <DialogHeader>
-            <DialogTitle className="sm:text-center">
-              Delete Label Tag
-            </DialogTitle>
+            <DialogTitle className="sm:text-center">Delete Label</DialogTitle>
           </DialogHeader>
         </div>
 
         <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete the label tag{" "}
-            <strong>{labelTag.name || "Untitled Label Tag"}</strong>? This
-            action cannot be undone.
+            Are you sure you want to delete the label{" "}
+            <strong>{labelTag.name || "Untitled Label"}</strong>? This action
+            cannot be undone.
           </p>
           <DialogFooter>
             <DialogClose asChild>
@@ -102,7 +100,7 @@ export default function DialogDeleteLabelTag({
               onClick={handleConfirm}
               variant="destructive"
             >
-              {isPending ? "Deleting..." : "Delete Label Tag"}
+              {isPending ? "Deleting..." : "Delete Label"}
             </Button>
           </DialogFooter>
         </form>

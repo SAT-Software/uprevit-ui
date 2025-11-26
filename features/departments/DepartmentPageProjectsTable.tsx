@@ -43,10 +43,11 @@ const columns: ColumnDef<Project>[] = [
     },
   },
   {
-    header: "Description",
-    accessorKey: "project_description",
+    header: "Users",
+    accessorKey: "users",
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("project_description")}</p>;
+      const users = row.original.users?.length || 0;
+      return <p className="text-xs">{users}</p>;
     },
   },
   {

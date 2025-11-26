@@ -73,7 +73,7 @@ export default function Page() {
     presentOnLabels: item.label_presence,
   }));
 
-  const otherComponentsData = (entityGroups["othercomponents"] || []).map(
+  const otherComponentsData = (entityGroups["other components"] || []).map(
     (item) => ({
       id: item._id,
       componentName: item.text,

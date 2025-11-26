@@ -207,30 +207,9 @@ export default function SymbolsGraphicsPageBarcodesTable({
       desc: false,
     },
   ]);
-  const [data, setData] = useState<Item[]>(dataProp ?? []);
-
-  useEffect(() => {
-    if (!dataProp) {
-      async function fetchPosts() {
-        // fallback demo data
-        setData([
-          {
-            id: "1",
-            componentName: "Demo Component",
-            componentDescription: "Description for demo component.",
-            componentImage:
-              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-            note: "This is a demo note for the component.",
-            presentOnLabels: ["IFU", "Outer Box"],
-          },
-        ]);
-      }
-      fetchPosts();
-    }
-  }, [dataProp]);
 
   const table = useReactTable({
-    data,
+    data: dataProp || [],
     columns,
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),

@@ -120,11 +120,11 @@ export default function DialogEditLabelTag({
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Edit Label Tag
+            Edit Label
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Edit the label tag details and upload a new image.
+          Edit the label details and upload a new image.
         </DialogDescription>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -153,10 +153,10 @@ export default function DialogEditLabelTag({
                 <Label htmlFor={`${id}-name`}>Name</Label>
                 <Input
                   id={`${id}-name`}
-                  placeholder="Enter label tag name"
+                  placeholder="Enter label name"
                   type="text"
                   {...register("name", {
-                    required: "Label tag name is required",
+                    required: "Label name is required",
                   })}
                 />
                 {errors.name && (
@@ -167,7 +167,7 @@ export default function DialogEditLabelTag({
                 <Label htmlFor={`${id}-type`}>Type</Label>
                 <Input
                   id={`${id}-type`}
-                  placeholder="Enter label tag type"
+                  placeholder="Enter label type"
                   type="text"
                   {...register("type")}
                 />
@@ -181,7 +181,7 @@ export default function DialogEditLabelTag({
                 <Label htmlFor={`${id}-description`}>Description</Label>
                 <Textarea
                   id={`${id}-description`}
-                  placeholder="Describe the label tag's purpose and specifications"
+                  placeholder="Describe the label's purpose and specifications"
                   {...register("description")}
                   className="min-h-[100px] resize-none"
                 />
@@ -207,7 +207,7 @@ export default function DialogEditLabelTag({
             onClick={handleSubmit(onSubmit)}
             disabled={uploadingImage}
           >
-            {uploadingImage ? "Updating..." : "Update Label Tag"}
+            {uploadingImage ? "Updating..." : "Update Label"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -250,8 +250,8 @@ function ComponentImage({
           src={currentImage}
           alt={
             value?.file.name || files[0]?.file.name
-              ? "Preview of uploaded label tag image"
-              : "Current label tag image"
+              ? "Preview of uploaded label image"
+              : "Current label image"
           }
           width={512}
           height={96}
@@ -260,7 +260,7 @@ function ComponentImage({
         <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
           <div className="flex flex-col items-center text-muted-foreground/60">
             <ImagePlusIcon className="w-8 h-8 mb-2" />
-            <span className="text-xs">Label Tag Image</span>
+            <span className="text-xs">Label Image</span>
           </div>
         </div>
       )}
@@ -294,7 +294,7 @@ function ComponentImage({
       <input
         {...getInputProps()}
         className="sr-only"
-        aria-label="Upload label tag image"
+        aria-label="Upload label image"
       />
     </div>
   );

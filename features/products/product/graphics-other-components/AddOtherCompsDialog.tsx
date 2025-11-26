@@ -83,11 +83,8 @@ export default function AddOtherCompsDialog({
           {
             text: data.componentName,
             image: utRes?.[0]?.ufsUrl || null,
-            entity: "OtherComponents",
-            label_presence: (Array.isArray(labelPresence)
-              ? labelPresence
-              : JSON.parse(labelPresence || "[]")
-            ).map((tag: Tag) => tag.text),
+            entity: "Other Components",
+            label_presence: labelPresence.map((tag: Tag) => tag.text),
             description: data.componentDescription,
           },
         ],
@@ -95,11 +92,18 @@ export default function AddOtherCompsDialog({
 
       console.log("Other components data", newOtherCompsData);
 
-      addOtherCompsData(newOtherCompsData);
-      setOpen(false);
-      reset();
-      // Reset local state
-      setLabelPresence([]);
+      addOtherCompsData(newOtherCompsData, {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+          // Reset local state
+          setLabelPresence([]);
+        },
+        onError: (error) => {
+          console.error("Failed to add other components item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to add other components item:", error);
       setUploadingImage(false);
@@ -205,20 +209,18 @@ export default function AddOtherCompsDialog({
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="add-other-comps-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Adding..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Add Other Components Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="add-other-comps-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Adding..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Add Other Components Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -83,12 +83,18 @@ export default function AddComponentDialog({
         ],
       };
 
-      addComponent(newComponentData);
-      setOpen(false);
-      reset();
+      addComponent(newComponentData, {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+        },
+        onError: () => {
+          setOpen(false);
+          reset();
+        },
+      });
     } catch (error) {
       console.error("Failed to add component:", error);
-      setUploadingImage(false);
     }
   };
 

@@ -27,12 +27,7 @@ export default function DeleteSymbolsSchematicsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const {
-    mutate: deleteSymbol,
-    isPending,
-    isSuccess,
-    isError,
-  } = useUpdateProductTabData();
+  const { mutate: deleteSymbol, isPending } = useUpdateProductTabData();
 
   async function handleConfirm() {
     try {
@@ -45,15 +40,16 @@ export default function DeleteSymbolsSchematicsDialog({
         },
       };
 
-      deleteSymbol(deleteData);
-
-      if (isSuccess) onOpenChange(false);
-
-      if (isError) throw new Error("Failed to delete graphic");
-
-      onOpenChange(false);
+      deleteSymbol(deleteData, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          console.error("Failed to delete graphic:", error);
+        },
+      });
     } catch (error) {
-      console.error("Failed to delete symbol:", error);
+      console.error("Failed to delete graphic:", error);
       onOpenChange(false);
     }
   }
@@ -69,7 +65,7 @@ export default function DeleteSymbolsSchematicsDialog({
             <CircleAlertIcon className="opacity-80" size={16} />
           </div>
           <DialogHeader>
-            <DialogTitle className="sm:text-center">Delete Symbol</DialogTitle>
+            <DialogTitle className="sm:text-center">Delete Graphic</DialogTitle>
           </DialogHeader>
         </div>
 
@@ -96,7 +92,7 @@ export default function DeleteSymbolsSchematicsDialog({
               onClick={handleConfirm}
               variant="destructive"
             >
-              {isPending ? "Deleting..." : "Delete Symbol"}
+              {isPending ? "Deleting..." : "Delete Graphic"}
             </Button>
           </DialogFooter>
         </form>

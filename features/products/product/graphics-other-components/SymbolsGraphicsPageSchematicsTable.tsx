@@ -202,10 +202,8 @@ export default function SymbolsGraphicsPageSchematicsTable({
       desc: false,
     },
   ]);
-  const [data] = useState<Item[]>(dataProp ?? []);
-
   const table = useReactTable({
-    data,
+    data: dataProp || [],
     columns,
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),

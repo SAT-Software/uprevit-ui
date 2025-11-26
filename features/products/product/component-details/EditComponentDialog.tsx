@@ -110,12 +110,18 @@ export default function EditComponentDialog({
         },
       };
 
-      updateComponent(updatedComponentData);
-      onOpenChange(false);
-      reset();
+      updateComponent(updatedComponentData, {
+        onSuccess: () => {
+          onOpenChange(false);
+          reset();
+        },
+        onError: () => {
+          onOpenChange(false);
+          reset();
+        },
+      });
     } catch (error) {
       console.error("Failed to update component:", error);
-      setUploadingImage(false);
     }
   };
 
