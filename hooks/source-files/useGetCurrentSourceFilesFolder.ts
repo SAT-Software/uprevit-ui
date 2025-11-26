@@ -13,7 +13,7 @@ async function getCurrentSourceFilesFolder(
 ) {
   console.log("Folder id in hook", folderId);
   const response = await fetch(
-    `/api/source-files/current-folder?workspaceId=68d2be511ad93c69d6e39e51&id=${folderId}`,
+    `/api/source-files/current-folder?workspaceId=${auth?.user?.profile.workspaceId}&id=${folderId}`,
     {
       headers: {
         Authorization: `Bearer ${auth?.user?.access_token}`,

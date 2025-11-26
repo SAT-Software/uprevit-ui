@@ -86,13 +86,10 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-4 items-center justify-center w-full h-100">
-          <p className="text-base md:text-xl font-semibold text-foreground">
+          <p className="text-base md:text-lg font-normal text-muted-foreground">
             There are no source files folders to display. Create your first
             folder
           </p>
-          <Button variant="default" className="flex items-center gap-2">
-            Create new Folder <PiPlusBold />
-          </Button>
         </div>
       )}
     </div>

@@ -23,6 +23,8 @@ function SourceFilesPage() {
 
   const sourceFilesFolders = foldersData?.result ?? [];
 
+  console.log("sourceFilesFolders", foldersData);
+
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const {

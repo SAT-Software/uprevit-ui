@@ -53,6 +53,7 @@ export default function DialogDeleteSourceFilesFolder({
           size="icon"
           aria-label="Delete folder"
           title="Delete folder"
+          className="cursor-pointer"
         >
           <TrashIcon className="h-5 w-5" />
         </Button>
