@@ -47,9 +47,15 @@ export default function DialogDeleteLabelTag({
 
       console.log("Deleting label tag:", deleteData);
 
-      deleteLabelTag(deleteData);
-
-      setOpen(false);
+      deleteLabelTag(deleteData, {
+        onSuccess: () => {
+          setOpen(false);
+        },
+        onError: (error) => {
+          setOpen(false);
+          console.error("Failed to delete label tag:", error);
+        },
+      });
     } catch (error) {
       console.error("Failed to delete label tag:", error);
     }

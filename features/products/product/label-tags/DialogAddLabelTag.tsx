@@ -40,7 +40,7 @@ export default function DialogAddLabelTag({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const { mutate: addLabelTag } = useUpdateProductTabData();
+  const { mutate: addLabelTag, isPending } = useUpdateProductTabData();
   const {
     register,
     handleSubmit,
@@ -48,14 +48,7 @@ export default function DialogAddLabelTag({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<FormData>({
-    defaultValues: {
-      name: "",
-      description: "",
-      type: "",
-      image: null,
-    },
-  });
+  } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -195,9 +188,13 @@ export default function DialogAddLabelTag({
             form="add-label-tag-form"
             type="submit"
             onClick={handleSubmit(onSubmit)}
-            disabled={uploadingImage}
+            disabled={uploadingImage || isPending}
           >
-            {uploadingImage ? "Uploading..." : "Add Label"}
+            {uploadingImage
+              ? "Uploading..."
+              : isPending
+              ? "Adding..."
+              : "Add Label"}
           </Button>
         </DialogFooter>
       </DialogContent>
