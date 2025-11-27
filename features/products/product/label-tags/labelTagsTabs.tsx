@@ -33,9 +33,9 @@ export default function LabelTagsTabs() {
     activeTab || data?.result?.data?.data?.[0]?.type || "tab-1";
 
   if (isLoading)
-    return <div className="flex flex-col gap-4 p-4">Loading label tags...</div>;
+    return <div className="flex flex-col gap-4 p-4">Loading labels...</div>;
 
-  if (error) return <div>Error loading label tags: {error.message}</div>;
+  if (error) return <div>Error loading labels: {error.message}</div>;
 
   const labelTagsData: LabelTagItem[] = data?.result?.data?.data;
   const filteredLabelTypesForTabs: string[] = [
@@ -84,7 +84,7 @@ export default function LabelTagsTabs() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                        {item.name || "Untitled Label Tag"}
+                        {item.name || "Untitled Label"}
                         <span className="text-base font-normal text-accent-foreground">
                           -
                         </span>
@@ -136,7 +136,7 @@ export default function LabelTagsTabs() {
                             No Image Available
                           </p>
                           <p className="text-xs text-center mt-1">
-                            Add an image to better visualize this label tag
+                            Add an image to better visualize this label
                           </p>
                         </div>
                       )}

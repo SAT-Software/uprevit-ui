@@ -2,7 +2,9 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ArchivedItems from "@/features/archive/ArchivedItems";
+import ArchivedDepartments from "@/features/archive/departments/ArchivedDepartments";
+import ArchivedProjects from "@/features/archive/projects/ArchivedProjects";
+import ArchivedProducts from "@/features/archive/products/ArchivedProducts";
 
 function ArchivePage() {
   return (
@@ -24,22 +26,13 @@ function ArchivePage() {
         </TabsList>
 
         <TabsContent value="department">
-          <ArchivedItems
-            type="department"
-            onRowClick={(row) => console.log(row)}
-          />
+          <ArchivedDepartments onRowClick={(row) => console.log(row)} />
         </TabsContent>
         <TabsContent value="project">
-          <ArchivedItems
-            type="project"
-            onRowClick={(row) => console.log(row)}
-          />
+          <ArchivedProjects onRowClick={(row) => console.log(row)} />
         </TabsContent>
         <TabsContent value="product">
-          <ArchivedItems
-            type="product"
-            onRowClick={(row) => console.log(row)}
-          />
+          <ArchivedProducts onRowClick={(row) => console.log(row)} />
         </TabsContent>
       </Tabs>
     </div>

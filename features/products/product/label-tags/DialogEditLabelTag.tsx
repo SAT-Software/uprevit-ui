@@ -30,7 +30,7 @@ type FormData = {
   name: string;
   description: string;
   type: string;
-  image: FileWithPreview | null;
+  image: FileWithPreview | string | null;
 };
 
 interface LabelTagItem {
@@ -51,7 +51,7 @@ export default function DialogEditLabelTag({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const { mutate: updateLabelTag } = useUpdateProductTabData();
+  const { mutate: updateLabelTag, isPending } = useUpdateProductTabData();
   const {
     register,
     handleSubmit,
@@ -60,11 +60,11 @@ export default function DialogEditLabelTag({
     reset,
     setValue,
   } = useForm<FormData>({
-    defaultValues: {
+    values: {
       name: labelTag.name || "",
       description: labelTag.description || "",
       type: labelTag.type || "",
-      image: null,
+      image: labelTag.image || null,
     },
   });
 
@@ -75,7 +75,11 @@ export default function DialogEditLabelTag({
       let utRes;
 
       // Only upload if there's a new image file
-      if (data.image && data.image.file instanceof File) {
+      if (
+        data.image &&
+        typeof data.image !== "string" &&
+        data.image.file instanceof File
+      ) {
         utRes = await uploadFiles("imageUploader", {
           files: [data.image.file],
         });
@@ -93,16 +97,21 @@ export default function DialogEditLabelTag({
           name: data.name,
           description: data.description,
           type: data.type,
-          image: utRes?.[0]?.ufsUrl || labelTag.image || "",
+          image:
+            utRes?.[0]?.ufsUrl ||
+            (typeof data.image === "string" ? data.image : ""),
         },
       };
 
-      console.log("Label tag data", editLabelTagData);
-
-      updateLabelTag(editLabelTagData);
-
-      setOpen(false);
-      reset();
+      updateLabelTag(editLabelTagData, {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+        },
+        onError: (error) => {
+          console.error("Failed to update label tag:", error);
+        },
+      });
     } catch (error) {
       console.error("Failed to edit label tag:", error);
       setUploadingImage(false);
@@ -120,11 +129,11 @@ export default function DialogEditLabelTag({
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
-            Edit Label Tag
+            Edit Label
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Edit the label tag details and upload a new image.
+          Edit the label details and upload a new image.
         </DialogDescription>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -139,10 +148,8 @@ export default function DialogEditLabelTag({
                 render={({ field }) => (
                   <ComponentImage
                     value={field.value}
-                    existingImage={labelTag.image}
                     onChange={(file) => {
                       field.onChange(file);
-                      setValue("image", file);
                     }}
                   />
                 )}
@@ -153,10 +160,10 @@ export default function DialogEditLabelTag({
                 <Label htmlFor={`${id}-name`}>Name</Label>
                 <Input
                   id={`${id}-name`}
-                  placeholder="Enter label tag name"
+                  placeholder="Enter label name"
                   type="text"
                   {...register("name", {
-                    required: "Label tag name is required",
+                    required: "Label name is required",
                   })}
                 />
                 {errors.name && (
@@ -167,7 +174,7 @@ export default function DialogEditLabelTag({
                 <Label htmlFor={`${id}-type`}>Type</Label>
                 <Input
                   id={`${id}-type`}
-                  placeholder="Enter label tag type"
+                  placeholder="Enter label type"
                   type="text"
                   {...register("type")}
                 />
@@ -181,7 +188,7 @@ export default function DialogEditLabelTag({
                 <Label htmlFor={`${id}-description`}>Description</Label>
                 <Textarea
                   id={`${id}-description`}
-                  placeholder="Describe the label tag's purpose and specifications"
+                  placeholder="Describe the label's purpose and specifications"
                   {...register("description")}
                   className="min-h-[100px] resize-none"
                 />
@@ -205,9 +212,13 @@ export default function DialogEditLabelTag({
             form="edit-label-tag-form"
             type="submit"
             onClick={handleSubmit(onSubmit)}
-            disabled={uploadingImage}
+            disabled={uploadingImage || isPending}
           >
-            {uploadingImage ? "Updating..." : "Update Label Tag"}
+            {uploadingImage
+              ? "Uploading Label..."
+              : isPending
+              ? "Updating Data..."
+              : "Update Label"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -216,16 +227,11 @@ export default function DialogEditLabelTag({
 }
 
 interface ComponentImageProps {
-  value: FileWithPreview | null;
-  existingImage?: string;
-  onChange: (file: FileWithPreview | null) => void;
+  value: FileWithPreview | string | null;
+  onChange: (file: FileWithPreview | string | null) => void;
 }
 
-function ComponentImage({
-  value,
-  existingImage,
-  onChange,
-}: ComponentImageProps) {
+function ComponentImage({ value, onChange }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
       accept: "image/*",
@@ -240,7 +246,9 @@ function ComponentImage({
 
   // Sync external value with internal state
   const currentImage =
-    value?.preview || files[0]?.preview || existingImage || null;
+    (typeof value === "string" ? value : value?.preview) ||
+    files[0]?.preview ||
+    null;
 
   return (
     <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
@@ -249,9 +257,10 @@ function ComponentImage({
           className="size-full object-cover rounded-xl"
           src={currentImage}
           alt={
-            value?.file.name || files[0]?.file.name
-              ? "Preview of uploaded label tag image"
-              : "Current label tag image"
+            (typeof value !== "string" && value?.file.name) ||
+            files[0]?.file.name
+              ? "Preview of uploaded label image"
+              : "Current label image"
           }
           width={512}
           height={96}
@@ -260,7 +269,7 @@ function ComponentImage({
         <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
           <div className="flex flex-col items-center text-muted-foreground/60">
             <ImagePlusIcon className="w-8 h-8 mb-2" />
-            <span className="text-xs">Label Tag Image</span>
+            <span className="text-xs">Label Image</span>
           </div>
         </div>
       )}
@@ -279,7 +288,9 @@ function ComponentImage({
             type="button"
             className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
             onClick={() => {
-              const fileId = value?.id || files[0]?.id;
+              const fileId =
+                (typeof value !== "string" ? value?.id : undefined) ||
+                files[0]?.id;
               if (fileId) {
                 removeFile(fileId);
               }
@@ -294,7 +305,7 @@ function ComponentImage({
       <input
         {...getInputProps()}
         className="sr-only"
-        aria-label="Upload label tag image"
+        aria-label="Upload label image"
       />
     </div>
   );

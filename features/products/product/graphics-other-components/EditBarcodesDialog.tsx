@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -80,6 +80,29 @@ export default function EditBarcodesDialog({
         : null,
     },
   });
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+
+  useEffect(() => {
+    reset({
+      componentName: barcode.componentName,
+      componentDescription: barcode.description,
+      labelPresence: barcode.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      })),
+      image: barcode.componentImage
+        ? { preview: barcode.componentImage }
+        : null,
+    });
+    setLabelPresence(
+      barcode.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      }))
+    );
+    setIsImageRemoved(false);
+  }, [barcode, reset]);
+
   const {
     mutate: updateBarcodesData,
     isPending,
@@ -103,6 +126,14 @@ export default function EditBarcodesDialog({
       }
       setUploadingImage(false);
 
+      let finalImage: string | null = barcode.componentImage;
+      if (isImageRemoved) {
+        finalImage = "";
+      }
+      if (utRes?.[0]?.ufsUrl) {
+        finalImage = utRes[0].ufsUrl;
+      }
+
       const updatedBarcodesData = {
         id: productId,
         action: "update_symbols_graphics",
@@ -110,7 +141,7 @@ export default function EditBarcodesDialog({
         data: {
           id: barcode.id,
           text: data.componentName,
-          image: utRes?.[0]?.ufsUrl || barcode.componentImage,
+          image: finalImage,
           entity: "Barcodes",
           description: data.componentDescription,
           label_presence: (Array.isArray(labelPresence)
@@ -120,21 +151,25 @@ export default function EditBarcodesDialog({
         },
       };
 
-      updateBarcodesData(updatedBarcodesData);
-
-      if (isSuccess) {
-        onOpenChange(false);
-        reset();
-        setLabelPresence([]);
-      }
-
-      if (isError) throw new Error("Failed to update barcodes item:");
+      updateBarcodesData(updatedBarcodesData, {
+        onSuccess: () => {
+          onOpenChange(false);
+          reset();
+          setLabelPresence([]);
+          setIsImageRemoved(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update barcodes item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to update barcodes item:", error);
       setUploadingImage(false);
       onOpenChange(false);
       reset();
       setLabelPresence([]);
+      setIsImageRemoved(false);
     }
   };
 
@@ -163,6 +198,8 @@ export default function EditBarcodesDialog({
                   <ComponentImage
                     currentImage={barcode.componentImage}
                     value={field.value}
+                    isRemoved={isImageRemoved}
+                    onRemove={() => setIsImageRemoved(true)}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -232,24 +269,29 @@ export default function EditBarcodesDialog({
         </form>
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => reset()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset();
+                setIsImageRemoved(false);
+              }}
+            >
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="edit-barcodes-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Updating..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Update Barcodes Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="edit-barcodes-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Updating..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Update Barcodes Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -259,12 +301,16 @@ export default function EditBarcodesDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
+  isRemoved: boolean;
+  onRemove: () => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
+  isRemoved,
+  onRemove,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -279,7 +325,8 @@ function ComponentImage({
       },
     });
 
-  const displayImage = value?.preview || files[0]?.preview || currentImage;
+  const displayImage =
+    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
 
   return (
     <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
@@ -317,8 +364,11 @@ function ComponentImage({
               const fileId = value?.id || files[0]?.id;
               if (fileId) {
                 removeFile(fileId);
+                onChange(null);
+              } else {
+                onRemove();
+                onChange(null);
               }
-              onChange(null);
             }}
             aria-label="Remove image"
           >

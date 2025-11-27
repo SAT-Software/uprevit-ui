@@ -39,7 +39,6 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [textPresent, setTextPresent] = useState("yes");
   const [labelPresence, setLabelPresence] = useState<Tag[]>([]);
   const {
     register,
@@ -92,14 +91,18 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
         ],
       };
 
-      console.log("Symbols data", newSymbolsData);
-
-      addSymbolsData(newSymbolsData);
-      setOpen(false);
-      reset();
-      // Reset local state
-      setTextPresent("yes");
-      setLabelPresence([]);
+      addSymbolsData(newSymbolsData, {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+          setLabelPresence([]);
+        },
+        onError: (error) => {
+          setUploadingImage(false);
+          console.error("Failed to add symbols item:", error);
+          setLabelPresence([]);
+        },
+      });
     } catch (error) {
       console.error("Failed to add symbols item:", error);
       setUploadingImage(false);
@@ -162,24 +165,31 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
               </div>
               <div className="space-y-2">
                 <Label>Symbol text present</Label>
-                <RadioGroup
-                  value={textPresent}
-                  onValueChange={setTextPresent}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id={`${id}-text-present-yes`} />
-                    <Label htmlFor={`${id}-text-present-yes`}>Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id={`${id}-text-present-no`} />
-                    <Label htmlFor={`${id}-text-present-no`}>No</Label>
-                  </div>
-                </RadioGroup>
-                <input
-                  type="hidden"
-                  {...register("textPresent")}
-                  value={textPresent}
+                <Controller
+                  name="textPresent"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="yes"
+                          id={`${id}-text-present-yes`}
+                        />
+                        <Label htmlFor={`${id}-text-present-yes`}>Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="no"
+                          id={`${id}-text-present-no`}
+                        />
+                        <Label htmlFor={`${id}-text-present-no`}>No</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
                 />
               </div>
             </div>
@@ -220,7 +230,6 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
               variant="outline"
               onClick={() => {
                 reset();
-                setTextPresent("yes");
                 setLabelPresence([]);
               }}
             >

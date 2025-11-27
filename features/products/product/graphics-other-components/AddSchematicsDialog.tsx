@@ -100,15 +100,17 @@ export default function AddSchematicsDialog({
 
       console.log("Schematics data", newSchematicsData);
 
-      addSchematicsData(newSchematicsData);
-
-      if (isSuccess) {
-        setOpen(false);
-        reset();
-        setLabelPresence([]);
-      }
-
-      if (isError) throw new Error("Failed to add schematics item:");
+      addSchematicsData(newSchematicsData, {
+        onSuccess: () => {
+          setOpen(false);
+          reset();
+          setLabelPresence([]);
+        },
+        onError: (error) => {
+          console.error("Failed to add schematics item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to add schematics item:", error);
       setUploadingImage(false);
@@ -216,20 +218,18 @@ export default function AddSchematicsDialog({
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="add-schematics-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Adding..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Add Schematics Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="add-schematics-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Adding..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Add Schematics Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

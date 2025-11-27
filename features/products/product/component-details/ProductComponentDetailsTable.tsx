@@ -470,7 +470,6 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
           <DropdownMenuGroup>
             <DropdownMenuItem
               onSelect={() => {
-                // Add small delay to allow dropdown to close first
                 setTimeout(() => setShowEditDialog(true), 100);
               }}
             >
@@ -481,7 +480,6 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              // Add small delay to allow dropdown to close first
               setTimeout(() => setShowDeleteDialog(true), 100);
             }}
             className="text-destructive focus:text-destructive"

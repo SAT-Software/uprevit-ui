@@ -206,12 +206,8 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
       desc: false,
     },
   ]);
-  const [data] = useState<Item[]>(dataProp ?? []);
-
-  console.log("other component data", data);
-
   const table = useReactTable({
-    data,
+    data: dataProp || [],
     columns,
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),

@@ -35,6 +35,8 @@ export default function Page() {
 
   if (isError) return notFound();
 
+  console.log("productData", productData);
+
   return (
     <div className="w-full">
       <div className="flex flex-col mb-8">
@@ -51,14 +53,21 @@ export default function Page() {
           <div className="flex flex-col gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />{" "}
-              <span>Target Date: {productData?.target_date || "N/A"}</span>
+              <span>
+                Target Date:{" "}
+                {productData?.target_date
+                  ? productData?.target_date.slice(0, 10)
+                  : "N/A"}
+              </span>
             </div>
 
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />{" "}
               <span>
                 Actual Completion:{" "}
-                {productData?.actual_completion_date || "N/A"}
+                {productData?.actual_completion_date
+                  ? productData?.actual_completion_date.slice(0, 10)
+                  : "N/A"}
               </span>
             </div>
           </div>

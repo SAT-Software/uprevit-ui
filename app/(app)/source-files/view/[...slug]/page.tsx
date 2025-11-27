@@ -83,9 +83,7 @@ export default function ProductSourceFilesPage() {
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useGetSourceFilesFolderById(slug ?? "");
-  const { data: currentFolderData } = useGetCurrentSourceFilesFolder(
-    slug ?? ""
-  );
+  const { data: currentFolderData } = useGetCurrentSourceFilesFolder(slug);
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
 
@@ -104,6 +102,8 @@ export default function ProductSourceFilesPage() {
 
   const folder = data?.result;
   const currentFolder = currentFolderData?.result; // TODO - Need to fix this in backend and here
+
+  console.log("currentFolder", currentFolder);
 
   if (isLoading) {
     return (
@@ -317,14 +317,15 @@ export default function ProductSourceFilesPage() {
                                   </div>
                                 );
                               })()}
-                              <button
+                              <Button
                                 type="button"
+                                variant="outline"
                                 aria-label="Delete file"
                                 onClick={() => setFileIdToDelete(file._id)}
-                                className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md p-1.5 bg-background/80 hover:bg-background text-muted-foreground border border-input shadow-sm"
+                                className="absolute top-2 right-2"
                               >
                                 <PiTrashDuotone className="w-4 h-4" />
-                              </button>
+                              </Button>
                             </div>
                             <p
                               className="mt-2 text-xs font-medium truncate px-2"

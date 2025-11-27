@@ -52,20 +52,23 @@ export default function DialogAddProductFolder({
   const folderName = watch("folderName");
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    addSourceFilesFolder(
-      {
-        workspace_id: workspaceId as string,
-        name: data.folderName,
-        type: "folder",
-        parentId: parentId,
+    const sourceFilesFolderData = {
+      workspace_id: workspaceId as string,
+      name: data.folderName,
+      type: "folder",
+      parentId: parentId,
+    };
+
+    addSourceFilesFolder(sourceFilesFolderData, {
+      onSuccess: () => {
+        reset();
+        setOpen(false);
       },
-      {
-        onSuccess: () => {
-          reset();
-          setOpen(false);
-        },
-      }
-    );
+      onError: () => {
+        reset();
+        setOpen(false);
+      },
+    });
   };
 
   return (

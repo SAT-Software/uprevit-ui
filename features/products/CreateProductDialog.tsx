@@ -89,7 +89,7 @@ export default function CreateProductDialog() {
     register("project", { required: "Project is required" });
   }, [register]);
 
-  const { mutate: createMutation, isPending } = useCreateProduct();
+  const { mutate: createProduct, isPending } = useCreateProduct();
 
   const filteredProjects = useMemo(() => {
     return selectedDepartment
@@ -101,7 +101,7 @@ export default function CreateProductDialog() {
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     try {
-      createMutation({
+      const productData = {
         product_plan_number: data.ppn,
         product_name: data.productName,
         product_description: data.description,
@@ -110,10 +110,19 @@ export default function CreateProductDialog() {
         project_id: data.project,
         master_version: data.version,
         status: data.status.toLowerCase(),
-      });
+      };
 
-      reset();
-      setOpen(false);
+      createProduct(productData, {
+        onSuccess: () => {
+          reset();
+          setOpen(false);
+        },
+        onError: (error) => {
+          console.error(error);
+          reset();
+          setOpen(false);
+        },
+      });
     } catch (error) {
       console.error(error);
     }

@@ -9,7 +9,7 @@ async function getAllSourceFileFolders({
   auth: AuthContextProps;
 }) {
   const res = await fetch(
-    "/api/source-files?workspaceId=68d2be511ad93c69d6e39e51",
+    `/api/source-files?workspaceId=${auth?.user?.profile.workspaceId}`,
     {
       headers: {
         Authorization: `Bearer ${auth?.user?.access_token}`,

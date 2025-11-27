@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,9 +58,6 @@ export default function ProductInformationCustomFieldEditDialog({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"add" | "manage">("add");
-  const [localCustomFields, setLocalCustomFields] = useState(
-    product?.custom_fields || []
-  );
   const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null);
   const [deleteFieldOpen, setDeleteFieldOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
@@ -83,6 +80,39 @@ export default function ProductInformationCustomFieldEditDialog({
     control,
     name: "customFields",
   });
+
+  // Form for managing existing fields
+  const {
+    register: registerManage,
+    control: controlManage,
+    reset: resetManage,
+    getValues: getValuesManage,
+    formState: { errors: errorsManage },
+  } = useForm<{
+    existingFields: Array<{ _id: string; label: string; value: string }>;
+  }>({
+    defaultValues: {
+      existingFields: [],
+    },
+  });
+
+  const { fields: manageFields } = useFieldArray({
+    control: controlManage,
+    name: "existingFields",
+  });
+
+  // Sync manage form with product data
+  useEffect(() => {
+    if (product?.custom_fields) {
+      resetManage({
+        existingFields: product.custom_fields.map((f) => ({
+          _id: f._id || "",
+          label: f.label,
+          value: f.value,
+        })),
+      });
+    }
+  }, [product?.custom_fields, resetManage]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!product?.id) {
@@ -116,7 +146,6 @@ export default function ProductInformationCustomFieldEditDialog({
       onSuccess: () => {
         reset();
         setOpen(false);
-        // Reset to single empty field
         remove(fields.length - 1);
         append({ label: "", value: "" });
       },
@@ -139,7 +168,7 @@ export default function ProductInformationCustomFieldEditDialog({
     }
 
     // Send all custom fields data instead of just the updated field
-    const allCustomFields = localCustomFields.map((field) =>
+    const allCustomFields = product?.custom_fields?.map((field) =>
       field._id === fieldId ? { ...field, label: label, value: value } : field
     );
 
@@ -147,17 +176,16 @@ export default function ProductInformationCustomFieldEditDialog({
       id: product.id,
       action: "update_custom_field",
       tab: "product-information",
-      data: allCustomFields.map((field) => ({
-        field_id: field._id!,
-        label: field.label,
-        value: field.value,
-      })),
+      data:
+        allCustomFields?.map((field) => ({
+          field_id: field._id!,
+          label: field.label,
+          value: field.value,
+        })) || [],
     };
 
     updateProductTabData(updateData, {
       onSuccess: () => {
-        // Update local state immediately for better UX
-        setLocalCustomFields(allCustomFields);
         toast.success("Custom field updated successfully");
         reset();
         setOpen(false);
@@ -189,46 +217,22 @@ export default function ProductInformationCustomFieldEditDialog({
 
     updateProductTabData(deleteData, {
       onSuccess: () => {
-        // Update local state immediately for better UX
-        setLocalCustomFields((prev) =>
-          prev.filter((field) => field._id !== fieldId)
-        );
         toast.success("Custom field deleted successfully");
         reset();
         setOpen(false);
+        setDeleteFieldOpen(true);
       },
       onError: () => {
         toast.error("Failed to delete custom field");
         reset();
         setOpen(false);
+        setDeleteFieldOpen(true);
       },
     });
   };
 
   const removeCustomField = (index: number) => {
     remove(index);
-  };
-
-  // Handle input changes for existing fields
-  const handleExistingFieldChange = (
-    index: number,
-    field: string,
-    value: string
-  ) => {
-    setLocalCustomFields((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
-    );
-  };
-
-  // Handle individual field update
-  const handleIndividualFieldUpdate = (field: {
-    _id?: string;
-    field_name: string;
-    field_value: string;
-  }) => {
-    if (!field._id) return;
-
-    handleUpdateCustomField(field._id, field.field_name, field.field_value);
   };
 
   return (
@@ -273,7 +277,6 @@ export default function ProductInformationCustomFieldEditDialog({
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === "add" ? (
-            /* Add New Field Tab */
             <form
               id={`edit-custom-fields-form-${id}`}
               className="p-6"
@@ -351,45 +354,46 @@ export default function ProductInformationCustomFieldEditDialog({
               </div>
             </form>
           ) : (
-            /* Manage Existing Fields Tab */
             <form className="p-6" onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-4">
-                {localCustomFields && localCustomFields.length > 0 ? (
-                  localCustomFields.map((field, index) => (
+                {manageFields.length > 0 ? (
+                  manageFields.map((field, index) => (
                     <div
-                      key={field._id}
+                      key={field.id}
                       className="space-y-3 p-4 border rounded-lg bg-muted/30"
                     >
                       <div className="space-y-2">
                         <Label className="text-sm">Field Label</Label>
                         <Input
-                          value={field.label}
-                          onChange={(e) =>
-                            handleExistingFieldChange(
-                              index,
-                              "label",
-                              e.target.value
-                            )
-                          }
                           placeholder="Enter field label"
                           type="text"
+                          {...registerManage(
+                            `existingFields.${index}.label` as const,
+                            { required: "Label is required" }
+                          )}
                         />
+                        {errorsManage.existingFields?.[index]?.label && (
+                          <p role="alert" className="text-xs text-destructive">
+                            {errorsManage.existingFields[index]?.label?.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-sm">Field Value</Label>
                         <Input
-                          value={field.value}
-                          onChange={(e) =>
-                            handleExistingFieldChange(
-                              index,
-                              "value",
-                              e.target.value
-                            )
-                          }
                           placeholder="Enter field value"
                           type="text"
+                          {...registerManage(
+                            `existingFields.${index}.value` as const,
+                            { required: "Value is required" }
+                          )}
                         />
+                        {errorsManage.existingFields?.[index]?.value && (
+                          <p role="alert" className="text-xs text-destructive">
+                            {errorsManage.existingFields[index]?.value?.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex gap-2">
@@ -397,13 +401,16 @@ export default function ProductInformationCustomFieldEditDialog({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            handleIndividualFieldUpdate({
-                              _id: field._id,
-                              field_name: field.label,
-                              field_value: field.value,
-                            })
-                          }
+                          onClick={() => {
+                            const data = getValuesManage(
+                              `existingFields.${index}`
+                            );
+                            handleUpdateCustomField(
+                              data._id,
+                              data.label,
+                              data.value
+                            );
+                          }}
                           disabled={isPending}
                         >
                           <Save className="h-3 w-3 mr-1" />
@@ -414,7 +421,7 @@ export default function ProductInformationCustomFieldEditDialog({
                           variant="destructive"
                           size="sm"
                           onClick={() => {
-                            setDeleteFieldId(field._id!);
+                            setDeleteFieldId(field._id);
                             setDeleteFieldOpen(true);
                           }}
                           disabled={isPending}
@@ -476,7 +483,6 @@ export default function ProductInformationCustomFieldEditDialog({
                 onClick={() => {
                   if (deleteFieldId) {
                     handleDeleteCustomField(deleteFieldId);
-                    setDeleteFieldOpen(false);
                     setDeleteFieldId(null);
                   }
                 }}

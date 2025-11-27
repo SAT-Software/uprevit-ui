@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -80,6 +80,29 @@ export default function EditSchematicsDialog({
         : null,
     },
   });
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+
+  useEffect(() => {
+    reset({
+      componentName: schematic.componentName,
+      componentDescription: schematic.description,
+      labelPresence: schematic.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      })),
+      image: schematic.componentImage
+        ? { preview: schematic.componentImage }
+        : null,
+    });
+    setLabelPresence(
+      schematic.labelPresence.map((label, index) => ({
+        id: `tag-${index}-${label}`,
+        text: label,
+      }))
+    );
+    setIsImageRemoved(false);
+  }, [schematic, reset]);
+
   const {
     mutate: updateSchematicsData,
     isPending,
@@ -103,6 +126,14 @@ export default function EditSchematicsDialog({
       }
       setUploadingImage(false);
 
+      let finalImage: string = schematic.componentImage;
+      if (isImageRemoved) {
+        finalImage = "";
+      }
+      if (utRes?.[0]?.ufsUrl) {
+        finalImage = utRes[0].ufsUrl;
+      }
+
       const updatedSchematicsData = {
         id: productId,
         action: "update_symbols_graphics",
@@ -110,7 +141,7 @@ export default function EditSchematicsDialog({
         data: {
           id: schematic.id,
           text: data.componentName,
-          image: utRes?.[0]?.ufsUrl || schematic.componentImage,
+          image: finalImage,
           entity: "Schematics",
           description: data.componentDescription,
           label_presence: (Array.isArray(labelPresence)
@@ -120,21 +151,25 @@ export default function EditSchematicsDialog({
         },
       };
 
-      updateSchematicsData(updatedSchematicsData);
-
-      if (isSuccess) {
-        onOpenChange(false);
-        reset();
-        setLabelPresence([]);
-      }
-
-      if (isError) throw new Error("Failed to update schematics item:");
+      updateSchematicsData(updatedSchematicsData, {
+        onSuccess: () => {
+          onOpenChange(false);
+          reset();
+          setLabelPresence([]);
+          setIsImageRemoved(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update schematics item:", error);
+          setUploadingImage(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to update schematics item:", error);
       setUploadingImage(false);
       onOpenChange(false);
       reset();
       setLabelPresence([]);
+      setIsImageRemoved(false);
     }
   };
 
@@ -163,6 +198,8 @@ export default function EditSchematicsDialog({
                   <ComponentImage
                     currentImage={schematic.componentImage}
                     value={field.value}
+                    isRemoved={isImageRemoved}
+                    onRemove={() => setIsImageRemoved(true)}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -223,24 +260,29 @@ export default function EditSchematicsDialog({
         </form>
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => reset()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset();
+                setIsImageRemoved(false);
+              }}
+            >
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="edit-schematics-form"
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Updating..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Update Schematics Item"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="edit-schematics-form"
+            type="submit"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? "Updating..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Update Schematics Item"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -250,12 +292,16 @@ export default function EditSchematicsDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
+  isRemoved: boolean;
+  onRemove: () => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
+  isRemoved,
+  onRemove,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -270,7 +316,8 @@ function ComponentImage({
       },
     });
 
-  const displayImage = value?.preview || files[0]?.preview || currentImage;
+  const displayImage =
+    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
 
   return (
     <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
@@ -308,8 +355,11 @@ function ComponentImage({
               const fileId = value?.id || files[0]?.id;
               if (fileId) {
                 removeFile(fileId);
+                onChange(null);
+              } else {
+                onRemove();
+                onChange(null);
               }
-              onChange(null);
             }}
             aria-label="Remove image"
           >

@@ -12,7 +12,7 @@ async function getSourceFilesFolderById(
   }
 ) {
   const response = await fetch(
-    `/api/source-files/folder?workspaceId=68d2be511ad93c69d6e39e51&parentId=${folderId}`,
+    `/api/source-files/folder?workspaceId=${auth?.user?.profile.workspaceId}&parentId=${folderId}`,
     {
       headers: {
         Authorization: `Bearer ${auth?.user?.access_token}`,

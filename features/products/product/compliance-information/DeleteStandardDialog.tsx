@@ -30,7 +30,8 @@ export default function DeleteStandardDialog({
   const [open, setOpen] = useState(false);
   const { mutate: deleteStandard, isPending } = useUpdateProductTabData();
 
-  async function handleDelete() {
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     try {
       const deleteStandardData = {
         id: productId,
@@ -41,11 +42,19 @@ export default function DeleteStandardDialog({
         },
       };
 
-      deleteStandard(deleteStandardData);
+      deleteStandard(deleteStandardData, {
+        onSuccess: () => {
+          setOpen(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update product information:", error);
+          setOpen(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to delete standard:", error);
     }
-  }
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -71,7 +80,7 @@ export default function DeleteStandardDialog({
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-destructive text-background hover:bg=destructive/90"
+            className="bg-destructive text-background hover:bg-destructive/90"
           >
             {isPending ? "Deleting..." : "Delete"}
           </AlertDialogAction>

@@ -30,22 +30,28 @@ export default function DeleteComponentDialog({
 }) {
   const { mutate: deleteComponent, isPending } = useUpdateProductTabData();
 
-  async function handleDelete() {
+  async function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     try {
       const deleteComponentData = {
         id: productId,
         action: "delete_label_component",
         tab: "label-components",
         data: {
-          component_id: component._id,
+          id: component._id,
         },
       };
 
-      deleteComponent(deleteComponentData);
+      deleteComponent(deleteComponentData, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+        onError: () => {
+          onOpenChange(false);
+        },
+      });
     } catch (error) {
       console.error("Failed to delete component:", error);
-    } finally {
-      onOpenChange(false);
     }
   }
 
