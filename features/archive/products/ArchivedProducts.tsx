@@ -35,7 +35,7 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
 
     updateProductStatus(
       {
-        ...selectedItemToRestore,
+        _id: selectedItemToRestore._id,
         action: "update-status",
         data: {
           status: "draft",

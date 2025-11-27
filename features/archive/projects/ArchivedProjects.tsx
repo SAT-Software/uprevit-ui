@@ -74,6 +74,7 @@ export function ArchivedProjects({ onRowClick }: ArchivedProjectsProps) {
         onOpenChange={setRestoreDialogOpen}
         entityName={selectedItemToRestore?.project_name || ""}
         onConfirm={handleConfirmRestore}
+        isPending={restoreProject.isPending}
       />
     </>
   );

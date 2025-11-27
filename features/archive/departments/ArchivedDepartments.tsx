@@ -81,6 +81,7 @@ export function ArchivedDepartments({ onRowClick }: ArchivedDepartmentsProps) {
         onOpenChange={setRestoreDialogOpen}
         entityName={selectedItemToRestore?.department_name || ""}
         onConfirm={handleConfirmRestore}
+        isPending={restoreDepartment.isPending}
       />
     </>
   );
