@@ -3,12 +3,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
+type UpdateProductProps = Partial<Product> & {
+  action?: string;
+  data?: any;
+  [key: string]: any;
+};
+
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   const auth = useAuth();
 
   return useMutation({
-    mutationFn: async (updatedProduct: Product) => {
+    mutationFn: async (updatedProduct: UpdateProductProps) => {
       const accessToken = auth.user?.access_token;
       if (!accessToken) {
         throw new Error("User is not authenticated");
@@ -31,6 +37,7 @@ export function useUpdateProduct() {
     onSuccess: () => {
       toast.success("Product updated successfully");
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
+      queryClient.invalidateQueries({ queryKey: ["archived-products"] });
     },
     onError: (error) => {
       console.error(error.message || "Failed to update product");

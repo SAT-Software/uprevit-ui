@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
-import { useArchiveProduct } from "@/hooks/product/useArchiveProduct";
 import { PiArchiveDuotone } from "react-icons/pi";
 import {
   Tooltip,
@@ -26,7 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export type ArchiveEntityType = "project" | "department" | "product";
+export type ArchiveEntityType = "project" | "department";
 
 export interface DialogArchiveEntityProps {
   id: string;
@@ -46,7 +45,6 @@ export default function DialogArchiveEntity({
   // Prepare mutations
   const departmentArchive = useArchiveDepartment();
   const projectArchive = useArchiveProject();
-  const productArchive = useArchiveProduct();
 
   const { mutateAsync, isPending } = useMemo(() => {
     switch (entityType) {
@@ -54,14 +52,12 @@ export default function DialogArchiveEntity({
         return departmentArchive;
       case "project":
         return projectArchive;
-      case "product":
-        return productArchive;
       default:
         throw new Error(`Invalid entity type: ${entityType}`);
     }
-  }, [entityType, departmentArchive, projectArchive, productArchive]);
+  }, [entityType, departmentArchive, projectArchive]);
 
-  const disabled = value !== entityName || isPending;
+  const disabled = value.trim() !== entityName.trim() || isPending;
 
   async function handleConfirm() {
     if (disabled) return;

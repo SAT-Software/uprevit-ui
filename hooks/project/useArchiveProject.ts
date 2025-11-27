@@ -32,6 +32,7 @@ export function useArchiveProject() {
     onSuccess: () => {
       toast.success("Project archived successfully");
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["archived-projects"] });
       router.push("/archive");
     },
     onError: (error) => {

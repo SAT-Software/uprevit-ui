@@ -1,23 +1,21 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
-export function useArchiveDepartment() {
+export function useRestoreProject() {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const auth = useAuth();
 
   return useMutation({
-    mutationFn: async (departmentId: string) => {
+    mutationFn: async (projectId: string) => {
       const accessToken = auth.user?.access_token;
       if (!accessToken) {
         throw new Error("User is not authenticated");
       }
 
-      const res = await fetch(`/api/departments/${departmentId}`, {
+      const res = await fetch(`/api/projects/${projectId}`, {
         method: "PATCH",
-        body: JSON.stringify({ isArchived: true }),
+        body: JSON.stringify({ isArchived: false }),
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -25,19 +23,18 @@ export function useArchiveDepartment() {
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to archive department");
+        throw new Error(text || "Failed to restore project");
       }
       return res.json().catch(() => null);
     },
     onSuccess: () => {
-      toast.success("Department archived successfully");
-      queryClient.invalidateQueries({ queryKey: ["all-departments"] });
-      queryClient.invalidateQueries({ queryKey: ["archived-departments"] });
-      router.push("/archive");
+      toast.success("Project restored successfully");
+      queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["archived-projects"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to archive department");
-      toast.error("Failed to archive department");
+      console.error(error.message || "Failed to restore project");
+      toast.error("Failed to restore project");
     },
   });
 }

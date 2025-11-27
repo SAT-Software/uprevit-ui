@@ -29,7 +29,7 @@ export default function DialogArchiveProduct({
   children?: React.ReactNode;
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const archiveProduct = useUpdateProduct();
+  const { mutate: archiveProduct, isPending } = useUpdateProduct();
 
   async function handleArchiveProduct(e: React.MouseEvent) {
     e.preventDefault();
@@ -42,11 +42,17 @@ export default function DialogArchiveProduct({
         data: {
           status: "archived",
         },
-      } as Product & { action: string; data: { status: string } };
+      };
 
-      await archiveProduct.mutateAsync(updatedProductStatus);
-      onOpenChange?.(false);
-      setInternalOpen(false);
+      archiveProduct(updatedProductStatus, {
+        onSuccess: () => {
+          onOpenChange?.(false);
+          setInternalOpen(false);
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      });
     } catch (error) {
       console.error("Failed to archive product:", error);
     }
@@ -72,14 +78,12 @@ export default function DialogArchiveProduct({
             </AlertDialogHeader>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={archiveProduct.isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleArchiveProduct}
-              disabled={archiveProduct.isPending}
+              disabled={isPending}
             >
-              {archiveProduct.isPending ? "Archiving..." : "Archive Product"}
+              {isPending ? "Archiving..." : "Archive Product"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -114,14 +118,12 @@ export default function DialogArchiveProduct({
           </AlertDialogHeader>
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={archiveProduct.isPending}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleArchiveProduct}
-            disabled={archiveProduct.isPending}
+            disabled={isPending}
           >
-            {archiveProduct.isPending ? "Archiving..." : "Archive Product"}
+            {isPending ? "Archiving..." : "Archive Product"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
