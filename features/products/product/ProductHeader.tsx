@@ -115,7 +115,7 @@ export function ProductHeader() {
     <header
       className={cn(
         "flex w-full shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height] ease-linear ",
-        "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        "h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
       )}
     >
       <div className="flex items-center gap-2">
@@ -125,15 +125,16 @@ export function ProductHeader() {
         <Button variant="outline" size="sm">
           Export Product Plan
         </Button>
-        <Select>
+        <Select value={product?.version} disabled={!product}>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="View Versions" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="v1.0">Version 1.0</SelectItem>
-            <SelectItem value="v1.1">Version 1.1</SelectItem>
-            <SelectItem value="v1.2">Version 1.2</SelectItem>
-            <SelectItem value="v2.0">Version 2.0 (Current)</SelectItem>
+            {product?.version && (
+              <SelectItem value={product.version}>
+                Version {product.version}
+              </SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>

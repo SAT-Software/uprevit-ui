@@ -37,11 +37,12 @@ export interface Product {
   label_components?: {
     data?: Array<{
       _id?: string;
-      component_name: string;
-      component_type?: string;
       dimensions?: string;
-      material?: string;
-      color?: string;
+      label_type?: string[];
+      component_number: string;
+      component_type: string;
+      component_description: string;
+      image?: string;
     }>;
     tab_completed?: boolean;
   };

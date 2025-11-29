@@ -20,23 +20,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput, Tag } from "@/components/ui/tag-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { uploadFiles } from "@/utils/uploadthing";
 
 type ComponentItem = {
   _id: string;
-  name: string;
-  specification_details: string;
-  number: string;
+  component_number: string;
+  component_description: string;
   image: string;
+  label_type: string[];
+  dimensions: string;
+  component_type: string;
 };
 
 type FormData = {
-  name: string;
-  number: string;
-  specification_details: string;
+  componentNumber: string;
+  componentDescription: string;
   image: FileWithPreview | null;
+  labelType: Tag[];
+  dimensions: string;
+  componentType: string;
 };
 
 export default function EditComponentDialog({
@@ -52,6 +64,7 @@ export default function EditComponentDialog({
 }) {
   const id = useId();
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [labelType, setLabelType] = useState<Tag[]>([]);
   const {
     register,
     handleSubmit,
@@ -61,10 +74,12 @@ export default function EditComponentDialog({
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      name: "",
-      number: "",
-      specification_details: "",
+      componentNumber: "",
+      componentDescription: "",
       image: null,
+      labelType: [],
+      dimensions: "",
+      componentType: "",
     },
   });
   const { mutate: updateComponent, isPending } = useUpdateProductTabData();
@@ -73,11 +88,19 @@ export default function EditComponentDialog({
   useEffect(() => {
     if (component && open) {
       reset({
-        name: component.name,
-        number: component.number,
-        specification_details: component.specification_details,
+        componentNumber: component.component_number,
+        componentDescription: component.component_description,
         image: null,
+        labelType: [], // This will be handled by the state
+        dimensions: component.dimensions || "",
+        componentType: component.component_type || "",
       });
+      setLabelType(
+        (component.label_type || []).map((text, index) => ({
+          id: index.toString(),
+          text,
+        }))
+      );
     }
   }, [component, open, reset]);
 
@@ -103,10 +126,15 @@ export default function EditComponentDialog({
         tab: "label-components",
         data: {
           id: component._id,
-          name: data.name,
-          number: data.number,
+          component_number: data.componentNumber,
           image: utRes?.[0]?.ufsUrl || component.image,
-          specification_details: data.specification_details,
+          component_description: data.componentDescription,
+          label_type: (Array.isArray(labelType)
+            ? labelType
+            : JSON.parse(labelType || "[]")
+          ).map((tag: Tag) => tag.text),
+          dimensions: data.dimensions,
+          component_type: data.componentType,
         },
       };
 
@@ -161,20 +189,6 @@ export default function EditComponentDialog({
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-component-name`}>Component Name</Label>
-                <Input
-                  id={`${id}-component-name`}
-                  placeholder="Enter component name"
-                  type="text"
-                  {...register("name", {
-                    required: "Component name is required",
-                  })}
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor={`${id}-component-number`}>
                   Component Number
                 </Label>
@@ -182,7 +196,33 @@ export default function EditComponentDialog({
                   id={`${id}-component-number`}
                   placeholder="Enter component number"
                   type="text"
-                  {...register("number")}
+                  {...register("componentNumber", {
+                    required: "Component number is required",
+                  })}
+                />
+                {errors.componentNumber && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentNumber.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-component-type`}>Component Type</Label>
+                <Controller
+                  name="componentType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select component type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Preprinted">Preprinted</SelectItem>
+                        <SelectItem value="Blank">Blank</SelectItem>
+                        <SelectItem value="N/A">N/A</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
             </div>
@@ -191,14 +231,34 @@ export default function EditComponentDialog({
           <div className="px-6 pt-4 pb-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-specification_details`}>
-                  specification_details
-                </Label>
+                <Label htmlFor={`${id}-description`}>Description</Label>
                 <Textarea
-                  id={`${id}-specification_details`}
+                  id={`${id}-description`}
                   placeholder="Describe the component's purpose and specifications"
-                  {...register("specification_details")}
+                  {...register("componentDescription")}
                   className="min-h-[100px] resize-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-dimensions`}>Dimensions</Label>
+                <Input
+                  id={`${id}-dimensions`}
+                  placeholder="Enter dimensions"
+                  type="text"
+                  {...register("dimensions")}
+                />
+              </div>
+              <div className="space-y-2">
+                <TagInput
+                  label="Label Type"
+                  tags={labelType}
+                  setTags={setLabelType}
+                  placeholder="Add label type and press Enter"
+                />
+                <input
+                  type="hidden"
+                  {...register("labelType")}
+                  value={JSON.stringify(labelType)}
                 />
               </div>
             </div>

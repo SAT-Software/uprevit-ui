@@ -11,10 +11,12 @@ import {
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 type ComponentItem = {
   _id: string;
-  name: string;
-  specification_details: string;
-  number: string;
+  component_number: string;
+  component_description: string;
   image: string;
+  label_type: string[];
+  dimensions: string;
+  component_type: string;
 };
 
 export default function DeleteComponentDialog({
