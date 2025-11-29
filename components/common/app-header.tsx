@@ -27,6 +27,7 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { Product } from "@/types/product";
 
@@ -91,6 +92,7 @@ const pathData = [
 export function AppHeader() {
   const pathname = usePathname();
   const params = useParams();
+  const { mutate: updateProduct } = useUpdateProduct();
 
   const productId =
     typeof params.productId === "string"
@@ -107,7 +109,18 @@ export function AppHeader() {
     ? data?.result.products?.find((p: Product) => p._id === productId)
     : null;
 
-  const isProductComplete = currentProduct?.status === "Submitted";
+  const isProductComplete = currentProduct?.complete_count === 100;
+
+  const handleSubmit = () => {
+    if (!currentProduct?._id) return;
+    updateProduct({
+      _id: currentProduct._id,
+      action: "update-status",
+      data: {
+        status: "submitted",
+      },
+    });
+  };
 
   // if (isProductPage) return null;
 
@@ -148,6 +161,7 @@ export function AppHeader() {
                   <Button
                     size="sm"
                     disabled={!isProductComplete}
+                    onClick={handleSubmit}
                     className={cn(
                       !isProductComplete && "opacity-50 cursor-not-allowed"
                     )}

@@ -136,15 +136,24 @@ export function ProductHeader() {
       "label-tags": "label-tags",
     };
 
-    const backendTabName = tabMapping[currentTab];
+    const actionMapping: Record<string, string> = {
+      "product-information": "update_product_information_completion",
+      "compliance-information": "update_compliance_tab_completion",
+      "label-components": "update_label_component_tab_completion",
+      "symbols-graphics": "update_symbols_graphics_tab_completion",
+      "product-data": "update_product_data_tab_completion",
+      "operational-parameters": "update_operational_parameters_tab_completion",
+      "label-tags": "update_label_tags_tab_completion",
+    };
 
-    console.log("tab completion", backendTabName, isCurrentTabCompleted);
+    const backendTabName = tabMapping[currentTab];
+    const actionName = actionMapping[currentTab];
 
     if (backendTabName) {
       updateProductTabData(
         {
           id: productId,
-          action: "update_product_information_completion",
+          action: actionName,
           tab: backendTabName,
           data: {
             tab_completed: !isCurrentTabCompleted,
@@ -166,13 +175,6 @@ export function ProductHeader() {
         },
       });
     }
-
-    console.log(
-      `Tab "${currentTab}" ${
-        isCurrentTabCompleted ? "uncompleted" : "completed"
-      } for product ${productId}`
-    );
-    console.log(`New completion percentage: ${newCompletionPercentage}%`);
   };
 
   return (
