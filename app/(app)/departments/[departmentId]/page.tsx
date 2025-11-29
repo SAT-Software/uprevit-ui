@@ -1,6 +1,6 @@
 "use client";
 
-import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
+import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
@@ -12,12 +12,12 @@ import {
   PiTextAlignJustifyDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
-import DepartmentPageProjectsTable from "@/features/departments/DepartmentPageProjectsTable";
-import DialogShareDepartment from "@/features/departments/DialogShareDepartment";
+import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
+import DialogShareDepartment from "@/features/workspace/departments/DialogShareDepartment";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
-import DialogUpdateDepartment from "@/features/departments/DialogUpdateDepartment";
+import DialogUpdateDepartment from "@/features/workspace/departments/DialogUpdateDepartment";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,

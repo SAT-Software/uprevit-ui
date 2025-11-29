@@ -1,7 +1,7 @@
 "use client";
 
-import DepartmentsCard from "@/features/departments/DepartmentsCard";
-import DialogAddDepartment from "@/features/departments/DialogAddDepartment";
+import DepartmentsCard from "@/features/workspace/departments/DepartmentsCard";
+import DialogAddDepartment from "@/features/workspace/departments/DialogAddDepartment";
 
 function DepartmentsPage() {
   return (

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import UploadSourceFiles from "@/features/source-files/UploadSourceFiles";
+import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFiles";
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
 import { SourceFilesFolder } from "@/types/source-files";
 import { uploadFiles } from "@/utils/uploadthing";

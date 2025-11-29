@@ -1,31 +1,31 @@
 "use client";
 
 import React, { useState } from "react";
-import { PiArchiveDuotone, PiStackPlusDuotone } from "react-icons/pi";
+import { PiArchiveDuotone, PiCirclesThreePlusDuotone } from "react-icons/pi";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
-  ArchivedProductsTable,
-  ProductArchiveRow,
-} from "@/features/archive/products/ArchivedProductsTable";
-import { RestoreEntityDialog } from "@/features/archive/RestoreEntityDialog";
-import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
-import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
+  ArchivedDepartmentsTable,
+  DepartmentArchiveRow,
+} from "@/features/workspace/archive/departments/ArchivedDepartmentsTable";
+import { RestoreEntityDialog } from "@/features/workspace/archive/RestoreEntityDialog";
+import { useGetArchivedDepartments } from "@/hooks/archive/useGetArchivedDepartments";
+import { useRestoreDepartment } from "@/hooks/department/useRestoreDepartment";
 
-export type ArchivedProductsProps = {
-  onRowClick?: (row: ProductArchiveRow) => void;
+export type ArchivedDepartmentsProps = {
+  onRowClick?: (row: DepartmentArchiveRow) => void;
 };
 
-export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
-  const { data: archivedProducts } = useGetArchivedProducts();
-  const { mutate: updateProductStatus, isPending } = useUpdateProduct();
+export function ArchivedDepartments({ onRowClick }: ArchivedDepartmentsProps) {
+  const { data: archivedDepartments } = useGetArchivedDepartments();
+  const restoreDepartment = useRestoreDepartment();
 
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [selectedItemToRestore, setSelectedItemToRestore] =
-    useState<ProductArchiveRow | null>(null);
+    useState<DepartmentArchiveRow | null>(null);
 
-  const handleRestoreClick = (row: ProductArchiveRow) => {
+  const handleRestoreClick = (row: DepartmentArchiveRow) => {
     setSelectedItemToRestore(row);
     setRestoreDialogOpen(true);
   };
@@ -33,22 +33,14 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
   const handleConfirmRestore = () => {
     if (!selectedItemToRestore) return;
 
-    updateProductStatus(
-      {
-        _id: selectedItemToRestore._id,
-        action: "update-status",
-        data: {
-          status: "draft",
-        },
-      },
-      {
-        onSuccess: () => setRestoreDialogOpen(false),
-        onError: () => setRestoreDialogOpen(false),
-      }
-    );
+    restoreDepartment.mutate(selectedItemToRestore._id, {
+      onSuccess: () => setRestoreDialogOpen(false),
+      onError: () => setRestoreDialogOpen(false),
+    });
   };
 
-  const items: ProductArchiveRow[] = archivedProducts?.result?.products ?? [];
+  const items: DepartmentArchiveRow[] =
+    archivedDepartments?.result?.departments ?? [];
 
   return (
     <>
@@ -60,21 +52,23 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
             </div>
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold">Archived Products</h2>
+                <h2 className="text-base font-semibold">
+                  Archived Departments
+                </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                Manage and restore archived products when needed.
+                These departments are hidden from active views until restored.
               </p>
             </div>
           </div>
-          <PiStackPlusDuotone
+          <PiCirclesThreePlusDuotone
             className="size-5 opacity-70"
             aria-hidden="true"
           />
         </div>
         <Separator />
         <div className="p-5">
-          <ArchivedProductsTable
+          <ArchivedDepartmentsTable
             data={items}
             onRowClick={onRowClick}
             onRestore={handleRestoreClick}
@@ -85,12 +79,12 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
       <RestoreEntityDialog
         open={restoreDialogOpen}
         onOpenChange={setRestoreDialogOpen}
-        entityName={selectedItemToRestore?.product_name || ""}
+        entityName={selectedItemToRestore?.department_name || ""}
         onConfirm={handleConfirmRestore}
-        isPending={isPending}
+        isPending={restoreDepartment.isPending}
       />
     </>
   );
 }
 
-export default ArchivedProducts;
+export default ArchivedDepartments;

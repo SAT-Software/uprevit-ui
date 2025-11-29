@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import DashboardProductsTable from "@/features/dashboard/DashboardProductsTable";
-import DashboardDepartmentsCard from "@/features/dashboard/DashboardDepartmentsCard";
-import DashboardProjectsCard from "@/features/dashboard/DashboardProjectsCard";
-import { StatsGrid } from "@/features/dashboard/StatsGrid";
+import DashboardProductsTable from "@/features/workspace/dashboard/DashboardProductsTable";
+import DashboardDepartmentsCard from "@/features/workspace/dashboard/DashboardDepartmentsCard";
+import DashboardProjectsCard from "@/features/workspace/dashboard/DashboardProjectsCard";
+import { StatsGrid } from "@/features/workspace/dashboard/StatsGrid";
 import Link from "next/link";
 
 function DashboardPage() {

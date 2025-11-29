@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import OperationalParametersDataGridRef, {
   OperationalParametersDataGridRefRef,
-} from "@/features/products/product/operational-parameters/OperationalParametersDataGrid";
+} from "@/features/workspace/products/product/operational-parameters/OperationalParametersDataGrid";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { Save } from "lucide-react";

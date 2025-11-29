@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import ProductDataGrid, {
   ProductDataGridRef,
-} from "@/features/products/product/product-data/ProductDataGrid";
+} from "@/features/workspace/products/product/product-data/ProductDataGrid";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { Save } from "lucide-react";

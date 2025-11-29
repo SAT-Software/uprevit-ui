@@ -3,9 +3,9 @@
 import { useAuth } from "react-oidc-context";
 
 import { BookmarkIcon } from "lucide-react";
-import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
+import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
-import SourceFilesFoldersCard from "@/features/source-files/SourceFilesFoldersCard";
+import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { SourceFilesFolder } from "@/types/source-files";
 

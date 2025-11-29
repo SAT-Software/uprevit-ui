@@ -8,8 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import {
   ArchivedProjectsTable,
   ProjectArchiveRow,
-} from "@/features/archive/projects/ArchivedProjectsTable";
-import { RestoreEntityDialog } from "@/features/archive/RestoreEntityDialog";
+} from "@/features/workspace/archive/projects/ArchivedProjectsTable";
+import { RestoreEntityDialog } from "@/features/workspace/archive/RestoreEntityDialog";
 import { useGetArchivedProjects } from "@/hooks/archive/useGetArchivedProjects";
 import { useRestoreProject } from "@/hooks/project/useRestoreProject";
 

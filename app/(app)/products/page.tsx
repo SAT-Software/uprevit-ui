@@ -1,7 +1,7 @@
 "use client";
 
-import ProductsPageProductTable from "@/features/products/ProductsPageProductTable";
-import CreateProductDialog from "@/features/products/CreateProductDialog";
+import ProductsPageProductTable from "@/features/workspace/products/ProductsPageProductTable";
+import CreateProductDialog from "@/features/workspace/products/CreateProductDialog";
 
 function ProductsPage() {
   return (

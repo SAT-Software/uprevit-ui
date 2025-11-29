@@ -2,13 +2,13 @@
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SymbolsGraphicsPageBarcodesTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageBarcodesTable";
-import SymbolsGraphicsPageSchematicsTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageSchematicsTable";
-import SymbolsGraphicsPageSymbolsTable from "@/features/products/product/graphics-other-components/SymbolsGraphicsPageSymbolsTable";
-import AddSymbolsDialog from "@/features/products/product/graphics-other-components/AddSymbolsDialog";
-import AddSchematicsDialog from "@/features/products/product/graphics-other-components/AddSchematicsDialog";
-import AddBarcodesDialog from "@/features/products/product/graphics-other-components/AddBarcodesDialog";
-import AddOtherCompsDialog from "@/features/products/product/graphics-other-components/AddOtherCompsDialog";
+import SymbolsGraphicsPageBarcodesTable from "@/features/workspace/products/product/graphics-other-components/SymbolsGraphicsPageBarcodesTable";
+import SymbolsGraphicsPageSchematicsTable from "@/features/workspace/products/product/graphics-other-components/SymbolsGraphicsPageSchematicsTable";
+import SymbolsGraphicsPageSymbolsTable from "@/features/workspace/products/product/graphics-other-components/SymbolsGraphicsPageSymbolsTable";
+import AddSymbolsDialog from "@/features/workspace/products/product/graphics-other-components/AddSymbolsDialog";
+import AddSchematicsDialog from "@/features/workspace/products/product/graphics-other-components/AddSchematicsDialog";
+import AddBarcodesDialog from "@/features/workspace/products/product/graphics-other-components/AddBarcodesDialog";
+import AddOtherCompsDialog from "@/features/workspace/products/product/graphics-other-components/AddOtherCompsDialog";
 import {
   BarcodeIcon,
   BoxIcon,

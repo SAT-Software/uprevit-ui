@@ -1,6 +1,6 @@
 "use client";
 
-import SchematicsSymbolsTabs from "@/features/products/product/graphics-other-components/SchematicsSymbolsTabs";
+import SchematicsSymbolsTabs from "@/features/workspace/products/product/graphics-other-components/SchematicsSymbolsTabs";
 import { useParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
