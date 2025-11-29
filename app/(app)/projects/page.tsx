@@ -1,8 +1,8 @@
 "use client";
 
-import ProjectsCard from "@/features/projects/ProjectsCard";
+import ProjectsCard from "@/features/workspace/projects/ProjectsCard";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
-import DialogCreateProject from "@/features/projects/DialogCreateProject";
+import DialogCreateProject from "@/features/workspace/projects/DialogCreateProject";
 
 function ProjectsPage() {
   const { data, isLoading } = useGetAllProjects();

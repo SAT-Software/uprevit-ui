@@ -3,7 +3,7 @@
 import { BookmarkIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import DialogCreateFolder from "@/features/bookmarks/DialogCreateFolder";
+import DialogCreateFolder from "@/features/workspace/bookmarks/DialogCreateFolder";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
 
 interface BookmarkFolder {

@@ -1,6 +1,6 @@
 "use client";
 
-import LabelTagsTabs from "@/features/products/product/label-tags/labelTagsTabs";
+import LabelTagsTabs from "@/features/workspace/products/product/label-tags/labelTagsTabs";
 
 export default function Page() {
   return (

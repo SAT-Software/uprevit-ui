@@ -1,11 +1,11 @@
 "use client";
 
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import DialogArchiveEntity from "@/features/archive/DialogArchiveEntity";
-import { Item } from "@/features/products/ProductsPageProductTable";
-import DialogUpdateProject from "@/features/projects/DialogUpdateProject";
-import DialogShareProject from "@/features/projects/DialogShareProject";
-import ProjectPageProductsTable from "@/features/projects/ProjectPageProductsTable";
+import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
+import { Item } from "@/features/workspace/products/ProductsPageProductTable";
+import DialogUpdateProject from "@/features/workspace/projects/DialogUpdateProject";
+import DialogShareProject from "@/features/workspace/projects/DialogShareProject";
+import ProjectPageProductsTable from "@/features/workspace/projects/ProjectPageProductsTable";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import { AuditLog } from "@/types/audit-log";

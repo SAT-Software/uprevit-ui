@@ -1,9 +1,9 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import ProductInformationCard from "@/features/products/product/product-information/ProductInfoCard";
-import ProductInformationCustomFieldEditDialog from "@/features/products/product/product-information/ProductInfoCustomFieldEditDialog";
-import EditProductDialog from "@/features/products/product/product-information/ProductInfoEditProductDialog";
+import ProductInformationCard from "@/features/workspace/products/product/product-information/ProductInfoCard";
+import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
+import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { CalendarDays, User } from "lucide-react";
 import { notFound, useParams } from "next/navigation";

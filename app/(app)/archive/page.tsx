@@ -2,9 +2,9 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ArchivedDepartments from "@/features/archive/departments/ArchivedDepartments";
-import ArchivedProjects from "@/features/archive/projects/ArchivedProjects";
-import ArchivedProducts from "@/features/archive/products/ArchivedProducts";
+import ArchivedDepartments from "@/features/workspace/archive/departments/ArchivedDepartments";
+import ArchivedProjects from "@/features/workspace/archive/projects/ArchivedProjects";
+import ArchivedProducts from "@/features/workspace/archive/products/ArchivedProducts";
 
 function ArchivePage() {
   return (

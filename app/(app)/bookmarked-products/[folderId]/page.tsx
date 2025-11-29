@@ -3,10 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { FolderIcon } from "lucide-react";
-import DialogAddProductsToFolder from "@/features/bookmarks/DialogAddProductsToFolder";
-import DialogEditBookmarkFolder from "@/features/bookmarks/DialogEditBookmarkFolder";
-import DialogDeleteBookmarkFolder from "@/features/bookmarks/DialogDeleteBookmarkFolder";
-import DialogRemoveProductBookmark from "@/features/bookmarks/DialogRemoveProductBookmark";
+import DialogAddProductsToFolder from "@/features/workspace/bookmarks/DialogAddProductsToFolder";
+import DialogEditBookmarkFolder from "@/features/workspace/bookmarks/DialogEditBookmarkFolder";
+import DialogDeleteBookmarkFolder from "@/features/workspace/bookmarks/DialogDeleteBookmarkFolder";
+import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
 import { useGetProductsInABookmarkFolder } from "@/hooks/bookmark/useGetProductsInABookmarkFolder";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";

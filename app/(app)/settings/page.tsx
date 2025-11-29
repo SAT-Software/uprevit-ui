@@ -1,13 +1,13 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SecurityTab from "@/features/settings/SecurityTab";
-import ProfileTab from "@/features/settings/ProfileTab";
-import WorkspaceTab from "@/features/settings/WorkspaceTab";
-import BillingTab from "@/features/settings/BillingTab";
-import AdminsTab from "@/features/settings/AdminsTab";
-import { InviteMembersDialog } from "@/features/settings/InviteMembersDialog";
-import UsersTab from "@/features/settings/UsersTab";
+import SecurityTab from "@/features/workspace/settings/SecurityTab";
+import ProfileTab from "@/features/workspace/settings/ProfileTab";
+import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
+import BillingTab from "@/features/workspace/settings/BillingTab";
+import AdminsTab from "@/features/workspace/settings/AdminsTab";
+import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
+import UsersTab from "@/features/workspace/settings/UsersTab";
 
 function SettingsPage() {
   return (

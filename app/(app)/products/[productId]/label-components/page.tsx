@@ -1,7 +1,7 @@
 "use client";
 
-import ProductComponentDetailsTable from "@/features/products/product/component-details/ProductComponentDetailsTable";
-import AddComponentDialog from "@/features/products/product/component-details/AddComponentDialog";
+import ProductComponentDetailsTable from "@/features/workspace/products/product/component-details/ProductComponentDetailsTable";
+import AddComponentDialog from "@/features/workspace/products/product/component-details/AddComponentDialog";
 import { useParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 

@@ -1,5 +1,5 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { ProductHeader } from "@/features/products/product/ProductHeader";
+import { ProductHeader } from "@/features/workspace/products/product/ProductHeader";
 
 export default function ProductLayout({
   children,

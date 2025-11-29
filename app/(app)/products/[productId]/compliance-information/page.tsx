@@ -1,11 +1,11 @@
 "use client";
 
-import AddStandardDialog from "@/features/products/product/compliance-information/AddStandardDialog";
+import AddStandardDialog from "@/features/workspace/products/product/compliance-information/AddStandardDialog";
 import { useParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { PiCheckCircleDuotone } from "react-icons/pi";
-import EditStandardDialog from "@/features/products/product/compliance-information/EditStandardDialog";
-import DeleteStandardDialog from "@/features/products/product/compliance-information/DeleteStandardDialog";
+import EditStandardDialog from "@/features/workspace/products/product/compliance-information/EditStandardDialog";
+import DeleteStandardDialog from "@/features/workspace/products/product/compliance-information/DeleteStandardDialog";
 
 interface ComplianceItem {
   _id: string;

@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import DialogAddProductFolder from "@/features/source-files/DialogAddProductFolder";
-import DialogDeleteSourceFilesFolder from "@/features/source-files/DialogDeleteSourceFilesFolder";
-import DialogEditSourceFilesFolder from "@/features/source-files/DialogEditSourceFilesFolder";
-import DialogUploadSourceFiles from "@/features/source-files/DialogUploadSourceFiles";
-import SourceFilesFoldersCard from "@/features/source-files/SourceFilesFoldersCard";
+import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
+import DialogDeleteSourceFilesFolder from "@/features/workspace/source-files/DialogDeleteSourceFilesFolder";
+import DialogEditSourceFilesFolder from "@/features/workspace/source-files/DialogEditSourceFilesFolder";
+import DialogUploadSourceFiles from "@/features/workspace/source-files/DialogUploadSourceFiles";
+import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
 import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
