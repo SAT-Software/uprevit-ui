@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,7 +14,10 @@ import { CheckCircle, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { useQueryClient } from "@tanstack/react-query";
 import { Product } from "@/types/product";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 
 export type Item = {
   productId: string;
@@ -39,8 +44,10 @@ export function ProductHeader() {
   const params = useParams();
   const pathname = usePathname();
   const { data: productsData } = useGetAllProducts();
+  const { mutate: updateProductTabData } = useUpdateProductTabData();
+  const { mutate: updateProduct } = useUpdateProduct();
+  const queryClient = useQueryClient();
 
-  // Get current tab from pathname
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
     return pathSegments[pathSegments.length - 1];
@@ -49,13 +56,33 @@ export function ProductHeader() {
   const currentTab = getCurrentTab();
   const productId = params.productId as string;
 
-  // Get current product directly from the API data
   const foundProduct =
     productId && productsData?.result.products
       ? productsData.result.products.find((p: Product) => p._id === productId)
       : null;
 
-  // Map the real API product to our local Item type for compatibility
+  const [tabsCompleted, setTabsCompleted] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (foundProduct) {
+      const completed: string[] = [];
+      if (foundProduct.product_information?.tab_completed)
+        completed.push("product-information");
+      if (foundProduct.compliance_information?.tab_completed)
+        completed.push("compliance-information");
+      if (foundProduct.label_components?.tab_completed)
+        completed.push("label-components");
+      if (foundProduct.symbols_graphics?.tab_completed)
+        completed.push("symbols-graphics");
+      if (foundProduct.product_data?.tab_completed)
+        completed.push("product-data");
+      if (foundProduct.operational_parameters?.tab_completed)
+        completed.push("operational-parameters");
+      if (foundProduct.label_tags?.tab_completed) completed.push("label-tags");
+      setTabsCompleted(completed);
+    }
+  }, [foundProduct]);
+
   const product: Item | null = foundProduct
     ? {
         productId: foundProduct._id || "",
@@ -74,17 +101,13 @@ export function ProductHeader() {
         targetDate: foundProduct.target_date || "N/A",
         completionDate: foundProduct.target_date || "N/A",
         delayReason: null,
-        tabsCompleted: [], // This would need to be calculated from the actual product data
-        completionPercentage: 0, // This would need to be calculated from the actual product data
+        tabsCompleted: tabsCompleted,
+        completionPercentage: Math.round(
+          (tabsCompleted.length / TOTAL_TABS) * 100
+        ),
       }
     : null;
-
-  // Use stored completion percentage, fallback to calculation if not available
-  const completionPercentage =
-    product?.completionPercentage ??
-    (product
-      ? Math.round((product.tabsCompleted.length / TOTAL_TABS) * 100)
-      : 0);
+  const completionPercentage = product?.completionPercentage ?? 0;
 
   const isCurrentTabCompleted =
     product && currentTab ? product.tabsCompleted.includes(currentTab) : false;
@@ -92,17 +115,58 @@ export function ProductHeader() {
   const handleToggleTab = () => {
     if (!currentTab || !product) return;
 
-    // Create updated product with toggled tab completion
     const updatedTabsCompleted = isCurrentTabCompleted
-      ? product.tabsCompleted.filter((tab) => tab !== currentTab)
-      : [...product.tabsCompleted, currentTab];
+      ? tabsCompleted.filter((tab: string) => tab !== currentTab)
+      : [...tabsCompleted, currentTab];
+
+    setTabsCompleted(updatedTabsCompleted);
 
     const newCompletionPercentage = Math.round(
       (updatedTabsCompleted.length / TOTAL_TABS) * 100
     );
 
-    // Here you would typically also update the data source (API call, etc.)
-    // For now, we'll just update local state
+    // Map URL tab to backend tab name
+    const tabMapping: Record<string, string> = {
+      "product-information": "product-information",
+      "compliance-information": "compliance-information",
+      "label-components": "label-components",
+      "symbols-graphics": "symbols-graphics",
+      "product-data": "product-data",
+      "operational-parameters": "operational-parameters",
+      "label-tags": "label-tags",
+    };
+
+    const backendTabName = tabMapping[currentTab];
+
+    console.log("tab completion", backendTabName, isCurrentTabCompleted);
+
+    if (backendTabName) {
+      updateProductTabData(
+        {
+          id: productId,
+          action: "update_product_information_completion",
+          tab: backendTabName,
+          data: {
+            tab_completed: !isCurrentTabCompleted,
+          },
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["all-products"] });
+          },
+        }
+      );
+
+      updateProduct({
+        _id: productId,
+        action: "update-product",
+        data: {
+          _id: productId,
+          complete_count: newCompletionPercentage,
+        },
+      });
+    }
+
     console.log(
       `Tab "${currentTab}" ${
         isCurrentTabCompleted ? "uncompleted" : "completed"

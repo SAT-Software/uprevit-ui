@@ -13,7 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Product } from "@/types/product";
-import { useUpdateProduct } from "@/hooks/product/useUpdateproduct";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 
 type ArchiveProductProps = Pick<Product, "_id">;
 
