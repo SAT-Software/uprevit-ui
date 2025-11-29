@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Item } from "./ProductsPageProductTable";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { useUpdateProduct } from "@/hooks/product/useUpdateproduct";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { Product } from "@/types/product";
 
 export default function UpdateProductDialog({

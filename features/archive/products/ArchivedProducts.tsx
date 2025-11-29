@@ -11,7 +11,7 @@ import {
 } from "@/features/archive/products/ArchivedProductsTable";
 import { RestoreEntityDialog } from "@/features/archive/RestoreEntityDialog";
 import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
-import { useUpdateProduct } from "@/hooks/product/useUpdateproduct";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 
 export type ArchivedProductsProps = {
   onRowClick?: (row: ProductArchiveRow) => void;

@@ -21,15 +21,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput, Tag } from "@/components/ui/tag-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { uploadFiles } from "@/utils/uploadthing";
 
 type FormData = {
-  componentName: string;
   componentNumber: string;
-  description: string;
+  componentDescription: string;
   image: FileWithPreview | null;
+  labelType: Tag[];
+  dimensions: string;
+  componentType: string;
 };
 
 export default function AddComponentDialog({
@@ -40,6 +50,7 @@ export default function AddComponentDialog({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [labelType, setLabelType] = useState<Tag[]>([]);
   const {
     register,
     handleSubmit,
@@ -50,6 +61,9 @@ export default function AddComponentDialog({
   } = useForm<FormData>({
     defaultValues: {
       image: null,
+      labelType: [],
+      dimensions: "",
+      componentType: "",
     },
   });
   const { mutate: addComponent, isPending } = useUpdateProductTabData();
@@ -75,10 +89,15 @@ export default function AddComponentDialog({
         tab: "label-components",
         data: [
           {
-            name: data.componentName,
-            number: data.componentNumber,
+            component_number: data.componentNumber,
             image: utRes?.[0]?.ufsUrl || null,
-            specification_details: data.description,
+            component_description: data.componentDescription,
+            label_type: (Array.isArray(labelType)
+              ? labelType
+              : JSON.parse(labelType || "[]")
+            ).map((tag: Tag) => tag.text),
+            dimensions: data.dimensions,
+            component_type: data.componentType,
           },
         ],
       };
@@ -87,10 +106,12 @@ export default function AddComponentDialog({
         onSuccess: () => {
           setOpen(false);
           reset();
+          setLabelType([]);
         },
         onError: () => {
           setOpen(false);
           reset();
+          setLabelType([]);
         },
       });
     } catch (error) {
@@ -138,22 +159,6 @@ export default function AddComponentDialog({
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-component-name`}>Component Name</Label>
-                <Input
-                  id={`${id}-component-name`}
-                  placeholder="Enter component name"
-                  type="text"
-                  {...register("componentName", {
-                    required: "Component name is required",
-                  })}
-                />
-                {errors.componentName && (
-                  <p className="text-xs text-red-500">
-                    {errors.componentName.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor={`${id}-component-number`}>
                   Component Number
                 </Label>
@@ -161,7 +166,33 @@ export default function AddComponentDialog({
                   id={`${id}-component-number`}
                   placeholder="Enter component number"
                   type="text"
-                  {...register("componentNumber")}
+                  {...register("componentNumber", {
+                    required: "Component number is required",
+                  })}
+                />
+                {errors.componentNumber && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentNumber.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-component-type`}>Component Type</Label>
+                <Controller
+                  name="componentType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select component type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Preprinted">Preprinted</SelectItem>
+                        <SelectItem value="Blank">Blank</SelectItem>
+                        <SelectItem value="N/A">N/A</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
             </div>
@@ -174,8 +205,30 @@ export default function AddComponentDialog({
                 <Textarea
                   id={`${id}-description`}
                   placeholder="Describe the component's purpose and specifications"
-                  {...register("description")}
+                  {...register("componentDescription")}
                   className="min-h-[100px] resize-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-dimensions`}>Dimensions</Label>
+                <Input
+                  id={`${id}-dimensions`}
+                  placeholder="Enter dimensions"
+                  type="text"
+                  {...register("dimensions")}
+                />
+              </div>
+              <div className="space-y-2">
+                <TagInput
+                  label="Label Type"
+                  tags={labelType}
+                  setTags={setLabelType}
+                  placeholder="Add label type and press Enter"
+                />
+                <input
+                  type="hidden"
+                  {...register("labelType")}
+                  value={JSON.stringify(labelType)}
                 />
               </div>
             </div>
@@ -183,7 +236,14 @@ export default function AddComponentDialog({
         </form>
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => reset()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset();
+                setLabelType([]);
+              }}
+            >
               Cancel
             </Button>
           </DialogClose>

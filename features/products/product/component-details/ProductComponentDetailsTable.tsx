@@ -22,6 +22,7 @@ import {
   EllipsisIcon,
   LayoutList,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Fragment, useId, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -62,10 +63,12 @@ import DeleteComponentDialog from "./DeleteComponentDialog";
 
 type ComponentItem = {
   _id: string;
-  name: string;
-  specification_details: string;
-  number: string;
+  component_number: string;
+  component_description: string;
   image: string;
+  label_type: string[];
+  dimensions: string;
+  component_type: string;
 };
 
 const columns: ColumnDef<ComponentItem>[] = [
@@ -80,8 +83,8 @@ const columns: ColumnDef<ComponentItem>[] = [
             onClick: row.getToggleExpandedHandler(),
             "aria-expanded": row.getIsExpanded(),
             "aria-label": row.getIsExpanded()
-              ? `Collapse details for ${row.original.name}`
-              : `Expand details for ${row.original.name}`,
+              ? `Collapse details for ${row.original.component_number}`
+              : `Expand details for ${row.original.component_number}`,
             size: "icon",
             variant: "ghost",
           }}
@@ -110,7 +113,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       row.original.image !== "" ? (
         <Image
           src={row.original.image}
-          alt={row.original.name}
+          alt={row.original.component_number}
           width={48}
           height={48}
           className="object-cover rounded-md border min-h-12"
@@ -122,31 +125,57 @@ const columns: ColumnDef<ComponentItem>[] = [
       ),
   },
   {
-    header: "Component Name",
-    accessorKey: "name",
-    enableSorting: true,
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
+    header: "Label Type",
+    accessorKey: "label_type",
+    cell: ({ row }) => {
+      const types = row.getValue("label_type") as string[];
+      return (
+        <div className="flex flex-wrap gap-1">
+          {types && types.length > 0 ? (
+            types.map((type, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {type}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-muted-foreground text-sm">-</span>
+          )}
+        </div>
+      );
+    },
   },
   {
     header: "Component #",
-    accessorKey: "number",
+    accessorKey: "component_number",
     enableSorting: true,
     cell: ({ row }) => (
       <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-        {row.getValue("number")}
+        {row.getValue("component_number")}
       </span>
     ),
   },
   {
-    header: "Specification details",
-    accessorKey: "specification_details",
+    header: "Description",
+    accessorKey: "component_description",
     enableSorting: true,
     cell: ({ row }) => (
       <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("specification_details")}
+        {row.getValue("component_description")}
       </div>
+    ),
+  },
+  {
+    header: "Dimensions",
+    accessorKey: "dimensions",
+    cell: ({ row }) => (
+      <div className="text-sm">{row.getValue("dimensions") || "-"}</div>
+    ),
+  },
+  {
+    header: "Component Type",
+    accessorKey: "component_type",
+    cell: ({ row }) => (
+      <div className="text-sm">{row.getValue("component_type") || "-"}</div>
     ),
   },
 
@@ -171,7 +200,7 @@ export default function ProductComponentDetailsTable({
   });
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: "name",
+      id: "component_number",
       desc: false,
     },
   ]);
@@ -179,7 +208,7 @@ export default function ProductComponentDetailsTable({
   const table = useReactTable({
     data,
     columns,
-    getRowCanExpand: (row) => Boolean(row.original.name),
+    getRowCanExpand: (row) => Boolean(row.original.component_description),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -289,7 +318,7 @@ export default function ProductComponentDetailsTable({
                           {row.original.image !== "" ? (
                             <Image
                               src={row.original.image}
-                              alt={row.original.name}
+                              alt={row.original.component_number}
                               width={200}
                               height={200}
                               className="rounded mb-3"
@@ -446,7 +475,8 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
 
   // Get productId from the current URL using usePathname
   const pathname = usePathname();
-  const getProductId = () => {
+  const getProductId = (): string => {
+    if (!pathname) return "";
     const match = pathname.match(/\/products\/([^\/]+)/);
     return match ? match[1] : "";
   };
