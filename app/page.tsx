@@ -70,14 +70,16 @@ const items = [
 
 export default function Home() {
   return (
-    <div className=" flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <MarketingHeader />
       <div className="relative w-full">
         <Ripple items={items} />
         <Hero />
       </div>
-      <HeroFeatureCards />
-      <DemoSection />
+      <div className="pointer-events-none max-w-7xl w-full mx-auto -mt-52">
+        <HeroFeatureCards />
+        <DemoSection />
+      </div>
     </div>
   );
 }

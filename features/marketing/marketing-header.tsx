@@ -84,7 +84,7 @@ export default function MarketingHeader() {
   }
 
   return (
-    <div className="fixed top-0 max-w-7xl w-full h-20 mx-auto flex items-center justify-between">
+    <div className="fixed top-0 max-w-7xl w-full h-20 mx-auto flex items-center justify-between z-55">
       <div>
         <Link
           href="/"
