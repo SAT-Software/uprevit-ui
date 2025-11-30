@@ -20,7 +20,7 @@ const items = [
         />
       </div>
     ),
-    speed: 30,
+    speed: 35,
   },
   {
     circleIndex: 1,
@@ -34,7 +34,7 @@ const items = [
         />
       </div>
     ),
-    speed: 25,
+    speed: 35,
     reverse: true,
   },
   {
@@ -49,22 +49,95 @@ const items = [
         />
       </div>
     ),
-    speed: 20,
+    speed: 35,
   },
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-8 w-36 border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
         <Image
-          src="/Barcode-graphic.webp"
+          src="/2D Barcode-graphic.png"
           alt="Barcode Graphic"
           fill
-          className="object-contain p-1"
+          className="object-contain p-3"
         />
       </div>
     ),
-    speed: 25,
+    speed: 35,
     reverse: true,
+  },
+  {
+    circleIndex: 0,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/FDA-logo.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+  },
+  {
+    circleIndex: 1,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/RX-symbol.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-3"
+        />
+      </div>
+    ),
+    speed: 35,
+  },
+  {
+    circleIndex: 2,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/UKCA-symbol.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-3"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+  },
+  {
+    circleIndex: 3,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/ISO-logo.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+  },
+  {
+    circleIndex: 4,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/UKCA-symbol.webp"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
   },
 ];
 
@@ -76,7 +149,7 @@ export default function Home() {
         <Ripple items={items} />
         <Hero />
       </div>
-      <div className="pointer-events-none max-w-7xl w-full mx-auto -mt-52">
+      <div className="pointer-events-none max-w-7xl w-full mx-auto -mt-60">
         <HeroFeatureCards />
         <DemoSection />
       </div>

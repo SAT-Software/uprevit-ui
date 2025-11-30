@@ -25,9 +25,11 @@ export default function Hero() {
             level. Built by compliance experts, designed for everyone.
           </p>
         </div>
-        <div className="mt-8 flex items-center gap-4">
-          <Button variant="outline">Learn More</Button>
-          <Button>Get Started</Button>
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <Button size="lg" variant="outline">
+            Learn More
+          </Button>
+          <Button size="lg">Get Started</Button>
         </div>
       </div>
     </div>
