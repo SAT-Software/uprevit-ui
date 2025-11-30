@@ -1,59 +1,168 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useAuth } from "react-oidc-context";
+import Hero from "@/features/marketing/landing-page/hero";
+import MarketingHeader from "@/features/marketing/marketing-header";
+import { Ripple } from "@/components/ui/ripple";
+import Image from "next/image";
+import DemoSection from "@/features/marketing/landing-page/DemoSection";
+import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
+
+const items = [
+  {
+    circleIndex: 0,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/CE-symbol.png"
+          alt="CE Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    initialAngle: 0,
+  },
+  {
+    circleIndex: 1,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/MD-symbol.png"
+          alt="MD Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+    initialAngle: 180,
+  },
+  {
+    circleIndex: 2,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/UDI-symbol.png"
+          alt="UDI Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    initialAngle: 90,
+  },
+  {
+    circleIndex: 3,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/2D Barcode-graphic.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-3"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+    initialAngle: 270,
+  },
+  {
+    circleIndex: 0,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/FDA-logo.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+    initialAngle: 180,
+  },
+  {
+    circleIndex: 1,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/RX-symbol.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-3"
+        />
+      </div>
+    ),
+    speed: 35,
+    initialAngle: 0,
+  },
+  {
+    circleIndex: 2,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/UKCA-symbol.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-3"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+    initialAngle: 270,
+  },
+  {
+    circleIndex: 3,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/ISO-logo.png"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    reverse: true,
+    initialAngle: 90,
+  },
+  {
+    circleIndex: 4,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+        <Image
+          src="/UKCA-symbol.webp"
+          alt="Barcode Graphic"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 35,
+    initialAngle: 45,
+  },
+];
 
 export default function Home() {
-  const auth = useAuth();
-  const router = useRouter();
-
-  const handleGetStarted = () => {
-    if (!auth.isLoading && auth.isAuthenticated) {
-      router.push("/dashboard");
-    } else {
-      auth.signinRedirect();
-    }
-  };
-
-  const signOutRedirect = () => {
-    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
-    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
-    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri
-    )}`;
-  };
-
-  if (auth.error) {
-    return <div>Encountering error... {auth.error.message}</div>;
-  }
-
   return (
-    <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-4 h-screen">
-      <h1 className="text-6xl font-bold text-center">
-        AI-Powered Labeling Documentation Platform for Medical Devices
-      </h1>
-      <p className="w-[60%] text-center">
-        Create, manage and track medical device labeling documentation with
-        ease. Collaborate seamlessly across teams and effortlessly track your
-        departments, projects and products - all in one place.
-      </p>
-      <div className="flex items-center gap-4">
-        <Button variant="default" className="w-fit" onClick={handleGetStarted}>
-          {auth.isAuthenticated ? "Go to Dashboard" : "Get Started"}
-        </Button>
-        {auth.isAuthenticated && (
-          <Button
-            onClick={async () => {
-              await auth.removeUser();
-              signOutRedirect();
-            }}
-            variant="destructive"
-          >
-            Sign Out
-          </Button>
-        )}
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="absolute top-200 left-80 w-px h-screen bg-accent" />
+      <div className="absolute top-200 right-80 w-px h-screen bg-accent" />
+      <MarketingHeader />
+      <div className="relative w-full">
+        <Ripple items={items} />
+        <Hero />
+      </div>
+      <div className="pointer-events-none max-w-7xl w-full mx-auto -mt-60">
+        <HeroFeatureCards />
+        <DemoSection />
       </div>
     </div>
   );

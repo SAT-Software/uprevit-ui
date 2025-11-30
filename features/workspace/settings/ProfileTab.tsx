@@ -4,10 +4,22 @@ import { useGetUser } from "@/hooks/user/useGetUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DialogUpdateProfile } from "./DialogUpdateProfile";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "react-oidc-context";
 
 function ProfileTab() {
+  const auth = useAuth();
   const { data, isLoading, error } = useGetUser();
   const userProfile = data?.user;
+
+  const signOutRedirect = () => {
+    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
+    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
+    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
+      logoutUri
+    )}`;
+  };
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -88,6 +100,17 @@ function ProfileTab() {
           </div>
         </div>
       </div>
+      {auth.isAuthenticated && (
+        <Button
+          onClick={async () => {
+            await auth.removeUser();
+            signOutRedirect();
+          }}
+          variant="destructive"
+        >
+          Sign Out
+        </Button>
+      )}
     </div>
   );
 }

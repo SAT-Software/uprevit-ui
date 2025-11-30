@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Geist, Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,8 +12,8 @@ import "@univerjs/presets/lib/styles/preset-sheets-core.css";
 import "@univerjs/presets/lib/styles/preset-sheets-table.css";
 import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
+      <body className={`${geist.variable} antialiased`}>
         <Providers>{children}</Providers>
         <Toaster />
       </body>
