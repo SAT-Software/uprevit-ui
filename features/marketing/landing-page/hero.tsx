@@ -1,8 +1,12 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export default function Hero() {
   return (
     <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-[calc(100vh)]">
+      {/* <Badge variant="secondary" className="mb-4">
+        For The Future
+      </Badge> */}
       <div className="flex flex-col items-center gap-4">
         <h1 className="text-6xl font-bold text-center">
           Master Your Labels:{" "}

@@ -4,6 +4,8 @@ import Hero from "@/features/marketing/landing-page/hero";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import { Ripple } from "@/components/ui/ripple";
 import Image from "next/image";
+import DemoSection from "@/features/marketing/landing-page/DemoSection";
+import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
 
 const items = [
   {
@@ -68,10 +70,14 @@ const items = [
 
 export default function Home() {
   return (
-    <div className="relative overflow-hidden flex flex-col items-center justify-center min-h-screen">
-      <Ripple items={items} />
+    <div className=" flex flex-col items-center justify-center min-h-screen">
       <MarketingHeader />
-      <Hero />
+      <div className="relative w-full">
+        <Ripple items={items} />
+        <Hero />
+      </div>
+      <HeroFeatureCards />
+      <DemoSection />
     </div>
   );
 }
