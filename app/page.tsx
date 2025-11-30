@@ -21,6 +21,7 @@ const items = [
       </div>
     ),
     speed: 35,
+    initialAngle: 0,
   },
   {
     circleIndex: 1,
@@ -36,6 +37,7 @@ const items = [
     ),
     speed: 35,
     reverse: true,
+    initialAngle: 180,
   },
   {
     circleIndex: 2,
@@ -50,6 +52,7 @@ const items = [
       </div>
     ),
     speed: 35,
+    initialAngle: 90,
   },
   {
     circleIndex: 3,
@@ -65,6 +68,7 @@ const items = [
     ),
     speed: 35,
     reverse: true,
+    initialAngle: 270,
   },
   {
     circleIndex: 0,
@@ -80,6 +84,7 @@ const items = [
     ),
     speed: 35,
     reverse: true,
+    initialAngle: 180,
   },
   {
     circleIndex: 1,
@@ -94,6 +99,7 @@ const items = [
       </div>
     ),
     speed: 35,
+    initialAngle: 0,
   },
   {
     circleIndex: 2,
@@ -109,6 +115,7 @@ const items = [
     ),
     speed: 35,
     reverse: true,
+    initialAngle: 270,
   },
   {
     circleIndex: 3,
@@ -124,6 +131,7 @@ const items = [
     ),
     speed: 35,
     reverse: true,
+    initialAngle: 90,
   },
   {
     circleIndex: 4,
@@ -138,12 +146,15 @@ const items = [
       </div>
     ),
     speed: 35,
+    initialAngle: 45,
   },
 ];
 
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="absolute top-200 left-80 w-px h-screen bg-accent" />
+      <div className="absolute top-200 right-80 w-px h-screen bg-accent" />
       <MarketingHeader />
       <div className="relative w-full">
         <Ripple items={items} />

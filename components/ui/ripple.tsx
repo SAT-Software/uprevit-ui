@@ -57,21 +57,23 @@ export const Ripple = React.memo(function Ripple({
             {circleItems.map((item, idx) => {
               const speed = item.speed || 20;
               const reverse = item.reverse;
-              const initialAngle = item.initialAngle || 0;
+              const initialAngle =
+                item.initialAngle !== undefined
+                  ? item.initialAngle
+                  : (360 / circleItems.length) * idx;
+
+              const delay = reverse
+                ? -1 * speed * (1 - initialAngle / 360)
+                : -1 * speed * (initialAngle / 360);
 
               return (
-                <div
-                  key={idx}
-                  className="absolute inset-0"
-                  style={{
-                    transform: `rotate(${initialAngle}deg)`,
-                  }}
-                >
+                <div key={idx} className="absolute inset-0">
                   <div
                     className={cn("absolute inset-0 animate-spin")}
                     style={{
                       animationDuration: `${speed}s`,
                       animationDirection: reverse ? "reverse" : "normal",
+                      animationDelay: `${delay}s`,
                     }}
                   >
                     <div
@@ -85,6 +87,7 @@ export const Ripple = React.memo(function Ripple({
                         style={{
                           animationDuration: `${speed}s`,
                           animationDirection: reverse ? "normal" : "reverse",
+                          animationDelay: `${delay}s`,
                         }}
                       >
                         {item.content}
