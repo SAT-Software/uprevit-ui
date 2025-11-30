@@ -84,7 +84,7 @@ export default function MarketingHeader() {
   }
 
   return (
-    <div className="max-w-7xl w-full h-20 mx-auto flex items-center justify-between">
+    <div className="fixed top-0 max-w-7xl w-full h-20 mx-auto flex items-center justify-between">
       <div>
         <Link
           href="/"
@@ -226,7 +226,7 @@ export default function MarketingHeader() {
             className="w-fit"
             onClick={handleGetStarted}
           >
-            {auth.isAuthenticated ? "Go to Dashboard" : "Get Started"}
+            {auth.isAuthenticated ? "Go to Dashboard" : "Sign Up"}
           </Button>
         </div>
       </div>
