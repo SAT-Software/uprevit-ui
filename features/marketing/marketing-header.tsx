@@ -131,7 +131,7 @@ export default function MarketingHeader() {
           <NavigationMenu viewport={isMobile}>
             <NavigationMenuList className="flex-wrap">
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Home</NavigationMenuTrigger>
+                <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="row-span-3">
@@ -167,7 +167,7 @@ export default function MarketingHeader() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+                <NavigationMenuTrigger>Pricing</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                     {components.map((component) => (
@@ -187,69 +187,25 @@ export default function MarketingHeader() {
                   asChild
                   className={navigationMenuTriggerStyle()}
                 >
-                  <Link href="/docs">Docs</Link>
+                  <Link href="/docs">Contact</Link>
                 </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem className="hidden md:block">
-                <NavigationMenuTrigger>List</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-4">
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link href="#">
-                          <div className="font-medium">Components</div>
-                          <div className="text-muted-foreground">
-                            Browse all components in the library.
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link href="#">
-                          <div className="font-medium">Documentation</div>
-                          <div className="text-muted-foreground">
-                            Learn how to use the library.
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link href="#">
-                          <div className="font-medium">Blog</div>
-                          <div className="text-muted-foreground">
-                            Read our latest blog posts.
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem className="hidden md:block">
-                <NavigationMenuTrigger>Simple</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[200px] gap-4">
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link href="#">Components</Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link href="#">Documentation</Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link href="#">Blocks</Link>
-                      </NavigationMenuLink>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
           <div className="flex items-center gap-4">
             <Button
+              variant="outline"
+              className="w-fit"
+              onClick={handleGetStarted}
+            >
+              {auth.isAuthenticated ? "Learn More" : "Log in"}
+            </Button>
+            <Button
               variant="default"
               className="w-fit"
               onClick={handleGetStarted}
             >
-              {auth.isAuthenticated ? "Go to Dashboard" : "Sign Up"}
+              {auth.isAuthenticated ? "Dashboard" : "Sign Up"}
             </Button>
           </div>
         </div>
