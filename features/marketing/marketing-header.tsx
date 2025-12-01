@@ -96,7 +96,7 @@ export default function MarketingHeader() {
   return (
     <div
       className={cn(
-        "fixed top-0 w-full h-18 mx-auto flex items-center justify-between z-50 transition-all delay-150 ease-in-out duration-300",
+        "fixed top-0 w-full h-18 mx-auto flex items-center justify-between z-60 transition-all delay-150 ease-in-out duration-300",
         !isAtTop ? "bg-accent/80 border-b" : "bg-transparent"
       )}
       style={{

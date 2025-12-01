@@ -6,6 +6,9 @@ import { Ripple } from "@/components/ui/ripple";
 import Image from "next/image";
 import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
 import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
+import DemoSection from "@/features/marketing/landing-page/DemoSection";
+import ReportSection from "@/features/marketing/landing-page/ReportSection";
+import FeaturesSection from "@/features/marketing/landing-page/FeaturesSection";
 
 const items = [
   {
@@ -152,18 +155,21 @@ const items = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="absolute top-210 left-80 w-px h-screen bg-linear-to-b from-accent/40 from-10% to-accent to-90% z-55" />
-      <div className="absolute top-210 right-80 w-px h-screen bg-linear-to-b from-accent/40 from-10% to-accent to-90% z-55" />
+    <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
       <div className="relative w-full">
         <Ripple items={items} />
         <HeroSection />
       </div>
-      <div className="pointer-events-none w-full mx-auto -mt-60">
+      <div className="pointer-events-none w-full mx-auto -mt-60 z-55">
         <HeroFeatureCards />
         <HeroFeatureDemo />
+        <DemoSection />
+        <ReportSection />
+        <FeaturesSection />
       </div>
+      <div className="absolute top-210 left-80 w-px bottom-0 bg-linear-to-b from-border/60 to-border/60 z-30" />
+      <div className="absolute top-210 right-80 w-px bottom-0 bg-linear-to-b from-border/60 to-border/60 z-30" />
     </div>
   );
 }

@@ -18,8 +18,8 @@ export default function HeroFeatureDemo() {
           </CardContent>
         </CardHeader>
       </Card>
-      <div className="absolute top-0 left-0 w-full h-px bg-accent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-accent" />
+      <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />
     </div>
   );
 }
