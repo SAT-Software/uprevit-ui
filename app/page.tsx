@@ -1,10 +1,10 @@
 "use client";
 
-import Hero from "@/features/marketing/landing-page/hero";
+import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import { Ripple } from "@/components/ui/ripple";
 import Image from "next/image";
-import DemoSection from "@/features/marketing/landing-page/DemoSection";
+import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
 import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
 
 const items = [
@@ -20,7 +20,7 @@ const items = [
         />
       </div>
     ),
-    speed: 35,
+    speed: 55,
     initialAngle: 0,
   },
   {
@@ -82,7 +82,7 @@ const items = [
         />
       </div>
     ),
-    speed: 35,
+    speed: 50,
     reverse: true,
     initialAngle: 180,
   },
@@ -138,7 +138,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
         <Image
-          src="/UKCA-symbol.webp"
+          src="/WEEE-symbol.webp"
           alt="Barcode Graphic"
           fill
           className="object-contain p-2"
@@ -153,16 +153,16 @@ const items = [
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="absolute top-200 left-80 w-px h-screen bg-accent" />
-      <div className="absolute top-200 right-80 w-px h-screen bg-accent" />
+      <div className="absolute top-210 left-80 w-px h-screen bg-linear-to-b from-accent/40 from-10% to-accent to-90% z-55" />
+      <div className="absolute top-210 right-80 w-px h-screen bg-linear-to-b from-accent/40 from-10% to-accent to-90% z-55" />
       <MarketingHeader />
       <div className="relative w-full">
         <Ripple items={items} />
-        <Hero />
+        <HeroSection />
       </div>
-      <div className="pointer-events-none max-w-7xl w-full mx-auto -mt-60">
+      <div className="pointer-events-none w-full mx-auto -mt-60">
         <HeroFeatureCards />
-        <DemoSection />
+        <HeroFeatureDemo />
       </div>
     </div>
   );

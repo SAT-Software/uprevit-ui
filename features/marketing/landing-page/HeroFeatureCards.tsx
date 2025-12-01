@@ -28,7 +28,7 @@ import {
 
 export default function HeroFeatureCards() {
   return (
-    <div className="grid group">
+    <div className="grid group max-w-7xl mx-auto w-full">
       <div className="col-start-1 row-start-1 transform-none">
         <div className="[--row-height:11.3px]">
           <div className="relative grid grid-cols-[repeat(118,1fr)] grid-rows-[repeat(12,var(--row-height))] gap-y-[19px]">
@@ -565,7 +565,7 @@ export default function HeroFeatureCards() {
                 style={{ transform: "translate(-50%, -50%)" }}
               ></div>
               <div
-                className="w-2 h-2 rounded-full border absolute bottom-0 left-px bg-muted"
+                className="w-2 h-2 rounded-full border absolute bottom-0 left-px bg-muted z-55"
                 style={{ transform: "translate(-50%, 50%)" }}
               ></div>
             </div>
