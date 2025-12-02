@@ -1,11 +1,17 @@
 "use client";
 
-import Hero from "@/features/marketing/landing-page/hero";
+import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import { Ripple } from "@/components/ui/ripple";
 import Image from "next/image";
-import DemoSection from "@/features/marketing/landing-page/DemoSection";
+import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
 import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
+import DemoSection from "@/features/marketing/landing-page/DemoSection";
+import ReportSection from "@/features/marketing/landing-page/ReportSection";
+import FeaturesSection from "@/features/marketing/landing-page/FeaturesSection";
+import FAQSection from "@/features/marketing/landing-page/FAQSection";
+import CTASection from "@/features/marketing/landing-page/CTASection";
+import FooterSection from "@/features/marketing/landing-page/FooterSection";
 
 const items = [
   {
@@ -20,7 +26,7 @@ const items = [
         />
       </div>
     ),
-    speed: 35,
+    speed: 55,
     initialAngle: 0,
   },
   {
@@ -82,7 +88,7 @@ const items = [
         />
       </div>
     ),
-    speed: 35,
+    speed: 50,
     reverse: true,
     initialAngle: 180,
   },
@@ -138,7 +144,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
         <Image
-          src="/UKCA-symbol.webp"
+          src="/WEEE-symbol.webp"
           alt="Barcode Graphic"
           fill
           className="object-contain p-2"
@@ -152,18 +158,32 @@ const items = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="absolute top-200 left-80 w-px h-screen bg-accent" />
-      <div className="absolute top-200 right-80 w-px h-screen bg-accent" />
+    <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
       <div className="relative w-full">
         <Ripple items={items} />
-        <Hero />
+        <HeroSection />
       </div>
-      <div className="pointer-events-none max-w-7xl w-full mx-auto -mt-60">
+      <div className="pointer-events-none w-full mx-auto -mt-60 z-55">
         <HeroFeatureCards />
+        <HeroFeatureDemo />
         <DemoSection />
+        <ReportSection />
+        <FeaturesSection />
+        <CTASection />
+        <FAQSection />
+        <FooterSection />
       </div>
+      <div className="absolute top-245 left-80 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+      <div className="absolute top-245 right-80 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+      <div className="absolute top-205 left-80 w-px h-10 bg-border/10 z-40" />
+      <div className="absolute top-205 right-80 w-px h-10 bg-border/10 z-40" />
+      <div className="absolute top-215 left-80 w-px h-10 bg-border/20 z-40" />
+      <div className="absolute top-215 right-80 w-px h-10 bg-border/20 z-40" />
+      <div className="absolute top-225 left-80 w-px h-10 bg-border/40 z-40" />
+      <div className="absolute top-225 right-80 w-px h-10 bg-border/40 z-40" />
+      <div className="absolute top-235 left-80 w-px h-10 bg-border/50 z-40" />
+      <div className="absolute top-235 right-80 w-px h-10 bg-border/50 z-40" />
     </div>
   );
 }

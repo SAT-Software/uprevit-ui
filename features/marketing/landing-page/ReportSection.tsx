@@ -8,21 +8,18 @@ import {
 } from "@/components/ui/card";
 import { PiImageDuotone } from "react-icons/pi";
 
-export default function DemoSection() {
+export default function ReportSection() {
   return (
     <div className="w-full mt-40 mb-20">
-      <div className="max-w-7xl mx-auto mb-8">
+      <div className="max-w-7xl flex flex-col items-center mx-auto mb-8">
         <Badge variant="white" className="mb-8 z-60">
           <PiImageDuotone className="mr-1 text-foreground/50" />
-          <span className="font-medium">Uprevit Demo</span>
+          <span className="font-medium">Report</span>
         </Badge>
-        <div className="w-full flex items-center justify-start text-2xl">
-          <h2 className="text-5xl w-1/2 font-medium">
-            The FastTrack way to Global labeling compliance
-          </h2>
-          <div className="mr-8 h-16 w-px bg-border" />
-          <p className="font-semibold text-muted-foreground/60">
-            Command Your Labels. <br /> Command Your Compliance.
+        <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">
+          <h2 className="text-5xl font-medium">Extract powerful reports</h2>
+          <p className="font-semibold text-muted-foreground/60 w-1/3 text-center tracking-tighter leading-tight">
+            Get insights into your data with our powerful reporting tools
           </p>
         </div>
       </div>
@@ -31,8 +28,8 @@ export default function DemoSection() {
           <CardHeader>
             <CardContent>
               <p>
-                TODO: Add a dynamic video (smooth zoom and transitions) of
-                Uprevit showing major feature in quick glimse of the product
+                TODO: Add a dynamic video (smooth zoom and transitions) of the
+                filtering and report extraction feature
               </p>
             </CardContent>
           </CardHeader>

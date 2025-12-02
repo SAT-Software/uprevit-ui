@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export default function Hero() {
+export default function HeroSection() {
   return (
     <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-[calc(100vh)]">
       <div className="flex items-center mb-4 py-1 px-2 rounded-full border text-xs font-semibold bg-white text-foreground shadow-lg shadow-foreground">
@@ -16,7 +16,7 @@ export default function Hero() {
           </span>
         </h1>
         <div className="flex flex-col gap-1 items-center mt-4">
-          <p className="text-xl font-normal text-black text-center">
+          <p className="text-xl font-normal text-black text-center tracking-tight leading-tight">
             The unified cloud-based platform for total labeling governance
           </p>
 
