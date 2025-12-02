@@ -28,15 +28,48 @@ export default function FeaturesSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <Card className="w-full h-150 mx-auto border-border max-w-7xl">
-          <CardHeader>
-            <CardTitle>Demo</CardTitle>
-            <CardDescription>Watch a demo of our product</CardDescription>
-            <CardContent>
-              <p>Watch a demo of our product</p>
-            </CardContent>
-          </CardHeader>
-        </Card>
+        <div className="p-1 bg-accent rounded-xl max-w-7xl mx-auto border border-border">
+          <div className="flex flex-col gap-1">
+            <div className="flex w-full h-130 gap-1">
+              <div className="w-2/3 h-full bg-background p-10 rounded-xl border border-border">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Automated- Redlining
+                </h3>
+                <p className="w-1/2 text-muted-foreground">
+                  No manual redlining of older versions. Get automated redlining
+                  copy with master version
+                </p>
+              </div>
+              <div className="w-1/3 h-full bg-background p-10 rounded-xl border border-border">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Version control perfected
+                </h3>
+                <p className="w-2/3 text-muted-foreground">
+                  Version-controlled product data and live progress tracking
+                </p>
+              </div>
+            </div>
+            <div className="flex w-full h-130 gap-1">
+              <div className="w-1/3 h-full bg-background p-10 rounded-xl border border-border">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Labeling Asset Management
+                </h3>
+                <p className="w-2/3 text-muted-foreground">
+                  Your source of truth for all symbols, schematics, graphics
+                </p>
+              </div>
+              <div className="w-2/3 h-full bg-background p-10 rounded-xl border border-border">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Label data tagging
+                </h3>
+                <p className="w-1/2 text-muted-foreground">
+                  Generate perfect label samples and mock-ups by tagging
+                  existing, approved master label elements.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
         <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />
       </div>

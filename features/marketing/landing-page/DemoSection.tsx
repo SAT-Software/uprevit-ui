@@ -29,10 +29,11 @@ export default function DemoSection() {
       <div className="relative w-full">
         <Card className="w-full h-150 mx-auto border-border max-w-7xl">
           <CardHeader>
-            <CardTitle>Demo</CardTitle>
-            <CardDescription>Watch a demo of our product</CardDescription>
             <CardContent>
-              <p>Watch a demo of our product</p>
+              <p>
+                TODO: Add a dynamic video (smooth zoom and transitions) of
+                Uprevit showing major feature in quick glimse of the product
+              </p>
             </CardContent>
           </CardHeader>
         </Card>

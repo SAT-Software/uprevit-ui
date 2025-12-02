@@ -174,8 +174,16 @@ export default function Home() {
         <FAQSection />
         <FooterSection />
       </div>
-      <div className="absolute top-210 left-80 w-px bottom-0 bg-linear-to-b from-border/60 to-border/60 z-30" />
-      <div className="absolute top-210 right-80 w-px bottom-0 bg-linear-to-b from-border/60 to-border/60 z-30" />
+      <div className="absolute top-245 left-80 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+      <div className="absolute top-245 right-80 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+      <div className="absolute top-205 left-80 w-px h-10 bg-border/10 z-40" />
+      <div className="absolute top-205 right-80 w-px h-10 bg-border/10 z-40" />
+      <div className="absolute top-215 left-80 w-px h-10 bg-border/20 z-40" />
+      <div className="absolute top-215 right-80 w-px h-10 bg-border/20 z-40" />
+      <div className="absolute top-225 left-80 w-px h-10 bg-border/40 z-40" />
+      <div className="absolute top-225 right-80 w-px h-10 bg-border/40 z-40" />
+      <div className="absolute top-235 left-80 w-px h-10 bg-border/50 z-40" />
+      <div className="absolute top-235 right-80 w-px h-10 bg-border/50 z-40" />
     </div>
   );
 }

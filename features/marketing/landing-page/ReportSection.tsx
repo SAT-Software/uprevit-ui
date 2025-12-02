@@ -26,10 +26,11 @@ export default function ReportSection() {
       <div className="relative w-full">
         <Card className="w-full h-150 mx-auto border-border max-w-7xl">
           <CardHeader>
-            <CardTitle>Report</CardTitle>
-            <CardDescription>Generate powerful reports</CardDescription>
             <CardContent>
-              <p>Generate powerful reports</p>
+              <p>
+                TODO: Add a dynamic video (smooth zoom and transitions) of the
+                filtering and report extraction feature
+              </p>
             </CardContent>
           </CardHeader>
         </Card>

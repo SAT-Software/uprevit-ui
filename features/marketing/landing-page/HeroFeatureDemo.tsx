@@ -11,10 +11,12 @@ export default function HeroFeatureDemo() {
     <div className="relative w-full mx-auto mt-20 mb-20">
       <Card className="w-full h-150 mx-auto border-border max-w-7xl">
         <CardHeader>
-          <CardTitle>Demo</CardTitle>
-          <CardDescription>Watch a demo of our product</CardDescription>
           <CardContent>
-            <p>Watch a demo of our product</p>
+            <p>
+              TODO: Add Screenshot of Dashboard page. Or we can add 5 tabs at
+              the top, and 5 screenshots and they will be changes for time to
+              time.
+            </p>
           </CardContent>
         </CardHeader>
       </Card>
