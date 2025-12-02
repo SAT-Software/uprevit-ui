@@ -16,7 +16,7 @@ export default function HeroSection() {
           </span>
         </h1>
         <div className="flex flex-col gap-1 items-center mt-4">
-          <p className="text-xl font-normal text-black text-center">
+          <p className="text-xl font-normal text-black text-center tracking-tight leading-tight">
             The unified cloud-based platform for total labeling governance
           </p>
 

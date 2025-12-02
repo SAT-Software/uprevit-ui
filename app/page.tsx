@@ -9,6 +9,9 @@ import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards
 import DemoSection from "@/features/marketing/landing-page/DemoSection";
 import ReportSection from "@/features/marketing/landing-page/ReportSection";
 import FeaturesSection from "@/features/marketing/landing-page/FeaturesSection";
+import FAQSection from "@/features/marketing/landing-page/FAQSection";
+import CTASection from "@/features/marketing/landing-page/CTASection";
+import FooterSection from "@/features/marketing/landing-page/FooterSection";
 
 const items = [
   {
@@ -167,6 +170,9 @@ export default function Home() {
         <DemoSection />
         <ReportSection />
         <FeaturesSection />
+        <CTASection />
+        <FAQSection />
+        <FooterSection />
       </div>
       <div className="absolute top-210 left-80 w-px bottom-0 bg-linear-to-b from-border/60 to-border/60 z-30" />
       <div className="absolute top-210 right-80 w-px bottom-0 bg-linear-to-b from-border/60 to-border/60 z-30" />

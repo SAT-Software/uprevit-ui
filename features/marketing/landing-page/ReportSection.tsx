@@ -18,7 +18,7 @@ export default function ReportSection() {
         </Badge>
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">
           <h2 className="text-5xl font-medium">Extract powerful reports</h2>
-          <p className="font-semibold text-muted-foreground/60 w-1/3 text-center">
+          <p className="font-semibold text-muted-foreground/60 w-1/3 text-center tracking-tighter leading-tight">
             Get insights into your data with our powerful reporting tools
           </p>
         </div>
