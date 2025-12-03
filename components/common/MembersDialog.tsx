@@ -1,18 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ButtonGroup } from "../ui/button-group";
-import { PiMagnifyingGlassDuotone } from "react-icons/pi";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMemo, useState } from "react";
+import { PiMagnifyingGlassDuotone, PiUserDuotone } from "react-icons/pi";
 
 export type User = {
   _id: string;
@@ -31,33 +33,21 @@ export interface MembersDialogProps {
 function MembersSearchBar({
   value,
   onChange,
-  onSearch,
 }: {
   value: string;
   onChange: (v: string) => void;
-  onSearch: () => void;
 }) {
   return (
-    <div className="flex gap-2">
-      <ButtonGroup className="w-full">
-        <Button variant="outline" aria-label="Search">
-          <PiMagnifyingGlassDuotone size={18} />
-        </Button>
-        <Input
-          placeholder="Search by name"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onClick={onSearch}
-          className="pl-10"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") onSearch();
-          }}
-        />
-      </ButtonGroup>
-      <Button variant="outline" onClick={onSearch}>
-        Search
-      </Button>
-    </div>
+    <InputGroup>
+      <InputGroupInput
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search..."
+      />
+      <InputGroupAddon>
+        <PiMagnifyingGlassDuotone />
+      </InputGroupAddon>
+    </InputGroup>
   );
 }
 
@@ -66,24 +56,28 @@ function MemberRow({ member }: { member: User }) {
     return member?.name
       ?.split(" ")
       ?.map((p) => p[0])
-      ?.join("");
+      ?.join("")
+      ?.toUpperCase()
+      ?.slice(0, 2);
   }, [member.name]);
 
   return (
-    <div className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-      <Avatar className="h-10 w-10">
+    <div className="flex items-center gap-3 rounded-lg p-2 transition-colors border border-border hover:bg-muted/50 group">
+      <Avatar className="h-9 w-9 border border-border">
         {member.profileAvatar ? (
           <AvatarImage src={member.profileAvatar} alt={member.name} />
         ) : null}
-        <AvatarFallback className="bg-muted text-muted-foreground">
+        <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
           {initials}
         </AvatarFallback>
       </Avatar>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-foreground">{member.name}</p>
+      <div className="min-w-0 flex-1 flex flex-col gap-0.5">
+        <p className="truncate text-sm font-medium text-foreground leading-none">
+          {member.name}
+        </p>
         {member.email ? (
-          <p className="truncate text-sm text-muted-foreground">
+          <p className="truncate text-xs text-muted-foreground leading-none">
             {member.email}
           </p>
         ) : null}
@@ -110,37 +104,41 @@ export function MembersDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] max-w-xl overflow-hidden p-0">
-        <div className="p-6 pb-0">
-          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
-            <DialogTitle className="text-xl font-semibold flex flex-row items-center gap-2">
-              <p>{titlePrefix ? `${titlePrefix} ` : ""}Users</p>
-              <span className="text-xs font-normal text-muted-foreground/80">
-                Total users - {users?.length}
-              </span>
-            </DialogTitle>
-          </DialogHeader>
+      <DialogContent className="max-h-[85vh] max-w-md overflow-hidden p-0 gap-0 border-border shadow-lg sm:rounded-xl">
+        <DialogHeader className="px-4 py-3 border-b border-border flex flex-row items-center justify-between space-y-0 bg-muted/10">
+          <DialogTitle className="text-base font-semibold flex items-center gap-2">
+            {titlePrefix ? `${titlePrefix} ` : ""}Members
+            <span className="flex items-center justify-center bg-muted border border-border text-muted-foreground text-[10px] font-medium px-1.5 h-5 rounded-full min-w-5">
+              {users?.length}
+            </span>
+          </DialogTitle>
+        </DialogHeader>
 
-          {/* <div className="mt-2">
-            <MembersSearchBar
-              value={query}
-              onChange={setQuery}
-              onSearch={() => {}}
-            />
-          </div> */}
+        <div className="p-3 border-b border-border bg-muted/5">
+          <MembersSearchBar value={query} onChange={setQuery} />
         </div>
 
-        <div className="px-6 pb-6">
-          <div className="mt-3 max-h-[420px] space-y-1 overflow-y-auto">
+        <ScrollArea className="max-h-[400px] overflow-y-auto my-2">
+          <div className="p-2 space-y-2">
             {filtered?.length ? (
               filtered?.map((m: User) => <MemberRow key={m._id} member={m} />)
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
-                No members found
+              <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted/50">
+                  <PiUserDuotone className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-foreground">
+                    No members found
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Try searching for a different name
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
@@ -149,6 +147,7 @@ export function MembersDialog({
 export function MembersInlineTrigger({
   users,
   titlePrefix,
+  className,
 }: {
   users: User[];
   titlePrefix?: string;
@@ -180,7 +179,8 @@ export function MembersInlineTrigger({
                   {m?.name
                     ?.split(" ")
                     ?.map((p) => p[0]?.toUpperCase())
-                    ?.join("")}
+                    ?.join("")
+                    ?.slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
             );
@@ -202,14 +202,6 @@ export function MembersInlineTrigger({
             </Avatar>
           ) : null}
         </div>
-        {users?.length <= 4 && extra === 0 && (
-          <div className="flex gap-1">
-            <span className="text-xs text-muted-foreground">
-              {users?.length}
-            </span>
-            <span className="text-xs text-muted-foreground">users</span>
-          </div>
-        )}
       </button>
 
       <MembersDialog
