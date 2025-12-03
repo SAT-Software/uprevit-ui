@@ -1,13 +1,13 @@
 "use client";
 
-import { AppHeader } from "@/components/common/app-header";
-import { AppSidebar } from "@/components/common/app-sidebar";
-import { MainContentWrapper } from "@/components/common/main-content-wrapper";
+import { AppHeader } from "@/components/common/AppHeader";
+import { MainContentWrapper } from "@/components/common/MainContentWrapper";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { useGetUser } from "@/hooks/user/useGetUser";
+import { AppSidebar } from "@/components/common/AppSidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
@@ -42,13 +42,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "260px",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <AppHeader />

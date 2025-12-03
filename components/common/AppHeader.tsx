@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { NavUser } from "./nav-user";
+import { NavUser } from "./UserNav";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -127,7 +127,7 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 bg-background flex shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height,left] ease-linear duration-200",
+        "fixed top-0 z-50 bg-sidebar-background flex shrink-0 items-center justify-between px-4 gap-2 border-b border-border transition-[width,height,left] ease-linear duration-200",
         // Width and positioning that accounts for sidebar
         "left-0 right-0",
         "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",
@@ -136,7 +136,7 @@ export function AppHeader() {
         // Height
         isProductPage
           ? "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-          : "h-16 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
+          : "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
       )}
     >
       {isProductPage ? (
