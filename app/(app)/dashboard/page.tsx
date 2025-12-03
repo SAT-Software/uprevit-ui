@@ -9,15 +9,15 @@ import Link from "next/link";
 
 function DashboardPage() {
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-2 p-2">
       <StatsGrid location="dashboard" />
 
-      <div className="flex flex-col xl:flex-row w-full justify-between gap-4">
+      <div className="flex flex-col xl:flex-row w-full justify-between gap-2">
         <DashboardDepartmentsCard />
         <DashboardProjectsCard />
       </div>
 
-      <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full ">
+      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full ">
         <div className="flex items-center justify-between w-full">
           <p className="text-base font-semibold">Recent Products</p>
           <Link href="/products">

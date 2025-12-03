@@ -178,7 +178,7 @@ function DashboardProjectsCard() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
+      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
         <div className="flex items-center justify-between w-full">
           <p className="text-base font-semibold">Recent Projects</p>
           <Link href="/projects">
@@ -199,7 +199,7 @@ function DashboardProjectsCard() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
+      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
         <div className="flex items-center justify-between w-full">
           <p className="text-base font-semibold">Recent Projects</p>
           <Link href="/projects">
@@ -216,7 +216,7 @@ function DashboardProjectsCard() {
   const filteredProjects = (projects || [])?.slice(0, 3);
 
   return (
-    <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
+    <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
       <div className="flex items-center justify-between w-full">
         <p className="text-base font-semibold">Recent Projects</p>
         <Link href="/projects">

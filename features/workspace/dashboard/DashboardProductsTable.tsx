@@ -181,7 +181,7 @@ export default function DashboardProductsTable() {
 
   if (isLoading) {
     return (
-      <div className="border border-input rounded-2xl">
+      <div className="border border-border rounded-2xl">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -254,7 +254,7 @@ export default function DashboardProductsTable() {
   if (error) return <div>Error loading products: {error.message}</div>;
 
   return (
-    <div className="border border-input rounded-2xl">
+    <div className="border border-border rounded-2xl">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

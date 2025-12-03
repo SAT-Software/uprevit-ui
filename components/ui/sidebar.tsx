@@ -261,12 +261,10 @@ function SidebarTrigger({
   const { toggleSidebar } = useSidebar();
 
   return (
-    <Button
+    <button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("size-7", className)}
+      className={cn("ml-0 mr-1 px-0 py-0 cursor-pointer", className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
@@ -275,7 +273,7 @@ function SidebarTrigger({
     >
       <PiSidebarSimpleDuotone />
       <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+    </button>
   );
 }
 
@@ -643,7 +641,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        "border-sidebar-border mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-0.5",
+        "border-sidebar-border ml-3.5 mr-0 flex min-w-0 translate-x-px flex-col gap-2 border-l pl-2.5 pr-0 py-2",
         "group-data-[collapsible=icon]:hidden",
         className
       )}

@@ -196,7 +196,7 @@ function DashboardDepartmentsCard() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
+      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
         <div className="flex items-center w-full justify-between">
           <p className="text-base font-semibold">Recent Departments</p>
           <Link href="/departments">
@@ -217,7 +217,7 @@ function DashboardDepartmentsCard() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
+      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
         <div className="flex items-center w-full justify-between">
           <p className="text-base font-semibold">Recent Departments</p>
           <Link href="/departments">
@@ -234,7 +234,7 @@ function DashboardDepartmentsCard() {
   const filteredDepartments = (departments || [])?.slice(0, 2);
 
   return (
-    <div className="flex flex-col items-start gap-4 justify-start border border-input bg-background rounded-xl p-4 w-full">
+    <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
       <div className="flex items-center w-full justify-between">
         <p className="text-base font-semibold">Recent Departments</p>
         <Link href="/departments">

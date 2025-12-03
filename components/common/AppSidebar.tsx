@@ -101,12 +101,12 @@ const data = {
 
 const productSubItems = [
   {
-    title: "Product Info",
+    title: "Product Information",
     url: "/product-information",
     icon: PiLayoutDuotone,
   },
   {
-    title: "Compliance Info",
+    title: "Compliance Information",
     url: "/compliance-information",
     icon: PiBookOpenDuotone,
   },
@@ -126,7 +126,7 @@ const productSubItems = [
     icon: PiMicrosoftExcelLogoDuotone,
   },
   {
-    title: "Operational Params",
+    title: "Operational Parameters",
     url: "/operational-parameters",
     icon: PiDatabaseDuotone,
   },
