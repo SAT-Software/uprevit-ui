@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { NavUser } from "./nav-user";
+import { NavUser } from "./UserNav";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -127,7 +127,7 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 bg-background flex shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height,left] ease-linear duration-200",
+        "fixed top-0 z-50 bg-sidebar-background flex shrink-0 items-center justify-between px-2 gap-2 border-b border-border transition-[width,height,left] ease-linear duration-200",
         // Width and positioning that accounts for sidebar
         "left-0 right-0",
         "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",
@@ -136,12 +136,12 @@ export function AppHeader() {
         // Height
         isProductPage
           ? "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-          : "h-16 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
+          : "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
       )}
     >
       {isProductPage ? (
         <div className="flex w-full">
-          <div className="flex w-full items-center gap-2 ">
+          <div className="flex w-full items-center gap-2">
             <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-muted-foreground bg-muted" />
 
             <Separator orientation="vertical" className=" h-4" />
@@ -180,10 +180,10 @@ export function AppHeader() {
         </div>
       ) : (
         <div className="flex w-full">
-          <div className="flex w-full items-center gap-2 ">
-            <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-muted-foreground bg-muted" />
+          <div className="flex w-full items-center gap-1">
+            <SidebarTrigger className="" />
             {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
-            <Separator orientation="vertical" className=" h-4" />
+            <Separator orientation="vertical" className="mr-1 h-4" />
             {/* Breadcrumbs for dynamic routes, icon+title for static */}
             {/^\/(departments|projects|products|source-files|bookmarked-products)\/.+/.test(
               pathname
@@ -198,7 +198,7 @@ export function AppHeader() {
                 // Extract dynamic id
                 const id = pathname.split("/")[2];
                 return (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     {Icon && <Icon className="text-muted-foreground" />}
                     {/* <Separator orientation="vertical" className="h-4" /> */}
                     <Breadcrumb>

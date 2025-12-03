@@ -19,6 +19,12 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        green: "bg-green-100 text-green-600 border-green-400",
+        blue: "bg-blue-100 text-blue-600 border-blue-400",
+        red: "bg-red-100 text-red-600 border-red-400",
+        yellow: "bg-yellow-100 text-yellow-600 border-yellow-400",
+        gray: "bg-gray-100 text-gray-600 border-gray-400",
+        orange: "bg-orange-100 text-orange-600 border-orange-400",
       },
     },
     defaultVariants: {
