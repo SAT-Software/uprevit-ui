@@ -46,18 +46,69 @@ export default function DepartmentDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
+        {/* Breadcrumbs Skeleton */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-          <div className="h-4 w-4 bg-muted rounded animate-pulse" />
-          <div className="h-3 w-3 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-4 bg-background rounded animate-pulse" />
+          <div className="h-3 w-3 bg-background rounded animate-pulse" />
+          <div className="h-4 w-20 bg-background rounded animate-pulse" />
+          <div className="h-3 w-3 bg-background rounded animate-pulse" />
+          <div className="h-4 w-32 bg-background rounded animate-pulse" />
         </div>
-        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl p-6 w-full h-full">
-          <div className="flex flex-col md:flex-row gap-6 items-start border-b border-border pb-6">
-            <div className="h-32 w-32 shrink-0 rounded-xl bg-muted animate-pulse" />
-            <div className="flex flex-col gap-3 w-full">
-              <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
-              <div className="h-4 w-1/4 bg-muted rounded animate-pulse" />
-              <div className="h-16 w-full bg-muted rounded animate-pulse mt-2" />
+
+        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+          {/* Header Section Skeleton */}
+          <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
+            <div className="flex flex-col md:flex-row gap-6 items-start w-full">
+              {/* Image Skeleton */}
+              <div className="h-24 w-24 md:h-32 md:w-32 shrink-0 rounded-xl bg-muted animate-pulse" />
+
+              {/* Info Skeleton */}
+              <div className="flex flex-col gap-3 w-full min-w-0">
+                <div className="flex flex-col gap-1">
+                  <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-1/4 bg-muted rounded animate-pulse" />
+                </div>
+                <div className="h-12 w-full max-w-2xl bg-muted rounded animate-pulse" />
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
+                  <div className="h-8 w-8 bg-muted rounded-full animate-pulse -ml-2" />
+                  <div className="h-8 w-8 bg-muted rounded-full animate-pulse -ml-2" />
+                </div>
+              </div>
+            </div>
+
+            {/* Actions & Meta Skeleton */}
+            <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="h-9 w-24 bg-muted rounded-md animate-pulse" />
+                <div className="h-9 w-24 bg-muted rounded-md animate-pulse" />
+                <div className="h-9 w-9 bg-muted rounded-md animate-pulse" />
+              </div>
+              <div className="flex flex-col items-start md:items-end gap-2 w-full">
+                <div className="h-7 w-48 bg-muted rounded-lg animate-pulse" />
+                <div className="h-7 w-52 bg-muted rounded-lg animate-pulse" />
+              </div>
+            </div>
+          </div>
+
+          {/* Projects Section Skeleton */}
+          <div className="flex flex-col gap-2 px-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-16 bg-muted rounded animate-pulse" />
+                <div className="w-1 h-1 bg-muted rounded-full" />
+                <div className="h-4 w-40 bg-muted rounded animate-pulse" />
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="border border-border rounded-xl overflow-hidden">
+                <div className="h-12 bg-muted/50 border-b border-border" />
+                <div className="flex flex-col divide-y divide-border">
+                  <div className="h-14 bg-background animate-pulse" />
+                  <div className="h-14 bg-background animate-pulse" />
+                  <div className="h-14 bg-background animate-pulse" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
