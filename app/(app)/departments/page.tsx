@@ -1,7 +1,7 @@
 "use client";
 
 import DepartmentsCard from "@/features/workspace/departments/DepartmentsCard";
-import DialogAddDepartment from "@/features/workspace/departments/DialogAddDepartment";
+import CreateDepartmentDialog from "@/features/workspace/departments/CreateDepartmentDialog";
 
 function DepartmentsPage() {
   return (
@@ -15,7 +15,7 @@ function DepartmentsPage() {
               Manage and view all departments in your workspace
             </p>
           </div>
-          <DialogAddDepartment />
+          <CreateDepartmentDialog />
         </div>
         <DepartmentsCard />
       </div>

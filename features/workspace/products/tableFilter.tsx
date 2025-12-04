@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Filter, Plus, X } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,14 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { ColumnFiltersState, Table } from "@tanstack/react-table";
+import { useState } from "react";
+import {
+  PiFunnelDuotone,
+  PiPlusCircleDuotone,
+  PiSlidersDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
 import { Item } from "./ProductsPageProductTable";
 
 // Types for our filter system
@@ -167,24 +170,11 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant={
-            table.getState().columnFilters.length > 0 ? "default" : "outline"
-          }
-          size="sm"
-          className="text-xs"
-        >
-          <Filter
-            className={cn(
-              "h-2 w-2 mr-1",
-              table.getState().columnFilters.length > 0
-                ? "text-background"
-                : "text-muted-foreground"
-            )}
-          />
+        <Button variant="secondary" size="sm">
+          <PiFunnelDuotone />
           Filter
           {table.getState().columnFilters.length > 0 && (
-            <span className="ml-1.5 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-medium text-background">
+            <span className="ml-1.5 rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">
               {table.getState().columnFilters.length}
             </span>
           )}
@@ -193,10 +183,10 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
       <DropdownMenuContent className="w-full" align="start">
         {filters.length === 0 ? (
           <div className="px-2 py-2 min-w-110">
-            <p className="mb-1 text-xs font-semibold">
+            <p className="mb-1 text-sm font-semibold">
               No filters applied to this view
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Add a column below to filter the view
             </p>
           </div>
@@ -212,7 +202,7 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
               return (
                 <div
                   key={filter.id}
-                  className="flex items-center text-xs space-x-2"
+                  className="flex items-center text-sm space-x-2"
                 >
                   {/* Column Select */}
                   <Select
@@ -222,14 +212,14 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
                     }
                   >
                     {/* Changed w-full to w-auto and added min-w */}
-                    <SelectTrigger className="h-8 w-auto min-w-[150px] text-xs whitespace-nowrap">
+                    <SelectTrigger className="h-8 w-auto min-w-[150px] text-sm whitespace-nowrap">
                       <SelectValue placeholder="Select column" />{" "}
                       {/* Use placeholder for better UX */}
                     </SelectTrigger>
                     <SelectContent>
                       {sampleColumns.map((col) => (
                         <SelectItem
-                          className="text-xs"
+                          className="text-sm"
                           key={col.name}
                           value={col.name}
                         >
@@ -246,13 +236,13 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
                       handleFilterChange(filter.id, "operator", value)
                     }
                   >
-                    <SelectTrigger className="h-8 w-full text-xs">
-                      <SelectValue className="text-xs" placeholder="Op" />
+                    <SelectTrigger className="h-8 w-full text-sm">
+                      <SelectValue className="text-sm" placeholder="Op" />
                     </SelectTrigger>
                     <SelectContent>
                       {operators.map((op) => (
                         <SelectItem
-                          className="text-xs"
+                          className="text-sm"
                           key={op.value}
                           value={op.value}
                         >
@@ -273,7 +263,7 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
                       onChange={(e) =>
                         handleFilterChange(filter.id, "value", e.target.value)
                       }
-                      className="h-8 w-full text-xs flex-grow"
+                      className="h-8 w-full text-sm grow"
                     />
                   )}
 
@@ -284,7 +274,7 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
                     onClick={() => handleRemoveFilter(filter.id)}
                     className="p-0"
                   >
-                    <X className="h-4 w-4" />
+                    <PiXCircleDuotone />
                     <span className="sr-only">Remove filter</span>
                   </Button>
                 </div>
@@ -297,20 +287,21 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
 
         <div className="flex justify-between items-center px-2 py-2">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="text-xs"
+            className="text-sm"
             onClick={handleAddFilter}
           >
-            <Plus className="h-4 w-4" />
+            <PiPlusCircleDuotone />
             Add filter
           </Button>
           <Button
             size="sm"
-            className="text-xs"
-            variant="outline"
+            className="text-sm"
+            variant="secondary"
             onClick={handleApplyFilters}
           >
+            <PiSlidersDuotone />
             Apply filter
           </Button>
         </div>

@@ -32,7 +32,12 @@ import { ImagePlusIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PiKanbanDuotone, PiPlusCircleDuotone } from "react-icons/pi";
+import {
+  PiBuildingsDuotone,
+  PiKanbanDuotone,
+  PiPlusCircleDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 
@@ -54,7 +59,7 @@ type FormValues = {
   department: string;
 };
 
-export default function DialogCreateProject({
+export default function CreateProjectDialog({
   trigger,
 }: DialogCreateProjectProps) {
   const id = useId();
@@ -152,15 +157,20 @@ export default function DialogCreateProject({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="flex items-center gap-2">
-          <PiPlusCircleDuotone />
-          Create New Project
+        <Button variant="default" size="sm" className="flex items-center gap-2">
+          <PiPlusCircleDuotone className="w-5 h-5" />
+          Create Project
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Create New Project
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Create New Project</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -172,7 +182,7 @@ export default function DialogCreateProject({
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="flex gap-4 px-6 pt-4">
+          <div className="flex gap-4 p-4">
             <div className="w-1/3">
               <ProfileBg setProjectImage={setProjectImage} />
             </div>
@@ -217,7 +227,7 @@ export default function DialogCreateProject({
               </div>
             </div>
           </div>
-          <div className="flex gap-4 w-full px-6 pt-4">
+          <div className="flex gap-4 w-full px-4 pb-4">
             <div className="space-y-2 w-1/2">
               <Label htmlFor={`${id}-department`}>Department</Label>
               <Select
@@ -254,7 +264,7 @@ export default function DialogCreateProject({
             </div>
           </div>
 
-          <div className="px-6 pt-4 pb-6">
+          <div className="px-4 pb-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor={`${id}-description`}>Project Description</Label>
@@ -291,7 +301,7 @@ export default function DialogCreateProject({
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 justify-between w-full space-y-4">
+              <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
                 <AddUsersInProjectDropdown
                   users={users?.map((user: User) => ({
                     _id: user._id,
@@ -302,31 +312,33 @@ export default function DialogCreateProject({
                   onRemoveUser={handleRemoveUser}
                   selectedUsers={selectedUsers}
                 />
-                <div className="mb-4 items-center justify-between w-1/2">
+                <div className="flex items-center justify-end flex-1">
                   {selectedUsers.length > 0 && (
-                    <div className="flex items-center -space-x-[0.525rem]">
-                      {selectedUsers.slice(0, 4).map((user) => {
-                        if (user.profileAvatar)
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center -space-x-2">
+                        {selectedUsers.slice(0, 4).map((user) => {
+                          if (user.profileAvatar)
+                            return (
+                              <Image
+                                key={user._id}
+                                className="ring-background rounded-full ring-2"
+                                src={user.profileAvatar}
+                                width={32}
+                                height={32}
+                                alt={user.name}
+                              />
+                            );
                           return (
-                            <Image
+                            <div
                               key={user._id}
-                              className="ring-background rounded-full ring-2"
-                              src={user.profileAvatar}
-                              width={32}
-                              height={32}
-                              alt={user.name}
-                            />
+                              className="flex h-8 w-8 items-center justify-center border border-border rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                            >
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
                           );
-                        return (
-                          <div
-                            key={user._id}
-                            className="flex h-8 w-8 items-center justify-center border-2 border-white rounded-full bg-muted text-xs font-medium ring-background ring-2"
-                          >
-                            {user.name.charAt(0).toUpperCase()}
-                          </div>
-                        );
-                      })}
-                      <p className="text-xs text-muted-foreground ml-4">
+                        })}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">
                         {selectedUsers.length} Users
                       </p>
                     </div>
@@ -336,22 +348,30 @@ export default function DialogCreateProject({
             </div>
           </div>
         </form>
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
               Cancel
             </Button>
           </DialogClose>
           <Button
             type="submit"
+            size="sm"
+            variant="default"
             form={`mutate-project-form-${id}`}
             disabled={uploadingImage || isPending}
             aria-busy={uploadingImage || isPending}
           >
+            {uploadingImage || isPending ? (
+              <PiPlusCircleDuotone />
+            ) : (
+              <PiPlusCircleDuotone />
+            )}
             {uploadingImage
-              ? "Uploading Image..."
+              ? "Uploading..."
               : isPending
-              ? "Creating Project..."
+              ? "Creating..."
               : "Create Project"}
           </Button>
         </DialogFooter>
@@ -379,8 +399,8 @@ function ProfileBg({
   setProjectImage(ImageFile);
 
   return (
-    <div className="h-32">
-      <div className="bg-muted relative flex size-full  rounded-xl items-center justify-center overflow-hidden">
+    <div className="h-40 w-full">
+      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
         {currentImage ? (
           <Image
             className="size-full object-cover rounded-xl"
@@ -394,14 +414,15 @@ function ProfileBg({
             height={96}
           />
         ) : (
-          <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-            <PiKanbanDuotone className="w-24 h-24 text-muted-foreground/60" />
+          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
+            <PiKanbanDuotone className="w-12 h-12" />
+            <span className="text-xs font-medium">Upload Image</span>
           </div>
         )}
-        <div className="absolute inset-0 flex items-center justify-center gap-2">
+        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
           <button
             type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
+            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
             onClick={openFileDialog}
             aria-label={currentImage ? "Change image" : "Upload image"}
           >
@@ -410,7 +431,7 @@ function ProfileBg({
           {currentImage && (
             <button
               type="button"
-              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
+              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
               onClick={() => removeFile(files[0]?.id)}
               aria-label="Remove image"
             >

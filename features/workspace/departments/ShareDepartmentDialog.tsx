@@ -1,17 +1,17 @@
 import { LinkIcon, CopyIcon, CheckIcon } from "lucide-react";
-import { PiShareNetworkDuotone } from "react-icons/pi";
+import { PiShareNetworkDuotone, PiXCircleDuotone } from "react-icons/pi";
 import { useState, useMemo } from "react";
 
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,7 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export default function DialogShareDepartment({
+export default function ShareDepartmentDialog({
   department,
 }: {
   department?: { _id: string; department_name?: string };
@@ -53,32 +53,29 @@ export default function DialogShareDepartment({
   };
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="secondary" size="sm">
-              <PiShareNetworkDuotone className="h-4 w-4" />
-              Share
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="secondary" size="sm">
+          <PiShareNetworkDuotone className="h-4 w-4" />
+          Share
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <p>Share Department</p>
-          </TooltipContent>
-        </Tooltip>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <PiShareNetworkDuotone size={20} />
-            Share Department
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Share this department with others by copying the link below.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="sr-only">
+          Share this department with others by copying the link below.
+        </DialogDescription>
 
-        <div className="space-y-4">
+        <div className="p-4 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="department-link">Department Link</Label>
             <div className="flex items-center space-x-2">
@@ -121,10 +118,15 @@ export default function DialogShareDepartment({
           )}
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel>Close</AlertDialogCancel>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <DialogClose asChild>
+            <Button variant="secondary" size="sm">
+              <PiXCircleDuotone />
+              Close
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

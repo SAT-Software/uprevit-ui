@@ -27,6 +27,24 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
+import {
+  PiBuildingsDuotone,
+  PiCaretCircleDoubleLeftDuotone,
+  PiCaretCircleDoubleRightDuotone,
+  PiCaretCircleLeftDuotone,
+  PiCaretCircleRightDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+  PiChartPieSliceDuotone,
+  PiColumnsDuotone,
+  PiGitBranchDuotone,
+  PiHashDuotone,
+  PiInfoDuotone,
+  PiKanbanDuotone,
+  PiPackageDuotone,
+} from "react-icons/pi";
+import { Progress } from "@/components/ui/progress";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -157,10 +175,44 @@ const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
   }
 };
 
+// Helper component for sortable headers
+const SortableHeader = ({
+  column,
+  title,
+  icon: Icon,
+}: {
+  column: any;
+  title: string;
+  icon: any;
+}) => {
+  return (
+    <button
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span>{title}</span>
+        </div>
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
+        ) : (
+          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
+        )}
+      </div>
+    </button>
+  );
+};
+
 const columns: ColumnDef<Item>[] = [
   {
-    header: "PPN",
     accessorKey: "product_plan_number",
+    header: ({ column }) => (
+      <SortableHeader column={column} title="PPN" icon={PiHashDuotone} />
+    ),
     cell: ({ row }) => {
       const ppn = row.getValue("product_plan_number");
       return <div className="text-xs font-medium">{ppn as string}</div>;
@@ -168,8 +220,14 @@ const columns: ColumnDef<Item>[] = [
     size: 120,
   },
   {
-    header: "Product Name",
     accessorKey: "product_name",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Product Name"
+        icon={PiPackageDuotone}
+      />
+    ),
     cell: ({ row }) => {
       return (
         <p className="text-xs font-medium">{row.getValue("product_name")}</p>
@@ -178,8 +236,14 @@ const columns: ColumnDef<Item>[] = [
     size: 200,
   },
   {
-    header: "Project Name",
     accessorKey: "project_name",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Project Name"
+        icon={PiKanbanDuotone}
+      />
+    ),
     cell: ({ row }) => {
       const project_name = row.original?.project?.[0]?.project_name;
       return <div className="text-xs font-medium">{project_name}</div>;
@@ -187,8 +251,14 @@ const columns: ColumnDef<Item>[] = [
     size: 150,
   },
   {
-    header: "Department Name",
     accessorKey: "department_name",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Department Name"
+        icon={PiBuildingsDuotone}
+      />
+    ),
     cell: ({ row }) => {
       const departmentName = row.original?.department?.[0]?.department_name;
       return <div className="text-xs font-medium">{departmentName}</div>;
@@ -196,86 +266,62 @@ const columns: ColumnDef<Item>[] = [
     size: 150,
   },
   {
-    header: "Status",
     accessorKey: "status",
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Status" icon={PiInfoDuotone} />
+    ),
     cell: ({ row }) => (
-      <Badge
-        className={cn(
-          row.getValue("status") === "Archived" &&
-            "bg-muted-foreground/60 text-primary-foreground",
-          row.getValue("status") === "Submitted" &&
-            "bg-secondary text-primary-foreground",
-          row.getValue("status") === "Draft" &&
-            "bg-primary text-primary-foreground"
-        )}
-      >
+      <Badge variant="outline" className="font-normal">
+        <div
+          className={cn("w-2 h-2 rounded-full mr-1", {
+            "bg-green-500": row.original?.status === "submitted",
+            "bg-blue-500": row.original?.status === "draft",
+            "bg-gray-500": row.original?.status === "archived",
+          })}
+        />
         {row.getValue("status")}
       </Badge>
     ),
     size: 100,
   },
   {
-    header: "Version",
     accessorKey: "master_version",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Version"
+        icon={PiGitBranchDuotone}
+      />
+    ),
     cell: ({ row }) => (
-      <div className="text-xs font-medium">
-        {row.getValue("master_version")}
-      </div>
+      <Badge variant="secondary" className="font-mono text-xs">
+        v{row.getValue("master_version")}
+      </Badge>
     ),
     size: 80,
   },
   {
-    header: "Progress",
     accessorKey: "complete_count",
-    cell: ({ row }) => (
-      <div className="text-xs font-medium">
-        {row.getValue("complete_count")} %
-      </div>
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Progress"
+        icon={PiChartPieSliceDuotone}
+      />
     ),
-    size: 80,
+    cell: ({ row }) => {
+      const progress = (row.getValue("complete_count") as number) || 0;
+      return (
+        <div className="flex items-center gap-3 min-w-[120px]">
+          <Progress value={progress} className="h-2 w-full" />
+          <span className="text-xs font-medium text-muted-foreground w-9 text-right">
+            {progress}%
+          </span>
+        </div>
+      );
+    },
+    size: 120,
   },
-  // {
-  //   header: "Created by - on",
-  //   accessorKey: "createdOn",
-  //   cell: ({ row }) => {
-  //     const createdBy = row.original.auditLogs?.filter(
-  //       (log) => log.action === "create"
-  //     )[0]?.actionBy;
-  //     const createdAt = row.original.auditLogs?.filter(
-  //       (log) => log.action === "create"
-  //     )[0]?.actionAt;
-  //     return (
-  //       <div className="">
-  //         <p className="text-xs font-medium">{createdBy}</p>
-  //         <p className="text-xs text-muted-foreground">
-  //           {createdAt ? new Date(createdAt).toLocaleDateString() : "N/A"}
-  //         </p>
-  //       </div>
-  //     );
-  //   },
-  //   size: 150,
-  // },
-  // {
-  //   header: "Modified by - on",
-  //   accessorKey: "modifiedOn",
-  //   cell: ({ row }) => {
-  //     const modifiedBy = row.original.auditLogs?.filter(
-  //       (log) => log.action === "update"
-  //     )[0]?.actionBy;
-  //     const modifiedAt = row.original.auditLogs?.filter(
-  //       (log) => log.action === "update"
-  //     )[0]?.actionAt;
-  //     return (
-  //       <div className="">
-  //         <p className="text-xs font-medium">{modifiedBy}</p>
-  //         <p className="text-xs text-muted-foreground">
-  //           {modifiedAt ? new Date(modifiedAt).toLocaleDateString() : "N/A"}
-  //         </p>
-  //       </div>
-  //     );
-  //   },
-  //   size: 150,
-  // },
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
@@ -332,15 +378,10 @@ export default function ProductsPageProductTable() {
         <div className="flex items-center justify-start w-full gap-3">
           <FilterBuilder table={table} />
 
-          {/* Toggle columns visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs">
-                <Columns3Icon
-                  className="-ms-1 text-muted-foreground"
-                  size={14}
-                  aria-hidden="true"
-                />
+              <Button variant="secondary" size="sm">
+                <PiColumnsDuotone />
                 View
               </Button>
             </DropdownMenuTrigger>
@@ -372,7 +413,7 @@ export default function ProductsPageProductTable() {
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
@@ -380,54 +421,14 @@ export default function ProductsPageProductTable() {
                     <TableHead
                       key={header.id}
                       style={{ width: `${header.getSize()}px` }}
-                      className="h-11 "
+                      className="h-11 border-r border-border last:border-r-0"
                     >
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <div
-                          className={cn(
-                            header.column.getCanSort() &&
-                              "flex text-xs h-full cursor-pointer items-center justify-between gap-2 select-none"
-                          )}
-                          onClick={header.column.getToggleSortingHandler()}
-                          onKeyDown={(e) => {
-                            // Enhanced keyboard handling for sorting
-                            if (
-                              header.column.getCanSort() &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
-                              e.preventDefault();
-                              header.column.getToggleSortingHandler()?.(e);
-                            }
-                          }}
-                          tabIndex={header.column.getCanSort() ? 0 : undefined}
-                        >
-                          {flexRender(
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                          {{
-                            asc: (
-                              <ChevronUpIcon
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                aria-hidden="true"
-                              />
-                            ),
-                            desc: (
-                              <ChevronDownIcon
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                aria-hidden="true"
-                              />
-                            ),
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      ) : (
-                        flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )
-                      )}
                     </TableHead>
                   );
                 })}
@@ -440,7 +441,7 @@ export default function ProductsPageProductTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:bg-muted/50"
                   onClick={() => {
                     router.push(
                       `/products/${row.original._id}/product-information`
@@ -473,30 +474,6 @@ export default function ProductsPageProductTable() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
-        <div className="flex items-center gap-3">
-          <Label htmlFor={id} className="max-sm:sr-only">
-            Rows per page
-          </Label>
-          <Select
-            value={table.getState().pagination.pageSize.toString()}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger id={id} className="w-fit whitespace-nowrap">
-              <SelectValue placeholder="Select number of results" />
-            </SelectTrigger>
-            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
-              {[5, 10, 25, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={pageSize.toString()}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -531,53 +508,53 @@ export default function ProductsPageProductTable() {
               {/* First page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.firstPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to first page"
                 >
-                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleLeftDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Previous page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to previous page"
                 >
-                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleLeftDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Next page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to next page"
                 >
-                  <ChevronRightIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleRightDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Last page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.lastPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to last page"
                 >
-                  <ChevronLastIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleRightDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
             </PaginationContent>
@@ -628,7 +605,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowUpdateDialog(true), 100);
               }}
             >
-              <PiPencilCircleDuotone className="mr-2 h-4 w-4" />
+              <PiPencilCircleDuotone className=" h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -641,7 +618,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowArchiveDialog(true), 100);
               }}
             >
-              <PiArchiveDuotone className="mr-2 h-4 w-4" />
+              <PiArchiveDuotone className=" h-4 w-4" />
               <span>Archive</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -654,7 +631,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowShareDialog(true), 100);
               }}
             >
-              <PiShareDuotone className="mr-2 h-4 w-4" />
+              <PiShareDuotone className=" h-4 w-4" />
               <span>Share</span>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -664,7 +641,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowBookmarkDialog(true), 100);
               }}
             >
-              <PiBookmarkDuotone className="mr-2 h-4 w-4" />
+              <PiBookmarkDuotone className=" h-4 w-4" />
               <span>Add to Bookmarks</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>

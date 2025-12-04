@@ -1,7 +1,7 @@
 "use client";
 
 import ProjectsCard from "@/features/workspace/projects/ProjectsCard";
-import DialogCreateProject from "@/features/workspace/projects/DialogCreateProject";
+import CreateProjectDialog from "@/features/workspace/projects/CreateProjectDialog";
 
 function ProjectsPage() {
   return (
@@ -15,7 +15,7 @@ function ProjectsPage() {
               Manage and view all projects in your workspace
             </p>
           </div>
-          <DialogCreateProject />
+          <CreateProjectDialog />
         </div>
         <ProjectsCard />
       </div>
