@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ColumnFiltersState, Table } from "@tanstack/react-table";
 import { Item } from "./ProductsPageProductTable";
+import { PiFunnelDuotone } from "react-icons/pi";
 
 // Types for our filter system
 type ColumnType = "text" | "number" | "boolean" | "array";
@@ -167,24 +168,11 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant={
-            table.getState().columnFilters.length > 0 ? "default" : "outline"
-          }
-          size="sm"
-          className="text-xs"
-        >
-          <Filter
-            className={cn(
-              "h-2 w-2 mr-1",
-              table.getState().columnFilters.length > 0
-                ? "text-background"
-                : "text-muted-foreground"
-            )}
-          />
+        <Button variant="secondary" size="sm" className="text-xs">
+          <PiFunnelDuotone className="h-2 w-2" />
           Filter
           {table.getState().columnFilters.length > 0 && (
-            <span className="ml-1.5 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-medium text-background">
+            <span className="ml-1.5 rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">
               {table.getState().columnFilters.length}
             </span>
           )}

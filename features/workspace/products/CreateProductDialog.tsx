@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PiPlusBold } from "react-icons/pi";
+import { PiPlusBold, PiPlusCircleDuotone } from "react-icons/pi";
 import {
   Select,
   SelectContent,
@@ -132,7 +132,8 @@ export default function CreateProductDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="flex items-center gap-2">
-          Create New Product <PiPlusBold />
+          <PiPlusCircleDuotone />
+          Create New Product
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
