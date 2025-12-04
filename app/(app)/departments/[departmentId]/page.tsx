@@ -15,11 +15,11 @@ import {
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
-import DialogShareDepartment from "@/features/workspace/departments/DialogShareDepartment";
+import ShareDepartmentDialog from "@/features/workspace/departments/ShareDepartmentDialog";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
-import DialogUpdateDepartment from "@/features/workspace/departments/DialogUpdateDepartment";
+import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
@@ -175,8 +175,8 @@ export default function DepartmentDetailPage() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <DialogUpdateDepartment department={department} />
-              <DialogShareDepartment department={department} />
+              <UpdateDepartmentDialog department={department} />
+              <ShareDepartmentDialog department={department} />
               <DialogArchiveEntity
                 id={departmentId ?? ""}
                 entityName={department.department_name}

@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PiPlusBold } from "react-icons/pi";
+import { PiUserCirclePlusDuotone } from "react-icons/pi";
 import { X } from "lucide-react";
 import Image from "next/image";
 
@@ -34,14 +34,13 @@ export default function AddUsersInProjectDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
-          Add Members <PiPlusBold />
+          <PiUserCirclePlusDuotone />
+          Add Users
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[200px]">
         {users.map((user) => {
-          const isSelected = selectedUsers.some(
-            (u: User) => u._id === user._id
-          );
+          const isSelected = selectedUsers.some((u) => u._id === user._id);
           return (
             <DropdownMenuItem
               key={user._id}

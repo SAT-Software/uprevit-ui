@@ -14,11 +14,11 @@ import {
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import ProjectPageProductsTable from "@/features/workspace/projects/ProjectPageProductsTable";
-import DialogShareProject from "@/features/workspace/projects/DialogShareProject";
+import ShareProjectDialog from "@/features/workspace/projects/ShareProjectDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { Item } from "@/features/workspace/projects/ProjectPageProductsTable";
 import { AuditLog } from "@/types/audit-log";
-import DialogUpdateProject from "@/features/workspace/projects/DialogUpdateProject";
+import UpdateProjectDialog from "@/features/workspace/projects/UpdateProjectDialog";
 import Link from "next/link";
 
 interface ProjectUser {
@@ -173,8 +173,8 @@ export default function ProjectDetailPage() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <DialogUpdateProject project={project} />
-              <DialogShareProject project={project} />
+              <UpdateProjectDialog project={project} />
+              <ShareProjectDialog project={project} />
               <DialogArchiveEntity
                 id={projectId ?? ""}
                 entityName={project.project_name}

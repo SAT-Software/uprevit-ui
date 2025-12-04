@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PiPlusBold } from "react-icons/pi";
+import { PiPlusBold, PiUserCirclePlusDuotone } from "react-icons/pi";
 import { X } from "lucide-react";
 import Image from "next/image";
 
@@ -34,7 +34,8 @@ export default function AddUsersInDepartmentDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
-          Add Users <PiPlusBold />
+          <PiUserCirclePlusDuotone />
+          Add Users
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[200px]">
