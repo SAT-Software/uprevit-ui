@@ -36,6 +36,7 @@ import {
   PiKanbanDuotone,
   PiPackageDuotone,
 } from "react-icons/pi";
+import { Progress } from "@/components/ui/progress";
 
 export type Item = {
   _id: string;
@@ -177,9 +178,9 @@ const columns: ColumnDef<Item>[] = [
       />
     ),
     cell: ({ row }) => (
-      <div className="text-sm font-medium">
-        {row.getValue("master_version")}
-      </div>
+      <Badge variant="secondary" className="font-mono text-xs">
+        v{row.getValue("master_version")}
+      </Badge>
     ),
   },
   {
@@ -191,11 +192,17 @@ const columns: ColumnDef<Item>[] = [
         icon={PiChartPieSliceDuotone}
       />
     ),
-    cell: ({ row }) => (
-      <div className="text-sm font-medium">
-        {row.getValue("complete_count")} %
-      </div>
-    ),
+    cell: ({ row }) => {
+      const progress = (row.getValue("complete_count") as number) || 0;
+      return (
+        <div className="flex items-center gap-3 min-w-[120px]">
+          <Progress value={progress} className="h-2 w-full" />
+          <span className="text-sm font-medium text-muted-foreground w-9 text-right">
+            {progress}%
+          </span>
+        </div>
+      );
+    },
   },
 ];
 

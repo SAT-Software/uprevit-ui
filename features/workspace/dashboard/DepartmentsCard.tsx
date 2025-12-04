@@ -1,7 +1,7 @@
 import { CalendarClock, Text } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PiCirclesThreePlusDuotone } from "react-icons/pi";
+import { PiBuildingsDuotone } from "react-icons/pi";
 import { DepartmentsProps } from "../departments/DepartmentsCard";
 
 function Departments({ departments }: { departments: DepartmentsProps[] }) {
@@ -26,7 +26,7 @@ function Departments({ departments }: { departments: DepartmentsProps[] }) {
                 />
               ) : (
                 <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-                  <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground" />
+                  <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground" />
                 </div>
               )}
             </div>

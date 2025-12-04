@@ -4,6 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -15,51 +17,138 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRouter } from "next/navigation";
 import { Project } from "@/types/project";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  PiCalendarDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+  PiHashDuotone,
+  PiInfoDuotone,
+  PiKanbanDuotone,
+  PiUserCircleGearDuotone,
+  PiUsersDuotone,
+} from "react-icons/pi";
+
+// Helper component for sortable headers
+const SortableHeader = ({
+  column,
+  title,
+  icon: Icon,
+}: {
+  column: any;
+  title: string;
+  icon: any;
+}) => {
+  return (
+    <button
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span>{title}</span>
+        </div>
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
+        ) : (
+          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
+        )}
+      </div>
+    </button>
+  );
+};
 
 const columns: ColumnDef<Project>[] = [
   {
-    header: "Project Number",
     accessorKey: "project_number",
+    size: 180,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Project Number"
+        icon={PiHashDuotone}
+      />
+    ),
     cell: ({ row }) => (
-      <div className="text-xs font-medium">
+      <div className="text-sm font-medium">
         {row.getValue("project_number")}
       </div>
     ),
   },
   {
-    header: "Project Name",
     accessorKey: "project_name",
+    size: 240,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Project Name"
+        icon={PiKanbanDuotone}
+      />
+    ),
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("project_name")}</p>;
+      return (
+        <p className="text-sm font-medium">{row.getValue("project_name")}</p>
+      );
     },
   },
   {
-    header: "Project Description",
     accessorKey: "project_description",
+    size: 340,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Description"
+        icon={PiInfoDuotone}
+      />
+    ),
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("project_description")}</p>;
+      return (
+        <p className="text-sm font-medium truncate">
+          {row.getValue("project_description")}
+        </p>
+      );
     },
   },
   {
-    header: "Users",
     accessorKey: "users",
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Users" icon={PiUsersDuotone} />
+    ),
     cell: ({ row }) => {
       const users = row.original.users?.length || 0;
-      return <p className="text-xs">{users}</p>;
+      return <p className="text-sm font-medium">{users}</p>;
     },
   },
   {
-    header: "Manager",
     accessorKey: "project_manager",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Manager"
+        icon={PiUserCircleGearDuotone}
+      />
+    ),
     cell: ({ row }) => {
-      return <p className="text-xs">{row.getValue("project_manager")}</p>;
+      return (
+        <p className="text-sm font-medium">{row.getValue("project_manager")}</p>
+      );
     },
   },
   {
-    header: "Created by - on",
     accessorKey: "createdOn",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Created"
+        icon={PiCalendarDuotone}
+      />
+    ),
     cell: ({ row }) => {
       const createdBy = row.original.auditLogs?.filter(
         (log) => log.action === "create"
@@ -69,23 +158,27 @@ const columns: ColumnDef<Project>[] = [
       )[0]?.actionAt;
       if (createdBy && createdAt)
         return (
-          <div className="">
-            <p className="text-xs  font-medium">{createdBy}</p>
+          <div className="flex flex-col">
+            <p className="text-sm font-medium">{createdBy}</p>
             <p className="text-xs text-muted-foreground">
-              {createdAt &&
-                Intl.DateTimeFormat("en-US", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                }).format(new Date(createdAt))}
+              {Intl.DateTimeFormat("en-US", {
+                dateStyle: "medium",
+              }).format(new Date(createdAt))}
             </p>
           </div>
         );
-      return <span className="text-xs text-muted-foreground">N/A</span>;
+      return <span className="text-sm text-muted-foreground">N/A</span>;
     },
   },
   {
-    header: "Modified by - on",
     accessorKey: "modifiedOn",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Modified"
+        icon={PiCalendarDuotone}
+      />
+    ),
     cell: ({ row }) => {
       const modifiedBy = row.original.auditLogs?.filter(
         (log) => log.action === "update"
@@ -95,18 +188,16 @@ const columns: ColumnDef<Project>[] = [
       )[0]?.actionAt;
       if (modifiedBy && modifiedAt)
         return (
-          <div className="">
-            <p className="text-xs  font-medium">{modifiedBy}</p>
+          <div className="flex flex-col">
+            <p className="text-sm font-medium">{modifiedBy}</p>
             <p className="text-xs text-muted-foreground">
-              {modifiedAt &&
-                Intl.DateTimeFormat("en-US", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                }).format(new Date(modifiedAt))}
+              {Intl.DateTimeFormat("en-US", {
+                dateStyle: "medium",
+              }).format(new Date(modifiedAt))}
             </p>
           </div>
         );
-      return <span className="text-xs text-muted-foreground">N/A</span>;
+      return <span className="text-sm text-muted-foreground">N/A</span>;
     },
   },
 ];
@@ -117,22 +208,32 @@ export default function DepartmentPageProjectsTable({
   data: Project[];
 }) {
   const router = useRouter();
-  // eslint-disable-next-line react-hooks/incompatible-library
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
   });
 
   return (
-    <div className="border border-input rounded-lg mt-4">
+    <div className="w-full border border-border rounded-lg overflow-hidden">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="border-r border-border"
+                    style={{ width: header.getSize() }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -163,11 +264,20 @@ export default function DepartmentPageProjectsTable({
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
-              >
-                No projects in this department yet.
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
+                  <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+                    <PiKanbanDuotone className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-medium text-foreground">
+                      No projects found
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Get started by creating a new project
+                    </p>
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           )}

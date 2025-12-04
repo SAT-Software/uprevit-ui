@@ -57,9 +57,9 @@ export default function DialogShareDepartment({
       <AlertDialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="secondary" size="sm">
               <PiShareNetworkDuotone className="h-4 w-4" />
-              <span className="sr-only">Share</span>
+              Share
             </Button>
           </TooltipTrigger>
           <TooltipContent>

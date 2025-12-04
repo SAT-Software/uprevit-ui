@@ -21,9 +21,9 @@ import {
   PiArchiveDuotone,
   PiBookmarkSimpleDuotone,
   PiBookOpenDuotone,
-  PiCirclesThreePlusDuotone,
+  PiBuildingsDuotone,
   PiDatabaseDuotone,
-  PiDiamondsFourDuotone,
+  PiHouseDuotone,
   PiFolderOpenDuotone,
   PiGearDuotone,
   PiImageSquareDuotone,
@@ -31,7 +31,7 @@ import {
   PiLayoutDuotone,
   PiMicrosoftExcelLogoDuotone,
   PiPictureInPictureDuotone,
-  PiStackPlusDuotone,
+  PiPackageDuotone,
   PiTagChevronDuotone,
 } from "react-icons/pi";
 import { usePathname } from "next/navigation";
@@ -47,12 +47,12 @@ const data = {
         {
           title: "Dashboard",
           url: "/dashboard",
-          icon: PiDiamondsFourDuotone,
+          icon: PiHouseDuotone,
         },
         {
           title: "Departments",
           url: "/departments",
-          icon: PiCirclesThreePlusDuotone,
+          icon: PiBuildingsDuotone,
         },
         {
           title: "Projects",
@@ -62,7 +62,7 @@ const data = {
         {
           title: "Products",
           url: "/products",
-          icon: PiStackPlusDuotone,
+          icon: PiPackageDuotone,
         },
       ],
     },

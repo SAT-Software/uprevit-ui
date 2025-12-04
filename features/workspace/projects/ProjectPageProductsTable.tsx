@@ -4,6 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -19,6 +21,20 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { AuditLog } from "@/types/product";
+import { useState } from "react";
+import {
+  PiBuildingsDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+  PiChartPieSliceDuotone,
+  PiGitBranchDuotone,
+  PiHashDuotone,
+  PiInfoDuotone,
+  PiKanbanDuotone,
+  PiPackageDuotone,
+} from "react-icons/pi";
+import { Progress } from "@/components/ui/progress";
 
 export type Item = {
   _id: string;
@@ -44,18 +60,58 @@ export type Item = {
   complete_count: number;
 };
 
+// Helper component for sortable headers
+const SortableHeader = ({
+  column,
+  title,
+  icon: Icon,
+}: {
+  column: any;
+  title: string;
+  icon: any;
+}) => {
+  return (
+    <button
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span>{title}</span>
+        </div>
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
+        ) : (
+          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
+        )}
+      </div>
+    </button>
+  );
+};
+
 const columns: ColumnDef<Item>[] = [
   {
-    header: "PPN",
     accessorKey: "product_plan_number",
+    header: ({ column }) => (
+      <SortableHeader column={column} title="PPN" icon={PiHashDuotone} />
+    ),
     cell: ({ row }) => {
       const ppn = row.getValue("product_plan_number");
       return <div className="text-sm font-medium">{ppn as string}</div>;
     },
   },
   {
-    header: "Product Name",
     accessorKey: "product_name",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Product Name"
+        icon={PiPackageDuotone}
+      />
+    ),
     cell: ({ row }) => {
       return (
         <p className="text-sm font-medium">{row.getValue("product_name")}</p>
@@ -63,8 +119,14 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
-    header: "Project Name",
     accessorKey: "project_name",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Project Name"
+        icon={PiKanbanDuotone}
+      />
+    ),
     cell: ({ row }) => {
       // Assuming project data is available through the data prop
       const project_name = row.original?.project?.[0]?.project_name || "N/A";
@@ -72,8 +134,14 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
-    header: "Department Name",
     accessorKey: "department_name",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Department Name"
+        icon={PiBuildingsDuotone}
+      />
+    ),
     cell: ({ row }) => {
       // Assuming department data is available through the data prop
       const departmentName =
@@ -82,102 +150,85 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
-    header: "Status",
     accessorKey: "status",
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Status" icon={PiInfoDuotone} />
+    ),
     cell: ({ row }) => (
-      <Badge
-        className={cn(
-          row.getValue("status") === "Archived" &&
-            "bg-muted-foreground/60 text-primary-foreground",
-          row.getValue("status") === "Submitted" &&
-            "bg-secondary text-primary-foreground",
-          row.getValue("status") === "Draft" &&
-            "bg-primary text-primary-foreground"
-        )}
-      >
-        {row.getValue("status")}
+      <Badge variant="outline" className="font-normal">
+        <div
+          className={cn("w-2 h-2 rounded-full mr-1", {
+            "bg-green-500": row.original?.status === "submitted",
+            "bg-blue-500": row.original?.status === "draft",
+            "bg-gray-500": row.original?.status === "archived",
+          })}
+        />
+        {row.original?.status}
       </Badge>
     ),
   },
   {
-    header: "Version",
     accessorKey: "master_version",
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Version"
+        icon={PiGitBranchDuotone}
+      />
+    ),
     cell: ({ row }) => (
-      <div className="text-sm font-medium">
-        {row.getValue("master_version")}
-      </div>
+      <Badge variant="secondary" className="font-mono text-xs">
+        v{row.getValue("master_version")}
+      </Badge>
     ),
   },
   {
-    header: "Progress",
     accessorKey: "complete_count",
-    cell: ({ row }) => (
-      <div className="text-sm font-medium">
-        {row.getValue("complete_count") || 0} %
-      </div>
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Progress"
+        icon={PiChartPieSliceDuotone}
+      />
     ),
+    cell: ({ row }) => {
+      const progress = (row.getValue("complete_count") as number) || 0;
+      return (
+        <div className="flex items-center gap-3 min-w-[120px]">
+          <Progress value={progress} className="h-2 w-full" />
+          <span className="text-sm font-medium text-muted-foreground w-9 text-right">
+            {progress}%
+          </span>
+        </div>
+      );
+    },
   },
-  // {
-  //   header: "Created by - on",
-  //   accessorKey: "createdOn",
-  //   cell: ({ row }) => {
-  //     const createdBy = row.original.auditLogs?.filter(
-  //       (log) => log.action === "create"
-  //     )[0]?.actionBy;
-  //     const createdAt = row.original.auditLogs?.filter(
-  //       (log) => log.action === "create"
-  //     )[0]?.actionAt;
-  //     return (
-  //       <div className="">
-  //         <p className="text-xs  font-medium">{createdBy}</p>
-  //         <p className="text-xs text-muted-foreground">
-  //           {createdAt ? createdAt.toLocaleString().slice(0, 10) : "N/A"}
-  //         </p>
-  //       </div>
-  //     );
-  //   },
-  // },
-  // {
-  //   header: "Modified by - on",
-  //   accessorKey: "modifiedOn",
-  //   cell: ({ row }) => {
-  //     const modifiedBy = row.original.auditLogs?.filter(
-  //       (log) => log.action === "update"
-  //     )[0]?.actionBy;
-  //     const modifiedAt = row.original.auditLogs?.filter(
-  //       (log) => log.action === "update"
-  //     )[0]?.actionAt;
-  //     return (
-  //       <div className="">
-  //         <p className="text-xs  font-medium">{modifiedBy}</p>
-  //         <p className="text-xs text-muted-foreground">
-  //           {modifiedAt ? modifiedAt.toLocaleString().slice(0, 10) : "N/A"}
-  //         </p>
-  //       </div>
-  //     );
-  //   },
-  // },
 ];
 
 export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
-  console.log("Products Table Data:", data);
   const router = useRouter();
-  // eslint-disable-next-line react-hooks/incompatible-library
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
   });
 
   return (
-    <div className="border border-input rounded-lg mt-4">
+    <div className="w-full border border-border rounded-lg overflow-hidden">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="border-r border-border">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -213,7 +264,19 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                There are no products in this project.
+                <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
+                  <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+                    <PiPackageDuotone className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-medium text-foreground">
+                      No products found
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      This project doesn't have any products yet.
+                    </p>
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           )}
