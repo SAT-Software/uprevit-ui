@@ -71,9 +71,9 @@ export default function DialogArchiveEntity({
       <DialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="secondary" size="sm">
               <PiArchiveDuotone className="h-4 w-4" />
-              <span className="sr-only">Archive</span>
+              Archive
             </Button>
           </TooltipTrigger>
           <TooltipContent>

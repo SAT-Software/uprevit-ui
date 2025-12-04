@@ -207,14 +207,6 @@ export function AppHeader() {
                         <BreadcrumbItem>
                           <Link href={`/${section}`}>{sectionData?.title}</Link>
                         </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                          <BreadcrumbPage>
-                            <span className="flex items-center gap-1">
-                              {id}
-                            </span>
-                          </BreadcrumbPage>
-                        </BreadcrumbItem>
                       </BreadcrumbList>
                     </Breadcrumb>
                   </div>

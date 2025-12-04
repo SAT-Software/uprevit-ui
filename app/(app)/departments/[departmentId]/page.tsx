@@ -6,11 +6,13 @@ import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
-  PiArrowLeftDuotone,
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiTextAlignJustifyDuotone,
   PiUserDuotone,
+  PiCaretRightDuotone,
+  PiHouseDuotone,
+  PiCirclesThreePlusDuotone,
+  PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
 import DialogShareDepartment from "@/features/workspace/departments/DialogShareDepartment";
@@ -18,20 +20,8 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
 import DialogUpdateDepartment from "@/features/workspace/departments/DialogUpdateDepartment";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-
-interface DepartmentUser {
-  _id: string;
-  name: string;
-  email: string;
-  profileAvatar?: string;
-}
+import Link from "next/link";
 
 interface DepartmentUser {
   _id: string;
@@ -53,20 +43,29 @@ export default function DepartmentDetailPage() {
       (p: Project) => p.department_id === departmentId
     ) || [];
 
-  console.log("Department by Id:", data);
-  console.log("Projects for department:", projectsData);
-
-  if (isLoading || !department) {
+  if (isLoading) {
     return (
-      <div className="p-4">
-        <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg p-6">
-          Loading department...
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
+          <div className="h-4 w-4 bg-muted rounded animate-pulse" />
+          <div className="h-3 w-3 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl p-6 w-full h-full">
+          <div className="flex flex-col md:flex-row gap-6 items-start border-b border-border pb-6">
+            <div className="h-32 w-32 shrink-0 rounded-xl bg-muted animate-pulse" />
+            <div className="flex flex-col gap-3 w-full">
+              <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-1/4 bg-muted rounded animate-pulse" />
+              <div className="h-16 w-full bg-muted rounded animate-pulse mt-2" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (isError) return notFound();
+  if (isError || !department) return notFound();
 
   const auditLogs = (department.auditLogs as AuditLog[]) || [];
   const creationLog = auditLogs.find((log) => log.action === "create");
@@ -75,6 +74,7 @@ export default function DepartmentDetailPage() {
     .sort(
       (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
     )[0];
+
   const formatAuditDate = (isoDate: string) => {
     const date = new Date(isoDate);
     if (Number.isNaN(date.getTime())) {
@@ -88,145 +88,160 @@ export default function DepartmentDetailPage() {
   };
 
   return (
-    <div className="p-4">
-      <div className="mx-auto bg-background overflow-hidden w-full h-full border border-input rounded-lg">
-        <div className="relative h-64 w-full rounded-t-lg overflow-hidden mb-6">
-          {department?.image ? (
-            <Image
-              src={department.image}
-              alt={`${department.department_name} cover image`}
-              layout="fill"
-              objectFit="cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full bg-muted rounded-t-md">
-              <PiKanbanDuotone className="w-24 h-24 text-muted-foreground/60" />
-            </div>
-          )}
-          <div className="absolute top-2 left-2 flex space-x-1 bg-background/80 rounded">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={() => window.history.back()} variant="ghost">
-                  <PiArrowLeftDuotone size={18} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Go Back</TooltipContent>
-            </Tooltip>
-          </div>
-          <div className="absolute top-2 right-2 flex space-x-1 bg-background/80 rounded">
-            <DialogUpdateDepartment department={department} />
-            <DialogShareDepartment department={department} />
-            <DialogArchiveEntity
-              id={departmentId ?? ""}
-              entityName={department.department_name}
-              entityType="department"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 px-4 py-4">
-          <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-bold">{department.department_name}</h1>
+    <div className="flex flex-col gap-2 p-2 h-full">
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
+        <Link
+          href="/dashboard"
+          className="hover:text-foreground transition-colors flex items-center"
+        >
+          <PiHouseDuotone className="w-4 h-4" />
+        </Link>
+        <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
+        <Link
+          href="/departments"
+          className="hover:text-foreground transition-colors"
+        >
+          Departments
+        </Link>
+        <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
+        <span className="text-foreground font-medium truncate max-w-[200px]">
+          {department.department_name}
+        </span>
+      </div>
 
-            {/* Manager Name */}
-            <div className="flex items-center space-x-2">
-              <PiUserDuotone className="h-5 w-5 text-gray-500" />
-              <p className="text-sm text-gray-600">
-                Manager:{" "}
-                <span className="font-medium">{department.manager}</span>
-              </p>
-            </div>
-
-            {/* Description */}
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <PiTextAlignJustifyDuotone className="w-5 h-5" />
-              {department.department_description}
-            </p>
-
-            <div className="flex items-center space-x-2">
-              {(() => {
-                const usersForDialog = (
-                  (department.users as DepartmentUser[]) || []
-                ).map((u: DepartmentUser) => ({
-                  _id: u._id,
-                  name: u.name,
-                  email: u.email,
-                  profileAvatar: u.profileAvatar,
-                }));
-                return (
-                  <MembersInlineTrigger
-                    users={usersForDialog}
-                    titlePrefix={department.department_name}
-                  />
-                );
-              })()}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-4">
-            <div className="flex w-full max-w-md flex-col items-end gap-3">
-              {creationLog || latestUpdateLog ? (
-                <div className="flex w-full flex-col gap-3">
-                  {creationLog && (
-                    <div className="flex flex-col items-end rounded-xl  bg-background/90 p-4 text-right shadow-sm">
-                      <Badge variant="outline">Created</Badge>
-                      <div className="mt-3 flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <PiUserDuotone className="h-4 w-4 text-muted-foreground" />
-                          <p>
-                            <span className="text-muted-foreground">By</span>{" "}
-                            <span className="font-medium">
-                              {creationLog.actionBy}
-                            </span>
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <PiCalendarDuotone className="h-4 w-4" />
-                          <p>
-                            <span className="text-muted-foreground">At</span>{" "}
-                            <time dateTime={creationLog.actionAt}>
-                              {formatAuditDate(creationLog.actionAt)}
-                            </time>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {latestUpdateLog && (
-                    <div className="flex flex-col items-end rounded-xl  bg-background/90 p-4 text-right shadow-sm">
-                      <Badge variant="secondary">Last Updated</Badge>
-                      <div className="mt-3 flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <PiUserDuotone className="h-4 w-4 text-muted-foreground" />
-                          <p>
-                            <span className="text-muted-foreground">By</span>{" "}
-                            <span className="font-medium">
-                              {latestUpdateLog.actionBy}
-                            </span>
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <PiCalendarDuotone className="h-4 w-4" />
-                          <p>
-                            <span className="text-muted-foreground">At</span>{" "}
-                            <time dateTime={latestUpdateLog.actionAt}>
-                              {formatAuditDate(latestUpdateLog.actionAt)}
-                            </time>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+      <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
+          <div className="flex flex-col md:flex-row gap-6 items-start w-full">
+            {/* Image */}
+            <div className="relative h-24 w-24 md:h-32 md:w-32 shrink-0 rounded-xl overflow-hidden border border-border bg-muted shadow-sm">
+              {department?.image ? (
+                <Image
+                  src={department.image}
+                  alt={`${department.department_name} cover image`}
+                  fill
+                  className="object-cover"
+                />
               ) : (
-                <div className="rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
-                  No audit history available yet.
+                <div className="flex items-center justify-center w-full h-full bg-muted/50">
+                  <PiKanbanDuotone className="w-12 h-12 text-muted-foreground/40" />
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex flex-col gap-3 w-full min-w-0">
+              <div className="flex flex-col gap-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                  {department.department_name}
+                </h1>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <PiUserCircleGearDuotone className="w-4 h-4" />
+                  <span className="text-sm">
+                    Manager:{" "}
+                    <span className="text-foreground font-medium">
+                      {department.manager || "N/A"}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
+                {department.department_description}
+              </p>
+
+              <div className="flex items-center gap-4 mt-1">
+                {(() => {
+                  const usersForDialog = (
+                    (department.users as DepartmentUser[]) || []
+                  ).map((u: DepartmentUser) => ({
+                    _id: u._id,
+                    name: u.name,
+                    email: u.email,
+                    profileAvatar: u.profileAvatar,
+                  }));
+                  return (
+                    <MembersInlineTrigger
+                      users={usersForDialog}
+                      titlePrefix={department.department_name}
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* Actions & Meta */}
+          <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <DialogUpdateDepartment department={department} />
+              <DialogShareDepartment department={department} />
+              <DialogArchiveEntity
+                id={departmentId ?? ""}
+                entityName={department.department_name}
+                entityType="department"
+              />
+            </div>
+
+            {/* Audit Badges */}
+            <div className="flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground w-full">
+              {creationLog && (
+                <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
+                  <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">
+                    Created {formatAuditDate(creationLog.actionAt)} -{" "}
+                    <span className="font-semibold">
+                      {creationLog.actionBy}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {latestUpdateLog && (
+                <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
+                  <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">
+                    Updated {formatAuditDate(latestUpdateLog.actionAt)} -{" "}
+                    <span className="font-semibold">
+                      {latestUpdateLog.actionBy}
+                    </span>
+                  </span>
                 </div>
               )}
             </div>
           </div>
         </div>
-        <div className="px-4 pb-4 mt-6">
-          <h2 className="text-xl font-semibold mt-6">Projects</h2>
-          <DepartmentPageProjectsTable data={projects} />
+
+        {/* Projects Section */}
+        <div className="flex flex-col gap-2 px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground">
+                Projects
+              </h2>
+              <Badge variant="secondary" className="rounded-full px-2">
+                {projects.length}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="w-full">
+            {projects.length > 0 ? (
+              <DepartmentPageProjectsTable data={projects} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
+                <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
+                  <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground/50" />
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  No projects found
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This department doesn't have any projects yet.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -175,7 +175,7 @@ export function MembersInlineTrigger({
                 {m?.profileAvatar ? (
                   <AvatarImage src={m.profileAvatar} alt={m.name} />
                 ) : null}
-                <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
+                <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
                   {m?.name
                     ?.split(" ")
                     ?.map((p) => p[0]?.toUpperCase())
@@ -188,7 +188,7 @@ export function MembersInlineTrigger({
 
           {extra > 0 ? (
             <Avatar className="h-7 w-7 ring-2 ring-background">
-              <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
+              <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
                 +{extra}
               </AvatarFallback>
             </Avatar>
@@ -196,7 +196,7 @@ export function MembersInlineTrigger({
 
           {users?.length === 0 ? (
             <Avatar className="h-7 w-7 ring-2 ring-background">
-              <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">
+              <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
                 0
               </AvatarFallback>
             </Avatar>

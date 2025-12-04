@@ -141,8 +141,13 @@ export default function DialogUpdateDepartment({
       <DialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-2"
+            >
               <PiPencilCircleDuotone size={18} />
+              <span>Update Department</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>

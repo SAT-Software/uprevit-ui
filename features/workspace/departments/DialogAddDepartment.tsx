@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PiCirclesThreePlusDuotone } from "react-icons/pi";
+import { PiCirclesThreePlusDuotone, PiPlusCircleDuotone } from "react-icons/pi";
 import Image from "next/image";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
@@ -125,6 +125,7 @@ export default function DialogAddDepartment() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="flex items-center gap-2">
+          <PiPlusCircleDuotone className="w-5 h-5" />
           Create New Department
         </Button>
       </DialogTrigger>
