@@ -606,7 +606,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowUpdateDialog(true), 100);
               }}
             >
-              <PiPencilCircleDuotone className="mr-2 h-4 w-4" />
+              <PiPencilCircleDuotone className=" h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -619,7 +619,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowArchiveDialog(true), 100);
               }}
             >
-              <PiArchiveDuotone className="mr-2 h-4 w-4" />
+              <PiArchiveDuotone className=" h-4 w-4" />
               <span>Archive</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -632,7 +632,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowShareDialog(true), 100);
               }}
             >
-              <PiShareDuotone className="mr-2 h-4 w-4" />
+              <PiShareDuotone className=" h-4 w-4" />
               <span>Share</span>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -642,7 +642,7 @@ function RowActions({ row }: { row: { original: Item } }) {
                 setTimeout(() => setShowBookmarkDialog(true), 100);
               }}
             >
-              <PiBookmarkDuotone className="mr-2 h-4 w-4" />
+              <PiBookmarkDuotone className=" h-4 w-4" />
               <span>Add to Bookmarks</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
