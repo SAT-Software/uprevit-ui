@@ -11,7 +11,7 @@ import {
   PiUserDuotone,
   PiCaretRightDuotone,
   PiHouseDuotone,
-  PiCirclesThreePlusDuotone,
+  PiBuildingsDuotone,
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
@@ -216,12 +216,11 @@ export default function DepartmentDetailPage() {
         <div className="flex flex-col gap-2 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-foreground">
-                Projects
-              </h2>
-              <Badge variant="secondary" className="rounded-full px-2">
-                {projects.length}
-              </Badge>
+              <p className="text-base font-semibold">Projects</p>
+              <div className="w-1 h-1 bg-border border border-border rounded-full" />
+              <p className="text-xs text-muted-foreground font-medium">
+                Latest projects in this department
+              </p>
             </div>
           </div>
 
@@ -231,7 +230,7 @@ export default function DepartmentDetailPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
                 <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
-                  <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground/50" />
+                  <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
                 </div>
                 <p className="text-sm font-medium text-foreground">
                   No projects found

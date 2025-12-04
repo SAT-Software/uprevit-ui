@@ -13,7 +13,7 @@ import Link from "next/link";
 import {
   PiArrowCircleUpRightDuotone,
   PiCalendarDuotone,
-  PiCirclesThreePlusDuotone,
+  PiBuildingsDuotone,
 } from "react-icons/pi";
 
 interface DepartmentUser {
@@ -58,7 +58,7 @@ function DepartmentEmptyState() {
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30">
       <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground" />
+        <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-foreground">
@@ -76,7 +76,7 @@ function DepartmentErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
       <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
-        <PiCirclesThreePlusDuotone className="w-8 h-8 text-destructive" />
+        <PiBuildingsDuotone className="w-8 h-8 text-destructive" />
       </div>
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-destructive">
@@ -120,7 +120,7 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full">
-            <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground/50" />
+            <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { PiArchiveDuotone, PiCirclesThreePlusDuotone } from "react-icons/pi";
+import { PiArchiveDuotone, PiBuildingsDuotone } from "react-icons/pi";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -61,7 +61,7 @@ export function ArchivedDepartments({ onRowClick }: ArchivedDepartmentsProps) {
               </p>
             </div>
           </div>
-          <PiCirclesThreePlusDuotone
+          <PiBuildingsDuotone
             className="size-5 opacity-70"
             aria-hidden="true"
           />

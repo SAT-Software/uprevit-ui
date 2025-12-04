@@ -4,9 +4,9 @@ import { useGetDashboardStats } from "@/hooks/dashboard/useGetDashboardStats";
 import { cn } from "@/lib/utils";
 import { IconType } from "react-icons";
 import {
-  PiCirclesThreePlusDuotone,
+  PiBuildingsDuotone,
   PiKanbanDuotone,
-  PiStackPlusDuotone,
+  PiPackageDuotone,
   PiFolderOpenDuotone,
 } from "react-icons/pi";
 export interface StatsCardProps {
@@ -48,7 +48,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                   : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
               }
             >
-              <PiStackPlusDuotone className="animate-pulse" />
+              <PiPackageDuotone className="animate-pulse" />
             </div>
             <div>
               <div className="font-medium text-xs uppercase text-muted-foreground">
@@ -69,7 +69,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                   : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
               }
             >
-              <PiCirclesThreePlusDuotone className="animate-pulse" />
+              <PiBuildingsDuotone className="animate-pulse" />
             </div>
             <div>
               <div className="font-medium text-xs uppercase text-muted-foreground">
@@ -147,7 +147,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                 : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
             }
           >
-            <PiStackPlusDuotone />
+            <PiPackageDuotone />
           </div>
 
           <div>
@@ -171,7 +171,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                 : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
             }
           >
-            <PiCirclesThreePlusDuotone />
+            <PiBuildingsDuotone />
           </div>
 
           <div>

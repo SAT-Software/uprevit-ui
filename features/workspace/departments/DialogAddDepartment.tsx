@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PiCirclesThreePlusDuotone, PiPlusCircleDuotone } from "react-icons/pi";
+import { PiBuildingsDuotone, PiPlusCircleDuotone } from "react-icons/pi";
 import Image from "next/image";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
@@ -326,7 +326,7 @@ function ProfileBg({
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-            <PiCirclesThreePlusDuotone className="w-24 h-24 text-muted-foreground/60" />
+            <PiBuildingsDuotone className="w-24 h-24 text-muted-foreground/60" />
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center gap-2">

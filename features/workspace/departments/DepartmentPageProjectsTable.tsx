@@ -17,8 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRouter } from "next/navigation";
 import { Project } from "@/types/project";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   PiCalendarDuotone,
@@ -28,7 +28,7 @@ import {
   PiHashDuotone,
   PiInfoDuotone,
   PiKanbanDuotone,
-  PiUserDuotone,
+  PiUserCircleGearDuotone,
   PiUsersDuotone,
 } from "react-icons/pi";
 
@@ -67,6 +67,7 @@ const SortableHeader = ({
 const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "project_number",
+    size: 180,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -82,6 +83,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "project_name",
+    size: 240,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -97,6 +99,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "project_description",
+    size: 340,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -106,7 +109,7 @@ const columns: ColumnDef<Project>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <p className="text-sm font-medium truncate max-w-[200px]">
+        <p className="text-sm font-medium truncate">
           {row.getValue("project_description")}
         </p>
       );
@@ -125,7 +128,11 @@ const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "project_manager",
     header: ({ column }) => (
-      <SortableHeader column={column} title="Manager" icon={PiUserDuotone} />
+      <SortableHeader
+        column={column}
+        title="Manager"
+        icon={PiUserCircleGearDuotone}
+      />
     ),
     cell: ({ row }) => {
       return (
@@ -222,7 +229,11 @@ export default function DepartmentPageProjectsTable({
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className="border-r border-border">
+                  <TableHead
+                    key={header.id}
+                    className="border-r border-border"
+                    style={{ width: header.getSize() }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

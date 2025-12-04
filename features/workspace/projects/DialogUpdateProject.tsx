@@ -18,10 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  PiCirclesThreePlusDuotone,
-  PiPencilCircleDuotone,
-} from "react-icons/pi";
+import { PiBuildingsDuotone, PiPencilCircleDuotone } from "react-icons/pi";
 import Image from "next/image";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
@@ -156,8 +153,9 @@ export default function DialogUpdateProject({
       <DialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <PiPencilCircleDuotone size={18} />
+            <Button variant="secondary" size="sm">
+              <PiPencilCircleDuotone />
+              Update
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -444,7 +442,7 @@ function ProfileBg({
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-            <PiCirclesThreePlusDuotone className="w-24 h-24 text-muted-foreground/60" />
+            <PiBuildingsDuotone className="w-24 h-24 text-muted-foreground/60" />
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center gap-2">

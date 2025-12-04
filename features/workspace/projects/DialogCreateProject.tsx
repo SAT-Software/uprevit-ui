@@ -152,13 +152,10 @@ export default function DialogCreateProject({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ? (
-          trigger
-        ) : (
-          <Button variant="default" className="flex items-center gap-2">
-            Create New Project <PiPlusCircleDuotone />
-          </Button>
-        )}
+        <Button variant="default" className="flex items-center gap-2">
+          <PiPlusCircleDuotone />
+          Create New Project
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">

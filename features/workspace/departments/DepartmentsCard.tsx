@@ -13,7 +13,7 @@ import Link from "next/link";
 import {
   PiArrowCircleUpRightDuotone,
   PiCalendarDuotone,
-  PiCirclesThreePlusDuotone,
+  PiBuildingsDuotone,
 } from "react-icons/pi";
 
 interface DepartmentUser {
@@ -58,7 +58,7 @@ function DepartmentEmptyState() {
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30">
       <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground" />
+        <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-foreground">
@@ -76,7 +76,7 @@ function DepartmentErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
       <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
-        <PiCirclesThreePlusDuotone className="w-8 h-8 text-destructive" />
+        <PiBuildingsDuotone className="w-8 h-8 text-destructive" />
       </div>
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-destructive">
@@ -110,7 +110,10 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
         </Tooltip>
       </div>
 
-      <div className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
+      <Link
+        href={`/departments/${department._id}`}
+        className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted"
+      >
         {department.image ? (
           <Image
             src={department.image}
@@ -120,13 +123,16 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full">
-            <PiCirclesThreePlusDuotone className="w-8 h-8 text-muted-foreground/50" />
+            <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
           </div>
         )}
-      </div>
+      </Link>
 
       <div className="flex flex-col flex-1 gap-1 min-w-0">
-        <div className="flex flex-col gap-0">
+        <Link
+          href={`/departments/${department._id}`}
+          className="flex flex-col gap-0"
+        >
           <p className="text-base font-semibold text-foreground truncate pr-8">
             {department.department_name}
           </p>
@@ -135,10 +141,13 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
               {department.department_description}
             </span>
           </p>
-        </div>
+        </Link>
 
         <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/50">
+          <Link
+            href={`/departments/${department._id}`}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/50"
+          >
             <PiCalendarDuotone className="w-3.5 h-3.5" />
             <span>
               {department?.auditLogs?.[0]?.actionAt
@@ -147,7 +156,7 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
                   ).toLocaleDateString()
                 : "No activity"}
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center -space-x-[0.525rem] mr-3">
             {(() => {

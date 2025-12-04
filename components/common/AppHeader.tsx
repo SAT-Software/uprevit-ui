@@ -13,13 +13,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   PiChatTeardropDotsDuotone,
-  PiCirclesThreePlusDuotone,
-  PiDiamondsFourDuotone,
+  PiBuildingsDuotone,
+  PiHouseDuotone,
   PiFolderOpenDuotone,
   PiGearDuotone,
   PiKanbanDuotone,
   PiLifebuoyDuotone,
-  PiStackPlusDuotone,
+  PiPackageDuotone,
   PiPresentationChartDuotone,
   PiArchiveDuotone,
   PiBookmarkSimpleDuotone,
@@ -35,12 +35,12 @@ const pathData = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: PiDiamondsFourDuotone,
+    icon: PiHouseDuotone,
   },
   {
     title: "Departments",
     url: "/departments",
-    icon: PiCirclesThreePlusDuotone,
+    icon: PiBuildingsDuotone,
   },
   {
     title: "Projects",
@@ -50,7 +50,7 @@ const pathData = [
   {
     title: "Products",
     url: "/products",
-    icon: PiStackPlusDuotone,
+    icon: PiPackageDuotone,
   },
   {
     title: "Source Files",
