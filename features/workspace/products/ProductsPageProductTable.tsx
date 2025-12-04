@@ -378,10 +378,9 @@ export default function ProductsPageProductTable() {
         <div className="flex items-center justify-start w-full gap-3">
           <FilterBuilder table={table} />
 
-          {/* Toggle columns visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm" className="text-xs">
+              <Button variant="secondary" size="sm">
                 <PiColumnsDuotone />
                 View
               </Button>

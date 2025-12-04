@@ -5,6 +5,7 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { PiCaretCircleDownDuotone, PiCheckCircleDuotone } from "react-icons/pi";
 
 function Select({
   ...props
@@ -40,7 +41,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon
+        <PiCaretCircleDownDuotone
           size={16}
           className="text-muted-foreground/80 in-aria-invalid:text-destructive/80 shrink-0"
         />
@@ -115,7 +116,7 @@ function SelectItem({
     >
       <span className="absolute start-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon size={16} />
+          <PiCheckCircleDuotone size={16} />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
