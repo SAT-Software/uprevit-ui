@@ -264,7 +264,7 @@ function SidebarTrigger({
     <button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      className={cn("ml-0 mr-1 px-0 py-0 cursor-pointer", className)}
+      className={cn("ml-0 px-0 py-0 cursor-pointer", className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();

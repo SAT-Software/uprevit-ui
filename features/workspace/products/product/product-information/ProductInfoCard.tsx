@@ -45,9 +45,6 @@ export default function ProductInformationCard({
 
   return (
     <Card className="rounded-xl shadow-none">
-      <CardHeader className="flex-row justify-between">
-        <CardTitle>Product Information</CardTitle>
-      </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mt-2">
           {fields.map((field, idx) => (

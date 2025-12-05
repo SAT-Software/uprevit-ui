@@ -16,7 +16,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: userProfileData } = useGetUser();
 
   useEffect(() => {
-    if (!auth.isAuthenticated || !auth.user?.profile) router.replace("/");
+    // Don't redirect while auth is still loading - this prevents
+    // redirecting to root on page refresh before auth state is restored
+    if (auth.isLoading) return;
+
+    if (!auth.isAuthenticated || !auth.user?.profile) {
+      router.replace("/");
+      return;
+    }
 
     if (auth.isAuthenticated) {
       const workspaceId = auth.user?.profile?.workspaceId;

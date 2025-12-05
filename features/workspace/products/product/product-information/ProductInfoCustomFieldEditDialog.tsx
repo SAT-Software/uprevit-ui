@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, X, Edit, Trash2, Save } from "lucide-react";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { toast } from "sonner";
+import { PiPencilLineDuotone } from "react-icons/pi";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -238,7 +239,8 @@ export default function ProductInformationCustomFieldEditDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" className="text-xs">
+        <Button size="sm" variant="secondary">
+          <PiPencilLineDuotone />
           Manage Custom Fields
         </Button>
       </DialogTrigger>
