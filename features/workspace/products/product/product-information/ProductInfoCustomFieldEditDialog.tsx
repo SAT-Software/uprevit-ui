@@ -25,10 +25,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, Edit, Trash2, Save } from "lucide-react";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { toast } from "sonner";
-import { PiPencilLineDuotone } from "react-icons/pi";
+import {
+  PiPencilLineDuotone,
+  PiCheckCircleDuotone,
+  PiXCircleDuotone,
+  PiPlusCircleDuotone,
+  PiPencilCircleDuotone,
+  PiTrashDuotone,
+} from "react-icons/pi";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -239,15 +245,24 @@ export default function ProductInformationCustomFieldEditDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary">
-          <PiPencilLineDuotone />
+        <Button
+          size="sm"
+          variant="secondary"
+          className="flex items-center gap-2"
+        >
+          <PiPencilLineDuotone className="w-4 h-4" />
           Manage Custom Fields
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-2xl max-h-[90vh] [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Manage Custom Fields
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Manage Custom Fields</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -255,22 +270,22 @@ export default function ProductInformationCustomFieldEditDialog({
         </DialogDescription>
 
         {/* Tab Navigation */}
-        <div className="border-b px-6 py-3">
+        <div className="border-b px-4 py-3 bg-muted/5">
           <div className="flex gap-2">
             <Button
               size="sm"
-              variant={activeTab === "add" ? "default" : "outline"}
+              variant={activeTab === "add" ? "secondary" : "outline"}
               onClick={() => setActiveTab("add")}
             >
-              <Plus className="h-3 w-3 mr-1" />
+              <PiPlusCircleDuotone className="h-4 w-4 mr-1" />
               Add New Field
             </Button>
             <Button
               size="sm"
-              variant={activeTab === "manage" ? "default" : "outline"}
+              variant={activeTab === "manage" ? "secondary" : "outline"}
               onClick={() => setActiveTab("manage")}
             >
-              <Edit className="h-3 w-3 mr-1" />
+              <PiPencilCircleDuotone className="h-4 w-4 mr-1" />
               Manage Existing Fields
             </Button>
           </div>
@@ -281,7 +296,7 @@ export default function ProductInformationCustomFieldEditDialog({
           {activeTab === "add" ? (
             <form
               id={`edit-custom-fields-form-${id}`}
-              className="p-6"
+              className="p-4"
               onSubmit={handleSubmit(onSubmit)}
               noValidate
             >
@@ -292,8 +307,8 @@ export default function ProductInformationCustomFieldEditDialog({
                     className="space-y-3 p-4 border rounded-lg bg-muted/30"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-muted-foreground">
-                        New Field {index + 1}
+                      <span className="text-base font-medium text-muted-foreground">
+                        New Field
                       </span>
                       {fields.length > 1 && (
                         <Button
@@ -303,7 +318,7 @@ export default function ProductInformationCustomFieldEditDialog({
                           onClick={() => removeCustomField(index)}
                           className="h-6 w-6 p-0"
                         >
-                          <X className="h-3 w-3" />
+                          <PiXCircleDuotone className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
@@ -356,7 +371,7 @@ export default function ProductInformationCustomFieldEditDialog({
               </div>
             </form>
           ) : (
-            <form className="p-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="p-4" onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-4">
                 {manageFields.length > 0 ? (
                   manageFields.map((field, index) => (
@@ -415,7 +430,7 @@ export default function ProductInformationCustomFieldEditDialog({
                           }}
                           disabled={isPending}
                         >
-                          <Save className="h-3 w-3 mr-1" />
+                          <PiCheckCircleDuotone className="h-4 w-4 mr-1" />
                           Update
                         </Button>
                         <Button
@@ -428,7 +443,7 @@ export default function ProductInformationCustomFieldEditDialog({
                           }}
                           disabled={isPending}
                         >
-                          <Trash2 className="h-3 w-3 mr-1" />
+                          <PiTrashDuotone className="h-4 w-4 mr-1" />
                           Delete
                         </Button>
                       </div>
@@ -450,9 +465,10 @@ export default function ProductInformationCustomFieldEditDialog({
           )}
         </div>
 
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
               Close
             </Button>
           </DialogClose>
@@ -462,8 +478,9 @@ export default function ProductInformationCustomFieldEditDialog({
               form={`edit-custom-fields-form-${id}`}
               disabled={isPending}
               aria-busy={isPending}
+              size="sm"
             >
-              <Save className="h-3 w-3 mr-1" />
+              <PiCheckCircleDuotone className="w-4 h-4 mr-1" />
               {isPending ? "Adding..." : "Add Field(s)"}
             </Button>
           )}

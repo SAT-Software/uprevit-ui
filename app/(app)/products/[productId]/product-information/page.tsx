@@ -157,7 +157,7 @@ export default function Page() {
           Products
         </Link>
         <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-        <span className=" truncate max-w-[200px]">
+        <span className="truncate max-w-[200px]">
           {productData.product_name || "Product Details"}
         </span>
         <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
