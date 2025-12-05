@@ -5,6 +5,7 @@ import { toast } from "sonner";
 export function useDeleteBookmarkFolder() {
   const queryClient = useQueryClient();
   const auth = useAuth();
+  const userId = auth?.user?.profile?.userId as string;
 
   return useMutation({
     mutationFn: async (folderId: string) => {
@@ -13,7 +14,7 @@ export function useDeleteBookmarkFolder() {
       }
 
       const res = await fetch(
-        `/api/bookmarks/products/${folderId}?user_id=68d2b37127794dcb43a32425`,
+        `/api/bookmarks/products/${folderId}?user_id=${userId}`,
         {
           method: "DELETE",
           headers: {

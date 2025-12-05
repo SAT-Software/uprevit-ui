@@ -4,20 +4,19 @@ import { AuthContextProps, useAuth } from "react-oidc-context";
 async function getAllUserBookmarkFolders({
   signal,
   auth,
+  userId,
 }: {
   signal: AbortSignal;
   auth: AuthContextProps;
+  userId: string;
 }) {
-  const response = await fetch(
-    "/api/bookmarks/products?userId=68d2b37127794dcb43a32425",
-    {
-      headers: {
-        Authorization: `Bearer ${auth?.user?.access_token}`,
-        "Content-Type": "application/json",
-      },
-      signal,
-    }
-  );
+  const response = await fetch(`/api/bookmarks/products?userId=${userId}`, {
+    headers: {
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
+    },
+    signal,
+  });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch user bookmark folders");
@@ -28,10 +27,12 @@ async function getAllUserBookmarkFolders({
 
 export function useGetAllUserBookmarkFolders() {
   const auth = useAuth();
+  const userId = auth?.user?.profile?.userId as string;
 
   return useQuery({
-    queryKey: ["all-user-bookmark-folders"],
-    queryFn: ({ signal }) => getAllUserBookmarkFolders({ signal, auth }),
-    enabled: auth.isAuthenticated,
+    queryKey: ["all-user-bookmark-folders", userId],
+    queryFn: ({ signal }) =>
+      getAllUserBookmarkFolders({ signal, auth, userId }),
+    enabled: auth.isAuthenticated && !!userId,
   });
 }

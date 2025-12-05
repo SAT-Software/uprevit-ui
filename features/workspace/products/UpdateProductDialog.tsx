@@ -19,6 +19,7 @@ import { Item } from "./ProductsPageProductTable";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { Product } from "@/types/product";
+import { PiXCircleDuotone, PiCheckCircleDuotone } from "react-icons/pi";
 
 export default function UpdateProductDialog({
   product: productData,
@@ -86,8 +87,13 @@ export default function UpdateProductDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Update Product
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Update Product</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -99,7 +105,7 @@ export default function UpdateProductDialog({
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="px-6 pt-4 pb-6">
+          <div className="p-4 space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`${id}-ppn`}>Product Plan Number (PPN)</Label>
               <Input
@@ -191,18 +197,22 @@ export default function UpdateProductDialog({
             </div>
           </div>
         </form>
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
               Cancel
             </Button>
           </DialogClose>
           <Button
             type="submit"
+            size="sm"
+            variant="default"
             form={`update-product-form-${id}`}
             disabled={isPending}
             aria-busy={isPending}
           >
+            <PiCheckCircleDuotone />
             {isPending ? "Updating..." : "Update Product"}
           </Button>
         </DialogFooter>
