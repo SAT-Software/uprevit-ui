@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { PiTrashDuotone } from "react-icons/pi";
+import {
+  PiTrashDuotone,
+  PiXCircleDuotone,
+  PiWarningDuotone,
+} from "react-icons/pi";
 
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -59,31 +61,58 @@ export default function DeleteStandardDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
+        <Button size="sm" variant="destructive">
           <PiTrashDuotone />
+          Delete
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete the compliance standard &quot;
-            {standardName}&quot;. This action cannot be undone.
-          </AlertDialogDescription>
+      <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
+        <AlertDialogHeader className="contents space-y-0 text-left">
+          <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
+            <div className="flex items-center gap-2 text-destructive">
+              <PiWarningDuotone className="w-4 h-4" />
+              <span>Delete Standard</span>
+            </div>
+            <button
+              type="button"
+              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <PiXCircleDuotone size={18} />
+            </button>
+          </AlertDialogTitle>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+        <div className="p-4">
+          <AlertDialogDescription className="text-sm text-muted-foreground">
+            This will permanently delete the compliance standard{" "}
+            <span className="font-semibold text-foreground">
+              &quot;{standardName}&quot;
+            </span>
+            . This action cannot be undone.
+          </AlertDialogDescription>
+        </div>
+        <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setOpen(false)}
+            disabled={isPending}
+          >
+            <PiXCircleDuotone />
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-destructive text-background hover:bg-destructive/90"
+            aria-busy={isPending}
           >
-            {isPending ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
+            <PiTrashDuotone />
+            {isPending ? "Deleting..." : "Delete Standard"}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
