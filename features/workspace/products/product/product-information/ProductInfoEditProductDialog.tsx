@@ -17,7 +17,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { PiPencilCircleDuotone } from "react-icons/pi";
+import {
+  PiPencilCircleDuotone,
+  PiCheckCircleDuotone,
+  PiXCircleDuotone,
+  PiCalendarBlankDuotone,
+} from "react-icons/pi";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -49,6 +60,24 @@ interface FormValues {
   commercialClinical: string;
 }
 
+function formatDate(date: Date | undefined) {
+  if (!date) {
+    return "";
+  }
+  return date.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function isValidDate(date: Date | undefined) {
+  if (!date) {
+    return false;
+  }
+  return !isNaN(date.getTime());
+}
+
 export default function EditProductDialog({
   product,
 }: {
@@ -57,6 +86,8 @@ export default function EditProductDialog({
   const id = useId();
   const [open, setOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
+  const [openTargetDate, setOpenTargetDate] = useState(false);
+  const [openCompletionDate, setOpenCompletionDate] = useState(false);
 
   // Get current product information data - handle both possible data structures
   const initialValues = {
@@ -79,11 +110,17 @@ export default function EditProductDialog({
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<FormValues>({
     defaultValues: initialValues,
     values: initialValues,
     mode: "onSubmit",
   });
+
+  // Watch dates to sync with calendar
+  const targetDateValue = watch("targetDate");
+  const completionDateValue = watch("completionDate");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!product?.id) {
@@ -129,15 +166,24 @@ export default function EditProductDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary">
-          <PiPencilCircleDuotone />
+        <Button
+          size="sm"
+          variant="secondary"
+          className="flex items-center gap-2"
+        >
+          <PiPencilCircleDuotone className="w-4 h-4" />
           Update
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-4xl max-h-[90vh] [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Edit Product Information
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Edit Product Information</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -149,7 +195,7 @@ export default function EditProductDialog({
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="px-6 pt-4 pb-6">
+          <div className="p-4">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Left Column: Basic Info */}
               <div className="space-y-4">
@@ -198,12 +244,55 @@ export default function EditProductDialog({
                   <Label htmlFor={`${id}-target-date`} className="text-sm">
                     Target Date
                   </Label>
-                  <Input
-                    id={`${id}-target-date`}
-                    type="date"
-                    aria-invalid={errors.targetDate ? "true" : "false"}
-                    {...register("targetDate")}
-                  />
+                  <Popover
+                    open={openTargetDate}
+                    onOpenChange={setOpenTargetDate}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id={`${id}-target-date`}
+                        className="h-9 w-full justify-between font-normal"
+                        aria-invalid={errors.targetDate ? "true" : "false"}
+                      >
+                        {targetDateValue
+                          ? new Date(targetDateValue).toLocaleDateString(
+                              "en-US",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
+                          : "Select target date"}
+                        <PiCalendarBlankDuotone />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-60 overflow-hidden p-0 rounded-lg"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={
+                          targetDateValue
+                            ? new Date(targetDateValue)
+                            : undefined
+                        }
+                        captionLayout="dropdown"
+                        onSelect={(selectedDate) => {
+                          if (selectedDate) {
+                            setValue(
+                              "targetDate",
+                              selectedDate.toISOString().split("T")[0]
+                            );
+                          }
+                          setOpenTargetDate(false);
+                        }}
+                        className="w-full"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   {errors.targetDate && (
                     <p role="alert" className="text-xs text-destructive">
                       {errors.targetDate.message}
@@ -216,12 +305,55 @@ export default function EditProductDialog({
                   <Label htmlFor={`${id}-completion-date`} className="text-sm">
                     Completion Date
                   </Label>
-                  <Input
-                    id={`${id}-completion-date`}
-                    type="date"
-                    aria-invalid={errors.completionDate ? "true" : "false"}
-                    {...register("completionDate")}
-                  />
+                  <Popover
+                    open={openCompletionDate}
+                    onOpenChange={setOpenCompletionDate}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id={`${id}-completion-date`}
+                        className="h-9 w-full justify-between font-normal"
+                        aria-invalid={errors.completionDate ? "true" : "false"}
+                      >
+                        {completionDateValue
+                          ? new Date(completionDateValue).toLocaleDateString(
+                              "en-US",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
+                          : "Select completion date"}
+                        <PiCalendarBlankDuotone />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-60 overflow-hidden p-0 rounded-lg"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={
+                          completionDateValue
+                            ? new Date(completionDateValue)
+                            : undefined
+                        }
+                        captionLayout="dropdown"
+                        onSelect={(selectedDate) => {
+                          if (selectedDate) {
+                            setValue(
+                              "completionDate",
+                              selectedDate.toISOString().split("T")[0]
+                            );
+                          }
+                          setOpenCompletionDate(false);
+                        }}
+                        className="w-full"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   {errors.completionDate && (
                     <p role="alert" className="text-xs text-destructive">
                       {errors.completionDate.message}
@@ -324,9 +456,10 @@ export default function EditProductDialog({
             </div>
           </div>
         </form>
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
               Cancel
             </Button>
           </DialogClose>
@@ -335,7 +468,9 @@ export default function EditProductDialog({
             form={`edit-product-info-form-${id}`}
             disabled={isPending}
             aria-busy={isPending}
+            size="sm"
           >
+            <PiCheckCircleDuotone />
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

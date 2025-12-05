@@ -17,7 +17,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { PiPencilSimpleDuotone } from "react-icons/pi";
+import {
+  PiPencilSimpleDuotone,
+  PiXCircleDuotone,
+  PiFloppyDiskDuotone,
+} from "react-icons/pi";
 
 interface FormValues {
   standard: string;
@@ -88,34 +92,45 @@ export default function EditStandardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="p-0.5">
+        <Button size="sm" variant="secondary">
           <PiPencilSimpleDuotone />
+          Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Update the Standard Details
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiPencilSimpleDuotone className="w-4 h-4" />
+              <span>Update Standard Details</span>
+            </div>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
           Update this current compliance standard by providing standard details.
         </DialogDescription>
-        <div className="overflow-y-auto">
-          <div className="px-6 pt-4 pb-6">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              id="update-standard-form"
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-standard`}>Standard Number</Label>
+        <form
+          id={`update-standard-form-${id}`}
+          className="overflow-y-auto"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
+          <div className="p-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-standard`}>Standard Number</Label>
+              <div className="flex flex-col gap-2">
                 <Input
                   id={`${id}-standard`}
-                  placeholder="Enter standard  (e.g., ISO 9001)"
+                  placeholder="Enter standard (e.g., ISO 9001)"
                   type="text"
+                  aria-invalid={errors.standard ? "true" : "false"}
                   {...register("standard", {
-                    required: "Standard  is required",
+                    required: "Standard is required",
                     minLength: {
                       value: 3,
                       message: "Standard must be at least 3 characters",
@@ -123,60 +138,66 @@ export default function EditStandardDialog({
                   })}
                 />
                 {errors.standard && (
-                  <p className="text-sm text-destructive">
+                  <p role="alert" className="text-xs text-destructive">
                     {errors.standard.message}
                   </p>
                 )}
-                <div className="rounded-md bg-blue-50 p-3 text-xs">
-                  <h4 className="mb-2 font-medium text-blue-700">
-                    Standard Number Guidelines
-                  </h4>
-                  <ul className="list-inside list-disc space-y-1 text-blue-600">
-                    <li>
-                      Use official standard designation (e.g., ISO 9001, IEC
-                      60601)
-                    </li>
-                    <li>
-                      Include version/year if applicable (e.g., ISO 13485:2016)
-                    </li>
-                    <li>Use standard industry notation</li>
-                  </ul>
-                </div>
               </div>
+              <div className="rounded-lg bg-muted/50 border border-border p-3 text-xs">
+                <h4 className="mb-2 font-medium text-foreground">
+                  Standard Number Guidelines
+                </h4>
+                <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+                  <li>
+                    Use official standard designation (e.g., ISO 9001, IEC
+                    60601)
+                  </li>
+                  <li>
+                    Include version/year if applicable (e.g., ISO 13485:2016)
+                  </li>
+                  <li>Use standard industry notation</li>
+                </ul>
+              </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
-                <Textarea
-                  id={`${id}-description`}
-                  placeholder="Describe the standard's purpose, scope, and requirements"
-                  className="min-h-[100px] resize-none"
-                  {...register("description", {
-                    maxLength: {
-                      value: 500,
-                      message: "Description must not exceed 500 characters",
-                    },
-                  })}
-                />
-                {errors.description && (
-                  <p className="text-sm text-destructive">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-            </form>
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-description`}>Description</Label>
+              <Textarea
+                id={`${id}-description`}
+                placeholder="Describe the standard's purpose, scope, and requirements"
+                className="h-24 resize-none"
+                aria-invalid={errors.description ? "true" : "false"}
+                {...register("description", {
+                  maxLength: {
+                    value: 500,
+                    message: "Description must not exceed 500 characters",
+                  },
+                })}
+              />
+              {errors.description && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-        <DialogFooter className="border-t px-6 py-4">
+        </form>
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
               Cancel
             </Button>
           </DialogClose>
           <Button
-            form="update-standard-form"
-            disabled={isPending}
             type="submit"
+            size="sm"
+            variant="default"
+            form={`update-standard-form-${id}`}
+            disabled={isPending}
+            aria-busy={isPending}
           >
+            <PiFloppyDiskDuotone />
             {isPending ? "Updating..." : "Update Standard"}
           </Button>
         </DialogFooter>

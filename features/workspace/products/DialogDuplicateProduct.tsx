@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -13,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CopyIcon } from "lucide-react";
 import { useId, useState } from "react";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
@@ -21,6 +21,11 @@ import { Item } from "./ProductsPageProductTable";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import {
+  PiCopyDuotone,
+  PiXCircleDuotone,
+  PiCheckCircleDuotone,
+} from "react-icons/pi";
 
 export interface UpdateProductDialogProps {
   product: Item;
@@ -103,23 +108,28 @@ export default function DialogDuplicateProduct({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <div
-          className="focus:bg-accent hover:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          className="focus:bg-accent hover:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
           key={product.productId}
         >
-          <CopyIcon className=" h-4 w-4" />
+          <PiCopyDuotone className="h-4 w-4 text-muted-foreground" />
         </div>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Duplicate Product
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Duplicate Product</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Update product details
+          Duplicate this product with a new PPN and details.
         </DialogDescription>
         <div className="overflow-y-auto">
-          <div className="px-6 pt-4 pb-6">
+          <div className="p-4">
             <form
               id="duplicate-product-form"
               className="space-y-4"
@@ -198,6 +208,7 @@ export default function DialogDuplicateProduct({
                     value={department?.department?.department_name}
                     disabled
                     type="text"
+                    className="bg-muted"
                   />
                 </div>
 
@@ -208,6 +219,7 @@ export default function DialogDuplicateProduct({
                     value={project?.project?.project_name}
                     disabled
                     type="text"
+                    className="bg-muted"
                   />
                 </div>
               </div>
@@ -240,16 +252,22 @@ export default function DialogDuplicateProduct({
             </form>
           </div>
         </div>
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
+              Cancel
+            </Button>
+          </DialogClose>
           <Button
-            type="button"
-            variant="outline"
-            onClick={() => setOpen(false)}
+            type="submit"
+            size="sm"
+            variant="default"
+            form="duplicate-product-form"
+            disabled={createMutation.isPending}
           >
-            Cancel
-          </Button>
-          <Button type="submit" form="duplicate-product-form">
-            Update Product
+            <PiCheckCircleDuotone />
+            {createMutation.isPending ? "Duplicating..." : "Duplicate Product"}
           </Button>
         </DialogFooter>
       </DialogContent>

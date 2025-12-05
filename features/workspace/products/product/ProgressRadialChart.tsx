@@ -1,85 +1,108 @@
 "use client";
 
-import {
-  Label,
-  PolarGrid,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
-} from "recharts";
+import { cn } from "@/lib/utils";
 
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-
-export const description = "A radial chart with text";
-
-const chartData = [
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-];
-
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
+const PROGRESS_STATES = [
+  {
+    min: 100,
+    label: "Ready to submit",
+    dot: "bg-emerald-500",
+    text: "text-emerald-600 dark:text-emerald-300",
+    bar: "from-emerald-400 via-emerald-500 to-emerald-600",
   },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
+  {
+    min: 70,
+    label: "On track",
+    dot: "bg-sky-500",
+    text: "text-sky-600 dark:text-sky-300",
+    bar: "from-sky-400 via-sky-500 to-sky-600",
   },
-} satisfies ChartConfig;
+  {
+    min: 40,
+    label: "In progress",
+    dot: "bg-amber-500",
+    text: "text-amber-600 dark:text-amber-300",
+    bar: "from-amber-400 via-amber-500 to-amber-600",
+  },
+  {
+    min: 0,
+    label: "Getting started",
+    dot: "bg-slate-400",
+    text: "text-slate-600 dark:text-slate-300",
+    bar: "from-slate-400 via-slate-500 to-slate-600",
+  },
+] as const;
+
+const getProgressState = (value: number) => {
+  for (const state of PROGRESS_STATES) {
+    if (value >= state.min) return state;
+  }
+  return PROGRESS_STATES[PROGRESS_STATES.length - 1];
+};
+
+interface ProgressRadialChartProps {
+  completionPercentage: number;
+  completedTabsCount: number;
+  totalTabs: number;
+}
 
 export function ProgressRadialChart({
   completionPercentage,
-}: {
-  completionPercentage: number;
-}) {
-  const radius = (completionPercentage / 100) * 360;
+  completedTabsCount,
+  totalTabs,
+}: ProgressRadialChartProps) {
+  const clampedPercentage = Math.max(
+    0,
+    Math.min(100, Math.round(completionPercentage || 0))
+  );
+  const progressState = getProgressState(clampedPercentage);
 
   return (
-    <div className="w-12 h-12">
-      <ChartContainer
-        config={chartConfig}
-        className="mx-auto aspect-square max-h-12"
-      >
-        <RadialBarChart
-          data={chartData}
-          startAngle={0}
-          endAngle={radius}
-          innerRadius={17}
-          outerRadius={24}
-        >
-          <PolarGrid
-            gridType="circle"
-            radialLines={false}
-            stroke="none"
-            className="first:fill-border/60 last:fill-accent"
-            polarRadius={[18, 16]}
-          />
-          <RadialBar dataKey="visitors" background cornerRadius={4} />
-          <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-            <Label
-              content={({ viewBox }) => {
-                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                  return (
-                    <text
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                    >
-                      <tspan
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        className="fill-foreground text-xs font-normal"
-                      >
-                        {completionPercentage}
-                      </tspan>
-                    </text>
-                  );
-                }
-              }}
+    <div className="flex items-center gap-4 py-1 px-2 rounded-lg border bg-accent">
+      <div className="flex flex-col justify-center leading-tight">
+        {/* <span className="text-[0.55rem] uppercase tracking-[0.2em] text-muted-foreground">
+          Progress
+        </span> */}
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl font-semibold text-foreground">
+            {clampedPercentage}
+          </span>
+          <span className="text-[0.65rem] font-medium text-muted-foreground">
+            %
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col justify-center gap-1">
+        <div className="flex items-center gap-4 justify-between text-[0.7rem] font-medium leading-none">
+          <span
+            className={cn(
+              "flex items-center gap-1 text-muted-foreground",
+              progressState.text
+            )}
+          >
+            <span
+              className={cn("h-1.5 w-1.5 rounded-full", progressState.dot)}
             />
-          </PolarRadiusAxis>
-        </RadialBarChart>
-      </ChartContainer>
+            {progressState.label}
+          </span>
+          <span className="text-[0.65rem] text-muted-foreground">
+            {completedTabsCount}/{totalTabs} tabs
+          </span>
+        </div>
+        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <span
+            className={cn(
+              "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-55",
+              progressState.bar
+            )}
+            style={{ width: `${clampedPercentage}%` }}
+          />
+          <span
+            className="absolute inset-y-0 left-0 rounded-full bg-border transition-[width] duration-300 ease-out z-40"
+            style={{ width: `${100}%` }}
+          ></span>
+        </div>
+      </div>
     </div>
   );
 }

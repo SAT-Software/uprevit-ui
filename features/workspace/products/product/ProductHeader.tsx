@@ -27,6 +27,7 @@ import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import { ProgressRadialChart } from "./ProgressRadialChart";
 
 export type Item = {
@@ -141,8 +142,45 @@ export function ProductHeader() {
   const isCurrentTabCompleted =
     product && currentTab ? product.tabsCompleted.includes(currentTab) : false;
 
+  const completedTabsCount = tabsCompleted.length;
+  const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
+
+  const toggleButtonTitle = isSyncingStatus
+    ? isCurrentTabCompleted
+      ? "Unmarking..."
+      : "Marking complete..."
+    : isCurrentTabCompleted
+    ? "Mark Incomplete"
+    : "Mark Complete";
+
+  const toggleButtonSubtitle = isSyncingStatus
+    ? "Syncing with workspace"
+    : isCurrentTabCompleted
+    ? "Send back to in-progress"
+    : "Mark this tab completed";
+
+  const toggleButtonIcon = isSyncingStatus ? (
+    <Spinner className="size-3" />
+  ) : isCurrentTabCompleted ? (
+    <PiCircleDuotone className="size-3 text-emerald-600" />
+  ) : (
+    <PiCircleDuotone className="size-3" />
+  );
+
+  const toggleButtonClasses = cn(
+    "group text-left text-xs flex items-center gap-2 cursor-pointer font-semibold leading-tight transition-all disabled:text-muted-foreground py-1 px-2 rounded-lg border bg-accent",
+    isCurrentTabCompleted ? "text-foreground" : "text-foreground"
+  );
+
+  const toggleButtonIconClasses = cn(
+    "flex size-7 items-center justify-center rounded-xl border text-base transition-colors border-border bg-muted/60 text-muted-foreground group-hover:border-foreground/30 group-hover:text-foreground",
+    isCurrentTabCompleted
+      ? "dark:bg-emerald-500/20 dark:text-emerald-100"
+      : "dark:border-border/80 dark:bg-muted/40"
+  );
+
   const handleToggleTab = async () => {
-    if (!currentTab || !product || isUpdatingTab || isUpdatingProduct) return;
+    if (!currentTab || !product || isSyncingStatus) return;
 
     const updatedTabsCompleted = isCurrentTabCompleted
       ? tabsCompleted.filter((tab: string) => tab !== currentTab)
@@ -203,8 +241,8 @@ export function ProductHeader() {
   return (
     <header
       className={cn(
-        "flex w-full shrink-0 items-center justify-between px-2 gap-2 border-b border-input transition-[width,height] ease-linear ",
-        "h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+        "flex w-full shrink-0 flex-wrap items-center justify-between gap-3 border-b border-input px-2 py-2 transition-[width,height] ease-linear md:flex-nowrap md:py-0",
+        "md:h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
       )}
     >
       <div className="flex items-center gap-2">
@@ -241,61 +279,33 @@ export function ProductHeader() {
           </Badge>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2">
-          <ProgressRadialChart completionPercentage={completionPercentage} />
+      <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+        <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+          <ProgressRadialChart
+            completionPercentage={completionPercentage}
+            completedTabsCount={completedTabsCount}
+            totalTabs={TOTAL_TABS}
+          />
 
-          {/* <div className="flex items-center gap-2">
-            <div
-              className={cn(
-                "text-xs font-medium",
-                completionPercentage === 100
-                  ? "text-green-600"
-                  : completionPercentage >= 50
-                  ? "text-yellow-600"
-                  : "text-muted-foreground"
-              )}
-            >
-              Progress: {completionPercentage}%
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {product?.tabsCompleted.length || 0}/{TOTAL_TABS}
-            </div>
-          </div> */}
-
-          <Button
-            variant={isCurrentTabCompleted ? "secondary" : "secondary"}
-            size="sm"
+          <button
             onClick={handleToggleTab}
-            disabled={
-              !currentTab || !product || isUpdatingTab || isUpdatingProduct
-            }
-            className={cn(
-              "gap-2 text-xs",
-              isCurrentTabCompleted
-                ? "bg-green-100 text-green-700 hover:bg-green-200 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-900"
-                : "text-muted-foreground hover:text-foreground"
-            )}
+            disabled={!currentTab || !product || isSyncingStatus}
+            className={toggleButtonClasses}
           >
-            {isUpdatingTab || isUpdatingProduct ? (
-              <>
-                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                {isCurrentTabCompleted ? "Uncompleting..." : "Completing..."}
-              </>
-            ) : isCurrentTabCompleted ? (
-              <>
-                <PiCheckCircleDuotone className="w-4 h-4" />
-                Mark Incomplete
-              </>
-            ) : (
-              <>
-                <PiCircleDuotone className="w-4 h-4" />
-                Mark Complete
-              </>
-            )}
-          </Button>
+            <span className={toggleButtonIconClasses}>{toggleButtonIcon}</span>
+            <span className="flex flex-col items-start leading-tight">
+              <span className="text-xs font-semibold">{toggleButtonTitle}</span>
+              <span className="text-[0.65rem] font-medium text-muted-foreground">
+                {toggleButtonSubtitle}
+              </span>
+            </span>
+          </button>
+          {/* <Button variant="secondary" size="sm">
+            <PiCircleDuotone />
+            {isCurrentTabCompleted ? "Tab Completed" : "Tab in Draft"}
+          </Button> */}
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           <div className="flex gap-2">
             <Button
               size="sm"

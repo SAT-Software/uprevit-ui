@@ -1,18 +1,18 @@
-import { Share2Icon, LinkIcon, CopyIcon, CheckIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { LinkIcon, CopyIcon, CheckIcon } from "lucide-react";
+import { PiShareNetworkDuotone, PiXCircleDuotone } from "react-icons/pi";
+import { useState, useMemo } from "react";
 
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   InputGroup,
@@ -32,16 +32,14 @@ export default function DialogShareProduct({
   children?: React.ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
-  const [productLink, setProductLink] = useState("/products/sample-id");
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setProductLink(
-        product?._id
-          ? `${window.location.origin}/products/${product._id}/product-information`
-          : "/products/sample-id"
-      );
+  const productLink = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "/products/sample-id";
     }
+    return product?._id
+      ? `${window.location.origin}/products/${product._id}/product-information`
+      : "/products/sample-id";
   }, [product?._id]);
 
   const handleCopyLink = async () => {
@@ -54,150 +52,99 @@ export default function DialogShareProduct({
     }
   };
 
+  const dialogContent = (
+    <>
+      <DialogHeader className="contents space-y-0 text-left">
+        <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+          <p>Share Product</p>
+          <DialogClose asChild>
+            <button type="button" className="cursor-pointer">
+              <PiXCircleDuotone size={18} />
+            </button>
+          </DialogClose>
+        </DialogTitle>
+      </DialogHeader>
+      <DialogDescription className="sr-only">
+        Share this product with others by copying the link below.
+      </DialogDescription>
+
+      <div className="p-4 space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="product-link">Product Link</Label>
+          <div className="flex items-center space-x-2">
+            <InputGroup>
+              <InputGroupInput
+                id="product-link"
+                value={productLink}
+                readOnly
+                className="pl-10"
+              />
+              <InputGroupAddon>
+                <LinkIcon size={16} />
+              </InputGroupAddon>
+            </InputGroup>
+            <Button size="sm" onClick={handleCopyLink} className="shrink-0">
+              {copied ? (
+                <>
+                  <CheckIcon size={16} className="mr-1" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <CopyIcon size={16} className="mr-1" />
+                  Copy
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {product?.product_name && (
+          <div className="rounded-lg border p-3 bg-muted/50">
+            <h4 className="font-medium text-sm">{product.product_name}</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Product ID: {product._id}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+        <DialogClose asChild>
+          <Button variant="secondary" size="sm">
+            <PiXCircleDuotone />
+            Close
+          </Button>
+        </DialogClose>
+      </DialogFooter>
+    </>
+  );
+
   // If external state control is provided, use controlled mode
   if (open !== undefined && onOpenChange !== undefined) {
     return (
-      <AlertDialog open={open} onOpenChange={onOpenChange}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Share2Icon size={20} />
-              Share Product
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Share this product with others by copying the link below.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="product-link">Product Link</Label>
-              <div className="flex items-center space-x-2">
-                {/* <div className="relative flex-1">
-                  <LinkIcon
-                    className="absolute left-3 top-1/2 transform -translate-1/2 text-muted-foreground"
-                    size={16}
-                  />
-                  <Input
-                    id="product-link"
-                    value={productLink}
-                    readOnly
-                    className="pl-10"
-                  />
-                </div> */}
-                <InputGroup>
-                  <InputGroupInput
-                    id="product-link"
-                    value={productLink}
-                    readOnly
-                    className="pl-10"
-                  />
-                  <InputGroupAddon>
-                    <LinkIcon size={16} />
-                  </InputGroupAddon>
-                </InputGroup>
-                <Button size="sm" onClick={handleCopyLink} className="shrink-0">
-                  {copied ? (
-                    <>
-                      <CheckIcon size={16} className="mr-1" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <CopyIcon size={16} className="mr-1" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {product?.product_name && (
-              <div className="rounded-lg border p-3 bg-muted/50">
-                <h4 className="font-medium text-sm">{product.product_name}</h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Product ID: {product._id}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel>Close</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+          {dialogContent}
+        </DialogContent>
+      </Dialog>
     );
   }
 
   // Original trigger-based mode
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <Dialog>
+      <DialogTrigger asChild>
         {children || (
-          <div className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-accent text-foreground cursor-pointer focus:bg-accent focus:text-accent-foreground">
-            <Share2Icon className="mr-2 h-4 w-4 text-muted-foreground" />
+          <div className="focus:bg-accent hover:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none">
+            <PiShareNetworkDuotone className="h-4 w-4 text-muted-foreground" />
             <span>Share</span>
           </div>
         )}
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <Share2Icon size={20} />
-            Share Product
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Share this product with others by copying the link below.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="product-link-standalone">Product Link</Label>
-            <div className="flex items-center space-x-2">
-              <div className="relative flex-1">
-                <LinkIcon
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                  size={16}
-                />
-                <Input
-                  id="product-link-standalone"
-                  value={productLink}
-                  readOnly
-                  className="pl-10"
-                />
-              </div>
-              <Button size="sm" onClick={handleCopyLink} className="shrink-0">
-                {copied ? (
-                  <>
-                    <CheckIcon size={16} className="mr-1" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <CopyIcon size={16} className="mr-1" />
-                    Copy
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {product?.product_name && (
-            <div className="rounded-lg border p-3 bg-muted/50">
-              <h4 className="font-medium text-sm">{product.product_name}</h4>
-              <p className="text-xs text-muted-foreground mt-1">
-                Product ID: {product._id}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel>Close</AlertDialogCancel>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogTrigger>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+        {dialogContent}
+      </DialogContent>
+    </Dialog>
   );
 }

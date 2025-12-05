@@ -7,7 +7,6 @@ import {
   PiHouseDuotone,
   PiCaretRightDuotone,
   PiCalendarDuotone,
-  PiListChecksDuotone,
   PiGlobeDuotone,
   PiFlagDuotone,
   PiBuildingsDuotone,
@@ -18,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
+import { AuditLog } from "@/types/audit-log";
 import { useMemo } from "react";
 
 export default function Page() {
@@ -30,6 +30,29 @@ export default function Page() {
   );
 
   const productData = { ...data?.result?.data?.data, id: productId };
+  const productAuditLog = data?.result?.data?.auditLogs;
+
+  console.log(productData, productAuditLog);
+
+  const auditLogs = (productAuditLog as AuditLog[]) || [];
+  const creationLog = auditLogs.find((log) => log.action === "create");
+  const latestUpdateLog = auditLogs
+    .filter((log) => log.action === "update")
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
+    )[0];
+
+  const formatAuditDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    if (Number.isNaN(date.getTime())) {
+      return isoDate;
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  };
 
   const fields = useMemo(() => {
     if (!productData) return [];
@@ -134,7 +157,7 @@ export default function Page() {
           Products
         </Link>
         <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-        <span className=" truncate max-w-[200px]">
+        <span className="truncate max-w-[200px]">
           {productData.product_name || "Product Details"}
         </span>
         <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
@@ -145,7 +168,7 @@ export default function Page() {
 
       <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
+        <div className="flex flex-col md:flex-row gap-6 justify-between border-b p-6 border-border">
           <div className="flex flex-col gap-3 w-full min-w-0">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
@@ -164,22 +187,11 @@ export default function Page() {
                 </Badge>
               </div>
             </div>
-
             <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
               {productData.product_description || "No description available."}
             </p>
-          </div>
-
-          {/* Actions & Meta */}
-          <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <EditProductDialog product={productData!} />
-              <ProductInformationCustomFieldEditDialog product={productData!} />
-            </div>
-
-            {/* Date Badges */}
-            <div className="flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground w-full">
-              <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
+            <div className="flex flex-col items-start gap-2 text-xs text-muted-foreground w-full mt-auto">
+              <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start ">
                 <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">
                   Target:{" "}
@@ -191,7 +203,7 @@ export default function Page() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
+              <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start ">
                 <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">
                   Actual:{" "}
@@ -202,6 +214,40 @@ export default function Page() {
                   </span>
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Actions & Meta */}
+          <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <EditProductDialog product={productData!} />
+              <ProductInformationCustomFieldEditDialog product={productData!} />
+            </div>
+
+            {/* Audit Badges */}
+            <div className="flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground w-full mt-auto">
+              {creationLog && (
+                <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
+                  <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">
+                    Created {formatAuditDate(creationLog.actionAt)} -{" "}
+                    <span className="font-semibold">
+                      {creationLog.actionBy}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {latestUpdateLog && (
+                <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
+                  <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">
+                    Updated {formatAuditDate(latestUpdateLog.actionAt)} -{" "}
+                    <span className="font-semibold">
+                      {latestUpdateLog.actionBy}
+                    </span>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
