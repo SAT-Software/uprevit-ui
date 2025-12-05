@@ -122,7 +122,7 @@ export function AppHeader() {
     });
   };
 
-  // if (isProductPage) return null;
+  if (isProductPage) return null;
 
   return (
     <header
@@ -139,7 +139,7 @@ export function AppHeader() {
           : "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
       )}
     >
-      {isProductPage ? (
+      {/* {isProductPage ? (
         <div className="flex w-full">
           <div className="flex w-full items-center gap-2">
             <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-muted-foreground bg-muted" />
@@ -178,56 +178,56 @@ export function AppHeader() {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="flex w-full">
-          <div className="flex w-full items-center gap-1">
-            <SidebarTrigger className="" />
-            {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
-            <Separator orientation="vertical" className="mr-1 h-4" />
-            {/* Breadcrumbs for dynamic routes, icon+title for static */}
-            {/^\/(departments|projects|products|source-files|bookmarked-products)\/.+/.test(
-              pathname
-            ) ? (
-              (() => {
-                // Determine section (departments, projects, products)
-                const section = pathname.split("/")[1];
-                const sectionData = pathData.find(
-                  (item) => item.url === `/${section}`
-                );
-                const Icon = sectionData?.icon;
-                // Extract dynamic id
-                const id = pathname.split("/")[2];
-                return (
-                  <div className="flex items-center gap-1">
-                    {Icon && <Icon className="text-muted-foreground" />}
-                    {/* <Separator orientation="vertical" className="h-4" /> */}
-                    <Breadcrumb>
-                      <BreadcrumbList>
-                        {/* <BreadcrumbSeparator /> */}
-                        <BreadcrumbItem>
-                          <Link href={`/${section}`}>{sectionData?.title}</Link>
-                        </BreadcrumbItem>
-                      </BreadcrumbList>
-                    </Breadcrumb>
-                  </div>
-                );
-              })()
-            ) : (
-              <>
-                {pathData.map(
-                  (item) =>
-                    item.url === pathname &&
-                    item.icon && <item.icon key={item.title} />
-                )}
-                <p className="text-sm font-medium">
-                  {pathData.find((item) => item.url === pathname)?.title || ""}
-                </p>
-              </>
-            )}
-          </div>
-          <NavUser />
+      ) :  */}
+
+      <div className="flex w-full">
+        <div className="flex w-full items-center gap-1">
+          <SidebarTrigger className="" />
+          {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
+          <Separator orientation="vertical" className="mr-1 h-4" />
+          {/* Breadcrumbs for dynamic routes, icon+title for static */}
+          {/^\/(departments|projects|products|source-files|bookmarked-products)\/.+/.test(
+            pathname
+          ) ? (
+            (() => {
+              // Determine section (departments, projects, products)
+              const section = pathname.split("/")[1];
+              const sectionData = pathData.find(
+                (item) => item.url === `/${section}`
+              );
+              const Icon = sectionData?.icon;
+              // Extract dynamic id
+              const id = pathname.split("/")[2];
+              return (
+                <div className="flex items-center gap-1">
+                  {Icon && <Icon className="text-muted-foreground" />}
+                  {/* <Separator orientation="vertical" className="h-4" /> */}
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      {/* <BreadcrumbSeparator /> */}
+                      <BreadcrumbItem>
+                        <Link href={`/${section}`}>{sectionData?.title}</Link>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+              );
+            })()
+          ) : (
+            <>
+              {pathData.map(
+                (item) =>
+                  item.url === pathname &&
+                  item.icon && <item.icon key={item.title} />
+              )}
+              <p className="text-sm font-medium">
+                {pathData.find((item) => item.url === pathname)?.title || ""}
+              </p>
+            </>
+          )}
         </div>
-      )}
+        <NavUser />
+      </div>
     </header>
   );
 }

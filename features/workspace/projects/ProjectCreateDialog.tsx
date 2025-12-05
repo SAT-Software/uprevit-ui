@@ -59,7 +59,7 @@ type FormValues = {
   department: string;
 };
 
-export default function CreateProjectDialog({
+export default function ProjectCreateDialog({
   trigger,
 }: DialogCreateProjectProps) {
   const id = useId();

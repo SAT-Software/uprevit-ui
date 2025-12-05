@@ -10,14 +10,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle, Circle } from "lucide-react";
+import {
+  PiCheckCircleDuotone,
+  PiCircleDuotone,
+  PiDownloadDuotone,
+  PiGitBranchDuotone,
+  PiGitMergeDuotone,
+  PiPaperPlaneRightDuotone,
+} from "react-icons/pi";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { useQueryClient } from "@tanstack/react-query";
 import { Product } from "@/types/product";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { ProgressRadialChart } from "./ProgressRadialChart";
 
 export type Item = {
   productId: string;
@@ -44,9 +54,10 @@ export function ProductHeader() {
   const params = useParams();
   const pathname = usePathname();
   const { data: productsData } = useGetAllProducts();
-  const { mutate: updateProductTabData } = useUpdateProductTabData();
-  const { mutate: updateProduct } = useUpdateProduct();
-  const queryClient = useQueryClient();
+  const { mutateAsync: updateProductTabData, isPending: isUpdatingTab } =
+    useUpdateProductTabData();
+  const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
+    useUpdateProduct();
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -55,6 +66,24 @@ export function ProductHeader() {
 
   const currentTab = getCurrentTab();
   const productId = params.productId as string;
+
+  const { data } = useGetAllProducts();
+  const currentProduct = productId
+    ? data?.result.products?.find((p: Product) => p._id === productId)
+    : null;
+
+  const isProductComplete = currentProduct?.complete_count === 100;
+
+  const handleSubmit = () => {
+    if (!currentProduct?._id) return;
+    updateProduct({
+      _id: currentProduct._id,
+      action: "update-status",
+      data: {
+        status: "submitted",
+      },
+    });
+  };
 
   const foundProduct =
     productId && productsData?.result.products
@@ -112,14 +141,12 @@ export function ProductHeader() {
   const isCurrentTabCompleted =
     product && currentTab ? product.tabsCompleted.includes(currentTab) : false;
 
-  const handleToggleTab = () => {
-    if (!currentTab || !product) return;
+  const handleToggleTab = async () => {
+    if (!currentTab || !product || isUpdatingTab || isUpdatingProduct) return;
 
     const updatedTabsCompleted = isCurrentTabCompleted
       ? tabsCompleted.filter((tab: string) => tab !== currentTab)
       : [...tabsCompleted, currentTab];
-
-    setTabsCompleted(updatedTabsCompleted);
 
     const newCompletionPercentage = Math.round(
       (updatedTabsCompleted.length / TOTAL_TABS) * 100
@@ -150,104 +177,144 @@ export function ProductHeader() {
     const actionName = actionMapping[currentTab];
 
     if (backendTabName) {
-      updateProductTabData(
-        {
+      // Run both API calls in parallel
+      // Each hook's onSuccess will invalidate queries automatically
+      await Promise.all([
+        updateProductTabData({
           id: productId,
           action: actionName,
           tab: backendTabName,
           data: {
             tab_completed: !isCurrentTabCompleted,
           },
-        },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["all-products"] });
-          },
-        }
-      );
-
-      updateProduct({
-        _id: productId,
-        action: "update-product",
-        data: {
+        }),
+        updateProduct({
           _id: productId,
-          complete_count: newCompletionPercentage,
-        },
-      });
+          action: "update-product",
+          data: {
+            _id: productId,
+            complete_count: newCompletionPercentage,
+          },
+        }),
+      ]);
     }
   };
 
   return (
     <header
       className={cn(
-        "flex w-full shrink-0 items-center justify-between px-4 gap-2 border-b border-input transition-[width,height] ease-linear ",
+        "flex w-full shrink-0 items-center justify-between px-2 gap-2 border-b border-input transition-[width,height] ease-linear ",
         "h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
       )}
     >
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm">
-          Create new version
-        </Button>
-        <Button variant="outline" size="sm">
-          Export Product Plan
-        </Button>
-        <Select value={product?.version} disabled={!product}>
-          <SelectTrigger className="w-40 h-9">
-            <SelectValue placeholder="View Versions" />
-          </SelectTrigger>
-          <SelectContent>
-            {product?.version && (
-              <SelectItem value={product.version}>
-                Version {product.version}
-              </SelectItem>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
+        <SidebarTrigger className="text-muted-foreground hover:text-muted-foreground bg-muted" />
 
-      <div className="flex items-center gap-4">
+        <Separator orientation="vertical" className=" h-4" />
         <div className="flex items-center gap-2">
-          <div
+          <Button variant="secondary" size="sm">
+            <PiGitMergeDuotone />
+            New version
+          </Button>
+          <Button variant="secondary" size="sm">
+            <PiDownloadDuotone />
+            Export
+          </Button>
+          <Select value={product?.version} disabled={!product}>
+            <SelectTrigger className="h-7 rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
+              <PiGitBranchDuotone />
+              <SelectValue placeholder="View Versions" />
+            </SelectTrigger>
+            <SelectContent>
+              {product?.version && (
+                <SelectItem value={product.version}>
+                  Version {product.version}
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+          <Badge variant="outline" className="flex items-center gap-0.5 h-7">
+            <p className="text-xs font-normal mt-0.5">v</p>
+            <p className="text-sm font-semibold text-foreground">
+              {currentProduct?.master_version.slice(0, 1)}
+            </p>
+          </Badge>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <ProgressRadialChart completionPercentage={completionPercentage} />
+
+          {/* <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                "text-xs font-medium",
+                completionPercentage === 100
+                  ? "text-green-600"
+                  : completionPercentage >= 50
+                  ? "text-yellow-600"
+                  : "text-muted-foreground"
+              )}
+            >
+              Progress: {completionPercentage}%
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {product?.tabsCompleted.length || 0}/{TOTAL_TABS}
+            </div>
+          </div> */}
+
+          <Button
+            variant={isCurrentTabCompleted ? "secondary" : "secondary"}
+            size="sm"
+            onClick={handleToggleTab}
+            disabled={
+              !currentTab || !product || isUpdatingTab || isUpdatingProduct
+            }
             className={cn(
-              "text-xs font-medium",
-              completionPercentage === 100
-                ? "text-green-600"
-                : completionPercentage >= 50
-                ? "text-yellow-600"
-                : "text-muted-foreground"
+              "gap-2 text-xs",
+              isCurrentTabCompleted
+                ? "bg-green-100 text-green-700 hover:bg-green-200 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-900"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Progress: {completionPercentage}%
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {product?.tabsCompleted.length || 0}/{TOTAL_TABS}
+            {isUpdatingTab || isUpdatingProduct ? (
+              <>
+                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                {isCurrentTabCompleted ? "Uncompleting..." : "Completing..."}
+              </>
+            ) : isCurrentTabCompleted ? (
+              <>
+                <PiCheckCircleDuotone className="w-4 h-4" />
+                Mark Incomplete
+              </>
+            ) : (
+              <>
+                <PiCircleDuotone className="w-4 h-4" />
+                Mark Complete
+              </>
+            )}
+          </Button>
+        </div>
+        <div className="flex gap-4 items-center">
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              disabled={!isProductComplete}
+              onClick={handleSubmit}
+              className={cn(
+                !isProductComplete && "opacity-50 cursor-not-allowed"
+              )}
+              title={
+                !isProductComplete
+                  ? "Complete all tabs to enable submission"
+                  : "Submit product"
+              }
+            >
+              <PiPaperPlaneRightDuotone />
+              Submit
+            </Button>
           </div>
         </div>
-
-        <Button
-          variant={isCurrentTabCompleted ? "default" : "outline"}
-          size="sm"
-          onClick={handleToggleTab}
-          disabled={!currentTab || !product}
-          className={cn(
-            "gap-2 text-xs",
-            isCurrentTabCompleted
-              ? "bg-slate-100 hover:bg-slate-200 text-foreground"
-              : "border-none text-slate-800 hover:bg-slate-50"
-          )}
-        >
-          {isCurrentTabCompleted ? (
-            <>
-              <CheckCircle size={10} />
-              Mark Incomplete
-            </>
-          ) : (
-            <>
-              <Circle size={10} />
-              Mark Complete
-            </>
-          )}
-        </Button>
       </div>
     </header>
   );

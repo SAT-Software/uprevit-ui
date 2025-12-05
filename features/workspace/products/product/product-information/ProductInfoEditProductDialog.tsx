@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { PiPencilCircleDuotone } from "react-icons/pi";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -128,8 +129,9 @@ export default function EditProductDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" className="text-xs">
-          Edit
+        <Button size="sm" variant="secondary">
+          <PiPencilCircleDuotone />
+          Update
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-4xl max-h-[90vh] [&>button:last-child]:top-3.5">

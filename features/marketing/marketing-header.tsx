@@ -194,7 +194,8 @@ export default function MarketingHeader() {
           </NavigationMenu>
           <div className="flex items-center gap-4">
             <Button
-              variant="outline"
+              variant="secondary"
+              size="default"
               className="w-fit"
               onClick={handleGetStarted}
             >
@@ -202,6 +203,7 @@ export default function MarketingHeader() {
             </Button>
             <Button
               variant="default"
+              size="default"
               className="w-fit"
               onClick={handleGetStarted}
             >
