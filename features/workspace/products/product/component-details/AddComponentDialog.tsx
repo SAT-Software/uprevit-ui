@@ -36,6 +36,7 @@ import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
   PiCubeDuotone,
+  PiPictureInPictureDuotone,
 } from "react-icons/pi";
 
 type FormData = {
@@ -140,7 +141,7 @@ export default function AddComponentDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiCubeDuotone className="w-4 h-4" />
+              <PiPlusCircleDuotone className="w-4 h-4" />
               <span>Add New Component</span>
             </div>
             <DialogClose asChild>
@@ -205,7 +206,7 @@ export default function AddComponentDialog({
                         <SelectValue placeholder="Select component type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Preprinted">Preprinted</SelectItem>
+                        <SelectItem value="Preprinted">Pre-printed</SelectItem>
                         <SelectItem value="Blank">Blank</SelectItem>
                         <SelectItem value="N/A">N/A</SelectItem>
                       </SelectContent>
@@ -326,7 +327,7 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiCubeDuotone className="w-12 h-12" />
+            <PiPictureInPictureDuotone className="w-12 h-12" />
             <span className="text-xs font-medium">Upload Image</span>
           </div>
         )}

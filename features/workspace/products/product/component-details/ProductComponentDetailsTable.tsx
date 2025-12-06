@@ -69,6 +69,8 @@ import {
   PiCaretCircleLeftDuotone,
   PiCaretCircleRightDuotone,
   PiCaretCircleDoubleRightDuotone,
+  PiCaretCircleDownDuotone,
+  PiDotsThreeCircleDuotone,
 } from "react-icons/pi";
 import EditComponentDialog from "./EditComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
@@ -142,13 +144,13 @@ const columns: ColumnDef<ComponentItem>[] = [
           }}
         >
           {row.getIsExpanded() ? (
-            <ChevronDownIcon
+            <PiCaretCircleDownDuotone
               className="opacity-60"
               size={16}
               aria-hidden="true"
             />
           ) : (
-            <ChevronRightIcon
+            <PiCaretCircleRightDuotone
               className="opacity-60"
               size={16}
               aria-hidden="true"
@@ -175,7 +177,7 @@ const columns: ColumnDef<ComponentItem>[] = [
         />
       ) : (
         <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
-          <LayoutList className="w-full h-full p-3" />
+          <PiImageDuotone className="w-full h-full p-2" />
         </div>
       ),
     size: 80,
@@ -371,7 +373,7 @@ export default function ProductComponentDetailsTable({
                             />
                           ) : (
                             <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
-                              <LayoutList className="w-full h-full p-3" />
+                              <PiImageDuotone className="w-full h-full p-2" />
                             </div>
                           )}
                         </div>
@@ -508,7 +510,7 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
             className="shadow-none"
             aria-label="More actions"
           >
-            <EllipsisIcon size={16} aria-hidden="true" />
+            <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

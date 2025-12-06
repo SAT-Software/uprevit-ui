@@ -68,7 +68,7 @@ export default function DeleteComponentDialog({
         <AlertDialogHeader className="contents space-y-0 text-left">
           <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
             <div className="flex items-center gap-2 text-destructive">
-              <PiWarningDuotone className="w-4 h-4" />
+              <PiTrashDuotone className="w-4 h-4" />
               <span>Delete Component</span>
             </div>
             <button

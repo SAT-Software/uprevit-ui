@@ -98,6 +98,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
           {tags.map((tag) => (
             <Badge
               key={tag.id}
+              variant="outline"
               className={cn("flex items-center gap-1", styleClasses?.tag?.body)}
             >
               {tag.text}

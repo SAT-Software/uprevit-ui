@@ -36,6 +36,7 @@ import {
   PiXCircleDuotone,
   PiCheckCircleDuotone,
   PiCubeDuotone,
+  PiPictureInPictureDuotone,
 } from "react-icons/pi";
 
 type ComponentItem = {
@@ -350,7 +351,7 @@ function ComponentImage({
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiCubeDuotone className="w-12 h-12" />
+            <PiPictureInPictureDuotone className="w-12 h-12" />
             <span className="text-xs font-medium">Upload Image</span>
           </div>
         )}
