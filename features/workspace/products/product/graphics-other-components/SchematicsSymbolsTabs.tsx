@@ -10,11 +10,12 @@ import AddSchematicsDialog from "@/features/workspace/products/product/graphics-
 import AddBarcodesDialog from "@/features/workspace/products/product/graphics-other-components/AddBarcodesDialog";
 import AddOtherCompsDialog from "@/features/workspace/products/product/graphics-other-components/AddOtherCompsDialog";
 import {
-  BarcodeIcon,
-  BoxIcon,
-  CircuitBoardIcon,
-  ShapesIcon,
-} from "lucide-react";
+  PiShapesDuotone,
+  PiCpuDuotone,
+  PiBarcodeDuotone,
+  PiCubeDuotone,
+  PiCubeTransparentDuotone,
+} from "react-icons/pi";
 import { useState } from "react";
 import SymbolsGraphicsPageOtherComponentsTable from "./SymbolsGraphicsPageOtherComponentsTable";
 
@@ -67,56 +68,38 @@ export default function SchematicsSymbolsTabs({
 }: SchematicsSymbolsTabsProps) {
   const [activeTab, setActiveTab] = useState("tab-1");
 
-  console.log("other comp data in Tabs", otherComponentsData);
+  // Get the current tab label for the description
+  const getTabLabel = () => {
+    switch (activeTab) {
+      case "tab-1":
+        return "symbols";
+      case "tab-2":
+        return "schematics";
+      case "tab-3":
+        return "barcodes";
+      case "tab-4":
+        return "other components";
+      default:
+        return "items";
+    }
+  };
 
   return (
-    <Tabs defaultValue="tab-1" value={activeTab} onValueChange={setActiveTab}>
-      <div className="flex items-center justify-between mb-3">
-        <ScrollArea className="flex-1">
-          <TabsList className="bg-background h-auto -space-x-px p-0 shadow-none rtl:space-x-reverse">
-            <TabsTrigger
-              value="tab-1"
-              className="cursor-pointer border-border data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s-lg last:rounded-e-lg"
-            >
-              <ShapesIcon
-                className="-ms-0.5 me-1.5 opacity-60 h-4 w-4"
-                aria-hidden="true"
-              />
-              Symbols
-            </TabsTrigger>
-            <TabsTrigger
-              value="tab-2"
-              className="cursor-pointer border-border data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
-            >
-              <CircuitBoardIcon
-                className="-ms-0.5 me-1.5 opacity-60 h-4 w-4"
-                aria-hidden="true"
-              />
-              Schematics
-            </TabsTrigger>
-            <TabsTrigger
-              value="tab-3"
-              className="cursor-pointer border-border data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
-            >
-              <BarcodeIcon
-                className="-ms-0.5 me-1.5 opacity-60 h-4 w-4"
-                aria-hidden="true"
-              />
-              Barcodes
-            </TabsTrigger>
-            <TabsTrigger
-              value="tab-4"
-              className="cursor-pointer border-border data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e-lg"
-            >
-              <BoxIcon
-                className="-ms-0.5 me-1.5 opacity-60 h-4 w-4"
-                aria-hidden="true"
-              />
-              Other Components
-            </TabsTrigger>
-          </TabsList>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+    <Tabs
+      defaultValue="tab-1"
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="flex flex-col h-full gap-0"
+    >
+      {/* Header Section */}
+      <div className="flex items-center justify-between border-b border-border p-4">
+        <div className="flex items-center gap-2">
+          <p className="text-base font-semibold">Symbols & Graphics</p>
+          <div className="w-1 h-1 bg-border border border-border rounded-full" />
+          <p className="text-xs text-muted-foreground font-medium">
+            Manage {getTabLabel()} for this product
+          </p>
+        </div>
         {activeTab === "tab-1" ? (
           <AddSymbolsDialog productId={productId} />
         ) : activeTab === "tab-2" ? (
@@ -127,18 +110,50 @@ export default function SchematicsSymbolsTabs({
           activeTab === "tab-4" && <AddOtherCompsDialog productId={productId} />
         )}
       </div>
-      <TabsContent value="tab-1">
-        <SymbolsGraphicsPageSymbolsTable data={symbolsData} />
-      </TabsContent>
-      <TabsContent value="tab-2">
-        <SymbolsGraphicsPageSchematicsTable data={schematicsData} />
-      </TabsContent>
-      <TabsContent value="tab-3">
-        <SymbolsGraphicsPageBarcodesTable data={barcodesData} />
-      </TabsContent>
-      <TabsContent value="tab-4">
-        <SymbolsGraphicsPageOtherComponentsTable data={otherComponentsData} />
-      </TabsContent>
+
+      {/* Tabs Navigation */}
+      <div className="px-4 py-2">
+        <ScrollArea className="w-full">
+          <TabsList>
+            <TabsTrigger value="tab-1">
+              <PiCubeTransparentDuotone
+                className="me-1.5 h-4 w-4"
+                aria-hidden="true"
+              />
+              Symbols
+            </TabsTrigger>
+            <TabsTrigger value="tab-2">
+              <PiShapesDuotone className="me-1.5 h-4 w-4" aria-hidden="true" />
+              Schematics
+            </TabsTrigger>
+            <TabsTrigger value="tab-3">
+              <PiBarcodeDuotone className="me-1.5 h-4 w-4" aria-hidden="true" />
+              Barcodes
+            </TabsTrigger>
+            <TabsTrigger value="tab-4">
+              <PiCubeDuotone className="me-1.5 h-4 w-4" aria-hidden="true" />
+              Other Components
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+
+      {/* Tab Contents */}
+      <div className="flex-1 overflow-hidden px-4">
+        <TabsContent value="tab-1" className="h-full mt-0">
+          <SymbolsGraphicsPageSymbolsTable data={symbolsData} />
+        </TabsContent>
+        <TabsContent value="tab-2" className="h-full mt-0">
+          <SymbolsGraphicsPageSchematicsTable data={schematicsData} />
+        </TabsContent>
+        <TabsContent value="tab-3" className="h-full mt-0">
+          <SymbolsGraphicsPageBarcodesTable data={barcodesData} />
+        </TabsContent>
+        <TabsContent value="tab-4" className="h-full mt-0">
+          <SymbolsGraphicsPageOtherComponentsTable data={otherComponentsData} />
+        </TabsContent>
+      </div>
     </Tabs>
   );
 }
