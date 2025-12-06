@@ -7,15 +7,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFiles";
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
 import { SourceFilesFolder } from "@/types/source-files";
 import { uploadFiles } from "@/utils/uploadthing";
-import { FolderIcon } from "lucide-react";
 import { useState } from "react";
-import { PiPlusBold } from "react-icons/pi";
+import {
+  PiCloudArrowUpDuotone,
+  PiXCircleDuotone,
+  PiUploadSimpleDuotone,
+} from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
+import { toast } from "sonner"; // Assuming sonner use for toasts if needed, though not used in original, I'll stick to original logic unless error handling needs it.
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -81,6 +86,7 @@ export default function DialogUploadSourceFiles({
       setSelectedFiles([]);
     } catch (e) {
       console.error(e);
+      toast.error("Failed to upload files");
     } finally {
       setIsUploading(false);
     }
@@ -89,35 +95,59 @@ export default function DialogUploadSourceFiles({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="flex items-center gap-2">
-          Upload Source File <PiPlusBold />
+        <Button variant="default" size="sm" className="flex items-center gap-2">
+          <PiCloudArrowUpDuotone className="w-5 h-5" />
+          Upload Files
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FolderIcon className="w-5 h-5" />
-            Upload Source Files for {folder?.name}
+      <DialogContent className="flex flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl max-h-[90vh] [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiCloudArrowUpDuotone className="w-5 h-5 text-muted-foreground" />
+              <p>Upload Source Files for {folder?.name}</p>
+            </div>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="sr-only">
             Upload source files for this product. You can drag and drop files or
             click to browse.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4">
+        <div className="p-4 flex-1 overflow-y-auto">
           <UploadSourceFiles onSelectionChange={setSelectedFiles} />
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsDialogOpen(false)}
+          >
+            <PiXCircleDuotone className="mr-2" />
             Cancel
           </Button>
           <Button
+            size="sm"
             onClick={handleUploadClick}
             disabled={!selectedFiles.length || isUploading}
           >
-            {isUploading ? "Uploading..." : "Upload Files"}
+            {isUploading ? (
+              <>
+                <PiUploadSimpleDuotone className="animate-spin mr-2" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <PiUploadSimpleDuotone className="mr-2" />
+                Upload Files
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

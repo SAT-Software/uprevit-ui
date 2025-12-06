@@ -34,12 +34,12 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
               key={folder._id}
               className="relative flex flex-col w-full max-w-xs rounded-2xl"
             >
-              <div className="absolute top-2 right-2 flex gap-2">
+              <div className="absolute top-2 right-2 flex gap-2 z-10">
                 <Button
                   variant="ghost"
                   size="icon"
                   aria-label="Toggle bookmark folder"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (userId) {
                       toggleBookmark({
                         folderId: folder._id,
@@ -53,16 +53,17 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                   }}
                   disabled={isPending}
                   title="Bookmark folder"
+                  className="h-8 w-8 hover:bg-background/80"
                 >
-                  <PiBookmarkSimpleDuotone className="h-5 w-5" />
+                  <PiBookmarkSimpleDuotone className="h-4 w-4" />
                 </Button>
               </div>
               <Card
-                className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full"
+                className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full border-border"
                 onClick={() => router.push(`/source-files/view/${folder._id}`)}
               >
                 <CardContent className="p-4 flex flex-row items-center gap-3">
-                  <div className="w-16 h-16 rounded-lg bg-muted border border-input flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center">
                     <FolderIcon className="w-10 h-10 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
