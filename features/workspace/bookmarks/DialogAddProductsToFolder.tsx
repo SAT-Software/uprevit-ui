@@ -1,10 +1,17 @@
-import { PlusIcon, FolderIcon, PackageIcon } from "lucide-react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
+import {
+  PiPlusCircleDuotone,
+  PiFolderDuotone,
+  PiPackageDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -22,7 +29,6 @@ import {
 } from "@/components/ui/select";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useAddProductInBookmarkFolder } from "@/hooks/bookmark/useAddProductInBookmarkFolder";
-import { useState } from "react";
 
 interface FormValues {
   productId: string;
@@ -96,37 +102,49 @@ export default function DialogAddProductsToFolder({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="flex items-center gap-2">
-          <PlusIcon size={16} />
+        <Button variant="default" size="sm" className="flex items-center gap-2">
+          <PiPlusCircleDuotone className="w-5 h-5" />
           Add Products
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiPlusCircleDuotone className="w-5 h-5" />
+              <p>Add Product to Folder</p>
+            </div>
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="sr-only">
+          Choose a product to add to this bookmark folder.
+        </DialogDescription>
+
         <form
+          id="add-products-form"
+          className="p-4 space-y-4"
           onSubmit={(e) => {
-            e.preventDefault(); // Prevent default form submission
-            handleSubmit(onSubmit)(e); // Call our custom submit handler
+            e.preventDefault();
+            handleSubmit(onSubmit)(e);
           }}
         >
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <PlusIcon size={20} />
-              Add Product to Folder
-            </DialogTitle>
-            <DialogDescription>
-              Choose a product to add to this bookmark folder.
-            </DialogDescription>
-          </DialogHeader>
-
           <div className="space-y-4">
             {/* Folder Display */}
-            <div className="rounded-lg border p-3 bg-muted/50">
+            <div className="rounded-lg border p-3 bg-muted/30">
               <div className="flex items-center gap-2">
-                <FolderIcon size={16} className="text-muted-foreground" />
+                <PiFolderDuotone size={16} className="text-muted-foreground" />
                 <h4 className="font-medium text-sm">{folderName}</h4>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Folder ID: {folderId}
+              <p className="text-xs text-muted-foreground mt-1 font-mono">
+                {folderId}
               </p>
             </div>
 
@@ -162,7 +180,7 @@ export default function DialogAddProductsToFolder({
                       }) => (
                         <SelectItem key={product._id} value={product._id}>
                           <div className="flex items-center gap-2 w-full">
-                            <PackageIcon
+                            <PiPackageDuotone
                               size={16}
                               className="text-muted-foreground"
                             />
@@ -170,7 +188,7 @@ export default function DialogAddProductsToFolder({
                               {product.product_name || "Unnamed Product"}
                             </span>
                             {product.status && (
-                              <span className="text-xs text-muted-foreground ml-auto">
+                              <span className="text-xs text-muted-foreground ml-auto uppercase border border-border px-1.5 rounded-[4px]">
                                 {product.status}
                               </span>
                             )}
@@ -190,40 +208,54 @@ export default function DialogAddProductsToFolder({
 
             {/* Selected Product Preview */}
             {selectedProduct && (
-              <div className="rounded-lg border p-3 bg-primary/5">
+              <div className="rounded-lg border p-3 bg-primary/5 border-primary/20">
                 <div className="flex items-center gap-2">
-                  <PackageIcon size={16} className="text-primary" />
-                  <h4 className="font-medium text-sm">
+                  <PiPackageDuotone size={16} className="text-primary" />
+                  <h4 className="font-semibold text-sm text-foreground">
                     {selectedProduct.product_name || "Unnamed Product"}
                   </h4>
                 </div>
                 {selectedProduct.product_plan_number && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Plan: {selectedProduct.product_plan_number}
+                    Plan:{" "}
+                    <span className="font-mono">
+                      {selectedProduct.product_plan_number}
+                    </span>
                   </p>
                 )}
                 {selectedProduct.status && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Status: {selectedProduct.status}
-                  </p>
+                  <div className="mt-2 flex">
+                    <span className="text-[10px] font-medium bg-background border px-1.5 py-0.5 rounded-sm shadow-sm uppercase">
+                      {selectedProduct.status}
+                    </span>
+                  </div>
                 )}
               </div>
             )}
           </div>
+        </form>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => setOpen(false)}
-            >
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 sm:justify-end">
+          <DialogClose asChild>
+            <Button variant="secondary" type="button" size="sm">
+              <PiXCircleDuotone className="mr-2 w-4 h-4" />
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Bookmarking..." : "Bookmark Product"}
-            </Button>
-          </DialogFooter>
-        </form>
+          </DialogClose>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isPending}
+            form="add-products-form"
+          >
+            {isPending ? (
+              <PiPlusCircleDuotone className="animate-spin mr-2 w-4 h-4" />
+            ) : (
+              <PiPlusCircleDuotone className="mr-2 w-4 h-4" />
+            )}
+            {isPending ? "Bookmarking..." : "Bookmark Product"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

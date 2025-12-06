@@ -4,6 +4,16 @@ import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DialogUpdateWorkspace } from "./DialogUpdateWorkspace";
+import {
+  PiBuildingsDuotone,
+  PiIdentificationCardDuotone,
+  PiTagDuotone,
+  PiCrownDuotone,
+  PiUsersDuotone,
+  PiTextAlignLeftDuotone,
+  PiPlanetDuotone,
+  PiBriefcaseDuotone,
+} from "react-icons/pi";
 
 function WorkspaceTab() {
   const { data, isLoading, error } = useGetWorkspace();
@@ -56,54 +66,88 @@ function WorkspaceTab() {
       {/* Workspace Information Read-Only View */}
       <div className="space-y-4">
         <div className="font-medium text-lg">Workspace Information</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg">
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Workspace Name
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiBriefcaseDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base">
-              {workspaceData?.workspaceName || "-"}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Company Name
-            </div>
-            <div className="text-base">{workspaceData?.companyName || "-"}</div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Company ID
-            </div>
-            <div className="text-base">
-              {workspaceData?.companyId || "123456"}
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Workspace Name
+              </div>
+              <div className="text-sm font-medium">
+                {workspaceData?.workspaceName || "-"}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Plan
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiIdentificationCardDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base">{workspaceData?.plan || "Pro"}</div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              User Count
-            </div>
-            <div className="text-base">
-              {workspaceData?.userIds?.length || 1}
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Company Name
+              </div>
+              <div className="text-sm font-medium">
+                {workspaceData?.companyName || "-"}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-1 md:col-span-2">
-            <div className="text-sm font-medium text-muted-foreground">
-              Workspace Description
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiTagDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base whitespace-pre-wrap">
-              {workspaceData?.description || "-"}
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Company ID
+              </div>
+              <div className="text-sm font-medium">
+                {workspaceData?.companyId || "123456"}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiCrownDuotone className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Plan
+              </div>
+              <div className="text-sm font-medium">
+                {workspaceData?.plan || "Pro"}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiUsersDuotone className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                User Count
+              </div>
+              <div className="text-sm font-medium">
+                {workspaceData?.userIds?.length || 1}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors md:col-span-2">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiTextAlignLeftDuotone className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Workspace Description
+              </div>
+              <div className="text-sm font-medium whitespace-pre-wrap">
+                {workspaceData?.description || "-"}
+              </div>
             </div>
           </div>
         </div>

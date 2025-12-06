@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { FolderIcon } from "lucide-react";
 import DialogAddProductsToFolder from "@/features/workspace/bookmarks/DialogAddProductsToFolder";
 import DialogEditBookmarkFolder from "@/features/workspace/bookmarks/DialogEditBookmarkFolder";
 import DialogDeleteBookmarkFolder from "@/features/workspace/bookmarks/DialogDeleteBookmarkFolder";
@@ -10,8 +9,15 @@ import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRe
 import { useGetProductsInABookmarkFolder } from "@/hooks/bookmark/useGetProductsInABookmarkFolder";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { LinkIcon } from "lucide-react";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
+import {
+  PiFolderOpenDuotone,
+  PiPackageDuotone,
+  PiTagDuotone,
+  PiArrowSquareOutDuotone,
+} from "react-icons/pi";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface BookmarkProduct {
   _id: string;
@@ -37,41 +43,26 @@ export default function FolderPage() {
     error,
   } = useGetProductsInABookmarkFolder(folderId);
 
+  const products = folderData?.products || [];
+
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-8 p-4 h-full">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Skeleton className="w-6 h-6" />
-              <Skeleton className="h-8 w-48" />
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded-md" />
+              <Skeleton className="h-5 w-32 rounded-md" />
             </div>
-            <Skeleton className="h-10 w-32" />
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-24 rounded-md" />
+            </div>
           </div>
-          <Skeleton className="h-4 w-64 ml-9" />
-        </div>
-
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-16" />
-                  </div>
-                  <div className="flex gap-4">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                  <div className="flex gap-4 mt-2">
-                    <Skeleton className="h-3 w-32" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <div className="grid gap-3 w-full">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-xl" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -79,92 +70,145 @@ export default function FolderPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-8 p-4 h-full">
-        <div className="text-center text-red-600 py-8">
-          <p>Error loading bookmarked products</p>
-          <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex flex-col items-center justify-center gap-4 border border-border bg-background rounded-xl p-4 w-full h-full text-center">
+          <div className="text-destructive bg-destructive/10 p-4 rounded-full">
+            <PiFolderOpenDuotone className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xl font-semibold">
+              Error loading bookmarked products
+            </p>
+            <p className="text-sm text-muted-foreground">{error.message}</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/bookmarked-products")}
+          >
+            Go Back
+          </Button>
         </div>
       </div>
     );
   }
 
-  const products = folderData?.products || [];
-
   return (
-    <div className="flex flex-col gap-8 p-4 h-full">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FolderIcon className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-semibold">{bookmarkFolderName}</h1>
-            <div className="flex items-center gap-1">
-              <DialogEditBookmarkFolder
-                folderId={folderId}
-                currentFolderName={bookmarkFolderName}
-              />
-              <DialogDeleteBookmarkFolder
-                folderId={folderId}
-                folderName={bookmarkFolderName}
-              />
-            </div>
+    <div className="flex flex-col gap-2 p-2 h-full">
+      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full overflow-y-auto">
+        <div className="flex flex-wrap gap-2 items-center w-full justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <PiFolderOpenDuotone className="w-5 h-5 text-primary" />
+            <h1 className="text-base font-semibold">{bookmarkFolderName}</h1>
+            <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
+            <p className="text-xs text-muted-foreground font-medium hidden sm:block">
+              Products saved in this bookmark folder
+            </p>
           </div>
-          <DialogAddProductsToFolder
-            folderName={bookmarkFolderName}
-            folderId={folderId}
-          />
+          <div className="flex items-center gap-1">
+            <DialogEditBookmarkFolder
+              folderId={folderId}
+              currentFolderName={bookmarkFolderName}
+            />
+            <DialogDeleteBookmarkFolder
+              folderId={folderId}
+              folderName={bookmarkFolderName}
+            />
+            <div className="w-px h-6 bg-border mx-1" />
+            <DialogAddProductsToFolder
+              folderName={bookmarkFolderName}
+              folderId={folderId}
+            />
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground ml-9">
-          Products saved in this bookmark folder
-        </p>
-      </div>
 
-      <div className="flex flex-col gap-4">
-        {products.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
-            No products in this folder yet.
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {products.map((product: BookmarkProduct) => (
-              <Card
-                key={product._id}
-                className="hover:bg-muted/50 transition-colors cursor-pointer"
-              >
-                <CardContent className="p-6">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-medium">{product.product_name}</h3>
+        <div className="flex flex-col gap-4 w-full">
+          {products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[300px] w-full gap-4 text-muted-foreground border border-dashed border-border rounded-xl bg-muted/5">
+              <div className="p-4 rounded-full bg-muted/30">
+                <PiPackageDuotone className="w-10 h-10 text-muted-foreground/50" />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <p className="text-lg font-medium text-foreground">
+                  No products in this folder yet.
+                </p>
+                <p className="text-sm">
+                  Add products to organize your collection.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-3 w-full">
+              {products.map((product: BookmarkProduct) => (
+                <Card
+                  key={product._id}
+                  className="group hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden border-border"
+                  onClick={() =>
+                    router.push(`/products/${product._id}/product-information`)
+                  }
+                >
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-lg bg-secondary/50 flex items-center justify-center border border-border group-hover:border-primary/20 group-hover:bg-primary/5 transition-colors delay-200 duration-200 ease-in-out shrink-0">
+                      <PiPackageDuotone className="w-6 h-6 text-foreground/70 group-hover:text-primary transition-colors delay-200 duration-200 ease-in-out" />
+                    </div>
+
+                    <div className="flex-1 flex flex-col gap-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                          v{product.master_version}
-                        </span>
-                        <DialogRemoveProductBookmark
-                          productId={product._id}
-                          productName={product.product_name}
-                          folderId={folderId}
-                        />
-                        <Button
-                          onClick={() =>
-                            router.push(
-                              `/products/${product._id}/product-information`
-                            )
-                          }
-                          variant="ghost"
-                          size="icon"
+                        <h3 className="font-semibold text-base truncate">
+                          {product.product_name}
+                        </h3>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "font-normal text-[10px] px-1.5 py-0 h-5",
+                            {
+                              "bg-green-500/10 text-green-700 border-green-500/20":
+                                product.status?.toLowerCase() === "published",
+                              "bg-blue-500/10 text-blue-700 border-blue-500/20":
+                                product.status?.toLowerCase() === "draft",
+                              "bg-gray-500/10 text-gray-700 border-gray-500/20":
+                                product.status?.toLowerCase() === "archived",
+                            }
+                          )}
                         >
-                          <LinkIcon className="w-4 h-4" />
-                        </Button>
+                          {product.status || "N/A"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <PiTagDuotone className="w-3.5 h-3.5" />v
+                          {product.master_version}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span>Status: {product.status}</span>
+
+                    <div
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          router.push(
+                            `/products/${product._id}/product-information`
+                          )
+                        }
+                      >
+                        <PiArrowSquareOutDuotone className="w-5 h-5" />
+                        View
+                      </Button>
+                      <DialogRemoveProductBookmark
+                        productId={product._id}
+                        productName={product.product_name}
+                        folderId={folderId}
+                      />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

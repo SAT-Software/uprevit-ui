@@ -24,7 +24,12 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { uploadFiles } from "@/utils/uploadthing";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { PiPencilDuotone } from "react-icons/pi";
+import {
+  PiPencilSimpleDuotone,
+  PiXCircleDuotone,
+  PiFloppyDiskDuotone,
+  PiPictureInPictureDuotone,
+} from "react-icons/pi";
 
 type FormData = {
   name: string;
@@ -58,7 +63,6 @@ export default function DialogEditLabelTag({
     control,
     formState: { errors },
     reset,
-    setValue,
   } = useForm<FormData>({
     values: {
       name: labelTag.name || "",
@@ -121,15 +125,23 @@ export default function DialogEditLabelTag({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <PiPencilDuotone className="h-4 w-4" />
-          <span className="sr-only">Edit</span>
+        <Button variant="secondary" size="sm">
+          <PiPencilSimpleDuotone />
+          Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Edit Label
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiPencilSimpleDuotone className="w-4 h-4" />
+              <span>Edit Label</span>
+            </div>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -137,10 +149,11 @@ export default function DialogEditLabelTag({
         </DialogDescription>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          id="edit-label-tag-form"
+          id={`edit-label-tag-form-${id}`}
           className="overflow-y-auto"
+          noValidate
         >
-          <div className="flex gap-4 px-6 pt-4">
+          <div className="flex gap-4 p-4">
             <div className="w-1/3">
               <Controller
                 name="image"
@@ -158,17 +171,22 @@ export default function DialogEditLabelTag({
             <div className="flex-1 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor={`${id}-name`}>Name</Label>
-                <Input
-                  id={`${id}-name`}
-                  placeholder="Enter label name"
-                  type="text"
-                  {...register("name", {
-                    required: "Label name is required",
-                  })}
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name.message}</p>
-                )}
+                <div className="flex flex-col gap-2">
+                  <Input
+                    id={`${id}-name`}
+                    placeholder="Enter label name"
+                    type="text"
+                    aria-invalid={errors.name ? "true" : "false"}
+                    {...register("name", {
+                      required: "Label name is required",
+                    })}
+                  />
+                  {errors.name && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`${id}-type`}>Type</Label>
@@ -182,42 +200,46 @@ export default function DialogEditLabelTag({
             </div>
           </div>
 
-          <div className="px-6 pt-4 pb-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
-                <Textarea
-                  id={`${id}-description`}
-                  placeholder="Describe the label's purpose and specifications"
-                  {...register("description")}
-                  className="min-h-[100px] resize-none"
-                />
-              </div>
+          <div className="px-4 pb-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-description`}>Description</Label>
+              <Textarea
+                id={`${id}-description`}
+                placeholder="Describe the label's purpose and specifications"
+                {...register("description")}
+                className="min-h-[100px] resize-none"
+              />
             </div>
           </div>
         </form>
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 reset();
               }}
             >
+              <PiXCircleDuotone />
               Cancel
             </Button>
           </DialogClose>
           <Button
-            form="edit-label-tag-form"
+            form={`edit-label-tag-form-${id}`}
             type="submit"
+            size="sm"
+            variant="default"
             onClick={handleSubmit(onSubmit)}
             disabled={uploadingImage || isPending}
+            aria-busy={uploadingImage || isPending}
           >
+            <PiFloppyDiskDuotone />
             {uploadingImage
-              ? "Uploading Label..."
+              ? "Uploading..."
               : isPending
-              ? "Updating Data..."
+              ? "Updating..."
               : "Update Label"}
           </Button>
         </DialogFooter>
@@ -251,62 +273,62 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
     null;
 
   return (
-    <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
-      {currentImage ? (
-        <Image
-          className="size-full object-cover rounded-xl"
-          src={currentImage}
-          alt={
-            (typeof value !== "string" && value?.file.name) ||
-            files[0]?.file.name
-              ? "Preview of uploaded label image"
-              : "Current label image"
-          }
-          width={512}
-          height={96}
-        />
-      ) : (
-        <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-          <div className="flex flex-col items-center text-muted-foreground/60">
-            <ImagePlusIcon className="w-8 h-8 mb-2" />
-            <span className="text-xs">Label Image</span>
+    <div className="h-40 w-full">
+      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
+        {currentImage ? (
+          <Image
+            className="size-full object-cover rounded-xl"
+            src={currentImage}
+            alt={
+              (typeof value !== "string" && value?.file.name) ||
+              files[0]?.file.name
+                ? "Preview of uploaded label image"
+                : "Current label image"
+            }
+            width={512}
+            height={160}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
+            <PiPictureInPictureDuotone className="w-12 h-12" />
+            <span className="text-xs font-medium">Upload Image</span>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="absolute inset-0 flex items-center justify-center gap-2">
-        <button
-          type="button"
-          className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-          onClick={openFileDialog}
-          aria-label={currentImage ? "Change image" : "Upload image"}
-        >
-          <ImagePlusIcon size={16} aria-hidden="true" />
-        </button>
-        {currentImage && (
+        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
           <button
             type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-            onClick={() => {
-              const fileId =
-                (typeof value !== "string" ? value?.id : undefined) ||
-                files[0]?.id;
-              if (fileId) {
-                removeFile(fileId);
-              }
-              onChange(null);
-            }}
-            aria-label="Remove image"
+            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
+            onClick={openFileDialog}
+            aria-label={currentImage ? "Change image" : "Upload image"}
           >
-            <XIcon size={16} aria-hidden="true" />
+            <ImagePlusIcon size={16} aria-hidden="true" />
           </button>
-        )}
+          {currentImage && (
+            <button
+              type="button"
+              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
+              onClick={() => {
+                const fileId =
+                  (typeof value !== "string" ? value?.id : undefined) ||
+                  files[0]?.id;
+                if (fileId) {
+                  removeFile(fileId);
+                }
+                onChange(null);
+              }}
+              aria-label="Remove image"
+            >
+              <XIcon size={16} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+        <input
+          {...getInputProps()}
+          className="sr-only"
+          aria-label="Upload label image"
+        />
       </div>
-      <input
-        {...getInputProps()}
-        className="sr-only"
-        aria-label="Upload label image"
-      />
     </div>
   );
 }

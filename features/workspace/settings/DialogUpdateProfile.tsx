@@ -10,12 +10,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useUpdateUser } from "@/hooks/user/useUpdateUser";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { User } from "@/types/user";
 import { uploadFiles } from "@/utils/uploadthing";
-import { ImagePlusIcon, XIcon, PencilIcon } from "lucide-react";
+import {
+  PiPencilSimpleDuotone,
+  PiXCircleDuotone,
+  PiCheckCircleDuotone,
+  PiCameraDuotone,
+  PiTrashDuotone,
+} from "react-icons/pi";
 
 interface DialogUpdateProfileProps {
   userProfile: User;
@@ -103,167 +111,181 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <PencilIcon className="w-4 h-4 mr-2" />
+        <Button variant="outline" size="sm" className="gap-2">
+          <PiPencilSimpleDuotone className="w-4 h-4" />
           Edit Profile
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-[600px] [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Edit Profile</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
         </DialogHeader>
 
         <form
           id="update-user-profile-form"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="space-y-4"
+          className="overflow-y-auto"
         >
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Profile Avatar</label>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Avatar className="w-16 h-16">
+          <div className="p-4 space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="relative group">
+                <Avatar className="w-20 h-20 ring-2 ring-background">
                   <AvatarImage src={currentAvatar} alt="Profile avatar" />
                   <AvatarFallback className="text-lg border">AV</AvatarFallback>
                 </Avatar>
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px] rounded-full z-10">
+                  <label
+                    className="cursor-pointer p-2 bg-background text-foreground rounded-full hover:bg-accent transition-colors flex items-center justify-center"
+                    title="Change Avatar"
+                  >
+                    <PiCameraDuotone size={16} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      disabled={uploadingAvatar}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {watch("profileAvatar") && (
+                    <button
+                      type="button"
+                      onClick={removeAvatar}
+                      disabled={uploadingAvatar}
+                      className="cursor-pointer p-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors flex items-center justify-center"
+                      title="Remove Avatar"
+                    >
+                      <PiTrashDuotone size={16} />
+                    </button>
+                  )}
+                </div>
+
                 {uploadingAvatar && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-20">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    disabled={uploadingAvatar}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    aria-label="Upload profile avatar"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={uploadingAvatar}
-                    className="w-fit cursor-pointer"
-                  >
-                    <ImagePlusIcon className="w-4 h-4 mr-2" />
-                    {uploadingAvatar ? "Uploading..." : "Change Avatar"}
-                  </Button>
-                </div>
+              <div className="space-y-1">
+                <h3 className="font-medium text-sm">Profile Picture</h3>
+                <p className="text-xs text-muted-foreground">
+                  Upload a new picture to update your profile.
+                </p>
+              </div>
+            </div>
 
-                {watch("profileAvatar") && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeAvatar}
-                    disabled={uploadingAvatar}
-                    className="w-fit text-destructive hover:text-destructive"
-                  >
-                    <XIcon className="w-4 h-4 mr-2" />
-                    Remove
-                  </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Full Name</label>
+                <Input
+                  id={`${id}-name`}
+                  type="text"
+                  placeholder="Enter your full name"
+                  className="w-full"
+                  {...register("name", {
+                    required: "Full name is required",
+                  })}
+                />
+                {errors.name && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.name.message}
+                  </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email Address</label>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^\S+@\S+$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Role / Designation
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Enter your role"
+                  className="w-full"
+                  {...register("designation", {
+                    required: "Designation is required",
+                  })}
+                />
+                {errors.designation && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.designation.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Location</label>
+                <Input
+                  type="text"
+                  placeholder="Enter your location"
+                  className="w-full"
+                  {...register("location")}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Phone Number</label>
+                <Input
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  className="w-full"
+                  {...register("phone")}
+                />
               </div>
             </div>
           </div>
+        </form>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Full Name</label>
-              <Input
-                id={`${id}-name`}
-                type="text"
-                placeholder="Enter your full name"
-                className="w-full"
-                {...register("name", {
-                  required: "Full name is required",
-                })}
-              />
-              {errors.name && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email Address</label>
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^\S+@\S+$/i,
-                    message: "Invalid email address",
-                  },
-                })}
-              />
-              {errors.email && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Role / Designation</label>
-              <Input
-                type="text"
-                placeholder="Enter your role"
-                className="w-full"
-                {...register("designation", {
-                  required: "Designation is required",
-                })}
-              />
-              {errors.designation && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.designation.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Location</label>
-              <Input
-                type="text"
-                placeholder="Enter your location"
-                className="w-full"
-                {...register("location")}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Phone Number</label>
-              <Input
-                type="tel"
-                placeholder="Enter your phone number"
-                className="w-full"
-                {...register("phone")}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-            >
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone className="mr-2 h-4 w-4" />
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} variant="default">
-              {isPending ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </form>
+          </DialogClose>
+          <Button
+            type="submit"
+            disabled={isPending || uploadingAvatar}
+            variant="default"
+            size="sm"
+            form="update-user-profile-form"
+          >
+            <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+            {isPending ? "Saving..." : "Save Changes"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { CircleAlertIcon } from "lucide-react";
-import { PiBookmarkSimpleDuotone } from "react-icons/pi";
+import {
+  PiBookmarkSimpleDuotone,
+  PiWarningCircleDuotone,
+  PiXCircleDuotone,
+  PiTrashDuotone,
+} from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRemoveProductBookmark } from "@/hooks/bookmark/useRemoveProductBookmark";
 
@@ -58,44 +60,68 @@ export default function DialogRemoveProductBookmark({
     );
   }
 
-  // Original trigger-based mode
   return (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-        >
-          <PiBookmarkSimpleDuotone className="h-4 w-4" />
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="destructive" size="sm">
+          <PiTrashDuotone className="h-4 w-4" />
+          Remove Bookmark
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
-          <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border"
-            aria-hidden="true"
-          >
-            <CircleAlertIcon className="opacity-80" size={16} />
+      </DialogTrigger>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center text-destructive">
+            <div className="flex items-center gap-2">
+              <PiBookmarkSimpleDuotone size={18} />
+              <p>Remove from Bookmarks</p>
+            </div>
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="cursor-pointer text-destructive/80 hover:text-destructive transition-colors"
+              >
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-4 p-4 border border-destructive/20 bg-destructive/5 rounded-lg text-sm text-destructive/90">
+            <PiWarningCircleDuotone className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold">Confirm Removal</p>
+              <p>
+                Are you sure you want to remove{" "}
+                <span className="font-semibold">{productName}</span> from this
+                bookmark folder?
+              </p>
+            </div>
           </div>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove from bookmarks?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {`Are you sure you want to remove "${productName}" from this bookmark
-                folder?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
         </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 sm:justify-end">
+          <DialogClose asChild>
+            <Button variant="secondary" size="sm" disabled={isPending}>
+              <PiXCircleDuotone className="mr-2 w-4 h-4" />
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button
             onClick={handleRemoveProductBookmark}
             disabled={isPending}
+            variant="destructive"
+            size="sm"
           >
+            {isPending ? (
+              <PiTrashDuotone className="animate-spin mr-2 w-4 h-4" />
+            ) : (
+              <PiTrashDuotone className="mr-2 w-4 h-4" />
+            )}
             {isPending ? "Removing..." : "Remove"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

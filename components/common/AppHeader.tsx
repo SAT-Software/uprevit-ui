@@ -181,7 +181,7 @@ export function AppHeader() {
       ) :  */}
 
       <div className="flex w-full">
-        <div className="flex w-full items-center gap-1">
+        <div className="flex w-full items-center gap-2">
           <SidebarTrigger className="" />
           {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
           <Separator orientation="vertical" className="mr-1 h-4" />

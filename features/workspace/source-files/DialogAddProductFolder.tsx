@@ -1,8 +1,6 @@
-import { PlusIcon } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 import { useAuth } from "react-oidc-context";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,11 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useAddSourceFilesFolder } from "@/hooks/source-files/useAddSourceFilesFolder";
-import { PiPlusBold } from "react-icons/pi";
+import {
+  PiPlusCircleDuotone,
+  PiXCircleDuotone,
+  PiFolderPlusDuotone,
+} from "react-icons/pi";
 
 interface FormValues {
   folderName: string;
@@ -48,7 +51,6 @@ export default function DialogAddProductFolder({
     mode: "onSubmit",
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const folderName = watch("folderName");
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
@@ -80,30 +82,39 @@ export default function DialogAddProductFolder({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <PiPlusBold />
-          Add Product Folder
+        <Button variant="secondary" size="sm">
+          <PiFolderPlusDuotone className="w-5 h-5" />
+          Add Folder
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiFolderPlusDuotone className="w-5 h-5 text-muted-foreground" />
+              <p>Add New Folder</p>
+            </div>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Enter a name for the new folder in your source files.
+          </DialogDescription>
+        </DialogHeader>
+
         <form
+          id="add-folder-form"
+          className="overflow-y-auto"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(onSubmit)(e);
           }}
         >
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <PlusIcon size={20} />
-              Add New Folder
-            </DialogTitle>
-            <DialogDescription>
-              Enter a name for the new folder in your source files.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-3">
+          <div className="space-y-4 p-4">
+            <div className="space-y-2">
               <Label htmlFor="folderName" className="text-sm font-medium">
                 Folder Name
               </Label>
@@ -115,25 +126,39 @@ export default function DialogAddProductFolder({
                 })}
               />
               {errors.folderName && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {errors.folderName.message}
                 </p>
               )}
             </div>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => setOpen(false)}
-            >
+        </form>
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone className="mr-2" />
               Cancel
             </Button>
-            <Button type="submit" disabled={!folderName || isPending}>
-              {isPending ? "Adding..." : "Add Folder"}
-            </Button>
-          </DialogFooter>
-        </form>
+          </DialogClose>
+          <Button
+            type="submit"
+            size="sm"
+            form="add-folder-form"
+            disabled={!folderName || isPending}
+          >
+            {isPending ? (
+              <>
+                <PiPlusCircleDuotone className="animate-spin mr-2" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <PiPlusCircleDuotone className="mr-2" />
+                Add Folder
+              </>
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

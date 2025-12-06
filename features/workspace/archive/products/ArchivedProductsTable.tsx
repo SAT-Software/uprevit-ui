@@ -10,17 +10,26 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-} from "lucide-react";
 import { useId, useMemo, useState } from "react";
-import { PiArrowCounterClockwiseDuotone } from "react-icons/pi";
+import {
+  PiArrowCounterClockwiseDuotone,
+  PiBuildingsDuotone,
+  PiCalendarDuotone,
+  PiCaretCircleDoubleLeftDuotone,
+  PiCaretCircleDoubleRightDuotone,
+  PiCaretCircleLeftDuotone,
+  PiCaretCircleRightDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+  PiGitBranchDuotone,
+  PiHashDuotone,
+  PiKanbanDuotone,
+  PiPackageDuotone,
+  PiUserCircleDuotone,
+} from "react-icons/pi";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -70,6 +79,38 @@ interface ArchivedProductsTableProps {
   onRestore: (item: ProductArchiveRow) => void;
 }
 
+// Helper component for sortable headers
+const SortableHeader = ({
+  column,
+  title,
+  icon: Icon,
+}: {
+  column: any;
+  title: string;
+  icon: any;
+}) => {
+  return (
+    <button
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span>{title}</span>
+        </div>
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
+        ) : (
+          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
+        )}
+      </div>
+    </button>
+  );
+};
+
 export function ArchivedProductsTable({
   data,
   onRowClick,
@@ -86,61 +127,93 @@ export function ArchivedProductsTable({
   const columns: ColumnDef<ProductArchiveRow>[] = useMemo(() => {
     return [
       {
-        header: "PPN",
         accessorKey: "product_plan_number",
+        header: ({ column }) => (
+          <SortableHeader column={column} title="PPN" icon={PiHashDuotone} />
+        ),
         size: 120,
         cell: ({ row }) => (
-          <div className="text-xs font-medium">
+          <div className="text-sm font-medium">
             {row.getValue("product_plan_number")}
           </div>
         ),
       },
       {
-        header: "Product Name",
         accessorKey: "product_name",
+        header: ({ column }) => (
+          <SortableHeader
+            column={column}
+            title="Product Name"
+            icon={PiPackageDuotone}
+          />
+        ),
         size: 260,
         cell: ({ row }) => (
-          <div className="text-xs font-medium">
+          <div className="text-sm font-medium">
             {row.getValue("product_name")}
           </div>
         ),
       },
       {
-        header: "Project Name",
         accessorKey: "project_name",
+        header: ({ column }) => (
+          <SortableHeader
+            column={column}
+            title="Project Name"
+            icon={PiKanbanDuotone}
+          />
+        ),
         size: 150,
         cell: ({ row }) => {
           const project_name = row.original?.project?.[0]?.project_name;
-          return <div className="text-xs font-medium">{project_name}</div>;
+          return <div className="text-sm font-medium">{project_name}</div>;
         },
       },
       {
-        header: "Department Name",
         accessorKey: "department_name",
+        header: ({ column }) => (
+          <SortableHeader
+            column={column}
+            title="Department Name"
+            icon={PiBuildingsDuotone}
+          />
+        ),
         size: 150,
         cell: ({ row }) => {
           const departmentName = row.original?.department?.[0]?.department_name;
-          return <div className="text-xs font-medium">{departmentName}</div>;
+          return <div className="text-sm font-medium">{departmentName}</div>;
         },
       },
       {
-        header: "Archived By",
         accessorKey: "actionBy",
+        header: ({ column }) => (
+          <SortableHeader
+            column={column}
+            title="Archived By"
+            icon={PiUserCircleDuotone}
+          />
+        ),
         size: 160,
         cell: ({ row }) => {
           const actionBy = row.original.auditLogs?.[0]?.actionBy;
-          return <div className="text-xs">{actionBy}</div>;
+          return <div className="text-sm">{actionBy}</div>;
         },
       },
       {
-        header: "Archived On",
         accessorKey: "actionAt",
+        header: ({ column }) => (
+          <SortableHeader
+            column={column}
+            title="Archived On"
+            icon={PiCalendarDuotone}
+          />
+        ),
         size: 140,
         cell: ({ row }) => {
           const actionAt = row.original.auditLogs?.[0]?.actionAt;
 
           if (!actionAt) {
-            return <div className="text-xs text-muted-foreground">-</div>;
+            return <div className="text-sm text-muted-foreground">-</div>;
           }
 
           const actionAtDate = new Date(actionAt).toLocaleDateString("en-US", {
@@ -150,20 +223,26 @@ export function ArchivedProductsTable({
           });
           const actionAtTime = new Date(actionAt).toLocaleTimeString();
           return (
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               {actionAtDate} {actionAtTime}
             </div>
           );
         },
       },
       {
-        header: "Version",
         accessorKey: "master_version",
+        header: ({ column }) => (
+          <SortableHeader
+            column={column}
+            title="Version"
+            icon={PiGitBranchDuotone}
+          />
+        ),
         size: 120,
         cell: ({ row }) => (
-          <div className="text-xs font-medium">
-            {row.getValue("master_version")}
-          </div>
+          <Badge variant="secondary" className="font-mono text-sm">
+            v{row.getValue("master_version")}
+          </Badge>
         ),
       },
       {
@@ -171,18 +250,20 @@ export function ArchivedProductsTable({
         header: "Restore",
         size: 100,
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRestore(row.original);
-            }}
-          >
-            <PiArrowCounterClockwiseDuotone className="h-5 w-5" />
-            <span className="sr-only">Restore</span>
-          </Button>
+          <div className="flex">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="text-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRestore(row.original);
+              }}
+            >
+              <PiArrowCounterClockwiseDuotone className="h-3 w-3" />
+              Restore
+            </Button>
+          </div>
         ),
       },
     ];
@@ -208,7 +289,7 @@ export function ArchivedProductsTable({
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
@@ -216,53 +297,14 @@ export function ArchivedProductsTable({
                     <TableHead
                       key={header.id}
                       style={{ width: `${header.getSize()}px` }}
-                      className="h-11"
+                      className="h-11 border-r border-border last:border-r-0"
                     >
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <div
-                          className={cn(
-                            header.column.getCanSort() &&
-                              "flex text-xs h-full cursor-pointer items-center justify-between gap-2 select-none"
-                          )}
-                          onClick={header.column.getToggleSortingHandler()}
-                          onKeyDown={(e) => {
-                            if (
-                              header.column.getCanSort() &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
-                              e.preventDefault();
-                              header.column.getToggleSortingHandler()?.(e);
-                            }
-                          }}
-                          tabIndex={header.column.getCanSort() ? 0 : undefined}
-                        >
-                          {flexRender(
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                          {{
-                            asc: (
-                              <ChevronUpIcon
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                aria-hidden="true"
-                              />
-                            ),
-                            desc: (
-                              <ChevronDownIcon
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                aria-hidden="true"
-                              />
-                            ),
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      ) : (
-                        flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )
-                      )}
                     </TableHead>
                   );
                 })}
@@ -275,7 +317,7 @@ export function ArchivedProductsTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:bg-muted/50"
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -304,29 +346,8 @@ export function ArchivedProductsTable({
 
       {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
-        <div className="flex items-center gap-3">
-          <Label htmlFor={id} className="max-sm:sr-only">
-            Rows per page
-          </Label>
-          <Select
-            value={table.getState().pagination.pageSize.toString()}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger id={id} className="w-fit whitespace-nowrap">
-              <SelectValue placeholder="Select number of results" />
-            </SelectTrigger>
-            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
-              {[5, 10, 25, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={pageSize.toString()}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Results per page (Deleted) */}
+
         {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
@@ -361,50 +382,56 @@ export function ArchivedProductsTable({
             <PaginationContent>
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  size="sm"
+                  variant="secondary"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.firstPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to first page"
                 >
-                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleLeftDuotone
+                    size={16}
+                    aria-hidden="true"
+                  />
                 </Button>
               </PaginationItem>
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  size="sm"
+                  variant="secondary"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to previous page"
                 >
-                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleLeftDuotone size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  size="sm"
+                  variant="secondary"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to next page"
                 >
-                  <ChevronRightIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleRightDuotone size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  size="sm"
+                  variant="secondary"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.lastPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to last page"
                 >
-                  <ChevronLastIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleRightDuotone
+                    size={16}
+                    aria-hidden="true"
+                  />
                 </Button>
               </PaginationItem>
             </PaginationContent>

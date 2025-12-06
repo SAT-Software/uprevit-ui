@@ -1,4 +1,3 @@
-import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
@@ -11,12 +10,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUpdateSourceFilesFolder } from "@/hooks/source-files/useUpdateSourceFilesFolder";
 import { SourceFilesFolder } from "@/types/source-files";
-import { PiPencilCircleDuotone } from "react-icons/pi";
+import {
+  PiPencilCircleDuotone,
+  PiChecksDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
 
 interface FormValues {
   folderName: string;
@@ -43,7 +47,6 @@ export default function DialogEditSourceFilesFolder({
     mode: "onSubmit",
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const folderName = watch("folderName");
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
@@ -70,34 +73,39 @@ export default function DialogEditSourceFilesFolder({
       }}
     >
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Delete folder"
-          title="Delete folder"
-        >
-          <PiPencilCircleDuotone className="h-5 w-5" />
+        <Button variant="secondary" size="sm" aria-label="Edit folder">
+          <PiPencilCircleDuotone />
+          Edit
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiPencilCircleDuotone className="w-5 h-5 text-muted-foreground" />
+              <p>Edit Folder</p>
+            </div>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Update the name for the folder.
+          </DialogDescription>
+        </DialogHeader>
+
         <form
+          id="edit-folder-form"
+          className="overflow-y-auto"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(onSubmit)(e);
           }}
         >
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <PlusIcon size={20} />
-              Edit Folder
-            </DialogTitle>
-            <DialogDescription>
-              Update the name for the new folder.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-3">
+          <div className="space-y-4 p-4">
+            <div className="space-y-2">
               <Label htmlFor="folderName" className="text-sm font-medium">
                 Folder Name
               </Label>
@@ -110,25 +118,39 @@ export default function DialogEditSourceFilesFolder({
                 })}
               />
               {errors.folderName && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {errors.folderName.message}
                 </p>
               )}
             </div>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => setOpen(false)}
-            >
+        </form>
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone className="mr-2" />
               Cancel
             </Button>
-            <Button type="submit" disabled={!folderName || isPending}>
-              {isPending ? "Updating..." : "Update Folder"}
-            </Button>
-          </DialogFooter>
-        </form>
+          </DialogClose>
+          <Button
+            type="submit"
+            size="sm"
+            form="edit-folder-form"
+            disabled={(!folderName && !currentFolder?.name) || isPending}
+          >
+            {isPending ? (
+              <>
+                <PiChecksDuotone className="animate-spin mr-2" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <PiChecksDuotone className="mr-2" />
+                Update Folder
+              </>
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

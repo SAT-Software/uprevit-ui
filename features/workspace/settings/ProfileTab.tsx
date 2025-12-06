@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { DialogUpdateProfile } from "./DialogUpdateProfile";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "react-oidc-context";
+import {
+  PiEnvelopeDuotone,
+  PiBriefcaseDuotone,
+  PiMapPinDuotone,
+  PiPhoneDuotone,
+} from "react-icons/pi";
 
 function ProfileTab() {
   const auth = useAuth();
@@ -63,40 +69,61 @@ function ProfileTab() {
       {/* Personal Information Read-Only View */}
       <div className="space-y-4">
         <div className="font-medium text-lg">Personal Information</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg">
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Full Name
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiBriefcaseDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base">{userProfile?.name || "-"}</div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Role / Designation
+              </div>
+              <div className="text-sm font-medium">
+                {userProfile?.designation || "-"}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Email Address
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiEnvelopeDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base">{userProfile?.email || "-"}</div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Email Address
+              </div>
+              <div className="text-sm font-medium">
+                {userProfile?.email || "-"}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Role / Designation
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiMapPinDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base">{userProfile?.designation || "-"}</div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Location
+              </div>
+              <div className="text-sm font-medium">
+                {userProfile?.location || "-"}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Location
+          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
+            <div className="p-2.5 bg-muted rounded-lg shrink-0">
+              <PiPhoneDuotone className="w-5 h-5 text-muted-foreground" />
             </div>
-            <div className="text-base">{userProfile?.location || "-"}</div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-muted-foreground">
-              Phone Number
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">
+                Phone Number
+              </div>
+              <div className="text-sm font-medium">
+                {userProfile?.phone || "-"}
+              </div>
             </div>
-            <div className="text-base">{userProfile?.phone || "-"}</div>
           </div>
         </div>
       </div>
