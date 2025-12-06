@@ -14,11 +14,7 @@ import {
 } from "@tanstack/react-table";
 import {
   ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
   ChevronRightIcon,
-  ChevronUpIcon,
   EllipsisIcon,
   LayoutList,
 } from "lucide-react";
@@ -57,7 +53,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
-import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
+import {
+  PiPencilSimpleDuotone,
+  PiTrashDuotone,
+  PiHashDuotone,
+  PiImageDuotone,
+  PiTagDuotone,
+  PiTextAlignLeftDuotone,
+  PiRulerDuotone,
+  PiCirclesFourDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretCircleDoubleLeftDuotone,
+  PiCaretCircleLeftDuotone,
+  PiCaretCircleRightDuotone,
+  PiCaretCircleDoubleRightDuotone,
+  PiCaretCircleDownDuotone,
+  PiDotsThreeCircleDuotone,
+} from "react-icons/pi";
 import EditComponentDialog from "./EditComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 
@@ -69,6 +83,46 @@ type ComponentItem = {
   label_type: string[];
   dimensions: string;
   component_type: string;
+};
+
+// Helper component for sortable headers
+const SortableHeader = ({
+  column,
+  title,
+  icon: Icon,
+}: {
+  column?: any;
+  title: string;
+  icon: any;
+}) => {
+  if (!column) {
+    return (
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <span>{title}</span>
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span>{title}</span>
+        </div>
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
+        ) : (
+          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
+        )}
+      </div>
+    </button>
+  );
 };
 
 const columns: ColumnDef<ComponentItem>[] = [
@@ -90,13 +144,13 @@ const columns: ColumnDef<ComponentItem>[] = [
           }}
         >
           {row.getIsExpanded() ? (
-            <ChevronUpIcon
+            <PiCaretCircleDownDuotone
               className="opacity-60"
               size={16}
               aria-hidden="true"
             />
           ) : (
-            <ChevronDownIcon
+            <PiCaretCircleRightDuotone
               className="opacity-60"
               size={16}
               aria-hidden="true"
@@ -105,10 +159,13 @@ const columns: ColumnDef<ComponentItem>[] = [
         </Button>
       ) : undefined;
     },
+    size: 30,
   },
   {
-    header: "Image",
     accessorKey: "image",
+    header: ({ column }) => (
+      <SortableHeader title="Image" icon={PiImageDuotone} />
+    ),
     cell: ({ row }) =>
       row.original.image !== "" ? (
         <Image
@@ -120,13 +177,17 @@ const columns: ColumnDef<ComponentItem>[] = [
         />
       ) : (
         <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
-          <LayoutList className="w-full h-full p-3" />
+          <PiImageDuotone className="w-full h-full p-2" />
         </div>
       ),
+    size: 80,
   },
   {
-    header: "Label Type",
     accessorKey: "label_type",
+    enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Label Type" icon={PiTagDuotone} />
+    ),
     cell: ({ row }) => {
       const types = row.getValue("label_type") as string[];
       return (
@@ -145,9 +206,15 @@ const columns: ColumnDef<ComponentItem>[] = [
     },
   },
   {
-    header: "Component #",
     accessorKey: "component_number",
     enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Component #"
+        icon={PiHashDuotone}
+      />
+    ),
     cell: ({ row }) => (
       <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
         {row.getValue("component_number")}
@@ -155,9 +222,15 @@ const columns: ColumnDef<ComponentItem>[] = [
     ),
   },
   {
-    header: "Description",
     accessorKey: "component_description",
     enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Description"
+        icon={PiTextAlignLeftDuotone}
+      />
+    ),
     cell: ({ row }) => (
       <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
         {row.getValue("component_description")}
@@ -165,25 +238,38 @@ const columns: ColumnDef<ComponentItem>[] = [
     ),
   },
   {
-    header: "Dimensions",
     accessorKey: "dimensions",
+    enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Dimensions"
+        icon={PiRulerDuotone}
+      />
+    ),
     cell: ({ row }) => (
       <div className="text-sm">{row.getValue("dimensions") || "-"}</div>
     ),
   },
   {
-    header: "Component Type",
     accessorKey: "component_type",
+    enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Component Type"
+        icon={PiCirclesFourDuotone}
+      />
+    ),
     cell: ({ row }) => (
       <div className="text-sm">{row.getValue("component_type") || "-"}</div>
     ),
   },
-
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => <RowActions row={row} />,
-    size: 80,
+    size: 40,
     enableHiding: false,
   },
 ];
@@ -220,73 +306,26 @@ export default function ProductComponentDetailsTable({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full p-4">
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="">
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="bg-muted/60" key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
-                      tabIndex={header.column.getCanSort() ? 0 : undefined}
-                      className={
-                        header.column.getCanSort()
-                          ? "cursor-pointer select-none"
-                          : undefined
-                      }
-                      aria-sort={
-                        header.column.getIsSorted() === false
-                          ? undefined
-                          : header.column.getIsSorted() === "asc"
-                          ? "ascending"
-                          : "descending"
-                      }
-                      onClick={header.column.getToggleSortingHandler?.()}
-                      onKeyDown={
-                        header.column.getCanSort()
-                          ? (e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                header.column.toggleSorting();
-                              }
-                            }
-                          : undefined
-                      }
+                      style={{ width: `${header.getSize()}px` }}
+                      className="h-11 border-r border-border last:border-r-0"
                     >
-                      {header.isPlaceholder ? null : (
-                        <span className="inline-flex items-center gap-1">
-                          {flexRender(
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                          {header.column.getCanSort() && (
-                            <span className="ml-1">
-                              {header.column.getIsSorted() === "asc" ? (
-                                <ChevronUpIcon
-                                  className="shrink-0 opacity-60"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              ) : header.column.getIsSorted() === "desc" ? (
-                                <ChevronDownIcon
-                                  className="shrink-0 opacity-60"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <ChevronUpIcon
-                                  className="shrink-0 opacity-10"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </span>
-                          )}
-                        </span>
-                      )}
                     </TableHead>
                   );
                 })}
@@ -297,11 +336,14 @@ export default function ProductComponentDetailsTable({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <Fragment key={row.id}>
-                  <TableRow data-state={row.getIsSelected() && "selected"}>
+                  <TableRow
+                    data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-muted/50"
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                        className="last:py-0 whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -331,7 +373,7 @@ export default function ProductComponentDetailsTable({
                             />
                           ) : (
                             <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
-                              <LayoutList className="w-full h-full p-3" />
+                              <PiImageDuotone className="w-full h-full p-2" />
                             </div>
                           )}
                         </div>
@@ -355,28 +397,6 @@ export default function ProductComponentDetailsTable({
       </div>
       {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
-        <div className="flex items-center gap-3">
-          <Label htmlFor={id} className="max-sm:sr-only">
-            Rows per page
-          </Label>
-          <Select
-            value={table.getState().pagination.pageSize.toString()}
-            onValueChange={(value) => table.setPageSize(Number(value))}
-          >
-            <SelectTrigger id={id} className="w-fit whitespace-nowrap">
-              <SelectValue placeholder="Select number of results" />
-            </SelectTrigger>
-            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
-              {[5, 10, 25, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={pageSize.toString()}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -411,53 +431,53 @@ export default function ProductComponentDetailsTable({
               {/* First page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.firstPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to first page"
                 >
-                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleLeftDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Previous page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to previous page"
                 >
-                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleLeftDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Next page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to next page"
                 >
-                  <ChevronRightIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleRightDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Last page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.lastPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to last page"
                 >
-                  <ChevronLastIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleRightDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
             </PaginationContent>
@@ -469,7 +489,6 @@ export default function ProductComponentDetailsTable({
 }
 
 function RowActions({ row }: { row: Row<ComponentItem> }) {
-  console.log("row", row);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -484,17 +503,15 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="mr-2" asChild>
-          <div className="flex justify-end ">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="shadow-none"
-              aria-label="Edit item"
-            >
-              <EllipsisIcon size={16} aria-hidden="true" />
-            </Button>
-          </div>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="shadow-none"
+            aria-label="More actions"
+          >
+            <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
@@ -503,7 +520,7 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
                 setTimeout(() => setShowEditDialog(true), 100);
               }}
             >
-              <PiPencilSimpleDuotone />
+              <PiPencilSimpleDuotone className=" h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -514,7 +531,7 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
             }}
             className="text-destructive focus:text-destructive"
           >
-            <PiTrashDuotone className="text-destructive" />
+            <PiTrashDuotone className="text-destructive h-4 w-4" />
             <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -5,14 +5,31 @@ import {
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  PaginationState,
+  Row,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon, LayoutList } from "lucide-react";
-import { Fragment, useState } from "react";
+import { Fragment, useId, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -21,7 +38,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Image from "next/image";
+import {
+  PiPencilSimpleDuotone,
+  PiTrashDuotone,
+  PiImageDuotone,
+  PiTagDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretCircleDoubleLeftDuotone,
+  PiCaretCircleLeftDuotone,
+  PiCaretCircleRightDuotone,
+  PiCaretCircleDoubleRightDuotone,
+  PiCaretCircleDownDuotone,
+  PiDotsThreeCircleDuotone,
+  PiTextTDuotone,
+  PiCheckCircleDuotone,
+} from "react-icons/pi";
 import EditSymbolsDialog from "./EditSymbolsDialog";
+import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 
 type Item = {
   id: string;
@@ -29,6 +65,46 @@ type Item = {
   componentImage: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
+};
+
+// Helper component for sortable headers
+const SortableHeader = ({
+  column,
+  title,
+  icon: Icon,
+}: {
+  column?: any;
+  title: string;
+  icon: any;
+}) => {
+  if (!column) {
+    return (
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <span>{title}</span>
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span>{title}</span>
+        </div>
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
+        ) : (
+          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
+        )}
+      </div>
+    </button>
+  );
 };
 
 const columns: ColumnDef<Item>[] = [
@@ -50,13 +126,13 @@ const columns: ColumnDef<Item>[] = [
           }}
         >
           {row.getIsExpanded() ? (
-            <ChevronUpIcon
+            <PiCaretCircleDownDuotone
               className="opacity-60"
               size={16}
               aria-hidden="true"
             />
           ) : (
-            <ChevronDownIcon
+            <PiCaretCircleRightDuotone
               className="opacity-60"
               size={16}
               aria-hidden="true"
@@ -65,84 +141,89 @@ const columns: ColumnDef<Item>[] = [
         </Button>
       ) : undefined;
     },
-    size: 40,
+    size: 30,
   },
   {
-    header: "Image",
     accessorKey: "componentImage",
+    header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
     cell: ({ row }) =>
-      row.original.componentImage !== "" ? (
+      row.original.componentImage ? (
         <Image
           src={row.original.componentImage}
           alt={row.original.componentName}
-          width={50}
-          height={50}
-          className="object-cover rounded border"
-          style={{ maxWidth: 50, maxHeight: 50 }}
+          width={48}
+          height={48}
+          className="object-cover rounded-md border min-h-12"
         />
       ) : (
         <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
-          <LayoutList className="w-full h-full p-3" />
+          <PiImageDuotone className="w-full h-full p-2" />
         </div>
       ),
-    size: 60,
+    size: 80,
   },
   {
-    header: "Symbol Text",
     accessorKey: "componentName",
     enableSorting: true,
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("componentName")}</div>
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Symbol Text"
+        icon={PiTextTDuotone}
+      />
     ),
-    size: 180,
+    cell: ({ row }) => (
+      <span className="font-medium">{row.getValue("componentName")}</span>
+    ),
   },
-
-  // Here It should be checkbox in header(for all rows) and for each row
-  // Later on we will save boolean value in database based on checkbox
   {
-    header: "Symbol Text Present",
     accessorKey: "textPresent",
-    cell: ({ row }) => {
-      return (
-        <div className="font-medium">
-          {row.getValue("textPresent") ? "Yes" : "No"}
-        </div>
-      );
-    },
-    size: 180,
+    enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Text Present"
+        icon={PiCheckCircleDuotone}
+      />
+    ),
+    cell: ({ row }) => (
+      <Badge variant={row.getValue("textPresent") ? "default" : "secondary"}>
+        {row.getValue("textPresent") ? "Yes" : "No"}
+      </Badge>
+    ),
   },
-
-  // use Origin UI MultiSelect component for this column only in each row.
-  // later on we will save the array of strings in database based on selections
   {
-    header: "Presence on labels",
     accessorKey: "symbolsTextPresent",
     enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Presence on Labels"
+        icon={PiTagDuotone}
+      />
+    ),
     cell: ({ row }) => {
       const symbols = row.getValue("symbolsTextPresent") as string[];
       return (
-        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-1">
           {symbols && symbols.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {symbols.map((symbol, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {symbol}
-                </Badge>
-              ))}
-            </div>
+            symbols.map((symbol, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {symbol}
+              </Badge>
+            ))
           ) : (
-            "None"
+            <span className="text-muted-foreground text-sm">-</span>
           )}
         </div>
       );
     },
-    size: 220,
   },
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions row={row} />, // Implement RowActions below
-    size: 80,
+    cell: ({ row }) => <RowActions row={row} />,
+    size: 40,
     enableHiding: false,
   },
 ];
@@ -150,47 +231,6 @@ const columns: ColumnDef<Item>[] = [
 type SymbolsGraphicsPageSymbolsTableProps = {
   data?: Item[];
 };
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  getPaginationRowModel,
-  getSortedRowModel,
-  PaginationState,
-  Row,
-  SortingState,
-} from "@tanstack/react-table";
-import {
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisIcon,
-} from "lucide-react";
-
-import { useId } from "react";
-import { PiPencilSimpleDuotone, PiTrashDuotone } from "react-icons/pi";
-import Image from "next/image";
-import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 
 export default function SymbolsGraphicsPageSymbolsTable({
   data,
@@ -207,6 +247,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
     },
   ]);
 
+  console.log(data);
   const table = useReactTable({
     data: data || [],
     columns,
@@ -214,81 +255,34 @@ export default function SymbolsGraphicsPageSymbolsTable({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
+    getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: { sorting, pagination },
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="bg-muted/60" key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      key={`${header.id}`}
+                      key={header.id}
                       colSpan={header.colSpan}
-                      tabIndex={header.column.getCanSort() ? 0 : undefined}
-                      className={
-                        header.column.getCanSort()
-                          ? "cursor-pointer select-none"
-                          : undefined
-                      }
-                      aria-sort={
-                        header.column.getIsSorted() === false
-                          ? undefined
-                          : header.column.getIsSorted() === "asc"
-                          ? "ascending"
-                          : "descending"
-                      }
-                      onClick={header.column.getToggleSortingHandler?.()}
-                      onKeyDown={
-                        header.column.getCanSort()
-                          ? (e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                header.column.toggleSorting();
-                              }
-                            }
-                          : undefined
-                      }
+                      style={{ width: `${header.getSize()}px` }}
+                      className="h-11 border-r border-border last:border-r-0"
                     >
-                      {header.isPlaceholder ? null : (
-                        <span className="inline-flex items-center gap-1">
-                          {flexRender(
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                          {header.column.getCanSort() && (
-                            <span className="ml-1">
-                              {header.column.getIsSorted() === "asc" ? (
-                                <ChevronUpIcon
-                                  className="shrink-0 opacity-60"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              ) : header.column.getIsSorted() === "desc" ? (
-                                <ChevronDownIcon
-                                  className="shrink-0 opacity-60"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <ChevronUpIcon
-                                  className="shrink-0 opacity-10"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </span>
-                          )}
-                        </span>
-                      )}
                     </TableHead>
                   );
                 })}
@@ -300,13 +294,13 @@ export default function SymbolsGraphicsPageSymbolsTable({
               table.getRowModel().rows.map((row) => (
                 <Fragment key={row.id}>
                   <TableRow
-                    key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-muted/50"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                        className="last:py-0 whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -315,11 +309,12 @@ export default function SymbolsGraphicsPageSymbolsTable({
                       </TableCell>
                     ))}
                   </TableRow>
+
                   {row.getIsExpanded() && (
                     <TableRow>
                       <TableCell colSpan={row.getVisibleCells().length}>
                         <div className="flex flex-col items-center py-4">
-                          {row.original.componentImage !== "" ? (
+                          {row.original.componentImage ? (
                             <Image
                               src={row.original.componentImage}
                               alt={row.original.componentName}
@@ -335,7 +330,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
                             />
                           ) : (
                             <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
-                              <LayoutList className="w-full h-full p-3" />
+                              <PiImageDuotone className="w-full h-full p-2" />
                             </div>
                           )}
                         </div>
@@ -359,30 +354,6 @@ export default function SymbolsGraphicsPageSymbolsTable({
       </div>
       {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
-        <div className="flex items-center gap-3">
-          <Label htmlFor={id} className="max-sm:sr-only">
-            Rows per page
-          </Label>
-          <Select
-            value={table.getState().pagination.pageSize.toString()}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger id={id} className="w-fit whitespace-nowrap">
-              <SelectValue placeholder="Select number of results" />
-            </SelectTrigger>
-            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
-              {[5, 10, 25, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={pageSize.toString()}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -409,6 +380,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
             </span>
           </p>
         </div>
+
         {/* Pagination buttons */}
         <div>
           <Pagination>
@@ -416,53 +388,53 @@ export default function SymbolsGraphicsPageSymbolsTable({
               {/* First page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.firstPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to first page"
                 >
-                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleLeftDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Previous page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to previous page"
                 >
-                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleLeftDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Next page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to next page"
                 >
-                  <ChevronRightIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleRightDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Last page button */}
               <PaginationItem>
                 <Button
-                  size="icon"
-                  variant="outline"
+                  variant="secondary"
+                  size="sm"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   onClick={() => table.lastPage()}
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to last page"
                 >
-                  <ChevronLastIcon size={16} aria-hidden="true" />
+                  <PiCaretCircleDoubleRightDuotone aria-hidden="true" />
                 </Button>
               </PaginationItem>
             </PaginationContent>
@@ -480,7 +452,8 @@ function RowActions({ row }: { row: Row<Item> }) {
 
   // Get productId from the current URL using usePathname
   const pathname = usePathname();
-  const getProductId = () => {
+  const getProductId = (): string => {
+    if (!pathname) return "";
     const match = pathname.match(/\/products\/([^\/]+)/);
     return match ? match[1] : "";
   };
@@ -488,39 +461,35 @@ function RowActions({ row }: { row: Row<Item> }) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="mr-2" asChild>
-          <div className="flex justify-end ">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="shadow-none"
-              aria-label="Edit item"
-            >
-              <EllipsisIcon size={16} aria-hidden="true" />
-            </Button>
-          </div>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="shadow-none"
+            aria-label="More actions"
+          >
+            <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem
               onSelect={() => {
-                // Add small delay to allow dropdown to close first
                 setTimeout(() => setShowEditDialog(true), 100);
               }}
             >
-              <PiPencilSimpleDuotone />
+              <PiPencilSimpleDuotone className="h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
             onSelect={() => {
-              // Add small delay to allow dropdown to close first
               setTimeout(() => setShowDeleteDialog(true), 100);
             }}
+            className="text-destructive focus:text-destructive"
           >
-            <PiTrashDuotone className="text-destructive" />
+            <PiTrashDuotone className="text-destructive h-4 w-4" />
             <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

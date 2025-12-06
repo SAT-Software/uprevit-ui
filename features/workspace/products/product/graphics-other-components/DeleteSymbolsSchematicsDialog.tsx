@@ -1,19 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { CircleAlert as CircleAlertIcon } from "lucide-react";
+import { PiTrashDuotone, PiXCircleDuotone } from "react-icons/pi";
 
 interface GraphicsItem {
   id: string;
+  componentName?: string;
 }
 
 export default function DeleteSymbolsSchematicsDialog({
@@ -29,7 +30,8 @@ export default function DeleteSymbolsSchematicsDialog({
 }) {
   const { mutate: deleteSymbol, isPending } = useUpdateProductTabData();
 
-  async function handleConfirm() {
+  async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     try {
       const deleteData = {
         id: productId,
@@ -44,8 +46,8 @@ export default function DeleteSymbolsSchematicsDialog({
         onSuccess: () => {
           onOpenChange(false);
         },
-        onError: (error) => {
-          console.error("Failed to delete graphic:", error);
+        onError: () => {
+          onOpenChange(false);
         },
       });
     } catch (error) {
@@ -55,48 +57,59 @@ export default function DeleteSymbolsSchematicsDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <div className="flex flex-col items-start gap-2">
-          <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border"
-            aria-hidden="true"
-          >
-            <CircleAlertIcon className="opacity-80" size={16} />
-          </div>
-          <DialogHeader>
-            <DialogTitle className="sm:text-center">Delete Graphic</DialogTitle>
-          </DialogHeader>
-        </div>
-
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete the graphic? This action cannot be
-            undone.
-          </p>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
+        <AlertDialogHeader className="contents space-y-0 text-left">
+          <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
+            <div className="flex items-center gap-2 text-destructive">
+              <PiTrashDuotone className="w-4 h-4" />
+              <span>Delete Graphic</span>
+            </div>
+            <button
               type="button"
-              className="flex-1"
-              disabled={isPending}
-              onClick={handleConfirm}
-              variant="destructive"
+              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => onOpenChange(false)}
             >
-              {isPending ? "Deleting..." : "Delete Graphic"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+              <PiXCircleDuotone size={18} />
+            </button>
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <div className="p-4">
+          <AlertDialogDescription className="text-sm text-muted-foreground">
+            This will permanently delete the graphic
+            {graphics.componentName && (
+              <>
+                {" "}
+                <span className="font-semibold text-foreground">
+                  &quot;{graphics.componentName}&quot;
+                </span>
+              </>
+            )}
+            . This action cannot be undone.
+          </AlertDialogDescription>
+        </div>
+        <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            <PiXCircleDuotone />
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={isPending}
+            variant="destructive"
+            size="sm"
+          >
+            <PiTrashDuotone />
+            {isPending ? "Deleting..." : "Delete Graphic"}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

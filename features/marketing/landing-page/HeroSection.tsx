@@ -9,9 +9,9 @@ export default function HeroSection() {
         <span className="text-xs font-semibold">For The Future</span>
       </div>
       <div className="flex flex-col items-center gap-4">
-        <h1 className="text-6xl font-bold text-center">
+        <h1 className="text-6xl font-bold text-center tracking-tighter">
           Master Your Labels:{" "}
-          <span className="text-muted-foreground/60">
+          <span className="text-muted-foreground/60 tracking-tighter">
             Master Your Compliance
           </span>
         </h1>

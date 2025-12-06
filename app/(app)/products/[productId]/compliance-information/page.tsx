@@ -25,10 +25,8 @@ export default function Page() {
 
   const { data, isLoading, error } = useGetProductTabData(
     productId,
-    "compliance-information"
+    "all-tabs"
   );
-
-  const productName = data?.result?.data?.productName || "Product";
 
   if (isLoading) {
     return (
@@ -123,7 +121,12 @@ export default function Page() {
     );
   }
 
-  const standards = (data?.result?.data?.data as ComplianceItem[]) || [];
+  const standards =
+    (data?.result?.data?.compliance_information?.data as ComplianceItem[]) ||
+    [];
+
+  const productName =
+    data?.result?.data?.product_information?.data?.product_name || "Product";
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
@@ -150,9 +153,9 @@ export default function Page() {
         </span>
       </div>
 
-      <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between border-b p-6 border-border">
+        <div className="flex items-center justify-between mb-2 border-b border-border p-4">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Compliance Standards</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -164,7 +167,7 @@ export default function Page() {
         </div>
 
         {/* Standards Content */}
-        <div className="px-6 pb-6">
+        <div className="p-4">
           {standards.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-4">
               <div className="p-4 rounded-full bg-muted">
