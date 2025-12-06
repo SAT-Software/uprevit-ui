@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { CircleAlert as CircleAlertIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { PiTrashDuotone } from "react-icons/pi";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { PiTrashDuotone, PiXCircleDuotone } from "react-icons/pi";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 
 interface LabelTagItem {
@@ -33,7 +32,8 @@ export default function DialogDeleteLabelTag({
   const [open, setOpen] = useState(false);
   const { mutate: deleteLabelTag, isPending } = useUpdateProductTabData();
 
-  async function handleConfirm() {
+  async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     try {
       console.log("Deleting label tag:", labelTag._id);
       const deleteData = {
@@ -62,55 +62,60 @@ export default function DialogDeleteLabelTag({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <PiTrashDuotone className="h-4 w-4" />
-          <span className="sr-only">Delete</span>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm">
+          <PiTrashDuotone />
+          Delete
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <div className="flex flex-col items-start gap-2">
-          <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border"
-            aria-hidden="true"
-          >
-            <CircleAlertIcon className="opacity-80" size={16} />
-          </div>
-          <DialogHeader>
-            <DialogTitle className="sm:text-center">Delete Label</DialogTitle>
-          </DialogHeader>
-        </div>
-
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete the label{" "}
-            <strong>{labelTag.name || "Untitled Label"}</strong>? This action
-            cannot be undone.
-          </p>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
+      </AlertDialogTrigger>
+      <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
+        <AlertDialogHeader className="contents space-y-0 text-left">
+          <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
+            <div className="flex items-center gap-2 text-destructive">
+              <PiTrashDuotone className="w-4 h-4" />
+              <span>Delete Label</span>
+            </div>
+            <button
               type="button"
-              className="flex-1"
-              disabled={isPending}
-              onClick={handleConfirm}
-              variant="destructive"
+              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setOpen(false)}
             >
-              {isPending ? "Deleting..." : "Delete Label"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+              <PiXCircleDuotone size={18} />
+            </button>
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <div className="p-4">
+          <AlertDialogDescription className="text-sm text-muted-foreground">
+            This will permanently delete the label{" "}
+            <span className="font-semibold text-foreground">
+              &quot;{labelTag.name || "Untitled Label"}&quot;
+            </span>{" "}
+            data. This action cannot be undone.
+          </AlertDialogDescription>
+        </div>
+        <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setOpen(false)}
+            disabled={isPending}
+          >
+            <PiXCircleDuotone />
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={isPending}
+            variant="destructive"
+            size="sm"
+          >
+            <PiTrashDuotone />
+            {isPending ? "Deleting..." : "Delete Label"}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
