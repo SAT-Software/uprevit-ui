@@ -1,14 +1,19 @@
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import {
+  PiTrashDuotone,
+  PiXCircleDuotone,
+  PiWarningDuotone,
+} from "react-icons/pi";
+
 type ComponentItem = {
   _id: string;
   component_number: string;
@@ -59,23 +64,51 @@ export default function DeleteComponentDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete the component data. This action cannot
-            be undone.
-          </AlertDialogDescription>
+      <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
+        <AlertDialogHeader className="contents space-y-0 text-left">
+          <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
+            <div className="flex items-center gap-2 text-destructive">
+              <PiWarningDuotone className="w-4 h-4" />
+              <span>Delete Component</span>
+            </div>
+            <button
+              type="button"
+              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => onOpenChange(false)}
+            >
+              <PiXCircleDuotone size={18} />
+            </button>
+          </AlertDialogTitle>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+        <div className="p-4">
+          <AlertDialogDescription className="text-sm text-muted-foreground">
+            This will permanently delete the component{" "}
+            <span className="font-semibold text-foreground">
+              &quot;{component.component_number}&quot;
+            </span>{" "}
+            data. This action cannot be undone.
+          </AlertDialogDescription>
+        </div>
+        <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            <PiXCircleDuotone />
+            Cancel
+          </Button>
+          <Button
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-destructive text-background hover:bg-destructive/90"
+            variant="destructive"
+            size="sm"
           >
-            {isPending ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
+            <PiTrashDuotone />
+            {isPending ? "Deleting..." : "Delete Component"}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -32,6 +32,11 @@ import {
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { uploadFiles } from "@/utils/uploadthing";
+import {
+  PiPlusCircleDuotone,
+  PiXCircleDuotone,
+  PiCubeDuotone,
+} from "react-icons/pi";
 
 type FormData = {
   componentNumber: string;
@@ -122,14 +127,27 @@ export default function AddComponentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" className="text-xs">
+        <Button
+          size="sm"
+          variant="secondary"
+          className="flex items-center gap-2"
+        >
+          <PiPlusCircleDuotone className="w-4 h-4" />
           Add Component
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Add New Component
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <div className="flex items-center gap-2">
+              <PiCubeDuotone className="w-4 h-4" />
+              <span>Add New Component</span>
+            </div>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -141,7 +159,7 @@ export default function AddComponentDialog({
           id="add-component-form"
           className="overflow-y-auto"
         >
-          <div className="flex gap-4 px-6 pt-4">
+          <div className="flex gap-4 p-4">
             <div className="w-1/3">
               <Controller
                 name="image"
@@ -198,7 +216,7 @@ export default function AddComponentDialog({
             </div>
           </div>
 
-          <div className="px-6 pt-4 pb-6">
+          <div className="px-4 pb-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor={`${id}-description`}>Description</Label>
@@ -234,33 +252,36 @@ export default function AddComponentDialog({
             </div>
           </div>
         </form>
-        <DialogFooter className="border-t px-6 py-4">
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 reset();
                 setLabelType([]);
               }}
             >
+              <PiXCircleDuotone />
               Cancel
             </Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              form="add-component-form"
-              type="button"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
-              {isPending
-                ? "Adding..."
-                : uploadingImage
-                ? "Uploading..."
-                : "Add Component"}
-            </Button>
-          </DialogClose>
+          <Button
+            form="add-component-form"
+            type="button"
+            size="sm"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+            variant="default"
+          >
+            <PiPlusCircleDuotone />
+            {isPending
+              ? "Adding..."
+              : uploadingImage
+              ? "Uploading..."
+              : "Add Component"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -289,59 +310,59 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
   const currentImage = value?.preview || files[0]?.preview || null;
 
   return (
-    <div className="h-32 bg-muted relative flex size-full rounded-xl items-center justify-center overflow-hidden">
-      {currentImage ? (
-        <Image
-          className="size-full object-cover rounded-xl"
-          src={currentImage}
-          alt={
-            value?.file.name || files[0]?.file.name
-              ? "Preview of uploaded component image"
-              : "Default component image"
-          }
-          width={512}
-          height={96}
-        />
-      ) : (
-        <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-          <div className="flex flex-col items-center text-muted-foreground/60">
-            <ImagePlusIcon className="w-8 h-8 mb-2" />
-            <span className="text-xs">Component Image</span>
+    <div className="h-40 w-full">
+      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
+        {currentImage ? (
+          <Image
+            className="size-full object-cover rounded-xl"
+            src={currentImage}
+            alt={
+              value?.file.name || files[0]?.file.name
+                ? "Preview of uploaded component image"
+                : "Component image"
+            }
+            width={512}
+            height={96}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
+            <PiCubeDuotone className="w-12 h-12" />
+            <span className="text-xs font-medium">Upload Image</span>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="absolute inset-0 flex items-center justify-center gap-2">
-        <button
-          type="button"
-          className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-          onClick={openFileDialog}
-          aria-label={currentImage ? "Change image" : "Upload image"}
-        >
-          <ImagePlusIcon size={16} aria-hidden="true" />
-        </button>
-        {currentImage && (
+        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
           <button
             type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-            onClick={() => {
-              const fileId = value?.id || files[0]?.id;
-              if (fileId) {
-                removeFile(fileId);
-              }
-              onChange(null);
-            }}
-            aria-label="Remove image"
+            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
+            onClick={openFileDialog}
+            aria-label={currentImage ? "Change image" : "Upload image"}
           >
-            <XIcon size={16} aria-hidden="true" />
+            <ImagePlusIcon size={16} aria-hidden="true" />
           </button>
-        )}
+          {currentImage && (
+            <button
+              type="button"
+              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
+              onClick={() => {
+                const fileId = value?.id || files[0]?.id;
+                if (fileId) {
+                  removeFile(fileId);
+                }
+                onChange(null);
+              }}
+              aria-label="Remove image"
+            >
+              <XIcon size={16} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+        <input
+          {...getInputProps()}
+          className="sr-only"
+          aria-label="Upload component image"
+        />
       </div>
-      <input
-        {...getInputProps()}
-        className="sr-only"
-        aria-label="Upload component image"
-      />
     </div>
   );
 }
