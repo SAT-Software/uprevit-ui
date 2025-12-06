@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { PiArchiveDuotone, PiBuildingsDuotone } from "react-icons/pi";
 
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   ArchivedDepartmentsTable,
   DepartmentArchiveRow,
@@ -44,37 +41,11 @@ export function ArchivedDepartments({ onRowClick }: ArchivedDepartmentsProps) {
 
   return (
     <>
-      <Card className="bg-background border rounded-xl shadow-none">
-        <div className="flex items-center justify-between gap-4 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-full border">
-              <PiArchiveDuotone className="size-4 opacity-80" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold">
-                  Archived Departments
-                </h2>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                These departments are hidden from active views until restored.
-              </p>
-            </div>
-          </div>
-          <PiBuildingsDuotone
-            className="size-5 opacity-70"
-            aria-hidden="true"
-          />
-        </div>
-        <Separator />
-        <div className="p-5">
-          <ArchivedDepartmentsTable
-            data={items}
-            onRowClick={onRowClick}
-            onRestore={handleRestoreClick}
-          />
-        </div>
-      </Card>
+      <ArchivedDepartmentsTable
+        data={items}
+        onRowClick={onRowClick}
+        onRestore={handleRestoreClick}
+      />
 
       <RestoreEntityDialog
         open={restoreDialogOpen}
