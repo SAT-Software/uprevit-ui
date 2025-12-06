@@ -271,12 +271,6 @@ export function ProductHeader() {
               )}
             </SelectContent>
           </Select>
-          <Badge variant="outline" className="flex items-center gap-0.5 h-7">
-            <p className="text-xs font-normal mt-0.5">v</p>
-            <p className="text-sm font-semibold text-foreground">
-              {currentProduct?.master_version.slice(0, 1)}
-            </p>
-          </Badge>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">

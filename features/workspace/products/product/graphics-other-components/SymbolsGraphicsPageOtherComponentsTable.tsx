@@ -330,68 +330,53 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between gap-8">
-        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
-          <p aria-live="polite">
-            <span className="text-foreground">
-              {table.getState().pagination.pageIndex *
-                table.getState().pagination.pageSize +
-                1}
-              -
-              {Math.min(
-                table.getState().pagination.pageIndex *
-                  table.getState().pagination.pageSize +
-                  table.getState().pagination.pageSize,
-                table.getRowCount()
-              )}
-            </span>{" "}
-            of <span className="text-foreground">{table.getRowCount()}</span>
-          </p>
+      <div className="flex items-center justify-end gap-8">
+        <div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => table.firstPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <PiCaretCircleDoubleLeftDuotone />
+                </Button>
+              </PaginationItem>
+              <PaginationItem>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <PiCaretCircleLeftDuotone />
+                </Button>
+              </PaginationItem>
+              <PaginationItem>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <PiCaretCircleRightDuotone />
+                </Button>
+              </PaginationItem>
+              <PaginationItem>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => table.lastPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <PiCaretCircleDoubleRightDuotone />
+                </Button>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => table.firstPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <PiCaretCircleDoubleLeftDuotone />
-              </Button>
-            </PaginationItem>
-            <PaginationItem>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <PiCaretCircleLeftDuotone />
-              </Button>
-            </PaginationItem>
-            <PaginationItem>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <PiCaretCircleRightDuotone />
-              </Button>
-            </PaginationItem>
-            <PaginationItem>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => table.lastPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <PiCaretCircleDoubleRightDuotone />
-              </Button>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
       </div>
     </div>
   );
