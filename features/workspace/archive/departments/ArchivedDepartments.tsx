@@ -45,6 +45,9 @@ export function ArchivedDepartments({ onRowClick }: ArchivedDepartmentsProps) {
         data={items}
         onRowClick={onRowClick}
         onRestore={handleRestoreClick}
+        loadingRowId={
+          restoreDepartment.isPending ? selectedItemToRestore?._id : null
+        }
       />
 
       <RestoreEntityDialog

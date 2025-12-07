@@ -22,6 +22,7 @@ import {
   PiCaretDownDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
+  PiCircleNotchDuotone,
   PiInfoDuotone,
   PiUserCircleDuotone,
   PiUserCircleGearDuotone,
@@ -68,6 +69,7 @@ interface ArchivedDepartmentsTableProps {
   data: DepartmentArchiveRow[];
   onRowClick?: (item: DepartmentArchiveRow) => void;
   onRestore: (item: DepartmentArchiveRow) => void;
+  loadingRowId?: string | null;
 }
 
 // Helper component for sortable headers
@@ -106,6 +108,7 @@ export function ArchivedDepartmentsTable({
   data,
   onRowClick,
   onRestore,
+  loadingRowId,
 }: ArchivedDepartmentsTableProps) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -223,25 +226,33 @@ export function ArchivedDepartmentsTable({
         id: "restore",
         header: "Restore",
         size: 100,
-        cell: ({ row }) => (
-          <div className="flex">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="text-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRestore(row.original);
-              }}
-            >
-              <PiArrowCounterClockwiseDuotone className="h-3 w-3" />
-              Restore
-            </Button>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const isLoading = loadingRowId === row.original._id;
+          return (
+            <div className="flex">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="text-sm"
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRestore(row.original);
+                }}
+              >
+                {isLoading ? (
+                  <PiCircleNotchDuotone className="h-3 w-3 animate-spin" />
+                ) : (
+                  <PiArrowCounterClockwiseDuotone className="h-3 w-3" />
+                )}
+                {isLoading ? "Restoring..." : "Restore"}
+              </Button>
+            </div>
+          );
+        },
       },
     ];
-  }, [onRestore]);
+  }, [onRestore, loadingRowId]);
 
   const table = useReactTable({
     data,
@@ -287,23 +298,29 @@ export function ArchivedDepartmentsTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onRowClick?.(row.original)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="last:py-0">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const isRowLoading = loadingRowId === row.original._id;
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className={cn(
+                      "cursor-pointer hover:bg-muted/50 transition-opacity",
+                      isRowLoading && "opacity-60 pointer-events-none"
+                    )}
+                    onClick={() => onRowClick?.(row.original)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="last:py-0">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
