@@ -133,7 +133,7 @@ export function AppHeader() {
         // Height
         isProductPage
           ? "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-          : "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-16"
+          : "h-12 group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       )}
     >
       {/* {isProductPage ? (

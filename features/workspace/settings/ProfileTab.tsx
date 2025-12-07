@@ -11,6 +11,8 @@ import {
   PiBriefcaseDuotone,
   PiMapPinDuotone,
   PiPhoneDuotone,
+  PiSignOutBold,
+  PiSignOutDuotone,
 } from "react-icons/pi";
 
 function ProfileTab() {
@@ -135,6 +137,7 @@ function ProfileTab() {
           }}
           variant="destructive"
         >
+          <PiSignOutDuotone />
           Sign Out
         </Button>
       )}
