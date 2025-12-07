@@ -1,12 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { PiImageDuotone } from "react-icons/pi";
+import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 
 export default function FeaturesSection() {
   return (
@@ -31,15 +25,7 @@ export default function FeaturesSection() {
         <div className="p-1 bg-accent rounded-xl max-w-7xl mx-auto border border-border">
           <div className="flex flex-col gap-1">
             <div className="flex w-full h-130 gap-1">
-              <div className="w-2/3 h-full bg-background p-10 rounded-xl border border-border">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Automated- Redlining
-                </h3>
-                <p className="w-1/2 text-muted-foreground">
-                  No manual redlining of older versions. Get automated redlining
-                  copy with master version
-                </p>
-              </div>
+              <AutomatedRedliningCard />
               <div className="w-1/3 h-full bg-background p-10 rounded-xl border border-border">
                 <h3 className="text-lg font-semibold text-foreground">
                   Version control perfected
