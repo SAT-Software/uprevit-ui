@@ -112,7 +112,10 @@ function ProjectCard({ project }: { project: ProjectProps }) {
         </Tooltip>
       </div>
 
-      <div className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
+      <Link
+        href={`/projects/${project._id}`}
+        className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted"
+      >
         {project.image ? (
           <Image
             src={project.image}
@@ -125,27 +128,30 @@ function ProjectCard({ project }: { project: ProjectProps }) {
             <PiKanbanDuotone className="w-8 h-8 text-muted-foreground/50" />
           </div>
         )}
-      </div>
+      </Link>
 
       <div className="flex flex-col flex-1 gap-1 min-w-0">
-        <div className="flex flex-col gap-0">
+        <Link href={`/projects/${project._id}`} className="flex flex-col gap-0">
           <p className="text-sm font-semibold text-foreground truncate pr-8">
             {project.project_name}
           </p>
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground line-clamp-1">
             <span className="truncate">{project.project_description}</span>
           </p>
-        </div>
+        </Link>
 
         <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/50">
+          <Link
+            href={`/projects/${project._id}`}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/50"
+          >
             <PiCalendarDuotone className="w-3.5 h-3.5" />
             <span>
               {project.date
                 ? new Date(project.date).toLocaleDateString()
                 : "No due date"}
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center -space-x-2">
             {(() => {

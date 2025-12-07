@@ -1,35 +1,32 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
-import { NavUser } from "./UserNav";
-import { SidebarTrigger } from "../ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+  BreadcrumbList,
 } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
+import { cn } from "@/lib/utils";
+import { Product } from "@/types/product";
+import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
 import {
-  PiChatTeardropDotsDuotone,
+  PiArchiveDuotone,
+  PiBookmarkSimpleDuotone,
   PiBuildingsDuotone,
-  PiHouseDuotone,
+  PiChatTeardropDotsDuotone,
   PiFolderOpenDuotone,
   PiGearDuotone,
+  PiHouseDuotone,
   PiKanbanDuotone,
   PiLifebuoyDuotone,
   PiPackageDuotone,
   PiPresentationChartDuotone,
-  PiArchiveDuotone,
-  PiBookmarkSimpleDuotone,
 } from "react-icons/pi";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
-import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { Product } from "@/types/product";
+import { SidebarTrigger } from "../ui/sidebar";
+import { UserNav } from "./UserNav";
 
 const pathData = [
   {
@@ -226,7 +223,7 @@ export function AppHeader() {
             </>
           )}
         </div>
-        <NavUser />
+        <UserNav />
       </div>
     </header>
   );
