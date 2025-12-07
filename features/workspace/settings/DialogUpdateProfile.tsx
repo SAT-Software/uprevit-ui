@@ -24,6 +24,7 @@ import {
   PiCameraDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DialogUpdateProfileProps {
   userProfile: User;
@@ -282,7 +283,11 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
             size="sm"
             form="update-user-profile-form"
           >
-            <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+            {isPending ? (
+              <Spinner />
+            ) : (
+              <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+            )}
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

@@ -38,6 +38,7 @@ import {
   PiCubeDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type ComponentItem = {
   _id: string;
@@ -296,10 +297,14 @@ export default function EditComponentDialog({
             type="button"
             size="sm"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={isPending || uploadingImage}
             variant="default"
           >
-            <PiCheckCircleDuotone />
+            {isPending || uploadingImage ? (
+              <Spinner />
+            ) : (
+              <PiCheckCircleDuotone />
+            )}
             {isPending
               ? "Updating..."
               : uploadingImage

@@ -80,19 +80,6 @@ export default function MarketingHeader() {
     }
   };
 
-  const signOutRedirect = () => {
-    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
-    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
-    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri
-    )}`;
-  };
-
-  if (auth.error) {
-    return <div>Encountering error... {auth.error.message}</div>;
-  }
-
   return (
     <div
       className={cn(

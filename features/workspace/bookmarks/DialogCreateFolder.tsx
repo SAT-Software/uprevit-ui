@@ -8,6 +8,7 @@ import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -145,7 +146,7 @@ export default function DialogCreateFolder() {
             disabled={isPending}
           >
             {isPending ? (
-              <PiPlusCircleDuotone className="animate-spin w-4 h-4 mr-2" />
+              <Spinner />
             ) : (
               <PiPlusCircleDuotone className="w-4 h-4 mr-2" />
             )}

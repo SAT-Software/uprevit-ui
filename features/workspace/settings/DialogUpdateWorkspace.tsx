@@ -26,6 +26,7 @@ import {
   PiTrashDuotone,
   PiBuildingsDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DialogUpdateWorkspaceProps {
   workspaceData: Workspace;
@@ -268,7 +269,11 @@ export function DialogUpdateWorkspace({
             size="sm"
             form="update-workspace-form"
           >
-            <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+            {isPending ? (
+              <Spinner />
+            ) : (
+              <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+            )}
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

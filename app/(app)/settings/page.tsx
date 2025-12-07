@@ -16,8 +16,11 @@ import {
   PiShieldCheckDuotone,
   PiCreditCardDuotone,
 } from "react-icons/pi";
+import { useSearchParams } from "next/navigation";
 
 function SettingsPage() {
+  const tab = useSearchParams().get("tab");
+
   return (
     <div className="flex flex-col gap-2 p-2">
       <div className="border border-input bg-background rounded-xl p-4">
@@ -36,7 +39,7 @@ function SettingsPage() {
 
       {/* Settings Tabs */}
       <div className="border border-input bg-background rounded-xl p-4">
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs defaultValue={tab || "profile"} className="w-full">
           <TabsList>
             <TabsTrigger value="profile">
               <PiUserDuotone className="mr-2 h-4 w-4" />

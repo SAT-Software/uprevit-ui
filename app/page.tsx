@@ -164,7 +164,7 @@ export default function Home() {
         <Ripple items={items} />
         <HeroSection />
       </div>
-      <div className="relative pointer-events-none w-full mx-auto -mt-60 z-55">
+      <div className="relative pointer-events-none w-full mx-auto -mt-50 z-55">
         <div className="absolute inset-0 w-full max-w-7xl mx-auto pointer-events-none">
           <div className="absolute top-40 left-0 w-px h-10 bg-border/5 z-40" />
           <div className="absolute top-40 right-0 w-px h-10 bg-border/5 z-40" />

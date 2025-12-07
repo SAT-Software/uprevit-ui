@@ -34,6 +34,7 @@ import {
   PiEnvelopeSimpleDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type InviteMembersFormValues = {
   users: { name: string; email: string }[];
@@ -234,7 +235,11 @@ export function InviteMembersDialog() {
             size="sm"
             className="gap-2"
           >
-            <PiPaperPlaneRightDuotone className="w-4 h-4" />
+            {isPending ? (
+              <Spinner />
+            ) : (
+              <PiPaperPlaneRightDuotone className="w-4 h-4" />
+            )}
             {isPending ? "Sending..." : "Send Invitations"}
           </Button>
         </DialogFooter>

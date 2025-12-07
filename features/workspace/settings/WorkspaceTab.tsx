@@ -14,9 +14,10 @@ import {
   PiPlanetDuotone,
   PiBriefcaseDuotone,
 } from "react-icons/pi";
+import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 
 function WorkspaceTab() {
-  const { data, isLoading, error } = useGetWorkspace();
+  const { data, isLoading, error } = useGetAllUsersByWorkspace();
   const workspaceData = data?.workspace;
 
   if (isLoading) return <div>Loading...</div>;

@@ -26,6 +26,7 @@ import {
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 export interface UpdateProductDialogProps {
   product: Item;
@@ -266,7 +267,7 @@ export default function DialogDuplicateProduct({
             form="duplicate-product-form"
             disabled={createMutation.isPending}
           >
-            <PiCheckCircleDuotone />
+            {createMutation.isPending ? <Spinner /> : <PiCheckCircleDuotone />}
             {createMutation.isPending ? "Duplicating..." : "Duplicate Product"}
           </Button>
         </DialogFooter>

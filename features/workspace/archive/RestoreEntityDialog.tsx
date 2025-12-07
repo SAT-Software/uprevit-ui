@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface RestoreEntityDialogProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function RestoreEntityDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button onClick={onConfirm} disabled={isPending}>
+            {isPending ? <Spinner /> : null}
             {isPending ? "Restoring..." : "Restore"}
           </Button>
         </AlertDialogFooter>

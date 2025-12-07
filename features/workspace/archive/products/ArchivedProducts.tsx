@@ -53,6 +53,7 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
         data={items}
         onRowClick={onRowClick}
         onRestore={handleRestoreClick}
+        loadingRowId={isPending ? selectedItemToRestore?._id : null}
       />
 
       <RestoreEntityDialog

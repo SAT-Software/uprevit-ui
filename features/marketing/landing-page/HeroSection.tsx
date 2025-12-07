@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function HeroSection() {
   return (
-    <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-[calc(100vh)]">
+    <div className="max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[800px] h-[800px]">
       <div className="flex items-center mb-4 py-1 px-2 rounded-full border text-xs font-semibold bg-white text-foreground shadow-lg shadow-foreground">
         <div className="mr-2 h-2 w-2 rounded-full bg-primary" />
         <span className="text-xs font-semibold">For The Future</span>

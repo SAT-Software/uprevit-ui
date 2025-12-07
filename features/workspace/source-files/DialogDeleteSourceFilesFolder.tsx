@@ -19,6 +19,7 @@ import {
   PiWarningCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DialogDeleteSourceFilesFolderProps {
   id: string;
@@ -111,6 +112,7 @@ export default function DialogDeleteSourceFilesFolder({
             disabled={disabled}
             onClick={handleConfirm}
           >
+            {deleteFolder.isPending ? <Spinner /> : <PiTrashDuotone />}
             {deleteFolder.isPending ? "Deleting..." : "Delete Folder"}
           </Button>
         </DialogFooter>

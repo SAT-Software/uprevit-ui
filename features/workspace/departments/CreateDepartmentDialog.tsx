@@ -24,6 +24,7 @@ import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
@@ -297,7 +298,7 @@ export default function CreateDepartmentDialog() {
             aria-busy={uploadingImage || isPending}
           >
             {uploadingImage || isPending ? (
-              <PiPlusCircleDuotone />
+              <Spinner />
             ) : (
               <PiPlusCircleDuotone />
             )}

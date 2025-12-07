@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FolderIcon } from "lucide-react";
@@ -6,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 interface SourceFilesFolder {
   _id: string;
@@ -20,65 +22,74 @@ interface SourceFilesFoldersCardProps {
 
 function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
   const router = useRouter();
-  const { mutate: toggleBookmark, isPending } =
-    useToggleBookmarkSourceFilesFolder();
+  const { mutate: toggleBookmark } = useToggleBookmarkSourceFilesFolder();
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
+  const [pendingFolderId, setPendingFolderId] = useState<string | null>(null);
 
   return (
     <div className="w-full h-full">
       {folders?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 auto-rows-max">
           {folders?.map((folder) => (
             <div
               key={folder._id}
-              className="relative flex flex-col w-full max-w-xs rounded-2xl"
+              className="relative flex flex-col w-full max-w-xs rounded-xl"
             >
-              <div className="absolute top-2 right-2 flex gap-2 z-10">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Toggle bookmark folder"
-                  onClick={(e) => {
-                    if (userId) {
-                      toggleBookmark({
-                        folderId: folder._id,
-                        userId: userId as string,
-                      });
-                    } else {
-                      toast.error(
-                        "User ID not available. Please log in again."
-                      );
-                    }
-                  }}
-                  disabled={isPending}
-                  title="Bookmark folder"
-                  className="h-8 w-8 hover:bg-background/80"
-                >
-                  <PiBookmarkSimpleDuotone className="h-4 w-4" />
-                </Button>
-              </div>
               <Card
                 className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full border-border"
                 onClick={() => router.push(`/source-files/view/${folder._id}`)}
               >
-                <CardContent className="p-4 flex flex-row items-center gap-3">
-                  <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center">
-                    <FolderIcon className="w-10 h-10 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm mb-1 truncate">
-                      {folder.name}
-                    </p>
-                    {/* <p className="text-xs text-muted-foreground truncate">
-                      Product ID: {folder.product_id}
-                    </p> */}
-                    {folder.created_at && (
-                      <p className="text-xs text-muted-foreground">
-                        Created:{" "}
-                        {new Date(folder.created_at).toLocaleDateString()}
+                <CardContent className="p-2 flex flex-row items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center">
+                      <FolderIcon className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 max-w-1/3 flex-1 flex flex-wrap">
+                      <p className="font-medium text-sm mb-1 leading-tight">
+                        {folder.name}
                       </p>
-                    )}
+                      {folder.created_at && (
+                        <p className="text-xs text-muted-foreground">
+                          Created:{" "}
+                          {new Date(folder.created_at).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      aria-label="Toggle bookmark folder"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (userId) {
+                          setPendingFolderId(folder._id);
+                          toggleBookmark(
+                            {
+                              folderId: folder._id,
+                              userId: userId as string,
+                            },
+                            {
+                              onSettled: () => setPendingFolderId(null),
+                            }
+                          );
+                        } else {
+                          toast.error(
+                            "User ID not available. Please log in again."
+                          );
+                        }
+                      }}
+                      disabled={pendingFolderId === folder._id}
+                      title="Bookmark folder"
+                    >
+                      {pendingFolderId === folder._id ? (
+                        <Spinner />
+                      ) : (
+                        <PiBookmarkSimpleDuotone className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

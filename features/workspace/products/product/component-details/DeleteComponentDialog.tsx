@@ -13,6 +13,7 @@ import {
   PiXCircleDuotone,
   PiWarningDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type ComponentItem = {
   _id: string;
@@ -106,7 +107,7 @@ export default function DeleteComponentDialog({
             variant="destructive"
             size="sm"
           >
-            <PiTrashDuotone />
+            {isPending ? <Spinner /> : <PiTrashDuotone />}
             {isPending ? "Deleting..." : "Delete Component"}
           </Button>
         </AlertDialogFooter>

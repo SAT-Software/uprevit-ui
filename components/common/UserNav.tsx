@@ -1,38 +1,122 @@
 "use client";
 
-// import { ChevronsUpDown } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
+import {
+  PiCreditCardDuotone,
+  PiGearDuotone,
+  PiSignOutDuotone,
+  PiSquaresFourDuotone,
+  PiUserCircleGearDuotone,
+  PiUserDuotone,
+} from "react-icons/pi";
+import { useAuth } from "react-oidc-context";
 
-export function NavUser() {
+export function UserNav() {
+  const auth = useAuth();
+  const { isMobile } = useSidebar();
   const { data: userData } = useGetUser();
   const user = userData?.user;
 
+  const signOutRedirect = () => {
+    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
+    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
+    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
+      logoutUri
+    )}`;
+  };
+
   return (
-    <SidebarMenu className="w-auto">
-      <SidebarMenuItem>
-        <Link href="/settings">
-          <SidebarMenuButton
-            size="lg"
-            variant="default"
-            className="group hover:bg-accent h-8 w-8 flex items-center justify-center border border-border rounded-full hover:text-foreground duration-300 delay-300 ease-in-out data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-          >
-            <Avatar className="h-6 w-6 rounded-full">
+    <DropdownMenu>
+      <DropdownMenuTrigger className="w-auto p-0 hover:bg-transparent" asChild>
+        <SidebarMenuButton
+          size="lg"
+          className="data-[state=open]:text-sidebar-accent-foreground"
+        >
+          <div className="relative mr-1">
+            <Avatar className="h-7 w-7 rounded-full">
               <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-full group-hover:bg-accent">
+              <AvatarFallback className="rounded-full">
                 {user?.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
-          </SidebarMenuButton>
-        </Link>
-      </SidebarMenuItem>
-    </SidebarMenu>
+            <span className="-end-1 -top-1 absolute size-3 rounded-full border-2 border-background bg-emerald-500">
+              <span className="sr-only">Online</span>
+            </span>
+          </div>
+        </SidebarMenuButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+        side={isMobile ? "bottom" : "right"}
+        align="end"
+        sideOffset={4}
+      >
+        <DropdownMenuLabel className="p-0 font-normal">
+          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <Avatar className="h-8 w-8 rounded-full">
+              <AvatarImage src={user?.profileAvatar} alt={user?.name} />
+              <AvatarFallback className="rounded-full">
+                <PiUserCircleGearDuotone size={20} />
+              </AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">{user?.name}</span>
+              <span className="text-muted-foreground truncate text-xs">
+                {user?.email}
+              </span>
+            </div>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href={`/settings?tab=profile`}>
+              <PiUserDuotone />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/settings?tab=workspace`}>
+              <PiSquaresFourDuotone />
+              Workspace
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/settings?tab=billing`}>
+              <PiCreditCardDuotone />
+              Billing
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={async () => {
+              await auth.removeUser();
+              signOutRedirect();
+            }}
+          >
+            <PiSignOutDuotone />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

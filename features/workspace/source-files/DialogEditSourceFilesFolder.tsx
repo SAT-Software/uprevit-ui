@@ -21,6 +21,7 @@ import {
   PiChecksDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   folderName: string;
@@ -138,17 +139,8 @@ export default function DialogEditSourceFilesFolder({
             form="edit-folder-form"
             disabled={(!folderName && !currentFolder?.name) || isPending}
           >
-            {isPending ? (
-              <>
-                <PiChecksDuotone className="animate-spin mr-2" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <PiChecksDuotone className="mr-2" />
-                Update Folder
-              </>
-            )}
+            {isPending ? <Spinner /> : <PiChecksDuotone className="mr-2" />}
+            {isPending ? "Updating..." : "Update Folder"}
           </Button>
         </DialogFooter>
       </DialogContent>

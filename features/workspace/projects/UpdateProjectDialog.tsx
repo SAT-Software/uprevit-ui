@@ -24,6 +24,7 @@ import {
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
@@ -384,7 +385,11 @@ export default function UpdateProjectDialog({
             form={`mutate-project-form-${id}`}
             disabled={uploadingImage || isPending}
           >
-            <PiCheckCircleDuotone />
+            {uploadingImage || isPending ? (
+              <Spinner />
+            ) : (
+              <PiCheckCircleDuotone />
+            )}
             {uploadingImage
               ? "Uploading..."
               : isPending

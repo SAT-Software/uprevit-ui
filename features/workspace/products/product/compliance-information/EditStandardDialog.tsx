@@ -22,6 +22,7 @@ import {
   PiXCircleDuotone,
   PiFloppyDiskDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   standard: string;
@@ -197,7 +198,7 @@ export default function EditStandardDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            <PiFloppyDiskDuotone />
+            {isPending ? <Spinner /> : <PiFloppyDiskDuotone />}
             {isPending ? "Updating..." : "Update Standard"}
           </Button>
         </DialogFooter>

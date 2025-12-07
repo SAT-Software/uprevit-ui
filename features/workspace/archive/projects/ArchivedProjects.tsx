@@ -43,6 +43,9 @@ export function ArchivedProjects({ onRowClick }: ArchivedProjectsProps) {
         data={items}
         onRowClick={onRowClick}
         onRestore={handleRestoreClick}
+        loadingRowId={
+          restoreProject.isPending ? selectedItemToRestore?._id : null
+        }
       />
 
       <RestoreEntityDialog

@@ -33,11 +33,13 @@ import {
   PiPictureInPictureDuotone,
   PiPackageDuotone,
   PiTagChevronDuotone,
+  PiSquaresFourDuotone,
 } from "react-icons/pi";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
+import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
 const data = {
   navMain: [
@@ -142,6 +144,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: workspaceData, isLoading } = useGetWorkspace();
   const workspace = workspaceData?.workspace;
 
+  console.log(workspace);
+
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-b border-sidebar-border h-12">
@@ -229,35 +233,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarGroup>
-        <SidebarMenu>
-          <SidebarMenuItem className="px-1 ">
-            <Link href={"/settings"}>
-              <button
-                className={cn(
-                  "cursor-pointer hover:bg-sidebar-border/50 rounded-lg py-1 flex items-center gap-2 w-full "
-                )}
-              >
-                <div className="relative flex size-8 min-w-8 items-center justify-center overflow-hidden rounded-md bg-muted">
-                  <Image
-                    src="/avatars/workspace-logo.png"
-                    alt="Workspace logo"
-                    fill
-                    className="object-cover p-1"
-                  />
-                </div>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-medium">
-                    {isLoading ? "Loading..." : workspace?.workspaceName}
-                  </span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {isLoading ? "Loading..." : workspace?.companyName}
-                  </span>
-                </div>
-              </button>
-            </Link>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarGroup className="p-2">
+        <SidebarNavWorkspace workspace={workspace} />
       </SidebarGroup>
       <SidebarRail />
     </Sidebar>

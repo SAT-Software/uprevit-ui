@@ -38,6 +38,7 @@ import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 
@@ -364,7 +365,7 @@ export default function ProjectCreateDialog({
             aria-busy={uploadingImage || isPending}
           >
             {uploadingImage || isPending ? (
-              <PiPlusCircleDuotone />
+              <Spinner />
             ) : (
               <PiPlusCircleDuotone />
             )}

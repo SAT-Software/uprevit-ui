@@ -20,6 +20,7 @@ import {
   PiXCircleDuotone,
   PiFolderPlusDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   folderName: string;
@@ -146,17 +147,8 @@ export default function DialogAddProductFolder({
             form="add-folder-form"
             disabled={!folderName || isPending}
           >
-            {isPending ? (
-              <>
-                <PiPlusCircleDuotone className="animate-spin mr-2" />
-                Adding...
-              </>
-            ) : (
-              <>
-                <PiPlusCircleDuotone className="mr-2" />
-                Add Folder
-              </>
-            )}
+            {isPending ? <Spinner /> : <PiPlusCircleDuotone className="mr-2" />}
+            {isPending ? "Adding..." : "Add Folder"}
           </Button>
         </DialogFooter>
       </DialogContent>

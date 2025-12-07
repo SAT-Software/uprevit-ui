@@ -38,6 +38,7 @@ import {
   PiCubeDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type FormData = {
   componentNumber: string;
@@ -273,10 +274,14 @@ export default function AddComponentDialog({
             type="button"
             size="sm"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={isPending || uploadingImage}
             variant="default"
           >
-            <PiPlusCircleDuotone />
+            {isPending || uploadingImage ? (
+              <Spinner />
+            ) : (
+              <PiPlusCircleDuotone />
+            )}
             {isPending
               ? "Adding..."
               : uploadingImage

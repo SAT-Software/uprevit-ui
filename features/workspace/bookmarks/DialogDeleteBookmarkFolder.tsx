@@ -20,6 +20,7 @@ import {
 } from "react-icons/pi";
 import { useDeleteBookmarkFolder } from "@/hooks/bookmark/useDeleteBookmarkFolder";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DialogDeleteBookmarkFolderProps {
   folderId: string;
@@ -59,7 +60,7 @@ export default function DialogDeleteBookmarkFolder({
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center text-destructive">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent/60 flex w-full justify-between items-center text-foreground">
             <div className="flex items-center gap-2">
               <PiTrashDuotone />
               <p>Delete Bookmark Folder</p>
@@ -76,13 +77,16 @@ export default function DialogDeleteBookmarkFolder({
         </DialogHeader>
 
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-4 p-4 border border-destructive/20 bg-destructive/5 rounded-lg text-sm text-destructive/90">
+          <div className="flex items-start gap-4 p-4 border border-border bg-accent rounded-lg text-sm">
             <PiWarningCircleDuotone className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="flex flex-col gap-1">
               <p className="text-xs text-muted-foreground">
                 You are about to delete the bookmark folder{" "}
-                <strong>{folderName}</strong>. This action cannot be undone and
-                will remove all products from this folder.
+                <span className="font-semibold text-foreground/80">
+                  {folderName}
+                </span>
+                . This action cannot be undone and will remove all products from
+                this folder.
               </p>
             </div>
           </div>
@@ -90,11 +94,11 @@ export default function DialogDeleteBookmarkFolder({
           <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
             <div className="space-y-2">
               <Label htmlFor={inputId}>
-                Type{" "}
-                <span className="font-mono text-muted-foreground">
+                Type "
+                <span className="font-semibold text-foreground/80">
                   {folderName}
-                </span>{" "}
-                to confirm
+                </span>
+                " to confirm
               </Label>
               <Input
                 id={inputId}
@@ -102,7 +106,7 @@ export default function DialogDeleteBookmarkFolder({
                 placeholder={folderName}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                className="font-mono"
+                className=""
               />
             </div>
           </form>
@@ -123,7 +127,7 @@ export default function DialogDeleteBookmarkFolder({
             variant="destructive"
           >
             {isPending ? (
-              <PiTrashDuotone className="animate-spin w-4 h-4 mr-2" />
+              <Spinner />
             ) : (
               <PiTrashDuotone className="w-4 h-4 mr-2" />
             )}

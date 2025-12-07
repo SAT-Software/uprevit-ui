@@ -24,6 +24,7 @@ import {
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
@@ -319,7 +320,11 @@ export default function UpdateDepartmentDialog({
             form={`mutate-department-form-${id}`}
             disabled={uploadingImage || isPending}
           >
-            <PiCheckCircleDuotone />
+            {uploadingImage || isPending ? (
+              <Spinner />
+            ) : (
+              <PiCheckCircleDuotone />
+            )}
             {uploadingImage
               ? "Uploading..."
               : isPending

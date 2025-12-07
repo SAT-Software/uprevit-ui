@@ -15,6 +15,7 @@ import {
   PiPackageDuotone,
   PiTagDuotone,
   PiArrowSquareOutDuotone,
+  PiBookmarksDuotone,
 } from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -97,7 +98,9 @@ export default function FolderPage() {
       <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full overflow-y-auto">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between shrink-0">
           <div className="flex items-center gap-2">
-            <PiFolderOpenDuotone className="w-5 h-5 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+              <PiFolderOpenDuotone className="w-4 h-4" />
+            </div>
             <h1 className="text-base font-semibold">{bookmarkFolderName}</h1>
             <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
             <p className="text-xs text-muted-foreground font-medium hidden sm:block">
