@@ -21,7 +21,7 @@ import {
 export function AutomatedRedliningCard() {
   return (
     <div className="relative w-2/3 h-full bg-background p-10 rounded-xl border border-border flex flex-col overflow-hidden group">
-      <div className=" z-10 flex flex-col h-full">
+      <div className="z-10 flex flex-col h-full">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-2">
             Automated- Redlining
@@ -33,8 +33,8 @@ export function AutomatedRedliningCard() {
         </div>
 
         <div className="absolute -bottom-16 -right-20 w-full flex-1 min-h-0">
-          <div className="p-2 bg-accent rounded-2xl">
-            <div className="relative h-full bg-background rounded-t-xl border border-border shadow-md overflow-hidden flex flex-col">
+          <div className="p-1 bg-accent border border-border rounded-2xl">
+            <div className="relative h-full bg-background rounded-t-[15px] border border-border shadow-md overflow-hidden flex flex-col">
               <div className="flex items-center justify-start gap-4 px-2 py-2 border-b bg-muted/30">
                 <div className="text-xs font-bold text-foreground">
                   Label Components
