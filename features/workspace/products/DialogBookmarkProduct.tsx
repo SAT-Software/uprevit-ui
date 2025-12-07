@@ -28,6 +28,7 @@ import {
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   folderId: string;
@@ -194,7 +195,7 @@ export default function DialogBookmarkProduct({
             variant="default"
             disabled={!selectedFolderId || bookmarkProduct.isPending}
           >
-            <PiCheckCircleDuotone />
+            {bookmarkProduct.isPending ? <Spinner /> : <PiCheckCircleDuotone />}
             {bookmarkProduct.isPending ? "Adding..." : "Add to Bookmarks"}
           </Button>
         </DialogFooter>

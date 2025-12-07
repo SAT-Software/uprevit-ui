@@ -21,6 +21,7 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { useEditBookmarkFolder } from "@/hooks/bookmark/useEditBookmarkFolder";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   folder_name: string;
@@ -151,7 +152,7 @@ export default function DialogEditBookmarkFolder({
             disabled={isPending}
           >
             {isPending ? (
-              <PiCheckCircleDuotone className="animate-spin w-4 h-4 mr-2" />
+              <Spinner />
             ) : (
               <PiCheckCircleDuotone className="w-4 h-4 mr-2" />
             )}

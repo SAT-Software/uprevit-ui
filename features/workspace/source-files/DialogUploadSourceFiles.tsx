@@ -19,6 +19,7 @@ import {
   PiXCircleDuotone,
   PiUploadSimpleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner"; // Assuming sonner use for toasts if needed, though not used in original, I'll stick to original logic unless error handling needs it.
 
@@ -138,16 +139,11 @@ export default function DialogUploadSourceFiles({
             disabled={!selectedFiles.length || isUploading}
           >
             {isUploading ? (
-              <>
-                <PiUploadSimpleDuotone className="animate-spin mr-2" />
-                Uploading...
-              </>
+              <Spinner />
             ) : (
-              <>
-                <PiUploadSimpleDuotone className="mr-2" />
-                Upload Files
-              </>
+              <PiUploadSimpleDuotone className="mr-2" />
             )}
+            {isUploading ? "Uploading..." : "Upload Files"}
           </Button>
         </DialogFooter>
       </DialogContent>

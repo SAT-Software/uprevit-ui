@@ -1,16 +1,56 @@
 "use client";
 
 import { useAuth } from "react-oidc-context";
-import { BookmarkIcon } from "lucide-react";
+import { BookmarkIcon, FolderIcon } from "lucide-react";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { SourceFilesFolder } from "@/types/source-files";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PiWarningCircleDuotone } from "react-icons/pi";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
   parentId?: string;
+}
+
+function FolderLoadingCard() {
+  return (
+    <div className="relative flex flex-col w-full max-w-xs rounded-2xl">
+      <Card className="shadow-none border-border w-full">
+        <CardContent className="p-4 flex flex-row items-center gap-3">
+          <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center animate-pulse">
+            <FolderIcon className="w-10 h-10 text-muted-foreground/30" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+            <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function FolderErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
+      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
+        <PiWarningCircleDuotone className="w-8 h-8 text-destructive" />
+      </div>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-destructive">
+          Failed to load source files folders
+        </p>
+        <p className="text-xs text-muted-foreground">Please try again later</p>
+      </div>
+      <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
+        Try Again
+      </Button>
+    </div>
+  );
 }
 
 function SourceFilesPage() {
@@ -18,6 +58,7 @@ function SourceFilesPage() {
     data: foldersData,
     isLoading: foldersLoading,
     error: foldersError,
+    refetch: refetchFolders,
   } = useGetAllSourceFileFolders();
 
   const sourceFilesFolders = foldersData?.result ?? [];
@@ -36,17 +77,58 @@ function SourceFilesPage() {
 
   if (foldersLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">Loading...</div>
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full">
+          {/* Main Header */}
+          <div className="flex items-center justify-between w-full p-4">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold">Source Files</h1>
+              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
+              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
+                Manage and view all source files and folders
+              </p>
+            </div>
+            <div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
+          </div>
+
+          {/* All Folders Section */}
+          <div className="flex flex-col gap-4 p-4 w-full">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                All Folders
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
+              {[...Array(5)].map((_, index) => (
+                <FolderLoadingCard key={index} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (foldersError) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-destructive">
-          Failed to load source files folders. Please try again.
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full">
+          {/* Main Header */}
+          <div className="flex items-center justify-between w-full p-4">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold">Source Files</h1>
+              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
+              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
+                Manage and view all source files and folders
+              </p>
+            </div>
+            <DialogAddProductFolder />
+          </div>
+
+          {/* Error State */}
+          <div className="flex flex-col gap-4 p-4 w-full">
+            <FolderErrorState onRetry={() => refetchFolders()} />
+          </div>
         </div>
       </div>
     );
@@ -79,12 +161,17 @@ function SourceFilesPage() {
                 </h2>
               </div>
               {bookmarkedLoading ? (
-                <div className="flex items-center justify-center h-[200px] gap- text-muted-foreground">
-                  <div>Loading...</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
+                  {[...Array(3)].map((_, index) => (
+                    <FolderLoadingCard key={index} />
+                  ))}
                 </div>
               ) : bookmarkedError ? (
-                <div className="flex items-center justify-center h-[200px] gap-2 text-destructive">
-                  <div>Failed to load bookmarked folders.</div>
+                <div className="flex items-center justify-center h-[100px] gap-2">
+                  <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
+                  <p className="text-sm text-destructive">
+                    Failed to load bookmarked folders.
+                  </p>
                 </div>
               ) : (
                 <SourceFilesFoldersCard folders={bookmarkedFolders} />

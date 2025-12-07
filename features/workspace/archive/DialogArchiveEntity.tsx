@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
 import { PiArchiveDuotone } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -137,6 +138,7 @@ export default function DialogArchiveEntity({
               disabled={disabled}
               onClick={handleConfirm}
             >
+              {isPending ? <Spinner /> : <PiArchiveDuotone />}
               {isPending ? "Archiving..." : "Archive"}
             </Button>
           </DialogFooter>

@@ -20,6 +20,7 @@ import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { Product } from "@/types/product";
 import { PiXCircleDuotone, PiCheckCircleDuotone } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function UpdateProductDialog({
   product: productData,
@@ -212,7 +213,7 @@ export default function UpdateProductDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            <PiCheckCircleDuotone />
+            {isPending ? <Spinner /> : <PiCheckCircleDuotone />}
             {isPending ? "Updating..." : "Update Product"}
           </Button>
         </DialogFooter>

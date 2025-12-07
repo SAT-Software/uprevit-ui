@@ -23,6 +23,7 @@ import {
   PiGearDuotone,
   PiSignOutDuotone,
   PiSquaresFourDuotone,
+  PiUserCircleGearDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
@@ -44,15 +45,15 @@ export function UserNav() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="w-auto p-0" asChild>
+      <DropdownMenuTrigger className="w-auto p-0 hover:bg-transparent" asChild>
         <SidebarMenuButton
           size="lg"
           className="data-[state=open]:text-sidebar-accent-foreground"
         >
           <div className="relative mr-1">
-            <Avatar className="h-7 w-7 rounded-lg">
+            <Avatar className="h-7 w-7 rounded-full">
               <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-full group-hover:bg-accent">
+              <AvatarFallback className="rounded-full">
                 {user?.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -70,10 +71,10 @@ export function UserNav() {
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="h-8 w-8 rounded-lg">
+            <Avatar className="h-8 w-8 rounded-full">
               <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-lg">
-                <PiSquaresFourDuotone size={20} />
+              <AvatarFallback className="rounded-full">
+                <PiUserCircleGearDuotone size={20} />
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">

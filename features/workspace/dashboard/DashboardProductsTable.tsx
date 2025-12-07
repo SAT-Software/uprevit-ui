@@ -385,9 +385,13 @@ export default function DashboardProductsTable() {
         <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
+              {headerGroup.headers.map((header, index) => {
+                const isLastColumn = index === headerGroup.headers.length - 1;
                 return (
-                  <TableHead key={header.id} className="border-r border-border">
+                  <TableHead
+                    key={header.id}
+                    className={cn(!isLastColumn && "border-r border-border")}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

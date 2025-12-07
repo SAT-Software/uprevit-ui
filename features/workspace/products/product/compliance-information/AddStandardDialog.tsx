@@ -22,6 +22,7 @@ import {
   PiXCircleDuotone,
   PiShieldCheckDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   standard: string;
@@ -191,7 +192,7 @@ export default function AddStandardDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            <PiPlusCircleDuotone />
+            {isPending ? <Spinner /> : <PiPlusCircleDuotone />}
             {isPending ? "Adding..." : "Add Standard"}
           </Button>
         </DialogFooter>

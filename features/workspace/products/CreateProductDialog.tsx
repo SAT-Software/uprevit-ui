@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PiPlusCircleDuotone, PiXCircleDuotone } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
   SelectContent,
@@ -340,11 +341,7 @@ export default function CreateProductDialog() {
             size="sm"
             form={`create-product-form-${id}`}
           >
-            {isPending ? (
-              <PiPlusCircleDuotone className="animate-spin" />
-            ) : (
-              <PiPlusCircleDuotone />
-            )}
+            {isPending ? <Spinner /> : <PiPlusCircleDuotone />}
             {isPending ? "Creating..." : "Create Product"}
           </Button>
         </DialogFooter>

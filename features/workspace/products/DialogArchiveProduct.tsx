@@ -18,6 +18,7 @@ import {
   PiWarningCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type ArchiveProductProps = Pick<Product, "_id">;
 
@@ -113,7 +114,7 @@ export default function DialogArchiveProduct({
           onClick={handleArchiveProduct}
           disabled={isPending}
         >
-          <PiArchiveDuotone />
+          {isPending ? <Spinner /> : <PiArchiveDuotone />}
           {isPending ? "Archiving..." : "Archive Product"}
         </Button>
       </DialogFooter>

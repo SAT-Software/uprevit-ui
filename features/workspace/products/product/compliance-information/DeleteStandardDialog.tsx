@@ -4,6 +4,7 @@ import {
   PiXCircleDuotone,
   PiWarningDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 import {
   AlertDialog,
@@ -110,7 +111,7 @@ export default function DeleteStandardDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            <PiTrashDuotone />
+            {isPending ? <Spinner /> : <PiTrashDuotone />}
             {isPending ? "Deleting..." : "Delete Standard"}
           </Button>
         </AlertDialogFooter>

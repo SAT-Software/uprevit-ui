@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useAddProductInBookmarkFolder } from "@/hooks/bookmark/useAddProductInBookmarkFolder";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FormValues {
   productId: string;
@@ -249,11 +250,11 @@ export default function DialogAddProductsToFolder({
             form="add-products-form"
           >
             {isPending ? (
-              <PiPlusCircleDuotone className="animate-spin mr-2 w-4 h-4" />
+              <Spinner />
             ) : (
               <PiPlusCircleDuotone className="mr-2 w-4 h-4" />
             )}
-            {isPending ? "Bookmarking..." : "Bookmark Product"}
+            {isPending ? "Adding..." : "Add Product"}
           </Button>
         </DialogFooter>
       </DialogContent>
