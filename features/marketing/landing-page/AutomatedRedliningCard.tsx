@@ -20,7 +20,7 @@ import {
 
 export function AutomatedRedliningCard() {
   return (
-    <div className="relative w-2/3 h-full bg-background p-10 rounded-xl border border-border flex flex-col overflow-hidden group">
+    <div className="relative w-2/3 h-full bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden group">
       <div className="z-10 flex flex-col h-full">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-2">

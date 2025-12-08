@@ -46,7 +46,7 @@ const faqs = [
 export default function FAQSection() {
   return (
     <div className="relative w-full pt-20 mt-40 pb-20 mb-20 pointer-events-auto">
-      <div className="max-w-7xl flex flex-col items-center mx-auto mb-8">
+      <div className="max-w-6xl flex flex-col items-center mx-auto mb-8">
         <Badge variant="white" className="mb-8 z-60">
           <PiImageDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">FAQ</span>
@@ -77,7 +77,7 @@ export default function FAQSection() {
       </div>
       <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
       <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />
-      <div className="absolute top-0 left-0 right-0 mx-auto w-full max-w-7xl aspect-2/1 rounded-t-full border border-b-0 border-dashed border-border bg-none pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 mx-auto w-full max-w-6xl aspect-2/1 rounded-t-full border border-b-0 border-dashed border-border bg-none pointer-events-none" />
     </div>
   );
 }

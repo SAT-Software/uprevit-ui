@@ -27,11 +27,12 @@ import {
   PiUserDuotone,
 } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
+import { Skeleton } from "../ui/skeleton";
 
 export function UserNav() {
   const auth = useAuth();
   const { isMobile } = useSidebar();
-  const { data: userData } = useGetUser();
+  const { data: userData, isLoading } = useGetUser();
   const user = userData?.user;
 
   const signOutRedirect = () => {
@@ -42,6 +43,9 @@ export function UserNav() {
       logoutUri
     )}`;
   };
+
+  if (isLoading)
+    return <Skeleton className="h-7 w-7 rounded-full bg-border/80" />;
 
   return (
     <DropdownMenu>

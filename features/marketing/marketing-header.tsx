@@ -92,7 +92,7 @@ export default function MarketingHeader() {
       }}
     >
       <div
-        className={"flex items-center justify-between max-w-7xl w-full mx-auto"}
+        className={"flex items-center justify-between max-w-6xl w-full mx-auto"}
       >
         <div>
           <Link

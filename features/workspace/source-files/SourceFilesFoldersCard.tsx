@@ -45,16 +45,10 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                     <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center">
                       <FolderIcon className="w-6 h-6 text-muted-foreground" />
                     </div>
-                    <div className="min-w-0 max-w-1/3 flex-1 flex flex-wrap">
-                      <p className="font-medium text-sm mb-1 leading-tight">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm leading-tight line-clamp-2">
                         {folder.name}
                       </p>
-                      {folder.created_at && (
-                        <p className="text-xs text-muted-foreground">
-                          Created:{" "}
-                          {new Date(folder.created_at).toLocaleDateString()}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">
