@@ -8,7 +8,7 @@ import { LabelDataTaggingCard } from "./LabelDataTaggingCard";
 export default function FeaturesSection() {
   return (
     <div className="w-full mt-40 mb-20">
-      <div className="max-w-7xl mx-auto mb-8">
+      <div className="max-w-6xl mx-auto mb-8">
         <Badge variant="white" className="mb-8 z-60">
           <PiImageDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">Features</span>
@@ -25,7 +25,7 @@ export default function FeaturesSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <div className="p-1 bg-accent rounded-xl max-w-7xl mx-auto border border-border">
+        <div className="p-1 bg-accent rounded-xl max-w-6xl mx-auto border border-border">
           <div className="flex flex-col gap-1">
             <div className="flex w-full h-130 gap-1">
               <AutomatedRedliningCard />

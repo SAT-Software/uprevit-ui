@@ -59,7 +59,7 @@ export function Worksteps({ className }: WorkstepsProps) {
   return (
     <div
       className={cn(
-        "w-full h-full bg-background p-10 rounded-xl border border-border flex flex-col items-start justify-start relative overflow-hidden",
+        "w-full h-full bg-background p-8 rounded-xl border border-border flex flex-col items-start justify-start relative overflow-hidden",
         className
       )}
     >

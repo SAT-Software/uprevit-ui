@@ -28,7 +28,7 @@ import {
 
 export default function HeroFeatureCards() {
   return (
-    <div className="grid group max-w-7xl mx-auto w-full">
+    <div className="grid group max-w-6xl mx-auto w-full">
       <div className="col-start-1 row-start-1 transform-none">
         <div className="[--row-height:11.3px]">
           <div className="relative grid grid-cols-[repeat(118,1fr)] grid-rows-[repeat(12,var(--row-height))] gap-y-[19px]">

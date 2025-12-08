@@ -4,7 +4,7 @@ export default function CTASection() {
   return (
     <div className="w-full mt-40 mb-20">
       <div className="relative w-full">
-        <div className="p-1 bg-accent rounded-2xl max-w-7xl mx-auto border border-border">
+        <div className="p-1 bg-accent rounded-2xl max-w-6xl mx-auto border border-border">
           <div className="w-full bg-foreground rounded-[14px] h-120 text-background p-10 gap-20 flex items-center justify-between">
             <div className="w-full flex flex-col items-start justify-between">
               <h2 className="text-5xl font-bold">

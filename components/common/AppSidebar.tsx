@@ -34,10 +34,12 @@ import {
   PiPackageDuotone,
   PiTagChevronDuotone,
   PiSquaresFourDuotone,
+  PiDotsThreeOutlineVerticalDuotone,
 } from "react-icons/pi";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
@@ -144,8 +146,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: workspaceData, isLoading } = useGetWorkspace();
   const workspace = workspaceData?.workspace;
 
-  console.log(workspace);
-
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-b border-sidebar-border h-12">
@@ -234,7 +234,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarGroup className="p-2">
-        <SidebarNavWorkspace workspace={workspace} />
+        {isLoading ? (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="lg"
+                className="border border-transparent cursor-default"
+              >
+                <Skeleton className="h-10 w-10 rounded-lg bg-border" />
+                <div className="grid flex-1 text-left text-sm leading-tight gap-1">
+                  <Skeleton className="h-6 w-28 bg-border" />
+                  <Skeleton className="h-4 w-38 bg-border" />
+                </div>
+                <PiDotsThreeOutlineVerticalDuotone className="ml-auto size-4 text-muted-foreground" />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        ) : (
+          <SidebarNavWorkspace workspace={workspace} />
+        )}
       </SidebarGroup>
       <SidebarRail />
     </Sidebar>

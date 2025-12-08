@@ -11,11 +11,12 @@ import { PiImageDuotone } from "react-icons/pi";
 export default function DemoSection() {
   return (
     <div className="w-full mt-40 mb-20">
-      <div className="max-w-7xl mx-auto mb-8">
+      <div className="max-w-6xl mx-auto mb-8 relative">
         <Badge variant="white" className="mb-8 z-60">
           <PiImageDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">Uprevit Demo</span>
         </Badge>
+
         <div className="w-full flex items-center justify-start text-2xl">
           <h2 className="text-5xl w-1/2 font-medium">
             The FastTrack way to Global labeling compliance
@@ -27,16 +28,18 @@ export default function DemoSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <Card className="w-full h-150 mx-auto border-border max-w-7xl">
-          <CardHeader>
-            <CardContent>
-              <p>
-                TODO: Add a dynamic video (smooth zoom and transitions) of
-                Uprevit showing major feature in quick glimse of the product
-              </p>
-            </CardContent>
-          </CardHeader>
-        </Card>
+        <div className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto">
+          <Card className="w-full h-150 mx-auto border-border max-w-6xl">
+            <CardHeader>
+              <CardContent>
+                <p>
+                  TODO: Add a dynamic video (smooth zoom and transitions) of
+                  Uprevit showing major feature in quick glimse of the product
+                </p>
+              </CardContent>
+            </CardHeader>
+          </Card>
+        </div>
         <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
         <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />
       </div>

@@ -53,7 +53,7 @@ export function VersionControlCards() {
   ];
 
   return (
-    <div className="w-1/3 h-full bg-background p-10 rounded-xl border border-border flex flex-col overflow-hidden">
+    <div className="w-1/3 h-full bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden">
       <div className="mb-8 z-10 shrink-0">
         <h3 className="text-lg font-semibold text-foreground">
           Version control perfected
