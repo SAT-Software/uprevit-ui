@@ -39,6 +39,7 @@ import {
   PiChartPieSliceDuotone,
   PiColumnsDuotone,
   PiGitBranchDuotone,
+  PiGitMergeDuotone,
   PiHashDuotone,
   PiInfoDuotone,
   PiKanbanDuotone,
@@ -709,6 +710,16 @@ function RowActions({ row }: { row: { original: Item } }) {
             >
               <PiPencilCircleDuotone className=" h-4 w-4" />
               <span>Edit</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+            // onClick={(e) => e.stopPropagation()}
+            // onSelect={() => {
+            //   // Add small delay to allow dropdown to close first
+            //   setTimeout(() => setShowUpdateDialog(true), 100);
+            // }}
+            >
+              <PiGitMergeDuotone />
+              New version
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

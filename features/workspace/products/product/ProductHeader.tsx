@@ -17,6 +17,7 @@ import {
   PiGitBranchDuotone,
   PiGitMergeDuotone,
   PiPaperPlaneRightDuotone,
+  PiTextStrikethroughDuotone,
 } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
@@ -251,10 +252,6 @@ export function ProductHeader() {
         <Separator orientation="vertical" className=" h-4" />
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm">
-            <PiGitMergeDuotone />
-            New version
-          </Button>
-          <Button variant="secondary" size="sm">
             <PiDownloadDuotone />
             Export
           </Button>
@@ -271,6 +268,10 @@ export function ProductHeader() {
               )}
             </SelectContent>
           </Select>
+          <Button variant="secondary" size="sm">
+            <PiTextStrikethroughDuotone />
+            View Redline
+          </Button>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">

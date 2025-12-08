@@ -2,18 +2,12 @@
 
 import { useAuth } from "react-oidc-context";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
+import DialogDeleteSourceFile from "@/features/workspace/source-files/DialogDeleteSourceFile";
+import DialogImagePreview from "@/features/workspace/source-files/DialogImagePreview";
 import DialogDeleteSourceFilesFolder from "@/features/workspace/source-files/DialogDeleteSourceFilesFolder";
 import DialogEditSourceFilesFolder from "@/features/workspace/source-files/DialogEditSourceFilesFolder";
 import DialogUploadSourceFiles from "@/features/workspace/source-files/DialogUploadSourceFiles";
@@ -32,14 +26,19 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   PiBookmarkSimpleDuotone,
+  PiDownloadSimpleDuotone,
   PiFileDocDuotone,
   PiFileDuotone,
   PiFilePdfDuotone,
+  PiGridFourDuotone,
   PiImageDuotone,
+  PiListDuotone,
+  PiSquareDuotone,
   PiTrashDuotone,
   PiWarningDuotone,
 } from "react-icons/pi";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
@@ -48,29 +47,43 @@ interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
 
 type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
 
-function getFileKind(fileNameOrUrl: string): FileKind {
-  const name = (fileNameOrUrl || "").toLowerCase();
-  if (
-    name.endsWith(".png") ||
-    name.endsWith(".jpg") ||
-    name.endsWith(".jpeg") ||
-    name.endsWith(".webp") ||
-    name.endsWith(".gif") ||
-    name.endsWith(".bmp") ||
-    name.endsWith(".tif") ||
-    name.endsWith(".tiff")
-  ) {
+function getFileKind(fileNameOrUrl: string, fileName?: string): FileKind {
+  // Check both the URL and the filename for extension detection
+  const urlLower = (fileNameOrUrl || "").toLowerCase();
+  const nameLower = (fileName || "").toLowerCase();
+
+  // Helper to check if a string has an image extension
+  const isImageExtension = (str: string) =>
+    str.endsWith(".png") ||
+    str.endsWith(".jpg") ||
+    str.endsWith(".jpeg") ||
+    str.endsWith(".webp") ||
+    str.endsWith(".gif") ||
+    str.endsWith(".bmp") ||
+    str.endsWith(".tif") ||
+    str.endsWith(".tiff");
+
+  // Helper to check if a string has a PDF extension
+  const isPdfExtension = (str: string) =>
+    str.endsWith(".pdf") || str.includes("application/pdf");
+
+  // Helper to check if a string has a Word extension
+  const isWordExtension = (str: string) =>
+    str.endsWith(".doc") ||
+    str.endsWith(".docx") ||
+    str.includes("application/msword") ||
+    str.includes(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
+
+  // Check URL first, then filename
+  if (isImageExtension(urlLower) || isImageExtension(nameLower)) {
     return "image";
   }
-  if (name.endsWith(".pdf") || name.includes("application/pdf")) return "pdf";
-  if (
-    name.endsWith(".doc") ||
-    name.endsWith(".docx") ||
-    name.includes("application/msword") ||
-    name.includes(
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-  ) {
+  if (isPdfExtension(urlLower) || isPdfExtension(nameLower)) {
+    return "pdf";
+  }
+  if (isWordExtension(urlLower) || isWordExtension(nameLower)) {
     return "word";
   }
 
@@ -83,6 +96,31 @@ export default function ProductSourceFilesPage() {
   const deleteSourceFile = useDeleteSourceFiles(slug);
   const router = useRouter();
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
+  const [pendingFolderId, setPendingFolderId] = useState<string | null>(null);
+  const [fileViewMode, setFileViewMode] = useState<"card" | "list" | "big">(
+    "big"
+  );
+  const [previewImage, setPreviewImage] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
+
+  const handleDownloadFile = async (url: string, fileName: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      toast.error("Failed to download file. Please try again.");
+    }
+  };
 
   const { data, isLoading, isError, refetch } = useGetSourceFilesFolderById(
     slug ?? ""
@@ -101,8 +139,7 @@ export default function ProductSourceFilesPage() {
     (folder: BookmarkedSourceFilesFolder) => folder.parentId === slug[0]
   );
 
-  const { mutate: toggleBookmark, isPending } =
-    useToggleBookmarkSourceFilesFolder();
+  const { mutate: toggleBookmark } = useToggleBookmarkSourceFilesFolder();
 
   const folder = data?.result;
   const currentFolder = currentFolderData?.result;
@@ -269,53 +306,65 @@ export default function ProductSourceFilesPage() {
                       Folders
                     </h2>
                   )}
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2">
                     {folder?.map((folder: SourceFilesFolder) => {
                       if (folder.type === "folder")
                         return (
                           <div
                             key={folder._id}
-                            className="relative flex flex-col w-full max-w-xs rounded-2xl"
+                            className="relative flex flex-col w-full max-w-xs rounded-xl"
                           >
-                            <div className="absolute top-2 right-2 flex gap-2 z-10">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Toggle bookmark folder"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (userId) {
-                                    toggleBookmark({
-                                      folderId: folder._id,
-                                      userId: userId as string,
-                                    });
-                                  } else {
-                                    toast.error(
-                                      "User ID not available. Please log in again."
-                                    );
-                                  }
-                                }}
-                                disabled={isPending}
-                                title="Bookmark folder"
-                                className="h-8 w-8 hover:bg-background/80"
-                              >
-                                <PiBookmarkSimpleDuotone className="h-4 w-4" />
-                              </Button>
-                            </div>
                             <Card
                               className="cursor-pointer shadow-none hover:bg-muted/50 transition-colors w-full border-border"
                               onClick={() =>
                                 router.push(`/source-files/view/${folder._id}`)
                               }
                             >
-                              <CardContent className="p-4 flex flex-row items-center gap-3">
-                                <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center">
-                                  <FolderIcon className="w-10 h-10 text-muted-foreground" />
+                              <CardContent className="p-2 flex flex-row items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center">
+                                    <FolderIcon className="w-6 h-6 text-muted-foreground" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-medium text-sm leading-tight line-clamp-2">
+                                      {folder.name}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-medium text-sm mb-1 truncate">
-                                    {folder.name}
-                                  </p>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="secondary"
+                                    size="icon"
+                                    aria-label="Toggle bookmark folder"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (userId) {
+                                        setPendingFolderId(folder._id);
+                                        toggleBookmark(
+                                          {
+                                            folderId: folder._id,
+                                            userId: userId as string,
+                                          },
+                                          {
+                                            onSettled: () =>
+                                              setPendingFolderId(null),
+                                          }
+                                        );
+                                      } else {
+                                        toast.error(
+                                          "User ID not available. Please log in again."
+                                        );
+                                      }
+                                    }}
+                                    disabled={pendingFolderId === folder._id}
+                                    title="Bookmark folder"
+                                  >
+                                    {pendingFolderId === folder._id ? (
+                                      <Spinner />
+                                    ) : (
+                                      <PiBookmarkSimpleDuotone className="h-4 w-4" />
+                                    )}
+                                  </Button>
                                 </div>
                               </CardContent>
                             </Card>
@@ -325,43 +374,176 @@ export default function ProductSourceFilesPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  {folder?.some(
-                    (f: SourceFilesFolder) => f.type === "file"
-                  ) && (
-                    <h2 className="text-sm font-semibold text-muted-foreground">
-                      Files
-                    </h2>
-                  )}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {folder?.map((file: SourceFilesFolder) => {
-                      if (file.type === "file")
-                        return (
-                          <div
-                            key={file._id}
-                            className="relative flex flex-col w-full"
-                          >
-                            <Card className="shadow-none hover:bg-muted/50 transition-colors w-full border-border overflow-hidden">
-                              <CardContent className="p-2">
-                                <div className="relative w-full aspect-4/3 overflow-hidden rounded-lg border border-border bg-accent/50 group">
+                {/* Files Section */}
+                {folder?.some((f: SourceFilesFolder) => f.type === "file") && (
+                  <div className="flex flex-col gap-4 border-t border-border pt-4">
+                    {/* Files Header with View Tabs */}
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-sm font-semibold text-muted-foreground">
+                        Files
+                      </h2>
+                      <Tabs
+                        value={fileViewMode}
+                        onValueChange={(value) =>
+                          setFileViewMode(value as "card" | "list" | "big")
+                        }
+                      >
+                        <TabsList>
+                          <TabsTrigger value="card" title="Card View">
+                            <PiGridFourDuotone className="w-4 h-4" />
+                          </TabsTrigger>
+                          <TabsTrigger value="list" title="List View">
+                            <PiListDuotone className="w-4 h-4" />
+                          </TabsTrigger>
+                          <TabsTrigger value="big" title="Big Card View">
+                            <PiSquareDuotone className="w-4 h-4" />
+                          </TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </div>
+
+                    {/* Card View */}
+                    {fileViewMode === "card" && (
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
+                        {folder?.map((file: SourceFilesFolder) => {
+                          if (file.type === "file")
+                            return (
+                              <div
+                                key={file._id}
+                                className="relative flex flex-col w-full group"
+                              >
+                                <Card className="shadow-none hover:bg-muted/50 transition-colors w-full border-border overflow-hidden">
+                                  <CardContent className="p-1.5">
+                                    <div className="relative w-full aspect-square overflow-hidden rounded-md border border-border bg-accent/50">
+                                      {(() => {
+                                        const kind = getFileKind(
+                                          file.url || "",
+                                          file.name
+                                        );
+                                        if (kind === "image" && file.url) {
+                                          return (
+                                            <Image
+                                              src={file.url}
+                                              alt={file.name}
+                                              fill
+                                              sizes="(max-width: 768px) 33vw, 10vw"
+                                              className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                              onClick={() =>
+                                                setPreviewImage({
+                                                  url: file.url!,
+                                                  name: file.name,
+                                                })
+                                              }
+                                            />
+                                          );
+                                        }
+                                        if (kind === "pdf") {
+                                          return (
+                                            <div className="flex items-center justify-center w-full h-full">
+                                              <PiFilePdfDuotone className="w-6 h-6 text-accent-foreground/40" />
+                                            </div>
+                                          );
+                                        }
+                                        if (
+                                          kind === "word" ||
+                                          kind === "docx" ||
+                                          kind === "doc"
+                                        ) {
+                                          return (
+                                            <div className="flex items-center justify-center w-full h-full">
+                                              <PiFileDocDuotone className="w-6 h-6 text-accent-foreground/40" />
+                                            </div>
+                                          );
+                                        }
+                                        return (
+                                          <div className="flex items-center justify-center w-full h-full">
+                                            <PiFileDuotone className="w-6 h-6 text-accent-foreground/40" />
+                                          </div>
+                                        );
+                                      })()}
+
+                                      <div className="absolute top-1 right-1 flex gap-1">
+                                        <Button
+                                          type="button"
+                                          variant="secondary"
+                                          size="icon"
+                                          aria-label="Download file"
+                                          onClick={() => {
+                                            if (file.url) {
+                                              handleDownloadFile(
+                                                file.url,
+                                                file.name
+                                              );
+                                            }
+                                          }}
+                                          className="h-6 w-6"
+                                        >
+                                          <PiDownloadSimpleDuotone className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          variant="destructive"
+                                          size="icon"
+                                          aria-label="Delete file"
+                                          onClick={() =>
+                                            setFileIdToDelete(file._id)
+                                          }
+                                          className="h-6 w-6 bg-destructive/20"
+                                        >
+                                          <PiTrashDuotone className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <p
+                                      className="mt-1 text-[10px] font-medium truncate"
+                                      title={file.name}
+                                    >
+                                      {file.name}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            );
+                        })}
+                      </div>
+                    )}
+
+                    {/* List View */}
+                    {fileViewMode === "list" && (
+                      <div className="flex flex-col gap-1">
+                        {folder?.map((file: SourceFilesFolder) => {
+                          if (file.type === "file")
+                            return (
+                              <div
+                                key={file._id}
+                                className="flex items-center gap-3 p-2 rounded-lg bg-muted transition-colors group border border-border"
+                              >
+                                <div className="w-10 h-10 rounded-md border border-border bg-accent/50 flex items-center justify-center shrink-0 overflow-hidden">
                                   {(() => {
-                                    const kind = getFileKind(file.url || "");
+                                    const kind = getFileKind(
+                                      file.url || "",
+                                      file.name
+                                    );
                                     if (kind === "image" && file.url) {
                                       return (
                                         <Image
                                           src={file.url}
                                           alt={file.name}
-                                          fill
-                                          sizes="(max-width: 768px) 50vw, 33vw"
-                                          className="object-cover"
+                                          width={40}
+                                          height={40}
+                                          className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() =>
+                                            setPreviewImage({
+                                              url: file.url!,
+                                              name: file.name,
+                                            })
+                                          }
                                         />
                                       );
                                     }
                                     if (kind === "pdf") {
                                       return (
-                                        <div className="flex items-center justify-center w-full h-full">
-                                          <PiFilePdfDuotone className="w-12 h-12 text-accent-foreground/40" />
-                                        </div>
+                                        <PiFilePdfDuotone className="w-5 h-5 text-accent-foreground/40" />
                                       );
                                     }
                                     if (
@@ -370,88 +552,202 @@ export default function ProductSourceFilesPage() {
                                       kind === "doc"
                                     ) {
                                       return (
-                                        <div className="flex items-center justify-center w-full h-full">
-                                          <PiFileDocDuotone className="w-12 h-12 text-accent-foreground/40" />
-                                        </div>
+                                        <PiFileDocDuotone className="w-5 h-5 text-accent-foreground/40" />
                                       );
                                     }
                                     return (
-                                      <div className="flex items-center justify-center w-full h-full">
-                                        <PiFileDuotone className="w-12 h-12 text-accent-foreground/40" />
-                                      </div>
+                                      <PiFileDuotone className="w-5 h-5 text-accent-foreground/40" />
                                     );
                                   })()}
-
-                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button
-                                      type="button"
-                                      variant="destructive"
-                                      size="icon"
-                                      aria-label="Delete file"
-                                      onClick={() =>
-                                        setFileIdToDelete(file._id)
-                                      }
-                                      className="h-8 w-8 shadow-sm"
-                                    >
-                                      <PiTrashDuotone className="w-4 h-4" />
-                                    </Button>
-                                  </div>
                                 </div>
                                 <p
-                                  className="mt-2 text-xs font-medium truncate px-1"
+                                  className="text-sm font-medium truncate flex-1"
                                   title={file.name}
                                 >
                                   {file.name}
                                 </p>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        );
-                    })}
+                                <div className="flex gap-1">
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="icon"
+                                    aria-label="Download file"
+                                    onClick={() => {
+                                      if (file.url) {
+                                        handleDownloadFile(file.url, file.name);
+                                      }
+                                    }}
+                                    className="h-7 w-7 shadow-sm"
+                                  >
+                                    <PiDownloadSimpleDuotone className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    aria-label="Delete file"
+                                    onClick={() => setFileIdToDelete(file._id)}
+                                    className="h-7 w-7 shadow-sm"
+                                  >
+                                    <PiTrashDuotone className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Big Card View (Original) */}
+                    {fileViewMode === "big" && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                        {folder?.map((file: SourceFilesFolder) => {
+                          if (file.type === "file")
+                            return (
+                              <div
+                                key={file._id}
+                                className="relative flex flex-col w-full"
+                              >
+                                <Card className="shadow-none hover:bg-muted/50 transition-colors w-full border-border overflow-hidden">
+                                  <CardContent className="p-2">
+                                    <div className="relative w-full aspect-4/3 overflow-hidden rounded-lg border border-border bg-accent/50 group">
+                                      {(() => {
+                                        const kind = getFileKind(
+                                          file.url || "",
+                                          file.name
+                                        );
+                                        if (kind === "image" && file.url) {
+                                          return (
+                                            <Image
+                                              src={file.url}
+                                              alt={file.name}
+                                              fill
+                                              sizes="(max-width: 768px) 50vw, 33vw"
+                                              className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                              onClick={() =>
+                                                setPreviewImage({
+                                                  url: file.url!,
+                                                  name: file.name,
+                                                })
+                                              }
+                                            />
+                                          );
+                                        }
+                                        if (kind === "pdf") {
+                                          return (
+                                            <div className="flex items-center justify-center w-full h-full">
+                                              <PiFilePdfDuotone className="w-12 h-12 text-accent-foreground/40" />
+                                            </div>
+                                          );
+                                        }
+                                        if (
+                                          kind === "word" ||
+                                          kind === "docx" ||
+                                          kind === "doc"
+                                        ) {
+                                          return (
+                                            <div className="flex items-center justify-center w-full h-full">
+                                              <PiFileDocDuotone className="w-12 h-12 text-accent-foreground/40" />
+                                            </div>
+                                          );
+                                        }
+                                        return (
+                                          <div className="flex items-center justify-center w-full h-full">
+                                            <PiFileDuotone className="w-12 h-12 text-accent-foreground/40" />
+                                          </div>
+                                        );
+                                      })()}
+
+                                      <div className="absolute top-2 right-2 flex gap-1">
+                                        <Button
+                                          type="button"
+                                          variant="secondary"
+                                          size="icon"
+                                          aria-label="Download file"
+                                          onClick={() => {
+                                            if (file.url) {
+                                              handleDownloadFile(
+                                                file.url,
+                                                file.name
+                                              );
+                                            }
+                                          }}
+                                          className="h-8 w-8 shadow-sm"
+                                        >
+                                          <PiDownloadSimpleDuotone className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          variant="destructive"
+                                          size="icon"
+                                          aria-label="Delete file"
+                                          onClick={() =>
+                                            setFileIdToDelete(file._id)
+                                          }
+                                          className="h-8 w-8 shadow-sm"
+                                        >
+                                          <PiTrashDuotone className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <p
+                                      className="mt-2 text-xs font-medium truncate px-1"
+                                      title={file.name}
+                                    >
+                                      {file.name}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            );
+                        })}
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </>
             )}
           </div>
         </div>
       </div>
-      <AlertDialog
+      <DialogDeleteSourceFile
         open={!!fileIdToDelete}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setFileIdToDelete(null);
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Are you sure you want to delete this file?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              file.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (!fileIdToDelete) return;
-                deleteSourceFile.mutate(fileIdToDelete, {
-                  onSuccess: () => {
-                    setFileIdToDelete(null);
-                  },
-                });
-              }}
-              disabled={deleteSourceFile.isPending}
-            >
-              {deleteSourceFile.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={() => {
+          if (!fileIdToDelete) return;
+          deleteSourceFile.mutate(fileIdToDelete, {
+            onSuccess: () => {
+              setFileIdToDelete(null);
+            },
+          });
+        }}
+        isPending={deleteSourceFile.isPending}
+        fileName={
+          folder?.find(
+            (f: SourceFilesFolder) =>
+              f.type === "file" && f._id === fileIdToDelete
+          )?.name
+        }
+      />
+      <DialogImagePreview
+        open={!!previewImage}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setPreviewImage(null);
+          }
+        }}
+        imageUrl={previewImage?.url || ""}
+        fileName={previewImage?.name || ""}
+        onDownload={
+          previewImage
+            ? () => handleDownloadFile(previewImage.url, previewImage.name)
+            : undefined
+        }
+      />
     </div>
   );
 }
