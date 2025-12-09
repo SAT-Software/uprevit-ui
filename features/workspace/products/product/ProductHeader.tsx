@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,25 +11,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  PiCheckCircleDuotone,
   PiCircleDuotone,
   PiDownloadDuotone,
   PiGitBranchDuotone,
-  PiGitMergeDuotone,
   PiPaperPlaneRightDuotone,
   PiTextStrikethroughDuotone,
 } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { Product } from "@/types/product";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressRadialChart } from "./ProgressRadialChart";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 
 export type Item = {
   productId: string;
@@ -55,7 +51,9 @@ const TOTAL_TABS = 7;
 export function ProductHeader() {
   const params = useParams();
   const pathname = usePathname();
-  const { data: productsData } = useGetAllProducts();
+  const productId = params.productId as string;
+
+  const { data: productData } = useGetProductTabData(productId, "all-tabs");
   const { mutateAsync: updateProductTabData, isPending: isUpdatingTab } =
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
@@ -67,19 +65,19 @@ export function ProductHeader() {
   };
 
   const currentTab = getCurrentTab();
-  const productId = params.productId as string;
 
-  const { data } = useGetAllProducts();
-  const currentProduct = productId
-    ? data?.result.products?.find((p: Product) => p._id === productId)
-    : null;
+  // Extract data from the all-tabs API response
+  // productData.result.data contains all tab objects with their tab_completed flags
+  // Product info (status, master_version, complete_count, etc.) is in product_information.data
+  const allTabsData = productData?.result?.data;
+  const productInfo = allTabsData?.product_information?.data;
 
-  const isProductComplete = currentProduct?.complete_count === 100;
+  const isProductComplete = productInfo?.complete_count === 100;
 
   const handleSubmit = () => {
-    if (!currentProduct?._id) return;
+    if (!productId) return;
     updateProduct({
-      _id: currentProduct._id,
+      _id: productId,
       action: "update-status",
       data: {
         status: "submitted",
@@ -87,61 +85,52 @@ export function ProductHeader() {
     });
   };
 
-  const foundProduct =
-    productId && productsData?.result.products
-      ? productsData.result.products.find((p: Product) => p._id === productId)
-      : null;
+  // Calculate completed tabs from the all-tabs response
+  const tabsCompleted = useMemo(() => {
+    if (!allTabsData) return [];
+    const completed: string[] = [];
+    if (allTabsData.product_information?.tab_completed)
+      completed.push("product-information");
+    if (allTabsData.compliance_information?.tab_completed)
+      completed.push("compliance-information");
+    if (allTabsData.label_components?.tab_completed)
+      completed.push("label-components");
+    if (allTabsData.symbols_graphics?.tab_completed)
+      completed.push("symbols-graphics");
+    if (allTabsData.product_data?.tab_completed) completed.push("product-data");
+    if (allTabsData.operational_parameters?.tab_completed)
+      completed.push("operational-parameters");
+    if (allTabsData.label_tags?.tab_completed) completed.push("label-tags");
+    return completed;
+  }, [allTabsData]);
 
-  const [tabsCompleted, setTabsCompleted] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (foundProduct) {
-      const completed: string[] = [];
-      if (foundProduct.product_information?.tab_completed)
-        completed.push("product-information");
-      if (foundProduct.compliance_information?.tab_completed)
-        completed.push("compliance-information");
-      if (foundProduct.label_components?.tab_completed)
-        completed.push("label-components");
-      if (foundProduct.symbols_graphics?.tab_completed)
-        completed.push("symbols-graphics");
-      if (foundProduct.product_data?.tab_completed)
-        completed.push("product-data");
-      if (foundProduct.operational_parameters?.tab_completed)
-        completed.push("operational-parameters");
-      if (foundProduct.label_tags?.tab_completed) completed.push("label-tags");
-      setTabsCompleted(completed);
-    }
-  }, [foundProduct]);
-
-  const product: Item | null = foundProduct
+  const product: Item | null = productInfo
     ? {
-        productId: foundProduct._id || "",
-        createdOn: foundProduct.action_at || "",
-        createdBy: foundProduct.action_by || "",
-        modifiedOn: foundProduct.action_at || "",
-        modifiedBy: foundProduct.action_by || "",
-        productName: foundProduct.product_name || "",
-        description: "",
-        projectId: foundProduct.project_id || "",
-        departmentId: foundProduct.department_id || "",
-        version: foundProduct.master_version || "1.0",
+        productId: productId || "",
+        createdOn: "",
+        createdBy: "",
+        modifiedOn: "",
+        modifiedBy: "",
+        productName: productInfo.product_name || "",
+        description: productInfo.product_description || "",
+        projectId: "",
+        departmentId: "",
+        version: productInfo.master_version || "1.0",
         status:
-          (foundProduct.status as "Submitted" | "Draft" | "Archived") ||
-          "Draft",
-        targetDate: foundProduct.target_date || "N/A",
-        completionDate: foundProduct.target_date || "N/A",
+          (productInfo.status as "Submitted" | "Draft" | "Archived") || "Draft",
+        targetDate: productInfo.target_date || "N/A",
+        completionDate: productInfo.actual_completion_date || "N/A",
         delayReason: null,
         tabsCompleted: tabsCompleted,
-        completionPercentage: Math.round(
-          (tabsCompleted.length / TOTAL_TABS) * 100
-        ),
+        completionPercentage: productInfo.complete_count ?? 0,
       }
     : null;
-  const completionPercentage = product?.completionPercentage ?? 0;
 
-  const isCurrentTabCompleted =
-    product && currentTab ? product.tabsCompleted.includes(currentTab) : false;
+  const completionPercentage = productInfo?.complete_count ?? 0;
+
+  const isCurrentTabCompleted = currentTab
+    ? tabsCompleted.includes(currentTab)
+    : false;
 
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;

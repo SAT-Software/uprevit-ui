@@ -38,6 +38,7 @@ import {
   PiCaretUpDuotone,
   PiChartPieSliceDuotone,
   PiColumnsDuotone,
+  PiDotsThreeCircleVerticalDuotone,
   PiGitBranchDuotone,
   PiGitMergeDuotone,
   PiHashDuotone,
@@ -216,7 +217,7 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => {
       const ppn = row.getValue("product_plan_number");
-      return <div className="text-xs font-medium">{ppn as string}</div>;
+      return <div className="text-sm font-medium">{ppn as string}</div>;
     },
     size: 110,
   },
@@ -231,7 +232,7 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <p className="text-xs font-medium">{row.getValue("product_name")}</p>
+        <p className="text-sm font-medium">{row.getValue("product_name")}</p>
       );
     },
     size: 190,
@@ -247,7 +248,7 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => {
       const project_name = row.original?.project?.[0]?.project_name;
-      return <div className="text-xs font-medium">{project_name}</div>;
+      return <div className="text-sm font-medium">{project_name}</div>;
     },
     size: 150,
   },
@@ -262,7 +263,7 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => {
       const departmentName = row.original?.department?.[0]?.department_name;
-      return <div className="text-xs font-medium">{departmentName}</div>;
+      return <div className="text-sm font-medium">{departmentName}</div>;
     },
     size: 150,
   },
@@ -294,11 +295,15 @@ const columns: ColumnDef<Item>[] = [
         icon={PiGitBranchDuotone}
       />
     ),
-    cell: ({ row }) => (
-      <Badge variant="secondary" className="font-mono text-xs">
-        v{row.getValue("master_version")}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const masterVersion = row.original?.master_version;
+      return (
+        <Badge variant="secondary" className="font-mono text-sm">
+          <span className="mr-0 text-muted-foreground">v</span>
+          {masterVersion.slice(0, 1)}
+        </Badge>
+      );
+    },
     size: 80,
   },
   {
@@ -406,7 +411,7 @@ const columns: ColumnDef<Item>[] = [
             <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <span
                 className={cn(
-                  "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-55",
+                  "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-45",
                   progressState.bar
                 )}
                 style={{ width: `${clampedPercentage}%` }}
@@ -417,7 +422,7 @@ const columns: ColumnDef<Item>[] = [
               ></span>
             </div>
           </div>
-          <span className="text-xs font-medium text-muted-foreground w-9 text-right">
+          <span className="text-xs font-semibold text-foreground w-9 text-right">
             {progress}%
           </span>
         </div>
@@ -696,7 +701,7 @@ function RowActions({ row }: { row: { original: Item } }) {
             aria-label="More actions"
             onClick={(e) => e.stopPropagation()}
           >
-            <EllipsisIcon size={16} aria-hidden="true" />
+            <PiDotsThreeCircleVerticalDuotone size={16} aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>

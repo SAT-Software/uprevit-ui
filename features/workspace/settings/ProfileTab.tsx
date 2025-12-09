@@ -13,7 +13,9 @@ import {
   PiPhoneDuotone,
   PiSignOutBold,
   PiSignOutDuotone,
+  PiWarningCircleDuotone,
 } from "react-icons/pi";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function ProfileTab() {
   const auth = useAuth();
@@ -29,11 +31,62 @@ function ProfileTab() {
     )}`;
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Profile Header Skeleton */}
+        <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
+          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-9 w-24 rounded-md" />
+        </div>
 
-  if (error) return <div>Error: {error?.message}</div>;
+        {/* Personal Information Skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-44" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-4 p-4 border rounded-xl bg-background/50"
+              >
+                <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-  if (!userProfile) return <div>No user profile found.</div>;
+        {/* Sign Out Button Skeleton */}
+        <Skeleton className="h-9 w-28 rounded-md" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center gap-4 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+        <div className="p-2.5 bg-destructive/10 rounded-lg shrink-0">
+          <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
+        </div>
+        <div className="space-y-0.5">
+          <div className="text-sm font-medium">Failed to load profile</div>
+          <div className="text-sm text-muted-foreground">
+            {error?.message || "An unexpected error occurred"}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

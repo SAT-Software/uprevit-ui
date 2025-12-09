@@ -13,18 +13,76 @@ import {
   PiTextAlignLeftDuotone,
   PiPlanetDuotone,
   PiBriefcaseDuotone,
+  PiWarningCircleDuotone,
 } from "react-icons/pi";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function WorkspaceTab() {
-  const { data, isLoading, error } = useGetAllUsersByWorkspace();
+  const {
+    data,
+    isLoading: workspaceLoading,
+    error: workspaceError,
+  } = useGetWorkspace();
+  const { data: workspaceUserData } = useGetAllUsersByWorkspace();
+
   const workspaceData = data?.workspace;
 
-  if (isLoading) return <div>Loading...</div>;
+  if (workspaceLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Workspace Header Skeleton */}
+        <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
+          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-80" />
+          </div>
+          <Skeleton className="h-9 w-24 rounded-md" />
+        </div>
 
-  if (error) return <div>Error: {error?.message}</div>;
+        {/* Workspace Information Skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-48" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className={`flex items-start gap-4 p-4 border rounded-xl bg-background/50 ${
+                  i === 4 ? "md:col-span-2" : ""
+                }`}
+              >
+                <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  if (!workspaceData) return <div>No workspace data found.</div>;
+  if (workspaceError) {
+    return (
+      <div className="flex items-center gap-4 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+        <div className="p-2.5 bg-destructive/10 rounded-lg shrink-0">
+          <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
+        </div>
+        <div className="space-y-0.5">
+          <div className="text-sm font-medium">Failed to load workspace</div>
+          <div className="text-sm text-muted-foreground">
+            {workspaceError?.message || "An unexpected error occurred"}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -133,7 +191,7 @@ function WorkspaceTab() {
                 User Count
               </div>
               <div className="text-sm font-medium">
-                {workspaceData?.userIds?.length || 1}
+                {workspaceUserData?.data?.length || 1}
               </div>
             </div>
           </div>
