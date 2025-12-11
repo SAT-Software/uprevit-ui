@@ -80,7 +80,7 @@ export type Item = {
   productName: string;
   projectId: string;
   departmentId: string;
-  version: string;
+  version: number;
   status: "Submitted" | "Draft" | "Archived";
 };
 

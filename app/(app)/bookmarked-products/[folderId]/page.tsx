@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 interface BookmarkProduct {
   _id: string;
   product_name: string;
-  master_version: string;
+  version: number;
   status: string;
 }
 
@@ -179,7 +179,7 @@ export default function FolderPage() {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <PiTagDuotone className="w-3.5 h-3.5" />v
-                          {product.master_version}
+                          {product.version}
                         </span>
                       </div>
                     </div>

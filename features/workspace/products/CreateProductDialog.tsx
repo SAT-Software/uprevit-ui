@@ -39,7 +39,7 @@ interface FormValues {
   description: string;
   department: string;
   project: string;
-  version: string;
+  version: number;
   status: string;
 }
 
@@ -76,7 +76,7 @@ export default function CreateProductDialog() {
       description: "",
       department: "",
       project: "",
-      version: "1.0",
+      version: 1,
       status: "draft",
     },
     mode: "onSubmit",
@@ -110,8 +110,8 @@ export default function CreateProductDialog() {
         department_id: data.department,
         workspace_id: user?.workspaceId as string,
         project_id: data.project,
-        master_version: data.version,
-        status: data.status.toLowerCase(),
+        version: data.version,
+        status: data.status.toLowerCase() as "draft" | "submitted" | "archived",
       };
 
       createProduct(productData, {

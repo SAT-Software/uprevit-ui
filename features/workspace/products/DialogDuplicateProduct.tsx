@@ -38,8 +38,8 @@ interface FormValues {
   description: string;
   department: string;
   project: string;
-  version: string;
-  status: string;
+  version: number;
+  status: "draft" | "submitted" | "archived";
 }
 
 export default function DialogDuplicateProduct({
@@ -69,7 +69,7 @@ export default function DialogDuplicateProduct({
       description: product.description,
       department: product.department_id,
       project: product.project_id,
-      version: "1.0",
+      version: 1,
       status: "draft",
     },
     mode: "onSubmit",
@@ -83,8 +83,8 @@ export default function DialogDuplicateProduct({
         product_description: data.description,
         department_id: product.department_id,
         project_id: product.project_id,
-        master_version: data.version,
-        status: data.status.toLowerCase(),
+        version: data.version,
+        status: data.status,
         product_information: allProductTabData.result.data.product_information,
         compliance_information:
           allProductTabData.result.data.compliance_information,

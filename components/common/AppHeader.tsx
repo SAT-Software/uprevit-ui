@@ -149,7 +149,7 @@ export function AppHeader() {
               </p>
               <div className="flex gap-4 items-center">
                 <p className="text-sm text-muted-foreground">
-                  Master-{currentProduct?.master_version}
+                  Master-{currentProduct?.version}
                 </p>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary">
