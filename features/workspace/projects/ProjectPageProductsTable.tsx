@@ -44,7 +44,7 @@ export type Item = {
   action_at: string;
   action_by: string;
   department_id: string;
-  master_version: string;
+  version: number;
   product_name: string;
   product_plan_number: string;
   project_id: string;
@@ -168,7 +168,7 @@ const columns: ColumnDef<Item>[] = [
     ),
   },
   {
-    accessorKey: "master_version",
+    accessorKey: "version",
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -178,7 +178,7 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => (
       <Badge variant="secondary" className="font-mono text-xs">
-        v{row.getValue("master_version")}
+        v{row.getValue("version")}
       </Badge>
     ),
   },

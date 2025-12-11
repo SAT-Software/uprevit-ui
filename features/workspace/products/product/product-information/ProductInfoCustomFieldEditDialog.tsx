@@ -35,6 +35,7 @@ import {
   PiPencilCircleDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
+import { ProductMetadata } from "@/types/product";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -57,10 +58,12 @@ interface FormValues {
 
 interface CustomFieldEditDialogProps {
   product: ProductData;
+  productMetadata: ProductMetadata;
 }
 
 export default function ProductInformationCustomFieldEditDialog({
   product,
+  productMetadata,
 }: CustomFieldEditDialogProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -249,6 +252,10 @@ export default function ProductInformationCustomFieldEditDialog({
           size="sm"
           variant="secondary"
           className="flex items-center gap-2"
+          disabled={
+            productMetadata?.status === "submitted" &&
+            productMetadata?.is_latest === false
+          }
         >
           <PiPencilLineDuotone className="w-4 h-4" />
           Manage Custom Fields

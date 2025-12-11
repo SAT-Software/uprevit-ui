@@ -11,7 +11,7 @@ import {
 export function VersionControlCards() {
   const cards = [
     {
-      version: "v 1.0",
+      version: 1,
       date: "Aug 15, 2024",
       status: "Submitted",
       name: "Peripheral Catheter",
@@ -19,7 +19,7 @@ export function VersionControlCards() {
       active: false,
     },
     {
-      version: "v 2.0",
+      version: 2,
       date: "Sep 22, 2024",
       status: "Submitted",
       name: "Peripheral Catheter",
@@ -27,7 +27,7 @@ export function VersionControlCards() {
       active: false,
     },
     {
-      version: "v 3.0",
+      version: 3,
       date: "Oct 24, 2024",
       status: "In Review",
       name: "Peripheral Catheter",
@@ -35,7 +35,7 @@ export function VersionControlCards() {
       active: true,
     },
     {
-      version: "v 4.0",
+      version: 4,
       date: "Pending",
       status: "Draft",
       name: "Peripheral Catheter",
@@ -43,7 +43,7 @@ export function VersionControlCards() {
       active: false,
     },
     {
-      version: "v 5.0",
+      version: 5,
       date: "Planned",
       status: "Concept",
       name: "Peripheral Catheter",

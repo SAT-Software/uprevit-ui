@@ -40,8 +40,10 @@ type FormData = {
 
 export default function AddBarcodesDialog({
   productId,
+  isSubmitted = false,
 }: {
   productId: string;
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -110,7 +112,7 @@ export default function AddBarcodesDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary">
+        <Button size="sm" variant="secondary" disabled={isSubmitted}>
           <PiPlusCircleDuotone />
           Add Barcode
         </Button>

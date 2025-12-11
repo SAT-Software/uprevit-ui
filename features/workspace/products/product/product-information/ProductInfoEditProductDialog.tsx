@@ -29,6 +29,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { ProductMetadata } from "@/types/product";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -80,8 +81,10 @@ function isValidDate(date: Date | undefined) {
 
 export default function EditProductDialog({
   product,
+  productMetadata,
 }: {
   product: ProductData;
+  productMetadata: ProductMetadata;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -148,8 +151,6 @@ export default function EditProductDialog({
       },
     };
 
-    console.log("updateData", updateData);
-
     updateProductTabData(updateData, {
       onSuccess: () => {
         setOpen(false);
@@ -169,6 +170,10 @@ export default function EditProductDialog({
         <Button
           size="sm"
           variant="secondary"
+          disabled={
+            productMetadata?.status === "submitted" &&
+            productMetadata?.is_latest === false
+          }
           className="flex items-center gap-2"
         >
           <PiPencilCircleDuotone className="w-4 h-4" />

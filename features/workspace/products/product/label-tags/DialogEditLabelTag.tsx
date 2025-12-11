@@ -49,9 +49,11 @@ interface LabelTagItem {
 export default function DialogEditLabelTag({
   productId,
   labelTag,
+  isSubmitted = false,
 }: {
   productId: string;
   labelTag: LabelTagItem;
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -125,7 +127,7 @@ export default function DialogEditLabelTag({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
+        <Button variant="secondary" size="sm" disabled={isSubmitted}>
           <PiPencilSimpleDuotone />
           Edit
         </Button>

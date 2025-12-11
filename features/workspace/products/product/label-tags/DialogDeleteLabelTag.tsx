@@ -25,9 +25,11 @@ interface LabelTagItem {
 export default function DialogDeleteLabelTag({
   productId,
   labelTag,
+  isSubmitted = false,
 }: {
   productId: string;
   labelTag: LabelTagItem;
+  isSubmitted?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const { mutate: deleteLabelTag, isPending } = useUpdateProductTabData();
@@ -64,7 +66,7 @@ export default function DialogDeleteLabelTag({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
+        <Button variant="destructive" size="sm" disabled={isSubmitted}>
           <PiTrashDuotone />
           Delete
         </Button>

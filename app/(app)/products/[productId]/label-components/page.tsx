@@ -45,6 +45,10 @@ export default function Page() {
     ? { ...productInfoData.result.data.data, id: productId }
     : null;
 
+  // Check if product is submitted - disable editing buttons
+  const isSubmitted =
+    productInfoData?.result?.data?.product_data?.data?.status === "submitted";
+
   const isLoading = isLoadingComponents || isLoadingProduct;
 
   if (isLoading) {
@@ -127,9 +131,15 @@ export default function Page() {
                 Manage label components for this product
               </p>
             </div>
-            <AddComponentDialog productId={productId as string} />
+            <AddComponentDialog
+              productId={productId as string}
+              isSubmitted={isSubmitted}
+            />
           </div>
-          <ProductComponentDetailsTable data={components} />
+          <ProductComponentDetailsTable
+            data={components}
+            isSubmitted={isSubmitted}
+          />
         </div>
       </div>
     </div>

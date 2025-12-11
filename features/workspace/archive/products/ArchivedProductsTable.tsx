@@ -62,7 +62,7 @@ export type ProductArchiveRow = {
     actionBy: string;
     actionAt: string;
   }[];
-  master_version?: string;
+  version?: string;
   product_plan_number?: string;
   department?: {
     _id: string;
@@ -233,7 +233,7 @@ export function ArchivedProductsTable({
         },
       },
       {
-        accessorKey: "master_version",
+        accessorKey: "version",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -244,7 +244,7 @@ export function ArchivedProductsTable({
         size: 120,
         cell: ({ row }) => (
           <Badge variant="secondary" className="font-mono text-sm">
-            v{row.getValue("master_version")}
+            v{row.getValue("version")}
           </Badge>
         ),
       },

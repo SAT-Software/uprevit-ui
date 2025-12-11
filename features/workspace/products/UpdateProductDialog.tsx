@@ -178,7 +178,7 @@ export default function UpdateProductDialog({
                 <Label htmlFor={`${id}-version`}>Version</Label>
                 <Input
                   id={`${id}-version`}
-                  value={product.master_version}
+                  value={product.version}
                   type="text"
                   disabled
                   className="bg-muted"

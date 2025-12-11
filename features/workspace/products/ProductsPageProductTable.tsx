@@ -84,7 +84,7 @@ import {
 import { cn } from "@/lib/utils";
 import DialogArchiveProduct from "./DialogArchiveProduct";
 import DialogBookmarkProduct from "./DialogBookmarkProduct";
-// import DialogDuplicateProduct from "./DialogDuplicateProduct";
+import DialogCreateVersion from "./DialogCreateVersion";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import {
   PiArchiveDuotone,
@@ -106,11 +106,14 @@ export type Item = {
   action_at: string;
   action_by: string;
   department_id: string;
-  master_version: string;
+  version: number;
   product_name: string;
   product_plan_number: string;
   project_id: string;
   status: string;
+  // Versioning fields
+  is_latest?: boolean;
+  parent_id?: string | null;
   product_information?: { tab_completed?: boolean };
   compliance_information?: { tab_completed?: boolean };
   label_components?: { tab_completed?: boolean };
@@ -287,7 +290,7 @@ const columns: ColumnDef<Item>[] = [
     size: 90,
   },
   {
-    accessorKey: "master_version",
+    accessorKey: "version",
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -296,11 +299,11 @@ const columns: ColumnDef<Item>[] = [
       />
     ),
     cell: ({ row }) => {
-      const masterVersion = row.original?.master_version;
+      const version = row.original?.version;
       return (
         <Badge variant="secondary" className="font-mono text-sm">
           <span className="mr-0 text-muted-foreground">v</span>
-          {masterVersion.slice(0, 1)}
+          {version}
         </Badge>
       );
     },
@@ -680,6 +683,10 @@ function RowActions({ row }: { row: { original: Item } }) {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [showVersionDialog, setShowVersionDialog] = useState(false);
+
+  // Can create new version only from submitted products
+  const canCreateVersion = row.original.status === "submitted";
 
   const handleOpen = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -717,11 +724,14 @@ function RowActions({ row }: { row: { original: Item } }) {
               <span>Edit</span>
             </DropdownMenuItem>
             <DropdownMenuItem
-            // onClick={(e) => e.stopPropagation()}
-            // onSelect={() => {
-            //   // Add small delay to allow dropdown to close first
-            //   setTimeout(() => setShowUpdateDialog(true), 100);
-            // }}
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowVersionDialog(true), 100);
+              }}
+              disabled={!canCreateVersion}
+              className={cn(
+                !canCreateVersion && "opacity-50 cursor-not-allowed"
+              )}
             >
               <PiGitMergeDuotone />
               New version
@@ -784,6 +794,11 @@ function RowActions({ row }: { row: { original: Item } }) {
       <DialogBookmarkProduct
         open={showBookmarkDialog}
         onOpenChange={setShowBookmarkDialog}
+        product={row.original}
+      />
+      <DialogCreateVersion
+        open={showVersionDialog}
+        onOpenChange={setShowVersionDialog}
         product={row.original}
       />
     </div>

@@ -29,10 +29,19 @@ export default function Page() {
     "product-information"
   );
 
+  console.log("Raw Product Data on first page", data);
+
   const productData = { ...data?.result?.data?.data, id: productId };
+  const customFieldsData = data?.result?.data?.custom_fields;
+  const productMetadata = data?.result?.data?.product_data?.data;
   const productAuditLog = data?.result?.data?.auditLogs;
 
-  console.log(productData, productAuditLog);
+  console.log(
+    "Product Data on first page",
+    productData,
+    customFieldsData,
+    productMetadata
+  );
 
   const auditLogs = (productAuditLog as AuditLog[]) || [];
   const creationLog = auditLogs.find((log) => log.action === "create");
@@ -79,13 +88,11 @@ export default function Page() {
       },
     ];
 
-    if (productData.custom_fields && productData.custom_fields.length > 0) {
-      const customFieldsWithIcons = productData.custom_fields.map(
-        (field: any) => ({
-          ...field,
-          icon: PiTagDuotone,
-        })
-      );
+    if (customFieldsData && customFieldsData.length > 0) {
+      const customFieldsWithIcons = customFieldsData.map((field: any) => ({
+        ...field,
+        icon: PiTagDuotone,
+      }));
       return [...baseFields, ...customFieldsWithIcons];
     }
 
@@ -139,6 +146,8 @@ export default function Page() {
 
   if (isError || !productData) return notFound();
 
+  console.log("product Data Metadata", productMetadata);
+
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
       {/* Breadcrumbs */}
@@ -158,7 +167,7 @@ export default function Page() {
         </Link>
         <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
         <span className="truncate max-w-[200px]">
-          {productData.product_name || "Product Details"}
+          {productMetadata?.product_name || "Product Details"}
         </span>
         <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
         <span className="text-foreground font-medium truncate max-w-[200px]">
@@ -173,17 +182,17 @@ export default function Page() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                  {productData.product_name || "N/A"}
+                  {productMetadata?.product_name || "N/A"}
                 </h1>
                 <Badge variant="outline" className="font-normal">
                   <div
                     className={cn("w-2 h-2 rounded-full mr-1", {
-                      "bg-green-500": productData.status === "submitted",
-                      "bg-blue-500": productData.status === "draft",
-                      "bg-gray-500": productData.status === "archived",
+                      "bg-green-500": productMetadata?.status === "submitted",
+                      "bg-blue-500": productMetadata?.status === "draft",
+                      "bg-gray-500": productMetadata?.status === "archived",
                     })}
                   />
-                  {productData.status || "N/A"}
+                  {productMetadata?.status || "N/A"}
                 </Badge>
               </div>
             </div>
@@ -220,8 +229,14 @@ export default function Page() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <EditProductDialog product={productData!} />
-              <ProductInformationCustomFieldEditDialog product={productData!} />
+              <EditProductDialog
+                product={productData!}
+                productMetadata={productMetadata!}
+              />
+              <ProductInformationCustomFieldEditDialog
+                product={productData!}
+                productMetadata={productMetadata!}
+              />
             </div>
 
             {/* Audit Badges */}

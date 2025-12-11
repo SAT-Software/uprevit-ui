@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
   PiCircleDuotone,
   PiDownloadDuotone,
   PiGitBranchDuotone,
+  PiLockKeyDuotone,
   PiPaperPlaneRightDuotone,
   PiTextStrikethroughDuotone,
 } from "react-icons/pi";
@@ -26,6 +28,9 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressRadialChart } from "./ProgressRadialChart";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { Badge } from "@/components/ui/badge";
+import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
+import { Product } from "@/types/product";
 
 export type Item = {
   productId: string;
@@ -37,10 +42,12 @@ export type Item = {
   description: string;
   projectId: string;
   departmentId: string;
-  version: string;
-  status: "Submitted" | "Draft" | "Archived";
-  targetDate: number;
-  completionDate: number | null;
+  version: number;
+  isLatest: boolean;
+  parentId: string | null;
+  status: "submitted" | "draft" | "archived";
+  targetDate: string | null;
+  completionDate: string | null;
   delayReason: string | null;
   tabsCompleted: string[];
   completionPercentage: number;
@@ -51,9 +58,12 @@ const TOTAL_TABS = 7;
 export function ProductHeader() {
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const productId = params.productId as string;
 
   const { data: productData } = useGetProductTabData(productId, "all-tabs");
+  const { data: versionsData, isLoading: isLoadingVersions } =
+    useGetAllProductVersions(productId);
   const { mutateAsync: updateProductTabData, isPending: isUpdatingTab } =
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
@@ -67,15 +77,22 @@ export function ProductHeader() {
   const currentTab = getCurrentTab();
 
   // Extract data from the all-tabs API response
-  // productData.result.data contains all tab objects with their tab_completed flags
-  // Product info (status, master_version, complete_count, etc.) is in product_information.data
+  // Each tab now has a product_data object with core product info including version fields
   const allTabsData = productData?.result?.data;
-  const productInfo = allTabsData?.product_information?.data;
 
-  const isProductComplete = productInfo?.complete_count === 100;
+  // Product core data (including version, is_latest, status) is now in product_data.data
+  const productCoreData = allTabsData?.product_information?.product_data?.data;
+
+  // Tab-specific data is in the data field
+  const productInfoData = allTabsData?.product_information?.data;
+
+  const isProductComplete = productCoreData?.complete_count === 100;
+
+  // READ-ONLY MODE: Submitted products cannot be edited
+  const isReadOnly = productCoreData?.status === "submitted";
 
   const handleSubmit = () => {
-    if (!productId) return;
+    if (!productId || isReadOnly) return;
     updateProduct({
       _id: productId,
       action: "update-status",
@@ -104,29 +121,30 @@ export function ProductHeader() {
     return completed;
   }, [allTabsData]);
 
-  const product: Item | null = productInfo
+  const product: Item | null = productCoreData
     ? {
         productId: productId || "",
         createdOn: "",
         createdBy: "",
         modifiedOn: "",
         modifiedBy: "",
-        productName: productInfo.product_name || "",
-        description: productInfo.product_description || "",
-        projectId: "",
-        departmentId: "",
-        version: productInfo.master_version || "1.0",
-        status:
-          (productInfo.status as "Submitted" | "Draft" | "Archived") || "Draft",
-        targetDate: productInfo.target_date || "N/A",
-        completionDate: productInfo.actual_completion_date || "N/A",
+        productName: productCoreData.product_name || "",
+        description: productCoreData.product_description || "",
+        projectId: productCoreData.project_id || "",
+        departmentId: productCoreData.department_id || "",
+        version: productCoreData.version || 1,
+        isLatest: productCoreData.is_latest ?? true,
+        parentId: productCoreData.parent_id || null,
+        status: productCoreData.status || "draft",
+        targetDate: productCoreData.target_date || null,
+        completionDate: productCoreData.actual_completion_date || null,
         delayReason: null,
         tabsCompleted: tabsCompleted,
-        completionPercentage: productInfo.complete_count ?? 0,
+        completionPercentage: productCoreData.complete_count ?? 0,
       }
     : null;
 
-  const completionPercentage = productInfo?.complete_count ?? 0;
+  const completionPercentage = productCoreData?.complete_count ?? 0;
 
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
@@ -135,22 +153,36 @@ export function ProductHeader() {
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
 
+  // Handle version change - navigate to different version
+  const handleVersionChange = (versionId: string) => {
+    if (versionId !== productId) {
+      // Navigate to the same tab but with different product version
+      router.push(`/products/${versionId}/${currentTab}`);
+    }
+  };
+
   const toggleButtonTitle = isSyncingStatus
     ? isCurrentTabCompleted
       ? "Unmarking..."
       : "Marking complete..."
+    : isReadOnly
+    ? "Submitted"
     : isCurrentTabCompleted
     ? "Mark Incomplete"
     : "Mark Complete";
 
   const toggleButtonSubtitle = isSyncingStatus
     ? "Syncing with workspace"
+    : isReadOnly
+    ? "This product is submitted"
     : isCurrentTabCompleted
     ? "Send back to in-progress"
     : "Mark this tab completed";
 
   const toggleButtonIcon = isSyncingStatus ? (
     <Spinner className="size-3" />
+  ) : isReadOnly ? (
+    <PiLockKeyDuotone className="size-3 text-amber-600" />
   ) : isCurrentTabCompleted ? (
     <PiCircleDuotone className="size-3 text-emerald-600" />
   ) : (
@@ -158,19 +190,23 @@ export function ProductHeader() {
   );
 
   const toggleButtonClasses = cn(
-    "group text-left text-xs flex items-center gap-2 cursor-pointer font-semibold leading-tight transition-all disabled:text-muted-foreground py-1 px-2 rounded-lg border bg-accent",
+    "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground py-1 px-2 rounded-lg border bg-accent",
+    isReadOnly ? "cursor-not-allowed opacity-70" : "cursor-pointer",
     isCurrentTabCompleted ? "text-foreground" : "text-foreground"
   );
 
   const toggleButtonIconClasses = cn(
-    "flex size-7 items-center justify-center rounded-xl border text-base transition-colors border-border bg-muted/60 text-muted-foreground group-hover:border-foreground/30 group-hover:text-foreground",
-    isCurrentTabCompleted
-      ? "dark:bg-emerald-500/20 dark:text-emerald-100"
-      : "dark:border-border/80 dark:bg-muted/40"
+    "flex size-7 items-center justify-center rounded-xl border text-base transition-colors border-border bg-muted/60 text-muted-foreground",
+    isReadOnly
+      ? "dark:bg-amber-500/20 dark:text-amber-100"
+      : isCurrentTabCompleted
+      ? "dark:bg-emerald-500/20 dark:text-emerald-100 group-hover:border-foreground/30 group-hover:text-foreground"
+      : "dark:border-border/80 dark:bg-muted/40 group-hover:border-foreground/30 group-hover:text-foreground"
   );
 
   const handleToggleTab = async () => {
-    if (!currentTab || !product || isSyncingStatus) return;
+    // Prevent any changes if product is submitted (read-only)
+    if (!currentTab || !product || isSyncingStatus || isReadOnly) return;
 
     const updatedTabsCompleted = isCurrentTabCompleted
       ? tabsCompleted.filter((tab: string) => tab !== currentTab)
@@ -228,6 +264,9 @@ export function ProductHeader() {
     }
   };
 
+  // Get versions list for dropdown
+  const versions = versionsData?.result?.versions || [];
+
   return (
     <header
       className={cn(
@@ -244,23 +283,58 @@ export function ProductHeader() {
             <PiDownloadDuotone />
             Export
           </Button>
-          <Select value={product?.version} disabled={!product}>
+
+          {/* Version Dropdown - Shows all versions */}
+          <Select
+            value={productId}
+            onValueChange={handleVersionChange}
+            disabled={!product || isLoadingVersions}
+          >
             <SelectTrigger className="h-7 rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
               <PiGitBranchDuotone />
               <SelectValue placeholder="View Versions" />
             </SelectTrigger>
             <SelectContent>
-              {product?.version && (
-                <SelectItem value={product.version}>
+              {versions.length > 0 ? (
+                versions.map((v: Product & { _id: string }) => (
+                  <SelectItem key={v._id} value={v._id}>
+                    <div className="flex items-center gap-2">
+                      <span>Version {v.version}</span>
+                      {/* <Badge
+                        variant={
+                          v.status === "submitted" ? "default" : "outline"
+                        }
+                        className="text-[0.65rem] pt-0.5 mt-0.5"
+                      >
+                        {v.status}
+                      </Badge> */}
+                    </div>
+                  </SelectItem>
+                ))
+              ) : product?.version ? (
+                <SelectItem value={productId}>
                   Version {product.version}
+                  {product.isLatest && " (Latest)"}
                 </SelectItem>
-              )}
+              ) : null}
             </SelectContent>
           </Select>
+
           <Button variant="secondary" size="sm">
             <PiTextStrikethroughDuotone />
             View Redline
           </Button>
+
+          {/* Show submitted badge when read-only */}
+          {/* {isReadOnly && (
+            <Badge
+              variant="default"
+              className="bg-green-600 hover:bg-green-600"
+            >
+              <PiLockKeyDuotone className="size-3 mr-1" />
+              Submitted
+            </Badge>
+          )} */}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
@@ -269,12 +343,14 @@ export function ProductHeader() {
             completionPercentage={completionPercentage}
             completedTabsCount={completedTabsCount}
             totalTabs={TOTAL_TABS}
+            productStatus={productCoreData?.status}
           />
 
           <button
             onClick={handleToggleTab}
-            disabled={!currentTab || !product || isSyncingStatus}
+            disabled={!currentTab || !product || isSyncingStatus || isReadOnly}
             className={toggleButtonClasses}
+            title={isReadOnly ? "Cannot edit submitted product" : undefined}
           >
             <span className={toggleButtonIconClasses}>{toggleButtonIcon}</span>
             <span className="flex flex-col items-start leading-tight">
@@ -284,28 +360,27 @@ export function ProductHeader() {
               </span>
             </span>
           </button>
-          {/* <Button variant="secondary" size="sm">
-            <PiCircleDuotone />
-            {isCurrentTabCompleted ? "Tab Completed" : "Tab in Draft"}
-          </Button> */}
         </div>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
             <Button
               size="sm"
-              disabled={!isProductComplete}
+              disabled={!isProductComplete || isReadOnly}
               onClick={handleSubmit}
               className={cn(
-                !isProductComplete && "opacity-50 cursor-not-allowed"
+                (!isProductComplete || isReadOnly) &&
+                  "opacity-50 cursor-not-allowed"
               )}
               title={
-                !isProductComplete
+                isReadOnly
+                  ? "Product is already submitted"
+                  : !isProductComplete
                   ? "Complete all tabs to enable submission"
                   : "Submit product"
               }
             >
               <PiPaperPlaneRightDuotone />
-              Submit
+              {isReadOnly ? "Submitted" : "Submit"}
             </Button>
           </div>
         </div>

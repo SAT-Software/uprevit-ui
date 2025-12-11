@@ -20,7 +20,7 @@ type Product = {
   productId: string;
   productName: string;
   description: string;
-  version: string;
+  version: number;
   status: string;
   projectId: string;
   departmentId: string;

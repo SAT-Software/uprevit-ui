@@ -22,11 +22,13 @@ interface LabelTagItem {
 interface LabelTagsTabsProps {
   labelTagsData: LabelTagItem[];
   productId: string;
+  isSubmitted?: boolean;
 }
 
 export default function LabelTagsTabs({
   labelTagsData,
   productId,
+  isSubmitted = false,
 }: LabelTagsTabsProps) {
   const [activeTab, setActiveTab] = useState("");
 
@@ -54,7 +56,7 @@ export default function LabelTagsTabs({
               Manage label tags and their images for this product
             </p>
           </div>
-          <DialogAddLabelTag productId={productId} />
+          <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
         </div>
         <div className="flex flex-col items-center justify-center py-16 gap-4 p-4">
           <div className="p-4 rounded-full bg-muted">
@@ -69,7 +71,7 @@ export default function LabelTagsTabs({
               product.
             </p>
           </div>
-          <DialogAddLabelTag productId={productId} />
+          <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
         </div>
       </>
     );
@@ -86,7 +88,7 @@ export default function LabelTagsTabs({
             Manage label tags and their images for this product
           </p>
         </div>
-        <DialogAddLabelTag productId={productId} />
+        <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
       </div>
 
       <div className="p-4">
@@ -138,10 +140,12 @@ export default function LabelTagsTabs({
                           <DialogEditLabelTag
                             productId={productId}
                             labelTag={item}
+                            isSubmitted={isSubmitted}
                           />
                           <DialogDeleteLabelTag
                             productId={productId}
                             labelTag={item}
+                            isSubmitted={isSubmitted}
                           />
                         </div>
                       </div>

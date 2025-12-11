@@ -23,12 +23,14 @@ interface DeleteStandardDialogProps {
   standardId: string;
   standardName: string;
   onDeleted?: () => void;
+  isSubmitted?: boolean;
 }
 
 export default function DeleteStandardDialog({
   productId,
   standardId,
   standardName,
+  isSubmitted = false,
 }: DeleteStandardDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate: deleteStandard, isPending } = useUpdateProductTabData();
@@ -62,7 +64,7 @@ export default function DeleteStandardDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="destructive">
+        <Button size="sm" variant="destructive" disabled={isSubmitted}>
           <PiTrashDuotone />
           Delete
         </Button>

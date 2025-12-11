@@ -268,7 +268,14 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions row={row} />,
+    cell: ({ row, table }) => (
+      <RowActions
+        row={row}
+        isSubmitted={
+          (table.options.meta as { isSubmitted?: boolean })?.isSubmitted
+        }
+      />
+    ),
     size: 40,
     enableHiding: false,
   },
@@ -276,8 +283,10 @@ const columns: ColumnDef<ComponentItem>[] = [
 
 export default function ProductComponentDetailsTable({
   data,
+  isSubmitted = false,
 }: {
   data: ComponentItem[];
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -303,6 +312,7 @@ export default function ProductComponentDetailsTable({
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: { sorting, pagination },
+    meta: { isSubmitted },
   });
 
   return (
@@ -488,7 +498,13 @@ export default function ProductComponentDetailsTable({
   );
 }
 
-function RowActions({ row }: { row: Row<ComponentItem> }) {
+function RowActions({
+  row,
+  isSubmitted = false,
+}: {
+  row: Row<ComponentItem>;
+  isSubmitted?: boolean;
+}) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -509,6 +525,7 @@ function RowActions({ row }: { row: Row<ComponentItem> }) {
             variant="ghost"
             className="shadow-none"
             aria-label="More actions"
+            disabled={isSubmitted}
           >
             <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
           </Button>
