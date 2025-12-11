@@ -343,6 +343,7 @@ export function ProductHeader() {
             completionPercentage={completionPercentage}
             completedTabsCount={completedTabsCount}
             totalTabs={TOTAL_TABS}
+            productStatus={productCoreData?.status}
           />
 
           <button
