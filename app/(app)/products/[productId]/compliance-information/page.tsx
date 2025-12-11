@@ -128,6 +128,11 @@ export default function Page() {
   const productName =
     data?.result?.data?.product_information?.data?.product_name || "Product";
 
+  // Check if product is submitted - disable editing buttons
+  const isSubmitted =
+    data?.result?.data?.product_information?.product_data?.data?.status ===
+    "submitted";
+
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
       {/* Breadcrumbs */}
@@ -163,7 +168,7 @@ export default function Page() {
               Regulatory standards and certifications for this product
             </p>
           </div>
-          <AddStandardDialog productId={productId} />
+          <AddStandardDialog productId={productId} isSubmitted={isSubmitted} />
         </div>
 
         {/* Standards Content */}
@@ -182,7 +187,10 @@ export default function Page() {
                   regulatory requirements for this product.
                 </p>
               </div>
-              <AddStandardDialog productId={productId} />
+              <AddStandardDialog
+                productId={productId}
+                isSubmitted={isSubmitted}
+              />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -204,11 +212,13 @@ export default function Page() {
                       <EditStandardDialog
                         productId={productId}
                         standards={item}
+                        isSubmitted={isSubmitted}
                       />
                       <DeleteStandardDialog
                         productId={productId}
                         standardId={item._id}
                         standardName={item.standard}
+                        isSubmitted={isSubmitted}
                       />
                     </div>
                   </div>

@@ -209,7 +209,14 @@ const columns: ColumnDef<Item>[] = [
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions row={row} />,
+    cell: ({ row, table }) => (
+      <RowActions
+        row={row}
+        isSubmitted={
+          (table.options.meta as { isSubmitted?: boolean })?.isSubmitted
+        }
+      />
+    ),
     size: 40,
     enableHiding: false,
   },
@@ -217,8 +224,10 @@ const columns: ColumnDef<Item>[] = [
 
 export default function SymbolsGraphicsPageOtherComponentsTable({
   data: dataProp,
+  isSubmitted = false,
 }: {
   data?: Item[];
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -241,6 +250,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: { sorting, pagination },
+    meta: { isSubmitted },
   });
 
   return (
@@ -382,7 +392,13 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
   );
 }
 
-function RowActions({ row }: { row: Row<Item> }) {
+function RowActions({
+  row,
+  isSubmitted = false,
+}: {
+  row: Row<Item>;
+  isSubmitted?: boolean;
+}) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
@@ -405,7 +421,12 @@ function RowActions({ row }: { row: Row<Item> }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost" className="shadow-none">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="shadow-none"
+            disabled={isSubmitted}
+          >
             <PiDotsThreeCircleDuotone size={18} />
           </Button>
         </DropdownMenuTrigger>

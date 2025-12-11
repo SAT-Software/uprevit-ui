@@ -146,6 +146,8 @@ export default function Page() {
 
   if (isError || !productData) return notFound();
 
+  console.log("product Data Metadata", productMetadata);
+
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
       {/* Breadcrumbs */}
@@ -227,8 +229,14 @@ export default function Page() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <EditProductDialog product={productData!} />
-              <ProductInformationCustomFieldEditDialog product={productData!} />
+              <EditProductDialog
+                product={productData!}
+                productMetadata={productMetadata!}
+              />
+              <ProductInformationCustomFieldEditDialog
+                product={productData!}
+                productMetadata={productMetadata!}
+              />
             </div>
 
             {/* Audit Badges */}

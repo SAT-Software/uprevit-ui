@@ -51,8 +51,10 @@ type FormData = {
 
 export default function AddComponentDialog({
   productId,
+  isSubmitted = false,
 }: {
   productId: string;
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -133,6 +135,7 @@ export default function AddComponentDialog({
           size="sm"
           variant="secondary"
           className="flex items-center gap-2"
+          disabled={isSubmitted}
         >
           <PiPlusCircleDuotone className="w-4 h-4" />
           Add Component

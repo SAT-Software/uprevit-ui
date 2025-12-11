@@ -57,6 +57,7 @@ interface SchematicsSymbolsTabsProps {
   otherComponentsData: OtherComponentData[];
   symbolsData: SymbolData[];
   productId: string;
+  isSubmitted?: boolean;
 }
 
 export default function SchematicsSymbolsTabs({
@@ -65,6 +66,7 @@ export default function SchematicsSymbolsTabs({
   otherComponentsData,
   symbolsData,
   productId,
+  isSubmitted = false,
 }: SchematicsSymbolsTabsProps) {
   const [activeTab, setActiveTab] = useState("tab-1");
 
@@ -101,13 +103,21 @@ export default function SchematicsSymbolsTabs({
           </p>
         </div>
         {activeTab === "tab-1" ? (
-          <AddSymbolsDialog productId={productId} />
+          <AddSymbolsDialog productId={productId} isSubmitted={isSubmitted} />
         ) : activeTab === "tab-2" ? (
-          <AddSchematicsDialog productId={productId} />
+          <AddSchematicsDialog
+            productId={productId}
+            isSubmitted={isSubmitted}
+          />
         ) : activeTab === "tab-3" ? (
-          <AddBarcodesDialog productId={productId} />
+          <AddBarcodesDialog productId={productId} isSubmitted={isSubmitted} />
         ) : (
-          activeTab === "tab-4" && <AddOtherCompsDialog productId={productId} />
+          activeTab === "tab-4" && (
+            <AddOtherCompsDialog
+              productId={productId}
+              isSubmitted={isSubmitted}
+            />
+          )
         )}
       </div>
 
@@ -142,16 +152,28 @@ export default function SchematicsSymbolsTabs({
       {/* Tab Contents */}
       <div className="flex-1 overflow-hidden px-4">
         <TabsContent value="tab-1" className="h-full mt-0">
-          <SymbolsGraphicsPageSymbolsTable data={symbolsData} />
+          <SymbolsGraphicsPageSymbolsTable
+            data={symbolsData}
+            isSubmitted={isSubmitted}
+          />
         </TabsContent>
         <TabsContent value="tab-2" className="h-full mt-0">
-          <SymbolsGraphicsPageSchematicsTable data={schematicsData} />
+          <SymbolsGraphicsPageSchematicsTable
+            data={schematicsData}
+            isSubmitted={isSubmitted}
+          />
         </TabsContent>
         <TabsContent value="tab-3" className="h-full mt-0">
-          <SymbolsGraphicsPageBarcodesTable data={barcodesData} />
+          <SymbolsGraphicsPageBarcodesTable
+            data={barcodesData}
+            isSubmitted={isSubmitted}
+          />
         </TabsContent>
         <TabsContent value="tab-4" className="h-full mt-0">
-          <SymbolsGraphicsPageOtherComponentsTable data={otherComponentsData} />
+          <SymbolsGraphicsPageOtherComponentsTable
+            data={otherComponentsData}
+            isSubmitted={isSubmitted}
+          />
         </TabsContent>
       </div>
     </Tabs>

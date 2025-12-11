@@ -31,8 +31,10 @@ interface FormValues {
 
 export default function AddStandardDialog({
   productId,
+  isSubmitted = false,
 }: {
   productId: string;
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const { mutate: addNewStandard, isPending } = useUpdateProductTabData();
@@ -87,6 +89,7 @@ export default function AddStandardDialog({
           size="sm"
           variant="secondary"
           className="flex items-center gap-2"
+          disabled={isSubmitted}
         >
           <PiPlusCircleDuotone className="w-4 h-4" />
           Add Standard

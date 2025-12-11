@@ -101,6 +101,23 @@ export interface ProductApiResponse {
   parent_id?: string | null;
 }
 
+export interface ProductMetadata {
+  actual_completion_date: string;
+  complete_count: number;
+  department_id: string;
+  is_latest: boolean;
+  parent_id: string | null;
+  product_description: string;
+  product_name: string;
+  product_plan_number: string;
+  project_id: string;
+  status: "submitted";
+  target_date: string;
+  version: number;
+  workspace_id: string;
+  _id: string;
+}
+
 export interface AuditLog {
   _id?: string;
   entity: string;

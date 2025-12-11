@@ -222,7 +222,14 @@ const columns: ColumnDef<Item>[] = [
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions row={row} />,
+    cell: ({ row, table }) => (
+      <RowActions
+        row={row}
+        isSubmitted={
+          (table.options.meta as { isSubmitted?: boolean })?.isSubmitted
+        }
+      />
+    ),
     size: 40,
     enableHiding: false,
   },
@@ -230,10 +237,12 @@ const columns: ColumnDef<Item>[] = [
 
 type SymbolsGraphicsPageSchematicsTableProps = {
   data?: Item[];
+  isSubmitted?: boolean;
 };
 
 export default function SymbolsGraphicsPageSchematicsTable({
   data: dataProp,
+  isSubmitted = false,
 }: SymbolsGraphicsPageSchematicsTableProps) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -259,6 +268,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: { sorting, pagination },
+    meta: { isSubmitted },
   });
 
   return (
@@ -417,7 +427,13 @@ export default function SymbolsGraphicsPageSchematicsTable({
   );
 }
 
-function RowActions({ row }: { row: Row<Item> }) {
+function RowActions({
+  row,
+  isSubmitted = false,
+}: {
+  row: Row<Item>;
+  isSubmitted?: boolean;
+}) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
@@ -447,6 +463,7 @@ function RowActions({ row }: { row: Row<Item> }) {
             variant="ghost"
             className="shadow-none"
             aria-label="More actions"
+            disabled={isSubmitted}
           >
             <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
           </Button>

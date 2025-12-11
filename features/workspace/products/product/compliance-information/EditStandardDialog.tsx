@@ -38,9 +38,11 @@ interface Standards {
 export default function EditStandardDialog({
   productId,
   standards,
+  isSubmitted = false,
 }: {
   productId: string;
   standards: Standards;
+  isSubmitted?: boolean;
 }) {
   const id = useId();
   const { mutate: updateStandard, isPending } = useUpdateProductTabData();
@@ -93,7 +95,7 @@ export default function EditStandardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary">
+        <Button size="sm" variant="secondary" disabled={isSubmitted}>
           <PiPencilSimpleDuotone />
           Edit
         </Button>

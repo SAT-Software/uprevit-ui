@@ -300,14 +300,14 @@ export function ProductHeader() {
                   <SelectItem key={v._id} value={v._id}>
                     <div className="flex items-center gap-2">
                       <span>Version {v.version}</span>
-                      <Badge
+                      {/* <Badge
                         variant={
                           v.status === "submitted" ? "default" : "outline"
                         }
                         className="text-[0.65rem] pt-0.5 mt-0.5"
                       >
                         {v.status}
-                      </Badge>
+                      </Badge> */}
                     </div>
                   </SelectItem>
                 ))
@@ -326,7 +326,7 @@ export function ProductHeader() {
           </Button>
 
           {/* Show submitted badge when read-only */}
-          {isReadOnly && (
+          {/* {isReadOnly && (
             <Badge
               variant="default"
               className="bg-green-600 hover:bg-green-600"
@@ -334,7 +334,7 @@ export function ProductHeader() {
               <PiLockKeyDuotone className="size-3 mr-1" />
               Submitted
             </Badge>
-          )}
+          )} */}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">

@@ -39,7 +39,13 @@ type FormData = {
   image: FileWithPreview | null;
 };
 
-export default function AddSymbolsDialog({ productId }: { productId: string }) {
+export default function AddSymbolsDialog({
+  productId,
+  isSubmitted = false,
+}: {
+  productId: string;
+  isSubmitted?: boolean;
+}) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -109,7 +115,7 @@ export default function AddSymbolsDialog({ productId }: { productId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary">
+        <Button size="sm" variant="secondary" disabled={isSubmitted}>
           <PiPlusCircleDuotone />
           Add Symbol
         </Button>
