@@ -28,8 +28,9 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { ProgressRadialChart } from "./ProgressRadialChart";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { useGetProductVersions } from "@/hooks/product/useGetProductVersions";
 import { Badge } from "@/components/ui/badge";
+import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
+import { Product } from "@/types/product";
 
 export type Item = {
   productId: string;
@@ -62,7 +63,7 @@ export function ProductHeader() {
 
   const { data: productData } = useGetProductTabData(productId, "all-tabs");
   const { data: versionsData, isLoading: isLoadingVersions } =
-    useGetProductVersions(productId);
+    useGetAllProductVersions(productId);
   const { mutateAsync: updateProductTabData, isPending: isUpdatingTab } =
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
@@ -264,7 +265,7 @@ export function ProductHeader() {
   };
 
   // Get versions list for dropdown
-  const versions = versionsData?.versions || [];
+  const versions = versionsData?.result?.versions || [];
 
   return (
     <header
@@ -295,23 +296,15 @@ export function ProductHeader() {
             </SelectTrigger>
             <SelectContent>
               {versions.length > 0 ? (
-                versions.map((v) => (
+                versions.map((v: Product & { _id: string }) => (
                   <SelectItem key={v._id} value={v._id}>
                     <div className="flex items-center gap-2">
                       <span>Version {v.version}</span>
-                      {v.is_latest && (
-                        <Badge
-                          variant="secondary"
-                          className="text-[0.65rem] px-1 py-0"
-                        >
-                          Latest
-                        </Badge>
-                      )}
                       <Badge
                         variant={
                           v.status === "submitted" ? "default" : "outline"
                         }
-                        className="text-[0.65rem] px-1 py-0"
+                        className="text-[0.65rem] pt-0.5 mt-0.5"
                       >
                         {v.status}
                       </Badge>
