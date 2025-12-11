@@ -36,6 +36,10 @@ export default function Page() {
   const productName =
     productInfoData?.result?.data?.data?.product_name || "Product";
 
+  // Check if product is submitted - disable editing buttons
+  const isSubmitted =
+    productInfoData?.result?.data?.product_data?.data?.status === "submitted";
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
@@ -162,7 +166,11 @@ export default function Page() {
       </div>
 
       <div className="flex flex-col gap-0 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-        <LabelTagsTabs labelTagsData={labelTagsData} productId={productId} />
+        <LabelTagsTabs
+          labelTagsData={labelTagsData}
+          productId={productId}
+          isSubmitted={isSubmitted}
+        />
       </div>
     </div>
   );

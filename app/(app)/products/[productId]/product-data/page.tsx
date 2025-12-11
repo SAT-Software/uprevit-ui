@@ -40,6 +40,10 @@ export default function Page() {
   const productName =
     productInfoData?.result?.data?.data?.product_name || "Product";
 
+  // Check if product is submitted - disable editing buttons
+  const isSubmitted =
+    productInfoData?.result?.data?.product_data?.data?.status === "submitted";
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
@@ -189,7 +193,7 @@ export default function Page() {
             size="sm"
             variant="secondary"
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isSubmitted}
           >
             <PiFloppyDiskDuotone />
             {isSaving ? "Saving..." : "Save Data"}
