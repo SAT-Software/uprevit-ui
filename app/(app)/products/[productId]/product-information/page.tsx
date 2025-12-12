@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   PiHouseDuotone,
@@ -19,29 +19,37 @@ import ProductInformationCustomFieldEditDialog from "@/features/workspace/produc
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
 import { AuditLog } from "@/types/audit-log";
 import { useMemo } from "react";
+import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
+  const searchParams = useSearchParams();
+  const isRedlineView = searchParams.get("view") === "redline";
 
   const { data, isLoading, isError } = useGetProductTabData(
     productId,
     "product-information"
   );
 
-  console.log("Raw Product Data on first page", data);
+  // Only fetch redline data when ?view=redline is in the URL
+  const {
+    data: diffRedlineData,
+    isLoading: diffRedlineLoading,
+    isError: diffRedlineError,
+  } = useGetProductDiffRedline(productId, isRedlineView);
+
+  console.log(
+    "Diff Redline Data",
+    diffRedlineData,
+    "isRedlineView:",
+    isRedlineView
+  );
 
   const productData = { ...data?.result?.data?.data, id: productId };
   const customFieldsData = data?.result?.data?.custom_fields;
   const productMetadata = data?.result?.data?.product_data?.data;
   const productAuditLog = data?.result?.data?.auditLogs;
-
-  console.log(
-    "Product Data on first page",
-    productData,
-    customFieldsData,
-    productMetadata
-  );
 
   const auditLogs = (productAuditLog as AuditLog[]) || [];
   const creationLog = auditLogs.find((log) => log.action === "create");
@@ -236,6 +244,7 @@ export default function Page() {
               <ProductInformationCustomFieldEditDialog
                 product={productData!}
                 productMetadata={productMetadata!}
+                customFieldsData={customFieldsData!}
               />
             </div>
 

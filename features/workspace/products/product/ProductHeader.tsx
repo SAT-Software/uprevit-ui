@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -68,6 +68,8 @@ export function ProductHeader() {
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
     useUpdateProduct();
+  const searchParams = useSearchParams();
+  const isRedlineView = searchParams.get("view") === "redline";
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -320,9 +322,27 @@ export function ProductHeader() {
             </SelectContent>
           </Select>
 
-          <Button variant="secondary" size="sm">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={product?.isLatest}
+            title={
+              product?.isLatest
+                ? "No newer version to compare against"
+                : "View redline comparison"
+            }
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString());
+              if (isRedlineView) {
+                params.delete("view");
+              } else {
+                params.set("view", "redline");
+              }
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+          >
             <PiTextStrikethroughDuotone />
-            View Redline
+            {isRedlineView ? "Hide Redline" : "View Redline"}
           </Button>
 
           {/* Show submitted badge when read-only */}
