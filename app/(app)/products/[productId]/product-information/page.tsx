@@ -39,9 +39,38 @@ export default function Page() {
 
   const diffs = diffRedlineData?.result?.diffs || [];
 
-  // Helper to find a diff by path (checks multiple possible paths)
+  // Helper to find a diff by exact path (checks multiple possible paths)
   const getDiff = (...paths: string[]) => {
     return diffs.find((d: any) => paths.includes(d.path));
+  };
+
+  // Helper to find all diffs that start with a base path (for custom fields)
+  const getFieldDiffs = (basePath: string) => {
+    return diffs.filter(
+      (d: any) => d.path === basePath || d.path.startsWith(basePath + ".")
+    );
+  };
+
+  // Helper to get overall status for a field (checks any nested diffs)
+  const getFieldStatus = (
+    basePath: string
+  ): "added" | "removed" | "modified" | null => {
+    const fieldDiffs = getFieldDiffs(basePath);
+    if (fieldDiffs.length === 0) return null;
+
+    // If the whole field was added/removed
+    const wholeDiff = fieldDiffs.find((d: any) => d.path === basePath);
+    if (wholeDiff) return wholeDiff.status;
+
+    // If any property was changed, it's modified
+    return "modified";
+  };
+
+  // Get the value diff specifically for custom fields
+  const getCustomFieldValueDiff = (basePath: string) => {
+    return diffs.find(
+      (d: any) => d.path === `${basePath}.value` || d.path === basePath
+    );
   };
 
   // Simple inline component for redline display
@@ -376,10 +405,22 @@ export default function Page() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
             {fields.map((field, idx) => {
-              const diff = getDiff(field.diffPath);
-              const isRemoved = diff?.status === "removed";
-              const isAdded = diff?.status === "added";
-              const isModified = diff?.status === "modified";
+              // For custom fields (with array index), check for nested diffs
+              const isCustomField = field.diffPath.includes("custom_fields[");
+
+              // Get status using appropriate method
+              const fieldStatus = isCustomField
+                ? getFieldStatus(field.diffPath)
+                : getDiff(field.diffPath)?.status || null;
+
+              // Get value diff for RedlineValue component
+              const valueDiff = isCustomField
+                ? getCustomFieldValueDiff(field.diffPath)
+                : getDiff(field.diffPath);
+
+              const isRemoved = fieldStatus === "removed";
+              const isAdded = fieldStatus === "added";
+              const isModified = fieldStatus === "modified";
 
               return (
                 <div
@@ -395,7 +436,7 @@ export default function Page() {
                     isRedlineView &&
                       isModified &&
                       "border-amber-500/50 bg-amber-100/10",
-                    !isRedlineView || !diff ? "border-border" : ""
+                    !isRedlineView || !fieldStatus ? "border-border" : ""
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -411,7 +452,7 @@ export default function Page() {
                         isRedlineView &&
                           isModified &&
                           "bg-amber-200/40 text-amber-500",
-                        !isRedlineView || !diff ? "border-border" : ""
+                        !isRedlineView || !fieldStatus ? "border-border" : ""
                       )}
                     >
                       <field.icon className="w-4 h-4" />
@@ -451,7 +492,7 @@ export default function Page() {
                     )}
                     title={field.value}
                   >
-                    <RedlineValue value={field.value} diff={diff} />
+                    <RedlineValue value={field.value} diff={valueDiff} />
                   </div>
                 </div>
               );

@@ -1,8 +1,9 @@
 "use client";
 
 import SchematicsSymbolsTabs from "@/features/workspace/products/product/graphics-other-components/SchematicsSymbolsTabs";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import Link from "next/link";
 import {
   PiHouseDuotone,
@@ -18,16 +19,28 @@ interface SymbolGraphicItem {
   text_present: boolean;
   label_presence: string[];
   entity: string;
+  _isFromDiff?: boolean;
+  _isRemovedFromDiff?: boolean;
 }
 
 export default function Page() {
   const { productId } = useParams<{ productId: string }>();
+  const searchParams = useSearchParams();
+  const isRedlineView = searchParams.get("view") === "redline";
 
   // Fetch all tabs to get both symbols-graphics data and product name
   const { data, isLoading, error } = useGetProductTabData(
     productId as string,
     "all-tabs"
   );
+
+  // Only fetch redline data when in redline view
+  const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
+    productId as string,
+    isRedlineView
+  );
+
+  console.log("graphics page diff data", diffData);
 
   const productName =
     data?.result?.data?.product_information?.data?.product_name || "Product";
@@ -36,6 +49,12 @@ export default function Page() {
   const isSubmitted =
     data?.result?.data?.product_information?.product_data?.data?.status ===
     "submitted";
+
+  // Filter diffs for symbols_graphics only
+  const allDiffs = diffData?.result?.diffs || [];
+  const symbolsGraphicsDiffs = allDiffs.filter((d: any) =>
+    d.path.startsWith("symbols_graphics.data")
+  );
 
   if (isLoading) {
     return (
@@ -133,7 +152,39 @@ export default function Page() {
   }
 
   const symbolsGraphicsData = data?.result?.data?.symbols_graphics?.data || [];
-  const symbolsGraphics = (symbolsGraphicsData as SymbolGraphicItem[]) || [];
+  let symbolsGraphics = (symbolsGraphicsData as SymbolGraphicItem[]) || [];
+
+  // In redline view, merge added and removed items from diffs
+  if (isRedlineView && symbolsGraphicsDiffs.length > 0) {
+    // Find whole-row additions (status: 'added' on path like symbols_graphics.data[X])
+    const addedItems = symbolsGraphicsDiffs
+      .filter(
+        (d: any) =>
+          d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
+          d.status === "added" &&
+          d.new_value
+      )
+      .map((d: any) => ({
+        ...d.new_value,
+        _isFromDiff: true,
+      }));
+
+    // Find whole-row removals (status: 'removed' on path like symbols_graphics.data[X])
+    const removedItems = symbolsGraphicsDiffs
+      .filter(
+        (d: any) =>
+          d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
+          d.status === "removed" &&
+          d.old_value
+      )
+      .map((d: any) => ({
+        ...d.old_value,
+        _isRemovedFromDiff: true,
+      }));
+
+    // Merge: current items + added items + removed items
+    symbolsGraphics = [...symbolsGraphics, ...addedItems, ...removedItems];
+  }
 
   // Group items by normalized entity (lowercase)
   const entityGroups: Record<string, SymbolGraphicItem[]> = {};
@@ -152,6 +203,8 @@ export default function Page() {
     componentDescription: item.description,
     componentImage: item.image,
     presentOnLabels: item.label_presence,
+    _isFromDiff: item._isFromDiff,
+    _isRemovedFromDiff: item._isRemovedFromDiff,
   }));
 
   const barcodesData = (entityGroups["barcodes"] || []).map((item) => ({
@@ -160,6 +213,8 @@ export default function Page() {
     componentDescription: item.description,
     componentImage: item.image,
     presentOnLabels: item.label_presence,
+    _isFromDiff: item._isFromDiff,
+    _isRemovedFromDiff: item._isRemovedFromDiff,
   }));
 
   const otherComponentsData = (entityGroups["other components"] || []).map(
@@ -169,6 +224,8 @@ export default function Page() {
       componentDescription: item.description,
       componentImage: item.image,
       presentOnLabels: item.label_presence,
+      _isFromDiff: item._isFromDiff,
+      _isRemovedFromDiff: item._isRemovedFromDiff,
     })
   );
 
@@ -179,6 +236,8 @@ export default function Page() {
     componentImage: item.image,
     symbolsTextPresent: item.label_presence,
     textPresent: item.text_present,
+    _isFromDiff: item._isFromDiff,
+    _isRemovedFromDiff: item._isRemovedFromDiff,
   }));
 
   return (
@@ -206,6 +265,17 @@ export default function Page() {
         </span>
       </div>
 
+      {/* Redline Mode Banner */}
+      {isRedlineView && (
+        <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
+          <span className="text-amber-600 font-medium">
+            {isLoadingDiff
+              ? "Loading changes..."
+              : `Redline View: ${symbolsGraphicsDiffs.length} changes in Symbols & Graphics`}
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col gap-0 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         <SchematicsSymbolsTabs
           schematicsData={schematicsData}
@@ -214,6 +284,8 @@ export default function Page() {
           symbolsData={symbolsData}
           productId={productId as string}
           isSubmitted={isSubmitted}
+          isRedlineView={isRedlineView}
+          diffs={symbolsGraphicsDiffs}
         />
       </div>
     </div>

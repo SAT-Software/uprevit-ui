@@ -51,6 +51,13 @@ interface OtherComponentData {
   presentOnLabels: string[];
 }
 
+interface DiffItem {
+  path: string;
+  status: "added" | "removed" | "modified";
+  old_value: any;
+  new_value: any;
+}
+
 interface SchematicsSymbolsTabsProps {
   schematicsData: SchematicData[];
   barcodesData: BarcodesData[];
@@ -58,6 +65,8 @@ interface SchematicsSymbolsTabsProps {
   symbolsData: SymbolData[];
   productId: string;
   isSubmitted?: boolean;
+  isRedlineView?: boolean;
+  diffs?: DiffItem[];
 }
 
 export default function SchematicsSymbolsTabs({
@@ -67,6 +76,8 @@ export default function SchematicsSymbolsTabs({
   symbolsData,
   productId,
   isSubmitted = false,
+  isRedlineView = false,
+  diffs = [],
 }: SchematicsSymbolsTabsProps) {
   const [activeTab, setActiveTab] = useState("tab-1");
 
@@ -155,24 +166,32 @@ export default function SchematicsSymbolsTabs({
           <SymbolsGraphicsPageSymbolsTable
             data={symbolsData}
             isSubmitted={isSubmitted}
+            isRedlineView={isRedlineView}
+            diffs={diffs}
           />
         </TabsContent>
         <TabsContent value="tab-2" className="h-full mt-0">
           <SymbolsGraphicsPageSchematicsTable
             data={schematicsData}
             isSubmitted={isSubmitted}
+            isRedlineView={isRedlineView}
+            diffs={diffs}
           />
         </TabsContent>
         <TabsContent value="tab-3" className="h-full mt-0">
           <SymbolsGraphicsPageBarcodesTable
             data={barcodesData}
             isSubmitted={isSubmitted}
+            isRedlineView={isRedlineView}
+            diffs={diffs}
           />
         </TabsContent>
         <TabsContent value="tab-4" className="h-full mt-0">
           <SymbolsGraphicsPageOtherComponentsTable
             data={otherComponentsData}
             isSubmitted={isSubmitted}
+            isRedlineView={isRedlineView}
+            diffs={diffs}
           />
         </TabsContent>
       </div>
