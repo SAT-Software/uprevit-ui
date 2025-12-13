@@ -110,25 +110,6 @@ export default function Page() {
   if (error) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
-        {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-          <Link
-            href="/dashboard"
-            className="hover:text-foreground transition-colors flex items-center"
-          >
-            <PiHouseDuotone className="w-4 h-4" />
-          </Link>
-          <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-          <Link
-            href="/products"
-            className="hover:text-foreground transition-colors"
-          >
-            Products
-          </Link>
-          <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-          <span className="text-foreground font-medium">Product Data</span>
-        </div>
-
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-4 text-center">

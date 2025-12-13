@@ -44,8 +44,6 @@ export default function Page() {
     isRedlineView
   );
 
-  console.log("diffData", diffData);
-
   const isSubmitted =
     componentsData?.result?.data?.product_data?.data?.status === "submitted";
 
@@ -58,13 +56,6 @@ export default function Page() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-          <div className="h-4 w-4 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-20 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-32 bg-background rounded animate-pulse" />
-        </div>
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           <div className="p-6">
             <div className="h-64 w-full bg-muted rounded-xl animate-pulse" />
