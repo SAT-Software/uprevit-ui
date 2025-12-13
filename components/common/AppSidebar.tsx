@@ -36,7 +36,7 @@ import {
   PiSquaresFourDuotone,
   PiDotsThreeOutlineVerticalDuotone,
 } from "react-icons/pi";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -145,6 +145,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { data: workspaceData, isLoading } = useGetWorkspace();
   const workspace = workspaceData?.workspace;
+  const searchParams = useSearchParams();
+  const isRedlineView = searchParams.get("view") === "redline";
 
   return (
     <Sidebar {...props}>
@@ -214,7 +216,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     <Link
                                       href={`/products/${
                                         pathname.split("/")[2]
-                                      }${subItem.url}`}
+                                      }${subItem.url}${
+                                        isRedlineView ? "?view=redline" : ""
+                                      }`}
                                     >
                                       {subItem.icon && <subItem.icon />}
                                       <span>{subItem.title}</span>

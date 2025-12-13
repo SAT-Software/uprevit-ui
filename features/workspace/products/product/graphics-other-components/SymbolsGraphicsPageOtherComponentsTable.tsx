@@ -66,6 +66,47 @@ type Item = {
   componentImage: string;
   note?: string;
   presentOnLabels: string[];
+  _isFromDiff?: boolean;
+  _isRemovedFromDiff?: boolean;
+};
+
+// Type for diff data
+type DiffItem = {
+  path: string;
+  status: "added" | "removed" | "modified";
+  old_value: any;
+  new_value: any;
+};
+
+// Helper component for displaying redline values
+const RedlineCell = ({
+  value,
+  diff,
+  formatFn,
+}: {
+  value: any;
+  diff: DiffItem | null;
+  formatFn?: (v: any) => React.ReactNode;
+}) => {
+  const format = formatFn || ((v: any) => v?.toString() || "-");
+  if (!diff) return <>{format(value)}</>;
+
+  const isAdded = diff.status === "added";
+  const isRemoved = diff.status === "removed";
+  const isModified = diff.status === "modified";
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      {(isModified || isRemoved) && diff.old_value !== null && (
+        <div className="line-through text-sm text-red-600/70">
+          {format(diff.old_value)}
+        </div>
+      )}
+      {(isModified || isAdded) && !isRemoved && (
+        <div className="text-sm text-blue-700">{format(diff.new_value)}</div>
+      )}
+    </div>
+  );
 };
 
 const SortableHeader = ({
@@ -159,9 +200,21 @@ const columns: ColumnDef<Item>[] = [
         icon={PiCubeDuotone}
       />
     ),
-    cell: ({ row }) => (
-      <span className="font-medium">{row.getValue("componentName")}</span>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as any;
+      const diff = meta?.isRedlineView
+        ? meta.getDiff?.(`symbols_graphics.data[${row.index}].text`)
+        : null;
+      return diff ? (
+        <RedlineCell
+          value={row.getValue("componentName")}
+          diff={diff}
+          formatFn={(v) => <span className="font-medium">{v}</span>}
+        />
+      ) : (
+        <span className="font-medium">{row.getValue("componentName")}</span>
+      );
+    },
   },
   {
     accessorKey: "componentDescription",
@@ -173,11 +226,27 @@ const columns: ColumnDef<Item>[] = [
         icon={PiTextAlignLeftDuotone}
       />
     ),
-    cell: ({ row }) => (
-      <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-        {row.getValue("componentDescription") || "-"}
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as any;
+      const diff = meta?.isRedlineView
+        ? meta.getDiff?.(`symbols_graphics.data[${row.index}].description`)
+        : null;
+      return diff ? (
+        <RedlineCell
+          value={row.getValue("componentDescription")}
+          diff={diff}
+          formatFn={(v) => (
+            <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+              {v || "-"}
+            </div>
+          )}
+        />
+      ) : (
+        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+          {row.getValue("componentDescription") || "-"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "presentOnLabels",
@@ -189,16 +258,43 @@ const columns: ColumnDef<Item>[] = [
         icon={PiTagDuotone}
       />
     ),
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as any;
       const labels = row.getValue("presentOnLabels") as string[];
+
+      let addedLabels: string[] = [];
+      if (meta?.isRedlineView && meta.diffs) {
+        const labelDiffs = (meta.diffs as DiffItem[]).filter((d) =>
+          d.path.startsWith(
+            `symbols_graphics.data[${row.index}].label_presence`
+          )
+        );
+        addedLabels = labelDiffs
+          .filter((d) => d.status === "added" && d.new_value)
+          .map((d) => d.new_value as string);
+      }
+
+      const displayLabels = meta?.isRedlineView
+        ? [...labels, ...addedLabels.filter((l) => !labels.includes(l))]
+        : labels;
+
       return (
         <div className="flex flex-wrap gap-1">
-          {labels && labels.length > 0 ? (
-            labels.map((label, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {label}
-              </Badge>
-            ))
+          {displayLabels && displayLabels.length > 0 ? (
+            displayLabels.map((label, index) => {
+              const isNew = addedLabels.includes(label);
+              return (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className={`text-xs ${
+                    isNew ? "border-blue-400 text-blue-700 bg-blue-50" : ""
+                  }`}
+                >
+                  {label}
+                </Badge>
+              );
+            })
           ) : (
             <span className="text-muted-foreground text-sm">-</span>
           )}
@@ -225,9 +321,13 @@ const columns: ColumnDef<Item>[] = [
 export default function SymbolsGraphicsPageOtherComponentsTable({
   data: dataProp,
   isSubmitted = false,
+  isRedlineView = false,
+  diffs = [],
 }: {
   data?: Item[];
   isSubmitted?: boolean;
+  isRedlineView?: boolean;
+  diffs?: DiffItem[];
 }) {
   const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
@@ -237,6 +337,28 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "componentName", desc: false },
   ]);
+
+  // Helper to find a diff by path
+  const getDiff = (path: string): DiffItem | null => {
+    return diffs.find((d) => d.path === path) || null;
+  };
+
+  // Check if a row has any changes
+  const getRowStatus = (rowIndex: number) => {
+    const isFromDiff = dataProp?.[rowIndex]?._isFromDiff;
+    if (isFromDiff) return "added";
+
+    const isRemovedFromDiff = dataProp?.[rowIndex]?._isRemovedFromDiff;
+    if (isRemovedFromDiff) return "removed";
+
+    const rowDiff = getDiff(`symbols_graphics.data[${rowIndex}]`);
+    if (rowDiff) return rowDiff.status;
+
+    const hasFieldDiff = diffs.some((d) =>
+      d.path.startsWith(`symbols_graphics.data[${rowIndex}].`)
+    );
+    return hasFieldDiff ? "modified" : null;
+  };
 
   const table = useReactTable({
     data: dataProp || [],
@@ -250,7 +372,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: { sorting, pagination },
-    meta: { isSubmitted },
+    meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
   });
 
   return (
@@ -280,53 +402,79 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <Fragment key={row.id}>
-                  <TableRow
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted/50"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="last:py-0 whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={row.getVisibleCells().length}>
-                        <div className="flex flex-col items-center py-4">
-                          {row.original.componentImage !== "" ? (
-                            <Image
-                              src={row.original.componentImage}
-                              alt={row.original.componentName}
-                              width={200}
-                              height={200}
-                              className="rounded mb-3"
-                              style={{
-                                width: "70%",
-                                height: "auto",
-                                maxWidth: 280,
-                              }}
-                              priority
-                            />
-                          ) : (
-                            <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md">
-                              <PiImageDuotone className="w-full h-full p-2" />
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
+              table.getRowModel().rows.map((row) => {
+                const rowStatus = getRowStatus(row.index);
+                const isAdded = isRedlineView && rowStatus === "added";
+                const isRemoved = isRedlineView && rowStatus === "removed";
+                const isModified = isRedlineView && rowStatus === "modified";
+
+                return (
+                  <Fragment key={row.id}>
+                    <TableRow
+                      data-state={row.getIsSelected() && "selected"}
+                      className={`hover:bg-muted/50 ${
+                        isAdded ? "bg-blue-50/30" : ""
+                      } ${isRemoved ? "bg-red-50/30" : ""} ${
+                        isModified ? "bg-amber-50/30" : ""
+                      }`}
+                    >
+                      {row.getVisibleCells().map((cell, cellIdx) => (
+                        <TableCell
+                          key={cell.id}
+                          className="last:py-0 whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                        >
+                          <div className="flex items-center gap-2">
+                            {cellIdx === 0 && isRedlineView && rowStatus && (
+                              <span
+                                className={`text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-full border shadow-sm whitespace-nowrap ${
+                                  isAdded
+                                    ? "text-blue-700 bg-blue-100 border-blue-200"
+                                    : isRemoved
+                                    ? "text-red-700 bg-red-100 border-red-200"
+                                    : "text-amber-700 bg-amber-100 border-amber-200"
+                                }`}
+                              >
+                                {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
+                              </span>
+                            )}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
-                </Fragment>
-              ))
+                    {row.getIsExpanded() && (
+                      <TableRow>
+                        <TableCell colSpan={row.getVisibleCells().length}>
+                          <div className="flex flex-col items-center py-4">
+                            {row.original.componentImage !== "" ? (
+                              <Image
+                                src={row.original.componentImage}
+                                alt={row.original.componentName}
+                                width={200}
+                                height={200}
+                                className="rounded mb-3"
+                                style={{
+                                  width: "70%",
+                                  height: "auto",
+                                  maxWidth: 280,
+                                }}
+                                priority
+                              />
+                            ) : (
+                              <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md">
+                                <PiImageDuotone className="w-full h-full p-2" />
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

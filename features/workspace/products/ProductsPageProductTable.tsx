@@ -371,6 +371,15 @@ const columns: ColumnDef<Item>[] = [
         },
       ] as const;
 
+      // State for when product is already submitted
+      const SUBMITTED_STATE = {
+        min: 100,
+        label: "Submitted",
+        dot: "bg-violet-500",
+        text: "text-violet-600 dark:text-violet-300",
+        bar: "from-violet-400 via-violet-500 to-violet-600",
+      } as const;
+
       const getProgressState = (value: number) => {
         for (const state of PROGRESS_STATES) {
           if (value >= state.min) return state;
@@ -384,7 +393,12 @@ const columns: ColumnDef<Item>[] = [
         0,
         Math.min(100, Math.round(progress || 0))
       );
-      const progressState = getProgressState(clampedPercentage);
+
+      // Use submitted state if product is submitted, otherwise determine based on percentage
+      const progressState =
+        row.original.status === "submitted"
+          ? SUBMITTED_STATE
+          : getProgressState(clampedPercentage);
 
       return (
         // <div className="flex items-center gap-3 min-w-[120px]">

@@ -59,11 +59,13 @@ interface FormValues {
 interface CustomFieldEditDialogProps {
   product: ProductData;
   productMetadata: ProductMetadata;
+  customFieldsData: Array<{ _id: string; label: string; value: string }>;
 }
 
 export default function ProductInformationCustomFieldEditDialog({
   product,
   productMetadata,
+  customFieldsData,
 }: CustomFieldEditDialogProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -113,16 +115,16 @@ export default function ProductInformationCustomFieldEditDialog({
 
   // Sync manage form with product data
   useEffect(() => {
-    if (product?.custom_fields) {
+    if (customFieldsData) {
       resetManage({
-        existingFields: product.custom_fields.map((f) => ({
+        existingFields: customFieldsData.map((f) => ({
           _id: f._id || "",
           label: f.label,
           value: f.value,
         })),
       });
     }
-  }, [product?.custom_fields, resetManage]);
+  }, [customFieldsData, resetManage]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!product?.id) {
@@ -178,7 +180,7 @@ export default function ProductInformationCustomFieldEditDialog({
     }
 
     // Send all custom fields data instead of just the updated field
-    const allCustomFields = product?.custom_fields?.map((field) =>
+    const allCustomFields = customFieldsData?.map((field) =>
       field._id === fieldId ? { ...field, label: label, value: value } : field
     );
 
