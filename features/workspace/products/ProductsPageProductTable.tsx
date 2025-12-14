@@ -86,7 +86,7 @@ import { cn } from "@/lib/utils";
 import DialogArchiveProduct from "./DialogArchiveProduct";
 import DialogBookmarkProduct from "./DialogBookmarkProduct";
 import DialogCreateVersion from "./DialogCreateVersion";
-import DialogExportProduct from "./DialogExportProduct";
+import DialogExportProductExcel from "./DialogExportProductExcel";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import {
   PiArchiveDuotone,
@@ -827,7 +827,7 @@ function RowActions({ row }: { row: { original: Item } }) {
         onOpenChange={setShowVersionDialog}
         product={row.original}
       />
-      <DialogExportProduct
+      <DialogExportProductExcel
         open={showExportDialog}
         onOpenChange={setShowExportDialog}
         product={row.original}

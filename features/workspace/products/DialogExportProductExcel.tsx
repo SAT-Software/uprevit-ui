@@ -19,7 +19,7 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 
-interface DialogExportProductProps {
+interface DialogExportProductExcelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: {
@@ -31,11 +31,11 @@ interface DialogExportProductProps {
   };
 }
 
-export default function DialogExportProduct({
+export default function DialogExportProductExcel({
   open,
   onOpenChange,
   product,
-}: DialogExportProductProps) {
+}: DialogExportProductExcelProps) {
   const { mutate: exportExcel, isPending } = useExportProductExcel();
 
   async function handleExport(e: React.MouseEvent) {
