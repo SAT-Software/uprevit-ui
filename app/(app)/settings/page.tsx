@@ -17,6 +17,7 @@ import {
   PiCreditCardDuotone,
 } from "react-icons/pi";
 import { useSearchParams } from "next/navigation";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 function SettingsPage() {
   const tab = useSearchParams().get("tab");
@@ -32,6 +33,7 @@ function SettingsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <InviteMembersDialog />
           </div>
         </div>

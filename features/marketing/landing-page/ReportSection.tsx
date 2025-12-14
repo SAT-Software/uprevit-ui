@@ -7,12 +7,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PiImageDuotone } from "react-icons/pi";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export default function ReportSection() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const badgeVariant =
+    mounted && resolvedTheme === "dark" ? "outline" : "white";
+
   return (
     <div className="w-full mt-40 mb-20">
       <div className="max-w-6xl flex flex-col items-center mx-auto mb-8">
-        <Badge variant="white" className="mb-8 z-60">
+        <Badge
+          variant={badgeVariant}
+          className="mb-8 z-60 dark:px-2 dark:py-0.5"
+        >
           <PiImageDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">Report</span>
         </Badge>

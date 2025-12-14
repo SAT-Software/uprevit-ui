@@ -5,17 +5,19 @@ export default function CTASection() {
     <div className="w-full mt-40 mb-20">
       <div className="relative w-full">
         <div className="p-1 bg-accent rounded-2xl max-w-6xl mx-auto border border-border">
-          <div className="w-full bg-foreground rounded-[14px] h-120 text-background p-10 gap-20 flex items-center justify-between">
+          <div className="w-full bg-foreground dark:bg-background rounded-[14px] h-120 text-background dark:text-foreground p-10 gap-20 flex items-center justify-between">
             <div className="w-full flex flex-col items-start justify-between">
               <h2 className="text-5xl font-bold">
                 Master Your Labeling Compliance{" "}
-                <span className="text-accent/60">Today</span>
+                <span className="text-accent/60 dark:text-foreground/40">
+                  Today
+                </span>
               </h2>
               <div className="mt-8 flex items-center justify-center gap-4">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-foreground/70"
+                  className="text-foreground/70 dark:text-foreground/80"
                 >
                   Learn More
                 </Button>

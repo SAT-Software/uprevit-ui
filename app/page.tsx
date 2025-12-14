@@ -17,7 +17,7 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/CE-symbol.png"
           alt="CE Symbol"
@@ -32,7 +32,7 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/MD-symbol.png"
           alt="MD Symbol"
@@ -48,7 +48,7 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/UDI-symbol.png"
           alt="UDI Symbol"
@@ -63,7 +63,7 @@ const items = [
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/2D Barcode-graphic.png"
           alt="Barcode Graphic"
@@ -79,7 +79,7 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/FDA-logo.png"
           alt="Barcode Graphic"
@@ -95,7 +95,7 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/RX-symbol.png"
           alt="Barcode Graphic"
@@ -110,7 +110,7 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/UKCA-symbol.png"
           alt="Barcode Graphic"
@@ -126,7 +126,7 @@ const items = [
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/ISO-logo.png"
           alt="Barcode Graphic"
@@ -142,7 +142,7 @@ const items = [
   {
     circleIndex: 4,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
           src="/WEEE-symbol.webp"
           alt="Barcode Graphic"
