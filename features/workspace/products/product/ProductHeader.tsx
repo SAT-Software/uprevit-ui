@@ -30,6 +30,7 @@ import { ProgressRadialChart } from "./ProgressRadialChart";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { Badge } from "@/components/ui/badge";
 import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
+import { useExportProductExcel } from "@/hooks/product/useExportProductExcel";
 import { Product } from "@/types/product";
 
 export type Item = {
@@ -68,6 +69,8 @@ export function ProductHeader() {
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
     useUpdateProduct();
+  const { mutate: exportExcel, isPending: isExporting } =
+    useExportProductExcel();
   const searchParams = useSearchParams();
   const isRedlineView = searchParams.get("view") === "redline";
 
@@ -281,9 +284,23 @@ export function ProductHeader() {
 
         <Separator orientation="vertical" className=" h-4" />
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm">
-            <PiDownloadDuotone />
-            Export
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              exportExcel({
+                productId,
+                productName: product?.productName,
+              })
+            }
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Spinner className="size-3" />
+            ) : (
+              <PiDownloadDuotone />
+            )}
+            {isExporting ? "Exporting..." : "Export"}
           </Button>
 
           {/* Version Dropdown - Shows all versions */}
