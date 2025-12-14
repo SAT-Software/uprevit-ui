@@ -38,6 +38,7 @@ export function useUpdateProduct() {
       toast.success("Product updated successfully");
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
       queryClient.invalidateQueries({ queryKey: ["archived-products"] });
+      queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
     },
     onError: (error) => {
       console.error(error.message || "Failed to update product");

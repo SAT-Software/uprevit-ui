@@ -39,6 +39,7 @@ import {
   PiChartPieSliceDuotone,
   PiColumnsDuotone,
   PiDotsThreeCircleVerticalDuotone,
+  PiDownloadDuotone,
   PiGitBranchDuotone,
   PiGitMergeDuotone,
   PiHashDuotone,
@@ -85,6 +86,7 @@ import { cn } from "@/lib/utils";
 import DialogArchiveProduct from "./DialogArchiveProduct";
 import DialogBookmarkProduct from "./DialogBookmarkProduct";
 import DialogCreateVersion from "./DialogCreateVersion";
+import DialogExportProduct from "./DialogExportProduct";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import {
   PiArchiveDuotone,
@@ -698,6 +700,7 @@ function RowActions({ row }: { row: { original: Item } }) {
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   // Can create new version only from submitted products
   const canCreateVersion = row.original.status === "submitted";
@@ -749,6 +752,15 @@ function RowActions({ row }: { row: { original: Item } }) {
             >
               <PiGitMergeDuotone />
               New version
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowExportDialog(true), 100);
+              }}
+            >
+              <PiDownloadDuotone className="h-4 w-4" />
+              <span>Export</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -813,6 +825,11 @@ function RowActions({ row }: { row: { original: Item } }) {
       <DialogCreateVersion
         open={showVersionDialog}
         onOpenChange={setShowVersionDialog}
+        product={row.original}
+      />
+      <DialogExportProduct
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
         product={row.original}
       />
     </div>
