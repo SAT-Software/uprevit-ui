@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,27 +11,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Spinner } from "@/components/ui/spinner";
+import { useExportProductExcel } from "@/hooks/product/useExportProductExcel";
+import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
+import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
+import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { cn } from "@/lib/utils";
+import { Product } from "@/types/product";
+import { useParams, usePathname } from "next/navigation";
 import {
   PiCircleDuotone,
-  PiDownloadDuotone,
+  PiFilePdfDuotone,
+  PiFileXlsDuotone,
   PiGitBranchDuotone,
   PiLockKeyDuotone,
   PiPaperPlaneRightDuotone,
   PiTextStrikethroughDuotone,
 } from "react-icons/pi";
-import { cn } from "@/lib/utils";
-import { useParams, usePathname } from "next/navigation";
-import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { ProgressRadialChart } from "./ProgressRadialChart";
-import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { Badge } from "@/components/ui/badge";
-import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
-import { useExportProductExcel } from "@/hooks/product/useExportProductExcel";
-import { Product } from "@/types/product";
 
 export type Item = {
   productId: string;
@@ -69,8 +70,10 @@ export function ProductHeader() {
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
     useUpdateProduct();
-  const { mutate: exportExcel, isPending: isExporting } =
+  const { mutate: exportExcel, isPending: isExportingExcel } =
     useExportProductExcel();
+  const { mutate: exportPDF, isPending: isExportingPDF } =
+    useExportProductPDF();
   const searchParams = useSearchParams();
   const isRedlineView = searchParams.get("view") === "redline";
 
@@ -293,14 +296,32 @@ export function ProductHeader() {
                 productName: product?.productName,
               })
             }
-            disabled={isExporting}
+            disabled={isExportingExcel}
           >
-            {isExporting ? (
+            {isExportingExcel ? (
               <Spinner className="size-3" />
             ) : (
-              <PiDownloadDuotone />
+              <PiFileXlsDuotone />
             )}
-            {isExporting ? "Exporting..." : "Export"}
+            {isExportingExcel ? "Exporting Excel..." : "Export Excel"}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              exportPDF({
+                productId,
+                productName: product?.productName,
+              })
+            }
+            disabled={isExportingPDF}
+          >
+            {isExportingPDF ? (
+              <Spinner className="size-3" />
+            ) : (
+              <PiFilePdfDuotone />
+            )}
+            {isExportingPDF ? "Exporting PDF..." : "Export PDF"}
           </Button>
 
           {/* Version Dropdown - Shows all versions */}

@@ -10,16 +10,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useExportProductExcel } from "@/hooks/product/useExportProductExcel";
 import {
   PiDownloadDuotone,
-  PiFileXlsDuotone,
+  PiFilePdfDuotone,
   PiInfoDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
 
-interface DialogExportProductProps {
+interface DialogExportProductPDFProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: {
@@ -31,18 +31,18 @@ interface DialogExportProductProps {
   };
 }
 
-export default function DialogExportProduct({
+export default function DialogExportProductPDF({
   open,
   onOpenChange,
   product,
-}: DialogExportProductProps) {
-  const { mutate: exportExcel, isPending } = useExportProductExcel();
+}: DialogExportProductPDFProps) {
+  const { mutate: exportPDF, isPending } = useExportProductPDF();
 
   async function handleExport(e: React.MouseEvent) {
     e.preventDefault();
     if (!product._id) return;
 
-    exportExcel(
+    exportPDF(
       {
         productId: product._id,
         productName: product.product_name,
@@ -69,7 +69,7 @@ export default function DialogExportProduct({
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Export product data to an Excel spreadsheet file.
+          Export product data to a PDF file.
         </DialogDescription>
         <div className="p-4 space-y-4">
           <div className="flex items-start gap-3">
@@ -77,16 +77,16 @@ export default function DialogExportProduct({
               className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-500"
               aria-hidden="true"
             >
-              <PiFileXlsDuotone size={20} />
+              <PiFilePdfDuotone size={20} />
             </div>
             <div className="space-y-1">
-              <h4 className="font-medium text-sm">Export to Excel</h4>
+              <h4 className="font-medium text-sm">Export to PDF</h4>
               <p className="text-sm text-muted-foreground">
                 Download all data for{" "}
                 <span className="font-medium text-foreground">
                   {product.product_name || "this product"}
                 </span>{" "}
-                as an Excel spreadsheet.
+                as a PDF file.
               </p>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function DialogExportProduct({
             disabled={isPending}
           >
             {isPending ? <Spinner /> : <PiDownloadDuotone />}
-            {isPending ? "Exporting..." : "Export Excel"}
+            {isPending ? "Exporting..." : "Export PDF"}
           </Button>
         </DialogFooter>
       </DialogContent>
