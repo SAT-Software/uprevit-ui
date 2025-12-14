@@ -40,6 +40,8 @@ import {
   PiColumnsDuotone,
   PiDotsThreeCircleVerticalDuotone,
   PiDownloadDuotone,
+  PiFilePdfDuotone,
+  PiFileXlsDuotone,
   PiGitBranchDuotone,
   PiGitMergeDuotone,
   PiHashDuotone,
@@ -98,6 +100,7 @@ import DialogShareProduct from "./DialogShareProduct";
 import FilterBuilder from "./tableFilter";
 import UpdateProductDialog from "./UpdateProductDialog";
 import { AuditLog } from "@/types/product";
+import DialogExportProductPDF from "./DialogExportProductPDF";
 
 // Define the type for the table data
 export type Item = {
@@ -700,7 +703,8 @@ function RowActions({ row }: { row: { original: Item } }) {
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showExportExcelDialog, setShowExportExcelDialog] = useState(false);
+  const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
   // Can create new version only from submitted products
   const canCreateVersion = row.original.status === "submitted";
@@ -756,11 +760,20 @@ function RowActions({ row }: { row: { original: Item } }) {
             <DropdownMenuItem
               onClick={(e) => e.stopPropagation()}
               onSelect={() => {
-                setTimeout(() => setShowExportDialog(true), 100);
+                setTimeout(() => setShowExportExcelDialog(true), 100);
               }}
             >
-              <PiDownloadDuotone className="h-4 w-4" />
-              <span>Export</span>
+              <PiFileXlsDuotone className="h-4 w-4" />
+              <span>Export to Excel</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowExportPDFDialog(true), 100);
+              }}
+            >
+              <PiFilePdfDuotone className="h-4 w-4" />
+              <span>Export to PDF</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -828,8 +841,13 @@ function RowActions({ row }: { row: { original: Item } }) {
         product={row.original}
       />
       <DialogExportProductExcel
-        open={showExportDialog}
-        onOpenChange={setShowExportDialog}
+        open={showExportExcelDialog}
+        onOpenChange={setShowExportExcelDialog}
+        product={row.original}
+      />
+      <DialogExportProductPDF
+        open={showExportPDFDialog}
+        onOpenChange={setShowExportPDFDialog}
         product={row.original}
       />
     </div>
