@@ -1,26 +1,24 @@
 "use client";
 
-import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { notFound, useParams, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import {
-  PiHouseDuotone,
-  PiCaretRightDuotone,
-  PiCalendarDuotone,
-  PiGlobeDuotone,
-  PiFlagDuotone,
-  PiBuildingsDuotone,
-  PiFlaskDuotone,
-  PiTagDuotone,
-  PiArrowRightBold,
-} from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
-import { AuditLog } from "@/types/audit-log";
-import { useMemo } from "react";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { cn } from "@/lib/utils";
+import { AuditLog } from "@/types/audit-log";
+import { notFound, useParams, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import {
+  PiArrowRightBold,
+  PiBuildingsDuotone,
+  PiCalendarDuotone,
+  PiFlagDuotone,
+  PiFlaskDuotone,
+  PiGlobeDuotone,
+  PiMapPinDuotone,
+  PiTagDuotone,
+} from "react-icons/pi";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
@@ -175,6 +173,12 @@ export default function Page() {
         value: productData.commercial_clinical || "N/A",
         icon: PiFlaskDuotone,
         diffPath: "product_information.data.commercial_clinical",
+      },
+      {
+        label: "Manufacturing Location",
+        value: productData.manufacturing_location || "N/A",
+        icon: PiMapPinDuotone,
+        diffPath: "product_information.data.manufacturing_location",
       },
     ];
 

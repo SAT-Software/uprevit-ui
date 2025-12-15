@@ -9,12 +9,10 @@ export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[oklch(0.97_0_0)] p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-6">
-          <div className="text-8xl font-bold text-[oklch(0.708_0_0)] mb-2">
-            404
-          </div>
+          <div className="text-8xl font-bold text-foreground mb-2">404</div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Page Not Found
           </h1>

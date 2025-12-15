@@ -42,11 +42,13 @@ interface ProductData {
   country_of_origin?: string;
   oem_contract_manufacturer?: string;
   commercial_clinical?: string;
+  manufacturing_location?: string;
   product_information?: {
     market_geography?: string;
     country_of_origin?: string;
     oem_contract_manufacturer?: string;
     commercial_clinical?: string;
+    manufacturing_location?: string;
   };
 }
 
@@ -59,6 +61,7 @@ interface FormValues {
   countryOfOrigin: string;
   oemContractManufacturer: string;
   commercialClinical: string;
+  manufacturingLocation: string;
 }
 
 function formatDate(date: Date | undefined) {
@@ -106,6 +109,7 @@ export default function EditProductDialog({
     countryOfOrigin: product?.country_of_origin || "",
     oemContractManufacturer: product?.oem_contract_manufacturer || "",
     commercialClinical: product?.commercial_clinical || "",
+    manufacturingLocation: product?.manufacturing_location || "",
   };
 
   const {
@@ -148,6 +152,7 @@ export default function EditProductDialog({
         country_of_origin: data.countryOfOrigin,
         oem_contract_manufacturer: data.oemContractManufacturer,
         commercial_clinical: data.commercialClinical,
+        manufacturing_location: data.manufacturingLocation,
       },
     };
 
@@ -458,6 +463,30 @@ export default function EditProductDialog({
                   {errors.commercialClinical && (
                     <p role="alert" className="text-xs text-destructive">
                       {errors.commercialClinical.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Manufacturing Location */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor={`${id}-manufacturing-location`}
+                    className="text-sm"
+                  >
+                    Manufacturing Location
+                  </Label>
+                  <Input
+                    id={`${id}-manufacturing-location`}
+                    placeholder="Enter manufacturing location"
+                    type="text"
+                    aria-invalid={
+                      errors.manufacturingLocation ? "true" : "false"
+                    }
+                    {...register("manufacturingLocation")}
+                  />
+                  {errors.manufacturingLocation && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.manufacturingLocation.message}
                     </p>
                   )}
                 </div>
