@@ -285,6 +285,8 @@ export default function EditProductDialog({
                             : undefined
                         }
                         captionLayout="dropdown"
+                        startMonth={new Date(new Date().getFullYear() - 50, 0)}
+                        endMonth={new Date(new Date().getFullYear() + 50, 11)}
                         onSelect={(selectedDate) => {
                           if (selectedDate) {
                             setValue(
@@ -346,6 +348,8 @@ export default function EditProductDialog({
                             : undefined
                         }
                         captionLayout="dropdown"
+                        startMonth={new Date(new Date().getFullYear() - 50, 0)}
+                        endMonth={new Date(new Date().getFullYear() + 50, 11)}
                         onSelect={(selectedDate) => {
                           if (selectedDate) {
                             setValue(
