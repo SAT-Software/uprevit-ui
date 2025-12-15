@@ -35,10 +35,10 @@ export default function DemoSection() {
         </Badge>
 
         <div className="w-full flex items-center justify-start text-2xl">
-          <h2 className="text-5xl w-1/2 font-medium">
+          <h2 className="text-5xl w-1/2 font-medium mr-16">
             The FastTrack way to Global labeling compliance
           </h2>
-          <div className="mr-8 h-16 w-px bg-border" />
+          <div className="mr-12 h-16 w-px bg-border" />
           <p className="font-semibold text-muted-foreground/60">
             Command Your Labels. <br /> Command Your Compliance.
           </p>

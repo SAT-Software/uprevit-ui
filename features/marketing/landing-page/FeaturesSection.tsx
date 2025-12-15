@@ -34,8 +34,8 @@ export default function FeaturesSection() {
           </h2>
           <div className="mx-8 h-24 w-px bg-border" />
           <p className="font-semibold text-muted-foreground/60 mr-8 tracking-tighter leading-tight">
-            Import your Technical data, source files, label components,
-            compliance information and let Uprevit do the rest
+            Unify your data, Uprevit your workflow. Stop managing scattered
+            source files and start managing results
           </p>
         </div>
       </div>

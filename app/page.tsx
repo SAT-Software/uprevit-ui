@@ -72,9 +72,9 @@ const items = [
         />
       </div>
     ),
-    speed: 35,
+    speed: 40,
     reverse: true,
-    initialAngle: 270,
+    initialAngle: 160,
   },
   {
     circleIndex: 0,
@@ -119,9 +119,9 @@ const items = [
         />
       </div>
     ),
-    speed: 35,
+    speed: 45,
     reverse: true,
-    initialAngle: 270,
+    initialAngle: 200,
   },
   {
     circleIndex: 3,
@@ -153,6 +153,83 @@ const items = [
     ),
     speed: 35,
     initialAngle: 45,
+  },
+  {
+    circleIndex: 0,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+        <Image
+          src="/CAS_symbol.webp"
+          alt="CAS Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 45,
+    initialAngle: 90,
+  },
+  {
+    circleIndex: 0,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+        <Image
+          src="/DNR_symbol.png"
+          alt="DNR Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 45,
+    reverse: true,
+    initialAngle: 270,
+  },
+  {
+    circleIndex: 1,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+        <Image
+          src="/EC-REP_Symbol.webp"
+          alt="EC-REP Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 50,
+    initialAngle: 90,
+  },
+  {
+    circleIndex: 1,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+        <Image
+          src="/IFU_symbol.webp"
+          alt="IFU Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 45,
+    reverse: true,
+    initialAngle: 270,
+  },
+  {
+    circleIndex: 2,
+    content: (
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+        <Image
+          src="/Manufacturer_symbol.png"
+          alt="Manufacturer Symbol"
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+    ),
+    speed: 55,
+    initialAngle: 0,
   },
 ];
 

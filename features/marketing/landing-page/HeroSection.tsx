@@ -23,7 +23,7 @@ export default function HeroSection() {
           <p className="w-[80%] text-center text-muted-foreground dark:text-muted-foreground/60">
             Forget document-level risk: Streamline your global labeling process
             with a unified, intuitive platform that manages labels at the data
-            level. Built by compliance experts, designed for everyone.
+            level. Built by compliance experts, designed for Medical devices.
           </p>
         </div>
         <div className="mt-8 flex items-center justify-center gap-4">

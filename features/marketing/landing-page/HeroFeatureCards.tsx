@@ -47,11 +47,11 @@ export default function HeroFeatureCards() {
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiSealCheckDuotone size={14} />
-                    <span className="truncate">Standard Applied</span>
+                    <span className="truncate">Applicable Standards</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiMapPinDuotone size={14} />
-                    <span className="truncate">Market Region</span>
+                    <span className="truncate">Applicable Geography</span>
                   </li>
                 </ul>
               </CardContent>
@@ -65,7 +65,7 @@ export default function HeroFeatureCards() {
               <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
                   <PiDatabaseFill className="bg-blue-600 dark:bg-blue-700 text-white p-1 w-6 h-6 rounded" />
-                  <span>Technical Data</span>
+                  <span>Product Specifications</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
@@ -76,17 +76,17 @@ export default function HeroFeatureCards() {
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiCubeDuotone size={14} />
-                    <span className="truncate">Product Data</span>
+                    <span className="truncate">Design Specifications</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiHashDuotone size={14} />
-                    <span className="truncate">Mateirla Number and ...</span>
+                    <span className="truncate">Material Number</span>
                   </li>
                 </ul>
               </CardContent>
               <CardFooter className="py-0 px-0 place-content-start">
                 <Badge variant="outline" className="mt-1.5">
-                  Draft
+                  Exclusivity
                 </Badge>
               </CardFooter>
             </Card>
@@ -101,17 +101,17 @@ export default function HeroFeatureCards() {
                 <ul>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiPenNibDuotone size={14} />
-                    <span className="truncate">Label Artworks</span>
+                    <span className="truncate">Label Artworks, IFUs</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiFilePngDuotone size={14} />
-                    <span className="truncate">Stocks, Die-cut</span>
+                    <span className="truncate">Stocks, R&D Documents</span>
                   </li>
                 </ul>
               </CardContent>
               <CardFooter className="py-0 px-0 place-content-start">
                 <Badge variant="outline" className="mt-1.5">
-                  Syncing
+                  Backed
                 </Badge>
               </CardFooter>
             </Card>
@@ -130,13 +130,13 @@ export default function HeroFeatureCards() {
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiRulerDuotone size={14} />
-                    <span className="truncate">Dimensions, Barcodes</span>
+                    <span className="truncate">Label Artworks</span>
                   </li>
                 </ul>
               </CardContent>
               <CardFooter className="py-0 px-0 place-content-start">
                 <Badge variant="outline" className="mt-1.5">
-                  Redlined
+                  Essential
                 </Badge>
               </CardFooter>
             </Card>
@@ -155,13 +155,13 @@ export default function HeroFeatureCards() {
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <PiBarcodeDuotone size={14} />
-                    <span className="truncate">Barcodes, Other Components</span>
+                    <span className="truncate">Barcodes</span>
                   </li>
                 </ul>
               </CardContent>
               <CardFooter className="py-0 px-0 place-content-start">
                 <Badge variant="outline" className="mt-1.5">
-                  In Review
+                  Mandate
                 </Badge>
               </CardFooter>
             </Card>
