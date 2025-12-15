@@ -245,6 +245,10 @@ export default function EditSchematicsDialog({
                   {...register("labelPresence")}
                   value={JSON.stringify(labelPresence)}
                 />
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Press Enter to add a label type. You can add multiple label
+                  types.
+                </p>
               </div>
             </div>
           </div>
