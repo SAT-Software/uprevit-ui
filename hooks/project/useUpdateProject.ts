@@ -33,7 +33,7 @@ export function useUpdateProject() {
       queryClient.invalidateQueries({
         queryKey: ["project", variables._id],
       });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["all-projects"] });
     },
     onError: (error) => {
       console.error(error.message || "Failed to update project");
