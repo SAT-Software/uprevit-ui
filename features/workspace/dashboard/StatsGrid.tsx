@@ -48,7 +48,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                   : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
               }
             >
-              <PiPackageDuotone className="animate-pulse" />
+              <PiBuildingsDuotone className="animate-pulse" />
             </div>
             <div>
               <div className="font-medium text-xs uppercase text-muted-foreground">
@@ -69,7 +69,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                   : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
               }
             >
-              <PiBuildingsDuotone className="animate-pulse" />
+              <PiKanbanDuotone className="animate-pulse" />
             </div>
             <div>
               <div className="font-medium text-xs uppercase text-muted-foreground">
@@ -90,7 +90,7 @@ export function StatsGrid({ location }: StatsGridProps) {
                   : "max-[480px]:hidden size-10 shrink-0 rounded-full bg-neutral-200/25 border border-neutral-600/50 flex items-center justify-center text-neutral-500"
               }
             >
-              <PiKanbanDuotone className="animate-pulse" />
+              <PiPackageDuotone className="animate-pulse" />
             </div>
             <div>
               <div className="font-medium text-xs uppercase text-muted-foreground">
