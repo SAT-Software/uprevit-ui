@@ -107,13 +107,13 @@ export function InviteMembersDialog() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="overflow-y-auto p-4"
         >
-          <FieldGroup className="space-y-3">
+          <FieldGroup className="space-y-2 gap-4">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="flex items-start gap-3 p-3 border rounded-lg bg-background/50 group hover:bg-muted/20 transition-colors"
+                className="flex items-center gap-2 p-2 border rounded-lg bg-background/50 group hover:bg-muted/20 transition-colors"
               >
-                <div className="grid flex-1 grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid flex-1 grid-cols-1 sm:grid-cols-2 gap-2">
                   <Controller
                     name={`users.${index}.name`}
                     control={form.control}
@@ -121,23 +121,24 @@ export function InviteMembersDialog() {
                     render={({ field: controllerField, fieldState }) => (
                       <Field
                         data-invalid={fieldState.invalid}
-                        className="space-y-1"
+                        className="space-y-0"
                       >
                         <FieldLabel
                           htmlFor={`invite-name-${index}`}
-                          className="text-xs font-medium text-muted-foreground ml-1"
+                          className="text-xs font-medium text-muted-foreground"
                         >
                           Name
                         </FieldLabel>
                         <InputGroup className="bg-background">
                           <InputGroupText>
-                            <PiUserDuotone />
+                            <PiUserDuotone className="ml-2" />
                           </InputGroupText>
                           <InputGroupInput
                             {...controllerField}
                             id={`invite-name-${index}`}
                             placeholder="John Doe"
                             autoComplete="off"
+                            className="pl-2"
                             aria-invalid={fieldState.invalid}
                           />
                         </InputGroup>
@@ -160,23 +161,24 @@ export function InviteMembersDialog() {
                     render={({ field: controllerField, fieldState }) => (
                       <Field
                         data-invalid={fieldState.invalid}
-                        className="space-y-1"
+                        className="space-y-0"
                       >
                         <FieldLabel
                           htmlFor={`invite-email-${index}`}
-                          className="text-xs font-medium text-muted-foreground ml-1"
+                          className="text-xs font-medium text-muted-foreground"
                         >
                           Email
                         </FieldLabel>
                         <InputGroup className="bg-background">
                           <InputGroupText>
-                            <PiEnvelopeSimpleDuotone />
+                            <PiEnvelopeSimpleDuotone className="ml-2" />
                           </InputGroupText>
                           <InputGroupInput
                             {...controllerField}
                             id={`invite-email-${index}`}
                             placeholder="name@example.com"
                             type="email"
+                            className="pl-2"
                             autoComplete="off"
                             aria-invalid={fieldState.invalid}
                           />
@@ -207,7 +209,7 @@ export function InviteMembersDialog() {
               type="button"
               variant="outline"
               size="sm"
-              className="w-full border-dashed gap-2 text-muted-foreground hover:text-foreground"
+              className="w-full border-dashed gap-2 p-4 text-muted-foreground hover:text-foreground"
               onClick={() => append({ name: "", email: "" })}
               disabled={fields.length >= 10}
             >

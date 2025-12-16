@@ -11,6 +11,7 @@ import "@univerjs/presets/lib/styles/preset-sheets-thread-comment.css";
 import "@univerjs/presets/lib/styles/preset-sheets-core.css";
 import "@univerjs/presets/lib/styles/preset-sheets-table.css";
 import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
+import { ThemeProvider } from "@/lib/theme-provider";
 
 const geist = Geist({
   variable: "--font-geist",
@@ -30,9 +31,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geist.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Providers>{children}</Providers>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

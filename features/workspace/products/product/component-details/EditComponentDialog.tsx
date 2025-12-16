@@ -276,6 +276,10 @@ export default function EditComponentDialog({
                   {...register("labelType")}
                   value={JSON.stringify(labelType)}
                 />
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Press Enter to add a label type. You can add multiple label
+                  types.
+                </p>
               </div>
             </div>
           </div>

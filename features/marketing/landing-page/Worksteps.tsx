@@ -71,7 +71,8 @@ export function Worksteps({ className }: WorkstepsProps) {
           Labeling Asset Management
         </h3>
         <p className="text-muted-foreground text-sm mt-1">
-          Your source of truth for all symbols, schematics, graphics
+          Your single source of truth for all compliant symbols, schematics, and
+          product imagery
         </p>
       </div>
 

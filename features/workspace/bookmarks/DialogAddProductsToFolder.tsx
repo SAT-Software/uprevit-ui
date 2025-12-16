@@ -7,7 +7,9 @@ import {
   PiPackageDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
+import { Check, ChevronsUpDown } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,12 +23,18 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useAddProductInBookmarkFolder } from "@/hooks/bookmark/useAddProductInBookmarkFolder";
 import { Spinner } from "@/components/ui/spinner";
@@ -50,6 +58,7 @@ export default function DialogAddProductsToFolder({
   const { data: productsData, isLoading, error } = useGetAllProducts();
   const products = productsData?.result?.products ?? [];
   const [open, setOpen] = useState(false);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   const { mutate: addProductToFolder, isPending } =
     useAddProductInBookmarkFolder();
@@ -151,55 +160,89 @@ export default function DialogAddProductsToFolder({
 
             <div className="space-y-3">
               <Label className="text-sm font-medium">Select Product</Label>
-              <Select
-                value={selectedProductId}
-                onValueChange={(value) => setValue("productId", value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose a product..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {isLoading ? (
-                    <SelectItem disabled value="loading">
-                      Loading products...
-                    </SelectItem>
-                  ) : error ? (
-                    <SelectItem disabled value="error">
-                      Error loading products
-                    </SelectItem>
-                  ) : products.length === 0 ? (
-                    <SelectItem disabled value="empty">
-                      No products available
-                    </SelectItem>
-                  ) : (
-                    products?.map(
-                      (product: {
-                        _id: string;
-                        product_name?: string;
-                        product_plan_number?: string;
-                        status?: string;
-                      }) => (
-                        <SelectItem key={product._id} value={product._id}>
-                          <div className="flex items-center gap-2 w-full">
-                            <PiPackageDuotone
-                              size={16}
-                              className="text-muted-foreground"
-                            />
-                            <span className="flex-1">
-                              {product.product_name || "Unnamed Product"}
-                            </span>
-                            {product.status && (
-                              <span className="text-xs text-muted-foreground ml-auto uppercase border border-border px-1.5 rounded-[4px]">
-                                {product.status}
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      )
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    role="combobox"
+                    aria-expanded={comboboxOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedProductId
+                      ? products.find(
+                          (product: { _id: string; product_name?: string }) =>
+                            product._id === selectedProductId
+                        )?.product_name || "Unnamed Product"
+                      : "Choose a product..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search products..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        {isLoading
+                          ? "Loading products..."
+                          : error
+                          ? "Error loading products"
+                          : "No product found."}
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {products
+                          ?.slice(0, 50)
+                          .map(
+                            (product: {
+                              _id: string;
+                              product_name?: string;
+                              product_plan_number?: string;
+                              status?: string;
+                            }) => (
+                              <CommandItem
+                                key={product._id}
+                                value={product.product_name || product._id}
+                                onSelect={() => {
+                                  setValue(
+                                    "productId",
+                                    product._id === selectedProductId
+                                      ? ""
+                                      : product._id
+                                  );
+                                  setComboboxOpen(false);
+                                }}
+                              >
+                                <PiPackageDuotone
+                                  size={16}
+                                  className="mr-2 text-muted-foreground"
+                                />
+                                <span className="flex-1 truncate">
+                                  {product.product_name || "Unnamed Product"}
+                                </span>
+                                {product.status && (
+                                  <span className="text-xs text-muted-foreground ml-2 uppercase border border-border px-1.5 rounded-[4px]">
+                                    {product.status}
+                                  </span>
+                                )}
+                                <Check
+                                  className={cn(
+                                    "ml-2 h-4 w-4",
+                                    selectedProductId === product._id
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                              </CommandItem>
+                            )
+                          )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {errors.productId && (
                 <p className="text-sm text-destructive">
                   {errors.productId.message}

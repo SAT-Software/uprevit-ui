@@ -33,6 +33,9 @@ export function useUpdateDepartment() {
       queryClient.invalidateQueries({
         queryKey: ["department", variables._id],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["all-departments"],
+      });
     },
     onError: (error) => {
       console.error(error.message || "Failed to update department");

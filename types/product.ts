@@ -22,6 +22,7 @@ export interface Product {
     country_of_origin?: string;
     oem_contract_manufacturer?: string;
     commercial_clinical?: string;
+    manufacturing_location?: string;
     custom_fields?: Array<{
       _id?: string;
       field_name: string;
@@ -177,6 +178,7 @@ export interface ProductInformationData {
   country_of_origin?: string;
   oem_contract_manufacturer?: string;
   commercial_clinical?: string;
+  manufacturing_location?: string;
 }
 
 /** Product information tab in all-tabs response */

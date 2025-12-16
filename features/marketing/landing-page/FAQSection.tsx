@@ -6,6 +6,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PiImageDuotone } from "react-icons/pi";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 const faqs = [
   {
@@ -20,8 +22,12 @@ const faqs = [
   },
   {
     question: "How does Uprevit handle version control and change tracking ?",
-    answer:
-      "We eliminate manual redlining completely. Uprevit provides Perfect Version Control and a comprehensive product phase tracking. Every change event is logged with a time-stamp. Our Automated Redlining feature instantly generates comparison copies against the master version, providing instant, irrefutable proof of compliance",
+    answer: [
+      "We eliminate manual redlining completely",
+      "Uprevit provides Perfect Version Control and a comprehensive product phase tracking",
+      "Every change event is logged with a time-stamp",
+      "Our Automated Redlining feature instantly generates comparison copies against the master version, providing instant, irrefutable proof of compliance",
+    ],
   },
   {
     question:
@@ -38,16 +44,32 @@ const faqs = [
   {
     question:
       "What level of user access control and collaboration does the platform offer?",
-    answer:
-      "Uprevit is built for seamless collaboration with robust control. We offer role-based access control (RBAC), allowing you to define precise permissions for every user, team, and department. This ensures only authorized personnel can create, review, or approve specific label actions, maintaining tight security and audit control over the workflow.",
+    answer: [
+      "Uprevit is built for seamless collaboration with robust control",
+      "We offer role-based access control (RBAC), allowing you to define precise permissions for every user, team, and department",
+      "This ensures only authorized personnel can create, review, or approve specific label actions, maintaining tight security and audit control over the workflow",
+    ],
   },
 ];
 
 export default function FAQSection() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const badgeVariant =
+    mounted && resolvedTheme === "dark" ? "outline" : "white";
+
   return (
     <div className="relative w-full pt-20 mt-40 pb-20 mb-20 pointer-events-auto">
       <div className="max-w-6xl flex flex-col items-center mx-auto mb-8">
-        <Badge variant="white" className="mb-8 z-60">
+        <Badge
+          variant={badgeVariant}
+          className="mb-8 z-60 dark:px-2 dark:py-0.5"
+        >
           <PiImageDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">FAQ</span>
         </Badge>
@@ -69,7 +91,15 @@ export default function FAQSection() {
             <AccordionItem key={index} value={`item-${index}`}>
               <AccordionTrigger>{faq.question}</AccordionTrigger>
               <AccordionContent className="text-balance text-muted-foreground leading-relaxed">
-                {faq.answer}
+                {Array.isArray(faq.answer) ? (
+                  <ul className="list-disc list-inside space-y-1.5">
+                    {faq.answer.map((point, i) => (
+                      <li key={i}>{point}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  faq.answer
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
