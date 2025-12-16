@@ -67,6 +67,7 @@ type Item = {
   textPresent: boolean;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
+  _originalIndex?: number;
 };
 
 // Type for diff data
@@ -82,10 +83,12 @@ const RedlineCell = ({
   value,
   diff,
   formatFn,
+  showBadgeStyle = false,
 }: {
   value: any;
   diff: DiffItem | null;
-  formatFn?: (v: any) => React.ReactNode;
+  formatFn?: (v: any, isOld?: boolean, isNew?: boolean) => React.ReactNode;
+  showBadgeStyle?: boolean;
 }) => {
   const format = formatFn || ((v: any) => v?.toString() || "-");
 
@@ -96,16 +99,30 @@ const RedlineCell = ({
   const isModified = diff.status === "modified";
 
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-1">
       {/* Old value - show for modified and removed */}
       {(isModified || isRemoved) && diff.old_value !== null && (
-        <div className="line-through text-sm text-red-600/70">
-          {format(diff.old_value)}
+        <div
+          className={`line-through text-sm ${
+            showBadgeStyle
+              ? "text-red-700 px-1.5 py-0.5"
+              : "text-red-600/70 px-1.5 py-0.5"
+          }`}
+        >
+          {format(diff.old_value, true, false)}
         </div>
       )}
       {/* New value - show for modified and added */}
       {(isModified || isAdded) && !isRemoved && (
-        <div className="text-sm text-blue-700">{format(diff.new_value)}</div>
+        <div
+          className={`text-sm ${
+            showBadgeStyle
+              ? "text-blue-700 px-1.5 py-0.5"
+              : "text-blue-700 px-1.5 py-0.5"
+          }`}
+        >
+          {format(diff.new_value, false, true)}
+        </div>
       )}
     </div>
   );
@@ -218,8 +235,9 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
+      const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`symbols_graphics.data[${row.index}].text`)
+        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].text`)
         : null;
 
       return diff ? (
@@ -245,17 +263,38 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
+      const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`symbols_graphics.data[${row.index}].text_present`)
+        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].text_present`)
         : null;
+
+      console.log("diff in text present", diff);
 
       if (diff) {
         return (
           <RedlineCell
             value={row.getValue("textPresent")}
             diff={diff}
-            formatFn={(v) => (
-              <Badge variant={v ? "default" : "secondary"}>
+            showBadgeStyle={true}
+            formatFn={(v, isOld, isNew) => (
+              <Badge
+                variant={
+                  isNew
+                    ? "default"
+                    : isOld
+                    ? "destructive"
+                    : v
+                    ? "default"
+                    : "secondary"
+                }
+                className={`${
+                  isNew
+                    ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-500"
+                    : isOld
+                    ? "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 line-through"
+                    : ""
+                }`}
+              >
                 {v ? "Yes" : "No"}
               </Badge>
             )}
@@ -283,23 +322,32 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
       const symbols = row.getValue("symbolsTextPresent") as string[];
+      const originalIndex = row.original._originalIndex ?? row.index;
 
-      // Check for added label presence values
+      // Check for added and removed label presence values
       let addedLabels: string[] = [];
+      let removedLabels: string[] = [];
       if (meta?.isRedlineView && meta.diffs) {
         const labelDiffs = (meta.diffs as DiffItem[]).filter((d) =>
           d.path.startsWith(
-            `symbols_graphics.data[${row.index}].label_presence`
+            `symbols_graphics.data[${originalIndex}].label_presence`
           )
         );
         addedLabels = labelDiffs
           .filter((d) => d.status === "added" && d.new_value)
           .map((d) => d.new_value as string);
+        removedLabels = labelDiffs
+          .filter((d) => d.status === "removed" && d.old_value)
+          .map((d) => d.old_value as string);
       }
 
-      // Merge current with added
+      // Merge current with added and removed for display
       const displayLabels = meta?.isRedlineView
-        ? [...symbols, ...addedLabels.filter((l) => !symbols.includes(l))]
+        ? [
+            ...symbols,
+            ...addedLabels.filter((l) => !symbols.includes(l)),
+            ...removedLabels.filter((l) => !symbols.includes(l)),
+          ]
         : symbols;
 
       return (
@@ -307,13 +355,16 @@ const columns: ColumnDef<Item>[] = [
           {displayLabels && displayLabels.length > 0 ? (
             displayLabels.map((symbol, index) => {
               const isNewlyAdded = addedLabels.includes(symbol);
+              const isRemoved = removedLabels.includes(symbol);
               return (
                 <Badge
                   key={index}
                   variant="outline"
                   className={`text-xs ${
                     isNewlyAdded
-                      ? "border-blue-400 text-blue-700 bg-blue-50"
+                      ? "border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500"
+                      : isRemoved
+                      ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
                       : ""
                   }`}
                 >
@@ -374,8 +425,8 @@ export default function SymbolsGraphicsPageSymbolsTable({
     return diffs.find((d) => d.path === path) || null;
   };
 
-  // Check if a row has any changes (for symbols entity)
-  const getRowStatus = (rowIndex: number) => {
+  // Check if a row has any changes (using original index for correct diff matching)
+  const getRowStatus = (rowIndex: number, originalIndex: number) => {
     const isFromDiff = data?.[rowIndex]?._isFromDiff;
     if (isFromDiff) return "added";
 
@@ -383,12 +434,12 @@ export default function SymbolsGraphicsPageSymbolsTable({
     if (isRemovedFromDiff) return "removed";
 
     // Check for whole-row addition/removal
-    const rowDiff = getDiff(`symbols_graphics.data[${rowIndex}]`);
+    const rowDiff = getDiff(`symbols_graphics.data[${originalIndex}]`);
     if (rowDiff) return rowDiff.status;
 
     // Check for any field-level changes
     const hasFieldDiff = diffs.some((d) =>
-      d.path.startsWith(`symbols_graphics.data[${rowIndex}].`)
+      d.path.startsWith(`symbols_graphics.data[${originalIndex}].`)
     );
     return hasFieldDiff ? "modified" : null;
   };
@@ -438,7 +489,8 @@ export default function SymbolsGraphicsPageSymbolsTable({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const rowStatus = getRowStatus(row.index);
+                const originalIndex = row.original._originalIndex ?? row.index;
+                const rowStatus = getRowStatus(row.index, originalIndex);
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";

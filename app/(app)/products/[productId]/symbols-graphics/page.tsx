@@ -21,6 +21,7 @@ interface SymbolGraphicItem {
   entity: string;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
+  _originalIndex?: number;
 }
 
 export default function Page() {
@@ -42,9 +43,6 @@ export default function Page() {
 
   console.log("graphics page diff data", diffData);
 
-  const productName =
-    data?.result?.data?.product_information?.data?.product_name || "Product";
-
   // Check if product is submitted - disable editing buttons
   const isSubmitted =
     data?.result?.data?.product_information?.product_data?.data?.status ===
@@ -55,6 +53,8 @@ export default function Page() {
   const symbolsGraphicsDiffs = allDiffs.filter((d: any) =>
     d.path.startsWith("symbols_graphics.data")
   );
+
+  console.log("graphics page diff data", symbolsGraphicsDiffs);
 
   if (isLoading) {
     return (
@@ -119,25 +119,40 @@ export default function Page() {
     );
   }
 
-  const symbolsGraphicsData = data?.result?.data?.symbols_graphics?.data || [];
+  // Get the appropriate data source
+  // In redline view, use next_version data for correct ordering (follows new version sequence)
+  const symbolsGraphicsData =
+    isRedlineView && diffData?.result?.next_version
+      ? diffData.result.next_version.symbols_graphics?.data || []
+      : data?.result?.data?.symbols_graphics?.data || [];
+
   let symbolsGraphics = (symbolsGraphicsData as SymbolGraphicItem[]) || [];
 
-  // In redline view, merge added and removed items from diffs
+  // In redline view, mark added items and append removed items
   if (isRedlineView && symbolsGraphicsDiffs.length > 0) {
-    // Find whole-row additions (status: 'added' on path like symbols_graphics.data[X])
-    const addedItems = symbolsGraphicsDiffs
-      .filter(
-        (d: any) =>
-          d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
-          d.status === "added" &&
-          d.new_value
-      )
-      .map((d: any) => ({
-        ...d.new_value,
-        _isFromDiff: true,
-      }));
+    // Get indices of whole-row additions to mark them
+    const addedIndices = new Set(
+      symbolsGraphicsDiffs
+        .filter(
+          (d: any) =>
+            d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
+            d.status === "added"
+        )
+        .map((d: any) => {
+          const match = d.path.match(/\[(\d+)\]$/);
+          return match ? parseInt(match[1]) : -1;
+        })
+        .filter((idx: number) => idx >= 0)
+    );
 
-    // Find whole-row removals (status: 'removed' on path like symbols_graphics.data[X])
+    // Mark added items in the new version data
+    symbolsGraphics = symbolsGraphics.map((item, index) => ({
+      ...item,
+      _isFromDiff: addedIndices.has(index),
+    }));
+
+    // Find whole-row removals (items that existed in old version but are deleted)
+    // These need to be appended at the end since they don't exist in new version
     const removedItems = symbolsGraphicsDiffs
       .filter(
         (d: any) =>
@@ -150,18 +165,22 @@ export default function Page() {
         _isRemovedFromDiff: true,
       }));
 
-    // Merge: current items + added items + removed items
-    symbolsGraphics = [...symbolsGraphics, ...addedItems, ...removedItems];
+    // Append removed items at the end
+    symbolsGraphics = [...symbolsGraphics, ...removedItems];
   }
 
-  // Group items by normalized entity (lowercase)
+  // Group items by normalized entity (lowercase), preserving original index for diff lookups
   const entityGroups: Record<string, SymbolGraphicItem[]> = {};
-  symbolsGraphics.forEach((item) => {
+  symbolsGraphics.forEach((item, index) => {
     const key = item.entity.toLowerCase();
     if (!entityGroups[key]) {
       entityGroups[key] = [];
     }
-    entityGroups[key].push(item);
+    // Preserve original index for correct diff path matching
+    entityGroups[key].push({
+      ...item,
+      _originalIndex: item._originalIndex ?? index,
+    });
   });
 
   // Map grouped data to expected prop names for SchematicsSymbolsTabs
@@ -173,6 +192,7 @@ export default function Page() {
     presentOnLabels: item.label_presence,
     _isFromDiff: item._isFromDiff,
     _isRemovedFromDiff: item._isRemovedFromDiff,
+    _originalIndex: item._originalIndex,
   }));
 
   const barcodesData = (entityGroups["barcodes"] || []).map((item) => ({
@@ -183,6 +203,7 @@ export default function Page() {
     presentOnLabels: item.label_presence,
     _isFromDiff: item._isFromDiff,
     _isRemovedFromDiff: item._isRemovedFromDiff,
+    _originalIndex: item._originalIndex,
   }));
 
   const otherComponentsData = (entityGroups["other components"] || []).map(
@@ -194,6 +215,7 @@ export default function Page() {
       presentOnLabels: item.label_presence,
       _isFromDiff: item._isFromDiff,
       _isRemovedFromDiff: item._isRemovedFromDiff,
+      _originalIndex: item._originalIndex,
     })
   );
 
@@ -206,6 +228,7 @@ export default function Page() {
     textPresent: item.text_present,
     _isFromDiff: item._isFromDiff,
     _isRemovedFromDiff: item._isRemovedFromDiff,
+    _originalIndex: item._originalIndex,
   }));
 
   return (

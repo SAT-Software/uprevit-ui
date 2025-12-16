@@ -68,6 +68,7 @@ type Item = {
   presentOnLabels: string[];
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
+  _originalIndex?: number;
 };
 
 // Type for diff data
@@ -83,10 +84,12 @@ const RedlineCell = ({
   value,
   diff,
   formatFn,
+  showBadgeStyle = false,
 }: {
   value: any;
   diff: DiffItem | null;
-  formatFn?: (v: any) => React.ReactNode;
+  formatFn?: (v: any, isOld?: boolean, isNew?: boolean) => React.ReactNode;
+  showBadgeStyle?: boolean;
 }) => {
   const format = formatFn || ((v: any) => v?.toString() || "-");
   if (!diff) return <>{format(value)}</>;
@@ -96,14 +99,28 @@ const RedlineCell = ({
   const isModified = diff.status === "modified";
 
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-1">
       {(isModified || isRemoved) && diff.old_value !== null && (
-        <div className="line-through text-sm text-red-600/70">
-          {format(diff.old_value)}
+        <div
+          className={`line-through text-sm ${
+            showBadgeStyle
+              ? "text-red-700 px-1.5 py-0.5"
+              : "text-red-600/70 px-1.5 py-0.5"
+          }`}
+        >
+          {format(diff.old_value, true, false)}
         </div>
       )}
       {(isModified || isAdded) && !isRemoved && (
-        <div className="text-sm text-blue-700">{format(diff.new_value)}</div>
+        <div
+          className={`text-sm ${
+            showBadgeStyle
+              ? "text-blue-700 px-1.5 py-0.5"
+              : "text-blue-700 px-1.5 py-0.5"
+          }`}
+        >
+          {format(diff.new_value, false, true)}
+        </div>
       )}
     </div>
   );
@@ -202,8 +219,9 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
+      const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`symbols_graphics.data[${row.index}].text`)
+        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].text`)
         : null;
       return diff ? (
         <RedlineCell
@@ -228,8 +246,9 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
+      const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`symbols_graphics.data[${row.index}].description`)
+        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].description`)
         : null;
       return diff ? (
         <RedlineCell
@@ -261,34 +280,50 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as any;
       const labels = row.getValue("presentOnLabels") as string[];
+      const originalIndex = row.original._originalIndex ?? row.index;
 
+      // Check for added and removed label presence values
       let addedLabels: string[] = [];
+      let removedLabels: string[] = [];
       if (meta?.isRedlineView && meta.diffs) {
         const labelDiffs = (meta.diffs as DiffItem[]).filter((d) =>
           d.path.startsWith(
-            `symbols_graphics.data[${row.index}].label_presence`
+            `symbols_graphics.data[${originalIndex}].label_presence`
           )
         );
         addedLabels = labelDiffs
           .filter((d) => d.status === "added" && d.new_value)
           .map((d) => d.new_value as string);
+        removedLabels = labelDiffs
+          .filter((d) => d.status === "removed" && d.old_value)
+          .map((d) => d.old_value as string);
       }
 
+      // Merge current with added and removed for display
       const displayLabels = meta?.isRedlineView
-        ? [...labels, ...addedLabels.filter((l) => !labels.includes(l))]
+        ? [
+            ...labels,
+            ...addedLabels.filter((l) => !labels.includes(l)),
+            ...removedLabels.filter((l) => !labels.includes(l)),
+          ]
         : labels;
 
       return (
         <div className="flex flex-wrap gap-1">
           {displayLabels && displayLabels.length > 0 ? (
             displayLabels.map((label, index) => {
-              const isNew = addedLabels.includes(label);
+              const isNewlyAdded = addedLabels.includes(label);
+              const isRemoved = removedLabels.includes(label);
               return (
                 <Badge
                   key={index}
                   variant="outline"
                   className={`text-xs ${
-                    isNew ? "border-blue-400 text-blue-700 bg-blue-50" : ""
+                    isNewlyAdded
+                      ? "border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500"
+                      : isRemoved
+                      ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
+                      : ""
                   }`}
                 >
                   {label}
@@ -343,19 +378,19 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     return diffs.find((d) => d.path === path) || null;
   };
 
-  // Check if a row has any changes
-  const getRowStatus = (rowIndex: number) => {
+  // Check if a row has any changes (using original index for correct diff matching)
+  const getRowStatus = (rowIndex: number, originalIndex: number) => {
     const isFromDiff = dataProp?.[rowIndex]?._isFromDiff;
     if (isFromDiff) return "added";
 
     const isRemovedFromDiff = dataProp?.[rowIndex]?._isRemovedFromDiff;
     if (isRemovedFromDiff) return "removed";
 
-    const rowDiff = getDiff(`symbols_graphics.data[${rowIndex}]`);
+    const rowDiff = getDiff(`symbols_graphics.data[${originalIndex}]`);
     if (rowDiff) return rowDiff.status;
 
     const hasFieldDiff = diffs.some((d) =>
-      d.path.startsWith(`symbols_graphics.data[${rowIndex}].`)
+      d.path.startsWith(`symbols_graphics.data[${originalIndex}].`)
     );
     return hasFieldDiff ? "modified" : null;
   };
@@ -403,7 +438,8 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const rowStatus = getRowStatus(row.index);
+                const originalIndex = row.original._originalIndex ?? row.index;
+                const rowStatus = getRowStatus(row.index, originalIndex);
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
