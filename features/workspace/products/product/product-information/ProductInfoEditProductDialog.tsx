@@ -97,13 +97,15 @@ export default function EditProductDialog({
 
   // Get current product information data - handle both possible data structures
   const initialValues = {
-    productName: product?.product_name || "",
-    productDescription: product?.product_description || "",
-    targetDate: product?.target_date
-      ? new Date(product.target_date).toISOString().split("T")[0]
+    productName: productMetadata?.product_name || "",
+    productDescription: productMetadata?.product_description || "",
+    targetDate: productMetadata?.target_date
+      ? new Date(productMetadata.target_date).toISOString().split("T")[0]
       : "",
-    completionDate: product?.completion_date
-      ? new Date(product.completion_date).toISOString().split("T")[0]
+    completionDate: productMetadata?.actual_completion_date
+      ? new Date(productMetadata.actual_completion_date)
+          .toISOString()
+          .split("T")[0]
       : "",
     marketGeography: product?.market_geography || "",
     countryOfOrigin: product?.country_of_origin || "",
@@ -315,7 +317,7 @@ export default function EditProductDialog({
                 {/* Completion Date */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-completion-date`} className="text-sm">
-                    Completion Date
+                    Actual Completion Date
                   </Label>
                   <Popover
                     open={openCompletionDate}

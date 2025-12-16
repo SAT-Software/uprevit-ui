@@ -31,18 +31,14 @@ export default function Page() {
     "product-information"
   );
 
-  // Only fetch redline data when ?view=redline is in the URL
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, isRedlineView);
 
   const diffs = diffRedlineData?.result?.diffs || [];
-
-  // Helper to find a diff by exact path (checks multiple possible paths)
   const getDiff = (...paths: string[]) => {
     return diffs.find((d: any) => paths.includes(d.path));
   };
 
-  // Helper to find all diffs that start with a base path (for custom fields)
   const getFieldDiffs = (basePath: string) => {
     return diffs.filter(
       (d: any) => d.path === basePath || d.path.startsWith(basePath + ".")
@@ -56,15 +52,12 @@ export default function Page() {
     const fieldDiffs = getFieldDiffs(basePath);
     if (fieldDiffs.length === 0) return null;
 
-    // If the whole field was added/removed
     const wholeDiff = fieldDiffs.find((d: any) => d.path === basePath);
     if (wholeDiff) return wholeDiff.status;
 
-    // If any property was changed, it's modified
     return "modified";
   };
 
-  // Get the value diff specifically for custom fields
   const getCustomFieldValueDiff = (basePath: string) => {
     return diffs.find(
       (d: any) => d.path === `${basePath}.value` || d.path === basePath
@@ -276,7 +269,8 @@ export default function Page() {
             <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
               <RedlineValue
                 value={
-                  productData.product_description || "No description available."
+                  productMetadata.product_description ||
+                  "No description available."
                 }
                 diff={getDiff(
                   "product_description",
@@ -290,8 +284,8 @@ export default function Page() {
                 <span className="truncate">
                   Target:{" "}
                   <span className="font-semibold">
-                    {productData?.target_date
-                      ? productData?.target_date.slice(0, 10)
+                    {productMetadata?.target_date
+                      ? productMetadata?.target_date.slice(0, 10)
                       : "N/A"}
                   </span>
                 </span>
@@ -304,7 +298,7 @@ export default function Page() {
                   <span className="font-semibold">
                     <RedlineValue
                       value={
-                        productData?.actual_completion_date?.slice(0, 10) ||
+                        productMetadata?.actual_completion_date?.slice(0, 10) ||
                         "N/A"
                       }
                       diff={getDiff(

@@ -32,6 +32,7 @@ import {
   PiPaperPlaneRightDuotone,
   PiTextStrikethroughDuotone,
 } from "react-icons/pi";
+import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
 import { ProgressRadialChart } from "./ProgressRadialChart";
 
 export type Item = {
@@ -99,15 +100,28 @@ export function ProductHeader() {
   // READ-ONLY MODE: Submitted products cannot be edited
   const isReadOnly = productCoreData?.status === "submitted";
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!productId || isReadOnly) return;
-    updateProduct({
-      _id: productId,
-      action: "update-status",
-      data: {
-        status: "submitted",
-      },
-    });
+
+    const today = new Date().toISOString();
+
+    await Promise.all([
+      updateProduct({
+        _id: productId,
+        action: "update-status",
+        data: {
+          status: "submitted",
+        },
+      }),
+      updateProduct({
+        _id: productId,
+        action: "update-product",
+        data: {
+          _id: productId,
+          actual_completion_date: today,
+        },
+      }),
+    ]);
   };
 
   // Calculate completed tabs from the all-tabs response
@@ -421,25 +435,30 @@ export function ProductHeader() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
-            <Button
-              size="sm"
+            <ConfirmSubmitProductDialog
+              productName={product?.productName}
+              onConfirm={handleSubmit}
               disabled={!isProductComplete || isReadOnly}
-              onClick={handleSubmit}
-              className={cn(
-                (!isProductComplete || isReadOnly) &&
-                  "opacity-50 cursor-not-allowed"
-              )}
-              title={
-                isReadOnly
-                  ? "Product is already submitted"
-                  : !isProductComplete
-                  ? "Complete all tabs to enable submission"
-                  : "Submit product"
-              }
             >
-              <PiPaperPlaneRightDuotone />
-              {isReadOnly ? "Submitted" : "Submit"}
-            </Button>
+              <Button
+                size="sm"
+                disabled={!isProductComplete || isReadOnly}
+                className={cn(
+                  (!isProductComplete || isReadOnly) &&
+                    "opacity-50 cursor-not-allowed"
+                )}
+                title={
+                  isReadOnly
+                    ? "Product is already submitted"
+                    : !isProductComplete
+                    ? "Complete all tabs to enable submission"
+                    : "Submit product"
+                }
+              >
+                <PiPaperPlaneRightDuotone />
+                {isReadOnly ? "Submitted" : "Submit"}
+              </Button>
+            </ConfirmSubmitProductDialog>
           </div>
         </div>
       </div>
