@@ -108,7 +108,7 @@ export function ProgressRadialChart({
         <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <span
             className={cn(
-              "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-55",
+              "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-45",
               progressState.bar
             )}
             style={{ width: `${clampedPercentage}%` }}

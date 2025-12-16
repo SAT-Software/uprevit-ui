@@ -3,22 +3,19 @@
 import { Button } from "@/components/ui/button";
 import ProductDataGrid, {
   ProductDataGridRef,
-} from "@/features/workspace/products/product/product-data/ProductDataGrid";
+} from "@/features/workspace/products/product/product-specifications/ProductDataGrid";
+import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
+import dynamic from "next/dynamic";
 import { useParams, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 import {
-  PiHouseDuotone,
-  PiCaretRightDuotone,
   PiFloppyDiskDuotone,
   PiTableDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
-import dynamic from "next/dynamic";
+import { toast } from "sonner";
 
 // Dynamic import for read-only viewer (SSR disabled) - reusing from operational-parameters
 const UniverReadOnlyViewer = dynamic(
@@ -42,7 +39,7 @@ export default function Page() {
   const { mutate: updateProductDataTab } = useUpdateProductTabData();
   const { data, isLoading, error } = useGetProductTabData(
     productId,
-    "product-data"
+    "product-specifications"
   );
 
   // Fetch Product Information for breadcrumb
@@ -79,15 +76,6 @@ export default function Page() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
-        {/* Breadcrumbs Skeleton */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-          <div className="h-4 w-4 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-20 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-32 bg-background rounded animate-pulse" />
-        </div>
-
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           {/* Header Skeleton */}
           <div className="flex items-center justify-between border-b border-border p-4">
@@ -141,7 +129,7 @@ export default function Page() {
       const productTabDataData = {
         id: productId,
         action: "add_product_data",
-        tab: "product-data",
+        tab: "product-specifications",
         data: {
           workbook_data: savedData,
         },
@@ -150,20 +138,20 @@ export default function Page() {
       updateProductDataTab(productTabDataData, {
         onSuccess: () => {
           setIsSaving(false);
-          toast.success("Product Data saved successfully");
+          toast.success("Product Specifications saved successfully");
           console.log("Saved data:", savedData);
           console.log("Stringified data:", JSON.stringify(savedData, null, 2));
         },
         onError: (error) => {
           setIsSaving(false);
           console.error("Failed to update product information:", error);
-          toast.error("Failed to save the product data");
+          toast.error("Failed to save the product specifications");
         },
       });
     } catch (error) {
       setIsSaving(false);
       console.error("Save error:", error);
-      toast.error("Failed to save the product data");
+      toast.error("Failed to save the product specifications");
     }
   };
 
@@ -176,7 +164,7 @@ export default function Page() {
           <span className="text-amber-600 font-medium">
             {isLoadingDiff
               ? "Loading changes..."
-              : `Redline View: ${productDataDiffs.length} changes in Product Data`}
+              : `Redline View: ${productDataDiffs.length} changes in Product Specifications`}
           </span>
           <span className="text-muted-foreground text-xs">
             (comparing spreadsheet versions side by side)
@@ -187,7 +175,7 @@ export default function Page() {
           {/* Header Section */}
           <div className="flex items-center justify-between border-b border-border p-4 shrink-0">
             <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Product Data</p>
+              <p className="text-base font-semibold">Product Specifications</p>
               <div className="w-1 h-1 bg-border border border-border rounded-full" />
               <p className="text-xs text-muted-foreground font-medium">
                 Side-by-side comparison view (read-only)
@@ -259,10 +247,10 @@ export default function Page() {
         {/* Header Section */}
         <div className="flex items-center justify-between border-b border-border p-4 shrink-0">
           <div className="flex items-center gap-2">
-            <p className="text-base font-semibold">Product Data</p>
+            <p className="text-base font-semibold">Product Specifications</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />
             <p className="text-xs text-muted-foreground font-medium">
-              Manage product data in the spreadsheet below
+              Manage product specifications in the spreadsheet below
             </p>
           </div>
           <Button

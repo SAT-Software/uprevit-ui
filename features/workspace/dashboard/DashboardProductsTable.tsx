@@ -213,7 +213,7 @@ const columns: ColumnDef<Item>[] = [
         if (row.original.symbols_graphics?.tab_completed)
           tabsCompleted.push("symbols-graphics");
         if (row.original.product_data?.tab_completed)
-          tabsCompleted.push("product-data");
+          tabsCompleted.push("product-specifications");
         if (row.original.operational_parameters?.tab_completed)
           tabsCompleted.push("operational-parameters");
         if (row.original.label_tags?.tab_completed)

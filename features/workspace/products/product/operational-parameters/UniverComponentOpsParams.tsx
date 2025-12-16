@@ -104,8 +104,8 @@ const UniverComponentOpsParams = forwardRef<
     // Use passed data or fallback to sample data
     const workbookData: IWorkbookData =
       (operationalParametersData?.workbook_data as IWorkbookData) || {
-        id: "product-data-workbook",
-        name: "Product Data",
+        id: "operational-parameters-workbook",
+        name: "Operational Parameters",
         locale: LocaleType.EN_US,
         appVersion: "0.1.0",
         styles: {},
@@ -127,12 +127,7 @@ const UniverComponentOpsParams = forwardRef<
     };
   }, [operationalParametersData]); // Re-create when data changes
 
-  return (
-    <div
-      ref={containerRef}
-      className="w-full h-full border border-border rounded-xl overflow-hidden"
-    />
-  );
+  return <div ref={containerRef} className="w-full h-full overflow-hidden" />;
 });
 
 UniverComponentOpsParams.displayName = "UniverComponent";
