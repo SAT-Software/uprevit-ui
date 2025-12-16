@@ -98,7 +98,7 @@ function ProfileTab() {
               src={userProfile?.profileAvatar}
               alt={userProfile?.name}
             />
-            <AvatarFallback className="text-lg bg-white border border-border">{`${userProfile?.name
+            <AvatarFallback className="text-lg bg-background border border-border">{`${userProfile?.name
               ?.split(" ")[0]
               ?.slice(0, 1)}${
               userProfile?.name?.split(" ")[1]

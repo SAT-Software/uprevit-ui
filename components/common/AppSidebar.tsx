@@ -125,8 +125,8 @@ const productSubItems = [
     icon: PiImageSquareDuotone,
   },
   {
-    title: "Product Data",
-    url: "/product-data",
+    title: "Product Specifications",
+    url: "/product-specifications",
     icon: PiMicrosoftExcelLogoDuotone,
   },
   {

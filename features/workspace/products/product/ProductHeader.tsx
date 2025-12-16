@@ -136,7 +136,8 @@ export function ProductHeader() {
       completed.push("label-components");
     if (allTabsData.symbols_graphics?.tab_completed)
       completed.push("symbols-graphics");
-    if (allTabsData.product_data?.tab_completed) completed.push("product-data");
+    if (allTabsData.product_data?.tab_completed)
+      completed.push("product-specifications");
     if (allTabsData.operational_parameters?.tab_completed)
       completed.push("operational-parameters");
     if (allTabsData.label_tags?.tab_completed) completed.push("label-tags");
@@ -244,7 +245,7 @@ export function ProductHeader() {
       "compliance-information": "compliance-information",
       "label-components": "label-components",
       "symbols-graphics": "symbols-graphics",
-      "product-data": "product-data",
+      "product-specifications": "product-specifications",
       "operational-parameters": "operational-parameters",
       "label-tags": "label-tags",
     };
@@ -254,7 +255,7 @@ export function ProductHeader() {
       "compliance-information": "update_compliance_tab_completion",
       "label-components": "update_label_component_tab_completion",
       "symbols-graphics": "update_symbols_graphics_tab_completion",
-      "product-data": "update_product_data_tab_completion",
+      "product-specifications": "update_product_data_tab_completion",
       "operational-parameters": "update_operational_parameters_tab_completion",
       "label-tags": "update_label_tags_tab_completion",
     };
@@ -299,7 +300,11 @@ export function ProductHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="text-muted-foreground hover:text-muted-foreground bg-muted" />
 
-        <Separator orientation="vertical" className=" h-4" />
+        <Separator orientation="vertical" className="h-12" />
+        <p className="text-xs font-semibold text-muted-foreground">
+          {product?.productName}
+        </p>
+        <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"

@@ -94,7 +94,7 @@ function WorkspaceTab() {
               src={workspaceData?.logo}
               alt={workspaceData?.workspaceName}
             />
-            <AvatarFallback className="text-lg bg-white border border-border">
+            <AvatarFallback className="text-lg bg-background border border-border">
               {workspaceData?.workspaceName
                 ?.split(" ")
                 .map((word: string) => word[0])

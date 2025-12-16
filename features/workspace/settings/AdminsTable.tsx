@@ -23,6 +23,7 @@ import {
   PiTrashDuotone,
   PiCrownDuotone,
   PiUserDuotone,
+  PiUsersDuotone,
   PiCaretDownDuotone,
   PiCaretUpDuotone,
   PiCaretUpDownDuotone,
@@ -30,6 +31,7 @@ import {
   PiBriefcaseDuotone,
   PiMapPinDuotone,
   PiInfoDuotone,
+  PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
 import { SortingState, getSortedRowModel } from "@tanstack/react-table";
@@ -112,24 +114,25 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "userType",
     header: ({ column }) => (
-      <SortableHeader column={column} title="User Type" icon={PiCrownDuotone} />
+      <SortableHeader
+        column={column}
+        title="User Type"
+        icon={PiUserCircleGearDuotone}
+      />
     ),
     cell: ({ row }) => {
       const userType = row.getValue("userType") as string;
       if (userType === "admin") {
         return (
-          <Badge
-            variant="default"
-            className="gap-1 bg-indigo-500/15 text-indigo-700 hover:bg-indigo-500/25 border-indigo-200"
-          >
-            <PiCrownDuotone className="w-3 h-3" />
+          <Badge variant="secondary">
+            <PiUserCircleGearDuotone className="w-4 h-4" />
             Admin
           </Badge>
         );
       }
       return (
         <Badge variant="outline" className="gap-1 text-muted-foreground">
-          <PiUserDuotone className="w-3 h-3" />
+          <PiUserDuotone className="w-4 h-4" />
           Member
         </Badge>
       );
@@ -171,8 +174,10 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as "active" | "invited";
       const statusClasses = {
-        active: "bg-green-50/90 text-green-600 border border-green-500",
-        invited: "bg-yellow-50/90 text-yellow-600 border border-yellow-500",
+        active:
+          "bg-green-50/90 dark:bg-green-900/60 text-green-600 dark:text-green-400 border border-green-500 dark:border-green-700",
+        invited:
+          "bg-yellow-50/90 dark:bg-yellow-900/60 text-yellow-600 dark:text-yellow-400 border border-yellow-500 dark:border-yellow-700",
       };
       const displayText = status === "active" ? "Active" : "Invited";
       return <Badge className={cn(statusClasses[status])}>{displayText}</Badge>;
@@ -308,8 +313,8 @@ export function AdminsTable() {
                 className="h-32 text-center text-muted-foreground"
               >
                 <div className="flex flex-col items-center justify-center gap-2">
-                  <PiUserDuotone className="w-8 h-8 opacity-20" />
-                  <p>No admins found</p>
+                  <PiUsersDuotone className="w-8 h-8 opacity-20" />
+                  <p>No admins found. Invite users to get started.</p>
                 </div>
               </TableCell>
             </TableRow>
