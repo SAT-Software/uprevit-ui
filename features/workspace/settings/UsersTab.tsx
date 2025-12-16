@@ -71,7 +71,7 @@ const UsersTab = () => {
   return (
     <div>
       <div className="flex items-center gap-6 px-6 py-4 bg-accent rounded-lg border mb-6">
-        <p className="top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl border border-border font-bold bg-white rounded-full w-20 h-20 flex items-center justify-center">
+        <p className="top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl border border-border font-bold bg-background rounded-full w-20 h-20 flex items-center justify-center">
           {workspaceData?.data?.length}
         </p>
 

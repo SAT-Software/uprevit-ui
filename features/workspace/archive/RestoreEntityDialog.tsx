@@ -10,6 +10,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  PiArrowCounterClockwiseDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
 
 interface RestoreEntityDialogProps {
   open: boolean;
@@ -37,9 +41,11 @@ export function RestoreEntityDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>
+            <PiXCircleDuotone /> Cancel
+          </AlertDialogCancel>
           <Button onClick={onConfirm} disabled={isPending}>
-            {isPending ? <Spinner /> : null}
+            {isPending ? <Spinner /> : <PiArrowCounterClockwiseDuotone />}
             {isPending ? "Restoring..." : "Restore"}
           </Button>
         </AlertDialogFooter>

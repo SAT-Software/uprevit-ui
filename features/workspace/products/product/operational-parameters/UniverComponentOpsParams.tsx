@@ -26,6 +26,7 @@ import { UniverSheetsTablePreset } from "@univerjs/presets/preset-sheets-table";
 import UniverPresetSheetsTableEnUS from "@univerjs/presets/preset-sheets-table/locales/en-US";
 import { UniverSheetsSortPreset } from "@univerjs/presets/preset-sheets-sort";
 import SheetsSortEnUS from "@univerjs/presets/preset-sheets-sort/locales/en-US";
+import { useTheme } from "next-themes";
 
 export interface ProductDataGridRef {
   saveData: () => IWorkbookData | null;
@@ -44,6 +45,7 @@ const UniverComponentOpsParams = forwardRef<
 >(({ operationalParametersData }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const { theme } = useTheme();
 
   useImperativeHandle(ref, () => ({
     saveData: () => {
@@ -79,6 +81,7 @@ const UniverComponentOpsParams = forwardRef<
         ),
       },
       theme: defaultTheme,
+      darkMode: theme === "dark" ? true : false,
       presets: [
         UniverSheetsCorePreset({
           container: containerRef.current,
