@@ -11,6 +11,11 @@ import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
 import Image from "next/image";
 import { PiImageDuotone, PiTagDuotone, PiArrowRightBold } from "react-icons/pi";
 import { cn } from "@/lib/utils";
+import { AnnotationState } from "@markerjs/markerjs3";
+import EditorLabelTag from "./EditorLabelTag";
+import Viewer from "./Viewer";
+import Render from "./Viewer";
+import Editor from "./Editor";
 
 interface LabelTagItem {
   _id: string;
@@ -45,6 +50,11 @@ export default function LabelTagsTabs({
   diffs = [],
 }: LabelTagsTabsProps) {
   const [activeTab, setActiveTab] = useState("");
+  const [annotation, setAnnotation] = useState<AnnotationState | null>(null);
+
+  const handleSave = (annotation: AnnotationState) => {
+    setAnnotation(annotation);
+  };
 
   // Helper to find a diff by path and optional property (e.g., "name", "description", "image")
   const getDiff = (index: number, property?: string) => {
@@ -385,26 +395,37 @@ export default function LabelTagsTabs({
                               />
                             </div>
                           ) : item.image ? (
-                            <div className="relative w-full max-w-md">
-                              <div
-                                className={cn(
-                                  "aspect-square relative overflow-hidden rounded-lg border bg-muted",
-                                  isRedlineView && isRemoved
-                                    ? "border-red-300 opacity-60"
-                                    : isRedlineView && isAdded
-                                    ? "border-blue-300"
-                                    : "border-border"
-                                )}
-                              >
-                                <Image
-                                  src={item.image}
-                                  alt={item.name || "label image"}
-                                  fill
-                                  className="object-cover"
-                                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                />
-                              </div>
-                            </div>
+                            // <div className="relative w-full max-w-md">
+                            //   <div
+                            //     className={cn(
+                            //       "aspect-square relative overflow-hidden rounded-lg border bg-muted",
+                            //       isRedlineView && isRemoved
+                            //         ? "border-red-300 opacity-60"
+                            //         : isRedlineView && isAdded
+                            //         ? "border-blue-300"
+                            //         : "border-border"
+                            //     )}
+                            //   >
+                            //     <Image
+                            //       src={item.image}
+                            //       alt={item.name || "label image"}
+                            //       fill
+                            //       className="object-cover"
+                            //       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            //     />
+                            //   </div>
+                            // </div>
+                            // <EditorLabelTag
+                            //   targetImage={item.image}
+                            //   onSave={handleSave}
+                            // />
+                            <Editor
+                              targetImageSrc={item.image}
+                              annotation={annotation}
+                              onSave={(newAnnotation) => {
+                                handleSave(newAnnotation);
+                              }}
+                            />
                           ) : (
                             <div
                               className={cn(
@@ -430,6 +451,34 @@ export default function LabelTagsTabs({
                     </CardContent>
                   </Card>
                 </TabsContent>
+              );
+            });
+          })}
+          {/* {filteredLabelTypesForTabs.map((type) => {
+            const currentTabData = labelTagsData.filter(
+              (item: LabelTagItem) => item.type === type
+            );
+
+            return currentTabData.map((item: LabelTagItem, i) => {
+              if (!item.image) {
+                return null;
+              }
+              return (
+                <EditorLabelTag targetImage={item.image} onSave={handleSave} />
+              );
+            });
+          })} */}
+          {filteredLabelTypesForTabs.map((type) => {
+            const currentTabData = labelTagsData.filter(
+              (item: LabelTagItem) => item.type === type
+            );
+
+            return currentTabData.map((item: LabelTagItem, i) => {
+              if (!item.image || !annotation) {
+                return null;
+              }
+              return (
+                <Render targetImage={item.image} annotation={annotation} />
               );
             });
           })}
