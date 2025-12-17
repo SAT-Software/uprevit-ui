@@ -208,10 +208,10 @@ const Editor = ({
           editor.current.zoomLevel = 1;
           break;
         }
-        case "download": {
-          downloadMarkedImage();
-          break;
-        }
+        // case "download": {
+        //   downloadMarkedImage();
+        //   break;
+        // }
         case "save": {
           if (onSave) {
             onSave(editor.current.getState());
@@ -223,32 +223,32 @@ const Editor = ({
     }
   };
 
-  const downloadMarkedImage = async () => {
-    if (editor.current) {
-      setEditorState((prevState: any) => ({
-        ...prevState,
-        mode: "rendering",
-      }));
-      const currentState = editor.current.getState();
+  // const downloadMarkedImage = async () => {
+  //   if (editor.current) {
+  //     setEditorState((prevState: any) => ({
+  //       ...prevState,
+  //       mode: "rendering",
+  //     }));
+  //     const currentState = editor.current.getState();
 
-      const renderer = new Renderer();
-      renderer.targetImage = editor.current.targetImage;
-      renderer.naturalSize = true;
-      renderer.imageType = "image/png";
+  //     const renderer = new Renderer();
+  //     renderer.targetImage = editor.current.targetImage;
+  //     renderer.naturalSize = true;
+  //     renderer.imageType = "image/png";
 
-      const renderedImage = await renderer.rasterize(currentState);
+  //     const renderedImage = await renderer.rasterize(currentState);
 
-      const downloadLink = document.createElement("a");
-      downloadLink.href = renderedImage;
-      downloadLink.download = "marked-image.png";
-      downloadLink.click();
+  //     const downloadLink = document.createElement("a");
+  //     downloadLink.href = renderedImage;
+  //     downloadLink.download = "marked-image.png";
+  //     downloadLink.click();
 
-      setEditorState((prevState: any) => ({
-        ...prevState,
-        mode: "select",
-      }));
-    }
-  };
+  //     setEditorState((prevState: any) => ({
+  //       ...prevState,
+  //       mode: "select",
+  //     }));
+  //   }
+  // };
 
   const handleNewMarker = (markerType: MarkerTypeItem | null) => {
     setCurrentMarkerType(markerType);

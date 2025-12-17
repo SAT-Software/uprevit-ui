@@ -62,7 +62,7 @@ const EditorToolbar = ({
         />
       </div>
 
-      <div className="hidden sm:inline-flex space-x-1 items-center">
+      <div className="hidden sm:inline-flex gap-6 space-x-1 items-center">
         {markerTypes.map(
           (markerListItem) =>
             isMarkerTypeGroup(markerListItem) ? (
@@ -97,7 +97,7 @@ const EditorToolbar = ({
             onAction={onAction}
           />
         )}
-        <ToolbarActionButton
+        {/* <ToolbarActionButton
           icon={PiDownloadDuotone}
           title="Download"
           variant={variant}
@@ -105,7 +105,7 @@ const EditorToolbar = ({
           disabled={editorState.mode === "rendering"}
           loading={editorState.mode === "rendering"}
           onAction={onAction}
-        />
+        /> */}
       </div>
     </div>
   );

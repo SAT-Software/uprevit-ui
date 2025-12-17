@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 
-import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Toggle } from "@/components/ui/toggle";
 
 import { MarkerTypeGroup, MarkerTypeItem } from "@/types/toolbar";
-import { PiCaretDownDuotone } from "react-icons/pi";
+import { PiCaretDown } from "react-icons/pi";
 
 type Props = {
   markers: MarkerTypeGroup;
@@ -39,26 +39,25 @@ const ToolbarMarkerGroup = ({
   };
 
   return (
-    <div className="inline-flex border rounded-md border-transparent hover:border hover:border-slate-200">
+    <div className="inline-flex items-center gap-0">
       <Toggle
         title={currentMarkerType.name}
         pressed={toggled}
         variant={variant === "ghost" ? "default" : "outline"}
-        className="rounded-r-none border-r-0"
+        className="rounded-r-none border-r-0 cursor-pointer"
         onClick={() => handleMarkerSelection(currentMarkerType)}
       >
         <currentMarkerType.icon />
       </Toggle>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant={variant}
+          <button
             title={markers.name}
-            className="rounded-l-none border-l-0 bg-transparent"
+            className="rounded-l-none border-l-0 bg-transparent pr-1 cursor-pointer"
             onClick={() => setPopoverOpen(!popoverOpen)}
           >
-            <PiCaretDownDuotone className="-mx-4 h-4 w-4" />
-          </Button>
+            <PiCaretDown />
+          </button>
         </PopoverTrigger>
         <PopoverContent className="flex flex-wrap w-auto p-2">
           {markers.markerTypes.map((markerType) => (
