@@ -287,7 +287,7 @@ export default function LabelTagsTabs({
 
               return (
                 <TabsContent key={`${i}-${type}`} value={type}>
-                  <Card
+                  <div
                     className={cn(
                       "w-full shadow-none transition-all duration-200",
                       isRedlineView &&
@@ -302,10 +302,10 @@ export default function LabelTagsTabs({
                       !isRedlineView || !itemStatus ? "border-border" : ""
                     )}
                   >
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
+                    <div className="pb-4">
+                      <div className="flex items-start justify-between">
                         <div className="space-y-1">
-                          <CardTitle
+                          <div
                             className={cn(
                               "text-xl font-semibold flex items-center gap-2",
                               isRedlineView &&
@@ -341,11 +341,11 @@ export default function LabelTagsTabs({
                                 item.description
                               )}
                             </span>
-                          </CardTitle>
+                          </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
+                            {/* <Badge variant="secondary" className="text-xs">
                               {item.type || "Unknown Type"}
-                            </Badge>
+                            </Badge> */}
                             {isRedlineView && isAdded && (
                               <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
                                 NEW
@@ -378,13 +378,10 @@ export default function LabelTagsTabs({
                           </div>
                         )}
                       </div>
-                    </CardHeader>
+                    </div>
 
-                    <CardContent className="space-y-6">
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-muted-foreground">
-                          Label Image
-                        </h4>
                         <div className="flex justify-start">
                           {isRedlineView && imageDiff ? (
                             <div className="relative w-full max-w-md">
@@ -448,8 +445,8 @@ export default function LabelTagsTabs({
                           )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </TabsContent>
               );
             });

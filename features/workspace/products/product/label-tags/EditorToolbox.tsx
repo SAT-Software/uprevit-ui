@@ -1,15 +1,7 @@
 "use client";
 
-import { ToolbarAction } from "@/types/toolbar";
-import {
-  PiArrowCounterClockwiseDuotone,
-  PiArrowClockwiseDuotone,
-  PiMagnifyingGlassPlusDuotone,
-  PiMagnifyingGlassMinusDuotone,
-  PiMagnifyingGlassDuotone,
-} from "react-icons/pi";
-import ToolbarActionButton from "./toolbar/ToolbarActionButton";
 import { EditorState } from "@/types/editor";
+import { ToolbarAction } from "@/types/toolbar";
 import {
   CalloutMarkerEditor,
   CaptionFrameMarkerEditor,
@@ -21,22 +13,31 @@ import {
   ShapeOutlineMarkerEditor,
   TextMarkerEditor,
 } from "@markerjs/markerjs3";
-import OpacityPanel from "./toolbox/OpacityPanel";
-import StrokePanel from "./toolbox/StrokePanel";
+import {
+  PiArrowClockwiseDuotone,
+  PiArrowCounterClockwiseDuotone,
+  PiMagnifyingGlassMinusDuotone,
+  PiMagnifyingGlassPlusDuotone,
+  PiScanDuotone,
+} from "react-icons/pi";
+import ToolbarActionButton from "./toolbar/ToolbarActionButton";
 import FillPanel from "./toolbox/FillPanel";
 import FontPanel from "./toolbox/FontPanel";
 import NotesPanel from "./toolbox/NotesPanel";
+import OpacityPanel from "./toolbox/OpacityPanel";
+import StrokePanel from "./toolbox/StrokePanel";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 type Props = {
   editorState: EditorState;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   markerEditor: MarkerBaseEditor | null;
   onAction: (action: ToolbarAction) => void;
 } & React.ComponentProps<"div">;
 
 const EditorToolbox = ({
   editorState,
-  variant = "ghost",
+  variant = "secondary",
   markerEditor,
   onAction,
   ...props
@@ -104,11 +105,8 @@ const EditorToolbox = ({
   };
 
   return (
-    <div
-      className="flex space-x-1 p-2 justify-between border-t border-slate-100"
-      {...props}
-    >
-      <div className="inline-flex space-x-1">
+    <div className="flex space-x-1 p-2 justify-between" {...props}>
+      <ButtonGroup>
         <ToolbarActionButton
           icon={PiArrowCounterClockwiseDuotone}
           title="Undo"
@@ -126,9 +124,9 @@ const EditorToolbox = ({
           onAction={onAction}
           disabled={!editorState.canRedo}
         />
-      </div>
+      </ButtonGroup>
 
-      <div className="inline-flex space-x-1">
+      <div className="flex items-center gap-2">
         {canEditFont(markerEditor) && (
           <FontPanel markerEditor={markerEditor} variant={variant} />
         )}
@@ -146,7 +144,7 @@ const EditorToolbox = ({
         )}
       </div>
 
-      <div className="inline-flex space-x-1">
+      <ButtonGroup>
         <ToolbarActionButton
           icon={PiMagnifyingGlassMinusDuotone}
           title="Zoom-out"
@@ -155,7 +153,7 @@ const EditorToolbox = ({
           onAction={onAction}
         />
         <ToolbarActionButton
-          icon={PiMagnifyingGlassDuotone}
+          icon={PiScanDuotone}
           title="Reset zoom"
           variant={variant}
           className="hidden sm:inline-flex"
@@ -169,7 +167,7 @@ const EditorToolbox = ({
           action="zoom-in"
           onAction={onAction}
         />
-      </div>
+      </ButtonGroup>
     </div>
   );
 };

@@ -25,6 +25,7 @@ import { Product } from "@/types/product";
 import { useParams, usePathname } from "next/navigation";
 import {
   PiCircleDuotone,
+  PiExportDuotone,
   PiFilePdfDuotone,
   PiFileXlsDuotone,
   PiGitBranchDuotone,
@@ -300,48 +301,57 @@ export function ProductHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="text-muted-foreground hover:text-muted-foreground bg-muted" />
 
-        <Separator orientation="vertical" className="h-12" />
-        <p className="text-xs font-semibold text-muted-foreground">
+        <Separator orientation="vertical" className="h-4" />
+        {/* <p className="text-xs font-semibold text-muted-foreground">
           {product?.productName}
         </p>
-        <Separator orientation="vertical" className="h-4" />
+        <Separator orientation="vertical" className="h-4" /> */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              exportExcel({
-                productId,
-                productName: product?.productName,
-              })
-            }
-            disabled={isExportingExcel}
+          <Select
+            onValueChange={(value) => {
+              if (value === "excel") {
+                exportExcel({
+                  productId,
+                  productName: product?.productName,
+                });
+              } else if (value === "pdf") {
+                exportPDF({
+                  productId,
+                  productName: product?.productName,
+                });
+              }
+            }}
+            disabled={isExportingExcel || isExportingPDF}
           >
-            {isExportingExcel ? (
-              <Spinner className="size-3" />
-            ) : (
-              <PiFileXlsDuotone />
-            )}
-            {isExportingExcel ? "Exporting Excel..." : "Export Excel"}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              exportPDF({
-                productId,
-                productName: product?.productName,
-              })
-            }
-            disabled={isExportingPDF}
-          >
-            {isExportingPDF ? (
-              <Spinner className="size-3" />
-            ) : (
-              <PiFilePdfDuotone />
-            )}
-            {isExportingPDF ? "Exporting PDF..." : "Export PDF"}
-          </Button>
+            <SelectTrigger className="h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 whitespace-nowrap">
+              {isExportingExcel || isExportingPDF ? (
+                <Spinner className="size-3" />
+              ) : (
+                <PiExportDuotone />
+              )}
+              {isExportingExcel ? (
+                "Exporting Excel..."
+              ) : isExportingPDF ? (
+                "Exporting PDF..."
+              ) : (
+                <SelectValue placeholder="Export" />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="excel">
+                <div className="flex items-center gap-2">
+                  <PiFileXlsDuotone className="size-4" />
+                  <span>Export as Excel</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="pdf">
+                <div className="flex items-center gap-2">
+                  <PiFilePdfDuotone className="size-4" />
+                  <span>Export as PDF</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Version Dropdown - Shows all versions */}
           <Select
@@ -349,7 +359,7 @@ export function ProductHeader() {
             onValueChange={handleVersionChange}
             disabled={!product || isLoadingVersions}
           >
-            <SelectTrigger className="h-7 rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
+            <SelectTrigger className="h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 whitespace-nowrap">
               <PiGitBranchDuotone />
               <SelectValue placeholder="View Versions" />
             </SelectTrigger>

@@ -14,19 +14,19 @@ import { cn } from "@/lib/utils";
 type Props = {
   title: string;
   icon: any;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   children: ReactNode;
 } & React.ComponentProps<"div">;
 
 export type PanelProps = {
   markerEditor: MarkerBaseEditor;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
 };
 
 const ToolboxPanel = ({
   title,
   icon: Icon,
-  variant = "ghost",
+  variant = "secondary",
   children,
   className,
   ...props
