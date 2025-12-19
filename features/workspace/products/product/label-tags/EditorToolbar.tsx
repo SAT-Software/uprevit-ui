@@ -16,12 +16,13 @@ import { EditorState } from "@/types/editor";
 import ToolbarMarkerGroup from "./toolbar/ToolbarMarkerGroup";
 import ToolbarActionButton from "./toolbar/ToolbarActionButton";
 import ToolbarMarkersButton from "./toolbar/ToolbarMarkersButton";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 type Props = {
   markerTypes: MarkerTypeList;
   currentMarkerType: MarkerTypeItem | null;
   editorState: EditorState;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   saveVisible?: boolean;
   onAction: (action: ToolbarAction) => void;
   onNewMarker: (markerType: MarkerTypeItem) => void;
@@ -31,18 +32,15 @@ const EditorToolbar = ({
   markerTypes,
   currentMarkerType,
   editorState,
-  variant = "ghost",
+  variant = "secondary",
   saveVisible = false,
   onAction,
   onNewMarker,
   ...props
 }: Props) => {
   return (
-    <div
-      className="flex space-x-1 p-2 justify-between border-b border-slate-100"
-      {...props}
-    >
-      <div className="inline-flex space-x-1">
+    <div className="flex space-x-1 p-2 items-center justify-between" {...props}>
+      <ButtonGroup>
         <ToolbarActionButton
           icon={PiCursorDuotone}
           title="Select"
@@ -60,9 +58,9 @@ const EditorToolbar = ({
           onAction={onAction}
           disabled={!editorState.canDelete}
         />
-      </div>
+      </ButtonGroup>
 
-      <div className="hidden sm:inline-flex gap-6 space-x-1 items-center">
+      <ButtonGroup>
         {markerTypes.map(
           (markerListItem) =>
             isMarkerTypeGroup(markerListItem) ? (
@@ -79,7 +77,7 @@ const EditorToolbar = ({
               />
             ) : null // @todo handle single marker items
         )}
-      </div>
+      </ButtonGroup>
       <div className="sm:hidden space-x-1 items-center">
         <ToolbarMarkersButton
           markerList={markerTypes}

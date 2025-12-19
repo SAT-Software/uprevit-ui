@@ -10,23 +10,28 @@ import {
 } from "@/components/ui/popover";
 import { MarkerBaseEditor } from "@markerjs/markerjs3";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   title: string;
   icon: any;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   children: ReactNode;
 } & React.ComponentProps<"div">;
 
 export type PanelProps = {
   markerEditor: MarkerBaseEditor;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
 };
 
 const ToolboxPanel = ({
   title,
   icon: Icon,
-  variant = "ghost",
+  variant = "secondary",
   children,
   className,
   ...props
@@ -37,13 +42,20 @@ const ToolboxPanel = ({
     <div className="inline-flex">
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant={variant}
-            title={title}
-            onClick={() => setPopoverOpen(!popoverOpen)}
-          >
-            <Icon />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={variant}
+                // title={title}
+                onClick={() => setPopoverOpen(!popoverOpen)}
+              >
+                <Icon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{title}</p>
+            </TooltipContent>
+          </Tooltip>
         </PopoverTrigger>
         <PopoverContent className="min-w-48 w-auto p-4">
           <div className={cn("flex flex-col space-y-6", className)} {...props}>

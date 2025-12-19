@@ -6,12 +6,17 @@ import { IconType } from "react-icons";
 import { ToolbarAction } from "@/types/toolbar";
 import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   icon: IconType;
   title: string;
   buttonType?: "button" | "toggle";
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   toggled?: boolean;
   disabled?: boolean;
   loading?: boolean;
@@ -24,7 +29,7 @@ const ToolbarActionButton = ({
   icon: Icon,
   title,
   buttonType,
-  variant = "ghost",
+  variant = "secondary",
   toggled,
   disabled,
   loading = false,
@@ -35,29 +40,44 @@ const ToolbarActionButton = ({
   return (
     <>
       {(buttonType === undefined || buttonType === "button") && (
-        <Button
-          variant={variant}
-          className={cn("bg-transparent", className)}
-          size="icon"
-          title={title}
-          disabled={disabled}
-          onClick={() => onAction(action)}
-        >
-          {loading && <PiSpinnerDuotone className="animate-spin" />}
-          {!loading && <Icon />}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={variant}
+              className={cn("", className)}
+              size="icon-sm"
+              // title={title}
+              disabled={disabled}
+              onClick={() => onAction(action)}
+            >
+              {loading && <PiSpinnerDuotone className="animate-spin" />}
+              {!loading && <Icon />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{title}</p>
+          </TooltipContent>
+        </Tooltip>
       )}
       {buttonType === "toggle" && (
-        <Toggle
-          variant={variant === "ghost" ? "default" : "outline"}
-          className={cn("bg-transparent", className)}
-          title={title}
-          pressed={toggled ? true : false}
-          disabled={disabled}
-          onClick={() => onAction(action)}
-        >
-          <Icon />
-        </Toggle>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Toggle
+              variant={variant === "outline" ? "outline" : "outline"}
+              className={cn("", className)}
+              size="icon-sm"
+              // title={title}
+              pressed={toggled ? true : false}
+              disabled={disabled}
+              onClick={() => onAction(action)}
+            >
+              <Icon />
+            </Toggle>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{title}</p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </>
   );

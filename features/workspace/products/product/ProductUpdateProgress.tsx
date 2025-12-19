@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const PROGRESS_STATES = [
@@ -49,19 +50,19 @@ const getProgressState = (value: number) => {
   return PROGRESS_STATES[PROGRESS_STATES.length - 1];
 };
 
-interface ProgressRadialChartProps {
+interface ProductUpdateProgressProps {
   completionPercentage: number;
   completedTabsCount: number;
   totalTabs: number;
   productStatus?: string;
 }
 
-export function ProgressRadialChart({
+export function ProductUpdateProgress({
   completionPercentage,
   completedTabsCount,
   totalTabs,
   productStatus,
-}: ProgressRadialChartProps) {
+}: ProductUpdateProgressProps) {
   const clampedPercentage = Math.max(
     0,
     Math.min(100, Math.round(completionPercentage || 0))
@@ -74,18 +75,21 @@ export function ProgressRadialChart({
       : getProgressState(clampedPercentage);
 
   return (
-    <div className="flex items-center gap-4 py-1 px-2 rounded-lg border bg-accent">
+    <Button
+      variant="secondary"
+      size="default"
+      className="px-2 cursor-auto"
+      // className="hover:bg-accent/90 active:bg-accent/90"
+    >
       <div className="flex flex-col justify-center leading-tight">
         {/* <span className="text-[0.55rem] uppercase tracking-[0.2em] text-muted-foreground">
           Progress
         </span> */}
-        <div className="flex items-baseline gap-1">
-          <span className="text-xl font-semibold text-foreground">
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-sm font-semibold text-foreground">
             {clampedPercentage}
           </span>
-          <span className="text-[0.65rem] font-medium text-muted-foreground">
-            %
-          </span>
+          <span className="text-[0.65rem] text-muted-foreground">%</span>
         </div>
       </div>
       <div className="flex flex-1 flex-col justify-center gap-1">
@@ -119,6 +123,6 @@ export function ProgressRadialChart({
           ></span>
         </div>
       </div>
-    </div>
+    </Button>
   );
 }

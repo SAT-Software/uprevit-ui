@@ -231,7 +231,7 @@ export default function Page() {
 
       <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-2 border-b border-border p-4">
+        <div className="flex items-center justify-between border-b border-border p-2">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Compliance Standards</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -243,9 +243,9 @@ export default function Page() {
         </div>
 
         {/* Standards Content */}
-        <div className="p-4">
+        <div className="px-2">
           {standards.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-4">
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
               <div className="p-4 rounded-full bg-muted">
                 <PiCertificateDuotone className="w-10 h-10 text-muted-foreground" />
               </div>
@@ -264,7 +264,7 @@ export default function Page() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {standards.map((item: any, idx) => {
                 // Check if this item came from diff (added in V2)
                 const isFromDiff = item._isFromDiff === true;

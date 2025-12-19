@@ -78,7 +78,7 @@ export default function Page() {
       <div className="flex flex-col gap-2 p-2 h-full">
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           {/* Header Skeleton */}
-          <div className="flex items-center justify-between border-b border-border p-4">
+          <div className="flex items-center justify-between border-b border-border py-2 px-3">
             <div className="flex items-center gap-2">
               <div className="h-5 w-32 bg-muted rounded animate-pulse" />
               <div className="h-2 w-2 bg-muted rounded-full animate-pulse" />
@@ -173,7 +173,7 @@ export default function Page() {
 
         <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
           {/* Header Section */}
-          <div className="flex items-center justify-between border-b border-border p-4 shrink-0">
+          <div className="flex items-center justify-between border-b border-border p-2 shrink-0">
             <div className="flex items-center gap-2">
               <p className="text-base font-semibold">Product Specifications</p>
               <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -245,7 +245,7 @@ export default function Page() {
     <div className="flex flex-col gap-2 p-2 h-full">
       <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
         {/* Header Section */}
-        <div className="flex items-center justify-between border-b border-border p-4 shrink-0">
+        <div className="flex items-center justify-between border-b border-border p-2 shrink-0">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Product Specifications</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />

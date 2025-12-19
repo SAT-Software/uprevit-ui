@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { EditorState } from "@/types/editor";
+import { MarkerTypeItem, MarkerTypeList, ToolbarAction } from "@/types/toolbar";
 import {
   AnnotationState,
   ArrowMarker,
@@ -13,62 +14,62 @@ import {
   EllipseMarker,
   FrameMarker,
   FreehandMarker,
+  HighlighterMarker,
   HighlightMarker,
   LineMarker,
   MarkerArea,
   MarkerBaseEditor,
   MeasurementMarker,
   PolygonMarker,
-  Renderer,
   TextMarker,
-  HighlighterMarker,
 } from "@markerjs/markerjs3";
-import EditorToolbar from "./EditorToolbar";
-import EditorToolbox from "./EditorToolbox";
-import { MarkerTypeItem, MarkerTypeList, ToolbarAction } from "@/types/toolbar";
-import { EditorState } from "@/types/editor";
+import { useEffect, useRef, useState } from "react";
 import {
   PiArrowUpRightDuotone,
+  PiBezierCurveDuotone,
   PiChatTeardropDuotone,
+  PiCircle,
+  PiCircleFill,
   PiFrameCornersDuotone,
-  PiSquareDuotone,
-  PiCircleDuotone,
-  PiRectangleDuotone,
-  PiScribbleLoopDuotone,
   PiHighlighterCircleDuotone,
   PiLineSegmentDuotone,
-  PiRulerDuotone,
-  PiBezierCurveDuotone,
   PiPolygonDuotone,
+  PiRulerDuotone,
+  PiScribbleLoopDuotone,
+  PiSquare,
+  PiSquareDuotone,
+  PiSquareFill,
   PiTextTDuotone,
 } from "react-icons/pi";
+import EditorToolbar from "./EditorToolbar";
+import EditorToolbox from "./EditorToolbox";
 
 const markerTypes: MarkerTypeList = [
   {
     name: "Basic shapes",
     markerTypes: [
       {
-        icon: PiRectangleDuotone,
+        icon: PiSquare,
         name: "Rectangle",
         markerType: FrameMarker,
       },
       {
-        icon: PiSquareDuotone,
+        icon: PiSquareFill,
         name: "Cover (filled rectangle)",
         markerType: CoverMarker,
       },
       {
-        icon: PiHighlighterCircleDuotone,
+        icon: PiSquareDuotone,
         name: "Highlight",
         markerType: HighlightMarker,
       },
       {
-        icon: PiCircleDuotone,
+        icon: PiCircle,
         name: "Ellipse",
         markerType: EllipseFrameMarker,
       },
       {
-        icon: PiCircleDuotone,
+        icon: PiCircleFill,
         name: "Ellipse (filled)",
         markerType: EllipseMarker,
       },
@@ -143,14 +144,14 @@ const markerTypes: MarkerTypeList = [
 
 type Props = {
   targetImageSrc: string;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   annotation: AnnotationState | null;
   onSave?: (annotation: AnnotationState) => void;
 };
 
 const Editor = ({
   targetImageSrc,
-  variant = "ghost",
+  variant = "secondary",
   annotation,
   onSave,
 }: Props) => {
@@ -169,6 +170,16 @@ const Editor = ({
 
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
+
+  function deleteSelctedMarkers(event: KeyboardEvent) {
+    if (
+      editor.current &&
+      (event.key === "Delete" || event.key === "Backspace")
+    ) {
+      event.preventDefault();
+      editor.current.deleteSelectedMarkers();
+    }
+  }
 
   const handleToolbarAction = (action: ToolbarAction) => {
     if (editor.current) {
@@ -326,8 +337,16 @@ const Editor = ({
     }
   }, [annotation, targetImageSrc]);
 
+  // Cleanup for keyboard event listener
+  useEffect(() => {
+    document.addEventListener("keydown", deleteSelctedMarkers);
+    return () => {
+      document.removeEventListener("keydown", deleteSelctedMarkers);
+    };
+  }, []);
+
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] w-full h-full">
+    <div className="grid grid-rows-[auto_1fr_auto] w-full h-full border border-border rounded-xl">
       <div>
         <EditorToolbar
           variant={variant}
@@ -341,7 +360,7 @@ const Editor = ({
       </div>
       <div
         ref={editorContainer}
-        className="flex overflow-hidden bg-slate-50"
+        className="flex overflow-hidden bg-slate-50 border-y border-border rounded-none"
       ></div>
       <div>
         <EditorToolbox

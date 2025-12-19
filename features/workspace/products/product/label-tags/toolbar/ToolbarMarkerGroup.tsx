@@ -12,17 +12,23 @@ import { Toggle } from "@/components/ui/toggle";
 
 import { MarkerTypeGroup, MarkerTypeItem } from "@/types/toolbar";
 import { PiCaretDown } from "react-icons/pi";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   markers: MarkerTypeGroup;
-  variant?: "ghost" | "outline";
+  variant?: "ghost" | "outline" | "secondary";
   toggled: boolean;
   onSelectionChange: (markerType: MarkerTypeItem) => void;
 };
 
 const ToolbarMarkerGroup = ({
   markers,
-  variant = "ghost",
+  variant = "secondary",
   toggled,
   onSelectionChange,
 }: Props) => {
@@ -39,17 +45,38 @@ const ToolbarMarkerGroup = ({
   };
 
   return (
-    <div className="inline-flex items-center gap-0">
-      <Toggle
+    <ButtonGroup className="inline-flex items-center gap-0">
+      {/* <Toggle
         title={currentMarkerType.name}
         pressed={toggled}
+        size="icon-sm"
         variant={variant === "ghost" ? "default" : "outline"}
         className="rounded-r-none border-r-0 cursor-pointer"
         onClick={() => handleMarkerSelection(currentMarkerType)}
       >
         <currentMarkerType.icon />
-      </Toggle>
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      </Toggle> */}
+      <ButtonGroup>
+        {markers.markerTypes.map((markerType) => (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                key={markerType.name}
+                // title={markerType.name}
+                onClick={() => handleMarkerSelection(markerType)}
+              >
+                <markerType.icon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{markerType.name}</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </ButtonGroup>
+      {/* <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <button
             title={markers.name}
@@ -62,7 +89,7 @@ const ToolbarMarkerGroup = ({
         <PopoverContent className="flex flex-wrap w-auto p-2">
           {markers.markerTypes.map((markerType) => (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="icon"
               key={markerType.name}
               title={markerType.name}
@@ -72,8 +99,8 @@ const ToolbarMarkerGroup = ({
             </Button>
           ))}
         </PopoverContent>
-      </Popover>
-    </div>
+      </Popover> */}
+    </ButtonGroup>
   );
 };
 

@@ -124,9 +124,9 @@ export default function Page() {
         </div>
       )}
 
-      <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         <div className="flex flex-col gap-0">
-          <div className="flex items-center justify-between border-b border-border p-4">
+          <div className="flex items-center justify-between border-b border-border p-2">
             <div className="flex items-center gap-2">
               <p className="text-base font-semibold">Label Components</p>
               <div className="w-1 h-1 bg-border border border-border rounded-full" />

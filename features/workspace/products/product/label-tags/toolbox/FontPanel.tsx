@@ -20,7 +20,7 @@ type Props = {
   markerEditor: TextMarkerEditor;
 } & PanelProps;
 
-const FontPanel = ({ markerEditor, variant = "ghost" }: Props) => {
+const FontPanel = ({ markerEditor, variant = "secondary" }: Props) => {
   const [color, setColor] = useState(markerEditor.color);
   const [fontFamily, setFontFamily] = useState(markerEditor.fontFamily);
   const [fontSize, setFontSize] = useState(markerEditor.fontSize.value);

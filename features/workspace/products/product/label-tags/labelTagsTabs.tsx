@@ -1,21 +1,17 @@
 "use client";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
-import DialogAddLabelTag from "./DialogAddLabelTag";
-import DialogEditLabelTag from "./DialogEditLabelTag";
-import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
-import Image from "next/image";
-import { PiImageDuotone, PiTagDuotone, PiArrowRightBold } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
-import EditorLabelTag from "./EditorLabelTag";
-import Viewer from "./Viewer";
-import Render from "./Viewer";
+import Image from "next/image";
+import { useState } from "react";
+import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
+import DialogAddLabelTag from "./DialogAddLabelTag";
+import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
+import DialogEditLabelTag from "./DialogEditLabelTag";
 import Editor from "./Editor";
+import Render from "./Viewer";
 
 interface LabelTagItem {
   _id: string;
@@ -204,7 +200,7 @@ export default function LabelTagsTabs({
     return (
       <>
         {/* Header Section */}
-        <div className="flex items-center justify-between border-b border-border p-4">
+        <div className="flex items-center justify-between border-b border-border p-2">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Label Tags</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -236,7 +232,7 @@ export default function LabelTagsTabs({
   return (
     <>
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-border p-4">
+      <div className="flex items-center justify-between border-b border-border p-2">
         <div className="flex items-center gap-2">
           <p className="text-base font-semibold">Label Tags</p>
           <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -247,7 +243,7 @@ export default function LabelTagsTabs({
         <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
       </div>
 
-      <div className="p-4">
+      <div className="p-2">
         <Tabs
           defaultValue="tab-1"
           value={effectiveActiveTab}
@@ -287,7 +283,7 @@ export default function LabelTagsTabs({
 
               return (
                 <TabsContent key={`${i}-${type}`} value={type}>
-                  <Card
+                  <div
                     className={cn(
                       "w-full shadow-none transition-all duration-200",
                       isRedlineView &&
@@ -302,12 +298,12 @@ export default function LabelTagsTabs({
                       !isRedlineView || !itemStatus ? "border-border" : ""
                     )}
                   >
-                    <CardHeader className="pb-4">
+                    <div className="pb-2">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                          <CardTitle
+                          <div
                             className={cn(
-                              "text-xl font-semibold flex items-center gap-2",
+                              "text-sm font-semibold flex items-center gap-2",
                               isRedlineView &&
                                 isRemoved &&
                                 "line-through text-red-500/70"
@@ -321,12 +317,12 @@ export default function LabelTagsTabs({
                             ) : (
                               item.name || "Untitled Label"
                             )}
-                            <span className="text-base font-normal text-muted-foreground">
+                            <span className="text-sm font-normal text-muted-foreground">
                               -
                             </span>
                             <span
                               className={cn(
-                                "text-base font-normal text-muted-foreground",
+                                "text-sm font-normal text-muted-foreground",
                                 isRedlineView &&
                                   isRemoved &&
                                   "line-through text-red-500/70"
@@ -341,11 +337,11 @@ export default function LabelTagsTabs({
                                 item.description
                               )}
                             </span>
-                          </CardTitle>
+                          </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
+                            {/* <Badge variant="secondary" className="text-xs">
                               {item.type || "Unknown Type"}
-                            </Badge>
+                            </Badge> */}
                             {isRedlineView && isAdded && (
                               <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
                                 NEW
@@ -378,13 +374,10 @@ export default function LabelTagsTabs({
                           </div>
                         )}
                       </div>
-                    </CardHeader>
+                    </div>
 
-                    <CardContent className="space-y-6">
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-muted-foreground">
-                          Label Image
-                        </h4>
                         <div className="flex justify-start">
                           {isRedlineView && imageDiff ? (
                             <div className="relative w-full max-w-md">
@@ -448,8 +441,8 @@ export default function LabelTagsTabs({
                           )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </TabsContent>
               );
             });
@@ -468,20 +461,22 @@ export default function LabelTagsTabs({
               );
             });
           })} */}
-          {filteredLabelTypesForTabs.map((type) => {
-            const currentTabData = labelTagsData.filter(
-              (item: LabelTagItem) => item.type === type
+          {/* Render only the currently active tab's image */}
+          {(() => {
+            const activeItem = labelTagsData.find(
+              (item: LabelTagItem) =>
+                item.type === effectiveActiveTab && item.image
             );
-
-            return currentTabData.map((item: LabelTagItem, i) => {
-              if (!item.image || !annotation) {
-                return null;
-              }
+            if (activeItem?.image && annotation) {
               return (
-                <Render targetImage={item.image} annotation={annotation} />
+                <Render
+                  targetImage={activeItem.image}
+                  annotation={annotation}
+                />
               );
-            });
-          })}
+            }
+            return null;
+          })()}
         </Tabs>
       </div>
     </>
