@@ -1,21 +1,17 @@
 "use client";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
-import DialogAddLabelTag from "./DialogAddLabelTag";
-import DialogEditLabelTag from "./DialogEditLabelTag";
-import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
-import Image from "next/image";
-import { PiImageDuotone, PiTagDuotone, PiArrowRightBold } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
-import EditorLabelTag from "./EditorLabelTag";
-import Viewer from "./Viewer";
-import Render from "./Viewer";
+import Image from "next/image";
+import { useState } from "react";
+import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
+import DialogAddLabelTag from "./DialogAddLabelTag";
+import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
+import DialogEditLabelTag from "./DialogEditLabelTag";
 import Editor from "./Editor";
+import Render from "./Viewer";
 
 interface LabelTagItem {
   _id: string;
@@ -465,20 +461,22 @@ export default function LabelTagsTabs({
               );
             });
           })} */}
-          {filteredLabelTypesForTabs.map((type) => {
-            const currentTabData = labelTagsData.filter(
-              (item: LabelTagItem) => item.type === type
+          {/* Render only the currently active tab's image */}
+          {(() => {
+            const activeItem = labelTagsData.find(
+              (item: LabelTagItem) =>
+                item.type === effectiveActiveTab && item.image
             );
-
-            return currentTabData.map((item: LabelTagItem, i) => {
-              if (!item.image || !annotation) {
-                return null;
-              }
+            if (activeItem?.image && annotation) {
               return (
-                <Render targetImage={item.image} annotation={annotation} />
+                <Render
+                  targetImage={activeItem.image}
+                  annotation={annotation}
+                />
               );
-            });
-          })}
+            }
+            return null;
+          })()}
         </Tabs>
       </div>
     </>
