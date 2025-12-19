@@ -171,6 +171,16 @@ const Editor = ({
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
 
+  function deleteSelctedMarkers(event: KeyboardEvent) {
+    if (
+      editor.current &&
+      (event.key === "Delete" || event.key === "Backspace")
+    ) {
+      event.preventDefault();
+      editor.current.deleteSelectedMarkers();
+    }
+  }
+
   const handleToolbarAction = (action: ToolbarAction) => {
     if (editor.current) {
       switch (action) {
@@ -326,6 +336,14 @@ const Editor = ({
       editor.current?.restoreState(annotation);
     }
   }, [annotation, targetImageSrc]);
+
+  // Cleanup for keyboard event listener
+  useEffect(() => {
+    document.addEventListener("keydown", deleteSelctedMarkers);
+    return () => {
+      document.removeEventListener("keydown", deleteSelctedMarkers);
+    };
+  }, []);
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] w-full h-full border border-border rounded-xl">

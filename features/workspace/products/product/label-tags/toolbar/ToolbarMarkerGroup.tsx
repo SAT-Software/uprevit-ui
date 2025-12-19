@@ -13,6 +13,11 @@ import { Toggle } from "@/components/ui/toggle";
 import { MarkerTypeGroup, MarkerTypeItem } from "@/types/toolbar";
 import { PiCaretDown } from "react-icons/pi";
 import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   markers: MarkerTypeGroup;
@@ -53,15 +58,22 @@ const ToolbarMarkerGroup = ({
       </Toggle> */}
       <ButtonGroup>
         {markers.markerTypes.map((markerType) => (
-          <Button
-            variant="secondary"
-            size="icon-sm"
-            key={markerType.name}
-            title={markerType.name}
-            onClick={() => handleMarkerSelection(markerType)}
-          >
-            <markerType.icon />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                key={markerType.name}
+                // title={markerType.name}
+                onClick={() => handleMarkerSelection(markerType)}
+              >
+                <markerType.icon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{markerType.name}</p>
+            </TooltipContent>
+          </Tooltip>
         ))}
       </ButtonGroup>
       {/* <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>

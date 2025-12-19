@@ -15,6 +15,11 @@ import {
   isMarkerTypeGroup,
 } from "@/types/toolbar";
 import { PiPlusDuotone } from "react-icons/pi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   markerList: MarkerTypeList;
@@ -56,15 +61,22 @@ const ToolbarMarkersButton = ({
               <div className="flex flex-wrap">
                 {isMarkerTypeGroup(markers) &&
                   markers.markerTypes.map((markerType) => (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      key={markerType.name}
-                      title={markerType.name}
-                      onClick={() => handleMarkerSelection(markerType)}
-                    >
-                      <markerType.icon />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          key={markerType.name}
+                          // title={markerType.name}
+                          onClick={() => handleMarkerSelection(markerType)}
+                        >
+                          <markerType.icon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{markerType.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   ))}
               </div>
             </div>

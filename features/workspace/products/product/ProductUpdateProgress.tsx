@@ -78,7 +78,7 @@ export function ProductUpdateProgress({
     <Button
       variant="secondary"
       size="default"
-      className="px-2"
+      className="px-2 cursor-auto"
       // className="hover:bg-accent/90 active:bg-accent/90"
     >
       <div className="flex flex-col justify-center leading-tight">

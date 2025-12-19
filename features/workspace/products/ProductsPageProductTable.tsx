@@ -248,11 +248,7 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "project_name",
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Project Name"
-        icon={PiKanbanDuotone}
-      />
+      <SortableHeader column={column} title="Project" icon={PiKanbanDuotone} />
     ),
     cell: ({ row }) => {
       const project_name = row.original?.project?.[0]?.project_name;
@@ -265,7 +261,7 @@ const columns: ColumnDef<Item>[] = [
     header: ({ column }) => (
       <SortableHeader
         column={column}
-        title="Department Name"
+        title="Department"
         icon={PiBuildingsDuotone}
       />
     ),
@@ -450,7 +446,7 @@ const columns: ColumnDef<Item>[] = [
         </div>
       );
     },
-    size: 150,
+    size: 180,
   },
   {
     id: "actions",
@@ -723,7 +719,7 @@ function RowActions({ row }: { row: { original: Item } }) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            size="icon"
+            size="icon-sm"
             variant="ghost"
             className="shadow-none"
             aria-label="More actions"
