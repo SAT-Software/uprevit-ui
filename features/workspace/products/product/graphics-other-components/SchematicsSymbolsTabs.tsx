@@ -105,7 +105,7 @@ export default function SchematicsSymbolsTabs({
       className="flex flex-col h-full gap-0"
     >
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-border py-2 px-3">
+      <div className="flex items-center justify-between border-b border-border p-2">
         <div className="flex items-center gap-2">
           <p className="text-base font-semibold">Symbols & Graphics</p>
           <div className="w-1 h-1 bg-border border border-border rounded-full" />
