@@ -200,7 +200,7 @@ export default function LabelTagsTabs({
     return (
       <>
         {/* Header Section */}
-        <div className="flex items-center justify-between border-b border-border p-4">
+        <div className="flex items-center justify-between border-b border-border py-2 px-3">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Label Tags</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -232,7 +232,7 @@ export default function LabelTagsTabs({
   return (
     <>
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-border p-4">
+      <div className="flex items-center justify-between border-b border-border py-2 px-3">
         <div className="flex items-center gap-2">
           <p className="text-base font-semibold">Label Tags</p>
           <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -243,7 +243,7 @@ export default function LabelTagsTabs({
         <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
       </div>
 
-      <div className="p-4">
+      <div className="p-2">
         <Tabs
           defaultValue="tab-1"
           value={effectiveActiveTab}
@@ -298,12 +298,12 @@ export default function LabelTagsTabs({
                       !isRedlineView || !itemStatus ? "border-border" : ""
                     )}
                   >
-                    <div className="pb-4">
-                      <div className="flex items-start justify-between">
+                    <div className="pb-2">
+                      <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <div
                             className={cn(
-                              "text-xl font-semibold flex items-center gap-2",
+                              "text-sm font-semibold flex items-center gap-2",
                               isRedlineView &&
                                 isRemoved &&
                                 "line-through text-red-500/70"
@@ -317,12 +317,12 @@ export default function LabelTagsTabs({
                             ) : (
                               item.name || "Untitled Label"
                             )}
-                            <span className="text-base font-normal text-muted-foreground">
+                            <span className="text-sm font-normal text-muted-foreground">
                               -
                             </span>
                             <span
                               className={cn(
-                                "text-base font-normal text-muted-foreground",
+                                "text-sm font-normal text-muted-foreground",
                                 isRedlineView &&
                                   isRemoved &&
                                   "line-through text-red-500/70"

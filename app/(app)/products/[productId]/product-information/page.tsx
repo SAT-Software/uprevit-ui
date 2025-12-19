@@ -194,7 +194,7 @@ export default function Page() {
       <div className="flex flex-col gap-2 p-2 h-full">
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           {/* Header Section Skeleton */}
-          <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
+          <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b px-3 py-2 border-border">
             <div className="flex flex-col gap-3 w-full min-w-0">
               <div className="flex flex-col gap-1">
                 <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
@@ -217,7 +217,7 @@ export default function Page() {
           </div>
 
           {/* Content Skeleton */}
-          <div className="p-6">
+          <div className="p-2">
             <div className="h-64 w-full bg-muted rounded-xl animate-pulse" />
           </div>
         </div>
@@ -245,9 +245,9 @@ export default function Page() {
         </div>
       )}
 
-      <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row gap-6 justify-between border-b p-6 border-border">
+        <div className="flex flex-col md:flex-row gap-2 justify-between border-b px-3 py-2 border-border">
           <div className="flex flex-col gap-3 w-full min-w-0">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ export default function Page() {
           </div>
 
           {/* Actions & Meta */}
-          <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
+          <div className="flex flex-col items-start md:items-end gap-2 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
               <EditProductDialog
                 product={productData!}
@@ -356,8 +356,8 @@ export default function Page() {
         </div>
 
         {/* Product Information Section */}
-        <div className="flex flex-col gap-2 px-6 pb-6">
-          <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between border-b border-border pb-2 px-3">
             <div className="flex items-center gap-2">
               <p className="text-base font-semibold">Product Information</p>
               <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -367,7 +367,7 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mx-2">
             {fields.map((field, idx) => {
               // For custom fields (with array index), check for nested diffs
               const isCustomField = field.diffPath.includes("custom_fields[");

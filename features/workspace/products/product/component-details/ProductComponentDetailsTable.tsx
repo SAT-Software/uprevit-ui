@@ -509,7 +509,7 @@ export default function ProductComponentDetailsTable({
   });
 
   return (
-    <div className="space-y-4 w-full p-4">
+    <div className="space-y-2 w-full p-2">
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="">
           <TableHeader className="bg-muted">

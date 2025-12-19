@@ -61,7 +61,7 @@ export default function Page() {
       <div className="flex flex-col gap-2 p-2 h-full">
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           {/* Header Section Skeleton */}
-          <div className="flex flex-col md:flex-row gap-4 items-start justify-between border-b p-4 border-border">
+          <div className="flex flex-col md:flex-row gap-2 items-start justify-between border-b px-3 py-2 border-border">
             <div className="flex items-center gap-2">
               <div className="h-5 w-40 bg-muted rounded animate-pulse" />
               <div className="h-2 w-2 bg-muted rounded-full animate-pulse" />
@@ -71,7 +71,7 @@ export default function Page() {
           </div>
 
           {/* Tabs Skeleton */}
-          <div className="px-4">
+          <div className="px-2">
             <div className="flex gap-0 mb-4">
               {[1, 2, 3, 4].map((i) => (
                 <div

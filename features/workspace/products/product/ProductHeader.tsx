@@ -34,7 +34,13 @@ import {
   PiTextStrikethroughDuotone,
 } from "react-icons/pi";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
-import { ProgressRadialChart } from "./ProgressRadialChart";
+import { ProductUpdateProgress } from "./ProductUpdateProgress";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type Item = {
   productId: string;
@@ -214,7 +220,7 @@ export function ProductHeader() {
   );
 
   const toggleButtonClasses = cn(
-    "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground py-1 px-2 rounded-lg border bg-accent",
+    "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground rounded-lg border bg-accent",
     isReadOnly ? "cursor-not-allowed opacity-70" : "cursor-pointer",
     isCurrentTabCompleted ? "text-foreground" : "text-foreground"
   );
@@ -425,29 +431,43 @@ export function ProductHeader() {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
-        <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
-          <ProgressRadialChart
+        <ButtonGroup>
+          <ProductUpdateProgress
             completionPercentage={completionPercentage}
             completedTabsCount={completedTabsCount}
             totalTabs={TOTAL_TABS}
             productStatus={productCoreData?.status}
           />
-
-          <button
-            onClick={handleToggleTab}
-            disabled={!currentTab || !product || isSyncingStatus || isReadOnly}
-            className={toggleButtonClasses}
-            title={isReadOnly ? "Cannot edit submitted product" : undefined}
-          >
-            <span className={toggleButtonIconClasses}>{toggleButtonIcon}</span>
-            <span className="flex flex-col items-start leading-tight">
-              <span className="text-xs font-semibold">{toggleButtonTitle}</span>
-              <span className="text-[0.65rem] font-medium text-muted-foreground">
-                {toggleButtonSubtitle}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleToggleTab}
+                variant="secondary"
+                // className="bg-emerald-200/50"
+                size="icon"
+                disabled={
+                  !currentTab || !product || isSyncingStatus || isReadOnly
+                }
+                // className={toggleButtonClasses}
+                title={isReadOnly ? "Cannot edit submitted product" : undefined}
+              >
+                <span className={toggleButtonIconClasses}>
+                  {toggleButtonIcon}
+                </span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-xs font-semibold">
+                  {toggleButtonTitle}
+                </span>
+                <span className="text-[0.65rem] font-medium text-muted-foreground">
+                  {toggleButtonSubtitle}
+                </span>
               </span>
-            </span>
-          </button>
-        </div>
+            </TooltipContent>
+          </Tooltip>
+        </ButtonGroup>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
             <ConfirmSubmitProductDialog

@@ -105,7 +105,7 @@ export default function SchematicsSymbolsTabs({
       className="flex flex-col h-full gap-0"
     >
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-border p-4">
+      <div className="flex items-center justify-between border-b border-border py-2 px-3">
         <div className="flex items-center gap-2">
           <p className="text-base font-semibold">Symbols & Graphics</p>
           <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -133,7 +133,7 @@ export default function SchematicsSymbolsTabs({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="px-4 py-2">
+      <div className="px-2 py-2">
         <ScrollArea className="w-full">
           <TabsList>
             <TabsTrigger value="tab-1">
@@ -161,7 +161,7 @@ export default function SchematicsSymbolsTabs({
       </div>
 
       {/* Tab Contents */}
-      <div className="flex-1 overflow-hidden px-4">
+      <div className="flex-1 overflow-hidden px-2">
         <TabsContent value="tab-1" className="h-full mt-0">
           <SymbolsGraphicsPageSymbolsTable
             data={symbolsData}
