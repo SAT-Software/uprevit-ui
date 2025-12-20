@@ -1,48 +1,23 @@
 import { Button } from "@/components/ui/button";
+import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 
 export default function CTASection() {
   return (
     <div className="w-full mt-40 mb-20">
       <div className="relative w-full">
         <div className="max-w-6xl mx-auto relative">
-          <div className="absolute -bottom-14 -left-16 text-border/60 pointer-events-none hidden md:block rotate-224">
-            <svg
-              width="120"
-              height="100"
-              viewBox="0 0 120 100"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute -bottom-14 -right-16 text-border/60 pointer-events-none hidden md:block rotate-135">
-            <svg
-              width="120"
-              height="100"
-              viewBox="0 0 120 100"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
+          {/* Bottom-left corner (large size, custom rotation) */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-14 -left-16"
+            rotation={224}
+            size="lg"
+          />
+          {/* Bottom-right corner (large size, custom rotation) */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-14 -right-16"
+            rotation={135}
+            size="lg"
+          />
 
           <div className="p-1 bg-accent rounded-2xl max-w-6xl mx-auto border border-border">
             <div className="w-full bg-foreground dark:bg-background rounded-[14px] h-120 text-background dark:text-foreground p-10 gap-20 flex items-center justify-between">

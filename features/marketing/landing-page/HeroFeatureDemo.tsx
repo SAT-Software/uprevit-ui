@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -42,44 +43,17 @@ export default function HeroFeatureDemo({
   return (
     <div className="relative w-full mx-auto mt-20 mb-20 px-4 lg:px-0">
       <div className="max-w-6xl mx-auto relative">
-        <div className="absolute -bottom-8 -left-22 text-border/60 pointer-events-none hidden md:block rotate-270">
-          <svg
-            width="120"
-            height="60"
-            viewBox="0 0 120 60"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r="58"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeDasharray="0.8 3"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-        <div className="absolute -bottom-15 -right-15 text-border/60 pointer-events-none hidden md:block rotate-180">
-          <svg
-            width="60"
-            height="60"
-            viewBox="0 0 60 60"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r="58"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeDasharray="0.8 3"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
+        {/* Bottom-left corner (medium size) */}
+        <DecorativeCornerCircleCustom
+          positionClassName="-bottom-8 -left-22"
+          rotation={270}
+          size="md"
+        />
+        {/* Bottom-right corner (small size) */}
+        <DecorativeCornerCircleCustom
+          positionClassName="-bottom-15 -right-15"
+          rotation={180}
+        />
 
         <div className="p-1 bg-accent border-border border rounded-[12px] backdrop-blur-sm">
           <Card className="relative w-full aspect-16/9 mx-auto border-border max-w-6xl overflow-hidden bg-background/50">

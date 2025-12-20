@@ -78,7 +78,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
                 <span className="text-foreground text-[10px]">Family Data</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-neutral-500 group-hover:bg-neutral-500/20 transition-all ease-in-out duration-300 delay-7" />
+                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-neutral-500 group-hover:bg-neutral-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">UDI Barcode</span>
               </div>
             </div>

@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DecorativeCornerCircle } from "@/components/ui/DecorativeCornerCircle";
 import { PiImageDuotone, PiPresentationChartDuotone } from "react-icons/pi";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -40,82 +41,14 @@ export default function ReportSection() {
       </div>
       <div className="relative w-full">
         <div className="max-w-6xl mx-auto relative">
-          <div className="absolute -bottom-15 -left-15 text-border/60 pointer-events-none hidden md:block rotate-270">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute -bottom-15 -right-15 text-border/60 pointer-events-none hidden md:block rotate-180">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute -top-15 -left-15 text-border/60 pointer-events-none hidden md:block rotate-0">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute -top-15 -right-15 text-border/60 pointer-events-none hidden md:block rotate-90">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
+          {/* Bottom-left corner */}
+          <DecorativeCornerCircle position="bottom-left" rotation={270} />
+          {/* Bottom-right corner */}
+          <DecorativeCornerCircle position="bottom-right" rotation={180} />
+          {/* Top-left corner */}
+          <DecorativeCornerCircle position="top-left" rotation={0} />
+          {/* Top-right corner */}
+          <DecorativeCornerCircle position="top-right" rotation={90} />
 
           <div className="p-1 bg-accent border-border border rounded-[12px] max-w-6xl mx-auto">
             <Card className="aspect-16/8 mx-auto border-border max-w-6xl">

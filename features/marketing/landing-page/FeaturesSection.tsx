@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 import { PiBoundingBoxDuotone, PiImageDuotone } from "react-icons/pi";
 import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";
@@ -41,82 +42,26 @@ export default function FeaturesSection() {
       </div>
       <div className="relative w-full">
         <div className="max-w-6xl mx-auto relative">
-          <div className="absolute bottom-0 -left-15 text-border/60 pointer-events-none hidden md:block rotate-0">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute bottom-0 -right-15 text-border/60 pointer-events-none hidden md:block rotate-90">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute -bottom-15 left-0 text-border/60 pointer-events-none hidden md:block rotate-180">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="absolute -bottom-15 right-0 text-border/60 pointer-events-none hidden md:block rotate-270">
-            <svg
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r="58"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="0.8 3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
+          {/* Inner bottom-left corner */}
+          <DecorativeCornerCircleCustom
+            positionClassName="bottom-0 -left-15"
+            rotation={0}
+          />
+          {/* Inner bottom-right corner */}
+          <DecorativeCornerCircleCustom
+            positionClassName="bottom-0 -right-15"
+            rotation={90}
+          />
+          {/* Outer bottom-left corner */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-15 left-0"
+            rotation={180}
+          />
+          {/* Outer bottom-right corner */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-15 right-0"
+            rotation={270}
+          />
 
           <div className="p-1 bg-accent rounded-[12px] max-w-6xl mx-auto border border-border">
             <div className="flex flex-col gap-1">
