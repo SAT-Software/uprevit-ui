@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PiImageDuotone } from "react-icons/pi";
+import { PiImageDuotone, PiPresentationChartDuotone } from "react-icons/pi";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -28,7 +28,7 @@ export default function ReportSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiImageDuotone className="mr-1 text-foreground/50" />
+          <PiPresentationChartDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">Report</span>
         </Badge>
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">
@@ -39,19 +39,17 @@ export default function ReportSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <div
-          className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto"
-          // style={{ boxShadow: "0px 2px 1px rgba(0, 0, 0, 0.03)" }}
-        >
-          <Card className="w-full h-150 mx-auto border-border max-w-6xl">
-            <CardHeader>
-              <CardContent>
-                <p>
-                  TODO: Add a dynamic video (smooth zoom and transitions) of the
-                  filtering and report extraction feature
-                </p>
-              </CardContent>
-            </CardHeader>
+        <div className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto">
+          <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
+            <CardContent className="p-0 overflow-hidden">
+              <video
+                src="/uprevit-test-demo-2.mp4"
+                className="overflow-hidden rounded-[8px]"
+                autoPlay
+                loop
+                muted
+              />
+            </CardContent>
           </Card>
         </div>
         <div className="absolute top-0 left-0 w-full h-px bg-border/60" />

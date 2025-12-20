@@ -321,8 +321,8 @@ export default function HeroFeatureCards({
                   d="M1 0V52C1 74.4021 1 85.6031 5.35974 94.1596C9.19467 101.686 15.3139 107.805 22.8404 111.64C31.3968 116 42.5979 116 65 116H107"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -348,8 +348,8 @@ export default function HeroFeatureCards({
                   d="M1 0L1 4.5C1 15.5457 9.95431 24.5 21 24.5L63 24.5C74.0457 24.5 83 33.4543 83 44.5L83 49"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <svg
@@ -369,19 +369,19 @@ export default function HeroFeatureCards({
                     d="M22 3C22 4.10457 21.1046 5 20 5C18.8954 5 18 4.10457 18 3C18 1.89543 18.8954 1 20 1C21.1046 1 22 1.89543 22 3Z"
                     fill="white"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                   ></path>
                   <path
                     d="M5 3C5 4.10457 4.10457 5 3 5C1.89543 5 1 4.10457 1 3C1 1.89543 1.89543 1 3 1C4.10457 1 5 1.89543 5 3Z"
                     fill="white"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                   ></path>
                   <path
                     d="M39 3C39 4.10457 38.1046 5 37 5C35.8954 5 35 4.10457 35 3C35 1.89543 35.8954 1 37 1C38.1046 1 39 1.89543 39 3Z"
                     fill="white"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                   ></path>
                 </g>
               </svg>
@@ -404,7 +404,7 @@ export default function HeroFeatureCards({
                   transform="matrix(-8.74228e-08 -1 -1 8.74228e-08 22 15)"
                   fill="white"
                   stroke="currentColor"
-                  stroke-width="2"
+                  strokeWidth="2"
                 ></circle>
                 <circle
                   cx="2"
@@ -413,7 +413,7 @@ export default function HeroFeatureCards({
                   transform="matrix(-8.74228e-08 -1 -1 8.74228e-08 39 15)"
                   fill="white"
                   stroke="currentColor"
-                  stroke-width="2"
+                  strokeWidth="2"
                 ></circle>
                 <circle
                   cx="2"
@@ -422,7 +422,7 @@ export default function HeroFeatureCards({
                   transform="matrix(-8.74228e-08 -1 -1 8.74228e-08 5 15)"
                   fill="white"
                   stroke="currentColor"
-                  stroke-width="2"
+                  strokeWidth="2"
                 ></circle>
               </svg>
             </div>
@@ -440,8 +440,8 @@ export default function HeroFeatureCards({
                   d="M660 50L660 49C660 32.1984 660 23.7976 656.73 17.3803C653.854 11.7354 649.265 7.14598 643.62 4.26978C637.202 0.999972 628.802 0.999973 612 0.999973L49 0.999998C32.1984 0.999999 23.7976 0.999999 17.3803 4.2698C11.7354 7.14601 7.14601 11.7354 4.26981 17.3803C1 23.7976 1 32.1984 1 49L1 50"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -467,8 +467,8 @@ export default function HeroFeatureCards({
                   d="M0 1L76 1C92.5685 1 106 14.4315 106 31L106 37C106 53.5685 119.431 67 136 67L191 67"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -490,8 +490,8 @@ export default function HeroFeatureCards({
                   d="M106 0V52C106 74.4021 106 85.6031 101.64 94.1596C97.8053 101.686 91.6861 107.805 84.1596 111.64C75.6032 116 64.4021 116 42 116H-5.94008e-07"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -517,8 +517,8 @@ export default function HeroFeatureCards({
                   d="M0.5 75L0.500001 57.7013L0.500002 36.7987L0.500002 31C0.500003 14.4315 13.9315 1.00001 30.5 1.00002L429 1.00002"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -540,8 +540,8 @@ export default function HeroFeatureCards({
                   d="M83 0L83 4.5C83 15.5457 74.0457 24.5 63 24.5L21 24.5C9.9543 24.5 0.999996 33.4543 0.999996 44.5L0.999996 49"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <svg
@@ -559,7 +559,7 @@ export default function HeroFeatureCards({
                   transform="matrix(-8.74228e-08 -1 -1 8.74228e-08 21 14)"
                   fill="white"
                   stroke="currentColor"
-                  stroke-width="2"
+                  strokeWidth="2"
                 ></circle>
               </svg>
               <svg
@@ -579,19 +579,19 @@ export default function HeroFeatureCards({
                     d="M22 3C22 4.10457 21.1046 5 20 5C18.8954 5 18 4.10457 18 3C18 1.89543 18.8954 1 20 1C21.1046 1 22 1.89543 22 3Z"
                     fill="white"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                   ></path>
                   <path
                     d="M5 3C5 4.10457 4.10457 5 3 5C1.89543 5 1 4.10457 1 3C1 1.89543 1.89543 1 3 1C4.10457 1 5 1.89543 5 3Z"
                     fill="white"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                   ></path>
                   <path
                     d="M39 3C39 4.10457 38.1046 5 37 5C35.8954 5 35 4.10457 35 3C35 1.89543 35.8954 1 37 1C38.1046 1 39 1.89543 39 3Z"
                     fill="white"
                     stroke="currentColor"
-                    stroke-width="2"
+                    strokeWidth="2"
                   ></path>
                 </g>
               </svg>
@@ -610,8 +610,8 @@ export default function HeroFeatureCards({
                   d="M0 1L70 1.00001"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -637,8 +637,8 @@ export default function HeroFeatureCards({
                   d="M0 1L70 1.00001"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
-                  stroke-dashoffset="0px"
+                  strokeDasharray="1px 1px"
+                  strokeDashoffset="0px"
                 ></path>
               </svg>
               <div
@@ -664,7 +664,7 @@ export default function HeroFeatureCards({
                   d="M1 0v80"
                   stroke="currentColor"
                   pathLength="1"
-                  stroke-dasharray="1px 1px"
+                  strokeDasharray="1px 1px"
                 ></path>
               </svg>
               <div

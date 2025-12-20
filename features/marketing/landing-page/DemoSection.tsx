@@ -46,15 +46,16 @@ export default function DemoSection() {
       </div>
       <div className="relative w-full">
         <div className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto">
-          <Card className="w-full h-150 mx-auto border-border max-w-6xl">
-            <CardHeader>
-              <CardContent>
-                <p>
-                  TODO: Add a dynamic video (smooth zoom and transitions) of
-                  Uprevit showing major feature in quick glimse of the product
-                </p>
-              </CardContent>
-            </CardHeader>
+          <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
+            <CardContent className="p-0 overflow-hidden">
+              <video
+                src="/uprevit-test-demo-1.mp4"
+                className="overflow-hidden rounded-[8px]"
+                autoPlay
+                loop
+                muted
+              />
+            </CardContent>
           </Card>
         </div>
         <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
