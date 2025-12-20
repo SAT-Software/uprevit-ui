@@ -1,39 +1,83 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+"use client";
 
-export default function HeroFeatureDemo() {
+import { Card } from "@/components/ui/card";
+import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
+const screenshots = [
+  "/features/feature-0.png",
+  "/features/feature-1.png",
+  "/features/feature-2.png",
+  "/features/feature-3.png",
+  "/features/feature-4.png",
+];
+
+const featureNames = [
+  "Labeling Standards",
+  "Product Specifications",
+  "Source Files",
+  "Label Components",
+  "Symbols-Graphics",
+];
+
+export default function HeroFeatureDemo({
+  activeIndex,
+}: {
+  activeIndex: number;
+}) {
+  const [displayIndex, setDisplayIndex] = useState(activeIndex);
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    if (activeIndex !== displayIndex) {
+      setOpacity(0);
+      const timer = setTimeout(() => {
+        setDisplayIndex(activeIndex);
+        setOpacity(1);
+      }, 3000); // Wait for transition out
+      return () => clearTimeout(timer);
+    }
+  }, [activeIndex, displayIndex]);
+
   return (
-    <div className="relative w-full mx-auto mt-20 mb-20">
-      {/* Decorative half circle - positioned behind the card */}
-      <div className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto">
-        <Card className="relative w-full h-150 mx-auto border-border max-w-6xl">
-          {/* <div
-          className="absolute bottom-0 left-0 w-10 h-20 border border-dashed border-border rounded-l-full border-r-0 z-0"
-          style={{
-            transform: "translate(-100%, 50%)",
-          }}
-        /> */}
-          <CardHeader>
-            <CardContent>
-              <p>
-                TODO: Add Screenshot of Dashboard page. Or we can add 5 tabs at
-                the top, and 5 screenshots and they will be changes for time to
-                time.
-              </p>
-            </CardContent>
-          </CardHeader>
-          {/* <div
-          className="absolute bottom-0 right-0 w-10 h-20 border border-dashed border-border rounded-r-full border-l-0 z-0 rotate-90"
-          style={{
-            transform: "translate(150%, -25%)",
-          }}
-        /> */}
-        </Card>
+    <div className="relative w-full mx-auto mt-20 mb-20 px-4 lg:px-0">
+      <div className="max-w-6xl mx-auto relative">
+        {/* Bottom-left corner (medium size) */}
+        <DecorativeCornerCircleCustom
+          positionClassName="-bottom-8 -left-22"
+          rotation={270}
+          size="md"
+        />
+        {/* Bottom-right corner (small size) */}
+        <DecorativeCornerCircleCustom
+          positionClassName="-bottom-15 -right-15"
+          rotation={180}
+        />
+
+        <div className="p-1 bg-accent border-border border rounded-[12px] backdrop-blur-sm">
+          <Card className="relative w-full aspect-16/9 mx-auto border-border max-w-6xl overflow-hidden bg-background/50">
+            <div className="absolute inset-0">
+              {screenshots.map((src, idx) => (
+                <div
+                  key={src}
+                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                    activeIndex === idx
+                      ? "opacity-100 scale-100 translate-y-0"
+                      : "opacity-0 scale-95 translate-y-4"
+                  }`}
+                >
+                  <Image
+                    src={src}
+                    alt={featureNames[idx]}
+                    fill
+                    className="object-cover rounded-b-xl"
+                  />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
       <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
       <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import { Ripple } from "@/components/ui/ripple";
@@ -12,6 +13,14 @@ import FeaturesSection from "@/features/marketing/landing-page/FeaturesSection";
 import FAQSection from "@/features/marketing/landing-page/FAQSection";
 import CTASection from "@/features/marketing/landing-page/CTASection";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
+
+const features = [
+  { id: 0, name: "Labeling Standards", color: "amber" },
+  { id: 1, name: "Product Specifications", color: "blue" },
+  { id: 2, name: "Source Files", color: "emerald" },
+  { id: 3, name: "Label Components", color: "violet" },
+  { id: 4, name: "Symbols-Graphics", color: "orange" },
+];
 
 const items = [
   {
@@ -234,6 +243,15 @@ const items = [
 ];
 
 export default function Home() {
+  const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveFeatureIndex((prev) => (prev + 1) % 5);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
@@ -258,8 +276,11 @@ export default function Home() {
           <div className="absolute top-100 left-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
           <div className="absolute top-100 right-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
         </div>
-        <HeroFeatureCards />
-        <HeroFeatureDemo />
+        <HeroFeatureCards
+          activeIndex={activeFeatureIndex}
+          onActiveChange={setActiveFeatureIndex}
+        />
+        <HeroFeatureDemo activeIndex={activeFeatureIndex} />
         <DemoSection />
         <ReportSection />
         <FeaturesSection />

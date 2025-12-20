@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { PiImageDuotone } from "react-icons/pi";
@@ -45,17 +46,38 @@ export default function DemoSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <div className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto">
-          <Card className="w-full h-150 mx-auto border-border max-w-6xl">
-            <CardHeader>
-              <CardContent>
-                <p>
-                  TODO: Add a dynamic video (smooth zoom and transitions) of
-                  Uprevit showing major feature in quick glimse of the product
-                </p>
+        <div className="max-w-6xl mx-auto relative">
+          {/* Bottom-left corner (medium size) */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-15 -left-15"
+            rotation={180}
+            size="md"
+          />
+          {/* Bottom-right corner (medium size) */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-7.5 -right-22.5"
+            rotation={90}
+            size="md"
+          />
+          {/* Top-right corner (small size) */}
+          <DecorativeCornerCircleCustom
+            positionClassName="-top-15 -right-15"
+            rotation={90}
+          />
+
+          <div className="p-1 bg-accent border-border border rounded-[12px]">
+            <Card className="aspect-16/8 mx-auto border-border overflow-hidden">
+              <CardContent className="p-0 overflow-hidden">
+                <video
+                  src="/uprevit-test-demo-1.mp4"
+                  className="overflow-hidden rounded-[8px]"
+                  autoPlay
+                  loop
+                  muted
+                />
               </CardContent>
-            </CardHeader>
-          </Card>
+            </Card>
+          </div>
         </div>
         <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
         <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />

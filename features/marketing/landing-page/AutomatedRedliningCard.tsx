@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -7,24 +8,280 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TextLoop } from "@/components/ui/text-loop";
+import { TextMorph } from "@/components/ui/text-morph";
+import { TextScramble } from "@/components/ui/text-scramble";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 import {
   PiCaretCircleDownDuotone,
   PiHashDuotone,
   PiPackageDuotone,
   PiPlusCircleDuotone,
   PiRulerDuotone,
-  PiScalesDuotone,
+  PiTagDuotone,
   PiTextAlignLeftDuotone,
 } from "react-icons/pi";
 
-export function AutomatedRedliningCard() {
+type RowData = {
+  no: string;
+  name: { clean: string; redline?: { old: string; new: string } };
+  description: { clean: string; redline?: { old: string; new: string } };
+  dimension: { clean: string; redline?: { old: string; new: string } };
+  labelTypes: {
+    clean: string[];
+    redline?: { old: string[]; new: string[] };
+  };
+};
+
+const CellContent = ({
+  data,
+  isMono = false,
+  TextScrambleTrigger,
+}: {
+  data: { clean: string; redline?: { old: string; new: string } };
+  isMono?: boolean;
+  TextScrambleTrigger?: boolean;
+}) => {
+  if (data.redline) {
+    return (
+      <div className="relative min-h-8">
+        <div className="absolute inset-0 flex flex-col gap-0.5">
+          <TextScramble
+            trigger={TextScrambleTrigger}
+            className="text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-400 transition-all duration-500 ease-in-out line-through opacity-100"
+          >
+            {data.redline.old}
+          </TextScramble>
+          <TextScramble
+            trigger={TextScrambleTrigger}
+            className="text-muted-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-400 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 font-medium"
+          >
+            {data.redline.new}
+          </TextScramble>
+        </div>
+      </div>
+    );
+  }
+  return <span className={cn(isMono && "font-mono")}>{data.clean}</span>;
+};
+
+const LabelTypesBadge = ({
+  data,
+}: {
+  data: { clean: string[]; redline?: { old: string[]; new: string[] } };
+}) => {
+  if (data.redline) {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <div className="flex flex-wrap gap-0.5">
+          {data.redline.old.map((label, idx) => (
+            <Badge
+              key={idx}
+              variant="outline"
+              className="text-[8px] text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-300 duration-300 ease-in-out delay-300 line-through opacity-70"
+            >
+              {label}
+            </Badge>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-0.5">
+          {data.redline.new.map((label, idx) => (
+            <Badge
+              key={idx}
+              variant="default"
+              className="text-[8px] bg-emerald-100/50 text-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-300 duration-300 ease-in-out delay-300 opacity-0 -mt-2 group-hover:opacity-100 group-hover:mt-0 transition-all border border-emerald-600"
+            >
+              {label}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="relative w-2/3 h-full bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden group">
+    <div className="flex flex-wrap gap-0.5">
+      {data.clean.map((label, idx) => (
+        <Badge
+          key={idx}
+          variant="outline"
+          className="text-[8px] py-0 px-1 h-3.5"
+        >
+          {label}
+        </Badge>
+      ))}
+    </div>
+  );
+};
+
+const tableData: RowData[] = [
+  {
+    no: "1001",
+    name: {
+      clean: "Chassis Assy V2",
+      redline: { old: "Chassis Assy V1", new: "Chassis Assy V2" },
+    },
+    description: {
+      clean: "Main structural base - Steel alloy",
+      redline: {
+        old: "Main structural base - Aluminum",
+        new: "Main structural base - Steel alloy",
+      },
+    },
+    dimension: {
+      clean: "455mm x 305mm",
+      redline: { old: "450mm x 300mm", new: "455mm x 305mm" },
+    },
+    labelTypes: {
+      clean: ["Pouch", "Carton"],
+      redline: { old: ["Pouch"], new: ["Pouch", "Carton"] },
+    },
+  },
+  {
+    no: "1042",
+    name: {
+      clean: "Power Supply Unit Gen2",
+    },
+    description: {
+      clean: "12V output, fully modular",
+      redline: {
+        old: "12V output, non-modular",
+        new: "12V output, fully modular",
+      },
+    },
+    dimension: {
+      clean: "140mm x 160mm",
+    },
+    labelTypes: {
+      clean: ["Box"],
+    },
+  },
+  {
+    no: "2055",
+    name: {
+      clean: "Warning Label ISO",
+      redline: { old: "Warning Label", new: "Warning Label ISO" },
+    },
+    description: {
+      clean: "Pictogram + text warning",
+    },
+    dimension: {
+      clean: "50mm x 50mm",
+      redline: { old: "50mm x 25mm", new: "50mm x 50mm" },
+    },
+    labelTypes: {
+      clean: ["Tyvek"],
+    },
+  },
+  {
+    no: "3010",
+    name: {
+      clean: "Cooling Fan (High RPM)",
+      redline: { old: "Cooling Fan", new: "Cooling Fan (High RPM)" },
+    },
+    description: {
+      clean: "MagLev bearing system",
+      redline: { old: "Standard bearing", new: "MagLev bearing system" },
+    },
+    dimension: {
+      clean: "120mm x 120mm",
+    },
+    labelTypes: {
+      clean: ["Jar", "Pouch"],
+      redline: { old: ["Jar"], new: ["Jar", "Pouch"] },
+    },
+  },
+  {
+    no: "3045",
+    name: {
+      clean: "Control Board V3",
+    },
+    description: {
+      clean: "Dual core MCU with WiFi",
+      redline: { old: "Single core MCU", new: "Dual core MCU with WiFi" },
+    },
+    dimension: {
+      clean: "85mm x 65mm",
+      redline: { old: "80mm x 60mm", new: "85mm x 65mm" },
+    },
+    labelTypes: {
+      clean: ["Pouch 2"],
+    },
+  },
+  {
+    no: "4102",
+    name: {
+      clean: "Connector Housing IP67",
+    },
+    description: {
+      clean: "Reinforced polymer",
+    },
+    dimension: {
+      clean: "22mm x 18mm",
+      redline: { old: "20mm x 15mm", new: "22mm x 18mm" },
+    },
+    labelTypes: {
+      clean: ["Carton", "Box"],
+      redline: { old: ["Carton"], new: ["Carton", "Box"] },
+    },
+  },
+  {
+    no: "4500",
+    name: {
+      clean: "Touch Display Panel",
+      redline: { old: "Display Panel", new: "Touch Display Panel" },
+    },
+    description: {
+      clean: "OLED 5.5-inch",
+      redline: { old: "LCD 5-inch", new: "OLED 5.5-inch" },
+    },
+    dimension: {
+      clean: "125mm x 85mm",
+    },
+    labelTypes: {
+      clean: ["Tyvek"],
+    },
+  },
+  {
+    no: "5021",
+    name: {
+      clean: "Battery Pack Li-Ion",
+    },
+    description: {
+      clean: "4500mAh capacity",
+      redline: { old: "3000mAh capacity", new: "4500mAh capacity" },
+    },
+    dimension: {
+      clean: "95mm x 55mm",
+      redline: { old: "90mm x 50mm", new: "95mm x 55mm" },
+    },
+    labelTypes: {
+      clean: ["Jar", "Pouch 2"],
+      redline: { old: ["Jar"], new: ["Jar", "Pouch 2"] },
+    },
+  },
+];
+
+export function AutomatedRedliningCard() {
+  const [versionText, setVersionText] = useState("1");
+  const [TextScrambleTrigger, setTextScrambleTrigger] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => {
+        setVersionText("2");
+        setTextScrambleTrigger(true);
+      }}
+      onMouseLeave={() => {
+        setVersionText("1");
+        setTextScrambleTrigger(false);
+      }}
+      className="relative group w-2/3 h-full bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden group transition-all duration-300 ease-in-out delay-300"
+    >
       <div className="z-10 flex flex-col h-full">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            Automated- Redlining
+            Automated Redlining
           </h3>
           <p className="w-2/3 text-muted-foreground leading-relaxed">
             No manual redlining of older versions. Get automated redlining copy
@@ -32,7 +289,7 @@ export function AutomatedRedliningCard() {
           </p>
         </div>
 
-        <div className="absolute -bottom-16 -right-20 w-full flex-1 min-h-0">
+        <div className="absolute -bottom-16 -right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out delay-300">
           <div className="p-1 bg-accent border border-border rounded-2xl">
             <div className="relative h-full bg-background rounded-t-[15px] border border-border shadow-md overflow-hidden flex flex-col">
               <div className="flex items-center justify-start gap-4 px-2 py-2 border-b bg-muted/30">
@@ -42,10 +299,10 @@ export function AutomatedRedliningCard() {
                 <div className="flex items-center gap-2">
                   <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
                     <PiPlusCircleDuotone className="h-2.5 w-2.5 text-muted-foreground" />
-                    New Version
+                    Version 2
                   </button>
-                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
-                    <PiCaretCircleDownDuotone className="h-2.5 w-2.5 text-muted-foreground" />
+                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 transition-all duration-300 ease-in-out delay-100">
+                    <PiCaretCircleDownDuotone className="h-2.5 w-2.5 text-muted-foreground group-hover:text-primary" />
                     View Redline
                   </button>
                 </div>
@@ -78,394 +335,51 @@ export function AutomatedRedliningCard() {
                           Dimension
                         </div>
                       </TableHead>
-                      <TableHead className="h-8 w-[150px]">
+                      {/* <TableHead className="h-8 w-[150px]">
                         <div className="flex items-center gap-1 text-[10px] xl:text-[10px]">
-                          <PiScalesDuotone className="h-3.5 w-3.5 text-muted-foreground" />
-                          Weight
+                          <PiTagDuotone className="h-3.5 w-3.5 text-muted-foreground" />
+                          Label Types
                         </div>
-                      </TableHead>
+                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* Row 1 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        1001
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Chassis Assy V1
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Chassis Assy V2
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Main structural base - Aluminum
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Main structural base - Steel alloy
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            450mm x 300mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            455mm x 305mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            1.20kg
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            1.55kg
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 2 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        1042
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Power Supply Unit
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Power Supply Unit Gen2
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            12V output, non-modular
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            12V output, fully modular
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            140mm x 150mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            140mm x 160mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            1.45kg
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            1.60kg
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 3 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        2055
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Warning Label
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Warning Label ISO
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Text only warning
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Pictogram + text warning
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            50mm x 25mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            50mm x 50mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            0.02g
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            0.04g
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 4 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        3010
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Cooling Fan
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Cooling Fan (High RPM)
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Standard bearing
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            MagLev bearing system
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            120mm x 120mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            120mm x 120mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            150g
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            145g
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 5 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        3045
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Control Board
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Control Board V3
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Single core MCU
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Dual core MCU with WiFi
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            80mm x 60mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            85mm x 65mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            85g
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            92g
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 6 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        4102
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Connector Housing
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Connector Housing IP67
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Standard plastic
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Reinforced polymer
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            20mm x 15mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            22mm x 18mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            8g
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            9.5g
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 7 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        4500
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Display Panel
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Touch Display Panel
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            LCD 5-inch
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            OLED 5.5-inch
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            120mm x 80mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            125mm x 85mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            180g
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            165g
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Row 8 */}
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
-                        5021
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            Battery Pack
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            Battery Pack Li-Ion
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            3000mAh capacity
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            4500mAh capacity
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            90mm x 50mm
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            95mm x 55mm
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-red-500 line-through opacity-70">
-                            250g
-                          </span>
-                          <span className="text-emerald-600 font-medium">
-                            310g
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    {tableData.map((row, index) => (
+                      <TableRow
+                        key={row.no}
+                        className="border-border hover:bg-transparent"
+                      >
+                        <TableCell className="py-1 text-[10px] xl:text-[10px] font-medium align-top">
+                          {row.no}
+                        </TableCell>
+                        <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
+                          <CellContent
+                            data={row.name}
+                            TextScrambleTrigger={TextScrambleTrigger}
+                          />
+                        </TableCell>
+                        <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
+                          <CellContent
+                            data={row.description}
+                            TextScrambleTrigger={TextScrambleTrigger}
+                          />
+                        </TableCell>
+                        <TableCell className="py-1 text-[10px] xl:text-[10px] font-mono align-top">
+                          <CellContent
+                            data={row.dimension}
+                            isMono
+                            TextScrambleTrigger={TextScrambleTrigger}
+                          />
+                        </TableCell>
+                        {/* <TableCell className="py-1 text-[10px] xl:text-[10px] align-top">
+                          <LabelTypesBadge data={row.labelTypes} />
+                        </TableCell> */}
+                      </TableRow>
+                    ))}
 
                     {/* Filler row */}
                     <TableRow className="border-border hover:bg-transparent">
-                      <TableCell className="py-1 h-8" colSpan={4} />
+                      <TableCell className="py-1 h-8" colSpan={5} />
                     </TableRow>
                   </TableBody>
                 </Table>

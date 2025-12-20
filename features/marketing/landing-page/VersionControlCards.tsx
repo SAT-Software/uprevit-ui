@@ -53,7 +53,7 @@ export function VersionControlCards() {
   ];
 
   return (
-    <div className="w-1/3 h-full bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden">
+    <div className="w-1/3 h-full group bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden">
       <div className="mb-8 z-10 shrink-0">
         <h3 className="text-lg font-semibold text-foreground">
           Version control perfected
@@ -85,21 +85,27 @@ export function VersionControlCards() {
             <div
               key={index}
               className={cn(
-                "w-full bg-card border border-border rounded-xl p-2 mb-2 transition-all duration-300 ease-in-out",
+                "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 transition-all duration-300 ease-in-out delay-300",
                 isActive
-                  ? "shadow-md border-foreground/20 bg-foreground"
-                  : "shadow-sm bg-accent/60",
-                opacity,
-                scale
+                  ? "shadow-md border-foreground/20 bg-foreground z-50 group-hover:bg-neutral-800 group-hover:dark:bg-neutral-200"
+                  : "shadow-sm bg-accent/60 z-40 group-hover:bg-accent",
+                !isActive &&
+                  dist === 1 &&
+                  "opacity-60 scale-[0.98] group-hover:opacity-70",
+                !isActive &&
+                  dist === 2 &&
+                  "opacity-30 scale-[0.95] group-hover:opacity-50 z-35"
+                // opacity,
+                // scale
               )}
             >
               <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div
                     className={cn(
-                      "p-1.5 rounded-lg",
+                      "p-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
                       isActive
-                        ? "bg-neutral-700 text-neutral-300 border border-neutral-600"
+                        ? "bg-neutral-700 group-hover:dark:bg-neutral-300 text-neutral-300 border border-neutral-600 group-hover:text-purple-400 group-hover:dark:text-purple-600"
                         : "bg-accent/50 text-muted-foreground"
                     )}
                   >
@@ -129,9 +135,9 @@ export function VersionControlCards() {
                 <Badge
                   variant="outline"
                   className={cn(
-                    "text-[10px] h-5 px-1.5 rounded-lg",
+                    "text-[10px] h-5 px-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
                     isActive
-                      ? "bg-neutral-700 text-neutral-300 border-neutral-600"
+                      ? "bg-neutral-700 text-neutral-300 border-neutral-600 group-hover:text-background group-hover:dark:text-neutral-100 group-hover:border-background/50"
                       : "bg-border/40 border-border text-muted-foreground"
                   )}
                 >
@@ -148,7 +154,9 @@ export function VersionControlCards() {
                 <div
                   className={cn(
                     "flex items-center gap-1.5 text-[10px] text-muted-foreground",
-                    isActive ? "text-background/70" : "text-muted-foreground"
+                    isActive
+                      ? "text-background/70 group-hover:text-background"
+                      : "text-muted-foreground"
                   )}
                 >
                   <PiGitCommitDuotone className="w-3 h-3" />

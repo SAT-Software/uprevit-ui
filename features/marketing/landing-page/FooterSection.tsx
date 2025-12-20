@@ -1,10 +1,13 @@
+"use client";
+
 import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 export default function FooterSection() {
   return (
-    <footer className="w-full bg-black text-white px-6 md:px-20 mt-20">
+    <footer className="w-full bg-black text-white px-6 md:px-20 mt-20 pointer-events-auto">
       <div className="relative max-w-6xl mx-auto py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-16">
           {/* Brand Column */}
@@ -84,7 +87,7 @@ export default function FooterSection() {
             <h4 className="text-sm font-medium text-gray-400 mb-6">
               Follow Us
             </h4>
-            <ul className="space-y-4">
+            <ul className="space-y-4 mb-8">
               <li>
                 <Link
                   href="https://x.com/uprevit"
@@ -106,6 +109,7 @@ export default function FooterSection() {
                 </Link>
               </li>
             </ul>
+            <ThemeToggle background="dark" />
           </div>
         </div>
 
