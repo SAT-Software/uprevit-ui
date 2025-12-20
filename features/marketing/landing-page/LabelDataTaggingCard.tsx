@@ -21,7 +21,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
   return (
     <div
       className={cn(
-        "h-full bg-background p-8 rounded-xl border border-border flex flex-col relative overflow-hidden",
+        "h-full group bg-background p-8 rounded-xl border border-border flex flex-col relative overflow-hidden",
         className
       )}
     >
@@ -59,26 +59,26 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
                   className="object-contain"
                 />
 
-                <div className="absolute top-18 left-14 w-24 h-5.5 border border-red-500 bg-red-500/10 rounded sm:rounded-md" />
-                <div className="absolute top-28 left-14 w-18 h-5.5 border border-red-500 bg-red-500/10 rounded sm:rounded-md" />
-                <div className="absolute top-8 left-6 w-36 h-9 border border-blue-500 bg-blue-500/10 rounded sm:rounded-md" />
-                <div className="absolute bottom-3.5 right-10 w-9.5 h-9.5 border border-neutral-500 bg-neutral-500/10 rounded sm:rounded-md" />
+                <div className="absolute top-8 left-6 w-36 h-9 border border-transparent bg-transparent group-hover:border-blue-500 group-hover:bg-blue-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-400" />
+                <div className="absolute top-18 left-14 w-24 h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-500" />
+                <div className="absolute top-28 left-14 w-18 h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-600" />
+                <div className="absolute bottom-3.5 right-10 w-9.5 h-9.5 border border-transparent bg-transparent group-hover:border-neutral-500 group-hover:bg-neutral-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-700" />
               </div>
             </div>
 
             <div className="absolute top-2 right-2 bg-accent/40 backdrop-blur-sm border border-border p-2 rounded-lg text-xs shadow-sm flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-red-500 bg-red-500/20" />
+                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">
                   Variable Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-blue-500 bg-blue-500/20" />
+                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">Family Data</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-neutral-500 bg-neutral-500/20" />
+                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-neutral-500 group-hover:bg-neutral-500/20 transition-all ease-in-out duration-300 delay-7" />
                 <span className="text-foreground text-[10px]">UDI Barcode</span>
               </div>
             </div>
@@ -94,7 +94,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
               <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
                 <PiImageDuotone size={16} />
               </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-blue-500 bg-blue-500/10">
+              <button className="p-1 rounded-xl text-foreground/70 bg-accent group-hover:text-blue-500 group-hover:bg-blue-500/10 transition-all ease-in-out duration-300 delay-100">
                 <PiBoundingBoxDuotone size={16} />
               </button>
               <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
