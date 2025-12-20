@@ -12,7 +12,7 @@ import {
 import { PiMoonDuotone, PiSunDuotone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
-export function ThemeToggle({ background }: { background: string }) {
+export function ThemeToggle({ background }: { background?: string }) {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
