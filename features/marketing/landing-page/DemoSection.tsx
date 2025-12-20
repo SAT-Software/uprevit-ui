@@ -45,18 +45,78 @@ export default function DemoSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <div className="p-1 bg-accent border-border border rounded-[13px] max-w-6xl mx-auto">
-          <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
-            <CardContent className="p-0 overflow-hidden">
-              <video
-                src="/uprevit-test-demo-1.mp4"
-                className="overflow-hidden rounded-[8px]"
-                autoPlay
-                loop
-                muted
+        <div className="max-w-6xl mx-auto relative">
+          <div className="absolute -bottom-15 -left-15 text-border/60 pointer-events-none hidden md:block rotate-180">
+            <svg
+              width="120"
+              height="60"
+              viewBox="0 0 120 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
               />
-            </CardContent>
-          </Card>
+            </svg>
+          </div>
+          <div className="absolute -bottom-7.5 -right-22.5 text-border/60 pointer-events-none hidden md:block rotate-90">
+            <svg
+              width="120"
+              height="60"
+              viewBox="0 0 120 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="absolute -top-15 -right-15 text-border/60 pointer-events-none hidden md:block rotate-90">
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 60 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          <div className="p-1 bg-accent border-border border rounded-[12px]">
+            <Card className="aspect-16/8 mx-auto border-border overflow-hidden">
+              <CardContent className="p-0 overflow-hidden">
+                <video
+                  src="/uprevit-test-demo-1.mp4"
+                  className="overflow-hidden rounded-[8px]"
+                  autoPlay
+                  loop
+                  muted
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
         <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
         <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />

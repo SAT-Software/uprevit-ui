@@ -133,7 +133,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                   className={cn(
                     "relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-sm",
                     isCompleted
-                      ? "group-hover:bg-purple-50 text-muted-foreground border-border group-hover:text-primary transition-all duration-300 delay-100 ease-in-out"
+                      ? "group-hover:bg-purple-50 group-hover:dark:bg-purple-950 text-muted-foreground border-border group-hover:text-primary group-hover:dark:text-foreground transition-all duration-300 delay-100 ease-in-out"
                       : isInProgress
                       ? "bg-accent border-border text-blue-500"
                       : "bg-background border-border text-muted-foreground"

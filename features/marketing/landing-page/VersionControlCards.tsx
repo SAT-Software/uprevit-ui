@@ -87,7 +87,7 @@ export function VersionControlCards() {
               className={cn(
                 "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 transition-all duration-300 ease-in-out delay-300",
                 isActive
-                  ? "shadow-md border-foreground/20 bg-foreground z-50 group-hover:bg-black"
+                  ? "shadow-md border-foreground/20 bg-foreground z-50 group-hover:bg-neutral-800 group-hover:dark:bg-neutral-200"
                   : "shadow-sm bg-accent/60 z-40 group-hover:bg-accent",
                 !isActive &&
                   dist === 1 &&
@@ -105,7 +105,7 @@ export function VersionControlCards() {
                     className={cn(
                       "p-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
                       isActive
-                        ? "bg-neutral-700 text-neutral-300 border border-neutral-600 group-hover:text-purple-400"
+                        ? "bg-neutral-700 group-hover:dark:bg-neutral-300 text-neutral-300 border border-neutral-600 group-hover:text-purple-400 group-hover:dark:text-purple-600"
                         : "bg-accent/50 text-muted-foreground"
                     )}
                   >
@@ -137,7 +137,7 @@ export function VersionControlCards() {
                   className={cn(
                     "text-[10px] h-5 px-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
                     isActive
-                      ? "bg-neutral-700 text-neutral-300 border-neutral-600 group-hover:text-background group-hover:border-background/50"
+                      ? "bg-neutral-700 text-neutral-300 border-neutral-600 group-hover:text-background group-hover:dark:text-neutral-100 group-hover:border-background/50"
                       : "bg-border/40 border-border text-muted-foreground"
                   )}
                 >

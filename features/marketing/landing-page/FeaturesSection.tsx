@@ -40,15 +40,94 @@ export default function FeaturesSection() {
         </div>
       </div>
       <div className="relative w-full">
-        <div className="p-1 bg-accent rounded-xl max-w-6xl mx-auto border border-border">
-          <div className="flex flex-col gap-1">
-            <div className="flex w-full h-130 gap-1">
-              <AutomatedRedliningCard />
-              <VersionControlCards />
-            </div>
-            <div className="flex w-full h-130 gap-1">
-              <Worksteps className="w-1/3" />
-              <LabelDataTaggingCard className="w-2/3" />
+        <div className="max-w-6xl mx-auto relative">
+          <div className="absolute bottom-0 -left-15 text-border/60 pointer-events-none hidden md:block rotate-0">
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 60 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="absolute bottom-0 -right-15 text-border/60 pointer-events-none hidden md:block rotate-90">
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 60 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="absolute -bottom-15 left-0 text-border/60 pointer-events-none hidden md:block rotate-180">
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 60 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="absolute -bottom-15 right-0 text-border/60 pointer-events-none hidden md:block rotate-270">
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 60 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="0.8 3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          <div className="p-1 bg-accent rounded-[12px] max-w-6xl mx-auto border border-border">
+            <div className="flex flex-col gap-1">
+              <div className="flex w-full h-130 gap-1">
+                <AutomatedRedliningCard />
+                <VersionControlCards />
+              </div>
+              <div className="flex w-full h-130 gap-1">
+                <Worksteps className="w-1/3" />
+                <LabelDataTaggingCard className="w-2/3" />
+              </div>
             </div>
           </div>
         </div>

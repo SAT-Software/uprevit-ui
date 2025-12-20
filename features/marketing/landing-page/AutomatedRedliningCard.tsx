@@ -49,13 +49,13 @@ const CellContent = ({
         <div className="absolute inset-0 flex flex-col gap-0.5">
           <TextScramble
             trigger={TextScrambleTrigger}
-            className="text-muted-foreground group-hover:text-red-500 transition-all duration-500 ease-in-out line-through opacity-100"
+            className="text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-400 transition-all duration-500 ease-in-out line-through opacity-100"
           >
             {data.redline.old}
           </TextScramble>
           <TextScramble
             trigger={TextScrambleTrigger}
-            className="text-muted-foreground group-hover:text-emerald-600 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 font-medium"
+            className="text-muted-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-400 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 font-medium"
           >
             {data.redline.new}
           </TextScramble>
@@ -79,7 +79,7 @@ const LabelTypesBadge = ({
             <Badge
               key={idx}
               variant="outline"
-              className="text-[8px] text-muted-foreground group-hover:text-red-500 duration-300 ease-in-out delay-300 line-through opacity-70"
+              className="text-[8px] text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-300 duration-300 ease-in-out delay-300 line-through opacity-70"
             >
               {label}
             </Badge>
@@ -90,7 +90,7 @@ const LabelTypesBadge = ({
             <Badge
               key={idx}
               variant="default"
-              className="text-[8px] bg-emerald-100/50 text-foreground group-hover:text-emerald-600 duration-300 ease-in-out delay-300 opacity-0 -mt-2 group-hover:opacity-100 group-hover:mt-0 transition-all border border-emerald-600"
+              className="text-[8px] bg-emerald-100/50 text-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-300 duration-300 ease-in-out delay-300 opacity-0 -mt-2 group-hover:opacity-100 group-hover:mt-0 transition-all border border-emerald-600"
             >
               {label}
             </Badge>
@@ -301,7 +301,7 @@ export function AutomatedRedliningCard() {
                     <PiPlusCircleDuotone className="h-2.5 w-2.5 text-muted-foreground" />
                     Version 2
                   </button>
-                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:border-purple-500 transition-all duration-300 ease-in-out delay-100">
+                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 transition-all duration-300 ease-in-out delay-100">
                     <PiCaretCircleDownDuotone className="h-2.5 w-2.5 text-muted-foreground group-hover:text-primary" />
                     View Redline
                   </button>
