@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { PiImageDuotone } from "react-icons/pi";
+import { PiBoundingBoxDuotone, PiImageDuotone } from "react-icons/pi";
 import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";
 import { Worksteps } from "./Worksteps";
@@ -19,13 +19,13 @@ export default function FeaturesSection() {
     mounted && resolvedTheme === "dark" ? "outline" : "white";
 
   return (
-    <div className="w-full mt-40 mb-20">
+    <div className="w-full mt-40 mb-20 pointer-events-auto">
       <div className="max-w-6xl mx-auto mb-8">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiImageDuotone className="mr-1 text-foreground/50" />
+          <PiBoundingBoxDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">Features</span>
         </Badge>
         <div className="w-full flex items-center justify-start text-2xl">
