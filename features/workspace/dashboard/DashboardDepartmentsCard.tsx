@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -151,9 +152,7 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
             <PiCalendarDuotone className="w-3.5 h-3.5" />
             <span>
               {department?.auditLogs?.[0]?.actionAt
-                ? new Date(
-                    department?.auditLogs?.[0].actionAt
-                  ).toLocaleDateString()
+                ? formatToLocalDate(department?.auditLogs?.[0].actionAt)
                 : "No activity"}
             </span>
           </Link>

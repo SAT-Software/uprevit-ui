@@ -344,28 +344,28 @@ const columns: ColumnDef<Item>[] = [
       const PROGRESS_STATES = [
         {
           min: 100,
-          label: "Ready to submit",
+          label: "Submit",
           dot: "bg-emerald-500",
           text: "text-emerald-600 dark:text-emerald-300",
           bar: "from-emerald-400 via-emerald-500 to-emerald-600",
         },
         {
           min: 70,
-          label: "On track",
+          label: "Steady",
           dot: "bg-sky-500",
           text: "text-sky-600 dark:text-sky-300",
           bar: "from-sky-400 via-sky-500 to-sky-600",
         },
         {
           min: 40,
-          label: "In progress",
+          label: "Progressing",
           dot: "bg-amber-500",
           text: "text-amber-600 dark:text-amber-300",
           bar: "from-amber-400 via-amber-500 to-amber-600",
         },
         {
           min: 0,
-          label: "Getting started",
+          label: "Started",
           dot: "bg-slate-400",
           text: "text-slate-600 dark:text-slate-300",
           bar: "from-slate-400 via-slate-500 to-slate-600",
@@ -413,7 +413,7 @@ const columns: ColumnDef<Item>[] = [
             <div className="flex items-center gap-4 justify-between text-[0.7rem] font-medium leading-none">
               <span
                 className={cn(
-                  "flex items-center gap-1 text-muted-foreground",
+                  "flex w-full items-center gap-1 text-muted-foreground",
                   progressState.text
                 )}
               >
@@ -422,7 +422,7 @@ const columns: ColumnDef<Item>[] = [
                 />
                 {progressState.label}
               </span>
-              <span className="text-[0.65rem] text-muted-foreground">
+              <span className="text-[0.65rem] w-full text-muted-foreground text-right">
                 {tabsCompleted.length}/{TOTAL_TABS} tabs
               </span>
             </div>

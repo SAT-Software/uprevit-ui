@@ -82,6 +82,18 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
+function formatDateToLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateStringAsLocal(dateString: string): Date {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export default function EditProductDialog({
   product,
   productMetadata,
@@ -100,12 +112,10 @@ export default function EditProductDialog({
     productName: productMetadata?.product_name || "",
     productDescription: productMetadata?.product_description || "",
     targetDate: productMetadata?.target_date
-      ? new Date(productMetadata.target_date).toISOString().split("T")[0]
+      ? formatDateToLocal(new Date(productMetadata.target_date))
       : "",
     completionDate: productMetadata?.actual_completion_date
-      ? new Date(productMetadata.actual_completion_date)
-          .toISOString()
-          .split("T")[0]
+      ? formatDateToLocal(new Date(productMetadata.actual_completion_date))
       : "",
     marketGeography: product?.market_geography || "",
     countryOfOrigin: product?.country_of_origin || "",
@@ -211,7 +221,6 @@ export default function EditProductDialog({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Left Column: Basic Info */}
               <div className="space-y-4">
-                {/* Product Name */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-product-name`} className="text-sm">
                     Product Name
@@ -232,7 +241,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* Description */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-description`} className="text-sm">
                     Description
@@ -251,7 +259,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* Target Date */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-target-date`} className="text-sm">
                     Target Date
@@ -268,14 +275,13 @@ export default function EditProductDialog({
                         aria-invalid={errors.targetDate ? "true" : "false"}
                       >
                         {targetDateValue
-                          ? new Date(targetDateValue).toLocaleDateString(
-                              "en-US",
-                              {
-                                day: "2-digit",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
+                          ? parseDateStringAsLocal(
+                              targetDateValue
+                            ).toLocaleDateString("en-US", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            })
                           : "Select target date"}
                         <PiCalendarBlankDuotone />
                       </Button>
@@ -288,7 +294,7 @@ export default function EditProductDialog({
                         mode="single"
                         selected={
                           targetDateValue
-                            ? new Date(targetDateValue)
+                            ? parseDateStringAsLocal(targetDateValue)
                             : undefined
                         }
                         captionLayout="dropdown"
@@ -298,7 +304,7 @@ export default function EditProductDialog({
                           if (selectedDate) {
                             setValue(
                               "targetDate",
-                              selectedDate.toISOString().split("T")[0]
+                              formatDateToLocal(selectedDate)
                             );
                           }
                           setOpenTargetDate(false);
@@ -314,7 +320,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* Completion Date */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-completion-date`} className="text-sm">
                     Actual Completion Date
@@ -331,14 +336,13 @@ export default function EditProductDialog({
                         aria-invalid={errors.completionDate ? "true" : "false"}
                       >
                         {completionDateValue
-                          ? new Date(completionDateValue).toLocaleDateString(
-                              "en-US",
-                              {
-                                day: "2-digit",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
+                          ? parseDateStringAsLocal(
+                              completionDateValue
+                            ).toLocaleDateString("en-US", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            })
                           : "Select completion date"}
                         <PiCalendarBlankDuotone />
                       </Button>
@@ -351,7 +355,7 @@ export default function EditProductDialog({
                         mode="single"
                         selected={
                           completionDateValue
-                            ? new Date(completionDateValue)
+                            ? parseDateStringAsLocal(completionDateValue)
                             : undefined
                         }
                         captionLayout="dropdown"
@@ -361,7 +365,7 @@ export default function EditProductDialog({
                           if (selectedDate) {
                             setValue(
                               "completionDate",
-                              selectedDate.toISOString().split("T")[0]
+                              formatDateToLocal(selectedDate)
                             );
                           }
                           setOpenCompletionDate(false);
@@ -380,7 +384,6 @@ export default function EditProductDialog({
 
               {/* Right Column: Additional Info */}
               <div className="space-y-4">
-                {/* Market / Geography */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-market-geography`} className="text-sm">
                     Market / Geography
@@ -401,7 +404,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* Country of Origin */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-country-origin`} className="text-sm">
                     Country of Origin
@@ -422,7 +424,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* OEM / Contract manufactured */}
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-oem-contract`} className="text-sm">
                     OEM / Contract manufacturer
@@ -445,7 +446,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* Commercial / Clinical */}
                 <div className="space-y-2">
                   <Label
                     htmlFor={`${id}-commercial-clinical`}
@@ -469,7 +469,6 @@ export default function EditProductDialog({
                   )}
                 </div>
 
-                {/* Manufacturing Location */}
                 <div className="space-y-2">
                   <Label
                     htmlFor={`${id}-manufacturing-location`}

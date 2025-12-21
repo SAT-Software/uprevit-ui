@@ -53,7 +53,6 @@ export default function DialogCreateVersion({
     createVersion(product._id, {
       onSuccess: (data) => {
         onOpenChange(false);
-        // Navigate to the new version
         router.push(`/products/${data.product._id}/product-information`);
       },
     });
