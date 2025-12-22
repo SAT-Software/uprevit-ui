@@ -92,19 +92,11 @@ export function ProductHeader() {
 
   const currentTab = getCurrentTab();
 
-  // Extract data from the all-tabs API response
-  // Each tab now has a product_data object with core product info including version fields
   const allTabsData = productData?.result?.data;
-
-  // Product core data (including version, is_latest, status) is now in product_data.data
   const productCoreData = allTabsData?.product_information?.product_data?.data;
-
-  // Tab-specific data is in the data field
   const productInfoData = allTabsData?.product_information?.data;
 
   const isProductComplete = productCoreData?.complete_count === 100;
-
-  // READ-ONLY MODE: Submitted products cannot be edited
   const isReadOnly = productCoreData?.status === "submitted";
 
   const handleSubmit = async () => {
@@ -131,7 +123,6 @@ export function ProductHeader() {
     ]);
   };
 
-  // Calculate completed tabs from the all-tabs response
   const tabsCompleted = useMemo(() => {
     if (!allTabsData) return [];
     const completed: string[] = [];
@@ -183,10 +174,8 @@ export function ProductHeader() {
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
 
-  // Handle version change - navigate to different version
   const handleVersionChange = (versionId: string) => {
     if (versionId !== productId) {
-      // Navigate to the same tab but with different product version
       router.push(`/products/${versionId}/${currentTab}`);
     }
   };
@@ -235,7 +224,6 @@ export function ProductHeader() {
   );
 
   const handleToggleTab = async () => {
-    // Prevent any changes if product is submitted (read-only)
     if (!currentTab || !product || isSyncingStatus || isReadOnly) return;
 
     const updatedTabsCompleted = isCurrentTabCompleted
@@ -246,7 +234,6 @@ export function ProductHeader() {
       (updatedTabsCompleted.length / TOTAL_TABS) * 100
     );
 
-    // Map URL tab to backend tab name
     const tabMapping: Record<string, string> = {
       "product-information": "product-information",
       "compliance-information": "compliance-information",
@@ -271,8 +258,6 @@ export function ProductHeader() {
     const actionName = actionMapping[currentTab];
 
     if (backendTabName) {
-      // Run both API calls in parallel
-      // Each hook's onSuccess will invalidate queries automatically
       await Promise.all([
         updateProductTabData({
           id: productId,
@@ -294,7 +279,6 @@ export function ProductHeader() {
     }
   };
 
-  // Get versions list for dropdown
   const versions = versionsData?.result?.versions || [];
 
   return (
@@ -359,7 +343,6 @@ export function ProductHeader() {
             </SelectContent>
           </Select>
 
-          {/* Version Dropdown - Shows all versions */}
           <Select
             value={productId}
             onValueChange={handleVersionChange}
@@ -438,35 +421,22 @@ export function ProductHeader() {
             totalTabs={TOTAL_TABS}
             productStatus={productCoreData?.status}
           />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={handleToggleTab}
-                variant="secondary"
-                // className="bg-emerald-200/50"
-                size="icon"
-                disabled={
-                  !currentTab || !product || isSyncingStatus || isReadOnly
-                }
-                // className={toggleButtonClasses}
-                title={isReadOnly ? "Cannot edit submitted product" : undefined}
-              >
-                <span className={toggleButtonIconClasses}>
-                  {toggleButtonIcon}
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <span className="flex flex-col items-start leading-tight">
-                <span className="text-xs font-semibold">
-                  {toggleButtonTitle}
-                </span>
-                <span className="text-[0.65rem] font-medium text-muted-foreground">
-                  {toggleButtonSubtitle}
-                </span>
+          <Button
+            onClick={handleToggleTab}
+            variant="secondary"
+            size="default"
+            className="px-1"
+            disabled={!currentTab || !product || isSyncingStatus || isReadOnly}
+            title={isReadOnly ? "Cannot edit submitted product" : undefined}
+          >
+            <span className={toggleButtonIconClasses}>{toggleButtonIcon}</span>
+            <span className="flex flex-col items-start leading-tight">
+              <span className="text-xs font-semibold">{toggleButtonTitle}</span>
+              <span className="text-[0.65rem] font-medium text-muted-foreground">
+                {toggleButtonSubtitle}
               </span>
-            </TooltipContent>
-          </Tooltip>
+            </span>
+          </Button>
         </ButtonGroup>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">

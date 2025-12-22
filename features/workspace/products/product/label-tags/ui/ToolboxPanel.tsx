@@ -40,30 +40,32 @@ const ToolboxPanel = ({
 
   return (
     <div className="inline-flex">
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Tooltip>
-            <TooltipTrigger asChild>
+      <Tooltip>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
               <Button
                 variant={variant}
-                // title={title}
                 onClick={() => setPopoverOpen(!popoverOpen)}
               >
                 <Icon />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{title}</p>
-            </TooltipContent>
-          </Tooltip>
-        </PopoverTrigger>
-        <PopoverContent className="min-w-48 w-auto p-4">
-          <div className={cn("flex flex-col space-y-6", className)} {...props}>
-            <h2 className="text-sm font-semibold">{title}</h2>
-            {children}
-          </div>
-        </PopoverContent>
-      </Popover>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <PopoverContent className="min-w-48 w-auto p-4">
+            <div
+              className={cn("flex flex-col space-y-6", className)}
+              {...props}
+            >
+              <h2 className="text-sm font-semibold">{title}</h2>
+              {children}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <TooltipContent>
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 };

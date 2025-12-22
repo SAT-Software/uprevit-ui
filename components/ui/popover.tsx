@@ -12,11 +12,12 @@ function Popover({
 }
 
 function PopoverTrigger({
+  className,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
   return (
     <PopoverPrimitive.Trigger
-      className="size-8"
+      className={className}
       data-slot="popover-trigger"
       {...props}
     />

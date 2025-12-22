@@ -7,6 +7,10 @@ import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline"
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { cn } from "@/lib/utils";
 import { AuditLog } from "@/types/audit-log";
+import {
+  formatToLocalDate,
+  formatToLocalDateTime,
+} from "@/utils/formatDateAndTimeLocal";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import {
@@ -127,18 +131,6 @@ export default function Page() {
     .sort(
       (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
     )[0];
-
-  const formatAuditDate = (isoDate: string) => {
-    const date = new Date(isoDate);
-    if (Number.isNaN(date.getTime())) {
-      return isoDate;
-    }
-
-    return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(date);
-  };
 
   const fields = useMemo(() => {
     if (!productData) return [];
@@ -285,7 +277,7 @@ export default function Page() {
                   Target:{" "}
                   <span className="font-semibold">
                     {productMetadata?.target_date
-                      ? productMetadata?.target_date.slice(0, 10)
+                      ? formatToLocalDate(productMetadata?.target_date)
                       : "N/A"}
                   </span>
                 </span>
@@ -298,8 +290,9 @@ export default function Page() {
                   <span className="font-semibold">
                     <RedlineValue
                       value={
-                        productMetadata?.actual_completion_date?.slice(0, 10) ||
-                        "N/A"
+                        formatToLocalDate(
+                          productMetadata?.actual_completion_date
+                        ) || "N/A"
                       }
                       diff={getDiff(
                         "actual_completion_date",
@@ -333,7 +326,7 @@ export default function Page() {
                 <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
                   <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">
-                    Created {formatAuditDate(creationLog.actionAt)} -{" "}
+                    Created {formatToLocalDateTime(creationLog.actionAt)} -{" "}
                     <span className="font-semibold">
                       {creationLog.actionBy}
                     </span>
@@ -344,7 +337,7 @@ export default function Page() {
                 <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
                   <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">
-                    Updated {formatAuditDate(latestUpdateLog.actionAt)} -{" "}
+                    Updated {formatToLocalDateTime(latestUpdateLog.actionAt)} -{" "}
                     <span className="font-semibold">
                       {latestUpdateLog.actionBy}
                     </span>

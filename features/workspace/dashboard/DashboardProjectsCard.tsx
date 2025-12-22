@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -147,9 +148,7 @@ function ProjectCard({ project }: { project: ProjectProps }) {
           >
             <PiCalendarDuotone className="w-3.5 h-3.5" />
             <span>
-              {project.date
-                ? new Date(project.date).toLocaleDateString()
-                : "No due date"}
+              {project.date ? formatToLocalDate(project.date) : "No due date"}
             </span>
           </Link>
 
