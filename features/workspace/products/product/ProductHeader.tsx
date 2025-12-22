@@ -34,6 +34,7 @@ import {
   PiTextStrikethroughDuotone,
 } from "react-icons/pi";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
+import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductUpdateProgress } from "./ProductUpdateProgress";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -421,22 +422,34 @@ export function ProductHeader() {
             totalTabs={TOTAL_TABS}
             productStatus={productCoreData?.status}
           />
-          <Button
-            onClick={handleToggleTab}
-            variant="secondary"
-            size="default"
-            className="px-1"
+          <ToggleTabCompletionDialog
+            tabName={currentTab}
+            isCompleted={isCurrentTabCompleted}
+            onConfirm={handleToggleTab}
             disabled={!currentTab || !product || isSyncingStatus || isReadOnly}
-            title={isReadOnly ? "Cannot edit submitted product" : undefined}
           >
-            <span className={toggleButtonIconClasses}>{toggleButtonIcon}</span>
-            <span className="flex flex-col items-start leading-tight">
-              <span className="text-xs font-semibold">{toggleButtonTitle}</span>
-              <span className="text-[0.65rem] font-medium text-muted-foreground">
-                {toggleButtonSubtitle}
+            <Button
+              variant="secondary"
+              size="default"
+              className="px-1"
+              disabled={
+                !currentTab || !product || isSyncingStatus || isReadOnly
+              }
+              title={isReadOnly ? "Cannot edit submitted product" : undefined}
+            >
+              <span className={toggleButtonIconClasses}>
+                {toggleButtonIcon}
               </span>
-            </span>
-          </Button>
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-xs font-semibold">
+                  {toggleButtonTitle}
+                </span>
+                <span className="text-[0.65rem] font-medium text-muted-foreground">
+                  {toggleButtonSubtitle}
+                </span>
+              </span>
+            </Button>
+          </ToggleTabCompletionDialog>
         </ButtonGroup>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
