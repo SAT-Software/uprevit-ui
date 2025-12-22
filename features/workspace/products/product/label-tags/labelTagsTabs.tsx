@@ -46,10 +46,24 @@ export default function LabelTagsTabs({
   diffs = [],
 }: LabelTagsTabsProps) {
   const [activeTab, setActiveTab] = useState("");
-  const [annotation, setAnnotation] = useState<AnnotationState | null>(null);
+  // Store annotations per-item using item._id as key
+  const [annotations, setAnnotations] = useState<
+    Record<string, AnnotationState>
+  >({});
+  // Track which item should be rendered/downloaded (triggered on save button)
+  const [renderItem, setRenderItem] = useState<{
+    id: string;
+    image: string;
+  } | null>(null);
 
-  const handleSave = (annotation: AnnotationState) => {
-    setAnnotation(annotation);
+  const handleSave = (
+    itemId: string,
+    itemImage: string,
+    annotation: AnnotationState
+  ) => {
+    setAnnotations((prev) => ({ ...prev, [itemId]: annotation }));
+    // Trigger the download for this specific item
+    setRenderItem({ id: itemId, image: itemImage });
   };
 
   // Helper to find a diff by path and optional property (e.g., "name", "description", "image")
@@ -97,7 +111,6 @@ export default function LabelTagsTabs({
     const isAdded = diff.status === "added";
 
     if (isImage) {
-      // For images, show old/new side by side or with indication
       return (
         <div className="flex flex-col gap-2">
           {(diff.old_value || isRemoved) && (
@@ -157,7 +170,6 @@ export default function LabelTagsTabs({
 
     return (
       <span className="inline-flex flex-wrap items-center gap-2">
-        {/* Old value - show for modified and removed */}
         {(diff.old_value !== null || isRemoved) && (
           <span className="relative group/old">
             <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
@@ -166,7 +178,6 @@ export default function LabelTagsTabs({
           </span>
         )}
 
-        {/* Arrow separator for modified */}
         {diff.old_value !== null &&
           diff.new_value !== null &&
           !isRemoved &&
@@ -174,7 +185,6 @@ export default function LabelTagsTabs({
             <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
           )}
 
-        {/* New value - show for modified and added */}
         {(diff.new_value !== null || isAdded) && !isRemoved && (
           <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
             {format(diff.new_value) || ""}
@@ -195,11 +205,9 @@ export default function LabelTagsTabs({
   const effectiveActiveTab =
     activeTab || filteredLabelTypesForTabs[0] || "tab-1";
 
-  // Empty state when no label tags exist
   if (!labelTagsData || labelTagsData.length === 0) {
     return (
       <>
-        {/* Header Section */}
         <div className="flex items-center justify-between border-b border-border p-2">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Label Tags</p>
@@ -231,7 +239,6 @@ export default function LabelTagsTabs({
 
   return (
     <>
-      {/* Header Section */}
       <div className="flex items-center justify-between border-b border-border p-2">
         <div className="flex items-center gap-2">
           <p className="text-base font-semibold">Label Tags</p>
@@ -267,7 +274,6 @@ export default function LabelTagsTabs({
               (item: LabelTagItem) => item.type === type
             );
             return currentTabData.map((item: LabelTagItem, i) => {
-              // Find the original index in labelTagsData for diff lookup
               const originalIndex = labelTagsData.findIndex(
                 (d) => d._id === item._id
               );
@@ -276,7 +282,6 @@ export default function LabelTagsTabs({
               const isAdded = itemStatus === "added";
               const isModified = itemStatus === "modified";
 
-              // Get diffs for individual fields
               const nameDiff = getDiff(originalIndex, "name");
               const descriptionDiff = getDiff(originalIndex, "description");
               const imageDiff = getDiff(originalIndex, "image");
@@ -414,9 +419,13 @@ export default function LabelTagsTabs({
                             // />
                             <Editor
                               targetImageSrc={item.image}
-                              annotation={annotation}
+                              annotation={annotations[item._id] || null}
                               onSave={(newAnnotation) => {
-                                handleSave(newAnnotation);
+                                handleSave(
+                                  item._id,
+                                  item.image!,
+                                  newAnnotation
+                                );
                               }}
                             />
                           ) : (
@@ -461,22 +470,14 @@ export default function LabelTagsTabs({
               );
             });
           })} */}
-          {/* Render only the currently active tab's image */}
-          {(() => {
-            const activeItem = labelTagsData.find(
-              (item: LabelTagItem) =>
-                item.type === effectiveActiveTab && item.image
-            );
-            if (activeItem?.image && annotation) {
-              return (
-                <Render
-                  targetImage={activeItem.image}
-                  annotation={annotation}
-                />
-              );
-            }
-            return null;
-          })()}
+
+          {renderItem && annotations[renderItem.id] && (
+            <Render
+              targetImage={renderItem.image}
+              annotation={annotations[renderItem.id]}
+              onComplete={() => setRenderItem(null)}
+            />
+          )}
         </Tabs>
       </div>
     </>

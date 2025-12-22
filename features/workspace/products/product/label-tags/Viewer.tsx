@@ -5,12 +5,14 @@ type Props = {
   targetImage: string;
   annotation: AnnotationState;
   filename?: string;
+  onComplete?: () => void;
 };
 
 const Render = ({
   targetImage,
   annotation,
   filename = "label-tag.png",
+  onComplete,
 }: Props) => {
   useEffect(() => {
     const targetImg = document.createElement("img");
@@ -30,6 +32,9 @@ const Render = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Notify parent that render/download is complete
+      onComplete?.();
     };
 
     targetImg.onerror = (error) => {
