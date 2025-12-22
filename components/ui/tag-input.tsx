@@ -69,13 +69,13 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInputValue(e.target.value);
+      setInputValue(e.target.value.toUpperCase());
     };
 
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
-        addTag(inputValue);
+        addTag(inputValue.toUpperCase());
       } else if (
         e.key === "Backspace" &&
         inputValue === "" &&
@@ -101,7 +101,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
               variant="outline"
               className={cn("flex items-center gap-1", styleClasses?.tag?.body)}
             >
-              {tag.text}
+              {tag.text.toUpperCase()}
               <button
                 type="button"
                 className={cn(
