@@ -12,6 +12,9 @@ import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
 import DialogEditLabelTag from "./DialogEditLabelTag";
 import Editor from "./Editor";
 import Render from "./Viewer";
+import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
+import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
+import { uploadFiles } from "@/utils/uploadthing";
 
 interface LabelTagItem {
   _id: string;
@@ -19,6 +22,7 @@ interface LabelTagItem {
   description?: string;
   type?: string;
   image?: string;
+  tagged_image?: string;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
 }
@@ -46,15 +50,24 @@ export default function LabelTagsTabs({
   diffs = [],
 }: LabelTagsTabsProps) {
   const [activeTab, setActiveTab] = useState("");
-  // Store annotations per-item using item._id as key
   const [annotations, setAnnotations] = useState<
     Record<string, AnnotationState>
   >({});
-  // Track which item should be rendered/downloaded (triggered on save button)
+
   const [renderItem, setRenderItem] = useState<{
     id: string;
     image: string;
   } | null>(null);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [pendingSave, setPendingSave] = useState<{
+    itemId: string;
+    itemImage: string;
+    annotation: AnnotationState;
+  } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { mutateAsync: updateLabelTaggedImage, isPending: isUpdating } =
+    useUpdateLabelTaggedImage();
 
   const handleSave = (
     itemId: string,
@@ -62,8 +75,48 @@ export default function LabelTagsTabs({
     annotation: AnnotationState
   ) => {
     setAnnotations((prev) => ({ ...prev, [itemId]: annotation }));
-    // Trigger the download for this specific item
-    setRenderItem({ id: itemId, image: itemImage });
+    setPendingSave({ itemId, itemImage, annotation });
+    setSaveDialogOpen(true);
+  };
+
+  const handleConfirmSave = async () => {
+    if (!pendingSave) return;
+    setRenderItem({
+      id: pendingSave.itemId,
+      image: pendingSave.itemImage,
+    });
+  };
+
+  const handleRendered = async (dataUrl: string) => {
+    if (!pendingSave) return;
+
+    try {
+      setIsSaving(true);
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "tagged-image.png", { type: "image/png" });
+
+      const utRes = await uploadFiles("imageUploader", { files: [file] });
+      const uploadedUrl = utRes?.[0]?.ufsUrl || "";
+
+      if (!uploadedUrl) {
+        throw new Error("Failed to get uploaded image URL");
+      }
+
+      await updateLabelTaggedImage({
+        productId,
+        labelTagId: pendingSave.itemId,
+        taggedImage: uploadedUrl,
+      });
+
+      setPendingSave(null);
+      setSaveDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to upload tagged image:", error);
+    } finally {
+      setIsSaving(false);
+      setRenderItem(null);
+    }
   };
 
   // Helper to find a diff by path and optional property (e.g., "name", "description", "image")
@@ -418,7 +471,7 @@ export default function LabelTagsTabs({
                             //   onSave={handleSave}
                             // />
                             <Editor
-                              targetImageSrc={item.image}
+                              targetImageSrc={item.tagged_image || item.image}
                               annotation={annotations[item._id] || null}
                               onSave={(newAnnotation) => {
                                 handleSave(
@@ -475,9 +528,23 @@ export default function LabelTagsTabs({
             <Render
               targetImage={renderItem.image}
               annotation={annotations[renderItem.id]}
+              mode="upload"
+              onRendered={handleRendered}
               onComplete={() => setRenderItem(null)}
             />
           )}
+
+          <SaveTaggedImageDialog
+            open={saveDialogOpen}
+            onOpenChange={(open) => {
+              setSaveDialogOpen(open);
+              if (!open) {
+                setPendingSave(null);
+              }
+            }}
+            onConfirm={handleConfirmSave}
+            isPending={isSaving || isUpdating}
+          />
         </Tabs>
       </div>
     </>
