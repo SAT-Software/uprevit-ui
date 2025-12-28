@@ -40,7 +40,7 @@ export default function SaveTaggedImageDialog({
     setIsSubmitting(true);
     try {
       await onConfirm();
-      onOpenChange(false);
+      // onOpenChange(false);
     } catch (error) {
       console.error("Failed to save tagged image:", error);
     } finally {

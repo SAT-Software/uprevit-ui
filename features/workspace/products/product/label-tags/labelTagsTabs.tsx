@@ -15,6 +15,7 @@ import Render from "./Viewer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
 import { uploadFiles } from "@/utils/uploadthing";
+import { toast } from "sonner";
 
 interface LabelTagItem {
   _id: string;
@@ -113,6 +114,9 @@ export default function LabelTagsTabs({
       setSaveDialogOpen(false);
     } catch (error) {
       console.error("Failed to upload tagged image:", error);
+      toast.error("Failed to upload tagged image");
+      setPendingSave(null);
+      setSaveDialogOpen(false);
     } finally {
       setIsSaving(false);
       setRenderItem(null);
