@@ -44,6 +44,7 @@ interface LabelTagItem {
   description?: string;
   type?: string;
   image?: string;
+  tagged_image?: string;
 }
 
 export default function DialogEditLabelTag({

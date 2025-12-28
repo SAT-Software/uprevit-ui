@@ -17,6 +17,7 @@ interface LabelTagItem {
   description?: string;
   type?: string;
   image?: string;
+  tagged_image?: string;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
 }

@@ -235,10 +235,6 @@ const Editor = ({
           }
           break;
         }
-        // case "download": {
-        //   downloadMarkedImage();
-        //   break;
-        // }
         case "save": {
           if (onSave) {
             onSave(editor.current.getState());
@@ -401,7 +397,6 @@ const Editor = ({
     previousImageSrc.current = targetImageSrc;
   }, [annotation, targetImageSrc]);
 
-  // Cleanup for keyboard event listener
   useEffect(() => {
     document.addEventListener("keydown", deleteSelctedMarkers);
     return () => {

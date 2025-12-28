@@ -8,7 +8,6 @@ import {
 } from "@/types/toolbar";
 import {
   PiTrashDuotone,
-  PiDownloadDuotone,
   PiCursorDuotone,
   PiFloppyDiskDuotone,
 } from "react-icons/pi";
@@ -95,15 +94,6 @@ const EditorToolbar = ({
             onAction={onAction}
           />
         )}
-        {/* <ToolbarActionButton
-          icon={PiDownloadDuotone}
-          title="Download"
-          variant={variant}
-          action="download"
-          disabled={editorState.mode === "rendering"}
-          loading={editorState.mode === "rendering"}
-          onAction={onAction}
-        /> */}
       </div>
     </div>
   );
