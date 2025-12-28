@@ -11,7 +11,7 @@ import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
 import DialogEditLabelTag from "./DialogEditLabelTag";
 import Editor from "./Editor";
-import Render from "./Viewer";
+import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
 import { uploadFiles } from "@/utils/uploadthing";
@@ -54,6 +54,8 @@ export default function LabelTagsTabs({
   const [annotations, setAnnotations] = useState<
     Record<string, AnnotationState>
   >({});
+
+  console.log("annotations", annotations);
 
   const [renderItem, setRenderItem] = useState<{
     id: string;

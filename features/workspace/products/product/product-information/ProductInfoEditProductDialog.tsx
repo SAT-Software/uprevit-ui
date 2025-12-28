@@ -56,7 +56,6 @@ interface FormValues {
   productName: string;
   productDescription: string;
   targetDate: string;
-  completionDate: string;
   marketGeography: string;
   countryOfOrigin: string;
   oemContractManufacturer: string;
@@ -105,7 +104,6 @@ export default function EditProductDialog({
   const [open, setOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const [openTargetDate, setOpenTargetDate] = useState(false);
-  const [openCompletionDate, setOpenCompletionDate] = useState(false);
 
   // Get current product information data - handle both possible data structures
   const initialValues = {
@@ -113,9 +111,6 @@ export default function EditProductDialog({
     productDescription: productMetadata?.product_description || "",
     targetDate: productMetadata?.target_date
       ? formatDateToLocal(new Date(productMetadata.target_date))
-      : "",
-    completionDate: productMetadata?.actual_completion_date
-      ? formatDateToLocal(new Date(productMetadata.actual_completion_date))
       : "",
     marketGeography: product?.market_geography || "",
     countryOfOrigin: product?.country_of_origin || "",
@@ -137,9 +132,7 @@ export default function EditProductDialog({
     mode: "onSubmit",
   });
 
-  // Watch dates to sync with calendar
   const targetDateValue = watch("targetDate");
-  const completionDateValue = watch("completionDate");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!product?.id) {
@@ -156,9 +149,6 @@ export default function EditProductDialog({
         product_description: data.productDescription,
         target_date: data.targetDate
           ? new Date(data.targetDate).toISOString()
-          : null,
-        actual_completion_date: data.completionDate
-          ? new Date(data.completionDate).toISOString()
           : null,
         market_geography: data.marketGeography,
         country_of_origin: data.countryOfOrigin,
@@ -316,67 +306,6 @@ export default function EditProductDialog({
                   {errors.targetDate && (
                     <p role="alert" className="text-xs text-destructive">
                       {errors.targetDate.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-completion-date`} className="text-sm">
-                    Actual Completion Date
-                  </Label>
-                  <Popover
-                    open={openCompletionDate}
-                    onOpenChange={setOpenCompletionDate}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        id={`${id}-completion-date`}
-                        className="h-9 w-full justify-between font-normal"
-                        aria-invalid={errors.completionDate ? "true" : "false"}
-                      >
-                        {completionDateValue
-                          ? parseDateStringAsLocal(
-                              completionDateValue
-                            ).toLocaleDateString("en-US", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })
-                          : "Select completion date"}
-                        <PiCalendarBlankDuotone />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-60 overflow-hidden p-0 rounded-lg"
-                      align="start"
-                    >
-                      <Calendar
-                        mode="single"
-                        selected={
-                          completionDateValue
-                            ? parseDateStringAsLocal(completionDateValue)
-                            : undefined
-                        }
-                        captionLayout="dropdown"
-                        startMonth={new Date(new Date().getFullYear() - 50, 0)}
-                        endMonth={new Date(new Date().getFullYear() + 50, 11)}
-                        onSelect={(selectedDate) => {
-                          if (selectedDate) {
-                            setValue(
-                              "completionDate",
-                              formatDateToLocal(selectedDate)
-                            );
-                          }
-                          setOpenCompletionDate(false);
-                        }}
-                        className="w-full"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {errors.completionDate && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.completionDate.message}
                     </p>
                   )}
                 </div>
