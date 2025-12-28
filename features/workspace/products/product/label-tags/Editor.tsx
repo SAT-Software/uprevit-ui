@@ -147,6 +147,7 @@ type Props = {
   variant?: "ghost" | "outline" | "secondary";
   annotation: AnnotationState | null;
   onSave?: (annotation: AnnotationState) => void;
+  onStateChange?: (annotation: AnnotationState) => void;
 };
 
 const Editor = ({
@@ -154,6 +155,7 @@ const Editor = ({
   variant = "secondary",
   annotation,
   onSave,
+  onStateChange,
 }: Props) => {
   const editorContainer = useRef<HTMLDivElement | null>(null);
   const editor = useRef<MarkerArea | null>(null);
@@ -312,6 +314,9 @@ const Editor = ({
 
         newEditor.addEventListener("areastatechange", () => {
           updateCalculatedEditorState();
+          if (onStateChange) {
+            onStateChange(newEditor.getState());
+          }
         });
 
         newEditor.addEventListener("markerselect", (ev) => {

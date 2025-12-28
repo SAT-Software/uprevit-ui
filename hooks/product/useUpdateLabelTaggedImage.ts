@@ -6,6 +6,7 @@ interface UpdateLabelTaggedImageParams {
   productId: string;
   labelTagId: string;
   taggedImage: string;
+  annotationState: object;
 }
 
 export function useUpdateLabelTaggedImage() {
@@ -26,6 +27,7 @@ export function useUpdateLabelTaggedImage() {
         data: {
           id: params.labelTagId,
           tagged_image: params.taggedImage,
+          annotation_state: params.annotationState,
         },
       };
 

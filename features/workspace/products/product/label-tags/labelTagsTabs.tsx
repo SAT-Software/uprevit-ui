@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
 import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
@@ -13,6 +13,7 @@ import DialogEditLabelTag from "./DialogEditLabelTag";
 import Editor from "./Editor";
 import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
+import UnsavedAnnotationDialog from "./UnsavedAnnotationDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
 import { uploadFiles } from "@/utils/uploadthing";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ interface LabelTagItem {
   type?: string;
   image?: string;
   tagged_image?: string;
+  annotation_state?: AnnotationState;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
 }
@@ -69,6 +71,16 @@ export default function LabelTagsTabs({
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Dirty state tracking
+  const [currentEditorState, setCurrentEditorState] = useState<
+    Record<string, AnnotationState>
+  >({});
+  const [savedAnnotations, setSavedAnnotations] = useState<
+    Record<string, AnnotationState>
+  >({});
+  const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
+  const [pendingTabChange, setPendingTabChange] = useState<string | null>(null);
+
   const { mutateAsync: updateLabelTaggedImage, isPending: isUpdating } =
     useUpdateLabelTaggedImage();
 
@@ -110,6 +122,7 @@ export default function LabelTagsTabs({
         productId,
         labelTagId: pendingSave.itemId,
         taggedImage: uploadedUrl,
+        annotationState: pendingSave.annotation,
       });
 
       setPendingSave(null);
@@ -124,6 +137,140 @@ export default function LabelTagsTabs({
       setRenderItem(null);
     }
   };
+
+  const filteredLabelTypesForTabs: string[] = [
+    ...new Set(
+      labelTagsData
+        ?.map((item: LabelTagItem) => item.type)
+        ?.filter((type): type is string => !!type)
+    ),
+  ];
+
+  const effectiveActiveTab =
+    activeTab || filteredLabelTypesForTabs[0] || "tab-1";
+
+  // Get current item ID based on active tab
+  const getCurrentItemId = useCallback(() => {
+    const currentTabData = labelTagsData.filter(
+      (item: LabelTagItem) => item.type === effectiveActiveTab
+    );
+    // For now, assume first item in tab (single item per tab content)
+    return currentTabData[0]?._id || null;
+  }, [labelTagsData, effectiveActiveTab]);
+
+  // Check if an item has unsaved changes
+  // Only dirty if: current state exists, is different from saved (or initial if never saved)
+  const isDirty = useCallback(
+    (itemId: string) => {
+      const current = currentEditorState[itemId];
+      // If we don't have current state, nothing to compare
+      if (!current) return false;
+
+      // Compare against saved state if it exists, otherwise against initial state
+      const baseline = savedAnnotations[itemId];
+      if (!baseline) {
+        // No baseline means this is initial state - not dirty
+        return false;
+      }
+
+      return JSON.stringify(current) !== JSON.stringify(baseline);
+    },
+    [currentEditorState, savedAnnotations]
+  );
+
+  // Check if any item has unsaved changes
+  const hasAnyDirtyItems = useCallback(() => {
+    return Object.keys(currentEditorState).some((itemId) => isDirty(itemId));
+  }, [currentEditorState, isDirty]);
+
+  // Handle state change from Editor
+  // First call sets the baseline, subsequent calls track changes
+  const handleStateChange = useCallback(
+    (itemId: string, annotation: AnnotationState) => {
+      setCurrentEditorState((prev) => ({ ...prev, [itemId]: annotation }));
+
+      // If this is the first state for this item, set it as the saved baseline
+      setSavedAnnotations((prev) => {
+        if (!prev[itemId]) {
+          return { ...prev, [itemId]: annotation };
+        }
+        return prev;
+      });
+    },
+    []
+  );
+
+  // Handle tab change with dirty check
+  const handleTabChange = useCallback(
+    (newTab: string) => {
+      const currentItemId = getCurrentItemId();
+      if (currentItemId && isDirty(currentItemId)) {
+        setPendingTabChange(newTab);
+        setUnsavedDialogOpen(true);
+      } else {
+        setActiveTab(newTab);
+      }
+    },
+    [getCurrentItemId, isDirty]
+  );
+
+  // Handle save from unsaved dialog
+  const handleUnsavedSave = async () => {
+    const currentItemId = getCurrentItemId();
+    if (!currentItemId) return;
+
+    const currentState = currentEditorState[currentItemId];
+    const currentItem = labelTagsData.find(
+      (item) => item._id === currentItemId
+    );
+    if (!currentState || !currentItem?.image) return;
+
+    // Trigger the save flow
+    handleSave(currentItemId, currentItem.image, currentState);
+
+    // Mark as saved and proceed
+    setSavedAnnotations((prev) => ({ ...prev, [currentItemId]: currentState }));
+    setUnsavedDialogOpen(false);
+    if (pendingTabChange) {
+      setActiveTab(pendingTabChange);
+      setPendingTabChange(null);
+    }
+  };
+
+  // Handle discard from unsaved dialog
+  const handleUnsavedDiscard = () => {
+    const currentItemId = getCurrentItemId();
+    if (currentItemId) {
+      // Reset current state to saved state
+      setCurrentEditorState((prev) => ({
+        ...prev,
+        [currentItemId]: savedAnnotations[currentItemId],
+      }));
+    }
+    setUnsavedDialogOpen(false);
+    if (pendingTabChange) {
+      setActiveTab(pendingTabChange);
+      setPendingTabChange(null);
+    }
+  };
+
+  // Handle cancel from unsaved dialog
+  const handleUnsavedCancel = () => {
+    setUnsavedDialogOpen(false);
+    setPendingTabChange(null);
+  };
+
+  // Handle beforeunload for browser close/refresh
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasAnyDirtyItems()) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasAnyDirtyItems]);
 
   // Helper to find a diff by path and optional property (e.g., "name", "description", "image")
   const getDiff = (index: number, property?: string) => {
@@ -253,17 +400,6 @@ export default function LabelTagsTabs({
     );
   };
 
-  const filteredLabelTypesForTabs: string[] = [
-    ...new Set(
-      labelTagsData
-        ?.map((item: LabelTagItem) => item.type)
-        ?.filter((type): type is string => !!type)
-    ),
-  ];
-
-  const effectiveActiveTab =
-    activeTab || filteredLabelTypesForTabs[0] || "tab-1";
-
   if (!labelTagsData || labelTagsData.length === 0) {
     return (
       <>
@@ -313,7 +449,7 @@ export default function LabelTagsTabs({
         <Tabs
           defaultValue="tab-1"
           value={effectiveActiveTab}
-          onValueChange={setActiveTab}
+          onValueChange={handleTabChange}
         >
           <ScrollArea className="flex-1 pb-2">
             <TabsList>
@@ -477,14 +613,21 @@ export default function LabelTagsTabs({
                             //   onSave={handleSave}
                             // />
                             <Editor
-                              targetImageSrc={item.tagged_image || item.image}
-                              annotation={annotations[item._id] || null}
+                              targetImageSrc={item.image}
+                              annotation={
+                                item.annotation_state ||
+                                annotations[item._id] ||
+                                null
+                              }
                               onSave={(newAnnotation) => {
                                 handleSave(
                                   item._id,
                                   item.image!,
                                   newAnnotation
                                 );
+                              }}
+                              onStateChange={(newAnnotation) => {
+                                handleStateChange(item._id, newAnnotation);
                               }}
                             />
                           ) : (
@@ -550,6 +693,15 @@ export default function LabelTagsTabs({
             }}
             onConfirm={handleConfirmSave}
             isPending={isSaving || isUpdating}
+          />
+
+          <UnsavedAnnotationDialog
+            open={unsavedDialogOpen}
+            onOpenChange={setUnsavedDialogOpen}
+            onSave={handleUnsavedSave}
+            onDiscard={handleUnsavedDiscard}
+            onCancel={handleUnsavedCancel}
+            isSaving={isSaving || isUpdating}
           />
         </Tabs>
       </div>
