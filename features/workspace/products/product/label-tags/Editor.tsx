@@ -175,11 +175,18 @@ const Editor = ({
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
 
-  function deleteSelctedMarkers(event: KeyboardEvent) {
-    if (
-      editor.current &&
-      (event.key === "Delete" || event.key === "Backspace")
-    ) {
+  function handleKeyboardShortcuts(event: KeyboardEvent) {
+    if (!editor.current || !editorContainer.current) return;
+
+    // Only handle shortcuts when the editor container or its children are focused
+    const isEditorFocused =
+      editorContainer.current.contains(document.activeElement) ||
+      editorContainer.current.contains(event.target as Node);
+
+    if (!isEditorFocused) return;
+
+    // Delete/Backspace - delete selected markers
+    if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       editor.current.deleteSelectedMarkers();
     }
@@ -197,8 +204,16 @@ const Editor = ({
           break;
         }
         case "delete": {
-          // @todo confirm delete
           editor.current.deleteSelectedMarkers();
+          break;
+        }
+        case "clear-all": {
+          const currentState = editor.current.getState();
+          editor.current.restoreState({
+            width: currentState.width,
+            height: currentState.height,
+            markers: [],
+          });
           break;
         }
         case "undo": {
@@ -366,9 +381,9 @@ const Editor = ({
   }, [annotation, targetImageSrc]);
 
   useEffect(() => {
-    document.addEventListener("keydown", deleteSelctedMarkers);
+    document.addEventListener("keydown", handleKeyboardShortcuts);
     return () => {
-      document.removeEventListener("keydown", deleteSelctedMarkers);
+      document.removeEventListener("keydown", handleKeyboardShortcuts);
     };
   }, []);
 

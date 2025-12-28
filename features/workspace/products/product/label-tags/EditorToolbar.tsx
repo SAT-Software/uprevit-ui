@@ -10,6 +10,7 @@ import {
   PiTrashDuotone,
   PiCursorDuotone,
   PiFloppyDiskDuotone,
+  PiEraserDuotone,
 } from "react-icons/pi";
 import { EditorState } from "@/types/editor";
 import ToolbarMarkerGroup from "./toolbar/ToolbarMarkerGroup";
@@ -51,11 +52,18 @@ const EditorToolbar = ({
         />
         <ToolbarActionButton
           icon={PiTrashDuotone}
-          title="Delete"
+          title="Delete Selected"
           variant={variant}
           action="delete"
           onAction={onAction}
           disabled={!editorState.canDelete}
+        />
+        <ToolbarActionButton
+          icon={PiEraserDuotone}
+          title="Clear All Annotations"
+          variant={variant}
+          action="clear-all"
+          onAction={onAction}
         />
       </ButtonGroup>
 
