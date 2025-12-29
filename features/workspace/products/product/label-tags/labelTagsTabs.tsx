@@ -168,7 +168,7 @@ export default function LabelTagsTabs({
 
       const baseline = savedAnnotations[itemId];
       if (!baseline) {
-        return false;
+        return current.markers && current.markers.length > 0;
       }
 
       return JSON.stringify(current) !== JSON.stringify(baseline);
