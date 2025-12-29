@@ -183,13 +183,6 @@ export default function LabelTagsTabs({
   const handleStateChange = useCallback(
     (itemId: string, annotation: AnnotationState) => {
       setCurrentEditorState((prev) => ({ ...prev, [itemId]: annotation }));
-
-      setSavedAnnotations((prev) => {
-        if (!prev[itemId]) {
-          return { ...prev, [itemId]: annotation };
-        }
-        return prev;
-      });
     },
     []
   );
@@ -249,6 +242,17 @@ export default function LabelTagsTabs({
     setUnsavedDialogOpen(false);
     setPendingTabChange(null);
   };
+
+  // Initialize savedAnnotations from labelTagsData on mount
+  useEffect(() => {
+    const initialSaved: Record<string, AnnotationState> = {};
+    labelTagsData.forEach((item: LabelTagItem) => {
+      if (item._id && item.annotation_state) {
+        initialSaved[item._id] = item.annotation_state;
+      }
+    });
+    setSavedAnnotations(initialSaved);
+  }, [labelTagsData]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -601,8 +605,10 @@ export default function LabelTagsTabs({
                             <Editor
                               targetImageSrc={item.image}
                               annotation={
-                                item.annotation_state ||
-                                annotations[item._id] ||
+                                currentEditorState[item._id] ??
+                                savedAnnotations[item._id] ??
+                                item.annotation_state ??
+                                annotations[item._id] ??
                                 null
                               }
                               onSave={(newAnnotation) => {
