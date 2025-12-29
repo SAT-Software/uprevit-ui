@@ -147,6 +147,7 @@ type Props = {
   variant?: "ghost" | "outline" | "secondary";
   annotation: AnnotationState | null;
   onSave?: (annotation: AnnotationState) => void;
+  onStateChange?: (annotation: AnnotationState) => void;
 };
 
 const Editor = ({
@@ -154,6 +155,7 @@ const Editor = ({
   variant = "secondary",
   annotation,
   onSave,
+  onStateChange,
 }: Props) => {
   const editorContainer = useRef<HTMLDivElement | null>(null);
   const editor = useRef<MarkerArea | null>(null);
@@ -173,11 +175,18 @@ const Editor = ({
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
 
-  function deleteSelctedMarkers(event: KeyboardEvent) {
-    if (
-      editor.current &&
-      (event.key === "Delete" || event.key === "Backspace")
-    ) {
+  function handleKeyboardShortcuts(event: KeyboardEvent) {
+    if (!editor.current || !editorContainer.current) return;
+
+    // Only handle shortcuts when the editor container or its children are focused
+    const isEditorFocused =
+      editorContainer.current.contains(document.activeElement) ||
+      editorContainer.current.contains(event.target as Node);
+
+    if (!isEditorFocused) return;
+
+    // Delete/Backspace - delete selected markers
+    if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       editor.current.deleteSelectedMarkers();
     }
@@ -195,8 +204,16 @@ const Editor = ({
           break;
         }
         case "delete": {
-          // @todo confirm delete
           editor.current.deleteSelectedMarkers();
+          break;
+        }
+        case "clear-all": {
+          const currentState = editor.current.getState();
+          editor.current.restoreState({
+            width: currentState.width,
+            height: currentState.height,
+            markers: [],
+          });
           break;
         }
         case "undo": {
@@ -218,16 +235,13 @@ const Editor = ({
           break;
         }
         case "zoom-reset": {
-          // Reset to show original size, or fit to container if larger
           if (
             imageNaturalWidth.current > 0 &&
             containerMaxWidthRef.current > 0
           ) {
             if (imageNaturalWidth.current <= containerMaxWidthRef.current) {
-              // Image is smaller than container - show at original size
               editor.current.zoomLevel = 1;
             } else {
-              // Image is larger than container - fit to container
               editor.current.zoomLevel = 1;
             }
           } else {
@@ -245,33 +259,6 @@ const Editor = ({
       updateCalculatedEditorState();
     }
   };
-
-  // const downloadMarkedImage = async () => {
-  //   if (editor.current) {
-  //     setEditorState((prevState: any) => ({
-  //       ...prevState,
-  //       mode: "rendering",
-  //     }));
-  //     const currentState = editor.current.getState();
-
-  //     const renderer = new Renderer();
-  //     renderer.targetImage = editor.current.targetImage;
-  //     renderer.naturalSize = true;
-  //     renderer.imageType = "image/png";
-
-  //     const renderedImage = await renderer.rasterize(currentState);
-
-  //     const downloadLink = document.createElement("a");
-  //     downloadLink.href = renderedImage;
-  //     downloadLink.download = "marked-image.png";
-  //     downloadLink.click();
-
-  //     setEditorState((prevState: any) => ({
-  //       ...prevState,
-  //       mode: "select",
-  //     }));
-  //   }
-  // };
 
   const handleNewMarker = (markerType: MarkerTypeItem | null) => {
     setCurrentMarkerType(markerType);
@@ -325,27 +312,26 @@ const Editor = ({
 
         const naturalHeight = targetImg.naturalHeight;
 
-        // Store dimensions for zoom-reset functionality
         imageNaturalWidth.current = naturalWidth;
         containerMaxWidthRef.current = containerMaxWidth;
 
         const newEditor = new MarkerArea();
         newEditor.targetImage = targetImg;
 
-        // Set correct target dimensions based on natural image size
         if (naturalWidth > containerMaxWidth) {
-          // Scale down proportionally
           const scale = containerMaxWidth / naturalWidth;
           newEditor.targetWidth = containerMaxWidth;
           newEditor.targetHeight = Math.round(naturalHeight * scale);
         } else {
-          // Use natural dimensions
           newEditor.targetWidth = naturalWidth;
           newEditor.targetHeight = naturalHeight;
         }
 
         newEditor.addEventListener("areastatechange", () => {
           updateCalculatedEditorState();
+          if (onStateChange) {
+            onStateChange(newEditor.getState());
+          }
         });
 
         newEditor.addEventListener("markerselect", (ev) => {
@@ -368,7 +354,6 @@ const Editor = ({
         containerRef.appendChild(newEditor);
         editor.current = newEditor;
 
-        // Restore annotation if exists
         if (
           annotation &&
           JSON.stringify(annotation) !== JSON.stringify(newEditor.getState())
@@ -377,11 +362,9 @@ const Editor = ({
         }
       };
 
-      // Check if image is already loaded (cached)
       if (targetImg.complete && targetImg.naturalWidth > 0) {
         initializeEditor(targetImg.naturalWidth);
       } else {
-        // Wait for image to load before initializing editor
         targetImg.onload = () => {
           initializeEditor(targetImg.naturalWidth);
         };
@@ -398,11 +381,11 @@ const Editor = ({
   }, [annotation, targetImageSrc]);
 
   useEffect(() => {
-    document.addEventListener("keydown", deleteSelctedMarkers);
+    document.addEventListener("keydown", handleKeyboardShortcuts);
     return () => {
-      document.removeEventListener("keydown", deleteSelctedMarkers);
+      document.removeEventListener("keydown", handleKeyboardShortcuts);
     };
-  }, []);
+  }, [handleKeyboardShortcuts]);
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] w-full h-full border border-border rounded-xl">

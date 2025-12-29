@@ -5,6 +5,7 @@ export type ToolbarAction =
   | "select"
   | "delete"
   | "delete-all"
+  | "clear-all"
   | "save"
   | "upload"
   | "download"
