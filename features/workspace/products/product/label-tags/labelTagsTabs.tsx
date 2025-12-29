@@ -125,6 +125,11 @@ export default function LabelTagsTabs({
         annotationState: pendingSave.annotation,
       });
 
+      setSavedAnnotations((prev) => ({
+        ...prev,
+        [pendingSave.itemId]: pendingSave.annotation,
+      }));
+
       setPendingSave(null);
       setSaveDialogOpen(false);
     } catch (error) {
@@ -149,27 +154,20 @@ export default function LabelTagsTabs({
   const effectiveActiveTab =
     activeTab || filteredLabelTypesForTabs[0] || "tab-1";
 
-  // Get current item ID based on active tab
   const getCurrentItemId = useCallback(() => {
     const currentTabData = labelTagsData.filter(
       (item: LabelTagItem) => item.type === effectiveActiveTab
     );
-    // For now, assume first item in tab (single item per tab content)
     return currentTabData[0]?._id || null;
   }, [labelTagsData, effectiveActiveTab]);
 
-  // Check if an item has unsaved changes
-  // Only dirty if: current state exists, is different from saved (or initial if never saved)
   const isDirty = useCallback(
     (itemId: string) => {
       const current = currentEditorState[itemId];
-      // If we don't have current state, nothing to compare
       if (!current) return false;
 
-      // Compare against saved state if it exists, otherwise against initial state
       const baseline = savedAnnotations[itemId];
       if (!baseline) {
-        // No baseline means this is initial state - not dirty
         return false;
       }
 
@@ -178,18 +176,14 @@ export default function LabelTagsTabs({
     [currentEditorState, savedAnnotations]
   );
 
-  // Check if any item has unsaved changes
   const hasAnyDirtyItems = useCallback(() => {
     return Object.keys(currentEditorState).some((itemId) => isDirty(itemId));
   }, [currentEditorState, isDirty]);
 
-  // Handle state change from Editor
-  // First call sets the baseline, subsequent calls track changes
   const handleStateChange = useCallback(
     (itemId: string, annotation: AnnotationState) => {
       setCurrentEditorState((prev) => ({ ...prev, [itemId]: annotation }));
 
-      // If this is the first state for this item, set it as the saved baseline
       setSavedAnnotations((prev) => {
         if (!prev[itemId]) {
           return { ...prev, [itemId]: annotation };
@@ -200,7 +194,6 @@ export default function LabelTagsTabs({
     []
   );
 
-  // Handle tab change with dirty check
   const handleTabChange = useCallback(
     (newTab: string) => {
       const currentItemId = getCurrentItemId();
@@ -214,7 +207,6 @@ export default function LabelTagsTabs({
     [getCurrentItemId, isDirty]
   );
 
-  // Handle save from unsaved dialog
   const handleUnsavedSave = async () => {
     const currentItemId = getCurrentItemId();
     if (!currentItemId) return;
@@ -225,11 +217,8 @@ export default function LabelTagsTabs({
     );
     if (!currentState || !currentItem?.image) return;
 
-    // Trigger the save flow
     handleSave(currentItemId, currentItem.image, currentState);
 
-    // Mark as saved and proceed
-    setSavedAnnotations((prev) => ({ ...prev, [currentItemId]: currentState }));
     setUnsavedDialogOpen(false);
     if (pendingTabChange) {
       setActiveTab(pendingTabChange);
@@ -237,14 +226,16 @@ export default function LabelTagsTabs({
     }
   };
 
-  // Handle discard from unsaved dialog
   const handleUnsavedDiscard = () => {
     const currentItemId = getCurrentItemId();
     if (currentItemId) {
-      // Reset current state to saved state
+      const currentItem = labelTagsData.find(
+        (item) => item._id === currentItemId
+      );
       setCurrentEditorState((prev) => ({
         ...prev,
-        [currentItemId]: savedAnnotations[currentItemId],
+        [currentItemId]:
+          savedAnnotations[currentItemId] ?? currentItem?.annotation_state,
       }));
     }
     setUnsavedDialogOpen(false);
@@ -254,13 +245,11 @@ export default function LabelTagsTabs({
     }
   };
 
-  // Handle cancel from unsaved dialog
   const handleUnsavedCancel = () => {
     setUnsavedDialogOpen(false);
     setPendingTabChange(null);
   };
 
-  // Handle beforeunload for browser close/refresh
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasAnyDirtyItems()) {
@@ -272,7 +261,6 @@ export default function LabelTagsTabs({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasAnyDirtyItems]);
 
-  // Helper to find a diff by path and optional property (e.g., "name", "description", "image")
   const getDiff = (index: number, property?: string) => {
     const basePath = `label_tags.data[${index}]`;
     if (property) {
@@ -281,7 +269,6 @@ export default function LabelTagsTabs({
     return diffs.find((d) => d.path === basePath);
   };
 
-  // Helper to get status for an item (whole row)
   const getItemStatus = (
     item: LabelTagItem,
     index: number
@@ -298,7 +285,6 @@ export default function LabelTagsTabs({
     return null;
   };
 
-  // Simple inline component for redline display
   const RedlineValue = ({
     value,
     diff,

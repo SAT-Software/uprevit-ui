@@ -385,7 +385,7 @@ const Editor = ({
     return () => {
       document.removeEventListener("keydown", handleKeyboardShortcuts);
     };
-  }, []);
+  }, [handleKeyboardShortcuts]);
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] w-full h-full border border-border rounded-xl">
