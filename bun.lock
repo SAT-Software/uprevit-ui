@@ -38,6 +38,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",
+        "country-flag-icons": "^1.6.4",
         "date-fns": "^4.1.0",
         "lucide-react": "^0.555.0",
         "motion": "^12.23.26",
@@ -870,6 +871,8 @@
     "concat-map": ["concat-map@0.0.1", "", {}, "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg=="],
 
     "convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
+
+    "country-flag-icons": ["country-flag-icons@1.6.4", "", {}, "sha512-Z3Zi419FI889tlElMsVhCIS5eRkiLDWixr576J5DPiTe5RGxpbRi+enMpHdYVp5iK5WFjr8P/RgyIFAGhFsiFg=="],
 
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
 
