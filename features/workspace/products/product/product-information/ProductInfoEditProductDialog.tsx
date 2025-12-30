@@ -30,6 +30,19 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { ProductMetadata } from "@/types/product";
+import { GEO_MARKETS } from "@/data/geo-markets";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { PiCheck, PiCaretUpDown } from "react-icons/pi";
+import { COUNTRIES } from "@/data/countries";
+import * as Flags from "country-flag-icons/react/3x2";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -56,8 +69,10 @@ interface FormValues {
   productName: string;
   productDescription: string;
   targetDate: string;
-  marketGeography: string;
-  countryOfOrigin: string;
+  marketGeographySelect: string;
+  marketGeographyInput: string;
+  countryOfOriginSelect: string;
+  countryOfOriginInput: string;
   oemContractManufacturer: string;
   commercialClinical: string;
   manufacturingLocation: string;
@@ -102,6 +117,8 @@ export default function EditProductDialog({
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const [openTargetDate, setOpenTargetDate] = useState(false);
 
@@ -112,8 +129,26 @@ export default function EditProductDialog({
     targetDate: productMetadata?.target_date
       ? formatDateToLocal(new Date(productMetadata.target_date))
       : "",
-    marketGeography: product?.market_geography || "",
-    countryOfOrigin: product?.country_of_origin || "",
+    marketGeographySelect:
+      product?.market_geography &&
+      GEO_MARKETS.some((m) => m.regionAcronym === product.market_geography)
+        ? product.market_geography
+        : "",
+    marketGeographyInput:
+      product?.market_geography &&
+      !GEO_MARKETS.some((m) => m.regionAcronym === product.market_geography)
+        ? product.market_geography
+        : "",
+    countryOfOriginSelect:
+      product?.country_of_origin &&
+      COUNTRIES.some((c) => c.name === product.country_of_origin)
+        ? product.country_of_origin
+        : "",
+    countryOfOriginInput:
+      product?.country_of_origin &&
+      !COUNTRIES.some((c) => c.name === product.country_of_origin)
+        ? product.country_of_origin
+        : "",
     oemContractManufacturer: product?.oem_contract_manufacturer || "",
     commercialClinical: product?.commercial_clinical || "",
     manufacturingLocation: product?.manufacturing_location || "",
@@ -133,6 +168,10 @@ export default function EditProductDialog({
   });
 
   const targetDateValue = watch("targetDate");
+  const marketGeographySelect = watch("marketGeographySelect");
+  const marketGeographyInput = watch("marketGeographyInput");
+  const countryOfOriginSelect = watch("countryOfOriginSelect");
+  const countryOfOriginInput = watch("countryOfOriginInput");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!product?.id) {
@@ -150,8 +189,10 @@ export default function EditProductDialog({
         target_date: data.targetDate
           ? new Date(data.targetDate).toISOString()
           : null,
-        market_geography: data.marketGeography,
-        country_of_origin: data.countryOfOrigin,
+        market_geography:
+          data.marketGeographySelect || data.marketGeographyInput,
+        country_of_origin:
+          data.countryOfOriginSelect || data.countryOfOriginInput,
         oem_contract_manufacturer: data.oemContractManufacturer,
         commercial_clinical: data.commercialClinical,
         manufacturing_location: data.manufacturingLocation,
@@ -317,40 +358,248 @@ export default function EditProductDialog({
                   <Label htmlFor={`${id}-market-geography`} className="text-sm">
                     Market / Geography
                   </Label>
-                  <Input
-                    id={`${id}-market-geography`}
-                    placeholder="Enter market/geography"
-                    type="text"
-                    aria-invalid={errors.marketGeography ? "true" : "false"}
-                    {...register("marketGeography", {
-                      required: "Market/Geography is required",
-                    })}
-                  />
-                  {errors.marketGeography && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.marketGeography.message}
+                  <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-expanded={comboboxOpen}
+                        className="w-full justify-between text-foreground/80 font-normal h-9"
+                        disabled={!!marketGeographyInput}
+                      >
+                        {marketGeographySelect
+                          ? GEO_MARKETS.find(
+                              (market) =>
+                                market.regionAcronym === marketGeographySelect
+                            )?.regionAcronym
+                          : "Select market..."}
+                        <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search market..." />
+                        <CommandList className="max-h-60 overflow-y-auto">
+                          <CommandEmpty>No market found.</CommandEmpty>
+                          <CommandGroup>
+                            {GEO_MARKETS.map((market) => (
+                              <CommandItem
+                                key={market.regionAcronym}
+                                value={market.regionAcronym}
+                                onSelect={(currentValue) => {
+                                  // The value comes lowercased from CommandItem, so we need to find the original casing
+                                  const originalValue = GEO_MARKETS.find(
+                                    (m) =>
+                                      m.regionAcronym.toLowerCase() ===
+                                      currentValue.toLowerCase()
+                                  )?.regionAcronym;
+
+                                  if (originalValue) {
+                                    setValue(
+                                      "marketGeographySelect",
+                                      originalValue === marketGeographySelect
+                                        ? ""
+                                        : originalValue,
+                                      { shouldValidate: true }
+                                    );
+                                    setComboboxOpen(false);
+                                  }
+                                }}
+                              >
+                                <PiCheck
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    marketGeographySelect ===
+                                      market.regionAcronym
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {market.regionAcronym} - {market.fullName}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  <div className="flex items-center gap-2 py-1">
+                    <div className="h-0 w-full border-t border-dashed" />
+                    <p className="text-[10px] font-light text-muted-foreground uppercase">
+                      OR
                     </p>
-                  )}
+                    <div className="h-0 w-full border-t border-dashed" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor={`${id}-market-geography-custom`}
+                      className="text-sm"
+                    >
+                      Enter Custom Market
+                    </Label>
+                    <Input
+                      id={`${id}-market-geography-custom`}
+                      placeholder="Enter custom market/geography"
+                      type="text"
+                      disabled={!!marketGeographySelect}
+                      {...register("marketGeographyInput", {
+                        validate: (value) => {
+                          const selectValue = watch("marketGeographySelect");
+                          if (!value && !selectValue) {
+                            return "Market/Geography is required";
+                          }
+                          return true;
+                        },
+                      })}
+                    />
+                    {(errors.marketGeographySelect ||
+                      errors.marketGeographyInput) && (
+                      <p role="alert" className="text-xs text-destructive">
+                        Market/Geography is required
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor={`${id}-country-origin`} className="text-sm">
                     Country of Origin
                   </Label>
-                  <Input
-                    id={`${id}-country-origin`}
-                    placeholder="Enter country of origin"
-                    type="text"
-                    aria-invalid={errors.countryOfOrigin ? "true" : "false"}
-                    {...register("countryOfOrigin", {
-                      required: "Country of Origin is required",
-                    })}
-                  />
-                  {errors.countryOfOrigin && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.countryOfOrigin.message}
+                  <Popover
+                    open={countryComboboxOpen}
+                    onOpenChange={setCountryComboboxOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-expanded={countryComboboxOpen}
+                        className="w-full justify-between text-foreground/80 font-normal h-9"
+                        disabled={!!countryOfOriginInput}
+                      >
+                        {countryOfOriginSelect ? (
+                          <span className="flex items-center gap-2">
+                            {(() => {
+                              const country = COUNTRIES.find(
+                                (c) => c.name === countryOfOriginSelect
+                              );
+                              if (country) {
+                                const FlagComponent =
+                                  Flags[country.code as keyof typeof Flags];
+                                return FlagComponent ? (
+                                  <FlagComponent className="h-3 w-4 rounded-sm" />
+                                ) : null;
+                              }
+                              return null;
+                            })()}
+                            {countryOfOriginSelect}
+                          </span>
+                        ) : (
+                          "Select country..."
+                        )}
+                        <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search country..." />
+                        <CommandList className="max-h-60 overflow-y-auto">
+                          <CommandEmpty>No country found.</CommandEmpty>
+                          <CommandGroup>
+                            {COUNTRIES.map((country) => {
+                              const FlagComponent =
+                                Flags[country.code as keyof typeof Flags];
+                              return (
+                                <CommandItem
+                                  key={country.code}
+                                  value={country.name}
+                                  onSelect={(currentValue) => {
+                                    const originalValue = COUNTRIES.find(
+                                      (c) =>
+                                        c.name.toLowerCase() ===
+                                        currentValue.toLowerCase()
+                                    )?.name;
+
+                                    if (originalValue) {
+                                      setValue(
+                                        "countryOfOriginSelect",
+                                        originalValue === countryOfOriginSelect
+                                          ? ""
+                                          : originalValue,
+                                        { shouldValidate: true }
+                                      );
+                                      setCountryComboboxOpen(false);
+                                    }
+                                  }}
+                                >
+                                  <PiCheck
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      countryOfOriginSelect === country.name
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {FlagComponent && (
+                                    <FlagComponent className="mr-2 h-3 w-4 rounded-sm" />
+                                  )}
+                                  {country.name} ({country.code})
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  <div className="flex items-center gap-2 py-1">
+                    <div className="h-0 w-full border-t border-dashed" />
+                    <p className="text-[10px] font-light text-muted-foreground uppercase">
+                      OR
                     </p>
-                  )}
+                    <div className="h-0 w-full border-t border-dashed" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor={`${id}-country-origin-custom`}
+                      className="text-sm"
+                    >
+                      Enter Custom Country
+                    </Label>
+                    <Input
+                      id={`${id}-country-origin-custom`}
+                      placeholder="Enter custom country of origin"
+                      type="text"
+                      disabled={!!countryOfOriginSelect}
+                      {...register("countryOfOriginInput", {
+                        validate: (value) => {
+                          const selectValue = watch("countryOfOriginSelect");
+                          if (!value && !selectValue) {
+                            return "Country of Origin is required";
+                          }
+                          return true;
+                        },
+                      })}
+                    />
+                    {(errors.countryOfOriginSelect ||
+                      errors.countryOfOriginInput) && (
+                      <p role="alert" className="text-xs text-destructive">
+                        Country of Origin is required
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
