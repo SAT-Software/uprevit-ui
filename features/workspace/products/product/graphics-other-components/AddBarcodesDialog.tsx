@@ -29,10 +29,28 @@ import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
   PiPictureInPictureDuotone,
+  PiCaretUpDown,
+  PiCheck,
 } from "react-icons/pi";
+import { BARCODE_STANDARDS } from "@/data/barcode-standards";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 type FormData = {
-  componentName: string;
+  barcodeTypeSelect: string;
+  barcodeTypeInput: string;
   componentDescription: string;
   labelPresence: Tag[];
   image: FileWithPreview | null;
@@ -49,6 +67,8 @@ export default function AddBarcodesDialog({
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [labelPresence, setLabelPresence] = useState<Tag[]>([]);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -56,15 +76,30 @@ export default function AddBarcodesDialog({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<FormData>({
     defaultValues: {
+      barcodeTypeSelect: "",
+      barcodeTypeInput: "",
       labelPresence: [],
       image: null,
     },
   });
+
+  const barcodeTypeSelect = watch("barcodeTypeSelect");
+  const barcodeTypeInput = watch("barcodeTypeInput");
+
   const { mutate: addBarcodesData, isPending } = useUpdateProductTabData();
 
   const onSubmit = async (data: FormData) => {
+    // Validate that at least one barcode type is selected/entered
+    if (!data.barcodeTypeSelect && !data.barcodeTypeInput) {
+      // You might want to handle this validation error more gracefully
+      return;
+    }
+
+    const componentName = data.barcodeTypeSelect || data.barcodeTypeInput;
+
     try {
       setUploadingImage(true);
       let utRes;
@@ -81,7 +116,7 @@ export default function AddBarcodesDialog({
         tab: "symbols-graphics",
         data: [
           {
-            text: data.componentName,
+            text: componentName,
             image: utRes?.[0]?.ufsUrl || null,
             entity: "Barcodes",
             label_presence: (Array.isArray(labelPresence)
@@ -155,23 +190,90 @@ export default function AddBarcodesDialog({
                 )}
               />
             </div>
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-2">
               <div className="space-y-2">
-                <Label htmlFor={`${id}-component-name`}>Barcode Type</Label>
+                <Label>Select Barcode Type</Label>
+                <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="default"
+                      role="combobox"
+                      aria-expanded={comboboxOpen}
+                      className="w-full justify-between text-foreground/80"
+                      disabled={!!barcodeTypeInput}
+                    >
+                      {barcodeTypeSelect
+                        ? BARCODE_STANDARDS.find(
+                            (framework) => framework.name === barcodeTypeSelect
+                          )?.name
+                        : "Select barcode type..."}
+                      <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search barcode type..." />
+                      <CommandList>
+                        <CommandEmpty>No barcode type found.</CommandEmpty>
+                        <CommandGroup>
+                          {BARCODE_STANDARDS.map((framework) => (
+                            <CommandItem
+                              key={framework.name}
+                              value={framework.name}
+                              onSelect={(currentValue) => {
+                                setValue(
+                                  "barcodeTypeSelect",
+                                  currentValue === barcodeTypeSelect
+                                    ? ""
+                                    : currentValue
+                                );
+                                setComboboxOpen(false);
+                              }}
+                            >
+                              <PiCheck
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  barcodeTypeSelect === framework.name
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {framework.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-0 w-full border-t border-dashed" />
+                <p className="text-xs font-light text-muted-foreground">OR</p>
+                <div className="h-0 w-full border-t border-dashed" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-component-name`}>
+                  Enter Custom Barcode Type
+                </Label>
                 <Input
                   id={`${id}-component-name`}
-                  placeholder="Enter barcode type (e.g., QR Code, UPC)"
+                  placeholder="Enter custom barcode type"
                   type="text"
-                  {...register("componentName", {
-                    required: "Barcode type is required",
-                  })}
+                  {...register("barcodeTypeInput")}
+                  disabled={!!barcodeTypeSelect}
                 />
-                {errors.componentName && (
+              </div>
+
+              {/* Validation Error Display */}
+              {!barcodeTypeSelect &&
+                !barcodeTypeInput &&
+                (errors.barcodeTypeSelect || errors.barcodeTypeInput) && (
                   <p className="text-xs text-red-500">
-                    {errors.componentName.message}
+                    Please select a barcode type or enter one manually.
                   </p>
                 )}
-              </div>
             </div>
           </div>
 
@@ -236,7 +338,7 @@ export default function AddBarcodesDialog({
             type="button"
             size="sm"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={isPending || (!barcodeTypeSelect && !barcodeTypeInput)}
             variant="default"
           >
             <PiPlusCircleDuotone />
