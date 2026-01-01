@@ -60,8 +60,8 @@ const pathData = [
     icon: PiBookmarkSimpleDuotone,
   },
   {
-    title: "Analytics",
-    url: "/analytics",
+    title: "Reports",
+    url: "/reports",
     icon: PiPresentationChartDuotone,
   },
   {

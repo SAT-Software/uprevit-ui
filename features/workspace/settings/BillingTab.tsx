@@ -220,7 +220,7 @@ function BillingTab() {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm">Advanced analytics & reporting</span>
+              <span className="text-sm">Advanced reports & reporting</span>
             </div>
             <div className="flex items-center gap-2">
               <svg

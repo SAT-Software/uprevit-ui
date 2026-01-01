@@ -1,0 +1,85 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { QueryCondition } from "@/types/reports";
+
+export function useQueryBuilderState() {
+  const [conditions, setConditions] = useState<QueryCondition[]>([]);
+  const [conditionLogic, setConditionLogic] = useState<"AND" | "OR">("AND");
+
+  const addCondition = useCallback(() => {
+    const newCondition: QueryCondition = {
+      id: crypto.randomUUID(),
+      tab: "",
+      field: "",
+      operator: "equals",
+      value: "",
+    };
+    setConditions((prev) => [...prev, newCondition]);
+  }, []);
+
+  const updateCondition = useCallback(
+    (id: string, updates: Partial<Omit<QueryCondition, "id">>) => {
+      setConditions((prev) =>
+        prev.map((condition) =>
+          condition.id === id ? { ...condition, ...updates } : condition
+        )
+      );
+    },
+    []
+  );
+
+  const removeCondition = useCallback((id: string) => {
+    setConditions((prev) => prev.filter((condition) => condition.id !== id));
+  }, []);
+
+  const clearConditions = useCallback(() => {
+    setConditions([]);
+  }, []);
+
+  const loadConditions = useCallback(
+    (savedConditions: QueryCondition[], savedLogic: "AND" | "OR") => {
+      setConditions(savedConditions);
+      setConditionLogic(savedLogic);
+    },
+    []
+  );
+
+  const validateConditions = useCallback(() => {
+    if (conditions.length === 0) return false;
+
+    return conditions.every((condition) => {
+      if (!condition.tab || !condition.field) return false;
+
+      if (
+        condition.operator !== "exists" &&
+        condition.operator !== "not_exists"
+      ) {
+        if (
+          !condition.value ||
+          (Array.isArray(condition.value) && condition.value.length === 0)
+        )
+          return false;
+      }
+
+      return true;
+    });
+  }, [conditions]);
+
+  const getApiConditions = useCallback(() => {
+    return conditions.map(({ id, ...rest }) => rest);
+  }, [conditions]);
+
+  return {
+    conditions,
+    conditionLogic,
+    setConditionLogic,
+    addCondition,
+    updateCondition,
+    removeCondition,
+    clearConditions,
+    loadConditions,
+    validateConditions,
+    getApiConditions,
+  };
+}
