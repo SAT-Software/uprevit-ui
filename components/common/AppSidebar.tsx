@@ -22,6 +22,7 @@ import {
   PiBookmarkSimpleDuotone,
   PiBookOpenDuotone,
   PiBuildingsDuotone,
+  PiPresentationChartDuotone,
   PiDatabaseDuotone,
   PiHouseDuotone,
   PiFolderOpenDuotone,
@@ -87,6 +88,16 @@ const data = {
           title: "Archive",
           url: "/archive",
           icon: PiArchiveDuotone,
+        },
+      ],
+    },
+    {
+      title: "Insights",
+      items: [
+        {
+          title: "Reports",
+          url: "/reports",
+          icon: PiPresentationChartDuotone,
         },
       ],
     },
