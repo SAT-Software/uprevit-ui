@@ -4,7 +4,8 @@ import { ReportsQueryRequest } from "@/types/reports";
 
 type ExportFormat = "pdf" | "excel";
 
-interface ExportRequest extends Omit<ReportsQueryRequest, "pagination"> {
+interface ExportRequest
+  extends Omit<ReportsQueryRequest, "pagination" | "workspaceId"> {
   format: ExportFormat;
 }
 

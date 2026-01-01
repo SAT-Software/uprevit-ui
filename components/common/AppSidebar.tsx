@@ -69,11 +69,6 @@ const data = {
           url: "/products",
           icon: PiPackageDuotone,
         },
-        {
-          title: "Reports",
-          url: "/reports",
-          icon: PiPresentationChartDuotone,
-        },
       ],
     },
     {
@@ -93,6 +88,16 @@ const data = {
           title: "Archive",
           url: "/archive",
           icon: PiArchiveDuotone,
+        },
+      ],
+    },
+    {
+      title: "Insights",
+      items: [
+        {
+          title: "Reports",
+          url: "/reports",
+          icon: PiPresentationChartDuotone,
         },
       ],
     },

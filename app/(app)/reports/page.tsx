@@ -96,7 +96,6 @@ export default function Page() {
     if (!validateConditions()) return;
     try {
       await exportPDF.mutateAsync({
-        workspaceId: "",
         conditions,
         conditionLogic,
       });
@@ -110,7 +109,6 @@ export default function Page() {
     if (!validateConditions()) return;
     try {
       await exportExcel.mutateAsync({
-        workspaceId: "",
         conditions,
         conditionLogic,
       });
@@ -222,7 +220,7 @@ export default function Page() {
                   results?.pagination || {
                     total: 0,
                     page: 1,
-                    limit: 20,
+                    limit: 10,
                     totalPages: 0,
                   }
                 }
