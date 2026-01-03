@@ -128,7 +128,7 @@ export default function Page() {
   const hasResults = results && results.products.length > 0;
 
   return (
-    <div className="container mx-auto p-2 space-y-2">
+    <div className="flex flex-col gap-2 p-2 h-full">
       <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export default function Page() {
           </div>
         </div>
 
-        <Card className="w-full h-full">
+        <Card className="w-full h-auto">
           <CardContent className="p-2 space-y-2">
             <QueryBuilder
               conditions={conditions}
