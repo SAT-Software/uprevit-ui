@@ -36,6 +36,7 @@ import {
   PiTagChevronDuotone,
   PiSquaresFourDuotone,
   PiDotsThreeOutlineVerticalDuotone,
+  PiChartBarDuotone,
 } from "react-icons/pi";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -98,6 +99,11 @@ const data = {
           title: "Reports",
           url: "/reports",
           icon: PiPresentationChartDuotone,
+        },
+        {
+          title: "Analytics",
+          url: "/analytics",
+          icon: PiChartBarDuotone,
         },
       ],
     },
