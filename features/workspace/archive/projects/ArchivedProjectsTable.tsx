@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
 import {
   ColumnDef,
   flexRender,
@@ -113,6 +115,17 @@ export function ArchivedProjectsTable({
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
+
+  const handleRestore = (item: ProjectArchiveRow) => {
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
+    onRestore(item);
+  };
 
   const columns: ColumnDef<ProjectArchiveRow>[] = useMemo(() => {
     return [
@@ -251,7 +264,7 @@ export function ArchivedProjectsTable({
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onRestore(row.original);
+                  handleRestore(row.original);
                 }}
               >
                 {isLoading ? (

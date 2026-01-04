@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
 import { useId, useMemo, useState } from "react";
 import { CircleAlert as CircleAlertIcon } from "lucide-react";
 
@@ -20,11 +22,6 @@ import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
 import { PiArchiveDuotone } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export type ArchiveEntityType = "project" | "department";
 
@@ -42,6 +39,9 @@ export default function DialogArchiveEntity({
   const inputId = useId();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
+
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
 
   // Prepare mutations
   const departmentArchive = useArchiveDepartment();
@@ -61,6 +61,10 @@ export default function DialogArchiveEntity({
   const disabled = value.trim() !== entityName.trim() || isPending;
 
   async function handleConfirm() {
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
     if (disabled) return;
     await mutateAsync(id);
     setOpen(false);
@@ -70,20 +74,20 @@ export default function DialogArchiveEntity({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="secondary" size="sm">
-              <PiArchiveDuotone />
-              Archive
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              Archive{" "}
-              {entityType.slice(0, 1).toUpperCase() + entityType.slice(1)}
-            </p>
-          </TooltipContent>
-        </Tooltip>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+            }
+          }}
+        >
+          <PiArchiveDuotone />
+          Archive
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <div className="flex flex-col items-start gap-2">

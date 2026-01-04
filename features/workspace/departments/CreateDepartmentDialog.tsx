@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
@@ -59,6 +60,7 @@ export default function CreateDepartmentDialog() {
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
+  const isAdmin = auth.user?.profile?.userType === "admin";
   const users = usersData?.data;
 
   const {
@@ -129,7 +131,18 @@ export default function CreateDepartmentDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="flex items-center gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+            }
+          }}
+        >
           <PiPlusCircleDuotone className="w-5 h-5" />
           Create Department
         </Button>

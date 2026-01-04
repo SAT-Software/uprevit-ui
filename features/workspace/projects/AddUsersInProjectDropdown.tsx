@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,6 +32,22 @@ export default function AddUsersInProjectDropdown({
   selectedUsers = [],
   users = [],
 }: AddUsersInProjectDropdownProps) {
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
+
+  const handleUserClick = (user: User) => {
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
+    const isSelected = selectedUsers.some((u) => u._id === user._id);
+    if (isSelected) {
+      onRemoveUser?.(user);
+    } else {
+      onAddUser(user);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,9 +62,7 @@ export default function AddUsersInProjectDropdown({
           return (
             <DropdownMenuItem
               key={user._id}
-              onClick={() =>
-                isSelected ? onRemoveUser?.(user) : onAddUser(user)
-              }
+              onClick={() => handleUserClick(user)}
               className="flex items-center justify-between gap-2"
             >
               <div className="flex items-center gap-2">

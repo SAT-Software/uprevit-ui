@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -78,6 +79,7 @@ export default function ProjectCreateDialog({
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
+  const isAdmin = auth.user?.profile?.userType === "admin";
 
   const departments = departmentsData?.result?.departments || [];
   const users = usersData?.data;
@@ -158,7 +160,18 @@ export default function ProjectCreateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="flex items-center gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+            }
+          }}
+        >
           <PiPlusCircleDuotone className="w-5 h-5" />
           Create Project
         </Button>
