@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useAuth } from "react-oidc-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,6 +42,9 @@ type InviteMembersFormValues = {
 };
 
 export function InviteMembersDialog() {
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
+
   const { mutate: inviteMembersMutation, isPending } =
     useInviteWorkspaceMembers();
 
@@ -81,7 +85,18 @@ export function InviteMembersDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2">
+        <Button
+          size="sm"
+          className="gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+              return;
+            }
+          }}
+        >
           <PiUserPlusDuotone className="w-4 h-4" />
           Invite Members
         </Button>

@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
 import { useId, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
@@ -75,6 +77,8 @@ export default function UpdateDepartmentDialog({
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { mutate: updateDepartment, isPending } = useUpdateDepartment();
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
 
   const {
     register,
@@ -146,6 +150,14 @@ export default function UpdateDepartmentDialog({
           variant="secondary"
           size="sm"
           className="flex items-center gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+              return;
+            }
+          }}
         >
           <PiPencilCircleDuotone className="w-4 h-4" />
           Update

@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
 import {
   ColumnDef,
   flexRender,
@@ -117,6 +119,17 @@ export function ArchivedDepartmentsTable({
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
+
+  const handleRestore = (item: DepartmentArchiveRow) => {
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
+    onRestore(item);
+  };
 
   const columns: ColumnDef<DepartmentArchiveRow>[] = useMemo(() => {
     return [
@@ -237,7 +250,7 @@ export function ArchivedDepartmentsTable({
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onRestore(row.original);
+                  handleRestore(row.original);
                 }}
               >
                 {isLoading ? (

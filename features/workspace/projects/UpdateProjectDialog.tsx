@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
 import { useEffect, useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
@@ -41,11 +43,6 @@ import {
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { Department } from "@/types/department";
 import { uploadFiles } from "@/utils/uploadthing";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface User {
   _id: string;
@@ -80,6 +77,8 @@ export default function UpdateProjectDialog({
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
+  const auth = useAuth();
+  const isAdmin = auth.user?.profile?.userType === "admin";
 
   type FormValues = {
     project_name: string;
@@ -157,21 +156,22 @@ export default function UpdateProjectDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <PiPencilCircleDuotone className="w-4 h-4" />
-              Update
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Update Project</p>
-          </TooltipContent>
-        </Tooltip>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+              return;
+            }
+          }}
+        >
+          <PiPencilCircleDuotone className="w-4 h-4" />
+          Update
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">

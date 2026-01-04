@@ -293,10 +293,10 @@ export function ProductHeader() {
         <SidebarTrigger className="text-muted-foreground hover:text-muted-foreground bg-muted" />
 
         <Separator orientation="vertical" className="h-4" />
-        {/* <p className="text-xs font-semibold text-muted-foreground">
+        <p className="text-sm font-semibold text-foreground">
           {product?.productName}
         </p>
-        <Separator orientation="vertical" className="h-4" /> */}
+        <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <Select
             onValueChange={(value) => {
