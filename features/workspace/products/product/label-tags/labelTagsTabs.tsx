@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
 import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
@@ -81,6 +81,13 @@ export default function LabelTagsTabs({
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<string | null>(null);
 
+  // Ref to track pending tab change from unsaved dialog (to be used after save completes)
+  const pendingTabChangeRef = useRef<string | null>(null);
+  // Ref to track if save is triggered from unsaved dialog
+  const isUnsavedFlowRef = useRef(false);
+  // Ref to prevent multiple handleRendered calls
+  const isRenderingRef = useRef(false);
+
   const { mutateAsync: updateLabelTaggedImage, isPending: isUpdating } =
     useUpdateLabelTaggedImage();
 
@@ -102,46 +109,73 @@ export default function LabelTagsTabs({
     });
   };
 
-  const handleRendered = async (dataUrl: string) => {
-    if (!pendingSave) return;
+  const handleRendered = useCallback(
+    async (dataUrl: string) => {
+      // Guard against multiple calls
+      if (!pendingSave || isRenderingRef.current) return;
+      isRenderingRef.current = true;
 
-    try {
-      setIsSaving(true);
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      const file = new File([blob], "tagged-image.png", { type: "image/png" });
+      try {
+        setIsSaving(true);
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "tagged-image.png", {
+          type: "image/png",
+        });
 
-      const utRes = await uploadFiles("imageUploader", { files: [file] });
-      const uploadedUrl = utRes?.[0]?.ufsUrl || "";
+        const utRes = await uploadFiles("imageUploader", { files: [file] });
+        const uploadedUrl = utRes?.[0]?.ufsUrl || "";
 
-      if (!uploadedUrl) {
-        throw new Error("Failed to get uploaded image URL");
+        if (!uploadedUrl) {
+          throw new Error("Failed to get uploaded image URL");
+        }
+
+        await updateLabelTaggedImage({
+          productId,
+          labelTagId: pendingSave.itemId,
+          taggedImage: uploadedUrl,
+          annotationState: pendingSave.annotation,
+        });
+
+        setSavedAnnotations((prev) => ({
+          ...prev,
+          [pendingSave.itemId]: pendingSave.annotation,
+        }));
+
+        // If triggered from unsaved dialog flow, close dialog and change tab now
+        if (isUnsavedFlowRef.current) {
+          setUnsavedDialogOpen(false);
+          if (pendingTabChangeRef.current) {
+            setActiveTab(pendingTabChangeRef.current);
+            setPendingTabChange(null);
+            pendingTabChangeRef.current = null;
+          }
+          isUnsavedFlowRef.current = false;
+        }
+
+        setPendingSave(null);
+        setSaveDialogOpen(false);
+      } catch (error) {
+        console.error("Failed to upload tagged image:", error);
+        toast.error("Failed to upload tagged image");
+
+        // Reset unsaved dialog flow state on error too
+        if (isUnsavedFlowRef.current) {
+          setUnsavedDialogOpen(false);
+          isUnsavedFlowRef.current = false;
+          pendingTabChangeRef.current = null;
+        }
+
+        setPendingSave(null);
+        setSaveDialogOpen(false);
+      } finally {
+        setIsSaving(false);
+        setRenderItem(null);
+        isRenderingRef.current = false;
       }
-
-      await updateLabelTaggedImage({
-        productId,
-        labelTagId: pendingSave.itemId,
-        taggedImage: uploadedUrl,
-        annotationState: pendingSave.annotation,
-      });
-
-      setSavedAnnotations((prev) => ({
-        ...prev,
-        [pendingSave.itemId]: pendingSave.annotation,
-      }));
-
-      setPendingSave(null);
-      setSaveDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to upload tagged image:", error);
-      toast.error("Failed to upload tagged image");
-      setPendingSave(null);
-      setSaveDialogOpen(false);
-    } finally {
-      setIsSaving(false);
-      setRenderItem(null);
-    }
-  };
+    },
+    [pendingSave, productId, updateLabelTaggedImage]
+  );
 
   const filteredLabelTypesForTabs: string[] = [
     ...new Set(
@@ -210,13 +244,27 @@ export default function LabelTagsTabs({
     );
     if (!currentState || !currentItem?.image) return;
 
-    handleSave(currentItemId, currentItem.image, currentState);
+    // Track that this is from unsaved dialog flow
+    isUnsavedFlowRef.current = true;
+    pendingTabChangeRef.current = pendingTabChange;
 
-    setUnsavedDialogOpen(false);
-    if (pendingTabChange) {
-      setActiveTab(pendingTabChange);
-      setPendingTabChange(null);
-    }
+    // Directly trigger save process without opening SaveTaggedImageDialog
+    // This mimics what handleSave + handleConfirmSave do together
+    const saveData = {
+      itemId: currentItemId,
+      itemImage: currentItem.image,
+      annotation: currentState,
+    };
+
+    setAnnotations((prev) => ({ ...prev, [currentItemId]: currentState }));
+    setPendingSave(saveData);
+    // Trigger the render directly (which will then call handleRendered)
+    setRenderItem({
+      id: currentItemId,
+      image: currentItem.image,
+    });
+
+    // DON'T close dialog or change tab here - wait for save to complete in handleRendered
   };
 
   const handleUnsavedDiscard = () => {

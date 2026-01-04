@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
   PiCloudArrowUpDuotone,
+  PiInfoDuotone,
   PiTrashDuotone,
   PiWarningDuotone,
   PiXCircleDuotone,
@@ -97,6 +98,23 @@ export default function UnsavedAnnotationDialog({
                 saving. What would you like to do?
               </p>
             </div>
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <PiInfoDuotone className="size-4 text-muted-foreground" />
+              <span className="text-muted-foreground font-medium">
+                If you save
+              </span>
+            </div>
+            <ul className="text-sm text-muted-foreground space-y-1 ml-6 list-disc">
+              <li>
+                It will <strong>replace</strong> any previous tagged image
+              </li>
+              <li>
+                The original label image will remain <strong>unchanged</strong>
+              </li>
+            </ul>
           </div>
         </div>
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 flex-col sm:flex-row gap-2">
