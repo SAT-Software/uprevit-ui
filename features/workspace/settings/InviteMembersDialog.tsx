@@ -82,19 +82,23 @@ export function InviteMembersDialog() {
     });
   }
 
+  const [open, setOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (newOpen && !isAdmin) {
+          toast.error("Insufficient privileges, contact Admin");
+          return;
+        }
+        setOpen(newOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           size="sm"
           className="gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
-            }
-          }}
         >
           <PiUserPlusDuotone className="w-4 h-4" />
           Invite Members

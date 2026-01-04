@@ -129,19 +129,21 @@ export default function CreateDepartmentDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (newOpen && !isAdmin) {
+          toast.error("Insufficient privileges, contact Admin");
+          return;
+        }
+        setOpen(newOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           variant="default"
           size="sm"
           className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
-            }
-          }}
         >
           <PiPlusCircleDuotone className="w-5 h-5" />
           Create Department

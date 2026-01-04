@@ -154,19 +154,21 @@ export default function UpdateProjectDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (newOpen && !isAdmin) {
+          toast.error("Insufficient privileges, contact Admin");
+          return;
+        }
+        setOpen(newOpen);
+      }}
+    >
       <DialogTrigger>
         <Button
           variant="secondary"
           size="sm"
           className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
-            }
-          }}
         >
           <PiPencilCircleDuotone className="w-4 h-4" />
           Update
