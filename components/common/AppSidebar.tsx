@@ -147,6 +147,11 @@ const productSubItems = [
     icon: PiMicrosoftExcelLogoDuotone,
   },
   {
+    title: "Product Data Table",
+    url: "/product-data-table",
+    icon: PiSquaresFourDuotone,
+  },
+  {
     title: "Operational Parameters",
     url: "/operational-parameters",
     icon: PiDatabaseDuotone,

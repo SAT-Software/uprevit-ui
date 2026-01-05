@@ -6,9 +6,11 @@ export default function ProductLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="flex flex-col h-full overflow-hidden">
       <ProductHeader />
-      <div className="flex flex-1 flex-col h-full bg-accent/60">{children}</div>
-    </>
+      <div className="flex flex-1 flex-col min-h-0 bg-accent/60">
+        {children}
+      </div>
+    </div>
   );
 }
