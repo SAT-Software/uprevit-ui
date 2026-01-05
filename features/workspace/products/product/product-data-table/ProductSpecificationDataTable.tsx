@@ -1,7 +1,7 @@
 "use client";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -21,6 +21,27 @@ function getColumnName(index: number): string {
 
 export function ProductSpecificationDataTable() {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<Record<string, string>>({});
+  const [activeCell, setActiveCell] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (!activeCell) return;
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    const rows = text.split("\n").map((r) => r.split("\t"));
+    setData((d) => {
+      const updated = { ...d };
+      rows.forEach((cols, ri) => {
+        cols.forEach((val, ci) => {
+          updated[`${activeCell.row + ri},${activeCell.col + ci}`] = val;
+        });
+      });
+      return updated;
+    });
+  };
 
   useEffect(() => {
     const el = parentRef.current;
@@ -129,15 +150,26 @@ export function ProductSpecificationDataTable() {
               style={{ width: colVirtualizer.getTotalSize(), height: row.size }}
             >
               {colVirtualizer.getVirtualItems().map((col) => (
-                <div
+                <input
                   key={col.key}
-                  className="border-r border-b border-border"
+                  className="border-r border-b border-border outline-none px-2 text-sm"
                   style={{
                     position: "absolute",
                     left: col.start,
                     width: col.size,
                     height: row.size,
                   }}
+                  value={data[`${row.index},${col.index}`] ?? ""}
+                  onChange={(e) =>
+                    setData((d) => ({
+                      ...d,
+                      [`${row.index},${col.index}`]: e.target.value,
+                    }))
+                  }
+                  onFocus={() =>
+                    setActiveCell({ row: row.index, col: col.index })
+                  }
+                  onPaste={handlePaste}
                 />
               ))}
             </div>
