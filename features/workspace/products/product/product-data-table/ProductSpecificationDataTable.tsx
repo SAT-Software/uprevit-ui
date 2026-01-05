@@ -7,6 +7,7 @@ const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
 const COL_WIDTH = 120;
 const ROW_HEIGHT = 34;
+const ROW_NUMBER_WIDTH = 50;
 
 function getColumnName(index: number): string {
   let name = "";
@@ -63,28 +64,42 @@ export function ProductSpecificationDataTable() {
       <div
         style={{
           height: rowVirtualizer.getTotalSize() + ROW_HEIGHT,
-          width: colVirtualizer.getTotalSize(),
+          width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
           position: "relative",
         }}
       >
         <div
-          className="sticky top-0 z-10 bg-muted flex"
-          style={{ height: ROW_HEIGHT, width: colVirtualizer.getTotalSize() }}
+          className="sticky top-0 z-20 bg-muted flex"
+          style={{ height: ROW_HEIGHT }}
         >
-          {colVirtualizer.getVirtualItems().map((col) => (
-            <div
-              key={col.key}
-              className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-              style={{
-                position: "absolute",
-                left: col.start,
-                width: col.size,
-                height: ROW_HEIGHT,
-              }}
-            >
-              {getColumnName(col.index)}
-            </div>
-          ))}
+          <div
+            className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+            style={{
+              width: ROW_NUMBER_WIDTH,
+              height: ROW_HEIGHT,
+              minWidth: ROW_NUMBER_WIDTH,
+            }}
+          ></div>
+
+          <div
+            className="relative"
+            style={{ width: colVirtualizer.getTotalSize(), height: ROW_HEIGHT }}
+          >
+            {colVirtualizer.getVirtualItems().map((col) => (
+              <div
+                key={col.key}
+                className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted"
+                style={{
+                  position: "absolute",
+                  left: col.start,
+                  width: col.size,
+                  height: ROW_HEIGHT,
+                }}
+              >
+                {getColumnName(col.index)}
+              </div>
+            ))}
+          </div>
         </div>
 
         {rowVirtualizer.getVirtualItems().map((row) => (
@@ -95,21 +110,37 @@ export function ProductSpecificationDataTable() {
               position: "absolute",
               top: row.start + ROW_HEIGHT,
               height: row.size,
-              width: colVirtualizer.getTotalSize(),
+              width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
             }}
           >
-            {colVirtualizer.getVirtualItems().map((col) => (
-              <div
-                key={col.key}
-                className="border-r border-b border-border"
-                style={{
-                  position: "absolute",
-                  left: col.start,
-                  width: col.size,
-                  height: row.size,
-                }}
-              />
-            ))}
+            <div
+              className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+              style={{
+                width: ROW_NUMBER_WIDTH,
+                minWidth: ROW_NUMBER_WIDTH,
+                height: row.size,
+              }}
+            >
+              {row.index + 1}
+            </div>
+
+            <div
+              className="relative"
+              style={{ width: colVirtualizer.getTotalSize(), height: row.size }}
+            >
+              {colVirtualizer.getVirtualItems().map((col) => (
+                <div
+                  key={col.key}
+                  className="border-r border-b border-border"
+                  style={{
+                    position: "absolute",
+                    left: col.start,
+                    width: col.size,
+                    height: row.size,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         ))}
       </div>
