@@ -22,10 +22,10 @@ export function MainContentWrapper({ children }: MainContentWrapperProps) {
   return (
     <div
       className={cn(
-        "flex flex-1 flex-col bg-sidebar h-full",
+        "flex flex-1 flex-col bg-sidebar min-h-0 overflow-hidden",
         // Dynamic top padding based on header height
         isProductPage
-          ? "pt-0 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-0 gap-0"
+          ? "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-0"
           : "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-2"
       )}
     >

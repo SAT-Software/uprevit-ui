@@ -285,7 +285,13 @@ export function ProductHeader() {
   return (
     <header
       className={cn(
-        "flex w-full shrink-0 flex-wrap items-center justify-between gap-3 border-b border-input px-2 py-2 transition-[width,height] ease-linear md:flex-nowrap md:py-0",
+        "fixed top-0 z-50 bg-muted flex w-full shrink-0 flex-wrap items-center justify-between gap-3 border-b border-input px-2 py-2 transition-[width,height,left] ease-linear duration-200 md:flex-nowrap md:py-0",
+        // Width and positioning that accounts for sidebar
+        "left-0 right-0",
+        "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",
+        "md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:left-[var(--sidebar-width-icon)] md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:w-[calc(100%-var(--sidebar-width-icon))]",
+        "md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:left-0 md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:w-full",
+        // Height
         "md:h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
       )}
     >
