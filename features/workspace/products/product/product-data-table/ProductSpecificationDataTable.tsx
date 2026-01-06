@@ -2,6 +2,7 @@
 
 import {
   type ColumnDef,
+  type ColumnSizingState,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -14,6 +15,8 @@ const ROW_COUNT = 5000;
 const COL_WIDTH = 120;
 const ROW_HEIGHT = 34;
 const ROW_NUMBER_WIDTH = 50;
+const MIN_COL_WIDTH = 50;
+const MAX_COL_WIDTH = 500;
 
 function getColumnName(index: number): string {
   let name = "";
@@ -32,6 +35,7 @@ export function ProductSpecificationDataTable() {
     row: number;
     col: number;
   } | null>(null);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
 
   const rows: { rowIndex: number }[] = useMemo(() => {
     return Array.from({ length: ROW_COUNT }, (_, i) => ({
@@ -44,6 +48,8 @@ export function ProductSpecificationDataTable() {
       id: `col-${colIndex}`,
       header: () => getColumnName(colIndex),
       size: COL_WIDTH,
+      minSize: MIN_COL_WIDTH,
+      maxSize: MAX_COL_WIDTH,
     }));
   }, []);
 
@@ -51,7 +57,18 @@ export function ProductSpecificationDataTable() {
     data: rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    columnResizeDirection: "ltr",
+    state: {
+      columnSizing,
+    },
+    onColumnSizingChange: setColumnSizing,
   });
+
+  const columnSizes = useMemo(() => {
+    return table.getVisibleLeafColumns().map((col) => col.getSize());
+  }, [table.getState().columnSizing]);
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent, rowIndex: number, colIndex: number) => {
@@ -104,12 +121,17 @@ export function ProductSpecificationDataTable() {
   const colVirtualizer = useVirtualizer({
     count: visibleColumns.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => visibleColumns[index]?.getSize() ?? COL_WIDTH,
+    estimateSize: (index) => columnSizes[index] ?? COL_WIDTH,
     horizontal: true,
     overscan: 5,
   });
 
+  useEffect(() => {
+    colVirtualizer.measure();
+  }, [columnSizes]);
+
   const headerGroup = table.getHeaderGroups()[0];
+  const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
 
   return (
     <div
@@ -119,7 +141,7 @@ export function ProductSpecificationDataTable() {
       <table
         style={{
           height: rowVirtualizer.getTotalSize() + ROW_HEIGHT,
-          width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
+          width: totalColumnWidth + ROW_NUMBER_WIDTH,
           position: "relative",
         }}
       >
@@ -138,7 +160,7 @@ export function ProductSpecificationDataTable() {
 
           <tr
             className="relative"
-            style={{ width: colVirtualizer.getTotalSize(), height: ROW_HEIGHT }}
+            style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
           >
             {colVirtualizer.getVirtualItems().map((virtualCol) => {
               const header = headerGroup?.headers[virtualCol.index];
@@ -147,17 +169,33 @@ export function ProductSpecificationDataTable() {
               return (
                 <div
                   key={header.id}
-                  className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted"
+                  className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
                   style={{
                     position: "absolute",
                     left: virtualCol.start,
-                    width: header.getSize(),
+                    width: virtualCol.size,
                     height: ROW_HEIGHT,
                   }}
                 >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
+                  )}
+
+                  {header.column.getCanResize() && (
+                    <div
+                      onMouseDown={header.getResizeHandler()}
+                      onTouchStart={header.getResizeHandler()}
+                      onDoubleClick={() => header.column.resetSize()}
+                      className={`absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none ${
+                        header.column.getIsResizing()
+                          ? "bg-primary"
+                          : "bg-transparent hover:bg-primary/50"
+                      }`}
+                      style={{
+                        transform: "translateX(50%)",
+                      }}
+                    />
                   )}
                 </div>
               );
@@ -178,7 +216,7 @@ export function ProductSpecificationDataTable() {
                 position: "absolute",
                 top: virtualRow.start + ROW_HEIGHT,
                 height: virtualRow.size,
-                width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
+                width: totalColumnWidth + ROW_NUMBER_WIDTH,
               }}
             >
               <div
@@ -195,7 +233,7 @@ export function ProductSpecificationDataTable() {
               <tr
                 className="relative"
                 style={{
-                  width: colVirtualizer.getTotalSize(),
+                  width: totalColumnWidth,
                   height: virtualRow.size,
                 }}
               >
