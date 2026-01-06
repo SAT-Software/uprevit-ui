@@ -30,6 +30,7 @@ import {
   PiFloppyDiskDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type FormData = {
   name: string;
@@ -238,7 +239,11 @@ export default function DialogEditLabelTag({
             disabled={uploadingImage || isPending}
             aria-busy={uploadingImage || isPending}
           >
-            <PiFloppyDiskDuotone />
+            {uploadingImage || isPending ? (
+              <Spinner />
+            ) : (
+              <PiFloppyDiskDuotone />
+            )}
             {uploadingImage
               ? "Uploading..."
               : isPending

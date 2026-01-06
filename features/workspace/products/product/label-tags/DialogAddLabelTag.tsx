@@ -30,6 +30,7 @@ import {
   PiTagDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type FormData = {
   name: string;
@@ -228,7 +229,11 @@ export default function DialogAddLabelTag({
             disabled={uploadingImage || isPending}
             aria-busy={uploadingImage || isPending}
           >
-            <PiPlusCircleDuotone />
+            {uploadingImage || isPending ? (
+              <Spinner />
+            ) : (
+              <PiPlusCircleDuotone />
+            )}
             {uploadingImage
               ? "Uploading..."
               : isPending

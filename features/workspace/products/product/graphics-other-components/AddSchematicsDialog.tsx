@@ -30,6 +30,7 @@ import {
   PiXCircleDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type FormData = {
   componentName: string;
@@ -227,10 +228,14 @@ export default function AddSchematicsDialog({
             type="button"
             size="sm"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={isPending || uploadingImage}
             variant="default"
           >
-            <PiPlusCircleDuotone />
+            {isPending || uploadingImage ? (
+              <Spinner />
+            ) : (
+              <PiPlusCircleDuotone />
+            )}
             {isPending
               ? "Adding..."
               : uploadingImage
