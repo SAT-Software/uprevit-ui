@@ -1,14 +1,22 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   type ColumnDef,
   type ColumnSizingState,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+} from "react-icons/pi";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -28,14 +36,51 @@ function getColumnName(index: number): string {
   return name;
 }
 
+const EditableHeader = ({ column, table }: { column: any; table: any }) => {
+  const colIndex = parseInt(column.id.split("-")[1]);
+  const meta = table.options.meta as {
+    headerData: Record<number, string>;
+    setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  };
+
+  return (
+    <div className="flex items-center w-full h-full gap-1 px-1">
+      <input
+        className="flex-1 min-w-0 bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground"
+        value={meta.headerData[colIndex] ?? ""}
+        onChange={(e) =>
+          meta.setHeaderData((d) => ({ ...d, [colIndex]: e.target.value }))
+        }
+        placeholder={`Column ${colIndex + 1}`}
+      />
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="shrink-0 hover:bg-accent-foreground/10 rounded size-6"
+      >
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="h-2 w-2" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="h-2 w-2" />
+        ) : (
+          <PiCaretUpDownDuotone className="h-2 w-2 opacity-50" />
+        )}
+      </Button>
+    </div>
+  );
+};
+
 export function ProductSpecificationDataTable() {
   const parentRef = useRef<HTMLDivElement>(null);
   const [cellData, setCellData] = useState<Record<string, string>>({});
+  const [headerData, setHeaderData] = useState<Record<number, string>>({});
   const [activeCell, setActiveCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const rows: { rowIndex: number }[] = useMemo(() => {
     return Array.from({ length: ROW_COUNT }, (_, i) => ({
@@ -46,7 +91,9 @@ export function ProductSpecificationDataTable() {
   const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
     return Array.from({ length: COLUMN_COUNT }, (_, colIndex) => ({
       id: `col-${colIndex}`,
-      header: () => getColumnName(colIndex),
+      header: ({ column, table }) => (
+        <EditableHeader column={column} table={table} />
+      ),
       size: COL_WIDTH,
       minSize: MIN_COL_WIDTH,
       maxSize: MAX_COL_WIDTH,
@@ -60,8 +107,15 @@ export function ProductSpecificationDataTable() {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     columnResizeDirection: "ltr",
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    meta: {
+      headerData,
+      setHeaderData,
+    },
     state: {
       columnSizing,
+      sorting,
     },
     onColumnSizingChange: setColumnSizing,
   });
@@ -156,7 +210,9 @@ export function ProductSpecificationDataTable() {
               height: ROW_HEIGHT,
               minWidth: ROW_NUMBER_WIDTH,
             }}
-          />
+          >
+            1
+          </div>
 
           <tr
             className="relative"
@@ -227,7 +283,7 @@ export function ProductSpecificationDataTable() {
                   height: virtualRow.size,
                 }}
               >
-                {rowIndex + 1}
+                {rowIndex + 2}
               </div>
 
               <tr
