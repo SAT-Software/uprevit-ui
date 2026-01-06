@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, Plus, X } from "lucide-react";
+import { PiFunnelDuotone, PiPlusDuotone, PiXDuotone } from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,7 +178,7 @@ export default function SourceFilesTableFilter({
           size="sm"
           className="text-xs"
         >
-          <Filter
+          <PiFunnelDuotone
             className={cn(
               "h-2 w-2 mr-1",
               table.getState().columnFilters.length > 0
@@ -288,7 +288,7 @@ export default function SourceFilesTableFilter({
                     onClick={() => handleRemoveFilter(filter.id)}
                     className="p-0"
                   >
-                    <X className="h-4 w-4" />
+                    <PiXDuotone className="h-4 w-4" />
                     <span className="sr-only">Remove filter</span>
                   </Button>
                 </div>
@@ -306,7 +306,7 @@ export default function SourceFilesTableFilter({
             className="text-xs"
             onClick={handleAddFilter}
           >
-            <Plus className="h-4 w-4" />
+            <PiPlusDuotone className="h-4 w-4" />
             Add filter
           </Button>
           <Button

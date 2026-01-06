@@ -16,24 +16,14 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import {
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  Columns3Icon,
-  EllipsisIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
-import {
   PiBuildingsDuotone,
   PiCaretCircleDoubleLeftDuotone,
   PiCaretCircleDoubleRightDuotone,
   PiCaretCircleLeftDuotone,
   PiCaretCircleRightDuotone,
   PiCaretDownDuotone,
+  PiCaretLeftDuotone,
+  PiCaretRightDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiChartPieSliceDuotone,
@@ -49,6 +39,8 @@ import {
   PiKanbanDuotone,
   PiPackageDuotone,
 } from "react-icons/pi";
+import { useRouter } from "next/navigation";
+import { useId, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 
 import { Badge } from "@/components/ui/badge";

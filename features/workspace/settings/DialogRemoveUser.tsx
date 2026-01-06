@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { UserX } from "lucide-react";
+import { PiUserMinusDuotone } from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +49,7 @@ export default function DialogRemoveUser({
             className="flex size-9 shrink-0 items-center justify-center rounded-full border"
             aria-hidden="true"
           >
-            <UserX className="opacity-80" size={16} />
+            <PiUserMinusDuotone className="opacity-80" size={16} />
           </div>
           <DialogHeader>
             <DialogTitle className="sm:text-center">Remove User</DialogTitle>

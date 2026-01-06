@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ImagePlusIcon, XIcon } from "lucide-react";
+import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
@@ -374,7 +374,7 @@ function ProfileBg({
             onClick={openFileDialog}
             aria-label={currentImage ? "Change image" : "Upload image"}
           >
-            <ImagePlusIcon size={16} aria-hidden="true" />
+            <PiPlusSquareDuotone size={16} aria-hidden="true" />
           </button>
           {currentImage && (
             <button
@@ -383,7 +383,7 @@ function ProfileBg({
               onClick={() => removeFile(files[0]?.id)}
               aria-label="Remove image"
             >
-              <XIcon size={16} aria-hidden="true" />
+              <PiXDuotone size={16} aria-hidden="true" />
             </button>
           )}
         </div>

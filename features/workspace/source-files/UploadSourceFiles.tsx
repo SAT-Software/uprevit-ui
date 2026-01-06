@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  AlertCircleIcon,
-  FileArchiveIcon,
-  FileIcon,
-  FileSpreadsheetIcon,
-  FileTextIcon,
-  FileUpIcon,
-  HeadphonesIcon,
-  ImageIcon,
-  VideoIcon,
-  XIcon,
-} from "lucide-react";
+  PiFileArchiveDuotone,
+  PiFileDuotone,
+  PiFileTextDuotone,
+  PiHeadphonesDuotone,
+  PiImageDuotone,
+  PiTableDuotone,
+  PiUploadSimpleDuotone,
+  PiVideoDuotone,
+  PiWarningCircleDuotone,
+  PiXDuotone,
+} from "react-icons/pi";
 
 import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
@@ -53,28 +53,28 @@ const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
     fileName.endsWith(".doc") ||
     fileName.endsWith(".docx")
   ) {
-    return <FileTextIcon className="size-4 opacity-60" />;
+    return <PiFileTextDuotone className="size-4 opacity-60" />;
   } else if (
     fileType.includes("zip") ||
     fileType.includes("archive") ||
     fileName.endsWith(".zip") ||
     fileName.endsWith(".rar")
   ) {
-    return <FileArchiveIcon className="size-4 opacity-60" />;
+    return <PiFileArchiveDuotone className="size-4 opacity-60" />;
   } else if (
     fileType.includes("excel") ||
     fileName.endsWith(".xls") ||
     fileName.endsWith(".xlsx")
   ) {
-    return <FileSpreadsheetIcon className="size-4 opacity-60" />;
+    return <PiTableDuotone className="size-4 opacity-60" />;
   } else if (fileType.includes("video/")) {
-    return <VideoIcon className="size-4 opacity-60" />;
+    return <PiVideoDuotone className="size-4 opacity-60" />;
   } else if (fileType.includes("audio/")) {
-    return <HeadphonesIcon className="size-4 opacity-60" />;
+    return <PiHeadphonesDuotone className="size-4 opacity-60" />;
   } else if (fileType.startsWith("image/")) {
-    return <ImageIcon className="size-4 opacity-60" />;
+    return <PiImageDuotone className="size-4 opacity-60" />;
   }
-  return <FileIcon className="size-4 opacity-60" />;
+  return <PiFileDuotone className="size-4 opacity-60" />;
 };
 
 type UploadSourceFilesProps = {
@@ -146,7 +146,7 @@ export default function Component({
             className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border"
             aria-hidden="true"
           >
-            <FileUpIcon className="size-4 opacity-60" />
+            <PiUploadSimpleDuotone className="size-4 opacity-60" />
           </div>
           <p className="mb-1.5 text-sm font-medium">Upload files</p>
           <p className="text-muted-foreground mb-2 text-xs">
@@ -167,7 +167,7 @@ export default function Component({
           className="text-destructive flex items-center gap-1 text-xs"
           role="alert"
         >
-          <AlertCircleIcon className="size-3 shrink-0" />
+          <PiWarningCircleDuotone className="size-3 shrink-0" />
           <span>{errors[0]}</span>
         </div>
       )}
@@ -209,7 +209,7 @@ export default function Component({
                 onClick={() => removeFile(file.id)}
                 aria-label="Remove file"
               >
-                <XIcon className="size-4" aria-hidden="true" />
+                <PiXDuotone className="size-4" aria-hidden="true" />
               </Button>
             </div>
           ))}

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FolderIcon } from "lucide-react";
-import { PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
+import { PiFolderSimpleDuotone, PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { useAuth } from "react-oidc-context";
@@ -43,7 +42,7 @@ function SourceFilesFoldersCard({ folders }: SourceFilesFoldersCardProps) {
                 <CardContent className="p-2 flex flex-row items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center">
-                      <FolderIcon className="w-6 h-6 text-muted-foreground" />
+                      <PiFolderSimpleDuotone className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm leading-tight line-clamp-2">
