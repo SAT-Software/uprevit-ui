@@ -19,7 +19,7 @@ import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFi
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { cn } from "@/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
-import { BookmarkIcon, FolderIcon } from "lucide-react";
+import { PiFolderSimpleDuotone } from "react-icons/pi";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -221,7 +221,7 @@ export default function ProductSourceFilesPage() {
         <div className="flex flex-wrap gap-2 items-center w-full justify-between p-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-              <FolderIcon className="w-4 h-4 text-muted-foreground" />
+              <PiFolderSimpleDuotone className="w-4 h-4 text-muted-foreground" />
             </div>
             <h1 className="text-base font-semibold">{currentFolder?.name}</h1>
             <div
@@ -282,7 +282,7 @@ export default function ProductSourceFilesPage() {
             {folder?.length === 0 ? (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4 text-muted-foreground">
-                  <FolderIcon className="w-16 h-16" />
+                  <PiFolderSimpleDuotone className="w-16 h-16" />
                   <p className="text-lg">No source files uploaded yet</p>
                   <p className="text-sm">
                     Upload your first source file to get started
@@ -323,7 +323,7 @@ export default function ProductSourceFilesPage() {
                               <CardContent className="p-2 flex flex-row items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                   <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center">
-                                    <FolderIcon className="w-6 h-6 text-muted-foreground" />
+                                    <PiFolderSimpleDuotone className="w-6 h-6 text-muted-foreground" />
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <p className="font-medium text-sm leading-tight line-clamp-2">

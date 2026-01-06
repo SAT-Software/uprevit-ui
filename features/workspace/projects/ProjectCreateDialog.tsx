@@ -29,7 +29,7 @@ import { useCreateProject } from "@/hooks/project/useCreateProject";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Department } from "@/types/department";
 import { uploadFiles } from "@/utils/uploadthing";
-import { ImagePlusIcon, XIcon } from "lucide-react";
+import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -441,7 +441,7 @@ function ProfileBg({
             onClick={openFileDialog}
             aria-label={currentImage ? "Change image" : "Upload image"}
           >
-            <ImagePlusIcon size={16} aria-hidden="true" />
+            <PiPlusSquareDuotone size={16} aria-hidden="true" />
           </button>
           {currentImage && (
             <button
@@ -450,7 +450,7 @@ function ProfileBg({
               onClick={() => removeFile(files[0]?.id)}
               aria-label="Remove image"
             >
-              <XIcon size={16} aria-hidden="true" />
+              <PiXDuotone size={16} aria-hidden="true" />
             </button>
           )}
         </div>

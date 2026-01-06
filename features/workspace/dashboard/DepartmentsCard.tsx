@@ -1,4 +1,4 @@
-import { CalendarClock, Text } from "lucide-react";
+import { PiCalendarCheckDuotone, PiTextTDuotone } from "react-icons/pi";
 import Image from "next/image";
 import Link from "next/link";
 import { PiBuildingsDuotone } from "react-icons/pi";
@@ -37,7 +37,7 @@ function Departments({ departments }: { departments: DepartmentsProps[] }) {
                 </p>
                 <p className="flex items-start gap-1 text-xs text-muted-foreground">
                   <span>
-                    <Text className="mr-1 w-4 h-4" />
+                    <PiTextTDuotone className="mr-1 w-4 h-4" />
                   </span>
                   {department.department_description}
                 </p>
@@ -45,7 +45,7 @@ function Departments({ departments }: { departments: DepartmentsProps[] }) {
               <div className="flex flex-wrap items-center justify-between w-full gap-4">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <span>
-                    <CalendarClock className="mr-1 w-4 h-4" />
+                    <PiCalendarCheckDuotone className="mr-1 w-4 h-4" />
                   </span>
                   <p className="text-xs text-muted-foreground">
                     {department.date}

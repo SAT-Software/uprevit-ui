@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, useEffect } from "react";
-import { ImagePlusIcon, XIcon } from "lucide-react";
+import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
   useFileUpload,
@@ -364,7 +364,7 @@ function ComponentImage({
             onClick={openFileDialog}
             aria-label={displayImage ? "Change image" : "Upload image"}
           >
-            <ImagePlusIcon size={16} aria-hidden="true" />
+            <PiPlusSquareDuotone size={16} aria-hidden="true" />
           </button>
           {displayImage && (
             <button
@@ -382,7 +382,7 @@ function ComponentImage({
               }}
               aria-label="Remove image"
             >
-              <XIcon size={16} aria-hidden="true" />
+              <PiXDuotone size={16} aria-hidden="true" />
             </button>
           )}
         </div>

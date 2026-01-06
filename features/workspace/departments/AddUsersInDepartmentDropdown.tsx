@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PiPlusBold, PiUserCirclePlusDuotone } from "react-icons/pi";
-import { X } from "lucide-react";
+import { PiXBold } from "react-icons/pi";
 import Image from "next/image";
 
 interface User {
@@ -82,7 +82,7 @@ export default function AddUsersInDepartmentDropdown({
                 {user.name}
               </div>
               {isSelected && (
-                <X className="size-4 text-muted-foreground hover:text-destructive" />
+                <PiXBold className="size-4 text-muted-foreground hover:text-destructive" />
               )}
             </DropdownMenuItem>
           );
