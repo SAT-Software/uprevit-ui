@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "react-oidc-context";
-import { BookmarkIcon, FolderIcon } from "lucide-react";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
@@ -9,7 +8,7 @@ import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files
 import { SourceFilesFolder } from "@/types/source-files";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PiWarningCircleDuotone } from "react-icons/pi";
+import { PiBookmarkSimpleDuotone, PiFolderSimpleDuotone, PiWarningCircleDuotone } from "react-icons/pi";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
@@ -22,7 +21,7 @@ function FolderLoadingCard() {
       <Card className="shadow-none border-border w-full">
         <CardContent className="p-4 flex flex-row items-center gap-3">
           <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center animate-pulse">
-            <FolderIcon className="w-10 h-10 text-muted-foreground/30" />
+            <PiFolderSimpleDuotone className="w-10 h-10 text-muted-foreground/30" />
           </div>
           <div className="min-w-0 flex-1 space-y-2">
             <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
@@ -188,7 +187,7 @@ function SourceFilesPage() {
             </div>
             {sourceFilesFolders.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[200px] gap-4 text-muted-foreground">
-                <BookmarkIcon className="w-16 h-16" />
+                <PiBookmarkSimpleDuotone className="w-16 h-16" />
                 <p className="text-lg">No folders created yet.</p>
                 <p className="text-sm">Create a new folder to get started.</p>
               </div>

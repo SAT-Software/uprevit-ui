@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { useId, useMemo, useState } from "react";
-import { CircleAlert as CircleAlertIcon } from "lucide-react";
+import { PiWarningCircleDuotone } from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -96,7 +96,7 @@ export default function DialogArchiveEntity({
             className="flex size-9 shrink-0 items-center justify-center rounded-full border"
             aria-hidden="true"
           >
-            <CircleAlertIcon className="opacity-80" size={16} />
+            <PiWarningCircleDuotone className="opacity-80" size={16} />
           </div>
           <DialogHeader>
             <DialogTitle className="sm:text-center">

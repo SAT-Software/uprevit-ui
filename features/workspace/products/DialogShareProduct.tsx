@@ -1,4 +1,4 @@
-import { LinkIcon, CopyIcon, CheckIcon } from "lucide-react";
+import { PiLinkDuotone, PiCopyDuotone, PiCheckDuotone } from "react-icons/pi";
 import { PiShareNetworkDuotone, PiXCircleDuotone } from "react-icons/pi";
 import { useState, useMemo } from "react";
 
@@ -80,18 +80,18 @@ export default function DialogShareProduct({
                 className="pl-10"
               />
               <InputGroupAddon>
-                <LinkIcon size={16} />
+                <PiLinkDuotone size={16} />
               </InputGroupAddon>
             </InputGroup>
             <Button size="sm" onClick={handleCopyLink} className="shrink-0">
               {copied ? (
                 <>
-                  <CheckIcon size={16} className="mr-1" />
+                  <PiCheckDuotone size={16} className="mr-1" />
                   Copied
                 </>
               ) : (
                 <>
-                  <CopyIcon size={16} className="mr-1" />
+                  <PiCopyDuotone size={16} className="mr-1" />
                   Copy
                 </>
               )}

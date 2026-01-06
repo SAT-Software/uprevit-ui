@@ -13,11 +13,25 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  EllipsisIcon,
-  LayoutList,
-} from "lucide-react";
+  PiCaretCircleDoubleLeftDuotone,
+  PiCaretCircleDoubleRightDuotone,
+  PiCaretCircleDownDuotone,
+  PiCaretCircleLeftDuotone,
+  PiCaretCircleRightDuotone,
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+  PiCirclesFourDuotone,
+  PiDotsThreeCircleDuotone,
+  PiHashDuotone,
+  PiImageDuotone,
+  PiLayoutDuotone,
+  PiPencilSimpleDuotone,
+  PiRulerDuotone,
+  PiTagDuotone,
+  PiTextAlignLeftDuotone,
+  PiTrashDuotone,
+} from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
 import { Fragment, useId, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -53,25 +67,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
-import {
-  PiPencilSimpleDuotone,
-  PiTrashDuotone,
-  PiHashDuotone,
-  PiImageDuotone,
-  PiTagDuotone,
-  PiTextAlignLeftDuotone,
-  PiRulerDuotone,
-  PiCirclesFourDuotone,
-  PiCaretDownDuotone,
-  PiCaretUpDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleDownDuotone,
-  PiDotsThreeCircleDuotone,
-} from "react-icons/pi";
 import EditComponentDialog from "./EditComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 

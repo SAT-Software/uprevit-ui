@@ -1,4 +1,4 @@
-import { BookmarkIcon, CheckIcon } from "lucide-react";
+import { PiBookmarkSimpleDuotone, PiCheckDuotone } from "react-icons/pi";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,7 @@ export default function DialogBookmarkSourceFileProductFolder({
     <DialogContent className="max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
-          <BookmarkIcon size={20} />
+          <PiBookmarkSimpleDuotone size={20} />
           Bookmark Product Folders
         </DialogTitle>
         <DialogDescription>
@@ -155,7 +155,7 @@ export default function DialogBookmarkSourceFileProductFolder({
                           </div>
                         </div>
                         {isSelected && (
-                          <CheckIcon
+                          <PiCheckDuotone
                             size={16}
                             className="text-primary flex-shrink-0 ml-2"
                           />
@@ -216,7 +216,7 @@ export default function DialogBookmarkSourceFileProductFolder({
       <DialogTrigger asChild>
         {children || (
           <Button variant="outline" className="flex items-center gap-2">
-            <BookmarkIcon size={16} />
+            <PiBookmarkSimpleDuotone size={16} />
             Bookmark Products
           </Button>
         )}

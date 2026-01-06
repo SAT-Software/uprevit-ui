@@ -16,15 +16,15 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import {
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  Columns3Icon,
-  EllipsisIcon,
-} from "lucide-react";
+  PiCaretDownDuotone,
+  PiCaretDoubleLeftDuotone,
+  PiCaretDoubleRightDuotone,
+  PiCaretLeftDuotone,
+  PiCaretRightDuotone,
+  PiCaretUpDuotone,
+  PiColumnsDuotone,
+  PiDotsThreeDuotone,
+} from "react-icons/pi";
 import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -290,7 +290,7 @@ export default function SourceFilesTable({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="text-xs">
-                <Columns3Icon
+                <PiColumnsDuotone
                   className="-ms-1 text-muted-foreground"
                   size={14}
                   aria-hidden="true"
@@ -361,14 +361,14 @@ export default function SourceFilesTable({
                           )}
                           {{
                             asc: (
-                              <ChevronUpIcon
+                              <PiCaretUpDuotone
                                 className="shrink-0 opacity-60"
                                 size={16}
                                 aria-hidden="true"
                               />
                             ),
                             desc: (
-                              <ChevronDownIcon
+                              <PiCaretDownDuotone
                                 className="shrink-0 opacity-60"
                                 size={16}
                                 aria-hidden="true"
@@ -492,7 +492,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to first page"
                 >
-                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                  <PiCaretDoubleLeftDuotone size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Previous page button */}
@@ -505,7 +505,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to previous page"
                 >
-                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                  <PiCaretLeftDuotone size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Next page button */}
@@ -518,7 +518,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to next page"
                 >
-                  <ChevronRightIcon size={16} aria-hidden="true" />
+                  <PiCaretRightDuotone size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Last page button */}
@@ -531,7 +531,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to last page"
                 >
-                  <ChevronLastIcon size={16} aria-hidden="true" />
+                  <PiCaretDoubleRightDuotone size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
             </PaginationContent>
@@ -555,7 +555,7 @@ function RowActions() {
             aria-label="Edit item"
             onClick={(e) => e.stopPropagation()}
           >
-            <EllipsisIcon size={16} aria-hidden="true" />
+            <PiDotsThreeDuotone size={16} aria-hidden="true" />
           </Button>
         </div>
       </DropdownMenuTrigger>
