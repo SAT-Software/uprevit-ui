@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { PiTrashDuotone, PiXCircleDuotone } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 
 interface LabelTagItem {
@@ -114,7 +115,7 @@ export default function DialogDeleteLabelTag({
             variant="destructive"
             size="sm"
           >
-            <PiTrashDuotone />
+            {isPending ? <Spinner /> : <PiTrashDuotone />}
             {isPending ? "Deleting..." : "Delete Label"}
           </Button>
         </AlertDialogFooter>
