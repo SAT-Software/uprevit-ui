@@ -3,7 +3,6 @@
 import { toast } from "sonner";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,8 @@ import {
   PiBuildingsDuotone,
   PiPlusCircleDuotone,
   PiXCircleDuotone,
+  PiXDuotone,
+  PiImageDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";

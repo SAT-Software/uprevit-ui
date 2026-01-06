@@ -2,10 +2,14 @@
 
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { PiCaretCircleDownDuotone, PiCheckCircleDuotone } from "react-icons/pi";
+import {
+  PiCaretCircleDownDuotone,
+  PiCaretUpDuotone,
+  PiCaretDownDuotone,
+  PiCheckCircleDuotone,
+} from "react-icons/pi";
 
 function Select({
   ...props
@@ -150,7 +154,7 @@ function SelectScrollUpButton({
       )}
       {...props}
     >
-      <ChevronUpIcon size={16} />
+      <PiCaretUpDuotone size={16} />
     </SelectPrimitive.ScrollUpButton>
   );
 }
@@ -168,7 +172,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <ChevronDownIcon size={16} />
+      <PiCaretDownDuotone size={16} />
     </SelectPrimitive.ScrollDownButton>
   );
 }

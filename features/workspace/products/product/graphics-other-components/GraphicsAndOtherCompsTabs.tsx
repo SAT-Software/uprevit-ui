@@ -1,4 +1,8 @@
-import { BoxIcon, HouseIcon, PanelsTopLeftIcon } from "lucide-react"
+import {
+  PiHouseDuotone,
+  PiSquaresFourDuotone,
+  PiBoxDuotone,
+} from "react-icons/pi"
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
@@ -17,7 +21,7 @@ export default function Component() {
             value="tab-1"
             className="data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
           >
-            <HouseIcon
+            <PiHouseDuotone
               className="-ms-0.5 me-1.5 opacity-60"
               size={16}
               aria-hidden="true"
@@ -28,7 +32,7 @@ export default function Component() {
             value="tab-2"
             className="data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
           >
-            <PanelsTopLeftIcon
+            <PiSquaresFourDuotone
               className="-ms-0.5 me-1.5 opacity-60"
               size={16}
               aria-hidden="true"
@@ -39,7 +43,7 @@ export default function Component() {
             value="tab-3"
             className="data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
           >
-            <BoxIcon
+            <PiBoxDuotone
               className="-ms-0.5 me-1.5 opacity-60"
               size={16}
               aria-hidden="true"

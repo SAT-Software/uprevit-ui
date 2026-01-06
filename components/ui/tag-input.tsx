@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import { useId, useState } from "react";
-import { XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PiXDuotone } from "react-icons/pi";
 
 interface Tag {
   id: string;
@@ -111,7 +111,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
                 onClick={() => removeTag(tag.id)}
                 disabled={disabled}
               >
-                <XIcon className="h-3 w-3" />
+                <PiXDuotone className="h-3 w-3" />
               </button>
             </Badge>
           ))}

@@ -12,17 +12,17 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  EllipsisIcon,
-  LayoutList,
-} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Fragment, useId, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import {
+  PiCaretDownDuotone,
+  PiCaretRightDuotone,
+  PiDotsThreeDuotone,
+  PiListDuotone,
+} from "react-icons/pi";
 import {
   DropdownMenu,
   DropdownMenuContent,

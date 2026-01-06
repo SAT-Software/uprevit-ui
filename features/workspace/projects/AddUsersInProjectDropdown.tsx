@@ -9,8 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PiUserCirclePlusDuotone } from "react-icons/pi";
-import { X } from "lucide-react";
+import { PiUserCirclePlusDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
 
 interface User {
@@ -82,7 +81,7 @@ export default function AddUsersInProjectDropdown({
                 {user.name}
               </div>
               {isSelected && (
-                <X className="size-4 text-muted-foreground hover:text-destructive" />
+                <PiXDuotone className="size-4 text-muted-foreground hover:text-destructive" />
               )}
             </DropdownMenuItem>
           );

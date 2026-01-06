@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react";
+import { PiCheckCircleDuotone, PiQuestionCircleDuotone, PiCircleDuotone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
 import { useIsMobile } from "@/hooks/general/use-mobile";

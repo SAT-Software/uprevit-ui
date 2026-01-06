@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { useId, useMemo, useState } from "react";
-import { CircleAlert as CircleAlertIcon } from "lucide-react";
+import { PiArchiveDuotone, PiAlertCircleDuotone } from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,6 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
-import { PiArchiveDuotone } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 
 export type ArchiveEntityType = "project" | "department";
@@ -96,7 +95,7 @@ export default function DialogArchiveEntity({
             className="flex size-9 shrink-0 items-center justify-center rounded-full border"
             aria-hidden="true"
           >
-            <CircleAlertIcon className="opacity-80" size={16} />
+            <PiAlertCircleDuotone className="opacity-80" size={16} />
           </div>
           <DialogHeader>
             <DialogTitle className="sm:text-center">

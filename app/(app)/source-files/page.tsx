@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "react-oidc-context";
-import { BookmarkIcon, FolderIcon } from "lucide-react";
+import { PiBookmarkDuotone, PiFolderDuotone } from "react-icons/pi";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";

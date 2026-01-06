@@ -1,5 +1,4 @@
-import { LinkIcon, CopyIcon, CheckIcon } from "lucide-react";
-import { PiShareNetworkDuotone, PiXCircleDuotone } from "react-icons/pi";
+import { PiShareNetworkDuotone, PiXCircleDuotone, PiLinkDuotone, PiCopyDuotone, PiCheckDuotone } from "react-icons/pi";
 import { useState, useMemo } from "react";
 
 import {

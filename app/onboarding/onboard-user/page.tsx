@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useOnboardUser } from "@/hooks/onboarding/useOnboardUser";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { uploadFiles } from "@/utils/uploadthing";
-import { ImagePlusIcon, XIcon } from "lucide-react";
+import { PiImageDuotone, PiXDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 

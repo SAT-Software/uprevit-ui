@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState } from "react";
-import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
   useFileUpload,
@@ -35,8 +34,10 @@ import { uploadFiles } from "@/utils/uploadthing";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
+  PiXDuotone,
   PiCubeDuotone,
   PiPictureInPictureDuotone,
+  PiImageDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 

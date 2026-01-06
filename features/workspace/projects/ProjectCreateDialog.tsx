@@ -29,7 +29,6 @@ import { useCreateProject } from "@/hooks/project/useCreateProject";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Department } from "@/types/department";
 import { uploadFiles } from "@/utils/uploadthing";
-import { ImagePlusIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -38,6 +37,8 @@ import {
   PiKanbanDuotone,
   PiPlusCircleDuotone,
   PiXCircleDuotone,
+  PiXDuotone,
+  PiImageDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "react-oidc-context";

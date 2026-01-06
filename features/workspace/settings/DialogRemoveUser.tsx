@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { UserX } from "lucide-react";
+import { PiUserXDuotone } from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import {

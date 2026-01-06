@@ -1,4 +1,4 @@
-import { CalendarClock, Text } from "lucide-react";
+import { PiCalendarClockDuotone, PiTextTDuotone } from "react-icons/pi";
 import Image from "next/image";
 import Link from "next/link";
 import { PiBuildingsDuotone } from "react-icons/pi";

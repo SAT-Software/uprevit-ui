@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  AlertCircleIcon,
-  FileArchiveIcon,
-  FileIcon,
-  FileSpreadsheetIcon,
-  FileTextIcon,
-  FileUpIcon,
-  HeadphonesIcon,
-  ImageIcon,
-  VideoIcon,
-  XIcon,
-} from "lucide-react";
+  PiFileArchiveDuotone,
+  PiFileDuotone,
+  PiFileSpreadsheetDuotone,
+  PiFileTextDuotone,
+  PiUploadSimpleDuotone,
+  PiHeadphonesDuotone,
+  PiImageDuotone,
+  PiVideoDuotone,
+  PiXDuotone,
+  PiAlertCircleDuotone,
+} from "react-icons/pi";
 
 import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";

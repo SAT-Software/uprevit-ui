@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FolderIcon } from "lucide-react";
-import { PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
+import { PiPlusBold, PiBookmarkSimpleDuotone, PiFolderDuotone } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { useAuth } from "react-oidc-context";

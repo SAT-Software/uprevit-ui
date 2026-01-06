@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { useEffect, useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { ImagePlusIcon, XIcon } from "lucide-react";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,9 @@ import {
   PiBuildingsDuotone,
   PiPencilCircleDuotone,
   PiXCircleDuotone,
+  PiXDuotone,
   PiCheckCircleDuotone,
+  PiImageDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";

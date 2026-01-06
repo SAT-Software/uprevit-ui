@@ -15,21 +15,21 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import {
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  Columns3Icon,
-  EllipsisIcon,
-} from "lucide-react";
 import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  PiCaretDownDuotone,
+  PiCaretUpDuotone,
+  PiCaretLeftDuotone,
+  PiCaretRightDuotone,
+  PiCaretCircleDoubleLeftDuotone,
+  PiCaretCircleDoubleRightDuotone,
+  PiColumnsDuotone,
+  PiDotsThreeDuotone,
+} from "react-icons/pi";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

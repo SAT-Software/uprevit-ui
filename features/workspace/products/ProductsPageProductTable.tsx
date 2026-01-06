@@ -15,16 +15,6 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import {
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  Columns3Icon,
-  EllipsisIcon,
-} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import {
@@ -36,9 +26,12 @@ import {
   PiCaretDownDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
+  PiCaretLeftDuotone,
+  PiCaretRightDuotone,
   PiChartPieSliceDuotone,
   PiColumnsDuotone,
   PiDotsThreeCircleVerticalDuotone,
+  PiDotsThreeDuotone,
   PiDownloadDuotone,
   PiFilePdfDuotone,
   PiFileXlsDuotone,

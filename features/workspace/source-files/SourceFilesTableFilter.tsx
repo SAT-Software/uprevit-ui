@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, Plus, X } from "lucide-react";
+import { PiFunnelDuotone, PiPlusDuotone, PiXDuotone } from "react-icons/pi";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

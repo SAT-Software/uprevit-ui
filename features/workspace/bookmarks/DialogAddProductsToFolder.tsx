@@ -6,8 +6,9 @@ import {
   PiFolderDuotone,
   PiPackageDuotone,
   PiXCircleDuotone,
+  PiCheckDuotone,
+  PiCaretUpDownDuotone,
 } from "react-icons/pi";
-import { Check, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -175,7 +176,7 @@ export default function DialogAddProductsToFolder({
                             product._id === selectedProductId
                         )?.product_name || "Unnamed Product"
                       : "Choose a product..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <PiCaretUpDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
@@ -227,7 +228,7 @@ export default function DialogAddProductsToFolder({
                                     {product.status}
                                   </span>
                                 )}
-                                <Check
+                                <PiCheckDuotone
                                   className={cn(
                                     "ml-2 h-4 w-4",
                                     selectedProductId === product._id

@@ -19,7 +19,7 @@ import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFi
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { cn } from "@/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
-import { BookmarkIcon, FolderIcon } from "lucide-react";
+import { PiBookmarkDuotone, PiFolderDuotone } from "react-icons/pi";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";

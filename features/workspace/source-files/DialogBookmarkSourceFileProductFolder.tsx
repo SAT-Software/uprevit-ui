@@ -1,4 +1,4 @@
-import { BookmarkIcon, CheckIcon } from "lucide-react";
+import { PiBookmarkDuotone, PiCheckDuotone } from "react-icons/pi";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";

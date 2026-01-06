@@ -1,9 +1,9 @@
 import * as React from "react"
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreHorizontalIcon,
-} from "lucide-react"
+  PiCaretLeftDuotone,
+  PiCaretRightDuotone,
+  PiDotsThreeDuotone,
+} from "react-icons/pi"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
