@@ -1,7 +1,13 @@
 "use client";
 
+import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -21,27 +27,49 @@ function getColumnName(index: number): string {
 
 export function ProductSpecificationDataTable() {
   const parentRef = useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<Record<string, string>>({});
+  const [cellData, setCellData] = useState<Record<string, string>>({});
   const [activeCell, setActiveCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    if (!activeCell) return;
-    e.preventDefault();
-    const text = e.clipboardData.getData("text/plain");
-    const rows = text.split("\n").map((r) => r.split("\t"));
-    setData((d) => {
-      const updated = { ...d };
-      rows.forEach((cols, ri) => {
-        cols.forEach((val, ci) => {
-          updated[`${activeCell.row + ri},${activeCell.col + ci}`] = val;
+  const rows: { rowIndex: number }[] = useMemo(() => {
+    return Array.from({ length: ROW_COUNT }, (_, i) => ({
+      rowIndex: i,
+    }));
+  }, []);
+
+  const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
+    return Array.from({ length: COLUMN_COUNT }, (_, colIndex) => ({
+      id: `col-${colIndex}`,
+      header: () => getColumnName(colIndex),
+      size: COL_WIDTH,
+    }));
+  }, []);
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent, rowIndex: number, colIndex: number) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData("text/plain");
+      const pastedRows = text.split("\n").map((r) => r.split("\t"));
+      setCellData((d) => {
+        const updated = { ...d };
+        pastedRows.forEach((cols, ri) => {
+          cols.forEach((val, ci) => {
+            updated[`${rowIndex + ri},${colIndex + ci}`] = val;
+          });
         });
+        return updated;
       });
-      return updated;
-    });
-  };
+    },
+    []
+  );
 
   useEffect(() => {
     const el = parentRef.current;
@@ -62,34 +90,40 @@ export function ProductSpecificationDataTable() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, []);
 
+  const tableRows = table.getRowModel().rows;
+
   const rowVirtualizer = useVirtualizer({
-    count: ROW_COUNT,
+    count: tableRows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 10,
   });
 
+  const visibleColumns = table.getVisibleLeafColumns();
+
   const colVirtualizer = useVirtualizer({
-    count: COLUMN_COUNT,
+    count: visibleColumns.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => COL_WIDTH,
+    estimateSize: (index) => visibleColumns[index]?.getSize() ?? COL_WIDTH,
     horizontal: true,
     overscan: 5,
   });
+
+  const headerGroup = table.getHeaderGroups()[0];
 
   return (
     <div
       ref={parentRef}
       className="flex-1 min-h-0 overflow-auto overscroll-contain"
     >
-      <div
+      <table
         style={{
           height: rowVirtualizer.getTotalSize() + ROW_HEIGHT,
           width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
           position: "relative",
         }}
       >
-        <div
+        <thead
           className="sticky top-0 z-20 bg-muted flex"
           style={{ height: ROW_HEIGHT }}
         >
@@ -100,82 +134,104 @@ export function ProductSpecificationDataTable() {
               height: ROW_HEIGHT,
               minWidth: ROW_NUMBER_WIDTH,
             }}
-          ></div>
+          />
 
-          <div
+          <tr
             className="relative"
             style={{ width: colVirtualizer.getTotalSize(), height: ROW_HEIGHT }}
           >
-            {colVirtualizer.getVirtualItems().map((col) => (
-              <div
-                key={col.key}
-                className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted"
-                style={{
-                  position: "absolute",
-                  left: col.start,
-                  width: col.size,
-                  height: ROW_HEIGHT,
-                }}
-              >
-                {getColumnName(col.index)}
-              </div>
-            ))}
-          </div>
-        </div>
+            {colVirtualizer.getVirtualItems().map((virtualCol) => {
+              const header = headerGroup?.headers[virtualCol.index];
+              if (!header) return null;
 
-        {rowVirtualizer.getVirtualItems().map((row) => (
-          <div
-            key={row.key}
-            className="flex"
-            style={{
-              position: "absolute",
-              top: row.start + ROW_HEIGHT,
-              height: row.size,
-              width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
-            }}
-          >
-            <div
-              className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-              style={{
-                width: ROW_NUMBER_WIDTH,
-                minWidth: ROW_NUMBER_WIDTH,
-                height: row.size,
-              }}
-            >
-              {row.index + 1}
-            </div>
-
-            <div
-              className="relative"
-              style={{ width: colVirtualizer.getTotalSize(), height: row.size }}
-            >
-              {colVirtualizer.getVirtualItems().map((col) => (
-                <input
-                  key={col.key}
-                  className="border-r border-b border-border outline-none px-2 text-sm"
+              return (
+                <div
+                  key={header.id}
+                  className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted"
                   style={{
                     position: "absolute",
-                    left: col.start,
-                    width: col.size,
-                    height: row.size,
+                    left: virtualCol.start,
+                    width: header.getSize(),
+                    height: ROW_HEIGHT,
                   }}
-                  value={data[`${row.index},${col.index}`] ?? ""}
-                  onChange={(e) =>
-                    setData((d) => ({
-                      ...d,
-                      [`${row.index},${col.index}`]: e.target.value,
-                    }))
-                  }
-                  onFocus={() =>
-                    setActiveCell({ row: row.index, col: col.index })
-                  }
-                  onPaste={handlePaste}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </div>
+              );
+            })}
+          </tr>
+        </thead>
+
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const row = tableRows[virtualRow.index];
+          if (!row) return null;
+          const rowIndex = row.original.rowIndex;
+
+          return (
+            <tbody
+              key={row.id}
+              className="flex"
+              style={{
+                position: "absolute",
+                top: virtualRow.start + ROW_HEIGHT,
+                height: virtualRow.size,
+                width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
+              }}
+            >
+              <div
+                className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                style={{
+                  width: ROW_NUMBER_WIDTH,
+                  minWidth: ROW_NUMBER_WIDTH,
+                  height: virtualRow.size,
+                }}
+              >
+                {rowIndex + 1}
+              </div>
+
+              <tr
+                className="relative"
+                style={{
+                  width: colVirtualizer.getTotalSize(),
+                  height: virtualRow.size,
+                }}
+              >
+                {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                  const colIndex = virtualCol.index;
+                  const cellKey = `${rowIndex},${colIndex}`;
+
+                  return (
+                    <input
+                      key={cellKey}
+                      className="border-r border-b border-border outline-none px-2 text-sm bg-background"
+                      style={{
+                        position: "absolute",
+                        left: virtualCol.start,
+                        width: virtualCol.size,
+                        height: virtualRow.size,
+                      }}
+                      value={cellData[cellKey] ?? ""}
+                      onChange={(e) =>
+                        setCellData((d) => ({
+                          ...d,
+                          [cellKey]: e.target.value,
+                        }))
+                      }
+                      onFocus={() =>
+                        setActiveCell({ row: rowIndex, col: colIndex })
+                      }
+                      onPaste={(e) => handlePaste(e, rowIndex, colIndex)}
+                    />
+                  );
+                })}
+              </tr>
+            </tbody>
+          );
+        })}
+      </table>
     </div>
   );
 }
