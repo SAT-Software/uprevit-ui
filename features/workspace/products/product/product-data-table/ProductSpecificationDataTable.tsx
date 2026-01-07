@@ -2,6 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
   type ColumnDef,
   type ColumnSizingState,
   flexRender,
@@ -71,12 +79,52 @@ const EditableHeader = ({ column, table }: { column: any; table: any }) => {
   );
 };
 
+const DATA_TYPE_OPTIONS = [
+  { value: "blank", label: "Blank" },
+  { value: "constant", label: "Constant Data" },
+  { value: "variable", label: "Variable Data" },
+  { value: "na", label: "NA" },
+] as const;
+
+type DataType = (typeof DATA_TYPE_OPTIONS)[number]["value"];
+
+const DataTypeSelect = ({
+  colIndex,
+  value,
+  onChange,
+}: {
+  colIndex: number;
+  value: DataType | undefined;
+  onChange: (colIndex: number, value: DataType) => void;
+}) => (
+  <Select
+    value={value ?? ""}
+    onValueChange={(val) => onChange(colIndex, val as DataType)}
+  >
+    <SelectTrigger className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2">
+      <SelectValue placeholder="" />
+    </SelectTrigger>
+    <SelectContent>
+      {DATA_TYPE_OPTIONS.map((opt) => (
+        <SelectItem className="text-xs" key={opt.value} value={opt.value}>
+          {opt.label}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+);
+
 export function ProductSpecificationDataTable() {
   const parentRef = useRef<HTMLDivElement>(null);
   const [cellData, setCellData] = useState<Record<string, string>>({});
   const cellDataRef = useRef<Record<string, string>>({});
   cellDataRef.current = cellData;
   const [headerData, setHeaderData] = useState<Record<number, string>>({});
+  // Stores data type per column. Sparse object - missing keys default to "blank".
+  // When saving to DB: use columnTypeData[col] ?? "blank" to get all values as strings.
+  const [columnTypeData, setColumnTypeData] = useState<
+    Record<number, DataType>
+  >({});
   const [activeCell, setActiveCell] = useState<{
     row: number;
     col: number;
@@ -208,38 +256,90 @@ export function ProductSpecificationDataTable() {
     >
       <table
         style={{
-          height: rowVirtualizer.getTotalSize() + ROW_HEIGHT,
+          height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
           width: totalColumnWidth + ROW_NUMBER_WIDTH,
           position: "relative",
         }}
       >
         <thead
-          className="sticky top-0 z-20 bg-muted flex"
-          style={{ height: ROW_HEIGHT }}
+          className="sticky top-0 z-20 bg-muted"
+          style={{ height: ROW_HEIGHT * 2 }}
         >
-          <div
-            className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-            style={{
-              width: ROW_NUMBER_WIDTH,
-              height: ROW_HEIGHT,
-              minWidth: ROW_NUMBER_WIDTH,
-            }}
-          >
-            1
-          </div>
+          <tr className="flex" style={{ height: ROW_HEIGHT }}>
+            <div
+              className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+              style={{
+                width: ROW_NUMBER_WIDTH,
+                height: ROW_HEIGHT,
+                minWidth: ROW_NUMBER_WIDTH,
+              }}
+            >
+              1
+            </div>
+            <div
+              className="relative"
+              style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
+            >
+              {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                const header = headerGroup?.headers[virtualCol.index];
+                if (!header) return null;
 
-          <tr
-            className="relative"
-            style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
-          >
-            {colVirtualizer.getVirtualItems().map((virtualCol) => {
-              const header = headerGroup?.headers[virtualCol.index];
-              if (!header) return null;
+                return (
+                  <div
+                    key={header.id}
+                    className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
+                    style={{
+                      position: "absolute",
+                      left: virtualCol.start,
+                      width: virtualCol.size,
+                      height: ROW_HEIGHT,
+                    }}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
 
-              return (
+                    {header.column.getCanResize() && (
+                      <div
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        onDoubleClick={() => header.column.resetSize()}
+                        className={`absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none ${
+                          header.column.getIsResizing()
+                            ? "bg-primary"
+                            : "bg-transparent hover:bg-primary/50"
+                        }`}
+                        style={{
+                          transform: "translateX(50%)",
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </tr>
+
+          <tr className="flex" style={{ height: ROW_HEIGHT }}>
+            <div
+              className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+              style={{
+                width: ROW_NUMBER_WIDTH,
+                height: ROW_HEIGHT,
+                minWidth: ROW_NUMBER_WIDTH,
+              }}
+            >
+              2
+            </div>
+            <div
+              className="relative"
+              style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
+            >
+              {colVirtualizer.getVirtualItems().map((virtualCol) => (
                 <div
-                  key={header.id}
-                  className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
+                  key={`type-${virtualCol.index}`}
+                  className="border-r border-b border-border flex items-center bg-muted"
                   style={{
                     position: "absolute",
                     left: virtualCol.start,
@@ -247,29 +347,21 @@ export function ProductSpecificationDataTable() {
                     height: ROW_HEIGHT,
                   }}
                 >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-
-                  {header.column.getCanResize() && (
-                    <div
-                      onMouseDown={header.getResizeHandler()}
-                      onTouchStart={header.getResizeHandler()}
-                      onDoubleClick={() => header.column.resetSize()}
-                      className={`absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none ${
-                        header.column.getIsResizing()
-                          ? "bg-primary"
-                          : "bg-transparent hover:bg-primary/50"
-                      }`}
-                      style={{
-                        transform: "translateX(50%)",
-                      }}
-                    />
-                  )}
+                  <DataTypeSelect
+                    colIndex={virtualCol.index}
+                    // undefined is for display only (shows empty cell). Actual state stores "blank" as string.
+                    value={
+                      columnTypeData[virtualCol.index] !== "blank"
+                        ? columnTypeData[virtualCol.index]
+                        : undefined
+                    }
+                    onChange={(col, val) =>
+                      setColumnTypeData((d) => ({ ...d, [col]: val }))
+                    }
+                  />
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </tr>
         </thead>
 
@@ -284,7 +376,7 @@ export function ProductSpecificationDataTable() {
               className="flex"
               style={{
                 position: "absolute",
-                top: virtualRow.start + ROW_HEIGHT,
+                top: virtualRow.start + ROW_HEIGHT * 2,
                 height: virtualRow.size,
                 width: totalColumnWidth + ROW_NUMBER_WIDTH,
               }}
@@ -297,7 +389,7 @@ export function ProductSpecificationDataTable() {
                   height: virtualRow.size,
                 }}
               >
-                {virtualRow.index + 2}
+                {virtualRow.index + 3}
               </div>
 
               <tr
