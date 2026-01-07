@@ -74,6 +74,8 @@ const EditableHeader = ({ column, table }: { column: any; table: any }) => {
 export function ProductSpecificationDataTable() {
   const parentRef = useRef<HTMLDivElement>(null);
   const [cellData, setCellData] = useState<Record<string, string>>({});
+  const cellDataRef = useRef<Record<string, string>>({});
+  cellDataRef.current = cellData;
   const [headerData, setHeaderData] = useState<Record<number, string>>({});
   const [activeCell, setActiveCell] = useState<{
     row: number;
@@ -91,6 +93,17 @@ export function ProductSpecificationDataTable() {
   const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
     return Array.from({ length: COLUMN_COUNT }, (_, colIndex) => ({
       id: `col-${colIndex}`,
+      accessorFn: (row) =>
+        cellDataRef.current[`${row.rowIndex},${colIndex}`] || undefined,
+      sortUndefined: "last",
+      sortingFn: (rowA, rowB, columnId) => {
+        const a = rowA.getValue(columnId) as string;
+        const b = rowB.getValue(columnId) as string;
+        const numA = parseFloat(a);
+        const numB = parseFloat(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return a.localeCompare(b);
+      },
       header: ({ column, table }) => (
         <EditableHeader column={column} table={table} />
       ),
@@ -283,7 +296,7 @@ export function ProductSpecificationDataTable() {
                   height: virtualRow.size,
                 }}
               >
-                {rowIndex + 2}
+                {virtualRow.index + 2}
               </div>
 
               <tr
