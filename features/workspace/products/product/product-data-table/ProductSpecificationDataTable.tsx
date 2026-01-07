@@ -97,8 +97,9 @@ export function ProductSpecificationDataTable() {
         cellDataRef.current[`${row.rowIndex},${colIndex}`] || undefined,
       sortUndefined: "last",
       sortingFn: (rowA, rowB, columnId) => {
-        const a = rowA.getValue(columnId) as string;
-        const b = rowB.getValue(columnId) as string;
+        const a = rowA.getValue(columnId) as string | undefined;
+        const b = rowB.getValue(columnId) as string | undefined;
+        if (!a || !b) return 0;
         const numA = parseFloat(a);
         const numB = parseFloat(b);
         if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
