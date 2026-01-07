@@ -1,13 +1,30 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  type ColumnDef,
+  type ColumnSizingState,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  SortingState,
+  getSortedRowModel,
+} from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  PiCaretDownDuotone,
+  PiCaretUpDownDuotone,
+  PiCaretUpDuotone,
+} from "react-icons/pi";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
 const COL_WIDTH = 120;
 const ROW_HEIGHT = 34;
 const ROW_NUMBER_WIDTH = 50;
+const MIN_COL_WIDTH = 50;
+const MAX_COL_WIDTH = 500;
 
 function getColumnName(index: number): string {
   let name = "";
@@ -19,8 +36,125 @@ function getColumnName(index: number): string {
   return name;
 }
 
+const EditableHeader = ({ column, table }: { column: any; table: any }) => {
+  const colIndex = parseInt(column.id.split("-")[1]);
+  const meta = table.options.meta as {
+    headerData: Record<number, string>;
+    setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  };
+
+  return (
+    <div className="flex items-center w-full h-full gap-1 px-1">
+      <input
+        className="flex-1 min-w-0 bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground"
+        value={meta.headerData[colIndex] ?? ""}
+        onChange={(e) =>
+          meta.setHeaderData((d) => ({ ...d, [colIndex]: e.target.value }))
+        }
+        placeholder={`Column ${colIndex + 1}`}
+      />
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="shrink-0 hover:bg-accent-foreground/10 rounded size-6"
+      >
+        {column.getIsSorted() === "desc" ? (
+          <PiCaretDownDuotone className="h-2 w-2" />
+        ) : column.getIsSorted() === "asc" ? (
+          <PiCaretUpDuotone className="h-2 w-2" />
+        ) : (
+          <PiCaretUpDownDuotone className="h-2 w-2 opacity-50" />
+        )}
+      </Button>
+    </div>
+  );
+};
+
 export function ProductSpecificationDataTable() {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [cellData, setCellData] = useState<Record<string, string>>({});
+  const cellDataRef = useRef<Record<string, string>>({});
+  cellDataRef.current = cellData;
+  const [headerData, setHeaderData] = useState<Record<number, string>>({});
+  const [activeCell, setActiveCell] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const rows: { rowIndex: number }[] = useMemo(() => {
+    return Array.from({ length: ROW_COUNT }, (_, i) => ({
+      rowIndex: i,
+    }));
+  }, []);
+
+  const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
+    return Array.from({ length: COLUMN_COUNT }, (_, colIndex) => ({
+      id: `col-${colIndex}`,
+      accessorFn: (row) =>
+        cellDataRef.current[`${row.rowIndex},${colIndex}`] || undefined,
+      sortUndefined: "last",
+      sortingFn: (rowA, rowB, columnId) => {
+        const a = rowA.getValue(columnId) as string | undefined;
+        const b = rowB.getValue(columnId) as string | undefined;
+        if (!a || !b) return 0;
+        const numA = parseFloat(a);
+        const numB = parseFloat(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return a.localeCompare(b);
+      },
+      header: ({ column, table }) => (
+        <EditableHeader column={column} table={table} />
+      ),
+      size: COL_WIDTH,
+      minSize: MIN_COL_WIDTH,
+      maxSize: MAX_COL_WIDTH,
+    }));
+  }, []);
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    columnResizeDirection: "ltr",
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    meta: {
+      headerData,
+      setHeaderData,
+    },
+    state: {
+      columnSizing,
+      sorting,
+    },
+    onColumnSizingChange: setColumnSizing,
+  });
+
+  const columnSizes = useMemo(() => {
+    return table.getVisibleLeafColumns().map((col) => col.getSize());
+  }, [table.getState().columnSizing]);
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent, rowIndex: number, colIndex: number) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData("text/plain");
+      const pastedRows = text.split("\n").map((r) => r.split("\t"));
+      setCellData((d) => {
+        const updated = { ...d };
+        pastedRows.forEach((cols, ri) => {
+          cols.forEach((val, ci) => {
+            updated[`${rowIndex + ri},${colIndex + ci}`] = val;
+          });
+        });
+        return updated;
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     const el = parentRef.current;
@@ -41,34 +175,45 @@ export function ProductSpecificationDataTable() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, []);
 
+  const tableRows = table.getRowModel().rows;
+
   const rowVirtualizer = useVirtualizer({
-    count: ROW_COUNT,
+    count: tableRows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 10,
   });
 
+  const visibleColumns = table.getVisibleLeafColumns();
+
   const colVirtualizer = useVirtualizer({
-    count: COLUMN_COUNT,
+    count: visibleColumns.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => COL_WIDTH,
+    estimateSize: (index) => columnSizes[index] ?? COL_WIDTH,
     horizontal: true,
     overscan: 5,
   });
+
+  useEffect(() => {
+    colVirtualizer.measure();
+  }, [columnSizes]);
+
+  const headerGroup = table.getHeaderGroups()[0];
+  const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
 
   return (
     <div
       ref={parentRef}
       className="flex-1 min-h-0 overflow-auto overscroll-contain"
     >
-      <div
+      <table
         style={{
           height: rowVirtualizer.getTotalSize() + ROW_HEIGHT,
-          width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
+          width: totalColumnWidth + ROW_NUMBER_WIDTH,
           position: "relative",
         }}
       >
-        <div
+        <thead
           className="sticky top-0 z-20 bg-muted flex"
           style={{ height: ROW_HEIGHT }}
         >
@@ -79,71 +224,122 @@ export function ProductSpecificationDataTable() {
               height: ROW_HEIGHT,
               minWidth: ROW_NUMBER_WIDTH,
             }}
-          ></div>
-
-          <div
-            className="relative"
-            style={{ width: colVirtualizer.getTotalSize(), height: ROW_HEIGHT }}
           >
-            {colVirtualizer.getVirtualItems().map((col) => (
-              <div
-                key={col.key}
-                className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted"
-                style={{
-                  position: "absolute",
-                  left: col.start,
-                  width: col.size,
-                  height: ROW_HEIGHT,
-                }}
-              >
-                {getColumnName(col.index)}
-              </div>
-            ))}
+            1
           </div>
-        </div>
 
-        {rowVirtualizer.getVirtualItems().map((row) => (
-          <div
-            key={row.key}
-            className="flex"
-            style={{
-              position: "absolute",
-              top: row.start + ROW_HEIGHT,
-              height: row.size,
-              width: colVirtualizer.getTotalSize() + ROW_NUMBER_WIDTH,
-            }}
+          <tr
+            className="relative"
+            style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
           >
-            <div
-              className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-              style={{
-                width: ROW_NUMBER_WIDTH,
-                minWidth: ROW_NUMBER_WIDTH,
-                height: row.size,
-              }}
-            >
-              {row.index + 1}
-            </div>
+            {colVirtualizer.getVirtualItems().map((virtualCol) => {
+              const header = headerGroup?.headers[virtualCol.index];
+              if (!header) return null;
 
-            <div
-              className="relative"
-              style={{ width: colVirtualizer.getTotalSize(), height: row.size }}
-            >
-              {colVirtualizer.getVirtualItems().map((col) => (
+              return (
                 <div
-                  key={col.key}
-                  className="border-r border-b border-border"
+                  key={header.id}
+                  className="border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
                   style={{
                     position: "absolute",
-                    left: col.start,
-                    width: col.size,
-                    height: row.size,
+                    left: virtualCol.start,
+                    width: virtualCol.size,
+                    height: ROW_HEIGHT,
                   }}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+
+                  {header.column.getCanResize() && (
+                    <div
+                      onMouseDown={header.getResizeHandler()}
+                      onTouchStart={header.getResizeHandler()}
+                      onDoubleClick={() => header.column.resetSize()}
+                      className={`absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none ${
+                        header.column.getIsResizing()
+                          ? "bg-primary"
+                          : "bg-transparent hover:bg-primary/50"
+                      }`}
+                      style={{
+                        transform: "translateX(50%)",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </tr>
+        </thead>
+
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const row = tableRows[virtualRow.index];
+          if (!row) return null;
+          const rowIndex = row.original.rowIndex;
+
+          return (
+            <tbody
+              key={row.id}
+              className="flex"
+              style={{
+                position: "absolute",
+                top: virtualRow.start + ROW_HEIGHT,
+                height: virtualRow.size,
+                width: totalColumnWidth + ROW_NUMBER_WIDTH,
+              }}
+            >
+              <div
+                className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                style={{
+                  width: ROW_NUMBER_WIDTH,
+                  minWidth: ROW_NUMBER_WIDTH,
+                  height: virtualRow.size,
+                }}
+              >
+                {virtualRow.index + 2}
+              </div>
+
+              <tr
+                className="relative"
+                style={{
+                  width: totalColumnWidth,
+                  height: virtualRow.size,
+                }}
+              >
+                {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                  const colIndex = virtualCol.index;
+                  const cellKey = `${rowIndex},${colIndex}`;
+
+                  return (
+                    <input
+                      key={cellKey}
+                      className="border-r border-b border-border outline-none px-2 text-sm bg-background"
+                      style={{
+                        position: "absolute",
+                        left: virtualCol.start,
+                        width: virtualCol.size,
+                        height: virtualRow.size,
+                      }}
+                      value={cellData[cellKey] ?? ""}
+                      onChange={(e) =>
+                        setCellData((d) => ({
+                          ...d,
+                          [cellKey]: e.target.value,
+                        }))
+                      }
+                      onFocus={() =>
+                        setActiveCell({ row: rowIndex, col: colIndex })
+                      }
+                      onPaste={(e) => handlePaste(e, rowIndex, colIndex)}
+                    />
+                  );
+                })}
+              </tr>
+            </tbody>
+          );
+        })}
+      </table>
     </div>
   );
 }
