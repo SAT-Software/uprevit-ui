@@ -59,6 +59,33 @@ const ROW_NUMBER_WIDTH = 50;
 const MIN_COL_WIDTH = 50;
 const MAX_COL_WIDTH = 500;
 
+interface CellFormat {
+  bgColor?: string;
+  textColor?: string;
+}
+
+const DEFAULT_COLORS = [
+  "#ffffff",
+  "#f9fafb",
+  "#fffbeb",
+  "#f0fdf4",
+  "#eff6ff",
+  "#fdf2f8",
+  "#fef2f2",
+  "#eef2ff",
+];
+
+const DEFAULT_TEXT_COLORS = [
+  "#000000",
+  "#4b5563",
+  "#d97706",
+  "#16a34a",
+  "#2563eb",
+  "#db2777",
+  "#dc2626",
+  "#4f46e5",
+];
+
 const EditableHeaderContent = ({
   column,
   table,
@@ -225,6 +252,94 @@ export function ProductSpecificationDataTable() {
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`)
   );
+  const [cellFormats, setCellFormats] = useState<Record<string, CellFormat>>(
+    {}
+  );
+  const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  const [selectionStart, setSelectionStart] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+
+  const applyBgColor = useCallback(
+    (color: string) => {
+      if (selectedCells.size === 0 && activeCell) {
+        const key = `${activeCell.row},${activeCell.col}`;
+        setCellFormats((f) => ({
+          ...f,
+          [key]: {
+            ...f[key],
+            bgColor: color === "#ffffff" ? undefined : color,
+          },
+        }));
+      } else {
+        setCellFormats((f) => {
+          const updated = { ...f };
+          selectedCells.forEach((key) => {
+            updated[key] = {
+              ...updated[key],
+              bgColor: color === "#ffffff" ? undefined : color,
+            };
+          });
+          return updated;
+        });
+      }
+    },
+    [selectedCells, activeCell]
+  );
+
+  const applyTextColor = useCallback(
+    (color: string) => {
+      if (selectedCells.size === 0 && activeCell) {
+        const key = `${activeCell.row},${activeCell.col}`;
+        setCellFormats((f) => ({
+          ...f,
+          [key]: {
+            ...f[key],
+            textColor: color === "#000000" ? undefined : color,
+          },
+        }));
+      } else {
+        setCellFormats((f) => {
+          const updated = { ...f };
+          selectedCells.forEach((key) => {
+            updated[key] = {
+              ...updated[key],
+              textColor: color === "#000000" ? undefined : color,
+            };
+          });
+          return updated;
+        });
+      }
+    },
+    [selectedCells, activeCell]
+  );
+
+  const handleCellClick = useCallback(
+    (rowIndex: number, colIndex: number, e: React.MouseEvent) => {
+      const cellKey = `${rowIndex},${colIndex}`;
+
+      if (e.shiftKey && selectionStart) {
+        const minRow = Math.min(selectionStart.row, rowIndex);
+        const maxRow = Math.max(selectionStart.row, rowIndex);
+        const minCol = Math.min(selectionStart.col, colIndex);
+        const maxCol = Math.max(selectionStart.col, colIndex);
+
+        const newSelection = new Set<string>();
+        for (let r = minRow; r <= maxRow; r++) {
+          for (let c = minCol; c <= maxCol; c++) {
+            newSelection.add(`${r},${c}`);
+          }
+        }
+        setSelectedCells(newSelection);
+      } else {
+        setSelectedCells(new Set([cellKey]));
+        setSelectionStart({ row: rowIndex, col: colIndex });
+      }
+      setActiveCell({ row: rowIndex, col: colIndex });
+    },
+    [selectionStart]
+  );
 
   const rows: { rowIndex: number }[] = useMemo(() => {
     return Array.from({ length: ROW_COUNT }, (_, i) => ({
@@ -372,190 +487,248 @@ export function ProductSpecificationDataTable() {
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
 
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      id={useId()}
-      modifiers={[restrictToHorizontalAxis]}
-      onDragEnd={handleDragEnd}
-      sensors={sensors}
-    >
-      <div
-        ref={parentRef}
-        className="flex-1 min-h-0 overflow-auto overscroll-contain"
+    <div className="flex flex-col flex-1 min-h-0">
+      {/* Formatting Toolbar */}
+      <div className="flex items-center gap-4 px-3 py-2 border-b border-border bg-muted/50 shrink-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">Fill:</span>
+          <div className="flex gap-0.5">
+            {DEFAULT_COLORS.map((color) => (
+              <button
+                key={`bg-${color}`}
+                onClick={() => applyBgColor(color)}
+                className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all"
+                style={{ backgroundColor: color }}
+                title={color === "#ffffff" ? "No fill" : color}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="w-px h-5 bg-border" />
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">Text:</span>
+          <div className="flex gap-0.5">
+            {DEFAULT_TEXT_COLORS.map((color) => (
+              <button
+                key={`text-${color}`}
+                onClick={() => applyTextColor(color)}
+                className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all flex items-center justify-center"
+                title={color === "#000000" ? "Default" : color}
+              >
+                <span className="text-xs font-bold" style={{ color }}>
+                  A
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {selectedCells.size > 1 && (
+          <>
+            <div className="w-px h-5 bg-border" />
+            <span className="text-xs text-muted-foreground">
+              {selectedCells.size} cells selected
+            </span>
+          </>
+        )}
+      </div>
+
+      <DndContext
+        collisionDetection={closestCenter}
+        id={useId()}
+        modifiers={[restrictToHorizontalAxis]}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
       >
-        <table
-          style={{
-            height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
-            width: totalColumnWidth + ROW_NUMBER_WIDTH,
-            position: "relative",
-          }}
+        <div
+          ref={parentRef}
+          className="flex-1 min-h-0 overflow-auto overscroll-contain"
         >
-          <thead
-            className="sticky top-0 z-20 bg-muted"
-            style={{ height: ROW_HEIGHT * 2 }}
+          <table
+            style={{
+              height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
+              width: totalColumnWidth + ROW_NUMBER_WIDTH,
+              position: "relative",
+            }}
           >
-            <tr className="flex" style={{ height: ROW_HEIGHT }}>
-              <div
-                className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                style={{
-                  width: ROW_NUMBER_WIDTH,
-                  height: ROW_HEIGHT,
-                  minWidth: ROW_NUMBER_WIDTH,
-                }}
-              >
-                1
-              </div>
-              <SortableContext
-                items={columnOrder}
-                strategy={horizontalListSortingStrategy}
-              >
+            <thead
+              className="sticky top-0 z-20 bg-muted"
+              style={{ height: ROW_HEIGHT * 2 }}
+            >
+              <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                <div
+                  className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                  style={{
+                    width: ROW_NUMBER_WIDTH,
+                    height: ROW_HEIGHT,
+                    minWidth: ROW_NUMBER_WIDTH,
+                  }}
+                >
+                  1
+                </div>
+                <SortableContext
+                  items={columnOrder}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div
+                    className="relative"
+                    style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
+                  >
+                    {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                      const header = headerGroup?.headers[virtualCol.index];
+                      if (!header) return null;
+
+                      return (
+                        <DraggableHeader
+                          key={header.id}
+                          header={header}
+                          virtualCol={{
+                            start: virtualCol.start,
+                            size: virtualCol.size,
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </tr>
+
+              <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                <div
+                  className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                  style={{
+                    width: ROW_NUMBER_WIDTH,
+                    height: ROW_HEIGHT,
+                    minWidth: ROW_NUMBER_WIDTH,
+                  }}
+                >
+                  2
+                </div>
                 <div
                   className="relative"
                   style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
                 >
                   {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                    const header = headerGroup?.headers[virtualCol.index];
-                    if (!header) return null;
-
-                    return (
-                      <DraggableHeader
-                        key={header.id}
-                        header={header}
-                        virtualCol={{
-                          start: virtualCol.start,
-                          size: virtualCol.size,
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              </SortableContext>
-            </tr>
-
-            <tr className="flex" style={{ height: ROW_HEIGHT }}>
-              <div
-                className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                style={{
-                  width: ROW_NUMBER_WIDTH,
-                  height: ROW_HEIGHT,
-                  minWidth: ROW_NUMBER_WIDTH,
-                }}
-              >
-                2
-              </div>
-              <div
-                className="relative"
-                style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
-              >
-                {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                  const column = visibleColumns[virtualCol.index];
-                  const originalColIndex = parseInt(column.id.split("-")[1]);
-
-                  return (
-                    <div
-                      key={`type-${column.id}`}
-                      className="border-r border-b border-border flex items-center bg-muted"
-                      style={{
-                        position: "absolute",
-                        left: virtualCol.start,
-                        width: virtualCol.size,
-                        height: ROW_HEIGHT,
-                      }}
-                    >
-                      <DataTypeSelect
-                        colIndex={originalColIndex}
-                        value={
-                          columnTypeData[originalColIndex] !== "blank"
-                            ? columnTypeData[originalColIndex]
-                            : undefined
-                        }
-                        onChange={(col, val) =>
-                          setColumnTypeData((d) => ({ ...d, [col]: val }))
-                        }
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </tr>
-          </thead>
-
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const row = tableRows[virtualRow.index];
-            if (!row) return null;
-            const rowIndex = row.original.rowIndex;
-
-            return (
-              <tbody
-                key={row.id}
-                className="flex"
-                style={{
-                  position: "absolute",
-                  top: virtualRow.start + ROW_HEIGHT * 2,
-                  height: virtualRow.size,
-                  width: totalColumnWidth + ROW_NUMBER_WIDTH,
-                }}
-              >
-                <div
-                  className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                  style={{
-                    width: ROW_NUMBER_WIDTH,
-                    minWidth: ROW_NUMBER_WIDTH,
-                    height: virtualRow.size,
-                  }}
-                >
-                  {virtualRow.index + 3}
-                </div>
-
-                <tr
-                  className="relative"
-                  style={{
-                    width: totalColumnWidth,
-                    height: virtualRow.size,
-                  }}
-                >
-                  {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                    // Get the column at this visual position (already reordered by TanStack Table)
                     const column = visibleColumns[virtualCol.index];
-                    // Extract original column index from column ID (e.g., "col-5" -> 5)
                     const originalColIndex = parseInt(column.id.split("-")[1]);
-                    const cellKey = `${rowIndex},${originalColIndex}`;
 
                     return (
-                      <input
-                        key={`${rowIndex}-${column.id}`}
-                        className="border-r border-b border-border outline-none px-2 text-sm bg-background"
+                      <div
+                        key={`type-${column.id}`}
+                        className="border-r border-b border-border flex items-center bg-muted"
                         style={{
                           position: "absolute",
                           left: virtualCol.start,
                           width: virtualCol.size,
-                          height: virtualRow.size,
+                          height: ROW_HEIGHT,
                         }}
-                        value={cellData[cellKey] ?? ""}
-                        onChange={(e) =>
-                          setCellData((d) => ({
-                            ...d,
-                            [cellKey]: e.target.value,
-                          }))
-                        }
-                        onFocus={() =>
-                          setActiveCell({
-                            row: rowIndex,
-                            col: originalColIndex,
-                          })
-                        }
-                        onPaste={(e) =>
-                          handlePaste(e, rowIndex, originalColIndex)
-                        }
-                      />
+                      >
+                        <DataTypeSelect
+                          colIndex={originalColIndex}
+                          value={
+                            columnTypeData[originalColIndex] !== "blank"
+                              ? columnTypeData[originalColIndex]
+                              : undefined
+                          }
+                          onChange={(col, val) =>
+                            setColumnTypeData((d) => ({ ...d, [col]: val }))
+                          }
+                        />
+                      </div>
                     );
                   })}
-                </tr>
-              </tbody>
-            );
-          })}
-        </table>
-      </div>
-    </DndContext>
+                </div>
+              </tr>
+            </thead>
+
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = tableRows[virtualRow.index];
+              if (!row) return null;
+              const rowIndex = row.original.rowIndex;
+
+              return (
+                <tbody
+                  key={row.id}
+                  className="flex"
+                  style={{
+                    position: "absolute",
+                    top: virtualRow.start + ROW_HEIGHT * 2,
+                    height: virtualRow.size,
+                    width: totalColumnWidth + ROW_NUMBER_WIDTH,
+                  }}
+                >
+                  <div
+                    className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                    style={{
+                      width: ROW_NUMBER_WIDTH,
+                      minWidth: ROW_NUMBER_WIDTH,
+                      height: virtualRow.size,
+                    }}
+                  >
+                    {virtualRow.index + 3}
+                  </div>
+
+                  <tr
+                    className="relative"
+                    style={{
+                      width: totalColumnWidth,
+                      height: virtualRow.size,
+                    }}
+                  >
+                    {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                      const column = visibleColumns[virtualCol.index];
+                      const originalColIndex = parseInt(
+                        column.id.split("-")[1]
+                      );
+                      const cellKey = `${rowIndex},${originalColIndex}`;
+                      const format = cellFormats[cellKey];
+                      const isSelected = selectedCells.has(cellKey);
+
+                      return (
+                        <input
+                          key={`${rowIndex}-${column.id}`}
+                          className={`border border-border/60 outline-none px-2 text-sm ${
+                            isSelected
+                              ? "ring-1 ring-primary ring-inset border-foreground/60"
+                              : "border-border"
+                          }`}
+                          style={{
+                            position: "absolute",
+                            left: virtualCol.start,
+                            width: virtualCol.size,
+                            height: virtualRow.size,
+                            backgroundColor:
+                              format?.bgColor || "var(--background)",
+                            color: format?.textColor || "inherit",
+                          }}
+                          value={cellData[cellKey] ?? ""}
+                          onChange={(e) =>
+                            setCellData((d) => ({
+                              ...d,
+                              [cellKey]: e.target.value,
+                            }))
+                          }
+                          onClick={(e) =>
+                            handleCellClick(rowIndex, originalColIndex, e)
+                          }
+                          onFocus={() =>
+                            setActiveCell({
+                              row: rowIndex,
+                              col: originalColIndex,
+                            })
+                          }
+                          onPaste={(e) =>
+                            handlePaste(e, rowIndex, originalColIndex)
+                          }
+                        />
+                      );
+                    })}
+                  </tr>
+                </tbody>
+              );
+            })}
+          </table>
+        </div>
+      </DndContext>
+    </div>
   );
 }
