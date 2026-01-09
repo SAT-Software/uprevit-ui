@@ -52,11 +52,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   ProductSpecificationDataTableProps,
-  sparseProductSpecDataForDatabase,
   type CellFormat,
   type DataType,
-  type ProductDataTableSchema,
 } from "@/types/product-data-table";
+import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -296,6 +295,7 @@ export function ProductSpecificationDataTable({
       );
       onDataChange(data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     headerData,
     columnTypeData,
@@ -303,7 +303,6 @@ export function ProductSpecificationDataTable({
     cellFormats,
     columnOrder,
     columnSizing,
-    onDataChange,
   ]);
 
   const applyBgColor = useCallback(

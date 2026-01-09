@@ -6,12 +6,10 @@ import { Switch } from "@/components/ui/switch";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import {
-  parseProductSpecDataFromDatabase,
-  type ProductDataTableSchema,
-} from "@/types/product-data-table";
+import { type ProductDataTableSchema } from "@/types/product-data-table";
+import { parseProductSpecDataFromDatabase } from "@/utils/product/product-spec";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PiCloudCheckDuotone,
   PiFloppyDiskDuotone,
@@ -23,7 +21,6 @@ const AUTO_SAVE_STORAGE_KEY = "product-data-table-auto-save";
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId ?? "";
-
   const [autoSave, setAutoSave] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(AUTO_SAVE_STORAGE_KEY);
@@ -31,7 +28,6 @@ export default function Page() {
     }
     return true;
   });
-
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,75 +39,64 @@ export default function Page() {
     isLoading,
     error,
   } = useGetProductTabData(productId, "product-specifications");
-
   const { mutate: updateTabData, isPending: isSaving } =
     useUpdateProductTabData();
 
-  const dataVersion = productTabData?.result?.data?.data?.workbook_data
-    ? "loaded"
-    : "empty";
+  const workbookData = productTabData?.result?.data?.data?.workbook_data;
+  const dataVersion = workbookData ? "loaded" : "empty";
 
   const initialData = useMemo(() => {
-    const workbookData = productTabData?.result?.data?.data?.workbook_data as
-      | ProductDataTableSchema
-      | undefined;
     return parseProductSpecDataFromDatabase(workbookData);
-  }, [productTabData?.result?.data?.data?.workbook_data]);
+  }, [workbookData]);
 
-  const handleAutoSaveToggle = useCallback((checked: boolean) => {
+  function handleAutoSaveToggle(checked: boolean) {
     setAutoSave(checked);
     localStorage.setItem(AUTO_SAVE_STORAGE_KEY, String(checked));
-  }, []);
+  }
 
-  const saveData = useCallback(
-    (data: ProductDataTableSchema) => {
-      const payload = {
-        id: productId,
-        tab: "product-specifications",
-        action: "add_product_data",
-        data: { workbook_data: data },
-      };
+  function saveDataToDB(data: ProductDataTableSchema) {
+    const payload = {
+      id: productId,
+      tab: "product-specifications",
+      action: "add_product_data",
+      data: { workbook_data: data },
+    };
 
-      updateTabData(payload, {
-        onSuccess: () => {
-          setHasUnsavedChanges(false);
-          setLastSavedAt(new Date());
-        },
-      });
-    },
-    [productId, updateTabData]
-  );
+    updateTabData(payload, {
+      onSuccess: () => {
+        setHasUnsavedChanges(false);
+        setLastSavedAt(new Date());
+      },
+    });
+  }
 
-  const handleDataChange = useCallback(
-    (data: ProductDataTableSchema) => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        pendingDataRef.current = data;
-        return;
-      }
-
-      setHasUnsavedChanges(true);
+  function handleAutoSave(data: ProductDataTableSchema) {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
       pendingDataRef.current = data;
-
-      if (autoSave) {
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
-        }
-        debounceTimerRef.current = setTimeout(() => {
-          if (pendingDataRef.current) {
-            saveData(pendingDataRef.current);
-          }
-        }, 1500);
-      }
-    },
-    [autoSave, saveData]
-  );
-
-  const handleManualSave = useCallback(() => {
-    if (pendingDataRef.current) {
-      saveData(pendingDataRef.current);
+      return;
     }
-  }, [saveData]);
+
+    setHasUnsavedChanges(true);
+    pendingDataRef.current = data;
+
+    if (autoSave) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        if (pendingDataRef.current) {
+          saveDataToDB(pendingDataRef.current);
+        }
+      }, 1500);
+    }
+  }
+
+  function handleManualSave() {
+    if (pendingDataRef.current) {
+      saveDataToDB(pendingDataRef.current);
+    }
+  }
 
   useEffect(() => {
     return () => {
@@ -232,7 +217,7 @@ export default function Page() {
         <ProductSpecificationDataTable
           key={dataVersion}
           initialData={initialData}
-          onDataChange={handleDataChange}
+          onDataChange={handleAutoSave}
         />
       </div>
     </div>
