@@ -50,6 +50,13 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  ProductSpecificationDataTableProps,
+  sparseProductSpecDataForDatabase,
+  type CellFormat,
+  type DataType,
+  type ProductDataTableSchema,
+} from "@/types/product-data-table";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -58,11 +65,6 @@ const ROW_HEIGHT = 34;
 const ROW_NUMBER_WIDTH = 50;
 const MIN_COL_WIDTH = 50;
 const MAX_COL_WIDTH = 500;
-
-interface CellFormat {
-  bgColor?: string;
-  textColor?: string;
-}
 
 const DEFAULT_COLORS = [
   "#ffffff",
@@ -204,8 +206,6 @@ const DATA_TYPE_OPTIONS = [
   { value: "na", label: "NA" },
 ] as const;
 
-type DataType = (typeof DATA_TYPE_OPTIONS)[number]["value"];
-
 const DataTypeSelect = ({
   colIndex,
   value,
@@ -232,34 +232,79 @@ const DataTypeSelect = ({
   </Select>
 );
 
-export function ProductSpecificationDataTable() {
+export function ProductSpecificationDataTable({
+  initialData,
+  onDataChange,
+}: ProductSpecificationDataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const [cellData, setCellData] = useState<Record<string, string>>({});
+  const isInitialized = useRef(false);
+
+  const [cellData, setCellData] = useState<Record<string, string>>(
+    initialData?.cellData ?? {}
+  );
   const cellDataRef = useRef<Record<string, string>>({});
   cellDataRef.current = cellData;
-  const [headerData, setHeaderData] = useState<Record<number, string>>({});
-  // Stores data type per column. Sparse object - missing keys default to "blank".
-  // When saving to DB: use columnTypeData[col] ?? "blank" to get all values as strings.
+
+  const [headerData, setHeaderData] = useState<Record<number, string>>(
+    initialData?.headerData ?? {}
+  );
+
   const [columnTypeData, setColumnTypeData] = useState<
     Record<number, DataType>
-  >({});
+  >(initialData?.columnTypeData ?? {});
+
   const [activeCell, setActiveCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
+    initialData?.columnSizing ?? {}
+  );
+
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
-    Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`)
+
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    initialData?.columnOrder ??
+      Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`)
   );
+
   const [cellFormats, setCellFormats] = useState<Record<string, CellFormat>>(
-    {}
+    initialData?.cellFormats ?? {}
   );
+
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [selectionStart, setSelectionStart] = useState<{
     row: number;
     col: number;
   } | null>(null);
+
+  useEffect(() => {
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      return;
+    }
+
+    if (onDataChange) {
+      const data = sparseProductSpecDataForDatabase(
+        headerData,
+        columnTypeData,
+        cellData,
+        cellFormats,
+        columnOrder,
+        columnSizing
+      );
+      onDataChange(data);
+    }
+  }, [
+    headerData,
+    columnTypeData,
+    cellData,
+    cellFormats,
+    columnOrder,
+    columnSizing,
+    onDataChange,
+  ]);
 
   const applyBgColor = useCallback(
     (color: string) => {
