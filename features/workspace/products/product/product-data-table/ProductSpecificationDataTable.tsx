@@ -59,9 +59,12 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   ProductSpecificationDataTableProps,
   type CellFormat,
+  type ColumnFilter,
   type DataType,
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
+import { applyFilter, detectColumnDataType } from "./column-filter-utils";
+import { ColumnFilterPopover } from "./ColumnFilterPopover";
 import {
   parseWorkbookToTableData,
   exportTableToWorkbook,
@@ -117,7 +120,17 @@ const EditableHeaderContent = ({
   const meta = table.options.meta as {
     headerData: Record<number, string>;
     setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+    cellData: Record<string, string>;
+    columnFilters: Record<number, ColumnFilter>;
+    setColumnFilters: React.Dispatch<
+      React.SetStateAction<Record<number, ColumnFilter>>
+    >;
   };
+
+  const dataType = useMemo(
+    () => detectColumnDataType(meta.cellData, colIndex, ROW_COUNT),
+    [meta.cellData, colIndex]
+  );
 
   return (
     <>
@@ -143,6 +156,20 @@ const EditableHeaderContent = ({
           <PiCaretUpDownDuotone className="h-3 w-3 opacity-50" />
         )}
       </Button>
+      <ColumnFilterPopover
+        dataType={dataType}
+        filter={meta.columnFilters[colIndex]}
+        onApply={(filter) =>
+          meta.setColumnFilters((f) => ({ ...f, [colIndex]: filter }))
+        }
+        onClear={() =>
+          meta.setColumnFilters((f) => {
+            const updated = { ...f };
+            delete updated[colIndex];
+            return updated;
+          })
+        }
+      />
     </>
   );
 };
@@ -318,6 +345,9 @@ export function ProductSpecificationDataTable({
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [columnFilters, setColumnFilters] = useState<
+    Record<number, ColumnFilter>
+  >({});
   const pendingFileRef = useRef<File | null>(null);
 
   useEffect(() => {
@@ -465,11 +495,25 @@ export function ProductSpecificationDataTable({
     (
       row: Row<{ rowIndex: number }>,
       _columnId: string,
-      filterValue: string
+      filterValue: {
+        search: string;
+        columnFilters: Record<number, ColumnFilter>;
+      }
     ) => {
-      if (!filterValue) return true;
       const rowIndex = row.original.rowIndex;
-      const searchTerm = filterValue.toLowerCase();
+      const { search, columnFilters: filters } = filterValue || {
+        search: "",
+        columnFilters: {},
+      };
+
+      for (const [colIndexStr, filter] of Object.entries(filters)) {
+        const colIndex = parseInt(colIndexStr);
+        const cellValue = cellData[`${rowIndex},${colIndex}`];
+        if (!applyFilter(cellValue, filter)) return false;
+      }
+
+      if (!search) return true;
+      const searchTerm = search.toLowerCase();
       for (let col = 0; col < COLUMN_COUNT; col++) {
         const cellValue = cellData[`${rowIndex},${col}`];
         if (cellValue?.toLowerCase().includes(searchTerm)) return true;
@@ -477,6 +521,11 @@ export function ProductSpecificationDataTable({
       return false;
     },
     [cellData]
+  );
+
+  const globalFilterValue = useMemo(
+    () => ({ search: debouncedSearch, columnFilters }),
+    [debouncedSearch, columnFilters]
   );
 
   const table = useReactTable({
@@ -494,12 +543,15 @@ export function ProductSpecificationDataTable({
     meta: {
       headerData,
       setHeaderData,
+      cellData,
+      columnFilters,
+      setColumnFilters,
     },
     state: {
       columnSizing,
       sorting,
       columnOrder,
-      globalFilter: debouncedSearch,
+      globalFilter: globalFilterValue,
     },
     onColumnSizingChange: setColumnSizing,
   });
