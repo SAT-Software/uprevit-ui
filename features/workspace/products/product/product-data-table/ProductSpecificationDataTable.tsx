@@ -11,11 +11,14 @@ import {
 import {
   type ColumnDef,
   type ColumnSizingState,
+  type FilterFn,
+  type Row,
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  SortingState,
+  getFilteredRowModel,
   getSortedRowModel,
+  SortingState,
+  useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -65,6 +68,12 @@ import {
 } from "@/lib/import-export";
 import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
 import { FindReplaceDialog } from "./FindReplaceDialog";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Search } from "lucide-react";
 import { toast } from "sonner";
 
 const COLUMN_COUNT = 150;
@@ -307,7 +316,14 @@ export function ProductSpecificationDataTable({
 
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [showFindReplace, setShowFindReplace] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const pendingFileRef = useRef<File | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (!hasLoadedData.current) {
@@ -445,15 +461,35 @@ export function ProductSpecificationDataTable({
     }));
   }, []);
 
+  const globalFilterFn: FilterFn<{ rowIndex: number }> = useCallback(
+    (
+      row: Row<{ rowIndex: number }>,
+      _columnId: string,
+      filterValue: string
+    ) => {
+      if (!filterValue) return true;
+      const rowIndex = row.original.rowIndex;
+      const searchTerm = filterValue.toLowerCase();
+      for (let col = 0; col < COLUMN_COUNT; col++) {
+        const cellValue = cellData[`${rowIndex},${col}`];
+        if (cellValue?.toLowerCase().includes(searchTerm)) return true;
+      }
+      return false;
+    },
+    [cellData]
+  );
+
   const table = useReactTable({
     data: rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    globalFilterFn,
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     columnResizeDirection: "ltr",
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
     onColumnOrderChange: setColumnOrder,
     meta: {
       headerData,
@@ -463,6 +499,7 @@ export function ProductSpecificationDataTable({
       columnSizing,
       sorting,
       columnOrder,
+      globalFilter: debouncedSearch,
     },
     onColumnSizingChange: setColumnSizing,
   });
@@ -666,6 +703,18 @@ export function ProductSpecificationDataTable({
         )}
 
         <div className="flex-1" />
+
+        <InputGroup className="max-w-xs">
+          <InputGroupInput
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 text-sm"
+          />
+          <InputGroupAddon>
+            <Search className="size-4" />
+          </InputGroupAddon>
+        </InputGroup>
 
         <Button
           variant="secondary"
