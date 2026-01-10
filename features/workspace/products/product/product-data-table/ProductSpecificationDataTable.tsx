@@ -31,6 +31,8 @@ import {
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiDotsSixVerticalBold,
+  PiDownloadSimple,
+  PiUploadSimple,
 } from "react-icons/pi";
 import {
   closestCenter,
@@ -56,6 +58,12 @@ import {
   type DataType,
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
+import {
+  parseWorkbookToTableData,
+  exportTableToWorkbook,
+} from "@/lib/import-export";
+import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
+import { toast } from "sonner";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -236,6 +244,7 @@ export function ProductSpecificationDataTable({
   onDataChange,
 }: ProductSpecificationDataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedData = useRef(false);
   const dndContextId = useId();
 
@@ -293,6 +302,9 @@ export function ProductSpecificationDataTable({
     row: number;
     col: number;
   } | null>(null);
+
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const pendingFileRef = useRef<File | null>(null);
 
   useEffect(() => {
     if (!hasLoadedData.current) {
@@ -485,6 +497,66 @@ export function ProductSpecificationDataTable({
     }
   }
 
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    e.target.value = "";
+
+    const hasData =
+      Object.keys(cellData).length > 0 || Object.keys(headerData).length > 0;
+
+    if (hasData) {
+      pendingFileRef.current = file;
+      setShowImportConfirm(true);
+    } else {
+      processImport(file);
+    }
+  }
+
+  async function processImport(file: File) {
+    try {
+      const buffer = await file.arrayBuffer();
+      const { headers, columnTypes, cells } = parseWorkbookToTableData(buffer);
+
+      setHeaderData(headers);
+      setColumnTypeData(columnTypes);
+      setCellData(cells);
+      setCellFormats({});
+    } catch (err) {
+      console.error("Import failed:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to import file");
+    }
+  }
+
+  function handleImportConfirm() {
+    setShowImportConfirm(false);
+    if (pendingFileRef.current) {
+      processImport(pendingFileRef.current);
+      pendingFileRef.current = null;
+    }
+  }
+
+  function handleExport() {
+    try {
+      const filename = `product-data-${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+      exportTableToWorkbook(
+        {
+          headers: headerData,
+          columnTypes: columnTypeData,
+          cells: cellData,
+          columnCount: COLUMN_COUNT,
+        },
+        filename
+      );
+    } catch (err) {
+      console.error("Export failed:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to export file");
+    }
+  }
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -589,6 +661,34 @@ export function ProductSpecificationDataTable({
             </span>
           </>
         )}
+
+        <div className="flex-1" />
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls,.numbers"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          // className="gap-1.5"
+        >
+          <PiUploadSimple className="size-4" />
+          Import
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleExport}
+          // className="gap-1.5"
+        >
+          <PiDownloadSimple className="size-4" />
+          Export
+        </Button>
       </div>
 
       <DndContext
@@ -788,6 +888,13 @@ export function ProductSpecificationDataTable({
           </table>
         </div>
       </DndContext>
+
+      <ConfirmFileImportAlertDialog
+        open={showImportConfirm}
+        onOpenChange={setShowImportConfirm}
+        onConfirm={handleImportConfirm}
+        onCancel={() => (pendingFileRef.current = null)}
+      />
     </div>
   );
 }
