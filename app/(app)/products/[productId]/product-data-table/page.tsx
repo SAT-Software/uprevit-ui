@@ -43,7 +43,6 @@ export default function Page() {
     useUpdateProductTabData();
 
   const workbookData = productTabData?.result?.data?.data?.workbook_data;
-  const dataVersion = workbookData ? "loaded" : "empty";
 
   const initialData = useMemo(() => {
     return parseProductSpecDataFromDatabase(workbookData);
@@ -52,6 +51,10 @@ export default function Page() {
   function handleAutoSaveToggle(checked: boolean) {
     setAutoSave(checked);
     localStorage.setItem(AUTO_SAVE_STORAGE_KEY, String(checked));
+    if (!checked && debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
   }
 
   function saveDataToDB(data: ProductDataTableSchema) {
@@ -93,6 +96,10 @@ export default function Page() {
   }
 
   function handleManualSave() {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
     if (pendingDataRef.current) {
       saveDataToDB(pendingDataRef.current);
     }
@@ -215,7 +222,6 @@ export default function Page() {
         </div>
 
         <ProductSpecificationDataTable
-          key={dataVersion}
           initialData={initialData}
           onDataChange={handleAutoSave}
         />

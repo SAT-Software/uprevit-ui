@@ -236,7 +236,23 @@ export function ProductSpecificationDataTable({
   onDataChange,
 }: ProductSpecificationDataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const isInitialized = useRef(false);
+  const hasLoadedData = useRef(false);
+  const dndContextId = useId();
+
+  useEffect(() => {
+    if (!hasLoadedData.current && initialData) {
+      setCellData(initialData.cellData ?? {});
+      setHeaderData(initialData.headerData ?? {});
+      setColumnTypeData(initialData.columnTypeData ?? {});
+      setColumnSizing(initialData.columnSizing ?? {});
+      setColumnOrder(
+        initialData.columnOrder ??
+          Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`)
+      );
+      setCellFormats(initialData.cellFormats ?? {});
+      hasLoadedData.current = true;
+    }
+  }, [initialData]);
 
   const [cellData, setCellData] = useState<Record<string, string>>(
     initialData?.cellData ?? {}
@@ -279,8 +295,7 @@ export function ProductSpecificationDataTable({
   } | null>(null);
 
   useEffect(() => {
-    if (!isInitialized.current) {
-      isInitialized.current = true;
+    if (!hasLoadedData.current) {
       return;
     }
 
@@ -525,7 +540,7 @@ export function ProductSpecificationDataTable({
 
   useEffect(() => {
     colVirtualizer.measure();
-  }, [columnSizes]);
+  }, [columnSizes, colVirtualizer]);
 
   const headerGroup = table.getHeaderGroups()[0];
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
@@ -577,8 +592,8 @@ export function ProductSpecificationDataTable({
       </div>
 
       <DndContext
+        id={dndContextId}
         collisionDetection={closestCenter}
-        id={useId()}
         modifiers={[restrictToHorizontalAxis]}
         onDragEnd={handleDragEnd}
         sensors={sensors}
