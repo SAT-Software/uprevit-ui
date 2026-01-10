@@ -62,6 +62,8 @@ import {
   parseWorkbookToTableData,
   exportTableToWorkbook,
 } from "@/lib/import-export";
+import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
+import { toast } from "sonner";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -301,6 +303,9 @@ export function ProductSpecificationDataTable({
     col: number;
   } | null>(null);
 
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const pendingFileRef = useRef<File | null>(null);
+
   useEffect(() => {
     if (!hasLoadedData.current) {
       return;
@@ -492,22 +497,24 @@ export function ProductSpecificationDataTable({
     }
   }
 
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    e.target.value = "";
+
     const hasData =
       Object.keys(cellData).length > 0 || Object.keys(headerData).length > 0;
-    if (hasData) {
-      const confirmed = window.confirm(
-        "Your current data will be replaced. Continue?"
-      );
-      if (!confirmed) {
-        e.target.value = "";
-        return;
-      }
-    }
 
+    if (hasData) {
+      pendingFileRef.current = file;
+      setShowImportConfirm(true);
+    } else {
+      processImport(file);
+    }
+  }
+
+  async function processImport(file: File) {
     try {
       const buffer = await file.arrayBuffer();
       const { headers, columnTypes, cells } = parseWorkbookToTableData(buffer);
@@ -518,25 +525,36 @@ export function ProductSpecificationDataTable({
       setCellFormats({});
     } catch (err) {
       console.error("Import failed:", err);
-      alert("Failed to import file. Please check the file format.");
+      toast.error(err instanceof Error ? err.message : "Failed to import file");
     }
+  }
 
-    e.target.value = "";
+  function handleImportConfirm() {
+    setShowImportConfirm(false);
+    if (pendingFileRef.current) {
+      processImport(pendingFileRef.current);
+      pendingFileRef.current = null;
+    }
   }
 
   function handleExport() {
-    const filename = `product-data-${
-      new Date().toISOString().split("T")[0]
-    }.xlsx`;
-    exportTableToWorkbook(
-      {
-        headers: headerData,
-        columnTypes: columnTypeData,
-        cells: cellData,
-        columnCount: COLUMN_COUNT,
-      },
-      filename
-    );
+    try {
+      const filename = `product-data-${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+      exportTableToWorkbook(
+        {
+          headers: headerData,
+          columnTypes: columnTypeData,
+          cells: cellData,
+          columnCount: COLUMN_COUNT,
+        },
+        filename
+      );
+    } catch (err) {
+      console.error("Export failed:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to export file");
+    }
   }
 
   const sensors = useSensors(
@@ -650,7 +668,7 @@ export function ProductSpecificationDataTable({
           ref={fileInputRef}
           type="file"
           accept=".csv,.xlsx,.xls,.numbers"
-          onChange={handleImport}
+          onChange={handleFileSelect}
           className="hidden"
         />
         <Button
@@ -870,6 +888,13 @@ export function ProductSpecificationDataTable({
           </table>
         </div>
       </DndContext>
+
+      <ConfirmFileImportAlertDialog
+        open={showImportConfirm}
+        onOpenChange={setShowImportConfirm}
+        onConfirm={handleImportConfirm}
+        onCancel={() => (pendingFileRef.current = null)}
+      />
     </div>
   );
 }

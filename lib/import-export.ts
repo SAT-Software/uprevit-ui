@@ -1,5 +1,11 @@
 import XLSX from "xlsx-js-style";
 import type { DataType } from "@/types/product-data-table";
+import {
+  validateFileSize,
+  validateSheetCount,
+  validateDataBoundaries,
+  validateCellCount,
+} from "./import-validation";
 
 const VALID_DATA_TYPES: DataType[] = ["blank", "constant", "variable", "na"];
 
@@ -26,8 +32,22 @@ function isDataTypeRow(row: (string | number | undefined)[]): boolean {
 }
 
 export function parseWorkbookToTableData(file: ArrayBuffer) {
+  validateFileSize(file);
+
   const workbook = XLSX.read(file);
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+  if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+    throw new Error("The file contains no sheets");
+  }
+
+  validateSheetCount(workbook.SheetNames);
+
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+
+  if (!worksheet) {
+    throw new Error(`Sheet "${sheetName}" is empty or missing`);
+  }
 
   const rawData: (string | number | undefined)[][] = XLSX.utils.sheet_to_json(
     worksheet,
@@ -35,6 +55,9 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
   );
 
   if (rawData.length === 0) return { headers: {}, columnTypes: {}, cells: {} };
+
+  const maxColumnCount = Math.max(...rawData.map((row) => row?.length || 0));
+  validateDataBoundaries(rawData.length, maxColumnCount);
 
   const headers: Record<number, string> = {};
   const headerRow = rawData[0] || [];
@@ -74,6 +97,8 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
       }
     });
   }
+
+  validateCellCount(Object.keys(cells).length);
 
   return { headers, columnTypes, cells };
 }
