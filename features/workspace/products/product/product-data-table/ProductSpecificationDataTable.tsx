@@ -31,6 +31,7 @@ import {
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiDotsSixVerticalBold,
+  PiDownloadSimple,
   PiUploadSimple,
 } from "react-icons/pi";
 import {
@@ -57,7 +58,10 @@ import {
   type DataType,
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
-import { parseWorkbookToTableData } from "@/lib/import-export";
+import {
+  parseWorkbookToTableData,
+  exportTableToWorkbook,
+} from "@/lib/import-export";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -520,6 +524,21 @@ export function ProductSpecificationDataTable({
     e.target.value = "";
   }
 
+  function handleExport() {
+    const filename = `product-data-${
+      new Date().toISOString().split("T")[0]
+    }.xlsx`;
+    exportTableToWorkbook(
+      {
+        headers: headerData,
+        columnTypes: columnTypeData,
+        cells: cellData,
+        columnCount: COLUMN_COUNT,
+      },
+      filename
+    );
+  }
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -635,13 +654,22 @@ export function ProductSpecificationDataTable({
           className="hidden"
         />
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          className="gap-1.5"
+          // className="gap-1.5"
         >
           <PiUploadSimple className="size-4" />
           Import
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleExport}
+          // className="gap-1.5"
+        >
+          <PiDownloadSimple className="size-4" />
+          Export
         </Button>
       </div>
 

@@ -3,6 +3,13 @@ import type { DataType } from "@/types/product-data-table";
 
 const VALID_DATA_TYPES: DataType[] = ["blank", "constant", "variable", "na"];
 
+interface ExportData {
+  headers: Record<number, string>;
+  columnTypes: Record<number, DataType>;
+  cells: Record<string, string>;
+  columnCount: number;
+}
+
 function isDataTypeRow(row: (string | number | undefined)[]): boolean {
   if (!row || row.length === 0) return false;
 
@@ -69,4 +76,48 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
   }
 
   return { headers, columnTypes, cells };
+}
+
+export function exportTableToWorkbook(data: ExportData, filename: string) {
+  const { headers, columnTypes, cells, columnCount } = data;
+
+  const headerRow: string[] = [];
+  for (let col = 0; col < columnCount; col++) {
+    headerRow.push(headers[col] || "");
+  }
+
+  const hasAnyDataType = Object.values(columnTypes).some(
+    (type) => type && type !== "blank"
+  );
+
+  const typeRow: string[] = [];
+  if (hasAnyDataType) {
+    for (let col = 0; col < columnCount; col++) {
+      typeRow.push(columnTypes[col] || "");
+    }
+  }
+
+  let maxRow = 0;
+  Object.keys(cells).forEach((key) => {
+    const rowIndex = parseInt(key.split(",")[0]);
+    if (rowIndex > maxRow) maxRow = rowIndex;
+  });
+
+  const dataRows: string[][] = [];
+  for (let row = 0; row <= maxRow; row++) {
+    const rowData: string[] = [];
+    for (let col = 0; col < columnCount; col++) {
+      rowData.push(cells[`${row},${col}`] || "");
+    }
+    dataRows.push(rowData);
+  }
+
+  const allRows: string[][] = [headerRow];
+  if (hasAnyDataType) allRows.push(typeRow);
+  allRows.push(...dataRows);
+  const worksheet = XLSX.utils.aoa_to_sheet(allRows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+  XLSX.writeFile(workbook, filename, { compression: true });
 }
