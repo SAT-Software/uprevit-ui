@@ -32,6 +32,7 @@ import {
   PiCaretUpDuotone,
   PiDotsSixVerticalBold,
   PiDownloadSimple,
+  PiMagnifyingGlass,
   PiUploadSimple,
 } from "react-icons/pi";
 import {
@@ -63,6 +64,7 @@ import {
   exportTableToWorkbook,
 } from "@/lib/import-export";
 import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
+import { FindReplaceDialog } from "./FindReplaceDialog";
 import { toast } from "sonner";
 
 const COLUMN_COUNT = 150;
@@ -304,6 +306,7 @@ export function ProductSpecificationDataTable({
   } | null>(null);
 
   const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [showFindReplace, setShowFindReplace] = useState(false);
   const pendingFileRef = useRef<File | null>(null);
 
   useEffect(() => {
@@ -664,6 +667,15 @@ export function ProductSpecificationDataTable({
 
         <div className="flex-1" />
 
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setShowFindReplace(true)}
+        >
+          <PiMagnifyingGlass className="size-4" />
+          Find & Replace
+        </Button>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -894,6 +906,13 @@ export function ProductSpecificationDataTable({
         onOpenChange={setShowImportConfirm}
         onConfirm={handleImportConfirm}
         onCancel={() => (pendingFileRef.current = null)}
+      />
+
+      <FindReplaceDialog
+        open={showFindReplace}
+        onOpenChange={setShowFindReplace}
+        cellData={cellData}
+        onReplace={setCellData}
       />
     </div>
   );
