@@ -1,25 +1,129 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { type ProductDataTableSchema } from "@/types/product-data-table";
+import { parseProductSpecDataFromDatabase } from "@/utils/product/product-spec";
 import { useParams } from "next/navigation";
-import { PiTableDuotone, PiWarningCircleDuotone } from "react-icons/pi";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  PiCloudCheckDuotone,
+  PiFloppyDiskDuotone,
+  PiWarningCircleDuotone,
+} from "react-icons/pi";
+
+const AUTO_SAVE_STORAGE_KEY = "product-data-table-auto-save";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
-  const productId = params?.productId;
+  const productId = params?.productId ?? "";
+  const [autoSave, setAutoSave] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(AUTO_SAVE_STORAGE_KEY);
+      return stored !== "false";
+    }
+    return true;
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
+  const isFirstRender = useRef(true);
 
   const {
-    data: productInfoData,
+    data: productTabData,
     isLoading,
     error,
-  } = useGetProductTabData(productId, "product-information");
+  } = useGetProductTabData(productId, "product-specifications");
+  const { mutate: updateTabData, isPending: isSaving } =
+    useUpdateProductTabData();
 
-  const productName =
-    productInfoData?.result?.data?.data?.product_name || "Product";
+  const workbookData = productTabData?.result?.data?.data?.workbook_data;
 
-  const isSubmitted =
-    productInfoData?.result?.data?.product_data?.data?.status === "submitted";
+  const initialData = useMemo(() => {
+    return parseProductSpecDataFromDatabase(workbookData);
+  }, [workbookData]);
+
+  function handleAutoSaveToggle(checked: boolean) {
+    setAutoSave(checked);
+    localStorage.setItem(AUTO_SAVE_STORAGE_KEY, String(checked));
+    if (!checked && debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }
+
+  function saveDataToDB(data: ProductDataTableSchema) {
+    const payload = {
+      id: productId,
+      tab: "product-specifications",
+      action: "add_product_data",
+      data: { workbook_data: data },
+    };
+
+    updateTabData(payload, {
+      onSuccess: () => {
+        setHasUnsavedChanges(false);
+        setLastSavedAt(new Date());
+      },
+    });
+  }
+
+  function handleAutoSave(data: ProductDataTableSchema) {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      pendingDataRef.current = data;
+      return;
+    }
+
+    setHasUnsavedChanges(true);
+    pendingDataRef.current = data;
+
+    if (autoSave) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        if (pendingDataRef.current) {
+          saveDataToDB(pendingDataRef.current);
+        }
+      }, 1500);
+    }
+  }
+
+  function handleManualSave() {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (pendingDataRef.current) {
+      saveDataToDB(pendingDataRef.current);
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !autoSave) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges, autoSave]);
 
   if (isLoading) {
     return (
@@ -75,10 +179,52 @@ export default function Page() {
               Manage product data in the table below
             </p>
           </div>
-          {/* Buttons will go here */}
+
+          <div className="flex items-center gap-3">
+            {isSaving ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Spinner className="w-4 h-4" />
+                <span className="text-xs">Saving...</span>
+              </div>
+            ) : lastSavedAt ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
+                <span className="text-xs">Saved</span>
+              </div>
+            ) : hasUnsavedChanges ? (
+              <span className="text-xs text-amber-600">Unsaved changes</span>
+            ) : null}
+
+            <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/50">
+              <span className="text-xs text-muted-foreground">Auto-save</span>
+              <Switch
+                checked={autoSave}
+                onCheckedChange={handleAutoSaveToggle}
+                className="scale-75"
+              />
+            </div>
+
+            <Button
+              size="sm"
+              variant={hasUnsavedChanges ? "default" : "outline"}
+              onClick={handleManualSave}
+              disabled={isSaving || !hasUnsavedChanges}
+              className="gap-1.5"
+            >
+              {isSaving ? (
+                <Spinner className="w-4 h-4" />
+              ) : (
+                <PiFloppyDiskDuotone className="w-4 h-4" />
+              )}
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
 
-        <ProductSpecificationDataTable />
+        <ProductSpecificationDataTable
+          initialData={initialData}
+          onDataChange={handleAutoSave}
+        />
       </div>
     </div>
   );
