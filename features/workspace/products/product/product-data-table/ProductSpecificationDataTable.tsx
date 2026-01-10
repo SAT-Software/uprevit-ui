@@ -31,6 +31,7 @@ import {
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiDotsSixVerticalBold,
+  PiUploadSimple,
 } from "react-icons/pi";
 import {
   closestCenter,
@@ -56,6 +57,7 @@ import {
   type DataType,
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
+import { parseWorkbookToTableData } from "@/lib/import-export";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -236,6 +238,7 @@ export function ProductSpecificationDataTable({
   onDataChange,
 }: ProductSpecificationDataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedData = useRef(false);
   const dndContextId = useId();
 
@@ -485,6 +488,38 @@ export function ProductSpecificationDataTable({
     }
   }
 
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const hasData =
+      Object.keys(cellData).length > 0 || Object.keys(headerData).length > 0;
+    if (hasData) {
+      const confirmed = window.confirm(
+        "Your current data will be replaced. Continue?"
+      );
+      if (!confirmed) {
+        e.target.value = "";
+        return;
+      }
+    }
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const { headers, columnTypes, cells } = parseWorkbookToTableData(buffer);
+
+      setHeaderData(headers);
+      setColumnTypeData(columnTypes);
+      setCellData(cells);
+      setCellFormats({});
+    } catch (err) {
+      console.error("Import failed:", err);
+      alert("Failed to import file. Please check the file format.");
+    }
+
+    e.target.value = "";
+  }
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -589,6 +624,25 @@ export function ProductSpecificationDataTable({
             </span>
           </>
         )}
+
+        <div className="flex-1" />
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls,.numbers"
+          onChange={handleImport}
+          className="hidden"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          className="gap-1.5"
+        >
+          <PiUploadSimple className="size-4" />
+          Import
+        </Button>
       </div>
 
       <DndContext
