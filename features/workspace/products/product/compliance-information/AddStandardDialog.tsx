@@ -196,21 +196,28 @@ export default function AddStandardDialog({
                             key={standard.id}
                             value={standard.id}
                             onSelect={(currentValue) => {
-                              const originalValue = COMPLIANCE_STANDARDS.find(
-                                (s) =>
-                                  s.id.toLowerCase() ===
-                                  currentValue.toLowerCase()
-                              )?.id;
+                              const selectedStandard =
+                                COMPLIANCE_STANDARDS.find(
+                                  (s) =>
+                                    s.id.toLowerCase() ===
+                                    currentValue.toLowerCase()
+                                );
 
-                              if (originalValue) {
+                              if (selectedStandard) {
+                                const isDeselecting =
+                                  selectedStandard.id === standardSelect;
                                 setValue(
                                   "standardSelect",
-                                  originalValue === standardSelect
-                                    ? ""
-                                    : originalValue,
+                                  isDeselecting ? "" : selectedStandard.id,
                                   { shouldValidate: true }
                                 );
                                 clearErrors("standardInput");
+                                setValue(
+                                  "description",
+                                  isDeselecting
+                                    ? ""
+                                    : selectedStandard.description
+                                );
                                 setComboboxOpen(false);
                               }
                             }}
@@ -323,29 +330,27 @@ export default function AddStandardDialog({
               )}
             </div>
 
-            {/* Description field - only show for custom input */}
-            {!standardSelect && (
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
-                <Textarea
-                  id={`${id}-description`}
-                  placeholder="Describe the standard's purpose, scope, and requirements"
-                  className="h-24 resize-none"
-                  aria-invalid={errors.description ? "true" : "false"}
-                  {...register("description", {
-                    maxLength: {
-                      value: 500,
-                      message: "Description must not exceed 500 characters",
-                    },
-                  })}
-                />
-                {errors.description && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Description field - always visible for editing */}
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-description`}>Description</Label>
+              <Textarea
+                id={`${id}-description`}
+                placeholder="Describe the standard's purpose, scope, and requirements"
+                className="h-24 resize-none"
+                aria-invalid={errors.description ? "true" : "false"}
+                {...register("description", {
+                  maxLength: {
+                    value: 500,
+                    message: "Description must not exceed 500 characters",
+                  },
+                })}
+              />
+              {errors.description && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
           </div>
         </form>
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">

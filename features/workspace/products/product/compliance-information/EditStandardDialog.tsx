@@ -313,6 +313,9 @@ export default function EditStandardDialog({
                       <span className="font-medium">Scope:</span>{" "}
                       {selectedStandardData.scope}
                     </p>
+                    <p className="mt-2 text-foreground/80 leading-relaxed italic">
+                      {selectedStandardData.description}
+                    </p>
                   </div>
                 </div>
               )}
