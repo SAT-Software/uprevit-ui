@@ -25,3 +25,21 @@ export interface ProductSpecificationDataTableProps {
   };
   onDataChange?: (data: ProductDataTableSchema) => void;
 }
+
+export type ColumnDataType = "number" | "string";
+
+export type FilterOperator =
+  | "contains"
+  | "equals"
+  | "startsWith"
+  | "endsWith"
+  | "notContains"
+  | "lt"
+  | "gt"
+  | "lte"
+  | "gte";
+
+export interface ColumnFilter {
+  operator: FilterOperator;
+  value: string;
+}

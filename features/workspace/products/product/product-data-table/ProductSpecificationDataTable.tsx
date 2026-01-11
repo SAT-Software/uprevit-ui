@@ -2,6 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -9,13 +14,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  type ColumnDef,
-  type ColumnSizingState,
+  exportTableToWorkbook,
+  parseWorkbookToTableData,
+} from "@/lib/import-export";
+import {
+  ProductSpecificationDataTableProps,
+  type CellFormat,
+  type ColumnFilter,
+  type DataType,
+} from "@/types/product-data-table";
+import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  SortingState,
+  getFilteredRowModel,
   getSortedRowModel,
+  SortingState,
+  useReactTable,
+  type ColumnDef,
+  type ColumnSizingState,
+  type FilterFn,
+  type Row,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -31,39 +68,15 @@ import {
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiDotsSixVerticalBold,
-  PiDownloadSimple,
-  PiUploadSimple,
+  PiDownloadSimpleDuotone,
+  PiMagnifyingGlassDuotone,
+  PiUploadSimpleDuotone,
 } from "react-icons/pi";
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
-import {
-  arrayMove,
-  horizontalListSortingStrategy,
-  SortableContext,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  ProductSpecificationDataTableProps,
-  type CellFormat,
-  type DataType,
-} from "@/types/product-data-table";
-import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
-import {
-  parseWorkbookToTableData,
-  exportTableToWorkbook,
-} from "@/lib/import-export";
-import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
 import { toast } from "sonner";
+import { applyFilter, detectColumnDataType } from "./column-filter-utils";
+import { ColumnFilterPopover } from "./ColumnFilterPopover";
+import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
+import { FindReplaceDialog } from "./FindReplaceDialog";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -106,7 +119,17 @@ const EditableHeaderContent = ({
   const meta = table.options.meta as {
     headerData: Record<number, string>;
     setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+    cellData: Record<string, string>;
+    columnFilters: Record<number, ColumnFilter>;
+    setColumnFilters: React.Dispatch<
+      React.SetStateAction<Record<number, ColumnFilter>>
+    >;
   };
+
+  const dataType = useMemo(
+    () => detectColumnDataType(meta.cellData, colIndex, ROW_COUNT),
+    [meta.cellData, colIndex]
+  );
 
   return (
     <>
@@ -132,6 +155,20 @@ const EditableHeaderContent = ({
           <PiCaretUpDownDuotone className="h-3 w-3 opacity-50" />
         )}
       </Button>
+      <ColumnFilterPopover
+        dataType={dataType}
+        filter={meta.columnFilters[colIndex]}
+        onApply={(filter) =>
+          meta.setColumnFilters((f) => ({ ...f, [colIndex]: filter }))
+        }
+        onClear={() =>
+          meta.setColumnFilters((f) => {
+            const updated = { ...f };
+            delete updated[colIndex];
+            return updated;
+          })
+        }
+      />
     </>
   );
 };
@@ -304,7 +341,18 @@ export function ProductSpecificationDataTable({
   } | null>(null);
 
   const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [showFindReplace, setShowFindReplace] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [columnFilters, setColumnFilters] = useState<
+    Record<number, ColumnFilter>
+  >({});
   const pendingFileRef = useRef<File | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (!hasLoadedData.current) {
@@ -442,24 +490,67 @@ export function ProductSpecificationDataTable({
     }));
   }, []);
 
+  const globalFilterFn: FilterFn<{ rowIndex: number }> = useCallback(
+    (
+      row: Row<{ rowIndex: number }>,
+      _columnId: string,
+      filterValue: {
+        search: string;
+        columnFilters: Record<number, ColumnFilter>;
+      }
+    ) => {
+      const rowIndex = row.original.rowIndex;
+      const { search, columnFilters: filters } = filterValue || {
+        search: "",
+        columnFilters: {},
+      };
+
+      for (const [colIndexStr, filter] of Object.entries(filters)) {
+        const colIndex = parseInt(colIndexStr);
+        const cellValue = cellData[`${rowIndex},${colIndex}`];
+        if (!applyFilter(cellValue, filter)) return false;
+      }
+
+      if (!search) return true;
+      const searchTerm = search.toLowerCase();
+      for (let col = 0; col < COLUMN_COUNT; col++) {
+        const cellValue = cellData[`${rowIndex},${col}`];
+        if (cellValue?.toLowerCase().includes(searchTerm)) return true;
+      }
+      return false;
+    },
+    [cellData]
+  );
+
+  const globalFilterValue = useMemo(
+    () => ({ search: debouncedSearch, columnFilters }),
+    [debouncedSearch, columnFilters]
+  );
+
   const table = useReactTable({
     data: rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    globalFilterFn,
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     columnResizeDirection: "ltr",
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
     onColumnOrderChange: setColumnOrder,
     meta: {
       headerData,
       setHeaderData,
+      cellData,
+      columnFilters,
+      setColumnFilters,
     },
     state: {
       columnSizing,
       sorting,
       columnOrder,
+      globalFilter: globalFilterValue,
     },
     onColumnSizingChange: setColumnSizing,
   });
@@ -620,7 +711,7 @@ export function ProductSpecificationDataTable({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Formatting Toolbar */}
-      <div className="flex items-center gap-4 px-3 py-2 border-b border-border bg-muted/50 shrink-0">
+      <div className="flex items-center gap-2 px-2 py-2 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted-foreground">Fill:</span>
           <div className="flex gap-0.5">
@@ -664,6 +755,27 @@ export function ProductSpecificationDataTable({
 
         <div className="flex-1" />
 
+        <InputGroup className="max-w-48 h-7">
+          <InputGroupInput
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className=" text-xs"
+          />
+          <InputGroupAddon className="pl-2">
+            <PiMagnifyingGlassDuotone className="size-3" />
+          </InputGroupAddon>
+        </InputGroup>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setShowFindReplace(true)}
+        >
+          <PiMagnifyingGlassDuotone className="size-3" />
+          Find & Replace
+        </Button>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -677,7 +789,7 @@ export function ProductSpecificationDataTable({
           onClick={() => fileInputRef.current?.click()}
           // className="gap-1.5"
         >
-          <PiUploadSimple className="size-4" />
+          <PiUploadSimpleDuotone className="size-3" />
           Import
         </Button>
         <Button
@@ -686,7 +798,7 @@ export function ProductSpecificationDataTable({
           onClick={handleExport}
           // className="gap-1.5"
         >
-          <PiDownloadSimple className="size-4" />
+          <PiDownloadSimpleDuotone className="size-3" />
           Export
         </Button>
       </div>
@@ -894,6 +1006,13 @@ export function ProductSpecificationDataTable({
         onOpenChange={setShowImportConfirm}
         onConfirm={handleImportConfirm}
         onCancel={() => (pendingFileRef.current = null)}
+      />
+
+      <FindReplaceDialog
+        open={showFindReplace}
+        onOpenChange={setShowFindReplace}
+        cellData={cellData}
+        onReplace={setCellData}
       />
     </div>
   );
