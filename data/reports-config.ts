@@ -98,8 +98,12 @@ export const QUERYABLE_TABS: TabConfig[] = [
     label: "Compliance Information",
     isArrayData: true,
     fields: [
-      { key: "compliance_type", label: "Standard/Type", type: "text" },
-      { key: "standard_number", label: "Standard Number", type: "text" },
+      { key: "standard", label: "Standard", type: "text" },
+      {
+        key: "standard_description",
+        label: "Standard Description",
+        type: "text",
+      },
     ],
   },
   {
