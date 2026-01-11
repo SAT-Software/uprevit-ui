@@ -54,6 +54,7 @@ type Item = {
   componentImage: string;
   description: string;
   labelPresence: string[];
+  count?: number;
 };
 
 type FormData = {
@@ -62,6 +63,7 @@ type FormData = {
   componentDescription: string;
   labelPresence: Tag[];
   image: FileWithPreview | null;
+  count: number;
 };
 
 export default function EditBarcodesDialog({
@@ -107,6 +109,7 @@ export default function EditBarcodesDialog({
         text: label,
       })),
       image: null,
+      count: barcode.count ?? 1,
     },
   });
 
@@ -129,6 +132,7 @@ export default function EditBarcodesDialog({
         text: label,
       })),
       image: null,
+      count: barcode.count ?? 1,
     });
     setLabelPresence(
       barcode.labelPresence.map((label, index) => ({
@@ -180,6 +184,7 @@ export default function EditBarcodesDialog({
           entity: "Barcodes",
           description: data.componentDescription,
           label_presence: labelPresence.map((tag: Tag) => tag.text),
+          count: data.count,
         },
       };
 
@@ -370,6 +375,23 @@ export default function EditBarcodesDialog({
                   Press Enter to add a label type. You can add multiple label
                   types.
                 </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-count`}>Count</Label>
+                <Input
+                  id={`${id}-count`}
+                  type="number"
+                  min={1}
+                  {...register("count", {
+                    required: "Count is required",
+                    min: { value: 1, message: "Count must be at least 1" },
+                    valueAsNumber: true,
+                  })}
+                />
+                {errors.count && (
+                  <p className="text-xs text-red-500">{errors.count.message}</p>
+                )}
               </div>
             </div>
           </div>

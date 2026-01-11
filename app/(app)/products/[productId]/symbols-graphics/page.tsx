@@ -19,6 +19,7 @@ interface SymbolGraphicItem {
   text_present: boolean;
   label_presence: string[];
   entity: string;
+  count?: number;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
   _originalIndex?: number;
@@ -201,6 +202,7 @@ export default function Page() {
     componentDescription: item.description,
     componentImage: item.image,
     presentOnLabels: item.label_presence,
+    count: item.count,
     _isFromDiff: item._isFromDiff,
     _isRemovedFromDiff: item._isRemovedFromDiff,
     _originalIndex: item._originalIndex,
