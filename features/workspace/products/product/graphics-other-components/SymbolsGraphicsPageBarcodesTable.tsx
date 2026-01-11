@@ -55,6 +55,7 @@ import {
   PiCaretCircleDownDuotone,
   PiDotsThreeCircleDuotone,
   PiBarcodeDuotone,
+  PiHashDuotone,
 } from "react-icons/pi";
 import EditBarcodesDialog from "./EditBarcodesDialog";
 import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
@@ -66,6 +67,7 @@ type Item = {
   componentImage: string;
   note?: string;
   presentOnLabels: string[];
+  count?: number;
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
   _originalIndex?: number;
@@ -338,6 +340,38 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
+    accessorKey: "count",
+    enableSorting: true,
+    header: ({ column }) => (
+      <SortableHeader
+        column={column}
+        title="Count"
+        icon={PiHashDuotone}
+      />
+    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as any;
+      const count = row.getValue("count") as number;
+      const originalIndex = row.original._originalIndex ?? row.index;
+      const diff = meta?.isRedlineView
+        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].count`)
+        : null;
+
+      const displayCount = count ?? 1; // Default to 1 if count is not set
+
+      return diff ? (
+        <RedlineCell
+          value={displayCount}
+          diff={diff}
+          formatFn={(v) => <span className="font-medium">{v}</span>}
+        />
+      ) : (
+        <span className="font-medium">{displayCount}</span>
+      );
+    },
+    size: 80,
+  },
+  {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row, table }) => (
@@ -599,6 +633,7 @@ function RowActions({
     description: item.componentDescription,
     componentImage: item.componentImage,
     labelPresence: item.presentOnLabels,
+    count: item.count,
   };
 
   return (

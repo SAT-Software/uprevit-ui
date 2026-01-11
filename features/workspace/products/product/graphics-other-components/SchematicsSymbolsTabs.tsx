@@ -41,6 +41,7 @@ interface BarcodesData {
   componentDescription: string;
   componentImage: string;
   presentOnLabels: string[];
+  count?: number;
 }
 
 interface OtherComponentData {
