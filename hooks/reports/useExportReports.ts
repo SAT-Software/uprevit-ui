@@ -7,6 +7,7 @@ type ExportFormat = "pdf" | "excel";
 interface ExportRequest
   extends Omit<ReportsQueryRequest, "pagination" | "workspaceId"> {
   format: ExportFormat;
+  reportHeader?: string;
 }
 
 async function exportReports({
@@ -63,6 +64,13 @@ function downloadBlob(blob: Blob, filename: string) {
   window.URL.revokeObjectURL(url);
 }
 
+function sanitizeFilename(name: string): string {
+  return name
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/\s+/g, "_")
+    .substring(0, 100);
+}
+
 export function useExportPDF() {
   const auth = useAuth();
 
@@ -74,7 +82,10 @@ export function useExportPDF() {
         format: "pdf",
       });
       const timestamp = new Date().toISOString().split("T")[0];
-      downloadBlob(blob, `reports-report-${timestamp}.pdf`);
+      const filename = payload.reportHeader
+        ? `${sanitizeFilename(payload.reportHeader)}_${timestamp}.pdf`
+        : `reports-report-${timestamp}.pdf`;
+      downloadBlob(blob, filename);
       return blob;
     },
   });
@@ -91,7 +102,10 @@ export function useExportExcel() {
         format: "excel",
       });
       const timestamp = new Date().toISOString().split("T")[0];
-      downloadBlob(blob, `reports-report-${timestamp}.xlsx`);
+      const filename = payload.reportHeader
+        ? `${sanitizeFilename(payload.reportHeader)}_${timestamp}.xlsx`
+        : `reports-report-${timestamp}.xlsx`;
+      downloadBlob(blob, filename);
       return blob;
     },
   });
