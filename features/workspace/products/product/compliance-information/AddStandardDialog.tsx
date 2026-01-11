@@ -65,6 +65,7 @@ export default function AddStandardDialog({
     reset,
     setValue,
     watch,
+    clearErrors,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -91,8 +92,6 @@ export default function AddStandardDialog({
         data.standardSelect && selectedStandardData
           ? selectedStandardData.description
           : data.description;
-
-      console.log("Form submitted:", { standardName, standardDescription });
 
       const addNewStandardData = {
         id: productId,
@@ -211,6 +210,7 @@ export default function AddStandardDialog({
                                     : originalValue,
                                   { shouldValidate: true }
                                 );
+                                clearErrors("standardInput");
                                 setComboboxOpen(false);
                               }
                             }}

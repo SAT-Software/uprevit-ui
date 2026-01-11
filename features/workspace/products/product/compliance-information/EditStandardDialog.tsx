@@ -86,7 +86,6 @@ export default function EditStandardDialog({
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: initialValues,
-    values: initialValues,
     mode: "onSubmit",
   });
 
@@ -103,8 +102,6 @@ export default function EditStandardDialog({
       const standardName = data.standardSelect || data.standardInput;
       // Use description from form (which may have been edited by user)
       const standardDescription = data.description;
-
-      console.log("Form submitted:", { standardName, standardDescription });
 
       const updateStandardData = {
         id: productId,
@@ -129,7 +126,7 @@ export default function EditStandardDialog({
         },
       });
     } catch (error) {
-      console.error("Failed to add standard:", error);
+      console.error("Failed to edit standard:", error);
     }
   };
 
