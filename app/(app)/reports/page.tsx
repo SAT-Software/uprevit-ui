@@ -104,7 +104,10 @@ export default function Page() {
   };
 
   const handleExport = async (header: string, format: ExportFormat) => {
-    if (!validateConditions()) return;
+    if (!validateConditions()) {
+      toast.error("Please fill in all required fields for each condition.");
+      return;
+    }
     try {
       if (format === "pdf") {
         await exportPDF.mutateAsync({
