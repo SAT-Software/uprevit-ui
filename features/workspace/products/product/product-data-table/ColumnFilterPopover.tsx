@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PiFunnel, PiFunnelFill } from "react-icons/pi";
+import { PiFunnel, PiFunnelDuotone, PiFunnelFill } from "react-icons/pi";
 import type {
   ColumnDataType,
   ColumnFilter,
@@ -70,7 +70,7 @@ export function ColumnFilterPopover({
           {hasFilter ? (
             <PiFunnelFill className="size-3 text-primary" />
           ) : (
-            <PiFunnel className="size-3 opacity-50" />
+            <PiFunnelDuotone className="size-3 opacity-50" />
           )}
         </Button>
       </PopoverTrigger>

@@ -2,6 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -9,16 +14,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  type ColumnDef,
-  type ColumnSizingState,
-  type FilterFn,
-  type Row,
+  exportTableToWorkbook,
+  parseWorkbookToTableData,
+} from "@/lib/import-export";
+import {
+  ProductSpecificationDataTableProps,
+  type CellFormat,
+  type ColumnFilter,
+  type DataType,
+} from "@/types/product-data-table";
+import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
+  type ColumnDef,
+  type ColumnSizingState,
+  type FilterFn,
+  type Row,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -34,50 +68,15 @@ import {
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiDotsSixVerticalBold,
-  PiDownloadSimple,
-  PiMagnifyingGlass,
-  PiUploadSimple,
+  PiDownloadSimpleDuotone,
+  PiMagnifyingGlassDuotone,
+  PiUploadSimpleDuotone,
 } from "react-icons/pi";
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
-import {
-  arrayMove,
-  horizontalListSortingStrategy,
-  SortableContext,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  ProductSpecificationDataTableProps,
-  type CellFormat,
-  type ColumnFilter,
-  type DataType,
-} from "@/types/product-data-table";
-import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
+import { toast } from "sonner";
 import { applyFilter, detectColumnDataType } from "./column-filter-utils";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
-import {
-  parseWorkbookToTableData,
-  exportTableToWorkbook,
-} from "@/lib/import-export";
 import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
 import { FindReplaceDialog } from "./FindReplaceDialog";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Search } from "lucide-react";
-import { toast } from "sonner";
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -712,7 +711,7 @@ export function ProductSpecificationDataTable({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Formatting Toolbar */}
-      <div className="flex items-center gap-4 px-3 py-2 border-b border-border bg-muted/50 shrink-0">
+      <div className="flex items-center gap-2 px-2 py-2 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted-foreground">Fill:</span>
           <div className="flex gap-0.5">
@@ -756,15 +755,15 @@ export function ProductSpecificationDataTable({
 
         <div className="flex-1" />
 
-        <InputGroup className="max-w-xs">
+        <InputGroup className="max-w-48 h-7">
           <InputGroupInput
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 text-sm"
+            className=" text-xs"
           />
-          <InputGroupAddon>
-            <Search className="size-4" />
+          <InputGroupAddon className="pl-2">
+            <PiMagnifyingGlassDuotone className="size-3" />
           </InputGroupAddon>
         </InputGroup>
 
@@ -773,7 +772,7 @@ export function ProductSpecificationDataTable({
           size="sm"
           onClick={() => setShowFindReplace(true)}
         >
-          <PiMagnifyingGlass className="size-4" />
+          <PiMagnifyingGlassDuotone className="size-3" />
           Find & Replace
         </Button>
 
@@ -790,7 +789,7 @@ export function ProductSpecificationDataTable({
           onClick={() => fileInputRef.current?.click()}
           // className="gap-1.5"
         >
-          <PiUploadSimple className="size-4" />
+          <PiUploadSimpleDuotone className="size-3" />
           Import
         </Button>
         <Button
@@ -799,7 +798,7 @@ export function ProductSpecificationDataTable({
           onClick={handleExport}
           // className="gap-1.5"
         >
-          <PiDownloadSimple className="size-4" />
+          <PiDownloadSimpleDuotone className="size-3" />
           Export
         </Button>
       </div>
