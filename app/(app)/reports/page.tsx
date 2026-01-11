@@ -12,6 +12,10 @@ import {
 import { toast } from "sonner";
 
 import { ExportButtons } from "@/features/workspace/reports/components/ExportButtons";
+import {
+  ExportFormat,
+  ExportReportDialog,
+} from "@/features/workspace/reports/components/ExportReportDialog";
 import { LoadQueryDialog } from "@/features/workspace/reports/components/LoadQueryDialog";
 import { ResultsTable } from "@/features/workspace/reports/components/ResultsTable";
 import { SaveQueryDialog } from "@/features/workspace/reports/components/SaveQueryDialog";
@@ -42,6 +46,8 @@ export default function Page() {
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("pdf");
   const [currentPage, setCurrentPage] = useState(1);
   const [results, setResults] = useState<{
     products: ReportsProduct[];
@@ -92,29 +98,32 @@ export default function Page() {
     toast.success("The saved query has been deleted.");
   };
 
-  const handleExportPDF = async () => {
-    if (!validateConditions()) return;
-    try {
-      await exportPDF.mutateAsync({
-        conditions,
-        conditionLogic,
-      });
-      toast.success("PDF has been downloaded.");
-    } catch {
-      toast.error("Failed to export PDF.");
-    }
+  const handleOpenExportDialog = (format: ExportFormat) => {
+    setExportFormat(format);
+    setExportDialogOpen(true);
   };
 
-  const handleExportExcel = async () => {
+  const handleExport = async (header: string, format: ExportFormat) => {
     if (!validateConditions()) return;
     try {
-      await exportExcel.mutateAsync({
-        conditions,
-        conditionLogic,
-      });
-      toast.success("Excel file has been downloaded.");
+      if (format === "pdf") {
+        await exportPDF.mutateAsync({
+          conditions,
+          conditionLogic,
+          reportHeader: header,
+        });
+        toast.success("PDF has been downloaded.");
+      } else {
+        await exportExcel.mutateAsync({
+          conditions,
+          conditionLogic,
+          reportHeader: header,
+        });
+        toast.success("Excel file has been downloaded.");
+      }
+      setExportDialogOpen(false);
     } catch {
-      toast.error("Failed to export Excel.");
+      toast.error(`Failed to export ${format.toUpperCase()}.`);
     }
   };
 
@@ -129,7 +138,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
+      <div className="flex flex-col items-start gap-2 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <h1 className="text-base font-semibold">Reports</h1>
@@ -197,14 +206,14 @@ export default function Page() {
         </Card>
 
         {(results || reportsQuery.isPending) && (
-          <Card className="w-full h-full">
-            <CardHeader className="pb-4">
+          <Card className="w-full h-auto">
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Results</CardTitle>
                 {hasResults && (
                   <ExportButtons
-                    onExportPDF={handleExportPDF}
-                    onExportExcel={handleExportExcel}
+                    onExportPDF={() => handleOpenExportDialog("pdf")}
+                    onExportExcel={() => handleOpenExportDialog("excel")}
                     isExportingPDF={exportPDF.isPending}
                     isExportingExcel={exportExcel.isPending}
                     disabled={!hasResults}
@@ -242,6 +251,13 @@ export default function Page() {
           queries={savedQueries}
           onLoad={handleLoadQuery}
           onDelete={handleDeleteQuery}
+        />
+        <ExportReportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          onExport={handleExport}
+          isExporting={exportPDF.isPending || exportExcel.isPending}
+          format={exportFormat}
         />
       </div>
     </div>
