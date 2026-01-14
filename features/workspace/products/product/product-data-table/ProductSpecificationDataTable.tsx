@@ -2,6 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
@@ -49,10 +54,13 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  type Column,
   type ColumnDef,
   type ColumnSizingState,
   type FilterFn,
+  type Header,
   type Row,
+  type Table,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -64,6 +72,8 @@ import {
   useState,
 } from "react";
 import {
+  PiArrowClockwiseBold,
+  PiArrowCounterClockwiseBold,
   PiCaretDownDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
@@ -77,6 +87,66 @@ import { applyFilter, detectColumnDataType } from "./column-filter-utils";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
 import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
 import { FindReplaceDialog } from "./FindReplaceDialog";
+
+// History entry types (delta-based)
+type CellEditEntry = {
+  type: "cell";
+  changes: Array<{
+    key: string;
+    prev: string | undefined;
+    next: string | undefined;
+  }>;
+};
+
+type HeaderEditEntry = {
+  type: "header";
+  colIndex: number;
+  prev: string;
+  next: string;
+};
+
+type ColumnTypeEntry = {
+  type: "columnType";
+  colIndex: number;
+  prev: DataType | undefined;
+  next: DataType | undefined;
+};
+
+type ColumnSizingEntry = {
+  type: "columnSizing";
+  prev: ColumnSizingState;
+  next: ColumnSizingState;
+};
+
+type ColumnOrderEntry = {
+  type: "columnOrder";
+  prev: string[];
+  next: string[];
+};
+
+type CellFormatEntry = {
+  type: "cellFormat";
+  changes: Array<{
+    key: string;
+    prev: CellFormat | undefined;
+    next: CellFormat | undefined;
+  }>;
+};
+
+type HistoryEntry =
+  | CellEditEntry
+  | HeaderEditEntry
+  | ColumnTypeEntry
+  | ColumnSizingEntry
+  | ColumnOrderEntry
+  | CellFormatEntry;
+
+type HistoryState = {
+  past: HistoryEntry[];
+  future: HistoryEntry[];
+  maxDepth: number;
+  lastCommitTime: number;
+};
 
 const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
@@ -108,23 +178,29 @@ const DEFAULT_TEXT_COLORS = [
   "#4f46e5",
 ];
 
+// Row data type for the table
+type RowData = { rowIndex: number };
+
+// Table meta interface for type-safe access to custom table metadata
+interface TableMeta {
+  headerData: Record<number, string>;
+  setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  cellData: Record<string, string>;
+  columnFilters: Record<number, ColumnFilter>;
+  setColumnFilters: React.Dispatch<
+    React.SetStateAction<Record<number, ColumnFilter>>
+  >;
+}
+
 const EditableHeaderContent = ({
   column,
   table,
 }: {
-  column: any;
-  table: any;
+  column: Column<RowData, unknown>;
+  table: Table<RowData>;
 }) => {
   const colIndex = parseInt(column.id.split("-")[1]);
-  const meta = table.options.meta as {
-    headerData: Record<number, string>;
-    setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-    cellData: Record<string, string>;
-    columnFilters: Record<number, ColumnFilter>;
-    setColumnFilters: React.Dispatch<
-      React.SetStateAction<Record<number, ColumnFilter>>
-    >;
-  };
+  const meta = table.options.meta as TableMeta;
 
   const dataType = useMemo(
     () => detectColumnDataType(meta.cellData, colIndex, ROW_COUNT),
@@ -177,7 +253,7 @@ const DraggableHeader = ({
   header,
   virtualCol,
 }: {
-  header: any;
+  header: Header<RowData, unknown>;
   virtualCol: { start: number; size: number };
 }) => {
   const {
@@ -239,7 +315,13 @@ const DraggableHeader = ({
   );
 };
 
-const EditableHeader = ({ column, table }: { column: any; table: any }) => {
+const EditableHeader = ({
+  column,
+  table,
+}: {
+  column: Column<RowData, unknown>;
+  table: Table<RowData>;
+}) => {
   return <EditableHeaderContent column={column} table={table} />;
 };
 
@@ -279,6 +361,7 @@ const DataTypeSelect = ({
 export function ProductSpecificationDataTable({
   initialData,
   onDataChange,
+  onSaveSuccess,
 }: ProductSpecificationDataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -349,6 +432,23 @@ export function ProductSpecificationDataTable({
   >({});
   const pendingFileRef = useRef<File | null>(null);
 
+  // History state
+  const [history, setHistory] = useState<HistoryState>({
+    past: [],
+    future: [],
+    maxDepth: 100,
+    lastCommitTime: 0,
+  });
+  const historyRef = useRef(history);
+  historyRef.current = history;
+
+  // Refs for tracking cell edit state
+  const cellDraftRef = useRef<Record<string, string>>({});
+  const cellInitialValueRef = useRef<Record<string, string>>({});
+
+  // onSaveSuccess callback ref
+  const onSaveSuccessRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
     return () => clearTimeout(timer);
@@ -380,18 +480,173 @@ export function ProductSpecificationDataTable({
     columnSizing,
   ]);
 
+  // History API functions
+  const record = useCallback((entry: HistoryEntry) => {
+    setHistory((prev) => ({
+      ...prev,
+      past: [...prev.past.slice(-prev.maxDepth + 1), entry],
+      future: [],
+      lastCommitTime: Date.now(),
+    }));
+  }, []);
+
+  const applyEntry = useCallback(
+    (entry: HistoryEntry, direction: "undo" | "redo") => {
+      const isUndo = direction === "undo";
+      switch (entry.type) {
+        case "cell":
+          entry.changes.forEach(({ key, prev, next }) => {
+            const value = isUndo ? prev : next;
+            setCellData((d) => ({ ...d, [key]: value ?? "" }));
+          });
+          break;
+        case "header":
+          setHeaderData((d) => ({
+            ...d,
+            [entry.colIndex]: isUndo ? entry.prev : entry.next,
+          }));
+          break;
+        case "columnType":
+          setColumnTypeData((d) => {
+            const updated = { ...d };
+            const value = isUndo ? entry.prev : entry.next;
+            if (value === undefined) delete updated[entry.colIndex];
+            else updated[entry.colIndex] = value;
+            return updated;
+          });
+          break;
+        case "columnSizing":
+          setColumnSizing(isUndo ? entry.prev : entry.next);
+          break;
+        case "columnOrder":
+          setColumnOrder(isUndo ? entry.prev : entry.next);
+          break;
+        case "cellFormat":
+          entry.changes.forEach(({ key, prev, next }) => {
+            const value = isUndo ? prev : next;
+            setCellFormats((d) => {
+              const updated = { ...d };
+              if (value === undefined) delete updated[key];
+              else updated[key] = value;
+              return updated;
+            });
+          });
+          break;
+      }
+    },
+    []
+  );
+
+  const undo = useCallback(() => {
+    const entry = history.past[history.past.length - 1];
+    if (!entry) return;
+    applyEntry(entry, "undo");
+    setHistory((prev) => ({
+      ...prev,
+      past: prev.past.slice(0, -1),
+      future: [...prev.future, entry],
+    }));
+  }, [history, applyEntry]);
+
+  const redo = useCallback(() => {
+    const entry = history.future[history.future.length - 1];
+    if (!entry) return;
+    applyEntry(entry, "redo");
+    setHistory((prev) => ({
+      ...prev,
+      past: [...prev.past, entry],
+      future: prev.future.slice(0, -1),
+    }));
+  }, [history, applyEntry]);
+
+  const clearHistory = useCallback(() => {
+    setHistory((prev) => ({ ...prev, past: [], future: [] }));
+  }, []);
+
+  // Wrapped setHeaderData that records history
+  const setHeaderDataWithRecord = useCallback(
+    (updater: React.SetStateAction<Record<number, string>>) => {
+      setHeaderData((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater;
+        // Find which column changed
+        for (const colIndex of Object.keys(next)) {
+          const col = parseInt(colIndex);
+          if (prev[col] !== next[col]) {
+            record({
+              type: "header",
+              colIndex: col,
+              prev: prev[col] ?? "",
+              next: next[col] ?? "",
+            });
+            break; // Only record the first changed column
+          }
+        }
+        return next;
+      });
+    },
+    [record]
+  );
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore when focus is in input/textarea
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "y") {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
+
+  // Handle onSaveSuccess callback - register clearHistory with parent
+  useEffect(() => {
+    if (onSaveSuccess) {
+      onSaveSuccess(clearHistory);
+    }
+  }, [onSaveSuccess, clearHistory]);
+
   const applyBgColor = useCallback(
     (color: string) => {
+      const changes: Array<{
+        key: string;
+        prev: CellFormat | undefined;
+        next: CellFormat;
+      }> = [];
       if (selectedCells.size === 0 && activeCell) {
         const key = `${activeCell.row},${activeCell.col}`;
-        setCellFormats((f) => ({
-          ...f,
-          [key]: {
-            ...f[key],
-            bgColor: color === "#ffffff" ? undefined : color,
-          },
-        }));
+        const prev = cellFormats[key];
+        const next = {
+          ...prev,
+          bgColor: color === "#ffffff" ? undefined : color,
+        };
+        changes.push({ key, prev, next });
+        setCellFormats((f) => ({ ...f, [key]: next }));
       } else {
+        selectedCells.forEach((key) => {
+          const prev = cellFormats[key];
+          const next = {
+            ...prev,
+            bgColor: color === "#ffffff" ? undefined : color,
+          };
+          changes.push({ key, prev, next });
+        });
         setCellFormats((f) => {
           const updated = { ...f };
           selectedCells.forEach((key) => {
@@ -403,22 +658,38 @@ export function ProductSpecificationDataTable({
           return updated;
         });
       }
+      if (changes.length > 0) {
+        record({ type: "cellFormat", changes });
+      }
     },
-    [selectedCells, activeCell]
+    [selectedCells, activeCell, cellFormats, record]
   );
 
   const applyTextColor = useCallback(
     (color: string) => {
+      const changes: Array<{
+        key: string;
+        prev: CellFormat | undefined;
+        next: CellFormat;
+      }> = [];
       if (selectedCells.size === 0 && activeCell) {
         const key = `${activeCell.row},${activeCell.col}`;
-        setCellFormats((f) => ({
-          ...f,
-          [key]: {
-            ...f[key],
-            textColor: color === "#000000" ? undefined : color,
-          },
-        }));
+        const prev = cellFormats[key];
+        const next = {
+          ...prev,
+          textColor: color === "#000000" ? undefined : color,
+        };
+        changes.push({ key, prev, next });
+        setCellFormats((f) => ({ ...f, [key]: next }));
       } else {
+        selectedCells.forEach((key) => {
+          const prev = cellFormats[key];
+          const next = {
+            ...prev,
+            textColor: color === "#000000" ? undefined : color,
+          };
+          changes.push({ key, prev, next });
+        });
         setCellFormats((f) => {
           const updated = { ...f };
           selectedCells.forEach((key) => {
@@ -430,8 +701,11 @@ export function ProductSpecificationDataTable({
           return updated;
         });
       }
+      if (changes.length > 0) {
+        record({ type: "cellFormat", changes });
+      }
     },
-    [selectedCells, activeCell]
+    [selectedCells, activeCell, cellFormats, record]
   );
 
   const handleCellClick = useCallback(
@@ -541,7 +815,7 @@ export function ProductSpecificationDataTable({
     onColumnOrderChange: setColumnOrder,
     meta: {
       headerData,
-      setHeaderData,
+      setHeaderData: setHeaderDataWithRecord,
       cellData,
       columnFilters,
       setColumnFilters,
@@ -552,7 +826,29 @@ export function ProductSpecificationDataTable({
       columnOrder,
       globalFilter: globalFilterValue,
     },
-    onColumnSizingChange: setColumnSizing,
+    onColumnSizingChange: (updater) => {
+      const prev = columnSizing;
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      // Coalesce: if same type within 500ms, replace last entry
+      if (
+        Date.now() - history.lastCommitTime < 500 &&
+        history.past.length > 0
+      ) {
+        const last = history.past[history.past.length - 1];
+        if (last.type === "columnSizing") {
+          // Create new entry instead of mutating
+          const updatedEntry: ColumnSizingEntry = { ...last, next };
+          setHistory((prev) => ({
+            ...prev,
+            past: [...prev.past.slice(0, -1), updatedEntry],
+          }));
+          setColumnSizing(next);
+          return;
+        }
+      }
+      setColumnSizing(next);
+      record({ type: "columnSizing", prev, next });
+    },
   });
 
   const columnSizes = useMemo(() => {
@@ -564,27 +860,44 @@ export function ProductSpecificationDataTable({
       e.preventDefault();
       const text = e.clipboardData.getData("text/plain");
       const pastedRows = text.split("\n").map((r) => r.split("\t"));
+
+      const changes: Array<{
+        key: string;
+        prev: string | undefined;
+        next: string;
+      }> = [];
       setCellData((d) => {
         const updated = { ...d };
         pastedRows.forEach((cols, ri) => {
           cols.forEach((val, ci) => {
-            updated[`${rowIndex + ri},${colIndex + ci}`] = val;
+            const key = `${rowIndex + ri},${colIndex + ci}`;
+            if (d[key] !== val) {
+              changes.push({ key, prev: d[key], next: val });
+              updated[key] = val;
+            }
           });
         });
         return updated;
       });
+
+      if (changes.length > 0) {
+        record({ type: "cell", changes });
+      }
     },
-    []
+    [record]
   );
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      setColumnOrder((columnOrder) => {
-        const oldIndex = columnOrder.indexOf(active.id as string);
-        const newIndex = columnOrder.indexOf(over.id as string);
-        return arrayMove(columnOrder, oldIndex, newIndex); //this is just a splice util
-      });
+      const prev = columnOrder;
+      const newOrder = arrayMove(
+        columnOrder,
+        columnOrder.indexOf(active.id as string),
+        columnOrder.indexOf(over.id as string)
+      );
+      setColumnOrder(newOrder);
+      record({ type: "columnOrder", prev, next: newOrder });
     }
   }
 
@@ -753,6 +1066,38 @@ export function ProductSpecificationDataTable({
           </>
         )}
 
+        <div className="w-px h-5 bg-border" />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={undo}
+              disabled={history.past.length === 0}
+              className="hover:bg-accent-foreground/10"
+            >
+              <PiArrowCounterClockwiseBold className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Undo (Cmd+Z)</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={redo}
+              disabled={history.future.length === 0}
+              className="hover:bg-accent-foreground/10"
+            >
+              <PiArrowClockwiseBold className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Redo (Cmd+Shift+Z)</TooltipContent>
+        </Tooltip>
+
         <div className="flex-1" />
 
         <InputGroup className="max-w-48 h-7">
@@ -900,9 +1245,18 @@ export function ProductSpecificationDataTable({
                               ? columnTypeData[originalColIndex]
                               : undefined
                           }
-                          onChange={(col, val) =>
-                            setColumnTypeData((d) => ({ ...d, [col]: val }))
-                          }
+                          onChange={(col, val) => {
+                            const prev = columnTypeData[col];
+                            setColumnTypeData((d) => ({ ...d, [col]: val }));
+                            if (prev !== val) {
+                              record({
+                                type: "columnType",
+                                colIndex: col,
+                                prev,
+                                next: val,
+                              });
+                            }
+                          }}
                         />
                       </div>
                     );
@@ -971,22 +1325,60 @@ export function ProductSpecificationDataTable({
                               format?.bgColor || "var(--background)",
                             color: format?.textColor || "inherit",
                           }}
-                          value={cellData[cellKey] ?? ""}
-                          onChange={(e) =>
+                          value={
+                            cellDraftRef.current[cellKey] ??
+                            cellData[cellKey] ??
+                            ""
+                          }
+                          onChange={(e) => {
+                            cellDraftRef.current[cellKey] = e.target.value;
                             setCellData((d) => ({
                               ...d,
                               [cellKey]: e.target.value,
-                            }))
-                          }
+                            }));
+                          }}
                           onClick={(e) =>
                             handleCellClick(rowIndex, originalColIndex, e)
                           }
-                          onFocus={() =>
+                          onFocus={() => {
+                            cellInitialValueRef.current[cellKey] =
+                              cellData[cellKey];
                             setActiveCell({
                               row: rowIndex,
                               col: originalColIndex,
-                            })
-                          }
+                            });
+                          }}
+                          onBlur={() => {
+                            const prev = cellInitialValueRef.current[cellKey];
+                            const next =
+                              cellDraftRef.current[cellKey] ??
+                              cellData[cellKey];
+                            if (prev !== next) {
+                              record({
+                                type: "cell",
+                                changes: [{ key: cellKey, prev, next }],
+                              });
+                            }
+                            delete cellDraftRef.current[cellKey];
+                            delete cellInitialValueRef.current[cellKey];
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const prev = cellInitialValueRef.current[cellKey];
+                              const next =
+                                cellDraftRef.current[cellKey] ??
+                                cellData[cellKey];
+                              if (prev !== next) {
+                                record({
+                                  type: "cell",
+                                  changes: [{ key: cellKey, prev, next }],
+                                });
+                              }
+                              delete cellDraftRef.current[cellKey];
+                              // Re-capture initial value for subsequent edits
+                              cellInitialValueRef.current[cellKey] = next;
+                            }
+                          }}
                           onPaste={(e) =>
                             handlePaste(e, rowIndex, originalColIndex)
                           }
