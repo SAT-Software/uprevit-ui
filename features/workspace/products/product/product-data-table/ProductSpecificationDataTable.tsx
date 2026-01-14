@@ -1375,7 +1375,8 @@ export function ProductSpecificationDataTable({
                                 });
                               }
                               delete cellDraftRef.current[cellKey];
-                              delete cellInitialValueRef.current[cellKey];
+                              // Re-capture initial value for subsequent edits
+                              cellInitialValueRef.current[cellKey] = next;
                             }
                           }}
                           onPaste={(e) =>
