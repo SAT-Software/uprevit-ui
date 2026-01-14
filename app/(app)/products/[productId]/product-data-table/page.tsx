@@ -33,6 +33,7 @@ export default function Page() {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
   const isFirstRender = useRef(true);
+  const onSaveSuccessRef = useRef<() => void>(() => {});
 
   const {
     data: productTabData,
@@ -69,6 +70,7 @@ export default function Page() {
       onSuccess: () => {
         setHasUnsavedChanges(false);
         setLastSavedAt(new Date());
+        onSaveSuccessRef.current();
       },
     });
   }
@@ -224,6 +226,9 @@ export default function Page() {
         <ProductSpecificationDataTable
           initialData={initialData}
           onDataChange={handleAutoSave}
+          onSaveSuccess={(clearHistory) => {
+            onSaveSuccessRef.current = clearHistory;
+          }}
         />
       </div>
     </div>

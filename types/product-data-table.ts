@@ -24,6 +24,7 @@ export interface ProductSpecificationDataTableProps {
     columnSizing: Record<string, number>;
   };
   onDataChange?: (data: ProductDataTableSchema) => void;
+  onSaveSuccess?: (clearHistory: () => void) => void;
 }
 
 export type ColumnDataType = "number" | "string";
