@@ -6,12 +6,13 @@ export interface QueryCondition {
   field: string;
   operator: Operator;
   value?: string | string[];
+  logic?: "AND" | "OR";
 }
 
 export interface ReportsQueryRequest {
   workspaceId: string;
   conditions: QueryCondition[];
-  conditionLogic: "AND" | "OR";
+  conditionLogic?: "AND" | "OR";
   pagination: {
     page: number;
     limit: number;
@@ -40,6 +41,6 @@ export interface SavedQuery {
   id: string;
   name: string;
   conditions: QueryCondition[];
-  conditionLogic: "AND" | "OR";
+  conditionLogic?: "AND" | "OR";
   createdAt: string;
 }

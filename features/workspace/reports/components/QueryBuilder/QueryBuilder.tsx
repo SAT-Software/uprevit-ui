@@ -16,6 +16,7 @@ export interface QueryBuilderProps {
   ) => void;
   onRemoveCondition: (id: string) => void;
   onLogicChange: (logic: "AND" | "OR") => void;
+  onConditionLogicChange: (id: string, logic: "AND" | "OR") => void;
   maxConditions?: number;
 }
 
@@ -26,6 +27,7 @@ export function QueryBuilder({
   onUpdateCondition,
   onRemoveCondition,
   onLogicChange,
+  onConditionLogicChange,
   maxConditions = 10,
 }: QueryBuilderProps) {
   const canAddMore = conditions.length < maxConditions;
@@ -63,11 +65,18 @@ export function QueryBuilder({
             <div key={condition.id} className="mb-0">
               <ConditionRow
                 condition={condition}
-                onUpdate={(updates) => onUpdateCondition(condition.id, updates)}
+                onUpdate={(updates: Partial<Omit<QueryCondition, "id">>) =>
+                  onUpdateCondition(condition.id, updates)
+                }
                 onRemove={() => onRemoveCondition(condition.id)}
               />
               {index < conditions.length - 1 && (
-                <LogicToggle value={conditionLogic} onChange={onLogicChange} />
+                <LogicToggle
+                  value={conditions[index + 1].logic || conditionLogic}
+                  onChange={(logic: "AND" | "OR") =>
+                    onConditionLogicChange(conditions[index + 1].id, logic)
+                  }
+                />
               )}
             </div>
           ))}

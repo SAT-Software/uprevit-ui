@@ -33,10 +33,12 @@ export default function Page() {
     setConditionLogic,
     addCondition,
     updateCondition,
+    updateConditionLogic,
     removeCondition,
     clearConditions,
     loadConditions,
     validateConditions,
+    getApiConditions,
   } = useQueryBuilderState();
 
   const reportsQuery = useReportsQuery();
@@ -67,10 +69,11 @@ export default function Page() {
 
     try {
       const response = await reportsQuery.mutateAsync({
-        conditions,
+        conditions: getApiConditions(),
         conditionLogic,
         pagination: { page, limit: 10 },
       });
+
       setResults(response.result);
       setCurrentPage(page);
     } catch (error) {
@@ -111,14 +114,14 @@ export default function Page() {
     try {
       if (format === "pdf") {
         await exportPDF.mutateAsync({
-          conditions,
+          conditions: getApiConditions(),
           conditionLogic,
           reportHeader: header,
         });
         toast.success("PDF has been downloaded.");
       } else {
         await exportExcel.mutateAsync({
-          conditions,
+          conditions: getApiConditions(),
           conditionLogic,
           reportHeader: header,
         });
@@ -161,6 +164,7 @@ export default function Page() {
               onUpdateCondition={updateCondition}
               onRemoveCondition={removeCondition}
               onLogicChange={setConditionLogic}
+              onConditionLogicChange={updateConditionLogic}
             />
 
             <div className="flex items-center justify-between">
