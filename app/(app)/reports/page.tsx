@@ -214,7 +214,7 @@ export default function Page() {
 
         {(results || reportsQuery.isPending) && (
           <Card className="w-full h-auto">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-1">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Results</CardTitle>
                 {hasResults && (

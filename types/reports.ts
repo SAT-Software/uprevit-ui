@@ -28,10 +28,13 @@ export interface ReportsProduct {
   product_name: string;
   product_plan_number: string;
   department_id: string;
+  department_name: string | null;
   project_id: string;
+  project_name: string | null;
   status: "draft" | "submitted" | "archived";
   target_date?: string | null;
   version?: number;
+  market_geography?: string | null;
   product_information?: {
     market_geography?: string;
   };
