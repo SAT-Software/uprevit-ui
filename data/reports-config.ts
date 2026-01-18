@@ -70,6 +70,7 @@ export const QUERYABLE_TABS: TabConfig[] = [
         label: "Product Plan Number",
         type: "text",
       },
+      { key: "version", label: "Version", type: "array" },
     ],
   },
   {
