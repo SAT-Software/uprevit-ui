@@ -133,13 +133,24 @@ type CellFormatEntry = {
   }>;
 };
 
+type FindReplaceEntry = {
+  type: "findReplace";
+  changes: Array<{
+    key: string;
+    prev: string | undefined;
+    next: string | undefined;
+  }>;
+  replaceAll: boolean;
+};
+
 type HistoryEntry =
   | CellEditEntry
   | HeaderEditEntry
   | ColumnTypeEntry
   | ColumnSizingEntry
   | ColumnOrderEntry
-  | CellFormatEntry;
+  | CellFormatEntry
+  | FindReplaceEntry;
 
 type HistoryState = {
   past: HistoryEntry[];
@@ -532,6 +543,12 @@ export function ProductSpecificationDataTable({
             });
           });
           break;
+        case "findReplace":
+          entry.changes.forEach(({ key, prev, next }) => {
+            const value = isUndo ? prev : next;
+            setCellData((d) => ({ ...d, [key]: value ?? "" }));
+          });
+          break;
       }
     },
     []
@@ -562,6 +579,30 @@ export function ProductSpecificationDataTable({
   const clearHistory = useCallback(() => {
     setHistory((prev) => ({ ...prev, past: [], future: [] }));
   }, []);
+
+  const handleFindReplace = useCallback(
+    (updatedCells: Record<string, string>) => {
+      const changes: Array<{
+        key: string;
+        prev: string | undefined;
+        next: string | undefined;
+      }> = [];
+
+      for (const [key, nextValue] of Object.entries(updatedCells)) {
+        const prevValue = cellData[key];
+        if (prevValue !== nextValue) {
+          changes.push({ key, prev: prevValue, next: nextValue });
+        }
+      }
+
+      if (changes.length > 0) {
+        record({ type: "findReplace", changes, replaceAll: true });
+      }
+
+      setCellData(updatedCells);
+    },
+    [cellData, record]
+  );
 
   // Wrapped setHeaderData that records history
   const setHeaderDataWithRecord = useCallback(
@@ -1404,7 +1445,7 @@ export function ProductSpecificationDataTable({
         open={showFindReplace}
         onOpenChange={setShowFindReplace}
         cellData={cellData}
-        onReplace={setCellData}
+        onReplace={handleFindReplace}
       />
     </div>
   );
