@@ -33,8 +33,8 @@ interface LabelTagItem {
 interface DiffItem {
   path: string;
   status: "added" | "removed" | "modified";
-  old_value: any;
-  new_value: any;
+  old_value?: any;
+  new_value?: any;
 }
 
 interface LabelTagsTabsProps {
@@ -94,7 +94,7 @@ export default function LabelTagsTabs({
   const handleSave = (
     itemId: string,
     itemImage: string,
-    annotation: AnnotationState
+    annotation: AnnotationState,
   ) => {
     setAnnotations((prev) => ({ ...prev, [itemId]: annotation }));
     setPendingSave({ itemId, itemImage, annotation });
@@ -174,14 +174,14 @@ export default function LabelTagsTabs({
         isRenderingRef.current = false;
       }
     },
-    [pendingSave, productId, updateLabelTaggedImage]
+    [pendingSave, productId, updateLabelTaggedImage],
   );
 
   const filteredLabelTypesForTabs: string[] = [
     ...new Set(
       labelTagsData
         ?.map((item: LabelTagItem) => item.type)
-        ?.filter((type): type is string => !!type)
+        ?.filter((type): type is string => !!type),
     ),
   ];
 
@@ -190,7 +190,7 @@ export default function LabelTagsTabs({
 
   const getCurrentItemId = useCallback(() => {
     const currentTabData = labelTagsData.filter(
-      (item: LabelTagItem) => item.type === effectiveActiveTab
+      (item: LabelTagItem) => item.type === effectiveActiveTab,
     );
     return currentTabData[0]?._id || null;
   }, [labelTagsData, effectiveActiveTab]);
@@ -207,7 +207,7 @@ export default function LabelTagsTabs({
 
       return JSON.stringify(current) !== JSON.stringify(baseline);
     },
-    [currentEditorState, savedAnnotations]
+    [currentEditorState, savedAnnotations],
   );
 
   const hasAnyDirtyItems = useCallback(() => {
@@ -218,7 +218,7 @@ export default function LabelTagsTabs({
     (itemId: string, annotation: AnnotationState) => {
       setCurrentEditorState((prev) => ({ ...prev, [itemId]: annotation }));
     },
-    []
+    [],
   );
 
   const handleTabChange = useCallback(
@@ -231,7 +231,7 @@ export default function LabelTagsTabs({
         setActiveTab(newTab);
       }
     },
-    [getCurrentItemId, isDirty]
+    [getCurrentItemId, isDirty],
   );
 
   const handleUnsavedSave = async () => {
@@ -240,7 +240,7 @@ export default function LabelTagsTabs({
 
     const currentState = currentEditorState[currentItemId];
     const currentItem = labelTagsData.find(
-      (item) => item._id === currentItemId
+      (item) => item._id === currentItemId,
     );
     if (!currentState || !currentItem?.image) return;
 
@@ -271,7 +271,7 @@ export default function LabelTagsTabs({
     const currentItemId = getCurrentItemId();
     if (currentItemId) {
       const currentItem = labelTagsData.find(
-        (item) => item._id === currentItemId
+        (item) => item._id === currentItemId,
       );
       setCurrentEditorState((prev) => ({
         ...prev,
@@ -323,14 +323,14 @@ export default function LabelTagsTabs({
 
   const getItemStatus = (
     item: LabelTagItem,
-    index: number
+    index: number,
   ): "added" | "removed" | "modified" | null => {
     if (item._isFromDiff) return "added";
     if (item._isRemovedFromDiff) return "removed";
 
     // Check if this item has any modifications
     const itemDiffs = diffs.filter((d) =>
-      d.path.startsWith(`label_tags.data[${index}].`)
+      d.path.startsWith(`label_tags.data[${index}].`),
     );
     if (itemDiffs.length > 0) return "modified";
 
@@ -504,11 +504,11 @@ export default function LabelTagsTabs({
 
           {filteredLabelTypesForTabs.map((type) => {
             const currentTabData = labelTagsData.filter(
-              (item: LabelTagItem) => item.type === type
+              (item: LabelTagItem) => item.type === type,
             );
             return currentTabData.map((item: LabelTagItem, i) => {
               const originalIndex = labelTagsData.findIndex(
-                (d) => d._id === item._id
+                (d) => d._id === item._id,
               );
               const itemStatus = getItemStatus(item, originalIndex);
               const isRemoved = itemStatus === "removed";
@@ -533,7 +533,7 @@ export default function LabelTagsTabs({
                       isRedlineView &&
                         isModified &&
                         "border-amber-500/50 bg-amber-100/10",
-                      !isRedlineView || !itemStatus ? "border-border" : ""
+                      !isRedlineView || !itemStatus ? "border-border" : "",
                     )}
                   >
                     <div className="pb-2">
@@ -544,7 +544,7 @@ export default function LabelTagsTabs({
                               "text-sm font-semibold flex items-center gap-2",
                               isRedlineView &&
                                 isRemoved &&
-                                "line-through text-red-500/70"
+                                "line-through text-red-500/70",
                             )}
                           >
                             {isRedlineView && nameDiff ? (
@@ -563,7 +563,7 @@ export default function LabelTagsTabs({
                                 "text-sm font-normal text-muted-foreground",
                                 isRedlineView &&
                                   isRemoved &&
-                                  "line-through text-red-500/70"
+                                  "line-through text-red-500/70",
                               )}
                             >
                               {isRedlineView && descriptionDiff ? (
@@ -663,7 +663,7 @@ export default function LabelTagsTabs({
                                 handleSave(
                                   item._id,
                                   item.image!,
-                                  newAnnotation
+                                  newAnnotation,
                                 );
                               }}
                               onStateChange={(newAnnotation) => {
@@ -677,8 +677,8 @@ export default function LabelTagsTabs({
                                 isRedlineView && isRemoved
                                   ? "border-red-300 bg-red-50/30 opacity-60"
                                   : isRedlineView && isAdded
-                                  ? "border-blue-300 bg-blue-50/30"
-                                  : "bg-muted/50 border-border"
+                                    ? "border-blue-300 bg-blue-50/30"
+                                    : "bg-muted/50 border-border",
                               )}
                             >
                               <PiImageDuotone className="w-12 h-12 mb-3 opacity-50" />

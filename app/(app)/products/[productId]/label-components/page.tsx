@@ -30,7 +30,8 @@ interface LabelComponentItem {
 export default function Page() {
   const { productId } = useParams<{ productId: string }>();
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
 
   const {
     data: componentsData,
@@ -38,10 +39,10 @@ export default function Page() {
     error: componentsError,
   } = useGetProductTabData(productId as string, "label-components");
 
-  // Only fetch redline data when in redline view
+  // Only fetch redline data when compareVersion is in URL
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId as string,
-    isRedlineView
+    compareVersionId
   );
 
   const isSubmitted =

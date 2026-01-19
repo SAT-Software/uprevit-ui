@@ -26,16 +26,17 @@ export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
 
   const { data, isLoading, error } = useGetProductTabData(
     productId,
     "all-tabs"
   );
 
-  // Only fetch redline data when ?view=redline is in the URL
+  // Only fetch redline data when compareVersion is in the URL
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
-    useGetProductDiffRedline(productId, isRedlineView);
+    useGetProductDiffRedline(productId, compareVersionId);
 
   const diffs = diffRedlineData?.result?.diffs || [];
 

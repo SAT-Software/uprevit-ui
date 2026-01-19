@@ -28,7 +28,8 @@ export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
 
   const { data, isLoading, isError } = useGetProductTabData(
     productId,
@@ -36,7 +37,7 @@ export default function Page() {
   );
 
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
-    useGetProductDiffRedline(productId, isRedlineView);
+    useGetProductDiffRedline(productId, compareVersionId);
 
   const diffs = diffRedlineData?.result?.diffs || [];
   const getDiff = (...paths: string[]) => {
@@ -261,7 +262,7 @@ export default function Page() {
             <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
               <RedlineValue
                 value={
-                  productMetadata.product_description ||
+                  productMetadata?.product_description ||
                   "No description available."
                 }
                 diff={getDiff(
