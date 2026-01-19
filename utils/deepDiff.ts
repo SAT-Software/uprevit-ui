@@ -61,7 +61,12 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
     const baseStr = String(base);
     const nextStr = String(next);
     if (baseStr !== nextStr) {
-      diffs.push({ path, status: "modified", old_value: baseStr, new_value: nextStr });
+      diffs.push({
+        path,
+        status: "modified",
+        old_value: baseStr,
+        new_value: nextStr,
+      });
     }
     return diffs;
   }
@@ -71,7 +76,12 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
     const baseTime = isDateString(base) ? new Date(base).getTime() : null;
     const nextTime = isDateString(next) ? new Date(next).getTime() : null;
     if (baseTime !== nextTime) {
-      diffs.push({ path, status: "modified", old_value: base, new_value: next });
+      diffs.push({
+        path,
+        status: "modified",
+        old_value: base,
+        new_value: next,
+      });
     }
     return diffs;
   }
@@ -90,7 +100,12 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
   // Primitives (string, number, boolean)
   if (typeof base !== "object") {
     if (base !== next) {
-      diffs.push({ path, status: "modified", old_value: base, new_value: next });
+      diffs.push({
+        path,
+        status: "modified",
+        old_value: base,
+        new_value: next,
+      });
     }
     return diffs;
   }
@@ -102,7 +117,8 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
 
     // Check if array items are objects (could have _id/parent_id)
     const hasObjectItems = (arr: any[]) =>
-      arr.length === 0 || (arr[0] && typeof arr[0] === "object" && !Array.isArray(arr[0]));
+      arr.length === 0 ||
+      (arr[0] && typeof arr[0] === "object" && !Array.isArray(arr[0]));
 
     // Check if items have parent_id (for version tracking) - check both arrays
     const hasParentIds = (baseArr: any[], nextArr: any[]) => {
@@ -113,7 +129,11 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
       return nextHasParentId && baseHasIds;
     };
 
-    if (hasObjectItems(baseArr) && hasObjectItems(nextArr) && hasParentIds(baseArr, nextArr)) {
+    if (
+      hasObjectItems(baseArr) &&
+      hasObjectItems(nextArr) &&
+      hasParentIds(baseArr, nextArr)
+    ) {
       // Use parent_id-based matching (for arrays like symbols_graphics with _id)
 
       // Get the _id from an item (base version items use _id)
@@ -143,8 +163,8 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
 
           const itemPath = path ? `${path}[${nextIndex}]` : `[${nextIndex}]`;
           diffs.push(...deepDiff(baseEntry.item, nextItem, itemPath));
-        } else if (!parentId && nextItem) {
-          // No parent_id means this is a NEW item (added in this version)
+        } else if (nextItem) {
+          // No parent_id OR parent_id doesn't match any base item = NEW item
           const itemPath = path ? `${path}[${nextIndex}]` : `[${nextIndex}]`;
           diffs.push({
             path: itemPath,
@@ -180,7 +200,10 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
   }
 
   // Objects - recurse into each key
-  const allKeys = new Set([...Object.keys(base || {}), ...Object.keys(next || {})]);
+  const allKeys = new Set([
+    ...Object.keys(base || {}),
+    ...Object.keys(next || {}),
+  ]);
 
   for (const key of allKeys) {
     // Skip internal fields we don't want to compare
@@ -208,4 +231,3 @@ function sanitizeValue(value: any): any {
   }
   return value;
 }
-

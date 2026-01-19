@@ -13,20 +13,20 @@ export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
   imageUploader: f({
     image: {
-      maxFileSize: "8MB",
-      maxFileCount: 1,
+      maxFileSize: "4MB",
+      maxFileCount: 4,
     },
     pdf: {
-      maxFileSize: "8MB",
-      maxFileCount: 1,
+      maxFileSize: "4MB",
+      maxFileCount: 4,
     },
     text: {
-      maxFileSize: "8MB",
-      maxFileCount: 1,
+      maxFileSize: "4MB",
+      maxFileCount: 4,
     },
     blob: {
-      maxFileSize: "8MB",
-      maxFileCount: 1,
+      maxFileSize: "4MB",
+      maxFileCount: 4,
     },
   })
     // Set permissions and file types for this FileRoute

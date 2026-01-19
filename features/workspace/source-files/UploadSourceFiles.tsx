@@ -90,8 +90,8 @@ export default function Component({
   maxFiles: maxFilesProp,
   maxSize: maxSizeProp,
 }: UploadSourceFilesProps) {
-  // Match server route constraints by default: image only, 1 file, 8MB
-  const maxSize = useMemo(() => maxSizeProp ?? 8 * 1024 * 1024, [maxSizeProp]);
+  // Match server route constraints by default: all files, max 5 files, 5MB
+  const maxSize = useMemo(() => maxSizeProp ?? 4 * 1024 * 1024, [maxSizeProp]);
   const maxFiles = useMemo(() => maxFilesProp ?? 5, [maxFilesProp]);
 
   const [
@@ -110,9 +110,7 @@ export default function Component({
     multiple: maxFiles > 1,
     maxFiles,
     maxSize,
-    accept:
-      accept ??
-      "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    accept: accept ?? "*",
     onFilesChange: (list) => {
       const onlyFiles = list
         .map((f) => f.file)
@@ -153,7 +151,7 @@ export default function Component({
             Drag & drop or click to browse
           </p>
           <div className="text-muted-foreground/70 flex flex-wrap justify-center gap-1 text-xs">
-            <span>Images only</span>
+            <span>All files</span>
             <span>∙</span>
             <span>Max {maxFiles} files</span>
             <span>∙</span>
@@ -196,7 +194,7 @@ export default function Component({
                     {formatBytes(
                       file.file instanceof File
                         ? file.file.size
-                        : file.file.size
+                        : file.file.size,
                     )}
                   </p>
                 </div>
