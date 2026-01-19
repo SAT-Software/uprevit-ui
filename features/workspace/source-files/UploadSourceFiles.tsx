@@ -90,9 +90,9 @@ export default function Component({
   maxFiles: maxFilesProp,
   maxSize: maxSizeProp,
 }: UploadSourceFilesProps) {
-  // Match server route constraints by default: all files, max 5 files, 5MB
-  const maxSize = useMemo(() => maxSizeProp ?? 4 * 1024 * 1024, [maxSizeProp]);
-  const maxFiles = useMemo(() => maxFilesProp ?? 5, [maxFilesProp]);
+  // Match server route constraints by default: all files, max 4 files, 5MB
+  const maxFiles = useMemo(() => maxFilesProp ?? 4, [maxFilesProp]);
+  const maxSize = useMemo(() => maxSizeProp ?? 5 * 1024 * 1024, [maxSizeProp]);
 
   const [
     { files, isDragging, errors },
