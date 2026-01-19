@@ -8,21 +8,35 @@ export function useQueryBuilderState() {
   const [conditionLogic, setConditionLogic] = useState<"AND" | "OR">("AND");
 
   const addCondition = useCallback(() => {
-    const newCondition: QueryCondition = {
-      id: crypto.randomUUID(),
-      tab: "",
-      field: "",
-      operator: "equals",
-      value: "",
-    };
-    setConditions((prev) => [...prev, newCondition]);
-  }, []);
+    setConditions((prev) => {
+      const newCondition: QueryCondition = {
+        id: crypto.randomUUID(),
+        tab: "",
+        field: "",
+        operator: "equals",
+        value: "",
+        ...(prev.length > 0 ? { logic: conditionLogic } : {}),
+      };
+      return [...prev, newCondition];
+    });
+  }, [conditionLogic]);
 
   const updateCondition = useCallback(
     (id: string, updates: Partial<Omit<QueryCondition, "id">>) => {
       setConditions((prev) =>
         prev.map((condition) =>
           condition.id === id ? { ...condition, ...updates } : condition
+        )
+      );
+    },
+    []
+  );
+
+  const updateConditionLogic = useCallback(
+    (id: string, logic: "AND" | "OR") => {
+      setConditions((prev) =>
+        prev.map((condition) =>
+          condition.id === id ? { ...condition, logic } : condition
         )
       );
     },
@@ -38,9 +52,9 @@ export function useQueryBuilderState() {
   }, []);
 
   const loadConditions = useCallback(
-    (savedConditions: QueryCondition[], savedLogic: "AND" | "OR") => {
+    (savedConditions: QueryCondition[], savedLogic?: "AND" | "OR") => {
       setConditions(savedConditions);
-      setConditionLogic(savedLogic);
+      setConditionLogic(savedLogic || "AND");
     },
     []
   );
@@ -67,7 +81,13 @@ export function useQueryBuilderState() {
   }, [conditions]);
 
   const getApiConditions = useCallback(() => {
-    return conditions.map(({ id, ...rest }) => rest);
+    return conditions.map((condition, index) => {
+      if (index === 0) {
+        const { id, logic, ...rest } = condition;
+        return { id, ...rest };
+      }
+      return condition;
+    });
   }, [conditions]);
 
   return {
@@ -76,6 +96,7 @@ export function useQueryBuilderState() {
     setConditionLogic,
     addCondition,
     updateCondition,
+    updateConditionLogic,
     removeCondition,
     clearConditions,
     loadConditions,

@@ -1,11 +1,13 @@
-export type FieldType = "text" | "select" | "multiselect" | "boolean";
+export type FieldType = "text" | "select" | "multiselect" | "boolean" | "array";
 export type Operator =
   | "equals"
   | "not_equals"
   | "contains"
   | "not_contains"
   | "exists"
-  | "not_exists";
+  | "not_exists"
+  | "contains_any"
+  | "contains_all";
 
 export interface QueryableField {
   key: string;
@@ -28,6 +30,8 @@ export const OPERATORS: { value: Operator; label: string }[] = [
   { value: "not_contains", label: "Does not contain" },
   { value: "exists", label: "Exists (has value)" },
   { value: "not_exists", label: "Does not exist (empty)" },
+  { value: "contains_any", label: "Contains any" },
+  { value: "contains_all", label: "Contains all" },
 ];
 
 const STATUS_OPTIONS = [
@@ -66,6 +70,7 @@ export const QUERYABLE_TABS: TabConfig[] = [
         label: "Product Plan Number",
         type: "text",
       },
+      { key: "version", label: "Version", type: "array" },
     ],
   },
   {
@@ -128,6 +133,7 @@ export const QUERYABLE_TABS: TabConfig[] = [
       { key: "component_type", label: "Component Type", type: "text" },
       { key: "component_number", label: "Component Number", type: "text" },
       { key: "component_description", label: "Description", type: "text" },
+      { key: "label_type", label: "Label Type", type: "array" },
     ],
   },
 ];
@@ -140,4 +146,10 @@ export function getTabConfig(tabKey: string): TabConfig | undefined {
 // Helper to get fields for a specific tab
 export function getFieldsForTab(tabKey: string): QueryableField[] {
   return getTabConfig(tabKey)?.fields ?? [];
+}
+
+export const ARRAY_FIELD_OPERATORS: Operator[] = ["contains_any", "contains_all"];
+
+export function isArrayFieldOperator(operator: Operator): boolean {
+  return ARRAY_FIELD_OPERATORS.includes(operator);
 }

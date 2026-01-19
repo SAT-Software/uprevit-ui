@@ -47,7 +47,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
       disabled = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const localId = useId();
     const inputId = id || localId;
@@ -91,8 +91,8 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
         {label && <Label htmlFor={inputId}>{label}</Label>}
         <div
           className={cn(
-            "flex flex-wrap items-center gap-2 rounded-md border border-input bg-background px-3 py-2",
-            styleClasses?.tagList?.container
+            "flex flex-wrap items-center gap-1 rounded-md border border-input bg-background px-2 h-9",
+            styleClasses?.tagList?.container,
           )}
         >
           {tags.map((tag) => (
@@ -106,7 +106,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
                 type="button"
                 className={cn(
                   "rounded-full hover:bg-background/20",
-                  styleClasses?.tag?.closeButton
+                  styleClasses?.tag?.closeButton,
                 )}
                 onClick={() => removeTag(tag.id)}
                 disabled={disabled}
@@ -125,7 +125,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
             placeholder={placeholder}
             className={cn(
               "flex-1 border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0",
-              styleClasses?.input
+              styleClasses?.input,
             )}
             disabled={disabled}
             {...props}
@@ -133,7 +133,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 TagInput.displayName = "TagInput";

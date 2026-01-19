@@ -16,12 +16,32 @@ import {
   OPERATORS,
   getFieldsForTab,
   Operator,
+  isArrayFieldOperator,
+  ARRAY_FIELD_OPERATORS,
 } from "@/data/reports-config";
+import { TagInput, Tag } from "@/components/ui/tag-input";
+import { useState, useEffect } from "react";
 
 interface ConditionRowProps {
   condition: QueryCondition;
   onUpdate: (updates: Partial<Omit<QueryCondition, "id">>) => void;
   onRemove: () => void;
+}
+
+const TEXT_FIELD_OPERATORS: Operator[] = [
+  "equals",
+  "not_equals",
+  "contains",
+  "not_contains",
+  "exists",
+  "not_exists",
+];
+
+function getOperatorsForField(fieldType: string | undefined): Operator[] {
+  if (fieldType === "array") {
+    return [...ARRAY_FIELD_OPERATORS, "equals", "not_equals", "exists", "not_exists"];
+  }
+  return TEXT_FIELD_OPERATORS;
 }
 
 export function ConditionRow({
@@ -33,6 +53,46 @@ export function ConditionRow({
   const selectedField = fields.find((f) => f.key === condition.field);
   const needsValue =
     condition.operator !== "exists" && condition.operator !== "not_exists";
+  const isArrayField = selectedField?.type === "array";
+  const availableOperators = getOperatorsForField(selectedField?.type);
+
+  const [tags, setTags] = useState<Tag[]>(() => {
+    if (Array.isArray(condition.value)) {
+      return condition.value.map((text, index) => ({
+        id: `tag-${index}-${text}`,
+        text,
+      }));
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (Array.isArray(condition.value)) {
+      const newTags = condition.value.map((text, index) => ({
+        id: `tag-${index}-${text}`,
+        text,
+      }));
+      setTags(newTags);
+    } else {
+      setTags([]);
+    }
+  }, [condition.value]);
+
+  const handleTagsChange = (newTags: Tag[]) => {
+    setTags(newTags);
+    const stringArray = newTags.map((tag) => tag.text);
+    onUpdate({ value: stringArray });
+  };
+
+  const handleFieldChange = (value: string) => {
+    const newField = fields.find((f) => f.key === value);
+    const newOperators = getOperatorsForField(newField?.type);
+    const currentOperator = condition.operator;
+    const isCurrentOperatorValid = newOperators.includes(currentOperator);
+    const newOperator = isCurrentOperatorValid ? currentOperator : newOperators[0];
+    setTags([]);
+    onUpdate({ field: value, value: "", operator: newOperator });
+  };
 
   return (
     <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
@@ -56,7 +116,7 @@ export function ConditionRow({
 
       <Select
         value={condition.field}
-        onValueChange={(value) => onUpdate({ field: value, value: "" })}
+        onValueChange={handleFieldChange}
         disabled={!condition.tab}
       >
         <SelectTrigger className="w-full">
@@ -80,11 +140,14 @@ export function ConditionRow({
           <SelectValue placeholder="Operator" />
         </SelectTrigger>
         <SelectContent>
-          {OPERATORS.map((op) => (
-            <SelectItem key={op.value} value={op.value}>
-              {op.label}
-            </SelectItem>
-          ))}
+          {availableOperators.map((op) => {
+            const operatorLabel = OPERATORS.find((o) => o.value === op)?.label || op;
+            return (
+              <SelectItem key={op} value={op}>
+                {operatorLabel}
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
 
@@ -107,6 +170,15 @@ export function ConditionRow({
                 ))}
               </SelectContent>
             </Select>
+          ) : isArrayField ? (
+            <div className="flex-1 min-w-[200px]">
+              <TagInput
+                tags={tags}
+                setTags={handleTagsChange}
+                placeholder="Type and press Enter to add"
+                disabled={!condition.field}
+              />
+            </div>
           ) : (
             <Input
               placeholder="Enter value..."
