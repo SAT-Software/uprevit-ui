@@ -32,16 +32,12 @@ import {
   PiLockKeyDuotone,
   PiPaperPlaneRightDuotone,
   PiTextStrikethroughDuotone,
+  PiXCircleDuotone,
 } from "react-icons/pi";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductUpdateProgress } from "./ProductUpdateProgress";
 import { ButtonGroup } from "@/components/ui/button-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export type Item = {
   productId: string;
@@ -84,7 +80,8 @@ export function ProductHeader() {
   const { mutate: exportPDF, isPending: isExportingPDF } =
     useExportProductPDF();
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -282,6 +279,31 @@ export function ProductHeader() {
 
   const versions = versionsData?.result?.versions || [];
 
+  // Get previous versions for redline comparison (versions with lower version number)
+  const currentVersion = product?.version ?? 1;
+  const previousVersions = useMemo(() => {
+    return versions.filter(
+      (v: Product & { _id: string }) => v.version < currentVersion
+    );
+  }, [versions, currentVersion]);
+
+  // Handle redline version selection
+  const handleRedlineVersionChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "clear") {
+      params.delete("compareVersion");
+    } else {
+      params.set("compareVersion", value);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // Get selected version info for display
+  const selectedCompareVersion = useMemo(() => {
+    if (!compareVersionId) return null;
+    return versions.find((v: Product & { _id: string }) => v._id === compareVersionId);
+  }, [compareVersionId, versions]);
+
   return (
     <header
       className={cn(
@@ -385,28 +407,53 @@ export function ProductHeader() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={product?.isLatest}
-            title={
-              product?.isLatest
-                ? "No newer version to compare against"
-                : "View redline comparison"
-            }
-            onClick={() => {
-              const params = new URLSearchParams(searchParams.toString());
-              if (isRedlineView) {
-                params.delete("view");
-              } else {
-                params.set("view", "redline");
-              }
-              router.push(`${pathname}?${params.toString()}`);
-            }}
+          <Select
+            value={compareVersionId || ""}
+            onValueChange={handleRedlineVersionChange}
+            disabled={!product || isLoadingVersions || previousVersions.length === 0}
           >
-            <PiTextStrikethroughDuotone />
-            {isRedlineView ? "Hide Redline" : "View Redline"}
-          </Button>
+            <SelectTrigger
+              className={cn(
+                "h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 border whitespace-nowrap",
+                isRedlineView
+                  ? "bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/20"
+                  : "bg-secondary text-secondary-foreground border-border hover:bg-secondary/80"
+              )}
+            >
+              <PiTextStrikethroughDuotone />
+              {isRedlineView && selectedCompareVersion ? (
+                <span>Comparing v{selectedCompareVersion.version}</span>
+              ) : (
+                <SelectValue placeholder="Compare Versions" />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              {isRedlineView && (
+                <SelectItem value="clear">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <PiXCircleDuotone className="size-4" />
+                    <span>Clear comparison</span>
+                  </div>
+                </SelectItem>
+              )}
+              {previousVersions.length > 0 ? (
+                previousVersions.map((v: Product & { _id: string }) => (
+                  <SelectItem key={v._id} value={v._id}>
+                    <div className="flex items-center gap-2">
+                      <span>Compare with v{v.version}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({v.status})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  No previous versions
+                </div>
+              )}
+            </SelectContent>
+          </Select>
 
           {/* Show submitted badge when read-only */}
           {/* {isReadOnly && (
