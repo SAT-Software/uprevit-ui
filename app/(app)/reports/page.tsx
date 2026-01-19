@@ -143,8 +143,8 @@ export default function Page() {
   const hasResults = results && results.products.length > 0;
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start gap-2 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
+    <div className="flex flex-col gap-2 p-2">
+      <div className="flex flex-col items-start gap-2 justify-start border border-border bg-background rounded-xl p-4 w-full">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <h1 className="text-base font-semibold">Reports</h1>
@@ -213,7 +213,7 @@ export default function Page() {
         </Card>
 
         {(results || reportsQuery.isPending) && (
-          <Card className="w-full h-auto">
+          <Card className="w-full">
             <CardHeader className="pb-1">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Results</CardTitle>

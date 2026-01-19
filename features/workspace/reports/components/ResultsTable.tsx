@@ -13,8 +13,16 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReportsProduct } from "@/types/reports";
 import { PiFileTextDuotone } from "react-icons/pi";
-import { PiHashDuotone, PiPackageDuotone, PiBuildingsDuotone, PiKanbanDuotone, PiInfoDuotone, PiGitBranchDuotone } from "react-icons/pi";
+import {
+  PiHashDuotone,
+  PiPackageDuotone,
+  PiBuildingsDuotone,
+  PiKanbanDuotone,
+  PiInfoDuotone,
+  PiGitBranchDuotone,
+} from "react-icons/pi";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 
 interface ResultsTableProps {
   products: ReportsProduct[];
@@ -41,12 +49,12 @@ function getStatusColor(status: string) {
   }
 }
 
-const SortableHeader = ({
+const ColumnHeader = ({
   title,
   icon: Icon,
 }: {
   title: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
 }) => {
   return (
     <div className="flex items-center gap-2 h-8">
@@ -93,7 +101,7 @@ export function ResultsTable({
   }
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Found{" "}
@@ -104,71 +112,71 @@ export function ResultsTable({
         </p>
       </div>
 
-      <div className="bg-background overflow-hidden rounded-xl border">
-        <Table className="table-fixed">
-          <TableHeader className="bg-muted">
-            <TableRow className="hover:bg-transparent border-b border-border">
-              <TableHead className="h-11 border-r border-border w-[110px]">
-                <SortableHeader title="PPN" icon={PiHashDuotone} />
-              </TableHead>
-              <TableHead className="h-11 border-r border-border w-[190px]">
-                <SortableHeader title="Product Name" icon={PiPackageDuotone} />
-              </TableHead>
-              <TableHead className="h-11 border-r border-border w-[150px]">
-                <SortableHeader title="Project" icon={PiKanbanDuotone} />
-              </TableHead>
-              <TableHead className="h-11 border-r border-border w-[150px]">
-                <SortableHeader title="Department" icon={PiBuildingsDuotone} />
-              </TableHead>
-              <TableHead className="h-11 border-r border-border w-[90px]">
-                <SortableHeader title="Status" icon={PiInfoDuotone} />
-              </TableHead>
-              <TableHead className="h-11 border-r border-border w-[80px]">
-                <SortableHeader title="Version" icon={PiGitBranchDuotone} />
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow
-                key={product._id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => {
-                  router.push(
-                    `/products/${product._id}/product-information`
-                  );
-                }}
-              >
-                <TableCell className="border-r border-border last:border-r-0 font-medium">
-                  {product.product_plan_number}
-                </TableCell>
-                <TableCell className="border-r border-border last:border-r-0 font-medium">
-                  {product.product_name}
-                </TableCell>
-                <TableCell className="border-r border-border last:border-r-0 text-muted-foreground">
-                  {product.project_name || "—"}
-                </TableCell>
-                <TableCell className="border-r border-border last:border-r-0 text-muted-foreground">
-                  {product.department_name || "—"}
-                </TableCell>
-                <TableCell className="border-r border-border last:border-r-0">
-                  <Badge variant="outline" className="font-normal">
-                    <div
-                      className={`w-2 h-2 rounded-full mr-1 ${getStatusColor(product.status)}`}
-                    />
-                    <span className="capitalize">{product.status}</span>
-                  </Badge>
-                </TableCell>
-                <TableCell className="border-r border-border last:border-r-0">
-                  <Badge variant="secondary" className="font-mono text-sm">
-                    <span className="mr-0 text-muted-foreground">v</span>
-                    {product.version || 1}
-                  </Badge>
-                </TableCell>
+      <div className="bg-background rounded-xl border">
+        <div className="overflow-x-auto">
+          <Table className="table-fixed">
+            <TableHeader className="bg-muted">
+              <TableRow className="hover:bg-transparent border-b border-border">
+                <TableHead className="h-11 border-r border-border w-[110px]">
+                  <ColumnHeader title="PPN" icon={PiHashDuotone} />
+                </TableHead>
+                <TableHead className="h-11 border-r border-border w-[190px]">
+                  <ColumnHeader title="Product Name" icon={PiPackageDuotone} />
+                </TableHead>
+                <TableHead className="h-11 border-r border-border w-[150px]">
+                  <ColumnHeader title="Project" icon={PiKanbanDuotone} />
+                </TableHead>
+                <TableHead className="h-11 border-r border-border w-[150px]">
+                  <ColumnHeader title="Department" icon={PiBuildingsDuotone} />
+                </TableHead>
+                <TableHead className="h-11 border-r border-border w-[90px]">
+                  <ColumnHeader title="Status" icon={PiInfoDuotone} />
+                </TableHead>
+                <TableHead className="h-11 border-r border-border w-[80px]">
+                  <ColumnHeader title="Version" icon={PiGitBranchDuotone} />
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody className="">
+              {products.map((product) => (
+                <TableRow
+                  key={product._id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => {
+                    router.push(`/products/${product._id}/product-information`);
+                  }}
+                >
+                  <TableCell className="border-r border-border last:border-r-0 font-medium">
+                    {product.product_plan_number}
+                  </TableCell>
+                  <TableCell className="border-r border-border last:border-r-0 font-medium">
+                    {product.product_name}
+                  </TableCell>
+                  <TableCell className="border-r border-border last:border-r-0 text-muted-foreground">
+                    {product.project_name || "—"}
+                  </TableCell>
+                  <TableCell className="border-r border-border last:border-r-0 text-muted-foreground">
+                    {product.department_name || "—"}
+                  </TableCell>
+                  <TableCell className="border-r border-border last:border-r-0">
+                    <Badge variant="outline" className="font-normal">
+                      <div
+                        className={`w-2 h-2 rounded-full mr-1 ${getStatusColor(product.status)}`}
+                      />
+                      <span className="capitalize">{product.status}</span>
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="border-r border-border last:border-r-0">
+                    <Badge variant="secondary" className="font-mono text-sm">
+                      <span className="mr-0 text-muted-foreground">v</span>
+                      {product.version || 1}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {pagination.totalPages > 1 && (

@@ -20,7 +20,7 @@ import {
   ARRAY_FIELD_OPERATORS,
 } from "@/data/reports-config";
 import { TagInput, Tag } from "@/components/ui/tag-input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ConditionRowProps {
   condition: QueryCondition;
@@ -66,6 +66,18 @@ export function ConditionRow({
     return [];
   });
 
+  useEffect(() => {
+    if (Array.isArray(condition.value)) {
+      const newTags = condition.value.map((text, index) => ({
+        id: `tag-${index}-${text}`,
+        text,
+      }));
+      setTags(newTags);
+    } else {
+      setTags([]);
+    }
+  }, [condition.value]);
+
   const handleTagsChange = (newTags: Tag[]) => {
     setTags(newTags);
     const stringArray = newTags.map((tag) => tag.text);
@@ -78,6 +90,7 @@ export function ConditionRow({
     const currentOperator = condition.operator;
     const isCurrentOperatorValid = newOperators.includes(currentOperator);
     const newOperator = isCurrentOperatorValid ? currentOperator : newOperators[0];
+    setTags([]);
     onUpdate({ field: value, value: "", operator: newOperator });
   };
 

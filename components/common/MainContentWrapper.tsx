@@ -14,19 +14,19 @@ export function MainContentWrapper({ children }: MainContentWrapperProps) {
     typeof params.productId === "string"
       ? params.productId
       : Array.isArray(params.productId)
-      ? params.productId[0]
-      : undefined;
+        ? params.productId[0]
+        : undefined;
 
   const isProductPage = Boolean(productId);
 
   return (
     <div
       className={cn(
-        "flex flex-1 flex-col bg-sidebar min-h-0 overflow-hidden",
+        "flex flex-1 flex-col bg-sidebar min-h-0 overflow-auto",
         // Dynamic top padding based on header height
         isProductPage
           ? "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-0"
-          : "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-2"
+          : "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-2",
       )}
     >
       {children}

@@ -34,10 +34,6 @@ export interface ReportsProduct {
   status: "draft" | "submitted" | "archived";
   target_date?: string | null;
   version?: number;
-  market_geography?: string | null;
-  product_information?: {
-    market_geography?: string;
-  };
 }
 
 export interface SavedQuery {
