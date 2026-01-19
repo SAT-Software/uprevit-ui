@@ -85,8 +85,8 @@ type ComponentItem = {
 type DiffItem = {
   path: string;
   status: "added" | "removed" | "modified";
-  old_value: any;
-  new_value: any;
+  old_value?: any;
+  new_value?: any;
 };
 
 // Helper component for displaying redline values (vertical stacking)
@@ -258,7 +258,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       if (meta?.isRedlineView && meta.diffs) {
         // Find diffs for label_type additions for THIS row (data[row.index])
         const rowLabelTypeDiffs = (meta.diffs as DiffItem[]).filter((d) =>
-          d.path.startsWith(`label_components.data[${row.index}].label_type`)
+          d.path.startsWith(`label_components.data[${row.index}].label_type`),
         );
 
         // Get all newly added label type values for this row
@@ -354,7 +354,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       const meta = table.options.meta as any;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(
-            `label_components.data[${row.index}].component_description`
+            `label_components.data[${row.index}].component_description`,
           )
         : null;
 
@@ -483,7 +483,7 @@ export default function ProductComponentDetailsTable({
 
     // Check for any field-level changes
     const hasFieldDiff = diffs.some((d) =>
-      d.path.startsWith(`label_components.data[${rowIndex}].`)
+      d.path.startsWith(`label_components.data[${rowIndex}].`),
     );
     return hasFieldDiff ? "modified" : null;
   };
@@ -522,7 +522,7 @@ export default function ProductComponentDetailsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -561,8 +561,8 @@ export default function ProductComponentDetailsTable({
                                   isAdded
                                     ? "text-blue-700 bg-blue-100 border-blue-200"
                                     : isRemoved
-                                    ? "text-red-700 bg-red-100 border-red-200"
-                                    : "text-amber-700 bg-amber-100 border-amber-200"
+                                      ? "text-red-700 bg-red-100 border-red-200"
+                                      : "text-amber-700 bg-amber-100 border-amber-200"
                                 }`}
                               >
                                 {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
@@ -570,7 +570,7 @@ export default function ProductComponentDetailsTable({
                             )}
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </div>
                         </TableCell>
@@ -659,9 +659,9 @@ export default function ProductComponentDetailsTable({
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}

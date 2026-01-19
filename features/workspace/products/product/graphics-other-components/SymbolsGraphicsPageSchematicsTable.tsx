@@ -74,8 +74,8 @@ type Item = {
 type DiffItem = {
   path: string;
   status: "added" | "removed" | "modified";
-  old_value: any;
-  new_value: any;
+  old_value?: any;
+  new_value?: any;
 };
 
 // Helper component for displaying redline values
@@ -301,8 +301,8 @@ const columns: ColumnDef<Item>[] = [
       if (meta?.isRedlineView && meta.diffs) {
         const labelDiffs = (meta.diffs as DiffItem[]).filter((d) =>
           d.path.startsWith(
-            `symbols_graphics.data[${originalIndex}].label_presence`
-          )
+            `symbols_graphics.data[${originalIndex}].label_presence`,
+          ),
         );
         addedLabels = labelDiffs
           .filter((d) => d.status === "added" && d.new_value)
@@ -335,8 +335,8 @@ const columns: ColumnDef<Item>[] = [
                     isNewlyAdded
                       ? "border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500"
                       : isRemoved
-                      ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
-                      : ""
+                        ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
+                        : ""
                   }`}
                 >
                   {label}
@@ -408,7 +408,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
     if (rowDiff) return rowDiff.status;
 
     const hasFieldDiff = diffs.some((d) =>
-      d.path.startsWith(`symbols_graphics.data[${originalIndex}].`)
+      d.path.startsWith(`symbols_graphics.data[${originalIndex}].`),
     );
     return hasFieldDiff ? "modified" : null;
   };
@@ -447,7 +447,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -486,8 +486,8 @@ export default function SymbolsGraphicsPageSchematicsTable({
                                   isAdded
                                     ? "text-blue-700 bg-blue-100 border-blue-200"
                                     : isRemoved
-                                    ? "text-red-700 bg-red-100 border-red-200"
-                                    : "text-amber-700 bg-amber-100 border-amber-200"
+                                      ? "text-red-700 bg-red-100 border-red-200"
+                                      : "text-amber-700 bg-amber-100 border-amber-200"
                                 }`}
                               >
                                 {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
@@ -495,7 +495,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
                             )}
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </div>
                         </TableCell>

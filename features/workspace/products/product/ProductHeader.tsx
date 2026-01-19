@@ -183,18 +183,18 @@ export function ProductHeader() {
       ? "Unmarking..."
       : "Marking complete..."
     : isReadOnly
-    ? "Submitted"
-    : isCurrentTabCompleted
-    ? "Mark Incomplete"
-    : "Mark Complete";
+      ? "Submitted"
+      : isCurrentTabCompleted
+        ? "Mark Incomplete"
+        : "Mark Complete";
 
   const toggleButtonSubtitle = isSyncingStatus
     ? "Syncing with workspace"
     : isReadOnly
-    ? "This product is submitted"
-    : isCurrentTabCompleted
-    ? "Send back to in-progress"
-    : "Mark this tab completed";
+      ? "This product is submitted"
+      : isCurrentTabCompleted
+        ? "Send back to in-progress"
+        : "Mark this tab completed";
 
   const toggleButtonIcon = isSyncingStatus ? (
     <Spinner className="size-3" />
@@ -209,7 +209,7 @@ export function ProductHeader() {
   const toggleButtonClasses = cn(
     "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground rounded-lg border bg-accent",
     isReadOnly ? "cursor-not-allowed opacity-70" : "cursor-pointer",
-    isCurrentTabCompleted ? "text-foreground" : "text-foreground"
+    isCurrentTabCompleted ? "text-foreground" : "text-foreground",
   );
 
   const toggleButtonIconClasses = cn(
@@ -217,8 +217,8 @@ export function ProductHeader() {
     isReadOnly
       ? "dark:bg-amber-500/20 dark:text-amber-100"
       : isCurrentTabCompleted
-      ? "dark:bg-emerald-500/20 dark:text-emerald-100 group-hover:border-foreground/30 group-hover:text-foreground"
-      : "dark:border-border/80 dark:bg-muted/40 group-hover:border-foreground/30 group-hover:text-foreground"
+        ? "dark:bg-emerald-500/20 dark:text-emerald-100 group-hover:border-foreground/30 group-hover:text-foreground"
+        : "dark:border-border/80 dark:bg-muted/40 group-hover:border-foreground/30 group-hover:text-foreground",
   );
 
   const handleToggleTab = async () => {
@@ -229,7 +229,7 @@ export function ProductHeader() {
       : [...tabsCompleted, currentTab];
 
     const newCompletionPercentage = Math.round(
-      (updatedTabsCompleted.length / TOTAL_TABS) * 100
+      (updatedTabsCompleted.length / TOTAL_TABS) * 100,
     );
 
     const tabMapping: Record<string, string> = {
@@ -283,7 +283,8 @@ export function ProductHeader() {
   const currentVersion = product?.version ?? 1;
   const previousVersions = useMemo(() => {
     return versions.filter(
-      (v: Product & { _id: string }) => v.version < currentVersion
+      (v: Product & { _id: string }) =>
+        v.version !== undefined && v.version < currentVersion,
     );
   }, [versions, currentVersion]);
 
@@ -301,7 +302,9 @@ export function ProductHeader() {
   // Get selected version info for display
   const selectedCompareVersion = useMemo(() => {
     if (!compareVersionId) return null;
-    return versions.find((v: Product & { _id: string }) => v._id === compareVersionId);
+    return versions.find(
+      (v: Product & { _id: string }) => v._id === compareVersionId,
+    );
   }, [compareVersionId, versions]);
 
   return (
@@ -314,7 +317,7 @@ export function ProductHeader() {
         "md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:left-[var(--sidebar-width-icon)] md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:w-[calc(100%-var(--sidebar-width-icon))]",
         "md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:left-0 md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:w-full",
         // Height
-        "md:h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+        "md:h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
       )}
     >
       <div className="flex items-center gap-2">
@@ -410,14 +413,16 @@ export function ProductHeader() {
           <Select
             value={compareVersionId || ""}
             onValueChange={handleRedlineVersionChange}
-            disabled={!product || isLoadingVersions || previousVersions.length === 0}
+            disabled={
+              !product || isLoadingVersions || previousVersions.length === 0
+            }
           >
             <SelectTrigger
               className={cn(
                 "h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 border whitespace-nowrap",
                 isRedlineView
                   ? "bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/20"
-                  : "bg-secondary text-secondary-foreground border-border hover:bg-secondary/80"
+                  : "bg-secondary text-secondary-foreground border-border hover:bg-secondary/80",
               )}
             >
               <PiTextStrikethroughDuotone />
@@ -516,14 +521,14 @@ export function ProductHeader() {
                 disabled={!isProductComplete || isReadOnly}
                 className={cn(
                   (!isProductComplete || isReadOnly) &&
-                    "opacity-50 cursor-not-allowed"
+                    "opacity-50 cursor-not-allowed",
                 )}
                 title={
                   isReadOnly
                     ? "Product is already submitted"
                     : !isProductComplete
-                    ? "Complete all tabs to enable submission"
-                    : "Submit product"
+                      ? "Complete all tabs to enable submission"
+                      : "Submit product"
                 }
               >
                 <PiPaperPlaneRightDuotone />

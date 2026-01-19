@@ -55,8 +55,8 @@ interface OtherComponentData {
 interface DiffItem {
   path: string;
   status: "added" | "removed" | "modified";
-  old_value: any;
-  new_value: any;
+  old_value?: any;
+  new_value?: any;
 }
 
 interface SchematicsSymbolsTabsProps {
