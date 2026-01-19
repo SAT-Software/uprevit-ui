@@ -168,7 +168,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: workspaceData, isLoading } = useGetWorkspace();
   const workspace = workspaceData?.workspace;
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
 
   return (
     <Sidebar {...props}>
@@ -239,7 +239,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                       href={`/products/${
                                         pathname.split("/")[2]
                                       }${subItem.url}${
-                                        isRedlineView ? "?view=redline" : ""
+                                        compareVersionId ? `?compareVersion=${compareVersionId}` : ""
                                       }`}
                                     >
                                       {subItem.icon && <subItem.icon />}

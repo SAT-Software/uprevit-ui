@@ -33,7 +33,8 @@ export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
 
   const [isMounted] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,10 +53,10 @@ export default function Page() {
     "product-information"
   );
 
-  // Fetch redline diff data when in redline view
+  // Fetch redline diff data when compareVersion is in URL
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId,
-    isRedlineView
+    compareVersionId
   );
 
   const productName =

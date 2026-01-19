@@ -25,7 +25,8 @@ interface LabelTagItem {
 export default function Page() {
   const { productId } = useParams<{ productId: string }>();
   const searchParams = useSearchParams();
-  const isRedlineView = searchParams.get("view") === "redline";
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
 
   // Fetch label tags data
   const { data, isLoading, error } = useGetProductTabData(
@@ -39,10 +40,10 @@ export default function Page() {
     "product-information"
   );
 
-  // Only fetch redline data when in redline view
+  // Only fetch redline data when compareVersion is in URL
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId as string,
-    isRedlineView
+    compareVersionId
   );
 
   const productName =
