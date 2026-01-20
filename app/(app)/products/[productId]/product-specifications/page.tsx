@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
@@ -180,6 +181,29 @@ export default function Page() {
             <p className="text-xs text-muted-foreground font-medium">
               Manage product data in the table below
             </p>
+            <PageInfoDialog
+              title="Keyboard Shortcuts"
+              content={
+                <div className="space-y-2">
+                  <p className="font-medium">Navigation</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Arrow keys - Move between cells</li>
+                  </ul>
+                  <p className="font-medium pt-2">Selection</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Click - Select single cell</li>
+                    <li>Shift + Click - Select range of cells</li>
+                    <li>Ctrl + Click - Add/remove cell from selection</li>
+                  </ul>
+                  <p className="font-medium pt-2">Actions</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Ctrl + Z - Undo</li>
+                    <li>Ctrl + Y - Redo</li>
+                    <li>Ctrl + R - Find and replace</li>
+                  </ul>
+                </div>
+              }
+            />
           </div>
 
           <div className="flex items-center gap-3">

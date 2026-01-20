@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import OperationalParametersDataGridRef, {
   OperationalParametersDataGridRefRef,
 } from "@/features/workspace/products/product/operational-parameters/OperationalParametersDataGrid";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
@@ -257,6 +258,10 @@ export default function Page() {
             <p className="text-xs text-muted-foreground font-medium">
               Manage operational parameters in the spreadsheet below
             </p>
+            <PageInfoDialog
+              title="Operational Parameters"
+              content="Add and manage operational parameters such as temperature, pressure, voltage, and other specifications."
+            />
           </div>
           <Button
             size="sm"

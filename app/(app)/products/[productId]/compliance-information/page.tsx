@@ -3,6 +3,7 @@
 import AddStandardDialog from "@/features/workspace/products/product/compliance-information/AddStandardDialog";
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import {
   PiShieldCheckDuotone,
   PiHouseDuotone,
@@ -239,6 +240,10 @@ export default function Page() {
             <p className="text-xs text-muted-foreground font-medium">
               Regulatory standards and certifications for this product
             </p>
+            <PageInfoDialog
+              title="Compliance Standards"
+              content="Add and manage regulatory compliance standards, certifications, and safety documents for your product."
+            />
           </div>
           <AddStandardDialog productId={productId} isSubmitted={isSubmitted} />
         </div>

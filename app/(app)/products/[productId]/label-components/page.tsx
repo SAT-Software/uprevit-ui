@@ -2,6 +2,7 @@
 
 import ProductComponentDetailsTable from "@/features/workspace/products/product/component-details/ProductComponentDetailsTable";
 import AddComponentDialog from "@/features/workspace/products/product/component-details/AddComponentDialog";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
@@ -134,6 +135,10 @@ export default function Page() {
               <p className="text-xs text-muted-foreground font-medium">
                 Manage label components for this product
               </p>
+              <PageInfoDialog
+                title="Label Components"
+                content="Add and organize label components such as labels, tags, stickers, and packaging materials for your product."
+              />
             </div>
             <AddComponentDialog
               productId={productId as string}

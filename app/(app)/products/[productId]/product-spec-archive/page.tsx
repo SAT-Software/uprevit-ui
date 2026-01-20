@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import ProductDataGrid, {
   ProductDataGridRef,
 } from "@/features/workspace/products/product/product-specifications/ProductDataGrid";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
@@ -178,9 +179,13 @@ export default function Page() {
             <div className="flex items-center gap-2">
 <p className="text-base font-semibold">Product Spec Archive</p>
               <div className="w-1 h-1 bg-border border border-border rounded-full" />
-              <p className="text-xs text-muted-foreground font-medium">
+<p className="text-xs text-muted-foreground font-medium">
                 Side-by-side comparison view (read-only)
               </p>
+              <PageInfoDialog
+                title="Product Spec Archive"
+                content="Compare different versions of product specifications side by side. This is a read-only view."
+              />
             </div>
           </div>
 
