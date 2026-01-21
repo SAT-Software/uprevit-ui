@@ -9,6 +9,7 @@ import AddSymbolsDialog from "@/features/workspace/products/product/graphics-oth
 import AddSchematicsDialog from "@/features/workspace/products/product/graphics-other-components/AddSchematicsDialog";
 import AddBarcodesDialog from "@/features/workspace/products/product/graphics-other-components/AddBarcodesDialog";
 import AddOtherCompsDialog from "@/features/workspace/products/product/graphics-other-components/AddOtherCompsDialog";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import {
   PiShapesDuotone,
   PiCpuDuotone,
@@ -113,6 +114,10 @@ export default function SchematicsSymbolsTabs({
           <p className="text-xs text-muted-foreground font-medium">
             Manage {getTabLabel()} for this product
           </p>
+          <PageInfoDialog
+            title="Symbols & Graphics"
+            content="Add and manage product symbols, schematics, barcodes, and other graphical components."
+          />
         </div>
         {activeTab === "tab-1" ? (
           <AddSymbolsDialog productId={productId} isSubmitted={isSubmitted} />

@@ -1,93 +1,145 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import ProductDataGrid, {
-  ProductDataGridRef,
-} from "@/features/workspace/products/product/product-specifications/ProductDataGrid";
-import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
+import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import dynamic from "next/dynamic";
-import { useParams, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { type ProductDataTableSchema } from "@/types/product-data-table";
+import { parseProductSpecDataFromDatabase } from "@/utils/product/product-spec";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  PiCloudCheckDuotone,
   PiFloppyDiskDuotone,
-  PiTableDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
-import { toast } from "sonner";
 
-// Dynamic import for read-only viewer (SSR disabled) - reusing from operational-parameters
-const UniverReadOnlyViewer = dynamic(
-  () =>
-    import(
-      "@/features/workspace/products/product/operational-parameters/UniverReadOnlyViewer"
-    ),
-  { ssr: false }
-);
+const AUTO_SAVE_STORAGE_KEY = "product-data-table-auto-save";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
-  const productId = params?.productId;
-  const searchParams = useSearchParams();
-  const compareVersionId = searchParams.get("compareVersion");
-  const isRedlineView = !!compareVersionId;
+  const productId = params?.productId ?? "";
+  const [autoSave, setAutoSave] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(AUTO_SAVE_STORAGE_KEY);
+      return stored !== "false";
+    }
+    return true;
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
+  const isFirstRender = useRef(true);
+  const onSaveSuccessRef = useRef<() => void>(() => {});
 
-  const [isMounted] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const productDataGridRef = useRef<ProductDataGridRef>(null);
+  const {
+    data: productTabData,
+    isLoading,
+    error,
+  } = useGetProductTabData(productId, "product-specifications");
+  const { mutate: updateTabData, isPending: isSaving } =
+    useUpdateProductTabData();
 
-  const { mutate: updateProductDataTab } = useUpdateProductTabData();
-  const { data, isLoading, error } = useGetProductTabData(
-    productId,
-    "product-specifications"
-  );
+  const workbookData = productTabData?.result?.data?.data?.workbook_data;
 
-  // Fetch Product Information for breadcrumb
-  const { data: productInfoData } = useGetProductTabData(
-    productId,
-    "product-information"
-  );
+  const initialData = useMemo(() => {
+    return parseProductSpecDataFromDatabase(workbookData);
+  }, [workbookData]);
 
-  // Fetch redline diff data when compareVersion is in URL
-  const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
-    productId,
-    compareVersionId
-  );
+  function handleAutoSaveToggle(checked: boolean) {
+    setAutoSave(checked);
+    localStorage.setItem(AUTO_SAVE_STORAGE_KEY, String(checked));
+    if (!checked && debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }
 
-  const productName =
-    productInfoData?.result?.data?.data?.product_name || "Product";
+  function saveDataToDB(data: ProductDataTableSchema) {
+    const payload = {
+      id: productId,
+      tab: "product-specifications",
+      action: "add_product_data",
+      data: { workbook_data: data },
+    };
 
-  // Check if product is submitted - disable editing buttons
-  const isSubmitted =
-    productInfoData?.result?.data?.product_data?.data?.status === "submitted";
+    updateTabData(payload, {
+      onSuccess: () => {
+        setHasUnsavedChanges(false);
+        setLastSavedAt(new Date());
+        onSaveSuccessRef.current();
+      },
+    });
+  }
 
-  // Extract base and next version workbook data for redline view
-  const baseVersionWorkbook =
-    diffData?.result?.base_version?.product_data?.data?.workbook_data;
-  const nextVersionWorkbook =
-    diffData?.result?.next_version?.product_data?.data?.workbook_data;
+  function handleAutoSave(data: ProductDataTableSchema) {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      pendingDataRef.current = data;
+      return;
+    }
 
-  // Filter diffs for product_data only
-  const allDiffs = diffData?.result?.diffs || [];
-  const productDataDiffs = allDiffs.filter((d: any) =>
-    d.path.startsWith("product_data")
-  );
+    setHasUnsavedChanges(true);
+    pendingDataRef.current = data;
+
+    if (autoSave) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        if (pendingDataRef.current) {
+          saveDataToDB(pendingDataRef.current);
+        }
+      }, 1500);
+    }
+  }
+
+  function handleManualSave() {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (pendingDataRef.current) {
+      saveDataToDB(pendingDataRef.current);
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const hasPendingAutoSave = !!debounceTimerRef.current;
+      if (hasUnsavedChanges && (!autoSave || hasPendingAutoSave)) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges, autoSave]);
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-          {/* Header Skeleton */}
           <div className="flex items-center justify-between border-b border-border py-2 px-3">
             <div className="flex items-center gap-2">
               <div className="h-5 w-32 bg-muted rounded animate-pulse" />
               <div className="h-2 w-2 bg-muted rounded-full animate-pulse" />
               <div className="h-4 w-48 bg-muted rounded animate-pulse" />
             </div>
-            <div className="h-7 w-28 bg-muted rounded-lg animate-pulse" />
           </div>
-          {/* Content Skeleton */}
           <div className="px-4 pb-4 flex-1">
             <div className="h-full w-full bg-muted rounded-xl animate-pulse" />
           </div>
@@ -120,169 +172,89 @@ export default function Page() {
     );
   }
 
-  const productTabData = data?.result?.data?.data;
-
-  const handleSave = async () => {
-    try {
-      setIsSaving(true);
-      const savedData = productDataGridRef.current?.saveData();
-
-      const productTabDataData = {
-        id: productId,
-        action: "add_product_data",
-        tab: "product-specifications",
-        data: {
-          workbook_data: savedData,
-        },
-      };
-
-      updateProductDataTab(productTabDataData, {
-        onSuccess: () => {
-          setIsSaving(false);
-          toast.success("Product Specifications saved successfully");
-          console.log("Saved data:", savedData);
-          console.log("Stringified data:", JSON.stringify(savedData, null, 2));
-        },
-        onError: (error) => {
-          setIsSaving(false);
-          console.error("Failed to update product information:", error);
-          toast.error("Failed to save the product specifications");
-        },
-      });
-    } catch (error) {
-      setIsSaving(false);
-      console.error("Save error:", error);
-      toast.error("Failed to save the product specifications");
-    }
-  };
-
-  // Render redline view with side-by-side comparison
-  if (isRedlineView) {
-    return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        {/* Redline Mode Banner */}
-        <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
-          <span className="text-amber-600 font-medium">
-            {isLoadingDiff
-              ? "Loading changes..."
-              : `Redline View: ${productDataDiffs.length} changes in Product Specifications`}
-          </span>
-          <span className="text-muted-foreground text-xs">
-            (comparing spreadsheet versions side by side)
-          </span>
-        </div>
-
-        <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
-          {/* Header Section */}
-          <div className="flex items-center justify-between border-b border-border p-2 shrink-0">
-            <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Product Specifications</p>
-              <div className="w-1 h-1 bg-border border border-border rounded-full" />
-              <p className="text-xs text-muted-foreground font-medium">
-                Side-by-side comparison view (read-only)
-              </p>
-            </div>
-          </div>
-
-          {/* Side-by-Side Comparison */}
-          <div className="flex-1 overflow-hidden p-4">
-            {isLoadingDiff ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="p-4 rounded-full bg-muted animate-pulse">
-                    <PiTableDuotone className="w-10 h-10 text-muted-foreground" />
-                  </div>
-                  <p className="text-muted-foreground">
-                    Loading comparison data...
-                  </p>
-                </div>
-              </div>
-            ) : !baseVersionWorkbook && !nextVersionWorkbook ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="p-4 rounded-full bg-muted">
-                    <PiTableDuotone className="w-10 h-10 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold">
-                      No Previous Version
-                    </h3>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                      This appears to be the first version or there is no
-                      previous comparison data available.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 h-full">
-                {/* Left: Previous Version */}
-                <div className="flex flex-col h-full min-h-0">
-                  <UniverReadOnlyViewer
-                    workbookData={baseVersionWorkbook}
-                    label="PREVIOUS VERSION"
-                    variant="old"
-                  />
-                </div>
-
-                {/* Right: New Version */}
-                <div className="flex flex-col h-full min-h-0">
-                  <UniverReadOnlyViewer
-                    workbookData={nextVersionWorkbook}
-                    label="NEW VERSION"
-                    variant="new"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Normal edit view
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
-        {/* Header Section */}
+    <div className="flex flex-1 flex-col gap-2 p-2 min-h-0 overflow-hidden">
+      <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full min-h-0">
         <div className="flex items-center justify-between border-b border-border p-2 shrink-0">
           <div className="flex items-center gap-2">
             <p className="text-base font-semibold">Product Specifications</p>
             <div className="w-1 h-1 bg-border border border-border rounded-full" />
             <p className="text-xs text-muted-foreground font-medium">
-              Manage product specifications in the spreadsheet below
+              Manage product data in the table below
             </p>
+            <PageInfoDialog
+              title="Keyboard Shortcuts"
+              content={
+                <div className="space-y-2">
+                  <p className="font-medium">Navigation</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Arrow keys - Move between cells</li>
+                  </ul>
+                  <p className="font-medium pt-2">Selection</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Click - Select single cell</li>
+                    <li>Shift + Click - Select range of cells</li>
+                    <li>Ctrl + Click - Add/remove cell from selection</li>
+                  </ul>
+                  <p className="font-medium pt-2">Actions</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Ctrl + Z - Undo</li>
+                    <li>Ctrl + Y - Redo</li>
+                    <li>Ctrl + R - Find and replace</li>
+                  </ul>
+                </div>
+              }
+            />
           </div>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={handleSave}
-            disabled={isSaving || isSubmitted}
-          >
-            <PiFloppyDiskDuotone />
-            {isSaving ? "Saving..." : "Save Data"}
-          </Button>
+
+          <div className="flex items-center gap-3">
+            {isSaving ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Spinner className="w-4 h-4" />
+                <span className="text-xs">Saving...</span>
+              </div>
+            ) : lastSavedAt ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
+                <span className="text-xs">Saved</span>
+              </div>
+            ) : hasUnsavedChanges ? (
+              <span className="text-xs text-amber-600">Unsaved changes</span>
+            ) : null}
+
+            <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/50">
+              <span className="text-xs text-muted-foreground">Auto-save</span>
+              <Switch
+                checked={autoSave}
+                onCheckedChange={handleAutoSaveToggle}
+                className="scale-75"
+              />
+            </div>
+
+            <Button
+              size="sm"
+              variant={hasUnsavedChanges ? "default" : "outline"}
+              onClick={handleManualSave}
+              disabled={isSaving || !hasUnsavedChanges}
+              className="gap-1.5"
+            >
+              {isSaving ? (
+                <Spinner className="w-4 h-4" />
+              ) : (
+                <PiFloppyDiskDuotone className="w-4 h-4" />
+              )}
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
 
-        {/* Spreadsheet Content */}
-        <div className="flex-1 overflow-hidden">
-          {isMounted ? (
-            <ProductDataGrid
-              ref={productDataGridRef}
-              productTabData={productTabData}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full w-full">
-              <div className="flex flex-col items-center gap-4">
-                <div className="p-4 rounded-full bg-muted">
-                  <PiTableDuotone className="w-10 h-10 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground">Loading spreadsheet...</p>
-              </div>
-            </div>
-          )}
-        </div>
+        <ProductSpecificationDataTable
+          initialData={initialData}
+          onDataChange={handleAutoSave}
+          onSaveSuccess={(clearHistory) => {
+            onSaveSuccessRef.current = clearHistory;
+          }}
+        />
       </div>
     </div>
   );

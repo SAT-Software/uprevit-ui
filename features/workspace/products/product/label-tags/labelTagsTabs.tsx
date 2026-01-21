@@ -10,6 +10,7 @@ import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
 import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
 import DialogEditLabelTag from "./DialogEditLabelTag";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import Editor from "./Editor";
 import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
@@ -448,6 +449,10 @@ export default function LabelTagsTabs({
             <p className="text-xs text-muted-foreground font-medium">
               Manage label tags and their images for this product
             </p>
+            <PageInfoDialog
+              title="Label Tags"
+              content="Add and organize label tags with annotations to highlight specific areas on label images."
+            />
           </div>
           <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
         </div>
@@ -479,6 +484,10 @@ export default function LabelTagsTabs({
           <p className="text-xs text-muted-foreground font-medium">
             Manage label tags and their images for this product
           </p>
+          <PageInfoDialog
+            title="Label Tags"
+            content="Add and organize label tags with annotations to highlight specific areas on label images."
+          />
         </div>
         <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
       </div>

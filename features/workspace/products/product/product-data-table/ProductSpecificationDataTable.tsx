@@ -133,13 +133,24 @@ type CellFormatEntry = {
   }>;
 };
 
+type FindReplaceEntry = {
+  type: "findReplace";
+  changes: Array<{
+    key: string;
+    prev: string | undefined;
+    next: string | undefined;
+  }>;
+  replaceAll: boolean;
+};
+
 type HistoryEntry =
   | CellEditEntry
   | HeaderEditEntry
   | ColumnTypeEntry
   | ColumnSizingEntry
   | ColumnOrderEntry
-  | CellFormatEntry;
+  | CellFormatEntry
+  | FindReplaceEntry;
 
 type HistoryState = {
   past: HistoryEntry[];
@@ -204,7 +215,7 @@ const EditableHeaderContent = ({
 
   const dataType = useMemo(
     () => detectColumnDataType(meta.cellData, colIndex, ROW_COUNT),
-    [meta.cellData, colIndex]
+    [meta.cellData, colIndex],
   );
 
   return (
@@ -376,7 +387,7 @@ export function ProductSpecificationDataTable({
       setColumnSizing(initialData.columnSizing ?? {});
       setColumnOrder(
         initialData.columnOrder ??
-          Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`)
+          Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
       );
       setCellFormats(initialData.cellFormats ?? {});
       hasLoadedData.current = true;
@@ -384,13 +395,13 @@ export function ProductSpecificationDataTable({
   }, [initialData]);
 
   const [cellData, setCellData] = useState<Record<string, string>>(
-    initialData?.cellData ?? {}
+    initialData?.cellData ?? {},
   );
   const cellDataRef = useRef<Record<string, string>>({});
   cellDataRef.current = cellData;
 
   const [headerData, setHeaderData] = useState<Record<number, string>>(
-    initialData?.headerData ?? {}
+    initialData?.headerData ?? {},
   );
 
   const [columnTypeData, setColumnTypeData] = useState<
@@ -403,22 +414,22 @@ export function ProductSpecificationDataTable({
   } | null>(null);
 
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
-    initialData?.columnSizing ?? {}
+    initialData?.columnSizing ?? {},
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
     initialData?.columnOrder ??
-      Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`)
+      Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
   );
 
   const [cellFormats, setCellFormats] = useState<Record<string, CellFormat>>(
-    initialData?.cellFormats ?? {}
+    initialData?.cellFormats ?? {},
   );
 
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
-  const [selectionStart, setSelectionStart] = useState<{
+  const [selectionStartVisual, setSelectionStartVisual] = useState<{
     row: number;
     col: number;
   } | null>(null);
@@ -466,7 +477,7 @@ export function ProductSpecificationDataTable({
         cellData,
         cellFormats,
         columnOrder,
-        columnSizing
+        columnSizing,
       );
       onDataChange(data);
     }
@@ -532,9 +543,15 @@ export function ProductSpecificationDataTable({
             });
           });
           break;
+        case "findReplace":
+          entry.changes.forEach(({ key, prev, next }) => {
+            const value = isUndo ? prev : next;
+            setCellData((d) => ({ ...d, [key]: value ?? "" }));
+          });
+          break;
       }
     },
-    []
+    [],
   );
 
   const undo = useCallback(() => {
@@ -563,6 +580,30 @@ export function ProductSpecificationDataTable({
     setHistory((prev) => ({ ...prev, past: [], future: [] }));
   }, []);
 
+  const handleFindReplace = useCallback(
+    (updatedCells: Record<string, string>) => {
+      const changes: Array<{
+        key: string;
+        prev: string | undefined;
+        next: string | undefined;
+      }> = [];
+
+      for (const [key, nextValue] of Object.entries(updatedCells)) {
+        const prevValue = cellData[key];
+        if (prevValue !== nextValue) {
+          changes.push({ key, prev: prevValue, next: nextValue });
+        }
+      }
+
+      if (changes.length > 0) {
+        record({ type: "findReplace", changes, replaceAll: true });
+      }
+
+      setCellData(updatedCells);
+    },
+    [cellData, record],
+  );
+
   // Wrapped setHeaderData that records history
   const setHeaderDataWithRecord = useCallback(
     (updater: React.SetStateAction<Record<number, string>>) => {
@@ -584,30 +625,36 @@ export function ProductSpecificationDataTable({
         return next;
       });
     },
-    [record]
+    [record],
   );
 
-  // Keyboard shortcuts for undo/redo
+  // Ref for table container to manage cell focus
+  const tableRef = useRef<HTMLTableElement>(null);
+
+  // Keyboard shortcuts (global - for undo/redo/find-replace)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore when focus is in input/textarea
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
+      // Allow Ctrl/Cmd combinations
+      const isCtrlCombo = (e.metaKey || e.ctrlKey) && !e.altKey;
 
-      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
-        e.preventDefault();
-        if (e.shiftKey) {
+      if (isCtrlCombo) {
+        if (e.key === "z") {
+          e.preventDefault();
+          if (e.shiftKey) {
+            redo();
+          } else {
+            undo();
+          }
+          return;
+        } else if (e.key === "y") {
+          e.preventDefault();
           redo();
-        } else {
-          undo();
+          return;
+        } else if (e.key === "r") {
+          e.preventDefault();
+          setShowFindReplace(true);
+          return;
         }
-      } else if ((e.metaKey || e.ctrlKey) && e.key === "y") {
-        e.preventDefault();
-        redo();
       }
     };
 
@@ -662,7 +709,7 @@ export function ProductSpecificationDataTable({
         record({ type: "cellFormat", changes });
       }
     },
-    [selectedCells, activeCell, cellFormats, record]
+    [selectedCells, activeCell, cellFormats, record],
   );
 
   const applyTextColor = useCallback(
@@ -705,33 +752,7 @@ export function ProductSpecificationDataTable({
         record({ type: "cellFormat", changes });
       }
     },
-    [selectedCells, activeCell, cellFormats, record]
-  );
-
-  const handleCellClick = useCallback(
-    (rowIndex: number, colIndex: number, e: React.MouseEvent) => {
-      const cellKey = `${rowIndex},${colIndex}`;
-
-      if (e.shiftKey && selectionStart) {
-        const minRow = Math.min(selectionStart.row, rowIndex);
-        const maxRow = Math.max(selectionStart.row, rowIndex);
-        const minCol = Math.min(selectionStart.col, colIndex);
-        const maxCol = Math.max(selectionStart.col, colIndex);
-
-        const newSelection = new Set<string>();
-        for (let r = minRow; r <= maxRow; r++) {
-          for (let c = minCol; c <= maxCol; c++) {
-            newSelection.add(`${r},${c}`);
-          }
-        }
-        setSelectedCells(newSelection);
-      } else {
-        setSelectedCells(new Set([cellKey]));
-        setSelectionStart({ row: rowIndex, col: colIndex });
-      }
-      setActiveCell({ row: rowIndex, col: colIndex });
-    },
-    [selectionStart]
+    [selectedCells, activeCell, cellFormats, record],
   );
 
   const rows: { rowIndex: number }[] = useMemo(() => {
@@ -771,7 +792,7 @@ export function ProductSpecificationDataTable({
       filterValue: {
         search: string;
         columnFilters: Record<number, ColumnFilter>;
-      }
+      },
     ) => {
       const rowIndex = row.original.rowIndex;
       const { search, columnFilters: filters } = filterValue || {
@@ -793,12 +814,12 @@ export function ProductSpecificationDataTable({
       }
       return false;
     },
-    [cellData]
+    [cellData],
   );
 
   const globalFilterValue = useMemo(
     () => ({ search: debouncedSearch, columnFilters }),
-    [debouncedSearch, columnFilters]
+    [debouncedSearch, columnFilters],
   );
 
   const table = useReactTable({
@@ -884,7 +905,7 @@ export function ProductSpecificationDataTable({
         record({ type: "cell", changes });
       }
     },
-    [record]
+    [record],
   );
 
   function handleDragEnd(event: DragEndEvent) {
@@ -894,7 +915,7 @@ export function ProductSpecificationDataTable({
       const newOrder = arrayMove(
         columnOrder,
         columnOrder.indexOf(active.id as string),
-        columnOrder.indexOf(over.id as string)
+        columnOrder.indexOf(over.id as string),
       );
       setColumnOrder(newOrder);
       record({ type: "columnOrder", prev, next: newOrder });
@@ -953,7 +974,7 @@ export function ProductSpecificationDataTable({
           cells: cellData,
           columnCount: COLUMN_COUNT,
         },
-        filename
+        filename,
       );
     } catch (err) {
       console.error("Export failed:", err);
@@ -973,7 +994,7 @@ export function ProductSpecificationDataTable({
         tolerance: 5,
       },
     }),
-    useSensor(KeyboardSensor, {})
+    useSensor(KeyboardSensor, {}),
   );
 
   useEffect(() => {
@@ -1020,6 +1041,120 @@ export function ProductSpecificationDataTable({
 
   const headerGroup = table.getHeaderGroups()[0];
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
+
+  // Handle cell multi-selection via mouse down (fires before focus changes)
+  const handleCellMouseDown = useCallback(
+    (vRow: number, vCol: number, e: React.MouseEvent) => {
+      const row = tableRows[vRow];
+      const col = visibleColumns[vCol];
+      if (!row || !col) return;
+
+      const rowIndex = row.original.rowIndex;
+      const colIndex = parseInt(col.id.split("-")[1]);
+      const cellKey = `${rowIndex},${colIndex}`;
+
+      if (e.ctrlKey || e.metaKey) {
+        // Prevent default to avoid context menu on Mac with Ctrl+Click
+        e.preventDefault();
+        const newSelected = new Set(selectedCells);
+        if (newSelected.has(cellKey)) {
+          newSelected.delete(cellKey);
+        } else {
+          newSelected.add(cellKey);
+        }
+        setSelectedCells(newSelected);
+        setSelectionStartVisual({ row: vRow, col: vCol });
+        setActiveCell({ row: rowIndex, col: colIndex });
+      } else if (e.shiftKey && selectionStartVisual) {
+        e.preventDefault();
+        const minVRow = Math.min(selectionStartVisual.row, vRow);
+        const maxVRow = Math.max(selectionStartVisual.row, vRow);
+        const minVCol = Math.min(selectionStartVisual.col, vCol);
+        const maxVCol = Math.max(selectionStartVisual.col, vCol);
+
+        const newSelection = new Set<string>();
+        for (let vr = minVRow; vr <= maxVRow; vr++) {
+          for (let vc = minVCol; vc <= maxVCol; vc++) {
+            const r = tableRows[vr].original.rowIndex;
+            const c = parseInt(visibleColumns[vc].id.split("-")[1]);
+            newSelection.add(`${r},${c}`);
+          }
+        }
+        setSelectedCells(newSelection);
+        setActiveCell({ row: rowIndex, col: colIndex });
+      } else {
+        // Normal click - single selection (let default focus behavior proceed)
+        setSelectedCells(new Set([cellKey]));
+        setSelectionStartVisual({ row: vRow, col: vCol });
+        setActiveCell({ row: rowIndex, col: colIndex });
+      }
+    },
+    [selectionStartVisual, selectedCells, tableRows, visibleColumns],
+  );
+
+  // Move to adjacent cell and focus it (using visual indices)
+  const moveToCellAndFocus = useCallback(
+    (
+      currentVRow: number,
+      currentVCol: number,
+      direction: "up" | "down" | "left" | "right",
+    ) => {
+      let newVRow = currentVRow;
+      let newVCol = currentVCol;
+
+      switch (direction) {
+        case "up":
+          newVRow = Math.max(0, currentVRow - 1);
+          break;
+        case "down":
+          newVRow = Math.min(tableRows.length - 1, currentVRow + 1);
+          break;
+        case "left":
+          newVCol = Math.max(0, currentVCol - 1);
+          break;
+        case "right":
+          newVCol = Math.min(visibleColumns.length - 1, currentVCol + 1);
+          break;
+      }
+
+      if (newVRow !== currentVRow || newVCol !== currentVCol) {
+        const row = tableRows[newVRow];
+        const col = visibleColumns[newVCol];
+        const rowIndex = row.original.rowIndex;
+        const colIndex = parseInt(col.id.split("-")[1]);
+        const cellKey = `${rowIndex},${colIndex}`;
+
+        setSelectedCells(new Set([cellKey]));
+        setSelectionStartVisual({ row: newVRow, col: newVCol });
+        setActiveCell({ row: rowIndex, col: colIndex });
+
+        // Only scroll if the target cell is not currently visible/rendered
+        const isRowVisible = rowVirtualizer
+          .getVirtualItems()
+          .some((item) => item.index === newVRow);
+        const isColVisible = colVirtualizer
+          .getVirtualItems()
+          .some((item) => item.index === newVCol);
+
+        if (!isRowVisible) {
+          rowVirtualizer.scrollToIndex(newVRow, { align: "auto" });
+        }
+        if (!isColVisible) {
+          colVirtualizer.scrollToIndex(newVCol, { align: "auto" });
+        }
+
+        // Focus the new cell input after state update and potential scroll
+        requestAnimationFrame(() => {
+          const newCellInput = tableRef.current?.querySelector(
+            `input[data-cell-key="${cellKey}"]`,
+          ) as HTMLInputElement | null;
+          // preventScroll: true is critical to stop browser-native jumpy scrolling
+          newCellInput?.focus({ preventScroll: true });
+        });
+      }
+    },
+    [tableRows, visibleColumns, rowVirtualizer, colVirtualizer],
+  );
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -1160,6 +1295,7 @@ export function ProductSpecificationDataTable({
           className="flex-1 min-h-0 overflow-auto overscroll-contain"
         >
           <table
+            ref={tableRef}
             style={{
               height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
               width: totalColumnWidth + ROW_NUMBER_WIDTH,
@@ -1302,7 +1438,7 @@ export function ProductSpecificationDataTable({
                     {colVirtualizer.getVirtualItems().map((virtualCol) => {
                       const column = visibleColumns[virtualCol.index];
                       const originalColIndex = parseInt(
-                        column.id.split("-")[1]
+                        column.id.split("-")[1],
                       );
                       const cellKey = `${rowIndex},${originalColIndex}`;
                       const format = cellFormats[cellKey];
@@ -1311,6 +1447,7 @@ export function ProductSpecificationDataTable({
                       return (
                         <input
                           key={`${rowIndex}-${column.id}`}
+                          data-cell-key={cellKey}
                           className={`border border-border/60 outline-none px-2 text-sm ${
                             isSelected
                               ? "ring-1 ring-primary ring-inset border-foreground/60"
@@ -1337,9 +1474,16 @@ export function ProductSpecificationDataTable({
                               [cellKey]: e.target.value,
                             }));
                           }}
-                          onClick={(e) =>
-                            handleCellClick(rowIndex, originalColIndex, e)
+                          onMouseDown={(e) =>
+                            handleCellMouseDown(
+                              virtualRow.index,
+                              virtualCol.index,
+                              e,
+                            )
                           }
+                          onContextMenu={(e) => {
+                            if (e.ctrlKey || e.metaKey) e.preventDefault();
+                          }}
                           onFocus={() => {
                             cellInitialValueRef.current[cellKey] =
                               cellData[cellKey];
@@ -1363,6 +1507,31 @@ export function ProductSpecificationDataTable({
                             delete cellInitialValueRef.current[cellKey];
                           }}
                           onKeyDown={(e) => {
+                            // Arrow key cell navigation
+                            if (
+                              [
+                                "ArrowUp",
+                                "ArrowDown",
+                                "ArrowLeft",
+                                "ArrowRight",
+                              ].includes(e.key)
+                            ) {
+                              e.preventDefault();
+                              const direction = e.key
+                                .replace("Arrow", "")
+                                .toLowerCase() as
+                                | "up"
+                                | "down"
+                                | "left"
+                                | "right";
+                              moveToCellAndFocus(
+                                virtualRow.index,
+                                virtualCol.index,
+                                direction,
+                              );
+                              return;
+                            }
+
                             if (e.key === "Enter") {
                               const prev = cellInitialValueRef.current[cellKey];
                               const next =
@@ -1404,7 +1573,7 @@ export function ProductSpecificationDataTable({
         open={showFindReplace}
         onOpenChange={setShowFindReplace}
         cellData={cellData}
-        onReplace={setCellData}
+        onReplace={handleFindReplace}
       />
     </div>
   );

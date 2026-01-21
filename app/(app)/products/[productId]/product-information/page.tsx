@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
+import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { cn } from "@/lib/utils";
@@ -358,6 +359,10 @@ export default function Page() {
               <p className="text-xs text-muted-foreground font-medium">
                 Key product details and custom fields
               </p>
+              <PageInfoDialog
+                title="Product Information"
+                content="View and edit core product information and custom fields for this product."
+              />
             </div>
           </div>
 
