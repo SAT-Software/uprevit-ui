@@ -10,8 +10,9 @@ async function getAllSourceFileFolders({
   auth: AuthContextProps;
   productId?: string;
 }) {
+  const workspaceId = auth?.user?.profile?.workspaceId;
   const params = new URLSearchParams({
-    workspaceId: auth?.user?.profile.workspaceId,
+    workspaceId: typeof workspaceId === "string" ? workspaceId : "",
   });
 
   if (productId) {
