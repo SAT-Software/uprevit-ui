@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 interface SourceFilesFolder {
   _id: string;
   name: string;
-  product_id: string;
+  product_id?: string | null;
   created_at?: string;
 }
 

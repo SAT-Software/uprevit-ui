@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ColumnFiltersState, Table } from "@tanstack/react-table";
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import {
   PiFunnelDuotone,
@@ -48,14 +49,13 @@ interface FilterCondition {
 
 // Sample columns for demonstration
 const sampleColumns: Column[] = [
-  { name: "productId", label: "Product Id", type: "text" },
-  { name: "createdBy", label: "Created By", type: "text" },
-  { name: "modifiedBy", label: "Modified By", type: "text" },
-  { name: "productName", label: "Product Name", type: "text" },
-  { name: "projectId", label: "Project Id", type: "text" },
-  { name: "departmentId", label: "Department Id", type: "text" },
-  { name: "version", label: "Version", type: "number" },
+  { name: "product_plan_number", label: "PPN", type: "text" },
+  { name: "product_name", label: "Product Name", type: "text" },
+  { name: "project_name", label: "Project", type: "text" },
+  { name: "department_name", label: "Department", type: "text" },
   { name: "status", label: "Status", type: "text" },
+  { name: "version", label: "Version", type: "number" },
+  { name: "complete_count", label: "Progress", type: "number" },
 ];
 
 // Operators based on column type
@@ -108,6 +108,14 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export default function FilterBuilder({ table }: { table: Table<Item> }) {
   const [filters, setFilters] = useState<FilterCondition[]>([]);
+
+  const dropdownShadowStyle: CSSProperties = {
+    boxShadow: "0 12px 28px rgba(0, 0, 0, 0.18)",
+  };
+
+  const selectContentStyle: CSSProperties = {
+    zIndex: 1000,
+  };
 
   const handleAddFilter = () => {
     setFilters([
@@ -180,7 +188,11 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-full" align="start">
+      <DropdownMenuContent
+        className="w-full"
+        align="start"
+        style={dropdownShadowStyle}
+      >
         {filters.length === 0 ? (
           <div className="px-2 py-2 min-w-110">
             <p className="mb-1 text-sm font-semibold">
@@ -216,7 +228,7 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
                       <SelectValue placeholder="Select column" />{" "}
                       {/* Use placeholder for better UX */}
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent style={selectContentStyle}>
                       {sampleColumns.map((col) => (
                         <SelectItem
                           className="text-sm"
@@ -239,7 +251,7 @@ export default function FilterBuilder({ table }: { table: Table<Item> }) {
                     <SelectTrigger className="h-8 w-full text-sm">
                       <SelectValue className="text-sm" placeholder="Op" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent style={selectContentStyle}>
                       {operators.map((op) => (
                         <SelectItem
                           className="text-sm"

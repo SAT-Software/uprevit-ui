@@ -7,6 +7,7 @@ interface AddSourceFilesFolderRequest {
   name: string;
   type: string;
   parentId?: string;
+  product_id?: string | null;
 }
 
 export function useAddSourceFilesFolder(folderId?: string) {

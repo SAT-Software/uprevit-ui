@@ -3,6 +3,7 @@
 import { useAuth } from "react-oidc-context";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
@@ -17,6 +18,7 @@ import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { cn } from "@/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
 import { PiFolderSimpleDuotone } from "react-icons/pi";
@@ -32,6 +34,7 @@ import {
   PiFilePdfDuotone,
   PiGridFourDuotone,
   PiImageDuotone,
+  PiLinkSimpleDuotone,
   PiListDuotone,
   PiSquareDuotone,
   PiTrashDuotone,
@@ -126,6 +129,8 @@ export default function ProductSourceFilesPage() {
     slug ?? ""
   );
   const { data: currentFolderData } = useGetCurrentSourceFilesFolder(slug);
+  const { data: productsData } = useGetAllProducts();
+  const products = productsData?.result?.products ?? [];
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
 
@@ -143,6 +148,9 @@ export default function ProductSourceFilesPage() {
 
   const folder = data?.result;
   const currentFolder = currentFolderData?.result;
+  const linkedProduct = products.find(
+    (product: any) => product._id === currentFolder?.product_id
+  );
 
   if (isLoading) {
     return (
@@ -224,6 +232,15 @@ export default function ProductSourceFilesPage() {
               <PiFolderSimpleDuotone className="w-4 h-4 text-muted-foreground" />
             </div>
             <h1 className="text-base font-semibold">{currentFolder?.name}</h1>
+            {currentFolder?.parentId == null && (
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1 text-xs"
+              >
+                <PiLinkSimpleDuotone className="w-3.5 h-3.5" />
+                {linkedProduct?.product_name || "Not linked"}
+              </Badge>
+            )}
             <div
               onClick={(e) => e.stopPropagation()}
               className="flex gap-1 ml-1 cursor-pointer"
