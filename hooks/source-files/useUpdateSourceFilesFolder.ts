@@ -3,8 +3,9 @@ import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
 interface UpdateSourceFilesFolderRequest {
-  name: string;
   id: string;
+  name?: string;
+  product_id?: string | null;
 }
 
 export function useUpdateSourceFilesFolder(folderId: string) {
@@ -18,13 +19,19 @@ export function useUpdateSourceFilesFolder(folderId: string) {
         throw new Error("User is not authenticated");
       }
 
+      const payload: Record<string, unknown> = {};
+      if (typeof sourceFilesFolder.name === "string") {
+        payload.name = sourceFilesFolder.name;
+      }
+      if (Object.prototype.hasOwnProperty.call(sourceFilesFolder, "product_id")) {
+        payload.product_id = sourceFilesFolder.product_id;
+      }
+
       const res = await fetch(
         `/api/source-files/folder/${sourceFilesFolder.id}`,
         {
           method: "PATCH",
-          body: JSON.stringify({
-            name: sourceFilesFolder.name,
-          }),
+          body: JSON.stringify(payload),
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
@@ -42,6 +49,9 @@ export function useUpdateSourceFilesFolder(folderId: string) {
 
       queryClient.invalidateQueries({
         queryKey: ["current-source-files-folder", folderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders"],
       });
     },
     onError: (error) => {

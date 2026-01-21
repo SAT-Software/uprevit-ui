@@ -1,7 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUpdateSourceFilesFolder } from "@/hooks/source-files/useUpdateSourceFilesFolder";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { SourceFilesFolder } from "@/types/source-files";
 import {
   PiPencilCircleDuotone,
@@ -37,6 +45,12 @@ export default function DialogEditSourceFilesFolder({
   const { mutate: updateSourceFilesFolder, isPending } =
     useUpdateSourceFilesFolder(folderId);
   const [open, setOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const { data: productsData, isLoading: productsLoading } =
+    useGetAllProducts();
+  const products = productsData?.result?.products ?? [];
+  const isRootFolder = currentFolder?.parentId == null;
+  const noneProductValue = "none";
 
   const {
     register,
@@ -50,15 +64,25 @@ export default function DialogEditSourceFilesFolder({
 
   const folderName = watch("folderName");
 
+  useEffect(() => {
+    if (open) {
+      setSelectedProductId(currentFolder?.product_id || "");
+    }
+  }, [open, currentFolder?.product_id]);
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     updateSourceFilesFolder(
       {
         name: data.folderName,
         id: currentFolder._id,
+        ...(isRootFolder && {
+          product_id: selectedProductId ? selectedProductId : null,
+        }),
       },
       {
         onSuccess: () => {
           reset();
+          setSelectedProductId("");
           setOpen(false);
         },
       }
@@ -70,7 +94,10 @@ export default function DialogEditSourceFilesFolder({
       open={open}
       onOpenChange={(newOpen) => {
         setOpen(newOpen);
-        if (!newOpen) reset();
+        if (!newOpen) {
+          reset();
+          setSelectedProductId("");
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -124,6 +151,41 @@ export default function DialogEditSourceFilesFolder({
                 </p>
               )}
             </div>
+            {isRootFolder && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Linked Product (optional)
+                </Label>
+                <Select
+                  value={selectedProductId || noneProductValue}
+                  onValueChange={(value) =>
+                    setSelectedProductId(value === noneProductValue ? "" : value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={noneProductValue}>No product</SelectItem>
+                    {productsLoading && (
+                      <SelectItem disabled value="loading">
+                        Loading products...
+                      </SelectItem>
+                    )}
+                    {!productsLoading && products.length === 0 && (
+                      <SelectItem disabled value="empty">
+                        No products found
+                      </SelectItem>
+                    )}
+                    {products.map((product: any) => (
+                      <SelectItem key={product._id} value={product._id}>
+                        {product.product_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </form>
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">

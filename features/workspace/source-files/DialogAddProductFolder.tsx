@@ -3,6 +3,13 @@ import { useState } from "react";
 import { useAuth } from "react-oidc-context";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -15,6 +22,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useAddSourceFilesFolder } from "@/hooks/source-files/useAddSourceFilesFolder";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -52,7 +60,14 @@ export default function DialogAddProductFolder({
     mode: "onSubmit",
   });
 
+  const { data: productsData, isLoading: productsLoading } =
+    useGetAllProducts();
+  const products = productsData?.result?.products ?? [];
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const noneProductValue = "none";
+
   const folderName = watch("folderName");
+  const isRootFolder = !parentId;
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     const sourceFilesFolderData = {
@@ -60,15 +75,18 @@ export default function DialogAddProductFolder({
       name: data.folderName,
       type: "folder",
       parentId: parentId,
+      ...(selectedProductId && { product_id: selectedProductId }),
     };
 
     addSourceFilesFolder(sourceFilesFolderData, {
       onSuccess: () => {
         reset();
+        setSelectedProductId("");
         setOpen(false);
       },
       onError: () => {
         reset();
+        setSelectedProductId("");
         setOpen(false);
       },
     });
@@ -79,7 +97,10 @@ export default function DialogAddProductFolder({
       open={open}
       onOpenChange={(newOpen) => {
         setOpen(newOpen);
-        if (!newOpen) reset();
+        if (!newOpen) {
+          reset();
+          setSelectedProductId("");
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -132,6 +153,41 @@ export default function DialogAddProductFolder({
                 </p>
               )}
             </div>
+            {isRootFolder && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Link to Product (optional)
+                </Label>
+                <Select
+                  value={selectedProductId || noneProductValue}
+                  onValueChange={(value) =>
+                    setSelectedProductId(value === noneProductValue ? "" : value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={noneProductValue}>No product</SelectItem>
+                    {productsLoading && (
+                      <SelectItem disabled value="loading">
+                        Loading products...
+                      </SelectItem>
+                    )}
+                    {!productsLoading && products.length === 0 && (
+                      <SelectItem disabled value="empty">
+                        No products found
+                      </SelectItem>
+                    )}
+                    {products.map((product: any) => (
+                      <SelectItem key={product._id} value={product._id}>
+                        {product.product_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </form>
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">

@@ -1,17 +1,25 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
 import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import { cn } from "@/lib/utils";
 import { AuditLog } from "@/types/audit-log";
+import { SourceFilesFolder } from "@/types/source-files";
 import {
   formatToLocalDate,
   formatToLocalDateTime,
 } from "@/utils/formatDateAndTimeLocal";
+import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import {
@@ -20,6 +28,7 @@ import {
   PiCalendarDuotone,
   PiFlagDuotone,
   PiFlaskDuotone,
+  PiFolderSimpleDuotone,
   PiGlobeDuotone,
   PiMapPinDuotone,
   PiTagDuotone,
@@ -39,6 +48,11 @@ export default function Page() {
 
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
+
+  const { data: linkedFoldersData, isLoading: linkedFoldersLoading } =
+    useGetAllSourceFileFolders(productId);
+
+  const linkedFolders = (linkedFoldersData?.result || []) as SourceFilesFolder[];
 
   const diffs = diffRedlineData?.result?.diffs || [];
   const getDiff = (...paths: string[]) => {
@@ -304,6 +318,73 @@ export default function Page() {
                     />
                   </span>
                 </span>
+              </div>
+
+              <div className="flex items-center gap-2 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start">
+                <span className="text-[11px] font-semibold text-muted-foreground">
+                  Source files
+                </span>
+                {linkedFoldersLoading ? (
+                  <span className="text-[11px] text-muted-foreground">
+                    Loading...
+                  </span>
+                ) : linkedFolders.length === 0 ? (
+                  <span className="text-[11px] text-muted-foreground">
+                    None linked
+                  </span>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {linkedFolders.slice(0, 3).map((folder) => (
+                      <Link
+                        key={folder._id}
+                        href={`/source-files/view/${folder._id}`}
+                        className="group"
+                      >
+                        <Badge
+                          variant="outline"
+                          className="px-1.5 py-0.5 text-[11px] font-medium flex items-center gap-1 hover:bg-muted/40"
+                          title={folder.name}
+                        >
+                          <PiFolderSimpleDuotone className="w-3 h-3 text-muted-foreground" />
+                          <span className="max-w-[120px] truncate">
+                            {folder.name}
+                          </span>
+                        </Badge>
+                      </Link>
+                    ))}
+                    {linkedFolders.length > 3 && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Badge
+                            variant="secondary"
+                            className="px-1.5 py-0.5 text-[11px] font-medium cursor-pointer"
+                            title="View all linked folders"
+                          >
+                            +{linkedFolders.length - 3}
+                          </Badge>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          side="right"
+                          align="start"
+                          className="p-2 w-56"
+                        >
+                          <div className="flex flex-col gap-1">
+                            {linkedFolders.slice(3).map((folder) => (
+                              <Link
+                                key={folder._id}
+                                href={`/source-files/view/${folder._id}`}
+                                className="flex items-center gap-2 rounded-md px-2 py-1 text-xs hover:bg-muted/50"
+                              >
+                                <PiFolderSimpleDuotone className="w-3.5 h-3.5 text-muted-foreground" />
+                                <span className="truncate">{folder.name}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

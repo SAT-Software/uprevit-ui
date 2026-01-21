@@ -238,7 +238,8 @@ const columns: ColumnDef<Item>[] = [
     size: 190,
   },
   {
-    accessorKey: "project_name",
+    id: "project_name",
+    accessorFn: (row) => row?.project?.[0]?.project_name ?? "",
     header: ({ column }) => (
       <SortableHeader column={column} title="Project" icon={PiKanbanDuotone} />
     ),
@@ -249,7 +250,8 @@ const columns: ColumnDef<Item>[] = [
     size: 150,
   },
   {
-    accessorKey: "department_name",
+    id: "department_name",
+    accessorFn: (row) => row?.department?.[0]?.department_name ?? "",
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -384,7 +386,7 @@ const columns: ColumnDef<Item>[] = [
 
       const clampedPercentage = Math.max(
         0,
-        Math.min(100, Math.round(progress || 0))
+        Math.min(100, Math.round(progress || 0)),
       );
 
       // Use submitted state if product is submitted, otherwise determine based on percentage
@@ -406,7 +408,7 @@ const columns: ColumnDef<Item>[] = [
               <span
                 className={cn(
                   "flex w-full items-center gap-1 text-muted-foreground",
-                  progressState.text
+                  progressState.text,
                 )}
               >
                 <span
@@ -422,7 +424,7 @@ const columns: ColumnDef<Item>[] = [
               <span
                 className={cn(
                   "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-45",
-                  progressState.bar
+                  progressState.bar,
                 )}
                 style={{ width: `${clampedPercentage}%` }}
               />
@@ -503,7 +505,10 @@ export default function ProductsPageProductTable() {
                 View
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              style={{ boxShadow: "0 12px 28px rgba(0, 0, 0, 0.18)" }}
+            >
               <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
               {table
                 .getAllColumns()
@@ -545,7 +550,7 @@ export default function ProductsPageProductTable() {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -562,7 +567,7 @@ export default function ProductsPageProductTable() {
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => {
                     router.push(
-                      `/products/${row.original._id}/product-information`
+                      `/products/${row.original._id}/product-information`,
                     );
                   }}
                 >
@@ -570,7 +575,7 @@ export default function ProductsPageProductTable() {
                     <TableCell key={cell.id} className="last:py-0">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -607,9 +612,9 @@ export default function ProductsPageProductTable() {
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}
@@ -739,7 +744,7 @@ function RowActions({ row }: { row: { original: Item } }) {
               }}
               disabled={!canCreateVersion}
               className={cn(
-                !canCreateVersion && "opacity-50 cursor-not-allowed"
+                !canCreateVersion && "opacity-50 cursor-not-allowed",
               )}
             >
               <PiGitMergeDuotone />
