@@ -118,7 +118,8 @@ export default function Page() {
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges && !autoSave) {
+      const hasPendingAutoSave = !!debounceTimerRef.current;
+      if (hasUnsavedChanges && (!autoSave || hasPendingAutoSave)) {
         e.preventDefault();
         e.returnValue = "";
       }
