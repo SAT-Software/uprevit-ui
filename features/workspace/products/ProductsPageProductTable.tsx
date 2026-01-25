@@ -1,6 +1,8 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
 import {
+  type Column,
   ColumnDef,
   ColumnFiltersState,
   FilterFn,
@@ -15,6 +17,9 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+import type { IconType } from "react-icons";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   PiBuildingsDuotone,
   PiCaretCircleDoubleLeftDuotone,
@@ -22,14 +27,11 @@ import {
   PiCaretCircleLeftDuotone,
   PiCaretCircleRightDuotone,
   PiCaretDownDuotone,
-  PiCaretLeftDuotone,
-  PiCaretRightDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
   PiChartPieSliceDuotone,
   PiColumnsDuotone,
   PiDotsThreeCircleVerticalDuotone,
-  PiDownloadDuotone,
   PiFilePdfDuotone,
   PiFileXlsDuotone,
   PiGitBranchDuotone,
@@ -39,9 +41,6 @@ import {
   PiKanbanDuotone,
   PiPackageDuotone,
 } from "react-icons/pi";
-import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
-import { Progress } from "@/components/ui/progress";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,19 +54,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -76,25 +67,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
-import DialogArchiveProduct from "./DialogArchiveProduct";
-import DialogBookmarkProduct from "./DialogBookmarkProduct";
-import DialogCreateVersion from "./DialogCreateVersion";
-import DialogExportProductExcel from "./DialogExportProductExcel";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { cn } from "@/lib/utils";
+import { AuditLog } from "@/types/product";
 import {
   PiArchiveDuotone,
   PiBookmarkDuotone,
   PiPencilCircleDuotone,
   PiShareDuotone,
 } from "react-icons/pi";
+import DialogArchiveProduct from "./DialogArchiveProduct";
+import DialogBookmarkProduct from "./DialogBookmarkProduct";
+import DialogCreateVersion from "./DialogCreateVersion";
+import DialogExportProductExcel from "./DialogExportProductExcel";
+import DialogExportProductPDF from "./DialogExportProductPDF";
 import DialogShareProduct from "./DialogShareProduct";
 import FilterBuilder from "./tableFilter";
 import UpdateProductDialog from "./UpdateProductDialog";
-import { AuditLog } from "@/types/product";
-import DialogExportProductPDF from "./DialogExportProductPDF";
 
-// Define the type for the table data
 export type Item = {
   _id: string;
   productId?: string;
@@ -108,7 +98,6 @@ export type Item = {
   product_plan_number: string;
   project_id: string;
   status: string;
-  // Versioning fields
   is_latest?: boolean;
   parent_id?: string | null;
   product_information?: { tab_completed?: boolean };
@@ -137,8 +126,20 @@ interface AdvancedFilter {
 
 // Advanced operator-based filter function
 const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
-  const { operator, value } = filterValue as AdvancedFilter;
   const rowValue = row.getValue(columnId);
+
+  if (filterValue == null) return true;
+
+  // Support simple string filters (e.g., from a basic text input)
+  if (typeof filterValue === "string") {
+    const needle = filterValue.toLowerCase();
+    if (!needle) return true;
+    return String(rowValue ?? "")
+      .toLowerCase()
+      .includes(needle);
+  }
+
+  const { operator, value } = filterValue as AdvancedFilter;
   switch (operator) {
     case "eq":
       return rowValue == value;
@@ -183,9 +184,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<Item, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -316,7 +317,7 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row }) => {
       const progress = (row.getValue("complete_count") as number) || 0;
 
-      let tabsCompleted: string[] = [];
+      const tabsCompleted: string[] = [];
 
       if (row.original) {
         if (row.original.product_information?.tab_completed)
@@ -452,7 +453,6 @@ const columns: ColumnDef<Item>[] = [
 ];
 
 export default function ProductsPageProductTable() {
-  const id = useId();
   const router = useRouter();
   const { data } = useGetAllProducts();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -491,11 +491,33 @@ export default function ProductsPageProductTable() {
     },
   });
 
+  const productNameFilterValue = table
+    .getColumn("product_name")
+    ?.getFilterValue();
+  const productNameQuery =
+    typeof productNameFilterValue === "string"
+      ? productNameFilterValue
+      : typeof productNameFilterValue === "object" &&
+          productNameFilterValue !== null &&
+          "value" in productNameFilterValue
+        ? String((productNameFilterValue as AdvancedFilter).value ?? "")
+        : "";
+
   return (
     <div className="space-y-4 w-full">
       {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center justify-start w-full gap-3">
+          <Input
+            placeholder="Filter products..."
+            value={productNameQuery}
+            onChange={(event) =>
+              table
+                .getColumn("product_name")
+                ?.setFilterValue(event.target.value)
+            }
+            className="w-60 h-7 text-xs"
+          />
           <FilterBuilder table={table} />
 
           <DropdownMenu>
@@ -690,7 +712,6 @@ export default function ProductsPageProductTable() {
 }
 
 function RowActions({ row }: { row: { original: Item } }) {
-  const router = useRouter();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
@@ -699,13 +720,7 @@ function RowActions({ row }: { row: { original: Item } }) {
   const [showExportExcelDialog, setShowExportExcelDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
-  // Can create new version only from submitted products
   const canCreateVersion = row.original.status === "submitted";
-
-  const handleOpen = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    router.push(`/products/${row.original._id}/product-information`);
-  };
 
   return (
     <div

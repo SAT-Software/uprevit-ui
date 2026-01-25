@@ -201,6 +201,7 @@ interface TableMeta {
   setColumnFilters: React.Dispatch<
     React.SetStateAction<Record<number, ColumnFilter>>
   >;
+  isReadOnly?: boolean;
 }
 
 const EditableHeaderContent = ({
@@ -223,9 +224,11 @@ const EditableHeaderContent = ({
       <input
         className="flex-1 min-w-0 bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground"
         value={meta.headerData[colIndex] ?? ""}
-        onChange={(e) =>
-          meta.setHeaderData((d) => ({ ...d, [colIndex]: e.target.value }))
-        }
+        readOnly={meta.isReadOnly}
+        onChange={(e) => {
+          if (meta.isReadOnly) return;
+          meta.setHeaderData((d) => ({ ...d, [colIndex]: e.target.value }));
+        }}
         placeholder={`Column ${colIndex + 1}`}
       />
       <Button
@@ -263,9 +266,11 @@ const EditableHeaderContent = ({
 const DraggableHeader = ({
   header,
   virtualCol,
+  showChangeIndicator = false,
 }: {
   header: Header<RowData, unknown>;
   virtualCol: { start: number; size: number };
+  showChangeIndicator?: boolean;
 }) => {
   const {
     attributes,
@@ -295,6 +300,9 @@ const DraggableHeader = ({
       className="border-r border-b border-border flex items-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
       style={style}
     >
+      {showChangeIndicator && (
+        <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-500" />
+      )}
       <Button
         variant="ghost"
         size="icon-sm"
@@ -347,12 +355,15 @@ const DataTypeSelect = ({
   colIndex,
   value,
   onChange,
+  isReadOnly = false,
 }: {
   colIndex: number;
   value: DataType | undefined;
   onChange: (colIndex: number, value: DataType) => void;
+  isReadOnly?: boolean;
 }) => (
   <Select
+    disabled={isReadOnly}
     value={value ?? ""}
     onValueChange={(val) => onChange(colIndex, val as DataType)}
   >
@@ -373,6 +384,9 @@ export function ProductSpecificationDataTable({
   initialData,
   onDataChange,
   onSaveSuccess,
+  isRedlineView = false,
+  redlineMode = "inline",
+  redlineBaseData,
 }: ProductSpecificationDataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -457,8 +471,137 @@ export function ProductSpecificationDataTable({
   const cellDraftRef = useRef<Record<string, string>>({});
   const cellInitialValueRef = useRef<Record<string, string>>({});
 
-  // onSaveSuccess callback ref
-  const onSaveSuccessRef = useRef<() => void>(() => {});
+  const redlineDiffs = useMemo(() => {
+    if (!isRedlineView || !redlineBaseData) {
+      return {
+        cellDiffs: {} as Record<
+          string,
+          {
+            status: "added" | "removed" | "modified";
+            oldValue: string;
+            newValue: string;
+          }
+        >,
+        headerDiffs: {} as Record<
+          number,
+          {
+            status: "added" | "removed" | "modified";
+            oldValue: string;
+            newValue: string;
+          }
+        >,
+        columnTypeDiffs: {} as Record<
+          number,
+          {
+            status: "added" | "removed" | "modified";
+            oldValue: DataType;
+            newValue: DataType;
+          }
+        >,
+        changedRows: new Set<number>(),
+        changedCols: new Set<number>(),
+      };
+    }
+
+    const cellDiffs: Record<
+      string,
+      {
+        status: "added" | "removed" | "modified";
+        oldValue: string;
+        newValue: string;
+      }
+    > = {};
+    const headerDiffs: Record<
+      number,
+      {
+        status: "added" | "removed" | "modified";
+        oldValue: string;
+        newValue: string;
+      }
+    > = {};
+    const columnTypeDiffs: Record<
+      number,
+      {
+        status: "added" | "removed" | "modified";
+        oldValue: DataType;
+        newValue: DataType;
+      }
+    > = {};
+    const changedRows = new Set<number>();
+    const changedCols = new Set<number>();
+
+    const baseCells = redlineBaseData.cellData ?? {};
+    const nextCells = cellData ?? {};
+    const cellKeys = new Set([
+      ...Object.keys(baseCells),
+      ...Object.keys(nextCells),
+    ]);
+    cellKeys.forEach((key) => {
+      const oldValue = baseCells[key] ?? "";
+      const newValue = nextCells[key] ?? "";
+      if (oldValue === newValue) return;
+      const status =
+        oldValue === "" ? "added" : newValue === "" ? "removed" : "modified";
+      cellDiffs[key] = { status, oldValue, newValue };
+
+      const [rowStr, colStr] = key.split(",");
+      const rowIndex = Number.parseInt(rowStr, 10);
+      const colIndex = Number.parseInt(colStr, 10);
+      if (!Number.isNaN(rowIndex)) changedRows.add(rowIndex);
+      if (!Number.isNaN(colIndex)) changedCols.add(colIndex);
+    });
+
+    const baseHeaders = redlineBaseData.headerData ?? {};
+    const headerKeys = new Set([
+      ...Object.keys(baseHeaders),
+      ...Object.keys(headerData),
+    ]);
+    headerKeys.forEach((key) => {
+      const colIndex = Number.parseInt(key, 10);
+      if (Number.isNaN(colIndex)) return;
+      const oldValue = baseHeaders[colIndex] ?? "";
+      const newValue = headerData[colIndex] ?? "";
+      if (oldValue === newValue) return;
+      const status =
+        oldValue === "" ? "added" : newValue === "" ? "removed" : "modified";
+      headerDiffs[colIndex] = { status, oldValue, newValue };
+      changedCols.add(colIndex);
+    });
+
+    const baseTypes = redlineBaseData.columnTypeData ?? {};
+    const typeKeys = new Set([
+      ...Object.keys(baseTypes),
+      ...Object.keys(columnTypeData),
+    ]);
+    typeKeys.forEach((key) => {
+      const colIndex = Number.parseInt(key, 10);
+      if (Number.isNaN(colIndex)) return;
+      const oldValue = baseTypes[colIndex] ?? "blank";
+      const newValue = columnTypeData[colIndex] ?? "blank";
+      if (oldValue === newValue) return;
+      const status =
+        oldValue === "blank"
+          ? "added"
+          : newValue === "blank"
+            ? "removed"
+            : "modified";
+      columnTypeDiffs[colIndex] = { status, oldValue, newValue };
+      changedCols.add(colIndex);
+    });
+
+    return {
+      cellDiffs,
+      headerDiffs,
+      columnTypeDiffs,
+      changedRows,
+      changedCols,
+    };
+  }, [isRedlineView, redlineBaseData, cellData, headerData, columnTypeData]);
+
+  const formatDiffValue = (value: string) => {
+    if (!value) return "—";
+    return value;
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -625,7 +768,7 @@ export function ProductSpecificationDataTable({
         return next;
       });
     },
-    [record],
+    [record, isRedlineView],
   );
 
   // Ref for table container to manage cell focus
@@ -840,6 +983,7 @@ export function ProductSpecificationDataTable({
       cellData,
       columnFilters,
       setColumnFilters,
+      isReadOnly: isRedlineView,
     },
     state: {
       columnSizing,
@@ -878,6 +1022,7 @@ export function ProductSpecificationDataTable({
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent, rowIndex: number, colIndex: number) => {
+      if (isRedlineView) return;
       e.preventDefault();
       const text = e.clipboardData.getData("text/plain");
       const pastedRows = text.split("\n").map((r) => r.split("\t"));
@@ -909,6 +1054,7 @@ export function ProductSpecificationDataTable({
   );
 
   function handleDragEnd(event: DragEndEvent) {
+    if (isRedlineView) return;
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
       const prev = columnOrder;
@@ -1329,6 +1475,13 @@ export function ProductSpecificationDataTable({
                       const header = headerGroup?.headers[virtualCol.index];
                       if (!header) return null;
 
+                      const originalColIndex = parseInt(
+                        header.column.id.split("-")[1],
+                      );
+                      const showChangeIndicator =
+                        isRedlineView &&
+                        redlineDiffs.changedCols.has(originalColIndex);
+
                       return (
                         <DraggableHeader
                           key={header.id}
@@ -1337,6 +1490,7 @@ export function ProductSpecificationDataTable({
                             start: virtualCol.start,
                             size: virtualCol.size,
                           }}
+                          showChangeIndicator={showChangeIndicator}
                         />
                       );
                     })}
@@ -1381,7 +1535,9 @@ export function ProductSpecificationDataTable({
                               ? columnTypeData[originalColIndex]
                               : undefined
                           }
+                          isReadOnly={isRedlineView}
                           onChange={(col, val) => {
+                            if (isRedlineView) return;
                             const prev = columnTypeData[col];
                             setColumnTypeData((d) => ({ ...d, [col]: val }));
                             if (prev !== val) {
@@ -1418,13 +1574,17 @@ export function ProductSpecificationDataTable({
                   }}
                 >
                   <div
-                    className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                    className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground relative"
                     style={{
                       width: ROW_NUMBER_WIDTH,
                       minWidth: ROW_NUMBER_WIDTH,
                       height: virtualRow.size,
                     }}
                   >
+                    {isRedlineView &&
+                      redlineDiffs.changedRows.has(rowIndex) && (
+                        <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      )}
                     {virtualRow.index + 3}
                   </div>
 
@@ -1443,24 +1603,36 @@ export function ProductSpecificationDataTable({
                       const cellKey = `${rowIndex},${originalColIndex}`;
                       const format = cellFormats[cellKey];
                       const isSelected = selectedCells.has(cellKey);
+                      const diff = isRedlineView
+                        ? redlineDiffs.cellDiffs[cellKey]
+                        : undefined;
+                      const showInlineDiff =
+                        isRedlineView && redlineMode === "inline" && diff;
+                      const showHighlightDiff =
+                        isRedlineView && redlineMode === "highlight" && diff;
 
-                      return (
+                      const input = (
                         <input
-                          key={`${rowIndex}-${column.id}`}
                           data-cell-key={cellKey}
-                          className={`border border-border/60 outline-none px-2 text-sm ${
+                          readOnly={isRedlineView}
+                          className={`h-full w-full border border-border/60 outline-none px-2 text-sm ${
                             isSelected
                               ? "ring-1 ring-primary ring-inset border-foreground/60"
                               : "border-border"
-                          }`}
+                          } ${
+                            showHighlightDiff
+                              ? "ring-1 ring-amber-400/60 border-amber-400/70"
+                              : ""
+                          } ${showInlineDiff ? "caret-transparent" : ""}`}
                           style={{
-                            position: "absolute",
-                            left: virtualCol.start,
-                            width: virtualCol.size,
-                            height: virtualRow.size,
                             backgroundColor:
                               format?.bgColor || "var(--background)",
-                            color: format?.textColor || "inherit",
+                            color: showInlineDiff
+                              ? "transparent"
+                              : format?.textColor || "inherit",
+                            caretColor: showInlineDiff
+                              ? "transparent"
+                              : undefined,
                           }}
                           value={
                             cellDraftRef.current[cellKey] ??
@@ -1468,6 +1640,7 @@ export function ProductSpecificationDataTable({
                             ""
                           }
                           onChange={(e) => {
+                            if (isRedlineView) return;
                             cellDraftRef.current[cellKey] = e.target.value;
                             setCellData((d) => ({
                               ...d,
@@ -1493,6 +1666,7 @@ export function ProductSpecificationDataTable({
                             });
                           }}
                           onBlur={() => {
+                            if (isRedlineView) return;
                             const prev = cellInitialValueRef.current[cellKey];
                             const next =
                               cellDraftRef.current[cellKey] ??
@@ -1532,6 +1706,8 @@ export function ProductSpecificationDataTable({
                               return;
                             }
 
+                            if (isRedlineView) return;
+
                             if (e.key === "Enter") {
                               const prev = cellInitialValueRef.current[cellKey];
                               const next =
@@ -1552,6 +1728,58 @@ export function ProductSpecificationDataTable({
                             handlePaste(e, rowIndex, originalColIndex)
                           }
                         />
+                      );
+
+                      return (
+                        <div
+                          key={`${rowIndex}-${column.id}`}
+                          style={{
+                            position: "absolute",
+                            left: virtualCol.start,
+                            width: virtualCol.size,
+                            height: virtualRow.size,
+                          }}
+                          className="relative"
+                        >
+                          {showHighlightDiff ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>{input}</TooltipTrigger>
+                              <TooltipContent side="top" className="text-xs">
+                                <div className="flex flex-col gap-1">
+                                  {diff?.status !== "added" && (
+                                    <span className="text-red-600/80 line-through">
+                                      Old:{" "}
+                                      {formatDiffValue(diff?.oldValue ?? "")}
+                                    </span>
+                                  )}
+                                  {diff?.status !== "removed" && (
+                                    <span className="text-blue-700 font-semibold">
+                                      New:{" "}
+                                      {formatDiffValue(diff?.newValue ?? "")}
+                                    </span>
+                                  )}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            input
+                          )}
+
+                          {showInlineDiff && diff && (
+                            <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
+                              {diff.status !== "added" && (
+                                <span className="text-red-600/80 line-through">
+                                  {formatDiffValue(diff.oldValue)}
+                                </span>
+                              )}
+                              {diff.status !== "removed" && (
+                                <span className="text-blue-700 font-semibold text-[11px]">
+                                  {formatDiffValue(diff.newValue)}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </tr>
