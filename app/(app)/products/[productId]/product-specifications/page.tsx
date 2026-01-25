@@ -5,11 +5,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
+import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { type ProductDataTableSchema } from "@/types/product-data-table";
 import { parseProductSpecDataFromDatabase } from "@/utils/product/product-spec";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PiCloudCheckDuotone,
@@ -22,6 +23,12 @@ const AUTO_SAVE_STORAGE_KEY = "product-data-table-auto-save";
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId ?? "";
+  const searchParams = useSearchParams();
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
+  const [redlineMode, setRedlineMode] = useState<"highlight" | "inline">(
+    "inline",
+  );
   const [autoSave, setAutoSave] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(AUTO_SAVE_STORAGE_KEY);
@@ -44,11 +51,27 @@ export default function Page() {
   const { mutate: updateTabData, isPending: isSaving } =
     useUpdateProductTabData();
 
+  const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
+    productId,
+    compareVersionId,
+  );
+
   const workbookData = productTabData?.result?.data?.data?.workbook_data;
+  const baseVersionWorkbook =
+    diffData?.result?.base_version?.product_data?.data?.workbook_data;
+  const nextVersionWorkbook =
+    diffData?.result?.next_version?.product_data?.data?.workbook_data;
+  const resolvedWorkbookData =
+    isRedlineView && nextVersionWorkbook ? nextVersionWorkbook : workbookData;
 
   const initialData = useMemo(() => {
-    return parseProductSpecDataFromDatabase(workbookData);
-  }, [workbookData]);
+    return parseProductSpecDataFromDatabase(resolvedWorkbookData);
+  }, [resolvedWorkbookData]);
+
+  const redlineBaseData = useMemo(() => {
+    if (!isRedlineView || !baseVersionWorkbook) return undefined;
+    return parseProductSpecDataFromDatabase(baseVersionWorkbook);
+  }, [isRedlineView, baseVersionWorkbook]);
 
   function handleAutoSaveToggle(checked: boolean) {
     setAutoSave(checked);
@@ -174,6 +197,16 @@ export default function Page() {
 
   return (
     <div className="flex flex-1 flex-col gap-2 p-2 min-h-0 overflow-hidden">
+      {isRedlineView && (
+        <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
+          <span className="text-amber-600 font-medium">
+            {isLoadingDiff
+              ? "Loading changes..."
+              : "Redline View: Product Specifications"}
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full min-h-0">
         <div className="flex items-center justify-between border-b border-border p-2 shrink-0">
           <div className="flex items-center gap-2">
@@ -208,6 +241,27 @@ export default function Page() {
           </div>
 
           <div className="flex items-center gap-3">
+            {isRedlineView && (
+              <div className="flex items-center gap-1 rounded-md bg-muted/60 p-1">
+                <Button
+                  size="sm"
+                  variant={redlineMode === "highlight" ? "secondary" : "ghost"}
+                  onClick={() => setRedlineMode("highlight")}
+                  className="h-7 px-2 text-xs"
+                >
+                  Highlight
+                </Button>
+                <Button
+                  size="sm"
+                  variant={redlineMode === "inline" ? "secondary" : "ghost"}
+                  onClick={() => setRedlineMode("inline")}
+                  className="h-7 px-2 text-xs"
+                >
+                  Inline
+                </Button>
+              </div>
+            )}
+
             {isSaving ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Spinner className="w-4 h-4" />
@@ -228,6 +282,7 @@ export default function Page() {
                 checked={autoSave}
                 onCheckedChange={handleAutoSaveToggle}
                 className="scale-75"
+                disabled={isRedlineView}
               />
             </div>
 
@@ -235,7 +290,7 @@ export default function Page() {
               size="sm"
               variant={hasUnsavedChanges ? "default" : "outline"}
               onClick={handleManualSave}
-              disabled={isSaving || !hasUnsavedChanges}
+              disabled={isSaving || !hasUnsavedChanges || isRedlineView}
               className="gap-1.5"
             >
               {isSaving ? (
@@ -250,10 +305,13 @@ export default function Page() {
 
         <ProductSpecificationDataTable
           initialData={initialData}
-          onDataChange={handleAutoSave}
+          onDataChange={isRedlineView ? undefined : handleAutoSave}
           onSaveSuccess={(clearHistory) => {
             onSaveSuccessRef.current = clearHistory;
           }}
+          isRedlineView={isRedlineView}
+          redlineMode={redlineMode}
+          redlineBaseData={redlineBaseData}
         />
       </div>
     </div>
