@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SecurityTab from "@/features/workspace/settings/SecurityTab";
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
@@ -18,9 +19,24 @@ import {
 } from "react-icons/pi";
 import { useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { toast } from "sonner";
 
 function SettingsPage() {
   const tab = useSearchParams().get("tab");
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
+  const [activeTab, setActiveTab] = useState(tab || "profile");
+
+  const handleTabChange = (value: string) => {
+    const adminTabs = ["admins", "workspace"];
+    if (adminTabs.includes(value) && !isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
+    setActiveTab(value);
+  };
 
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -41,7 +57,11 @@ function SettingsPage() {
 
       {/* Settings Tabs */}
       <div className="border border-input bg-background rounded-xl p-4">
-        <Tabs defaultValue={tab || "profile"} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
           <TabsList>
             <TabsTrigger value="profile">
               <PiUserDuotone className="mr-2 h-4 w-4" />

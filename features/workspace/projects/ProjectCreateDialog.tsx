@@ -34,13 +34,13 @@ import Image from "next/image";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-  PiBuildingsDuotone,
   PiKanbanDuotone,
   PiPlusCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 
 interface User {
@@ -79,7 +79,7 @@ export default function ProjectCreateDialog({
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
-  const isAdmin = auth.user?.profile?.userType === "admin";
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   const departments = departmentsData?.result?.departments || [];
   const users = usersData?.data;

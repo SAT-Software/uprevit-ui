@@ -24,9 +24,11 @@ import {
   PiCheckCircleDuotone,
   PiCameraDuotone,
   PiTrashDuotone,
-  PiBuildingsDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { toast } from "sonner";
 
 interface DialogUpdateWorkspaceProps {
   workspaceData: Workspace;
@@ -40,6 +42,8 @@ export function DialogUpdateWorkspace({
   const { mutate: updateWorkspaceMutation, isPending } = useUpdateWorkspace();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   const {
     register,
@@ -58,6 +62,10 @@ export function DialogUpdateWorkspace({
   });
 
   const onSubmit: SubmitHandler<Workspace> = async (formData) => {
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
     try {
       updateWorkspaceMutation(
         { ...formData, _id: workspaceData._id },
@@ -69,7 +77,7 @@ export function DialogUpdateWorkspace({
             setOpen(false);
             console.error("Failed to update workspace:", error);
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Failed to update workspace:", error);
@@ -77,7 +85,7 @@ export function DialogUpdateWorkspace({
   };
 
   const handleLogoChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -116,7 +124,19 @@ export function DialogUpdateWorkspace({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+              return;
+            }
+          }}
+        >
           <PiPencilSimpleDuotone className="w-4 h-4" />
           Edit Workspace
         </Button>

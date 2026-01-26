@@ -21,6 +21,7 @@ import {
 } from "@/hooks/onboarding/useOnboardAdminCreateWorkspace";
 import { Workspace } from "@/types/workspace";
 import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 
 type WorkspaceFormValues = Pick<
@@ -58,6 +59,12 @@ export default function OnboardingCreateWorkspacePage() {
     try {
       if (!auth.user?.profile)
         throw new Error("You are not authorized to perform this action");
+
+      const isAdmin = isAdminProfile(auth.user?.profile);
+      if (!isAdmin) {
+        toast.error("Insufficient privileges, contact Admin");
+        return;
+      }
 
       const { name, email, sub } = auth.user.profile;
 
