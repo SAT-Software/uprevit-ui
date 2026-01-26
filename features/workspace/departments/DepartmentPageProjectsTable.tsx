@@ -230,7 +230,6 @@ export default function DepartmentPageProjectsTable({
           { name: "project_number", label: "Project Number", type: "text" },
           { name: "project_name", label: "Project Name", type: "text" },
           { name: "project_description", label: "Description", type: "text" },
-          { name: "project_manager", label: "Manager", type: "text" },
         ]}
       />
       <div className="w-full border border-border rounded-lg overflow-hidden">

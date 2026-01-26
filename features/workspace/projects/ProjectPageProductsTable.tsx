@@ -232,7 +232,6 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
         filterColumns={[
           { name: "product_plan_number", label: "PPN", type: "text" },
           { name: "product_name", label: "Product Name", type: "text" },
-          { name: "project_name", label: "Project Name", type: "text" },
           { name: "department_name", label: "Department Name", type: "text" },
           { name: "status", label: "Status", type: "text" },
           { name: "version", label: "Version", type: "number" },

@@ -289,13 +289,7 @@ export function ArchivedProjectsTable({
         filterColumns={[
           { name: "project_number", label: "Project Number", type: "text" },
           { name: "project_name", label: "Project Name", type: "text" },
-          {
-            name: "project_description",
-            label: "Project Description",
-            type: "text",
-          },
           { name: "users", label: "Users", type: "number" },
-          { name: "project_manager", label: "Manager", type: "text" },
           { name: "actionBy", label: "Archived By", type: "text" },
           { name: "actionAt", label: "Archived On", type: "text" },
         ]}

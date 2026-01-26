@@ -290,8 +290,6 @@ export function ArchivedProductsTable({
         filterColumns={[
           { name: "product_plan_number", label: "PPN", type: "text" },
           { name: "product_name", label: "Product Name", type: "text" },
-          { name: "project_name", label: "Project Name", type: "text" },
-          { name: "department_name", label: "Department Name", type: "text" },
           { name: "actionBy", label: "Archived By", type: "text" },
           { name: "actionAt", label: "Archived On", type: "text" },
           { name: "version", label: "Version", type: "number" },

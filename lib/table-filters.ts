@@ -33,21 +33,21 @@ export const advancedFilterFn = <TData,>(): FilterFn<TData> => {
       case "neq":
         return rowValue != normalizedValue;
       case "contains":
-        return String(rowValue)
+        return String(rowValue ?? "")
           .toLowerCase()
-          .includes(String(normalizedValue).toLowerCase());
+          .includes(String(normalizedValue ?? "").toLowerCase());
       case "not_contains":
-        return !String(rowValue)
+        return !String(rowValue ?? "")
           .toLowerCase()
-          .includes(String(normalizedValue).toLowerCase());
+          .includes(String(normalizedValue ?? "").toLowerCase());
       case "starts_with":
-        return String(rowValue)
+        return String(rowValue ?? "")
           .toLowerCase()
-          .startsWith(String(normalizedValue).toLowerCase());
+          .startsWith(String(normalizedValue ?? "").toLowerCase());
       case "ends_with":
-        return String(rowValue)
+        return String(rowValue ?? "")
           .toLowerCase()
-          .endsWith(String(normalizedValue).toLowerCase());
+          .endsWith(String(normalizedValue ?? "").toLowerCase());
       case "gt":
         return Number(rowValue) > Number(normalizedValue);
       case "gte":
