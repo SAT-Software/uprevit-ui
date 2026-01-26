@@ -117,7 +117,7 @@ export function useUpdateWorkspace() {
 
 ## Backend Repository
 
-Located at `/Users/amit/Developer/Startup/uprevit-backend`:
+Located at `../uprevit-backend`:
 
 - Uses AWS SAM for local testing: `npm run start:local`
 - API endpoints return structured responses with `ResponseWrapper`

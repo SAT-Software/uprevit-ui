@@ -27,10 +27,12 @@ function SettingsPage() {
   const tab = useSearchParams().get("tab");
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const [activeTab, setActiveTab] = useState(tab || "profile");
+  const adminTabs = ["admins", "workspace"];
+  const initialTab =
+    tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const handleTabChange = (value: string) => {
-    const adminTabs = ["admins", "workspace"];
     if (adminTabs.includes(value) && !isAdmin) {
       toast.error("Insufficient privileges, contact Admin");
       return;

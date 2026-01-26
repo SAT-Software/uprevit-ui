@@ -121,21 +121,21 @@ export function DialogUpdateWorkspace({
 
   const currentLogo = logoPreview || watch("logo") || workspaceData?.logo;
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen && !isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
+    setOpen(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
           size="sm"
           className="gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
         >
           <PiPencilSimpleDuotone className="w-4 h-4" />
           Edit Workspace
