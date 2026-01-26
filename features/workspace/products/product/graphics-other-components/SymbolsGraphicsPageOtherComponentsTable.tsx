@@ -437,7 +437,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
           {
             name: "presentOnLabels",
             label: "Presence on Labels",
-            type: "text",
+            type: "array",
           },
         ]}
       />

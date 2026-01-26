@@ -9,6 +9,28 @@ export const advancedFilterFn = <TData,>(): FilterFn<TData> => {
   return (row, columnId, filterValue) => {
     const rowValue = row.getValue(columnId);
 
+    const normalizeArrayValue = (value: unknown) => {
+      if (Array.isArray(value)) {
+        return value.map((item) => String(item).toLowerCase());
+      }
+
+      if (value == null) {
+        return [];
+      }
+
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (!trimmed) return [];
+        return trimmed
+          .split(",")
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .map((part) => part.toLowerCase());
+      }
+
+      return [String(value).toLowerCase()];
+    };
+
     if (filterValue == null) {
       return true;
     }
@@ -60,6 +82,24 @@ export const advancedFilterFn = <TData,>(): FilterFn<TData> => {
         return rowValue == null || rowValue === "";
       case "is_not_null":
         return rowValue != null && rowValue !== "";
+      case "contained_by": {
+        if (!Array.isArray(rowValue)) return false;
+        const rowArray = normalizeArrayValue(rowValue);
+        const filterArray = normalizeArrayValue(normalizedValue);
+
+        if (filterArray.length === 0) return false;
+
+        return rowArray.every((item) => filterArray.includes(item));
+      }
+      case "overlaps": {
+        if (!Array.isArray(rowValue)) return false;
+        const rowArray = normalizeArrayValue(rowValue);
+        const filterArray = normalizeArrayValue(normalizedValue);
+
+        if (filterArray.length === 0) return false;
+
+        return rowArray.some((item) => filterArray.includes(item));
+      }
       default:
         return true;
     }

@@ -276,12 +276,6 @@ export function ArchivedDepartmentsTable({
         searchPlaceholder="Filter archived departments..."
         filterColumns={[
           { name: "department_name", label: "Department Name", type: "text" },
-          {
-            name: "department_description",
-            label: "Description",
-            type: "text",
-          },
-          { name: "manager", label: "Manager", type: "text" },
           { name: "users", label: "Users", type: "number" },
           { name: "actionBy", label: "Archived By", type: "text" },
           { name: "actionAt", label: "Archived On", type: "text" },
