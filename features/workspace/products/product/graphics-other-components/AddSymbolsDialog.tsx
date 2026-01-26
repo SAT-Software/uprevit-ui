@@ -68,8 +68,10 @@ export default function AddSymbolsDialog({
   const { mutate: addSymbolsData, isPending } = useUpdateProductTabData();
 
   const onSubmit = async (data: FormData) => {
+    if (isPending || uploadingImage) return;
+
+    setUploadingImage(true);
     try {
-      setUploadingImage(true);
       let utRes;
 
       if (data.image && data.image.file instanceof File) {
@@ -78,6 +80,7 @@ export default function AddSymbolsDialog({
         });
       }
       setUploadingImage(false);
+
       const newSymbolsData = {
         id: productId,
         action: "add_symbols_graphics",
@@ -98,6 +101,7 @@ export default function AddSymbolsDialog({
 
       addSymbolsData(newSymbolsData, {
         onSuccess: () => {
+          setUploadingImage(false);
           setOpen(false);
           reset();
           setLabelPresence([]);

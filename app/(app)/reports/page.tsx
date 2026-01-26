@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TagInput, Tag } from "@/components/ui/tag-input";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   PiMagnifyingGlassDuotone,
@@ -28,15 +28,10 @@ import {
   PiFolderOpenDuotone,
   PiTrashDuotone,
   PiFunnelDuotone,
-  PiChartBarDuotone,
   PiTableDuotone,
   PiPlusCircleDuotone,
   PiXCircleDuotone,
-  PiCheckCircleDuotone,
   PiCaretDownDuotone,
-  PiFileTextDuotone,
-  PiArchiveDuotone,
-  PiPackageDuotone,
 } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
@@ -276,8 +271,6 @@ function ResultsTable({
   };
   onPageChange: (page: number) => void;
 }) {
-  const router = useRouter();
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "draft":
@@ -359,44 +352,49 @@ function ResultsTable({
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr
-                  key={product._id}
-                  className="border-b last:border-b-0 hover:bg-muted/50 cursor-pointer transition-colors"
-                  onClick={() => {
-                    router.push(`/products/${product._id}/product-information`);
-                  }}
-                >
-                  <td className="py-3 px-4 font-medium text-sm">
-                    {product.product_plan_number}
-                  </td>
-                  <td className="py-3 px-4 font-medium text-sm">
-                    {product.product_name}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">
-                    {product.project_name || "—"}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">
-                    {product.department_name || "—"}
-                  </td>
-                  <td className="py-3 px-4">
-                    <Badge variant="outline" className="font-normal gap-1.5">
-                      <div
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          getStatusColor(product.status),
-                        )}
-                      />
-                      <span className="capitalize">{product.status}</span>
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Badge variant="secondary" className="font-mono text-xs">
-                      v{product.version || 1}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
+              {products.map((product) => {
+                const productHref = `/products/${product._id}/product-information`;
+                return (
+                  <tr
+                    key={product._id}
+                    className="border-b last:border-b-0 hover:bg-muted/50 transition-colors"
+                  >
+                    <td className="p-0">
+                      <Link
+                        href={productHref}
+                        className="flex items-center py-3 px-4 font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        {product.product_plan_number}
+                      </Link>
+                    </td>
+                    <td className="py-3 px-4 font-medium text-sm">
+                      {product.product_name}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground">
+                      {product.project_name || "—"}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground">
+                      {product.department_name || "—"}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant="outline" className="font-normal gap-1.5">
+                        <div
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            getStatusColor(product.status),
+                          )}
+                        />
+                        <span className="capitalize">{product.status}</span>
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        v{product.version || 1}
+                      </Badge>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -542,6 +540,7 @@ export default function Page() {
   const handleClear = () => {
     clearConditions();
     setResults(null);
+    setActiveTab("builder");
   };
 
   const isQueryValid = validateConditions();
@@ -581,10 +580,10 @@ export default function Page() {
       <div className="p-2">
         <div className="w-full mx-auto space-y-2">
           <Card className="p-0">
-            <CardHeader className="pb-2 px-2 pt-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <CardHeader className="pb-2 px-2 pt-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <TabsList>
                       <TabsTrigger value="builder" className="gap-2">
                         <PiFunnelDuotone size={14} />
@@ -599,42 +598,40 @@ export default function Page() {
                         Results
                       </TabsTrigger>
                     </TabsList>
-                  </Tabs>
-                </div>
-                <div className="flex items-center gap-2">
-                  {conditions.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleClear}
-                      className="gap-1.5 text-muted-foreground hover:text-destructive"
-                    >
-                      <PiTrashDuotone size={14} />
-                      Clear All
-                    </Button>
-                  )}
-                  <Button
-                    onClick={() => handleExecuteQuery(1)}
-                    disabled={!isQueryValid || reportsQuery.isPending}
-                    className="gap-1.5"
-                  >
-                    {reportsQuery.isPending ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        Searching...
-                      </>
-                    ) : (
-                      <>
-                        <PiMagnifyingGlassDuotone size={16} />
-                        Run Query
-                      </>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {conditions.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClear}
+                        className="gap-1.5 text-muted-foreground hover:text-destructive"
+                      >
+                        <PiTrashDuotone size={14} />
+                        Clear All
+                      </Button>
                     )}
-                  </Button>
+                    <Button
+                      onClick={() => handleExecuteQuery(1)}
+                      disabled={!isQueryValid || reportsQuery.isPending}
+                      className="gap-1.5"
+                    >
+                      {reportsQuery.isPending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <PiMagnifyingGlassDuotone size={16} />
+                          Run Query
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
+              </CardHeader>
+              <CardContent className="p-2">
                 <TabsContent value="builder" className="mt-0 space-y-4">
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-dashed">
                     <span className="text-sm font-medium text-muted-foreground">
@@ -761,8 +758,8 @@ export default function Page() {
                     </>
                   )}
                 </TabsContent>
-              </Tabs>
-            </CardContent>
+              </CardContent>
+            </Tabs>
           </Card>
         </div>
       </div>
