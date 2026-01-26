@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import {
+  Column,
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -33,6 +34,7 @@ import {
   PiUserCircleGearDuotone,
   PiUsersDuotone,
 } from "react-icons/pi";
+import type { IconType } from "react-icons";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -85,9 +87,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<DepartmentArchiveRow, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -156,36 +158,6 @@ export function ArchivedDepartmentsTable({
         ),
       },
       {
-        accessorKey: "department_description",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Description"
-            icon={PiInfoDuotone}
-          />
-        ),
-        size: 260,
-        cell: ({ row }) => (
-          <div className="text-sm font-medium truncate">
-            {row.getValue("department_description")}
-          </div>
-        ),
-      },
-      {
-        accessorKey: "manager",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Manager"
-            icon={PiUserCircleGearDuotone}
-          />
-        ),
-        size: 180,
-        cell: ({ row }) => (
-          <div className="text-sm">{row.getValue("manager")}</div>
-        ),
-      },
-      {
         id: "users",
         accessorFn: (row) => row.users?.length ?? 0,
         header: ({ column }) => (
@@ -207,7 +179,9 @@ export function ArchivedDepartmentsTable({
           />
         ),
         size: 160,
-        cell: ({ row }) => <div className="text-sm">{row.getValue("actionBy")}</div>,
+        cell: ({ row }) => (
+          <div className="text-sm">{row.getValue("actionBy")}</div>
+        ),
       },
       {
         id: "actionAt",
@@ -234,7 +208,7 @@ export function ArchivedDepartmentsTable({
           });
           const actionAtTime = new Date(actionAt).toLocaleTimeString();
           return (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {actionAtDate} {actionAtTime}
             </div>
           );
@@ -283,7 +257,7 @@ export function ArchivedDepartmentsTable({
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<DepartmentArchiveRow>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
@@ -295,7 +269,7 @@ export function ArchivedDepartmentsTable({
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
       <TableControls
         table={table}
         searchColumnId="department_name"
@@ -330,7 +304,7 @@ export function ArchivedDepartmentsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -348,7 +322,7 @@ export function ArchivedDepartmentsTable({
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer hover:bg-muted/50 transition-opacity",
-                      isRowLoading && "opacity-60 pointer-events-none"
+                      isRowLoading && "opacity-60 pointer-events-none",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
@@ -356,7 +330,7 @@ export function ArchivedDepartmentsTable({
                       <TableCell key={cell.id} className="last:py-0">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -397,9 +371,9 @@ export function ArchivedDepartmentsTable({
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}

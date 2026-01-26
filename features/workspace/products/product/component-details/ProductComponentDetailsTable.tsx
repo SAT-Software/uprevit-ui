@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -15,6 +16,8 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+import { usePathname } from "next/navigation";
+import { Fragment, useState } from "react";
 import {
   PiCaretCircleDoubleLeftDuotone,
   PiCaretCircleDoubleRightDuotone,
@@ -28,17 +31,14 @@ import {
   PiDotsThreeCircleDuotone,
   PiHashDuotone,
   PiImageDuotone,
-  PiLayoutDuotone,
   PiPencilSimpleDuotone,
   PiRulerDuotone,
   PiTagDuotone,
   PiTextAlignLeftDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
-import { Badge } from "@/components/ui/badge";
-import { Fragment, useState } from "react";
-import { usePathname } from "next/navigation";
 
+import TableControls from "@/components/table/TableControls";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,19 +48,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -69,11 +61,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
-import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
-import EditComponentDialog from "./EditComponentDialog";
+import Image from "next/image";
 import DeleteComponentDialog from "./DeleteComponentDialog";
+import EditComponentDialog from "./EditComponentDialog";
 
 type ComponentItem = {
   _id: string;
@@ -86,7 +77,6 @@ type ComponentItem = {
   _isFromDiff?: boolean;
 };
 
-// Type for diff data
 type DiffItem = {
   path: string;
   status: "added" | "removed" | "modified";
@@ -94,7 +84,6 @@ type DiffItem = {
   new_value?: any;
 };
 
-// Helper component for displaying redline values (vertical stacking)
 const RedlineCell = ({
   value,
   diff,
@@ -507,7 +496,7 @@ export default function ProductComponentDetailsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<ComponentItem>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },

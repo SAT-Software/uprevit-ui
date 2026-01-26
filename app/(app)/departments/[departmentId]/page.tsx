@@ -8,9 +8,6 @@ import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiUserDuotone,
-  PiCaretRightDuotone,
-  PiHouseDuotone,
   PiBuildingsDuotone,
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
@@ -20,8 +17,6 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
 import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 
 interface DepartmentUser {
   _id: string;
@@ -40,7 +35,7 @@ export default function DepartmentDetailPage() {
   const department = data?.department;
   const projects =
     projectsData?.result?.projects?.filter(
-      (p: Project) => p.department_id === departmentId
+      (p: Project) => p.department_id === departmentId,
     ) || [];
 
   if (isLoading) {
@@ -123,7 +118,7 @@ export default function DepartmentDetailPage() {
   const latestUpdateLog = auditLogs
     .filter((log) => log.action === "update")
     .sort(
-      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0];
 
   const formatAuditDate = (isoDate: string) => {
@@ -140,27 +135,6 @@ export default function DepartmentDetailPage() {
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
-      {/* Breadcrumbs */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-        <Link
-          href="/dashboard"
-          className="hover:text-foreground transition-colors flex items-center"
-        >
-          <PiHouseDuotone className="w-4 h-4" />
-        </Link>
-        <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-        <Link
-          href="/departments"
-          className="hover:text-foreground transition-colors"
-        >
-          Departments
-        </Link>
-        <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-        <span className="text-foreground font-medium truncate max-w-[200px]">
-          {department.department_name}
-        </span>
-      </div>
-
       <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
@@ -287,7 +261,7 @@ export default function DepartmentDetailPage() {
                   No projects found
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  This department doesn't have any projects yet.
+                  This department doesn&apos;t have any projects yet.
                 </p>
               </div>
             )}

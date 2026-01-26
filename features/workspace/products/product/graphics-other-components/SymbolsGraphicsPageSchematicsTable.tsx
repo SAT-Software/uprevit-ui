@@ -432,7 +432,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<Item>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
@@ -440,7 +440,7 @@ export default function SymbolsGraphicsPageSchematicsTable({
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
       <TableControls
         table={table}
         searchColumnId="componentName"
@@ -452,7 +452,11 @@ export default function SymbolsGraphicsPageSchematicsTable({
             label: "Description",
             type: "text",
           },
-          { name: "presentOnLabels", label: "Presence on Labels", type: "text" },
+          {
+            name: "presentOnLabels",
+            label: "Presence on Labels",
+            type: "text",
+          },
         ]}
       />
       <div className="bg-background overflow-hidden rounded-xl border">

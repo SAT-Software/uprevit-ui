@@ -211,7 +211,7 @@ export default function SourceFilesTable({
   const table = useReactTable({
     data: sampleProducts,
     columns,
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<Item>() },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,

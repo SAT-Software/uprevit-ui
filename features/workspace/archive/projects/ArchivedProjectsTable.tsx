@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import {
+  Column,
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -34,6 +35,7 @@ import {
   PiUserCircleGearDuotone,
   PiUsersDuotone,
 } from "react-icons/pi";
+import type { IconType } from "react-icons";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -81,9 +83,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<ProjectArchiveRow, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -140,7 +142,7 @@ export function ArchivedProjectsTable({
         header: ({ column }) => (
           <SortableHeader
             column={column}
-            title="Project Number"
+            title="Project No."
             icon={PiHashDuotone}
           />
         ),
@@ -168,22 +170,6 @@ export function ArchivedProjectsTable({
         ),
       },
       {
-        accessorKey: "project_description",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Project Description"
-            icon={PiInfoDuotone}
-          />
-        ),
-        size: 200,
-        cell: ({ row }) => (
-          <div className="text-sm font-medium truncate">
-            {row.getValue("project_description")}
-          </div>
-        ),
-      },
-      {
         id: "users",
         accessorFn: (row) => row.users?.length ?? 0,
         header: ({ column }) => (
@@ -192,22 +178,6 @@ export function ArchivedProjectsTable({
         size: 80,
         cell: ({ row }) => (
           <div className="text-sm font-medium">{row.getValue("users")}</div>
-        ),
-      },
-      {
-        accessorKey: "project_manager",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Manager"
-            icon={PiUserCircleGearDuotone}
-          />
-        ),
-        size: 150,
-        cell: ({ row }) => (
-          <div className="text-sm font-medium">
-            {row.getValue("project_manager")}
-          </div>
         ),
       },
       {
@@ -221,7 +191,9 @@ export function ArchivedProjectsTable({
           />
         ),
         size: 160,
-        cell: ({ row }) => <div className="text-sm">{row.getValue("actionBy")}</div>,
+        cell: ({ row }) => (
+          <div className="text-sm">{row.getValue("actionBy")}</div>
+        ),
       },
       {
         id: "actionAt",
@@ -248,7 +220,7 @@ export function ArchivedProjectsTable({
           });
           const actionAtTime = new Date(actionAt).toLocaleTimeString();
           return (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {actionAtDate} {actionAtTime}
             </div>
           );
@@ -297,7 +269,7 @@ export function ArchivedProjectsTable({
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<ProjectArchiveRow>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
@@ -309,7 +281,7 @@ export function ArchivedProjectsTable({
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
       <TableControls
         table={table}
         searchColumnId="project_name"
@@ -345,7 +317,7 @@ export function ArchivedProjectsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -363,7 +335,7 @@ export function ArchivedProjectsTable({
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer hover:bg-muted/50 transition-opacity",
-                      isRowLoading && "opacity-60 pointer-events-none"
+                      isRowLoading && "opacity-60 pointer-events-none",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
@@ -371,7 +343,7 @@ export function ArchivedProjectsTable({
                       <TableCell key={cell.id} className="last:py-0">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -412,9 +384,9 @@ export function ArchivedProjectsTable({
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}

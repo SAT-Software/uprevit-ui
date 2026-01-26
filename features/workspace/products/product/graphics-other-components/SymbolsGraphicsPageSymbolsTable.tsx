@@ -463,7 +463,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<Item>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
@@ -471,7 +471,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
       <TableControls
         table={table}
         searchColumnId="componentName"

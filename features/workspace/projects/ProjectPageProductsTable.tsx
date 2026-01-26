@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Column,
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -25,7 +26,7 @@ import {
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
 import { useRouter } from "next/navigation";
-import { AuditLog } from "@/types/product";
+import { AuditLog, Product } from "@/types/product";
 import { useState } from "react";
 import {
   PiBuildingsDuotone,
@@ -40,6 +41,7 @@ import {
   PiPackageDuotone,
 } from "react-icons/pi";
 import { Progress } from "@/components/ui/progress";
+import type { IconType } from "react-icons";
 
 export type Item = {
   _id: string;
@@ -71,9 +73,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<Item, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -124,31 +126,12 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
-    id: "project_name",
-    accessorFn: (row) => row.project?.[0]?.project_name ?? "N/A",
-    header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Project Name"
-        icon={PiKanbanDuotone}
-      />
-    ),
-    cell: ({ row }) => {
-      // Assuming project data is available through the data prop
-      return (
-        <div className="text-sm font-medium">
-          {row.getValue("project_name") as string}
-        </div>
-      );
-    },
-  },
-  {
     id: "department_name",
     accessorFn: (row) => row.department?.[0]?.department_name ?? "N/A",
     header: ({ column }) => (
       <SortableHeader
         column={column}
-        title="Department Name"
+        title="Department"
         icon={PiBuildingsDuotone}
       />
     ),
@@ -230,7 +213,7 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<Item>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
@@ -241,7 +224,7 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
   });
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-2 mt-2">
       <TableControls
         table={table}
         searchColumnId="product_name"
@@ -258,64 +241,73 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
       />
       <div className="w-full border border-border rounded-lg overflow-hidden">
         <Table>
-        <TableHeader className="bg-muted">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} className="border-r border-border">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() =>
-                  router.push(
-                    `/products/${row.original._id}/product-information`
-                  )
-                }
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+          <TableHeader className="bg-muted">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className="border-r border-border"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
-                  <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                    <PiPackageDuotone className="w-8 h-8 text-muted-foreground" />
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() =>
+                    router.push(
+                      `/products/${row.original._id}/product-information`,
+                    )
+                  }
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
+                    <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+                      <PiPackageDuotone className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="text-sm font-medium text-foreground">
+                        No products found
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        This project doesn&apos;t have any products yet.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      No products found
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      This project doesn't have any products yet.
-                    </p>
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </div>
     </div>

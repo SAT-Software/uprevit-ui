@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Column,
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -33,19 +34,18 @@ import {
   PiHashDuotone,
   PiInfoDuotone,
   PiKanbanDuotone,
-  PiUserCircleGearDuotone,
   PiUsersDuotone,
 } from "react-icons/pi";
+import type { IconType } from "react-icons";
 
-// Helper component for sortable headers
 const SortableHeader = ({
   column,
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<Project, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -76,7 +76,7 @@ const columns: ColumnDef<Project>[] = [
     header: ({ column }) => (
       <SortableHeader
         column={column}
-        title="Project Number"
+        title="Project No."
         icon={PiHashDuotone}
       />
     ),
@@ -85,6 +85,7 @@ const columns: ColumnDef<Project>[] = [
         {row.getValue("project_number")}
       </div>
     ),
+    minSize: 180,
   },
   {
     accessorKey: "project_name",
@@ -131,21 +132,6 @@ const columns: ColumnDef<Project>[] = [
     },
   },
   {
-    accessorKey: "project_manager",
-    header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Manager"
-        icon={PiUserCircleGearDuotone}
-      />
-    ),
-    cell: ({ row }) => {
-      return (
-        <p className="text-sm font-medium">{row.getValue("project_manager")}</p>
-      );
-    },
-  },
-  {
     accessorKey: "createdOn",
     header: ({ column }) => (
       <SortableHeader
@@ -156,10 +142,10 @@ const columns: ColumnDef<Project>[] = [
     ),
     cell: ({ row }) => {
       const createdBy = row.original.auditLogs?.filter(
-        (log) => log.action === "create"
+        (log) => log.action === "create",
       )[0]?.actionBy;
       const createdAt = row.original.auditLogs?.filter(
-        (log) => log.action === "create"
+        (log) => log.action === "create",
       )[0]?.actionAt;
       if (createdBy && createdAt)
         return (
@@ -186,10 +172,10 @@ const columns: ColumnDef<Project>[] = [
     ),
     cell: ({ row }) => {
       const modifiedBy = row.original.auditLogs?.filter(
-        (log) => log.action === "update"
+        (log) => log.action === "update",
       )[0]?.actionBy;
       const modifiedAt = row.original.auditLogs?.filter(
-        (log) => log.action === "update"
+        (log) => log.action === "update",
       )[0]?.actionAt;
       if (modifiedBy && modifiedAt)
         return (
@@ -217,14 +203,14 @@ export default function DepartmentPageProjectsTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  const table = useReactTable({
+  const table = useReactTable<Project>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn },
+    defaultColumn: { filterFn: advancedFilterFn<Project>() },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
@@ -235,7 +221,7 @@ export default function DepartmentPageProjectsTable({
   });
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-2 mt-2">
       <TableControls
         table={table}
         searchColumnId="project_name"
@@ -248,66 +234,72 @@ export default function DepartmentPageProjectsTable({
         ]}
       />
       <div className="w-full border border-border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader className="bg-muted">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    className="border-r border-border"
-                    style={{ width: header.getSize() }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/projects/${row.original._id}`)}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+        <Table>
+          <TableHeader className="bg-muted">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className="border-r border-border"
+                      style={{ width: header.getSize() }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
-                  <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                    <PiKanbanDuotone className="w-8 h-8 text-muted-foreground" />
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => router.push(`/projects/${row.original._id}`)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
+                    <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+                      <PiKanbanDuotone className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="text-sm font-medium text-foreground">
+                        No projects found
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Get started by creating a new project
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      No projects found
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Get started by creating a new project
-                    </p>
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

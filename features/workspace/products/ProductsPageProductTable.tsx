@@ -504,8 +504,7 @@ export default function ProductsPageProductTable() {
         : "";
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Filters */}
+    <div className="space-y-2 w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center justify-start w-full gap-3">
           <Input
@@ -727,7 +726,6 @@ function RowActions({ row }: { row: { original: Item } }) {
       className="flex items-center justify-end gap-2"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* <UpdateProductDialog product={row.original} /> */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
