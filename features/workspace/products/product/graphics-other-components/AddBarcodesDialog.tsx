@@ -32,6 +32,7 @@ import {
   PiCaretUpDown,
   PiCheck,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import { BARCODE_STANDARDS } from "@/data/barcode-standards";
 import {
   Popover,
@@ -362,10 +363,15 @@ export default function AddBarcodesDialog({
             type="button"
             size="sm"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending || (!barcodeTypeSelect && !barcodeTypeInput)}
+            disabled={
+              isPending ||
+              uploadingImage ||
+              (!barcodeTypeSelect && !barcodeTypeInput)
+            }
+            aria-busy={isPending || uploadingImage}
             variant="default"
           >
-            <PiPlusCircleDuotone />
+            {isPending || uploadingImage ? <Spinner /> : <PiPlusCircleDuotone />}
             {isPending
               ? "Adding..."
               : uploadingImage

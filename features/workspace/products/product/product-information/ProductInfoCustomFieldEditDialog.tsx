@@ -36,6 +36,7 @@ import {
   PiTrashDuotone,
 } from "react-icons/pi";
 import { ProductMetadata } from "@/types/product";
+import { Spinner } from "@/components/ui/spinner";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -489,7 +490,11 @@ export default function ProductInformationCustomFieldEditDialog({
               aria-busy={isPending}
               size="sm"
             >
-              <PiCheckCircleDuotone className="w-4 h-4 mr-1" />
+              {isPending ? (
+                <Spinner className="w-4 h-4 mr-1" />
+              ) : (
+                <PiCheckCircleDuotone className="w-4 h-4 mr-1" />
+              )}
               {isPending ? "Adding..." : "Add Field(s)"}
             </Button>
           )}
