@@ -3,16 +3,20 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import {
+  Column,
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PiArrowCounterClockwiseDuotone,
   PiBuildingsDuotone,
@@ -30,6 +34,7 @@ import {
   PiUserCircleGearDuotone,
   PiUsersDuotone,
 } from "react-icons/pi";
+import type { IconType } from "react-icons";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -54,6 +59,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 
 export type DepartmentArchiveRow = {
   _id: string;
@@ -80,9 +87,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<DepartmentArchiveRow, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -112,13 +119,14 @@ export function ArchivedDepartmentsTable({
   onRestore,
   loadingRowId,
 }: ArchivedDepartmentsTableProps) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const auth = useAuth();
   const isAdmin = auth.user?.profile?.userType === "admin";
@@ -150,48 +158,19 @@ export function ArchivedDepartmentsTable({
         ),
       },
       {
-        accessorKey: "department_description",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Description"
-            icon={PiInfoDuotone}
-          />
-        ),
-        size: 260,
-        cell: ({ row }) => (
-          <div className="text-sm font-medium truncate">
-            {row.getValue("department_description")}
-          </div>
-        ),
-      },
-      {
-        accessorKey: "manager",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Manager"
-            icon={PiUserCircleGearDuotone}
-          />
-        ),
-        size: 180,
-        cell: ({ row }) => (
-          <div className="text-sm">{row.getValue("manager")}</div>
-        ),
-      },
-      {
-        accessorKey: "users",
+        id: "users",
+        accessorFn: (row) => row.users?.length ?? 0,
         header: ({ column }) => (
           <SortableHeader column={column} title="Users" icon={PiUsersDuotone} />
         ),
         size: 80,
-        cell: ({ row }) => {
-          const users = row.original.users?.length || 0;
-          return <div className="text-sm font-medium">{users}</div>;
-        },
+        cell: ({ row }) => (
+          <div className="text-sm font-medium">{row.getValue("users")}</div>
+        ),
       },
       {
-        accessorKey: "actionBy",
+        id: "actionBy",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionBy ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -200,13 +179,13 @@ export function ArchivedDepartmentsTable({
           />
         ),
         size: 160,
-        cell: ({ row }) => {
-          const actionBy = row.original.auditLogs?.[0]?.actionBy;
-          return <div className="text-sm">{actionBy}</div>;
-        },
+        cell: ({ row }) => (
+          <div className="text-sm">{row.getValue("actionBy")}</div>
+        ),
       },
       {
-        accessorKey: "actionAt",
+        id: "actionAt",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionAt ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -216,7 +195,7 @@ export function ArchivedDepartmentsTable({
         ),
         size: 140,
         cell: ({ row }) => {
-          const actionAt = row.original.auditLogs?.[0]?.actionAt;
+          const actionAt = row.getValue("actionAt") as string | undefined;
 
           if (!actionAt) {
             return <div className="text-sm text-muted-foreground">-</div>;
@@ -229,7 +208,7 @@ export function ArchivedDepartmentsTable({
           });
           const actionAtTime = new Date(actionAt).toLocaleTimeString();
           return (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {actionAtDate} {actionAtTime}
             </div>
           );
@@ -239,6 +218,7 @@ export function ArchivedDepartmentsTable({
         id: "restore",
         header: "Restore",
         size: 100,
+        enableHiding: false,
         cell: ({ row }) => {
           const isLoading = loadingRowId === row.original._id;
           return (
@@ -276,14 +256,31 @@ export function ArchivedDepartmentsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
+    getFilteredRowModel: getFilteredRowModel(),
+    defaultColumn: { filterFn: advancedFilterFn<DepartmentArchiveRow>() },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       pagination,
+      columnFilters,
+      columnVisibility,
     },
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
+      <TableControls
+        table={table}
+        searchColumnId="department_name"
+        searchPlaceholder="Filter archived departments..."
+        filterColumns={[
+          { name: "department_name", label: "Department Name", type: "text" },
+          { name: "users", label: "Users", type: "number" },
+          { name: "actionBy", label: "Archived By", type: "text" },
+          { name: "actionAt", label: "Archived On", type: "text" },
+        ]}
+      />
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
@@ -301,7 +298,7 @@ export function ArchivedDepartmentsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -319,7 +316,7 @@ export function ArchivedDepartmentsTable({
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer hover:bg-muted/50 transition-opacity",
-                      isRowLoading && "opacity-60 pointer-events-none"
+                      isRowLoading && "opacity-60 pointer-events-none",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
@@ -327,7 +324,7 @@ export function ArchivedDepartmentsTable({
                       <TableCell key={cell.id} className="last:py-0">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -368,9 +365,9 @@ export function ArchivedDepartmentsTable({
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}

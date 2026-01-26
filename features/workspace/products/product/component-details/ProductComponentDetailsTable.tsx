@@ -1,17 +1,23 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   Row,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
+import { usePathname } from "next/navigation";
+import { Fragment, useState } from "react";
 import {
   PiCaretCircleDoubleLeftDuotone,
   PiCaretCircleDoubleRightDuotone,
@@ -25,17 +31,14 @@ import {
   PiDotsThreeCircleDuotone,
   PiHashDuotone,
   PiImageDuotone,
-  PiLayoutDuotone,
   PiPencilSimpleDuotone,
   PiRulerDuotone,
   PiTagDuotone,
   PiTextAlignLeftDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
-import { Badge } from "@/components/ui/badge";
-import { Fragment, useId, useState } from "react";
-import { usePathname } from "next/navigation";
 
+import TableControls from "@/components/table/TableControls";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -45,19 +48,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -66,9 +61,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { advancedFilterFn } from "@/lib/table-filters";
 import Image from "next/image";
-import EditComponentDialog from "./EditComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
+import EditComponentDialog from "./EditComponentDialog";
 
 type ComponentItem = {
   _id: string;
@@ -81,7 +77,6 @@ type ComponentItem = {
   _isFromDiff?: boolean;
 };
 
-// Type for diff data
 type DiffItem = {
   path: string;
   status: "added" | "removed" | "modified";
@@ -89,7 +84,6 @@ type DiffItem = {
   new_value?: any;
 };
 
-// Helper component for displaying redline values (vertical stacking)
 const RedlineCell = ({
   value,
   diff,
@@ -166,6 +160,7 @@ const SortableHeader = ({
 const columns: ColumnDef<ComponentItem>[] = [
   {
     id: "expander",
+    enableHiding: false,
     header: () => null,
     cell: ({ row }) => {
       return row.getCanExpand() ? (
@@ -455,7 +450,6 @@ export default function ProductComponentDetailsTable({
   isRedlineView?: boolean;
   diffs?: DiffItem[];
 }) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -466,6 +460,8 @@ export default function ProductComponentDetailsTable({
       desc: false,
     },
   ]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Helper to find a diff by path
   const getDiff = (path: string): DiffItem | null => {
@@ -495,16 +491,36 @@ export default function ProductComponentDetailsTable({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    state: { sorting, pagination },
+    defaultColumn: { filterFn: advancedFilterFn<ComponentItem>() },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    state: { sorting, pagination, columnFilters, columnVisibility },
     meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
   });
 
   return (
     <div className="space-y-2 w-full p-2">
+      <TableControls
+        table={table}
+        searchColumnId="component_number"
+        searchPlaceholder="Filter components..."
+        filterColumns={[
+          { name: "component_number", label: "Component #", type: "text" },
+          {
+            name: "component_description",
+            label: "Description",
+            type: "text",
+          },
+          { name: "label_type", label: "Label Type", type: "text" },
+          { name: "dimensions", label: "Dimensions", type: "text" },
+          { name: "component_type", label: "Component Type", type: "text" },
+        ]}
+      />
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="">
           <TableHeader className="bg-muted">

@@ -1,16 +1,20 @@
 "use client";
 
 import {
+  Column,
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PiArrowCounterClockwiseDuotone,
   PiBuildingsDuotone,
@@ -29,6 +33,7 @@ import {
   PiPackageDuotone,
   PiUserCircleDuotone,
 } from "react-icons/pi";
+import type { IconType } from "react-icons";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,6 +59,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 
 export type ProductArchiveRow = {
   _id: string;
@@ -87,9 +94,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<ProductArchiveRow, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -119,13 +126,14 @@ export function ArchivedProductsTable({
   onRestore,
   loadingRowId,
 }: ArchivedProductsTableProps) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const columns: ColumnDef<ProductArchiveRow>[] = useMemo(() => {
     return [
@@ -158,37 +166,8 @@ export function ArchivedProductsTable({
         ),
       },
       {
-        accessorKey: "project_name",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Project Name"
-            icon={PiKanbanDuotone}
-          />
-        ),
-        size: 150,
-        cell: ({ row }) => {
-          const project_name = row.original?.project?.[0]?.project_name;
-          return <div className="text-sm font-medium">{project_name}</div>;
-        },
-      },
-      {
-        accessorKey: "department_name",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Department Name"
-            icon={PiBuildingsDuotone}
-          />
-        ),
-        size: 150,
-        cell: ({ row }) => {
-          const departmentName = row.original?.department?.[0]?.department_name;
-          return <div className="text-sm font-medium">{departmentName}</div>;
-        },
-      },
-      {
-        accessorKey: "actionBy",
+        id: "actionBy",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionBy ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -197,13 +176,13 @@ export function ArchivedProductsTable({
           />
         ),
         size: 160,
-        cell: ({ row }) => {
-          const actionBy = row.original.auditLogs?.[0]?.actionBy;
-          return <div className="text-sm">{actionBy}</div>;
-        },
+        cell: ({ row }) => (
+          <div className="text-sm">{row.getValue("actionBy")}</div>
+        ),
       },
       {
-        accessorKey: "actionAt",
+        id: "actionAt",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionAt ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -213,7 +192,7 @@ export function ArchivedProductsTable({
         ),
         size: 140,
         cell: ({ row }) => {
-          const actionAt = row.original.auditLogs?.[0]?.actionAt;
+          const actionAt = row.getValue("actionAt") as string | undefined;
 
           if (!actionAt) {
             return <div className="text-sm text-muted-foreground">-</div>;
@@ -226,7 +205,7 @@ export function ArchivedProductsTable({
           });
           const actionAtTime = new Date(actionAt).toLocaleTimeString();
           return (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {actionAtDate} {actionAtTime}
             </div>
           );
@@ -252,6 +231,7 @@ export function ArchivedProductsTable({
         id: "restore",
         header: "Restore",
         size: 100,
+        enableHiding: false,
         cell: ({ row }) => {
           const isLoading = loadingRowId === row.original._id;
           return (
@@ -289,14 +269,32 @@ export function ArchivedProductsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
+    getFilteredRowModel: getFilteredRowModel(),
+    defaultColumn: { filterFn: advancedFilterFn<ProductArchiveRow>() },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       pagination,
+      columnFilters,
+      columnVisibility,
     },
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
+      <TableControls
+        table={table}
+        searchColumnId="product_name"
+        searchPlaceholder="Filter archived products..."
+        filterColumns={[
+          { name: "product_plan_number", label: "PPN", type: "text" },
+          { name: "product_name", label: "Product Name", type: "text" },
+          { name: "actionBy", label: "Archived By", type: "text" },
+          { name: "actionAt", label: "Archived On", type: "text" },
+          { name: "version", label: "Version", type: "number" },
+        ]}
+      />
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
@@ -314,7 +312,7 @@ export function ArchivedProductsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -332,7 +330,7 @@ export function ArchivedProductsTable({
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer hover:bg-muted/50 transition-opacity",
-                      isRowLoading && "opacity-60 pointer-events-none"
+                      isRowLoading && "opacity-60 pointer-events-none",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
@@ -340,7 +338,7 @@ export function ArchivedProductsTable({
                       <TableCell key={cell.id} className="last:py-0">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -381,9 +379,9 @@ export function ArchivedProductsTable({
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}

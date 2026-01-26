@@ -2,17 +2,20 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   Row,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { Fragment, useId, useState } from "react";
+import { Fragment, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +42,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 import {
   PiPencilSimpleDuotone,
   PiTrashDuotone,
@@ -168,6 +173,7 @@ const SortableHeader = ({
 const columns: ColumnDef<Item>[] = [
   {
     id: "expander",
+    enableHiding: false,
     header: () => null,
     cell: ({ row }) => {
       return row.getCanExpand() ? (
@@ -379,7 +385,6 @@ export default function SymbolsGraphicsPageSchematicsTable({
   isRedlineView = false,
   diffs = [],
 }: SymbolsGraphicsPageSchematicsTableProps) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -390,6 +395,8 @@ export default function SymbolsGraphicsPageSchematicsTable({
       desc: false,
     },
   ]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Helper to find a diff by path
   const getDiff = (path: string): DiffItem | null => {
@@ -420,16 +427,38 @@ export default function SymbolsGraphicsPageSchematicsTable({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    state: { sorting, pagination },
+    defaultColumn: { filterFn: advancedFilterFn<Item>() },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    state: { sorting, pagination, columnFilters, columnVisibility },
     meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
+      <TableControls
+        table={table}
+        searchColumnId="componentName"
+        searchPlaceholder="Filter schematics..."
+        filterColumns={[
+          { name: "componentName", label: "Schematic Name", type: "text" },
+          {
+            name: "componentDescription",
+            label: "Description",
+            type: "text",
+          },
+          {
+            name: "presentOnLabels",
+            label: "Presence on Labels",
+            type: "text",
+          },
+        ]}
+      />
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table>
           <TableHeader className="bg-muted">

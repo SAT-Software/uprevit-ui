@@ -3,16 +3,20 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import {
+  Column,
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PiArrowCounterClockwiseDuotone,
   PiCalendarDuotone,
@@ -31,6 +35,7 @@ import {
   PiUserCircleGearDuotone,
   PiUsersDuotone,
 } from "react-icons/pi";
+import type { IconType } from "react-icons";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -48,6 +53,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 
 export type ProjectArchiveRow = {
   _id: string;
@@ -76,9 +83,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<ProjectArchiveRow, unknown>;
   title: string;
-  icon: any;
+  icon: IconType;
 }) => {
   return (
     <button
@@ -108,13 +115,14 @@ export function ArchivedProjectsTable({
   onRestore,
   loadingRowId,
 }: ArchivedProjectsTableProps) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const auth = useAuth();
   const isAdmin = auth.user?.profile?.userType === "admin";
@@ -134,7 +142,7 @@ export function ArchivedProjectsTable({
         header: ({ column }) => (
           <SortableHeader
             column={column}
-            title="Project Number"
+            title="Project No."
             icon={PiHashDuotone}
           />
         ),
@@ -162,50 +170,19 @@ export function ArchivedProjectsTable({
         ),
       },
       {
-        accessorKey: "project_description",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Project Description"
-            icon={PiInfoDuotone}
-          />
-        ),
-        size: 200,
-        cell: ({ row }) => (
-          <div className="text-sm font-medium truncate">
-            {row.getValue("project_description")}
-          </div>
-        ),
-      },
-      {
-        accessorKey: "users",
+        id: "users",
+        accessorFn: (row) => row.users?.length ?? 0,
         header: ({ column }) => (
           <SortableHeader column={column} title="Users" icon={PiUsersDuotone} />
         ),
         size: 80,
-        cell: ({ row }) => {
-          const users = row.original.users?.length || 0;
-          return <div className="text-sm font-medium">{users}</div>;
-        },
-      },
-      {
-        accessorKey: "project_manager",
-        header: ({ column }) => (
-          <SortableHeader
-            column={column}
-            title="Manager"
-            icon={PiUserCircleGearDuotone}
-          />
-        ),
-        size: 150,
         cell: ({ row }) => (
-          <div className="text-sm font-medium">
-            {row.getValue("project_manager")}
-          </div>
+          <div className="text-sm font-medium">{row.getValue("users")}</div>
         ),
       },
       {
-        accessorKey: "actionBy",
+        id: "actionBy",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionBy ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -214,13 +191,13 @@ export function ArchivedProjectsTable({
           />
         ),
         size: 160,
-        cell: ({ row }) => {
-          const actionBy = row.original.auditLogs?.[0]?.actionBy;
-          return <div className="text-sm">{actionBy}</div>;
-        },
+        cell: ({ row }) => (
+          <div className="text-sm">{row.getValue("actionBy")}</div>
+        ),
       },
       {
-        accessorKey: "actionAt",
+        id: "actionAt",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionAt ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -230,7 +207,7 @@ export function ArchivedProjectsTable({
         ),
         size: 140,
         cell: ({ row }) => {
-          const actionAt = row.original.auditLogs?.[0]?.actionAt;
+          const actionAt = row.getValue("actionAt") as string | undefined;
 
           if (!actionAt) {
             return <div className="text-sm text-muted-foreground">-</div>;
@@ -243,7 +220,7 @@ export function ArchivedProjectsTable({
           });
           const actionAtTime = new Date(actionAt).toLocaleTimeString();
           return (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {actionAtDate} {actionAtTime}
             </div>
           );
@@ -253,6 +230,7 @@ export function ArchivedProjectsTable({
         id: "restore",
         header: "Restore",
         size: 100,
+        enableHiding: false,
         cell: ({ row }) => {
           const isLoading = loadingRowId === row.original._id;
           return (
@@ -290,14 +268,32 @@ export function ArchivedProjectsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
+    getFilteredRowModel: getFilteredRowModel(),
+    defaultColumn: { filterFn: advancedFilterFn<ProjectArchiveRow>() },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       pagination,
+      columnFilters,
+      columnVisibility,
     },
   });
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-2 mt-2 w-full">
+      <TableControls
+        table={table}
+        searchColumnId="project_name"
+        searchPlaceholder="Filter archived projects..."
+        filterColumns={[
+          { name: "project_number", label: "Project Number", type: "text" },
+          { name: "project_name", label: "Project Name", type: "text" },
+          { name: "users", label: "Users", type: "number" },
+          { name: "actionBy", label: "Archived By", type: "text" },
+          { name: "actionAt", label: "Archived On", type: "text" },
+        ]}
+      />
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
@@ -315,7 +311,7 @@ export function ArchivedProjectsTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -333,7 +329,7 @@ export function ArchivedProjectsTable({
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer hover:bg-muted/50 transition-opacity",
-                      isRowLoading && "opacity-60 pointer-events-none"
+                      isRowLoading && "opacity-60 pointer-events-none",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
@@ -341,7 +337,7 @@ export function ArchivedProjectsTable({
                       <TableCell key={cell.id} className="last:py-0">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -382,9 +378,9 @@ export function ArchivedProjectsTable({
                   table.getState().pagination.pageIndex *
                     table.getState().pagination.pageSize +
                     table.getState().pagination.pageSize,
-                  0
+                  0,
                 ),
-                table.getRowCount()
+                table.getRowCount(),
               )}
             </span>{" "}
             of{" "}
