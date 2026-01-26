@@ -552,7 +552,7 @@ export default function Page() {
       <div className="border-b bg-card/50">
         <div className="flex items-center justify-between px-2 py-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-base font-semibold">Reports & Analytics</h1>
+            <h1 className="text-base font-semibold">Reports</h1>
           </div>
           <div className="flex items-center gap-2">
             <Button
