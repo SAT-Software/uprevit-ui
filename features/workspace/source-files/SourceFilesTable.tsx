@@ -3,7 +3,6 @@
 import {
   ColumnDef,
   ColumnFiltersState,
-  FilterFn,
   flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
@@ -22,7 +21,6 @@ import {
   PiCaretLeftDuotone,
   PiCaretRightDuotone,
   PiCaretUpDuotone,
-  PiColumnsDuotone,
   PiDotsThreeDuotone,
 } from "react-icons/pi";
 import { useId, useState } from "react";
@@ -32,13 +30,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuPortal,
   DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -67,7 +63,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import SourceFilesTableFilter from "./SourceFilesTableFilter";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 
 // Define the type for the table data
 export type Item = {
@@ -84,52 +81,6 @@ export type Item = {
   status: "Submitted" | "Draft" | "Archived";
 };
 
-interface AdvancedFilter {
-  operator: string;
-  value: string | number | boolean;
-}
-
-// Advanced operator-based filter function
-const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
-  const { operator, value } = filterValue as AdvancedFilter;
-  const rowValue = row.getValue(columnId);
-  switch (operator) {
-    case "eq":
-      return rowValue == value;
-    case "neq":
-      return rowValue != value;
-    case "contains":
-      return String(rowValue)
-        .toLowerCase()
-        .includes(String(value).toLowerCase());
-    case "not_contains":
-      return !String(rowValue)
-        .toLowerCase()
-        .includes(String(value).toLowerCase());
-    case "starts_with":
-      return String(rowValue)
-        .toLowerCase()
-        .startsWith(String(value).toLowerCase());
-    case "ends_with":
-      return String(rowValue)
-        .toLowerCase()
-        .endsWith(String(value).toLowerCase());
-    case "gt":
-      return Number(rowValue) > Number(value);
-    case "gte":
-      return Number(rowValue) >= Number(value);
-    case "lt":
-      return Number(rowValue) < Number(value);
-    case "lte":
-      return Number(rowValue) <= Number(value);
-    case "is_null":
-      return rowValue == null || rowValue === "";
-    case "is_not_null":
-      return rowValue != null && rowValue !== "";
-    default:
-      return true;
-  }
-};
 
 const columns: ColumnDef<Item>[] = [
   {
@@ -282,46 +233,21 @@ export default function SourceFilesTable({
   return (
     <div className="space-y-4 w-full">
       {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center justify-start w-full gap-3">
-          <SourceFilesTableFilter table={table} />
-
-          {/* Toggle columns visibility */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs">
-                <PiColumnsDuotone
-                  className="-ms-1 text-muted-foreground"
-                  size={14}
-                  aria-hidden="true"
-                />
-                View
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                      onSelect={(event) => event.preventDefault()}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <TableControls
+        table={table}
+        searchColumnId="productName"
+        searchPlaceholder="Filter products..."
+        filterColumns={[
+          { name: "productId", label: "Product ID", type: "text" },
+          { name: "productName", label: "Product Name", type: "text" },
+          { name: "projectId", label: "Project ID", type: "text" },
+          { name: "departmentId", label: "Department ID", type: "text" },
+          { name: "createdBy", label: "Created By", type: "text" },
+          { name: "modifiedBy", label: "Modified By", type: "text" },
+          { name: "version", label: "Version", type: "number" },
+          { name: "status", label: "Status", type: "text" },
+        ]}
+      />
 
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">

@@ -2,17 +2,20 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   Row,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { Fragment, useId, useState } from "react";
+import { Fragment, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +42,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 import {
   PiPencilSimpleDuotone,
   PiTrashDuotone,
@@ -170,6 +175,7 @@ const SortableHeader = ({
 const columns: ColumnDef<Item>[] = [
   {
     id: "expander",
+    enableHiding: false,
     header: () => null,
     cell: ({ row }) => {
       return row.getCanExpand() ? (
@@ -394,7 +400,6 @@ export default function SymbolsGraphicsPageBarcodesTable({
   isRedlineView?: boolean;
   diffs?: DiffItem[];
 }) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -402,6 +407,8 @@ export default function SymbolsGraphicsPageBarcodesTable({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "componentName", desc: false },
   ]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Helper to find a diff by path
   const getDiff = (path: string): DiffItem | null => {
@@ -432,16 +439,35 @@ export default function SymbolsGraphicsPageBarcodesTable({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    state: { sorting, pagination },
+    defaultColumn: { filterFn: advancedFilterFn },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    state: { sorting, pagination, columnFilters, columnVisibility },
     meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
   });
 
   return (
     <div className="space-y-4 w-full">
+      <TableControls
+        table={table}
+        searchColumnId="componentName"
+        searchPlaceholder="Filter barcodes..."
+        filterColumns={[
+          { name: "componentName", label: "Barcode Name", type: "text" },
+          {
+            name: "componentDescription",
+            label: "Description",
+            type: "text",
+          },
+          { name: "presentOnLabels", label: "Presence on Labels", type: "text" },
+          { name: "count", label: "Count", type: "number" },
+        ]}
+      />
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table>
           <TableHeader className="bg-muted">

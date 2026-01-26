@@ -2,15 +2,18 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   Row,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import {
   PiCaretCircleDoubleLeftDuotone,
@@ -33,7 +36,7 @@ import {
   PiTrashDuotone,
 } from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
-import { Fragment, useId, useState } from "react";
+import { Fragment, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -67,6 +70,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 import EditComponentDialog from "./EditComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 
@@ -166,6 +171,7 @@ const SortableHeader = ({
 const columns: ColumnDef<ComponentItem>[] = [
   {
     id: "expander",
+    enableHiding: false,
     header: () => null,
     cell: ({ row }) => {
       return row.getCanExpand() ? (
@@ -455,7 +461,6 @@ export default function ProductComponentDetailsTable({
   isRedlineView?: boolean;
   diffs?: DiffItem[];
 }) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -466,6 +471,8 @@ export default function ProductComponentDetailsTable({
       desc: false,
     },
   ]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Helper to find a diff by path
   const getDiff = (path: string): DiffItem | null => {
@@ -495,16 +502,36 @@ export default function ProductComponentDetailsTable({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    state: { sorting, pagination },
+    defaultColumn: { filterFn: advancedFilterFn },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    state: { sorting, pagination, columnFilters, columnVisibility },
     meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
   });
 
   return (
     <div className="space-y-2 w-full p-2">
+      <TableControls
+        table={table}
+        searchColumnId="component_number"
+        searchPlaceholder="Filter components..."
+        filterColumns={[
+          { name: "component_number", label: "Component #", type: "text" },
+          {
+            name: "component_description",
+            label: "Description",
+            type: "text",
+          },
+          { name: "label_type", label: "Label Type", type: "text" },
+          { name: "dimensions", label: "Dimensions", type: "text" },
+          { name: "component_type", label: "Component Type", type: "text" },
+        ]}
+      />
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="">
           <TableHeader className="bg-muted">

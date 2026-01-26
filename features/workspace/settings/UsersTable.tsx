@@ -3,12 +3,15 @@
 import { useMemo, useState } from "react";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
   SortingState,
   getSortedRowModel,
+  getFilteredRowModel,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +40,8 @@ import {
 } from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/types/user";
@@ -185,6 +190,7 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: "remove",
+    enableHiding: false,
     cell: ({ row }) => {
       const { _id, name } = row.original;
       // Only show remove button if user has an ID and is not the current user
@@ -231,6 +237,8 @@ export function UsersTable() {
   const data = useMemo(() => responseData?.data ?? [], [responseData]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -239,9 +247,15 @@ export function UsersTable() {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    defaultColumn: { filterFn: advancedFilterFn },
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
+      columnFilters,
+      columnVisibility,
     },
   });
 
@@ -265,8 +279,22 @@ export function UsersTable() {
   }
 
   return (
-    <div className="border rounded-xl bg-background overflow-hidden">
-      <Table>
+    <div className="space-y-3">
+      <TableControls
+        table={table}
+        searchColumnId="name"
+        searchPlaceholder="Filter members..."
+        filterColumns={[
+          { name: "_id", label: "ID", type: "text" },
+          { name: "name", label: "User", type: "text" },
+          { name: "userType", label: "User Type", type: "text" },
+          { name: "designation", label: "Designation", type: "text" },
+          { name: "location", label: "Location", type: "text" },
+          { name: "status", label: "Status", type: "text" },
+        ]}
+      />
+      <div className="border rounded-xl bg-background overflow-hidden">
+        <Table>
         <TableHeader className="bg-muted/50">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -317,7 +345,8 @@ export function UsersTable() {
             </TableRow>
           )}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
   );
 }

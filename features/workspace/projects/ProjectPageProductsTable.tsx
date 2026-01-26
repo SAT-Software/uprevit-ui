@@ -2,11 +2,14 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
@@ -19,6 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 import { useRouter } from "next/navigation";
 import { AuditLog } from "@/types/product";
 import { useState } from "react";
@@ -119,7 +124,8 @@ const columns: ColumnDef<Item>[] = [
     },
   },
   {
-    accessorKey: "project_name",
+    id: "project_name",
+    accessorFn: (row) => row.project?.[0]?.project_name ?? "N/A",
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -129,12 +135,16 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => {
       // Assuming project data is available through the data prop
-      const project_name = row.original?.project?.[0]?.project_name || "N/A";
-      return <div className="text-sm font-medium">{project_name}</div>;
+      return (
+        <div className="text-sm font-medium">
+          {row.getValue("project_name") as string}
+        </div>
+      );
     },
   },
   {
-    accessorKey: "department_name",
+    id: "department_name",
+    accessorFn: (row) => row.department?.[0]?.department_name ?? "N/A",
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -144,9 +154,11 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row }) => {
       // Assuming department data is available through the data prop
-      const departmentName =
-        row.original?.department?.[0]?.department_name || "N/A";
-      return <div className="text-sm font-medium">{departmentName}</div>;
+      return (
+        <div className="text-sm font-medium">
+          {row.getValue("department_name") as string}
+        </div>
+      );
     },
   },
   {
@@ -208,6 +220,8 @@ const columns: ColumnDef<Item>[] = [
 export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
@@ -215,14 +229,35 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    defaultColumn: { filterFn: advancedFilterFn },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
+      columnFilters,
+      columnVisibility,
     },
   });
 
   return (
-    <div className="w-full border border-border rounded-lg overflow-hidden">
-      <Table>
+    <div className="w-full space-y-3">
+      <TableControls
+        table={table}
+        searchColumnId="product_name"
+        searchPlaceholder="Filter products..."
+        filterColumns={[
+          { name: "product_plan_number", label: "PPN", type: "text" },
+          { name: "product_name", label: "Product Name", type: "text" },
+          { name: "project_name", label: "Project Name", type: "text" },
+          { name: "department_name", label: "Department Name", type: "text" },
+          { name: "status", label: "Status", type: "text" },
+          { name: "version", label: "Version", type: "number" },
+          { name: "complete_count", label: "Progress", type: "number" },
+        ]}
+      />
+      <div className="w-full border border-border rounded-lg overflow-hidden">
+        <Table>
         <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -281,7 +316,8 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
             </TableRow>
           )}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
   );
 }

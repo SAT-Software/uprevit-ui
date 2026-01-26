@@ -4,15 +4,18 @@ import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PiArrowCounterClockwiseDuotone,
   PiBuildingsDuotone,
@@ -54,6 +57,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import TableControls from "@/components/table/TableControls";
+import { advancedFilterFn } from "@/lib/table-filters";
 
 export type DepartmentArchiveRow = {
   _id: string;
@@ -112,13 +117,14 @@ export function ArchivedDepartmentsTable({
   onRestore,
   loadingRowId,
 }: ArchivedDepartmentsTableProps) {
-  const id = useId();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const auth = useAuth();
   const isAdmin = auth.user?.profile?.userType === "admin";
@@ -180,18 +186,19 @@ export function ArchivedDepartmentsTable({
         ),
       },
       {
-        accessorKey: "users",
+        id: "users",
+        accessorFn: (row) => row.users?.length ?? 0,
         header: ({ column }) => (
           <SortableHeader column={column} title="Users" icon={PiUsersDuotone} />
         ),
         size: 80,
-        cell: ({ row }) => {
-          const users = row.original.users?.length || 0;
-          return <div className="text-sm font-medium">{users}</div>;
-        },
+        cell: ({ row }) => (
+          <div className="text-sm font-medium">{row.getValue("users")}</div>
+        ),
       },
       {
-        accessorKey: "actionBy",
+        id: "actionBy",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionBy ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -200,13 +207,11 @@ export function ArchivedDepartmentsTable({
           />
         ),
         size: 160,
-        cell: ({ row }) => {
-          const actionBy = row.original.auditLogs?.[0]?.actionBy;
-          return <div className="text-sm">{actionBy}</div>;
-        },
+        cell: ({ row }) => <div className="text-sm">{row.getValue("actionBy")}</div>,
       },
       {
-        accessorKey: "actionAt",
+        id: "actionAt",
+        accessorFn: (row) => row.auditLogs?.[0]?.actionAt ?? "",
         header: ({ column }) => (
           <SortableHeader
             column={column}
@@ -216,7 +221,7 @@ export function ArchivedDepartmentsTable({
         ),
         size: 140,
         cell: ({ row }) => {
-          const actionAt = row.original.auditLogs?.[0]?.actionAt;
+          const actionAt = row.getValue("actionAt") as string | undefined;
 
           if (!actionAt) {
             return <div className="text-sm text-muted-foreground">-</div>;
@@ -239,6 +244,7 @@ export function ArchivedDepartmentsTable({
         id: "restore",
         header: "Restore",
         size: 100,
+        enableHiding: false,
         cell: ({ row }) => {
           const isLoading = loadingRowId === row.original._id;
           return (
@@ -276,14 +282,37 @@ export function ArchivedDepartmentsTable({
     enableSortingRemoval: false,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
+    getFilteredRowModel: getFilteredRowModel(),
+    defaultColumn: { filterFn: advancedFilterFn },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       pagination,
+      columnFilters,
+      columnVisibility,
     },
   });
 
   return (
     <div className="space-y-4 w-full">
+      <TableControls
+        table={table}
+        searchColumnId="department_name"
+        searchPlaceholder="Filter archived departments..."
+        filterColumns={[
+          { name: "department_name", label: "Department Name", type: "text" },
+          {
+            name: "department_description",
+            label: "Description",
+            type: "text",
+          },
+          { name: "manager", label: "Manager", type: "text" },
+          { name: "users", label: "Users", type: "number" },
+          { name: "actionBy", label: "Archived By", type: "text" },
+          { name: "actionAt", label: "Archived On", type: "text" },
+        ]}
+      />
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
