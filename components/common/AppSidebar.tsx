@@ -187,18 +187,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
         </Link>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="gap-2 p-1">
         {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+          <SidebarGroup key={item.title} className="px-1 py-1">
+            <SidebarGroupLabel className="h-6 px-2">
+              {item.title}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-1">
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       className={cn(
+                        "h-7",
                         pathname.startsWith(item.url)
                           ? "bg-sidebar-accent border border-sidebar-border rounded text-sidebar-primary"
                           : ""
@@ -219,7 +222,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           className="group/collapsible"
                         >
                           <CollapsibleContent>
-                            <SidebarMenuSub>
+                            <SidebarMenuSub className="gap-1 py-1">
                               {productSubItems?.map((subItem) => (
                                 <SidebarMenuSubItem key={subItem.title}>
                                   <SidebarMenuSubButton
@@ -254,7 +257,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarGroup className="p-2">
+      <SidebarGroup className="px-2 py-1">
         {isLoading ? (
           <SidebarMenu>
             <SidebarMenuItem>

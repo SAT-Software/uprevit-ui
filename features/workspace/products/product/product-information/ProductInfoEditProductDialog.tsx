@@ -23,6 +23,7 @@ import {
   PiXCircleDuotone,
   PiCalendarBlankDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Popover,
   PopoverContent,
@@ -687,7 +688,7 @@ export default function EditProductDialog({
             aria-busy={isPending}
             size="sm"
           >
-            <PiCheckCircleDuotone />
+            {isPending ? <Spinner /> : <PiCheckCircleDuotone />}
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

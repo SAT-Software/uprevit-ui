@@ -91,7 +91,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
         {label && <Label htmlFor={inputId}>{label}</Label>}
         <div
           className={cn(
-            "flex flex-wrap items-center gap-1 rounded-md border border-input bg-background px-2 h-9",
+            "flex flex-wrap items-center gap-1 rounded-md border border-input bg-background px-2 min-h-9 py-1 max-h-28 overflow-y-auto",
             styleClasses?.tagList?.container,
           )}
         >
@@ -124,7 +124,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
             onKeyDown={handleInputKeyDown}
             placeholder={placeholder}
             className={cn(
-              "flex-1 border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0",
+              "flex-1 min-w-[120px] border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0",
               styleClasses?.input,
             )}
             disabled={disabled}

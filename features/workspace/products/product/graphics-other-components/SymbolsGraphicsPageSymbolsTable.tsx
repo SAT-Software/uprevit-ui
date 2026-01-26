@@ -213,10 +213,12 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentImage",
     header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
-    cell: ({ row }) =>
-      row.original.componentImage ? (
+    cell: ({ row }) => {
+      const image = row.original.componentImage;
+      const hasImage = typeof image === "string" && image.trim() !== "";
+      return hasImage ? (
         <Image
-          src={row.original.componentImage}
+          src={image}
           alt={row.original.componentName}
           width={48}
           height={48}
@@ -226,7 +228,8 @@ const columns: ColumnDef<Item>[] = [
         <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
           <PiImageDuotone className="w-full h-full p-2" />
         </div>
-      ),
+      );
+    },
     size: 80,
   },
   {
@@ -563,25 +566,30 @@ export default function SymbolsGraphicsPageSymbolsTable({
                       <TableRow>
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <div className="flex flex-col items-center py-4">
-                            {row.original.componentImage ? (
-                              <Image
-                                src={row.original.componentImage}
-                                alt={row.original.componentName}
-                                width={200}
-                                height={200}
-                                className="rounded mb-3"
-                                style={{
-                                  width: "70%",
-                                  height: "auto",
-                                  maxWidth: 280,
-                                }}
-                                priority={true}
-                              />
-                            ) : (
-                              <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
-                                <PiImageDuotone className="w-full h-full p-2" />
-                              </div>
-                            )}
+                            {(() => {
+                              const image = row.original.componentImage;
+                              const hasImage =
+                                typeof image === "string" && image.trim() !== "";
+                              return hasImage ? (
+                                <Image
+                                  src={image}
+                                  alt={row.original.componentName}
+                                  width={200}
+                                  height={200}
+                                  className="rounded mb-3"
+                                  style={{
+                                    width: "70%",
+                                    height: "auto",
+                                    maxWidth: 280,
+                                  }}
+                                  priority={true}
+                                />
+                              ) : (
+                                <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
+                                  <PiImageDuotone className="w-full h-full p-2" />
+                                </div>
+                              );
+                            })()}
                           </div>
                         </TableCell>
                       </TableRow>

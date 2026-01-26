@@ -511,217 +511,207 @@ export default function LabelTagsTabs({
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          {filteredLabelTypesForTabs.map((type) => {
-            const currentTabData = labelTagsData.filter(
-              (item: LabelTagItem) => item.type === type,
-            );
-            return currentTabData.map((item: LabelTagItem, i) => {
-              const originalIndex = labelTagsData.findIndex(
-                (d) => d._id === item._id,
+          <div className="flex flex-col gap-10">
+            {filteredLabelTypesForTabs.map((type) => {
+              const currentTabData = labelTagsData.filter(
+                (item: LabelTagItem) => item.type === type,
               );
-              const itemStatus = getItemStatus(item, originalIndex);
-              const isRemoved = itemStatus === "removed";
-              const isAdded = itemStatus === "added";
-              const isModified = itemStatus === "modified";
+              return currentTabData.map((item: LabelTagItem, i) => {
+                const originalIndex = labelTagsData.findIndex(
+                  (d) => d._id === item._id,
+                );
+                const itemStatus = getItemStatus(item, originalIndex);
+                const isRemoved = itemStatus === "removed";
+                const isAdded = itemStatus === "added";
+                const isModified = itemStatus === "modified";
 
-              const nameDiff = getDiff(originalIndex, "name");
-              const descriptionDiff = getDiff(originalIndex, "description");
-              const imageDiff = getDiff(originalIndex, "image");
+                const nameDiff = getDiff(originalIndex, "name");
+                const descriptionDiff = getDiff(originalIndex, "description");
+                const imageDiff = getDiff(originalIndex, "image");
 
-              return (
-                <TabsContent key={`${i}-${type}`} value={type}>
-                  <div
-                    className={cn(
-                      "w-full shadow-none transition-all duration-200",
-                      isRedlineView &&
-                        isRemoved &&
-                        "border-red-500/50 bg-red-100/5 opacity-60",
-                      isRedlineView &&
-                        isAdded &&
-                        "border-blue-500/50 bg-blue-100/5",
-                      isRedlineView &&
-                        isModified &&
-                        "border-amber-500/50 bg-amber-100/10",
-                      !isRedlineView || !itemStatus ? "border-border" : "",
-                    )}
-                  >
-                    <div className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div
-                            className={cn(
-                              "text-sm font-semibold flex items-center gap-2",
-                              isRedlineView &&
-                                isRemoved &&
-                                "line-through text-red-500/70",
-                            )}
-                          >
-                            {isRedlineView && nameDiff ? (
-                              <RedlineValue
-                                value={item.name || "Untitled Label"}
-                                diff={nameDiff}
-                              />
-                            ) : (
-                              item.name || "Untitled Label"
-                            )}
-                            <span className="text-sm font-normal text-muted-foreground">
-                              -
-                            </span>
-                            <span
+                return (
+                  <TabsContent key={`${i}-${type}`} value={type}>
+                    <div
+                      className={cn(
+                        "w-full shadow-none transition-all duration-200 mb-4 last:mb-0",
+                        isRedlineView &&
+                          isRemoved &&
+                          "border-red-500/50 bg-red-100/5 opacity-60",
+                        isRedlineView &&
+                          isAdded &&
+                          "border-blue-500/50 bg-blue-100/5",
+                        isRedlineView &&
+                          isModified &&
+                          "border-amber-500/50 bg-amber-100/10",
+                        !isRedlineView || !itemStatus ? "border-border" : "",
+                      )}
+                    >
+                      <div className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div
                               className={cn(
-                                "text-sm font-normal text-muted-foreground",
+                                "text-sm font-semibold flex items-center gap-2",
                                 isRedlineView &&
                                   isRemoved &&
                                   "line-through text-red-500/70",
                               )}
                             >
-                              {isRedlineView && descriptionDiff ? (
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground bg-muted/60 border border-border/60 px-2 py-0.5 rounded-full">
+                                Label {i + 1}
+                              </span>
+                              {isRedlineView && nameDiff ? (
                                 <RedlineValue
-                                  value={item.description || ""}
-                                  diff={descriptionDiff}
+                                  value={item.name || "Untitled Label"}
+                                  diff={nameDiff}
                                 />
                               ) : (
-                                item.description
+                                item.name || "Untitled Label"
                               )}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {/* <Badge variant="secondary" className="text-xs">
+                              <span className="text-sm font-normal text-muted-foreground">
+                                -
+                              </span>
+                              <span
+                                className={cn(
+                                  "text-sm font-normal text-muted-foreground",
+                                  isRedlineView &&
+                                    isRemoved &&
+                                    "line-through text-red-500/70",
+                                )}
+                              >
+                                {isRedlineView && descriptionDiff ? (
+                                  <RedlineValue
+                                    value={item.description || ""}
+                                    diff={descriptionDiff}
+                                  />
+                                ) : (
+                                  item.description
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {/* <Badge variant="secondary" className="text-xs">
                               {item.type || "Unknown Type"}
                             </Badge> */}
-                            {isRedlineView && isAdded && (
-                              <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
-                                NEW
-                              </span>
-                            )}
-                            {isRedlineView && isRemoved && (
-                              <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
-                                REMOVED
-                              </span>
-                            )}
-                            {isRedlineView && isModified && (
-                              <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
-                                MODIFIED
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        {!isRedlineView && (
-                          <div className="flex items-center gap-2">
-                            <DialogEditLabelTag
-                              productId={productId}
-                              labelTag={item}
-                              isSubmitted={isSubmitted}
-                            />
-                            <DialogDeleteLabelTag
-                              productId={productId}
-                              labelTag={item}
-                              isSubmitted={isSubmitted}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-start">
-                          {isRedlineView && imageDiff ? (
-                            <div className="relative w-full max-w-md">
-                              <RedlineValue
-                                value={item.image || ""}
-                                diff={imageDiff}
-                                isImage={true}
-                              />
-                            </div>
-                          ) : item.image ? (
-                            // <div className="relative w-full max-w-md">
-                            //   <div
-                            //     className={cn(
-                            //       "aspect-square relative overflow-hidden rounded-lg border bg-muted",
-                            //       isRedlineView && isRemoved
-                            //         ? "border-red-300 opacity-60"
-                            //         : isRedlineView && isAdded
-                            //         ? "border-blue-300"
-                            //         : "border-border"
-                            //     )}
-                            //   >
-                            //     <Image
-                            //       src={item.image}
-                            //       alt={item.name || "label image"}
-                            //       fill
-                            //       className="object-cover"
-                            //       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            //     />
-                            //   </div>
-                            // </div>
-                            // <EditorLabelTag
-                            //   targetImage={item.image}
-                            //   onSave={handleSave}
-                            // />
-                            <Editor
-                              targetImageSrc={item.image}
-                              annotation={
-                                currentEditorState[item._id] ??
-                                savedAnnotations[item._id] ??
-                                item.annotation_state ??
-                                annotations[item._id] ??
-                                null
-                              }
-                              onSave={(newAnnotation) => {
-                                handleSave(
-                                  item._id,
-                                  item.image!,
-                                  newAnnotation,
-                                );
-                              }}
-                              onStateChange={(newAnnotation) => {
-                                handleStateChange(item._id, newAnnotation);
-                              }}
-                            />
-                          ) : (
-                            <div
-                              className={cn(
-                                "flex flex-col items-center justify-center p-12 text-muted-foreground rounded-lg border border-dashed w-full max-w-md",
-                                isRedlineView && isRemoved
-                                  ? "border-red-300 bg-red-50/30 opacity-60"
-                                  : isRedlineView && isAdded
-                                    ? "border-blue-300 bg-blue-50/30"
-                                    : "bg-muted/50 border-border",
+                              {isRedlineView && isAdded && (
+                                <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                                  NEW
+                                </span>
                               )}
-                            >
-                              <PiImageDuotone className="w-12 h-12 mb-3 opacity-50" />
-                              <p className="text-sm font-medium">
-                                No Image Available
-                              </p>
-                              <p className="text-xs text-center mt-1">
-                                Add an image to better visualize this label
-                              </p>
+                              {isRedlineView && isRemoved && (
+                                <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                                  REMOVED
+                                </span>
+                              )}
+                              {isRedlineView && isModified && (
+                                <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                                  MODIFIED
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {!isRedlineView && (
+                            <div className="flex items-center gap-2">
+                              <DialogEditLabelTag
+                                productId={productId}
+                                labelTag={item}
+                                isSubmitted={isSubmitted}
+                              />
+                              <DialogDeleteLabelTag
+                                productId={productId}
+                                labelTag={item}
+                                isSubmitted={isSubmitted}
+                              />
                             </div>
                           )}
                         </div>
                       </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-start">
+                            {isRedlineView && imageDiff ? (
+                              <div className="relative w-full max-w-md">
+                                <RedlineValue
+                                  value={item.image || ""}
+                                  diff={imageDiff}
+                                  isImage={true}
+                                />
+                              </div>
+                            ) : item.image ? (
+                              // <div className="relative w-full max-w-md">
+                              //   <div
+                              //     className={cn(
+                              //       "aspect-square relative overflow-hidden rounded-lg border bg-muted",
+                              //       isRedlineView && isRemoved
+                              //         ? "border-red-300 opacity-60"
+                              //         : isRedlineView && isAdded
+                              //         ? "border-blue-300"
+                              //         : "border-border"
+                              //     )}
+                              //   >
+                              //     <Image
+                              //       src={item.image}
+                              //       alt={item.name || "label image"}
+                              //       fill
+                              //       className="object-cover"
+                              //       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              //     />
+                              //   </div>
+                              // </div>
+                              // <EditorLabelTag
+                              //   targetImage={item.image}
+                              //   onSave={handleSave}
+                              // />
+                              <Editor
+                                targetImageSrc={item.image}
+                                annotation={
+                                  currentEditorState[item._id] ??
+                                  savedAnnotations[item._id] ??
+                                  item.annotation_state ??
+                                  annotations[item._id] ??
+                                  null
+                                }
+                                onSave={(newAnnotation) => {
+                                  handleSave(
+                                    item._id,
+                                    item.image!,
+                                    newAnnotation,
+                                  );
+                                }}
+                                onStateChange={(newAnnotation) => {
+                                  handleStateChange(item._id, newAnnotation);
+                                }}
+                              />
+                            ) : (
+                              <div
+                                className={cn(
+                                  "flex flex-col items-center justify-center p-12 text-muted-foreground rounded-lg border border-dashed w-full max-w-md",
+                                  isRedlineView && isRemoved
+                                    ? "border-red-300 bg-red-50/30 opacity-60"
+                                    : isRedlineView && isAdded
+                                      ? "border-blue-300 bg-blue-50/30"
+                                      : "bg-muted/50 border-border",
+                                )}
+                              >
+                                <PiImageDuotone className="w-12 h-12 mb-3 opacity-50" />
+                                <p className="text-sm font-medium">
+                                  No Image Available
+                                </p>
+                                <p className="text-xs text-center mt-1">
+                                  Add an image to better visualize this label
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </TabsContent>
-              );
-            });
-          })}
-          {/* {filteredLabelTypesForTabs.map((type) => {
-            const currentTabData = labelTagsData.filter(
-              (item: LabelTagItem) => item.type === type
-            );
-
-            return currentTabData.map((item: LabelTagItem, i) => {
-              if (!item.image) {
-                return null;
-              }
-              return (
-                <EditorLabelTag targetImage={item.image} onSave={handleSave} />
-              );
-            });
-          })} */}
-
+                  </TabsContent>
+                );
+              });
+            })}
+          </div>
           {renderItem && annotations[renderItem.id] && (
             <Render
               targetImage={renderItem.image}

@@ -1,4 +1,7 @@
-export const formatToLocalDate = (isoDate: string) => {
+export const formatToLocalDate = (isoDate?: string | null) => {
+  if (!isoDate) {
+    return "";
+  }
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) {
     return isoDate;
@@ -9,7 +12,10 @@ export const formatToLocalDate = (isoDate: string) => {
   }).format(date);
 };
 
-export const formatToLocalDateTime = (isoDate: string) => {
+export const formatToLocalDateTime = (isoDate?: string | null) => {
+  if (!isoDate) {
+    return "";
+  }
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) {
     return isoDate;

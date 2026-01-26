@@ -30,6 +30,7 @@ import {
   PiCheckCircleDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
+import { Spinner } from "@/components/ui/spinner";
 
 type Item = {
   id: string;
@@ -273,10 +274,11 @@ export default function EditSchematicsDialog({
             type="button"
             size="sm"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={isPending || uploadingImage}
+            aria-busy={isPending || uploadingImage}
             variant="default"
           >
-            <PiCheckCircleDuotone />
+            {isPending || uploadingImage ? <Spinner /> : <PiCheckCircleDuotone />}
             {isPending
               ? "Updating..."
               : uploadingImage
