@@ -8,8 +8,6 @@ import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import {
   PiCalendarDuotone,
   PiKanbanDuotone,
-  PiCaretRightDuotone,
-  PiHouseDuotone,
   PiBuildingsDuotone,
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
@@ -19,7 +17,6 @@ import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { Item } from "@/features/workspace/projects/ProjectPageProductsTable";
 import { AuditLog } from "@/types/audit-log";
 import UpdateProjectDialog from "@/features/workspace/projects/UpdateProjectDialog";
-import Link from "next/link";
 
 interface ProjectUser {
   _id: string;
@@ -38,21 +35,12 @@ export default function ProjectDetailPage() {
   const project = data?.project;
   const products =
     productsData?.result?.products?.filter(
-      (p: Item) => p.project_id === projectId
+      (p: Item) => p.project_id === projectId,
     ) || [];
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
-        {/* Breadcrumbs Skeleton */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-          <div className="h-4 w-4 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-16 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-32 bg-background rounded animate-pulse" />
-        </div>
-
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           {/* Header Section Skeleton */}
           <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
@@ -121,7 +109,7 @@ export default function ProjectDetailPage() {
   const latestUpdateLog = auditLogs
     .filter((log) => log.action === "update")
     .sort(
-      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0];
 
   const formatAuditDate = (isoDate: string) => {
@@ -138,27 +126,6 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
-      {/* Breadcrumbs */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-        <Link
-          href="/dashboard"
-          className="hover:text-foreground transition-colors flex items-center"
-        >
-          <PiHouseDuotone className="w-4 h-4" />
-        </Link>
-        <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-        <Link
-          href="/projects"
-          className="hover:text-foreground transition-colors"
-        >
-          Projects
-        </Link>
-        <PiCaretRightDuotone className="w-3 h-3 text-muted-foreground/50" />
-        <span className="text-foreground font-medium truncate max-w-[200px]">
-          {project.project_name}
-        </span>
-      </div>
-
       <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
@@ -285,7 +252,7 @@ export default function ProjectDetailPage() {
                   No products found
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  This project doesn't have any products yet.
+                  This project doesn&apos;t have any products yet.
                 </p>
               </div>
             )}
