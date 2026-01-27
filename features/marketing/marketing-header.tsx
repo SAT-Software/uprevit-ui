@@ -168,7 +168,7 @@ export default function MarketingHeader() {
                   asChild
                   className={navigationMenuTriggerStyle()}
                 >
-                  <Link href="/docs">Contact</Link>
+                  <Link href="/contact">Contact</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
