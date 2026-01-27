@@ -2,10 +2,14 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { PiNewspaperDuotone, PiArrowRightDuotone, PiCalendarDuotone } from "react-icons/pi";
+import {
+  PiArrowRightDuotone,
+  PiCalendarDuotone,
+  PiNewspaperDuotone,
+} from "react-icons/pi";
 
 const blogPosts = [
   {
@@ -49,6 +53,13 @@ const newsUpdates = [
   },
 ];
 
+const focusAreas = [
+  "FDA updates",
+  "EU MDR shifts",
+  "ISO standards",
+  "Labeling operations",
+];
+
 export default function BlogsSection() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -58,90 +69,171 @@ export default function BlogsSection() {
   }, []);
 
   const badgeVariant = mounted && resolvedTheme === "dark" ? "outline" : "white";
+  const featuredPost = blogPosts[0];
+  const latestPosts = blogPosts.slice(1);
 
   return (
-    <div className="w-full mt-10 mb-20 pointer-events-auto">
-      {/* Part 1: Navigate Compliance with Clarity */}
-      <div className="max-w-6xl mx-auto mb-16 px-4">
-        <Badge variant={badgeVariant} className="mb-8 z-60 dark:px-2 dark:py-0.5">
+    <div className="w-full mt-12 mb-24 pointer-events-auto">
+      <div className="max-w-6xl mx-auto mb-12 px-4">
+        <Badge
+          variant={badgeVariant}
+          className="mb-8 z-60 dark:px-2 dark:py-0.5"
+        >
+          <PiNewspaperDuotone className="text-foreground/60" />
           <span className="font-medium">Blogs</span>
         </Badge>
-        <div className="w-full flex flex-col md:flex-row items-start gap-4 mb-6">
-          <h2 className="text-4xl md:text-5xl font-medium">
-            Navigate Compliance with Clarity and Confidence
+        <div className="w-full flex flex-col lg:flex-row items-start gap-8">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-medium leading-tight">
+            Insights for labeling leaders who need clarity fast
           </h2>
+          <div className="hidden lg:block h-24 w-px bg-border" />
+          <p className="text-lg text-muted-foreground max-w-md">
+            Clear, concise analysis of the regulatory shifts that matter most.
+            Stay ahead of enforcement changes with practical guidance you can
+            act on.
+          </p>
         </div>
-        <p className="text-lg text-muted-foreground max-w-3xl mb-8">
-          The medical device landscape is constantly evolving, making compliant labeling a continuous
-          challenge. Our blog and news section provides clear, expert analysis of the latest regulatory
-          shifts, giving you the critical knowledge to make informed decisions and stay ahead of
-          enforcement.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {blogPosts.map((post, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline">{post.category}</Badge>
-                </div>
-                <CardTitle className="text-lg leading-tight">{post.title}</CardTitle>
-                <CardDescription className="flex items-center gap-1 mt-2">
-                  <PiCalendarDuotone className="w-4 h-4" />
-                  {post.date}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base mb-4">
-                  {post.excerpt}
-                </CardDescription>
-                <Button variant="link" className="px-0">
-                  Read More
-                  <PiArrowRightDuotone className="w-4 h-4 ml-1" />
-                </Button>
-              </CardContent>
-            </Card>
+        <div className="mt-6 flex flex-wrap gap-2">
+          {focusAreas.map((area) => (
+            <Badge key={area} variant="outline" className="text-xs">
+              {area}
+            </Badge>
           ))}
+        </div>
+        <div className="mt-8 flex flex-wrap items-center gap-4">
+          <Button size="lg">Subscribe for updates</Button>
+          <Button size="lg" variant="outline">
+            See all posts
+          </Button>
         </div>
       </div>
 
-      {/* Part 2: Decoding Regulatory Change */}
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="border-t pt-16">
-          <div className="w-full flex flex-col md:flex-row items-start gap-4 mb-6">
-            <h2 className="text-4xl md:text-5xl font-medium">
-              Decoding Regulatory Change
-            </h2>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-3xl mb-8">
-            Compliance is complex, but understanding it shouldn&apos;t be. We break down the latest
-            regulatory announcements from bodies worldwide, transforming complicated rules into clear,
-            actionable steps for your labeling teams. Get the crucial intelligence you need to
-            future-proof your product documentation.
-          </p>
+      <div className="relative w-full mb-16">
+        <div className="max-w-6xl mx-auto relative px-4">
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-15 -left-15"
+            rotation={180}
+          />
+          <DecorativeCornerCircleCustom
+            positionClassName="-bottom-7.5 -right-22.5"
+            rotation={90}
+          />
+          <DecorativeCornerCircleCustom
+            positionClassName="-top-15 -right-15"
+            rotation={90}
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {newsUpdates.map((news, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary">{news.source}</Badge>
+          <div className="p-1 bg-accent border-border border rounded-[12px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1">
+              <div className="lg:col-span-2 rounded-[10px] border border-border bg-foreground text-background p-6">
+                <div className="flex items-center justify-between">
+                  <Badge
+                    variant="outline"
+                    className="border-background/40 text-background/80"
+                  >
+                    {featuredPost.category}
+                  </Badge>
+                  <span className="text-xs text-background/70">
+                    Featured
+                  </span>
+                </div>
+                <h3 className="mt-4 text-2xl font-semibold leading-tight">
+                  {featuredPost.title}
+                </h3>
+                <p className="mt-3 text-sm text-background/80">
+                  {featuredPost.excerpt}
+                </p>
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs text-background/70">
+                    <PiCalendarDuotone className="size-4" />
+                    {featuredPost.date}
                   </div>
-                  <CardTitle className="text-lg leading-tight">{news.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-1 mt-2">
-                    <PiCalendarDuotone className="w-4 h-4" />
-                    {news.date}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base mb-4">
-                    {news.excerpt}
-                  </CardDescription>
-                  <Button variant="outline" size="sm">
-                    Read Full Article
+                  <Button
+                    variant="outline"
+                    className="border-background/40 text-background hover:bg-background hover:text-foreground"
+                  >
+                    Read featured story
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-border bg-background/80 p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Latest posts</h3>
+                  <Badge variant="outline" className="text-xs">
+                    Updated weekly
+                  </Badge>
+                </div>
+                <div className="mt-4 space-y-4">
+                  {latestPosts.map((post) => (
+                    <div
+                      key={post.title}
+                      className="rounded-lg border border-border p-4 transition-colors hover:bg-accent/40"
+                    >
+                      <Badge variant="outline" className="text-xs">
+                        {post.category}
+                      </Badge>
+                      <h4 className="mt-2 text-base font-semibold leading-snug">
+                        {post.title}
+                      </h4>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {post.excerpt}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {post.date}
+                        </span>
+                        <Button variant="link" className="px-0 text-sm">
+                          Read more
+                          <PiArrowRightDuotone className="ml-1 size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex flex-col lg:flex-row items-start gap-8 mb-8">
+          <h2 className="text-3xl md:text-4xl font-medium">
+            Regulatory briefings in plain language
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            We distill complex announcements into clear, actionable steps. Use
+            these briefings to align your labeling roadmap with upcoming
+            enforcement timelines.
+          </p>
+        </div>
+        <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+            {newsUpdates.map((news) => (
+              <div
+                key={news.title}
+                className="rounded-[10px] border border-border bg-background/80 p-6 transition-colors hover:bg-accent/40"
+              >
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary" className="text-xs">
+                    {news.source}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {news.date}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-lg font-semibold leading-tight">
+                  {news.title}
+                </h3>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {news.excerpt}
+                </p>
+                <Button variant="outline" size="sm" className="mt-4">
+                  Read full briefing
+                </Button>
+              </div>
             ))}
           </div>
         </div>

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react";
 import {
   PiFileTextDuotone,
   PiSquaresFourDuotone,
@@ -22,7 +21,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import Image from "next/image";
 
@@ -58,6 +57,9 @@ export default function MarketingHeader() {
   const auth = useAuth();
   const router = useRouter();
   const [isAtTop, setIsAtTop] = React.useState(true);
+  const pathname = usePathname();
+
+  const isResourcesAndChildPaths = pathname.startsWith("/resources");
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -79,7 +81,8 @@ export default function MarketingHeader() {
     <div
       className={cn(
         "fixed top-0 w-full h-18 mx-auto flex items-center justify-between z-60 transition-all delay-150 ease-in-out duration-300",
-        !isAtTop ? "bg-accent/80 border-b" : "bg-transparent"
+        !isAtTop ? "bg-accent/80 border-b" : "bg-transparent",
+        isResourcesAndChildPaths && "border-b border-dashed border-border/80",
       )}
       style={{
         backdropFilter: !isAtTop ? "blur(8px)" : "none",
@@ -145,30 +148,19 @@ export default function MarketingHeader() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Pricing</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    <ListItem href="/pricing" title="Pricing Plans">
-                      Flexible pricing options for teams of all sizes.
-                    </ListItem>
-                    <ListItem href="/pricing#enterprise" title="Enterprise">
-                      Custom solutions for large organizations.
-                    </ListItem>
-                    <ListItem href="/pricing#faq" title="FAQ">
-                      Answers to common pricing questions.
-                    </ListItem>
-                    <ListItem href="/contact" title="Contact Sales">
-                      Get in touch for personalized pricing quotes.
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link href="/pricing">Pricing</Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild
                   className={navigationMenuTriggerStyle()}
                 >
-                  <Link href="/docs">Contact</Link>
+                  <Link href="/contact">Contact</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -212,7 +204,7 @@ function ListItem({
       <NavigationMenuLink asChild>
         <Link href={href} className="flex flex-row items-center gap-3">
           {Icon && (
-            <div className="flex-shrink-0 flex items-center justify-center size-10 rounded-lg bg-accent mt-0.5">
+            <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-accent mt-0.5">
               <Icon className="size-5 text-foreground" />
             </div>
           )}
