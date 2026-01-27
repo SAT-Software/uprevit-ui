@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,7 +61,7 @@ export default function CreateDepartmentDialog() {
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
-  const isAdmin = auth.user?.profile?.userType === "admin";
+  const isAdmin = isAdminProfile(auth.user?.profile);
   const users = usersData?.data;
 
   const {

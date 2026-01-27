@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import { useId, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
@@ -78,7 +79,7 @@ export default function UpdateDepartmentDialog({
 
   const { mutate: updateDepartment, isPending } = useUpdateDepartment();
   const auth = useAuth();
-  const isAdmin = auth.user?.profile?.userType === "admin";
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   const {
     register,

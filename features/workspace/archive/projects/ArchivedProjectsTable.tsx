@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import {
   Column,
   ColumnDef,
@@ -125,7 +126,7 @@ export function ArchivedProjectsTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const auth = useAuth();
-  const isAdmin = auth.user?.profile?.userType === "admin";
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   const handleRestore = (item: ProjectArchiveRow) => {
     if (!isAdmin) {

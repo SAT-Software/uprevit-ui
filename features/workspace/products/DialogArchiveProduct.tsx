@@ -19,6 +19,9 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { toast } from "sonner";
 
 type ArchiveProductProps = Pick<Product, "_id">;
 
@@ -35,9 +38,15 @@ export default function DialogArchiveProduct({
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const { mutate: archiveProduct, isPending } = useUpdateProduct();
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   async function handleArchiveProduct(e: React.MouseEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
     if (!product?._id) return;
 
     try {
@@ -135,7 +144,17 @@ export default function DialogArchiveProduct({
     <Dialog open={internalOpen} onOpenChange={setInternalOpen}>
       <DialogTrigger asChild>
         {children || (
-          <div className="focus:bg-accent hover:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none">
+          <div
+            className="focus:bg-accent hover:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none"
+            onClick={(e) => {
+              if (!isAdmin) {
+                e.preventDefault();
+                e.stopPropagation();
+                toast.error("Insufficient privileges, contact Admin");
+                return;
+              }
+            }}
+          >
             <PiArchiveDuotone className="h-4 w-4 text-muted-foreground" />
             <span>Archive</span>
           </div>

@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,7 +33,7 @@ export default function AddUsersInProjectDropdown({
   users = [],
 }: AddUsersInProjectDropdownProps) {
   const auth = useAuth();
-  const isAdmin = auth.user?.profile?.userType === "admin";
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   const handleUserClick = (user: User) => {
     if (!isAdmin) {

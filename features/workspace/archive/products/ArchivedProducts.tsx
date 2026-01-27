@@ -9,6 +9,9 @@ import {
 import { RestoreEntityDialog } from "@/features/workspace/archive/RestoreEntityDialog";
 import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { toast } from "sonner";
 
 export type ArchivedProductsProps = {
   onRowClick?: (row: ProductArchiveRow) => void;
@@ -17,12 +20,18 @@ export type ArchivedProductsProps = {
 export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
   const { data: archivedProducts } = useGetArchivedProducts();
   const { mutate: updateProductStatus, isPending } = useUpdateProduct();
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
 
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [selectedItemToRestore, setSelectedItemToRestore] =
     useState<ProductArchiveRow | null>(null);
 
   const handleRestoreClick = (row: ProductArchiveRow) => {
+    if (!isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
     setSelectedItemToRestore(row);
     setRestoreDialogOpen(true);
   };
