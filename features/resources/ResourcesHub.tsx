@@ -9,6 +9,7 @@ import {
   PiBookOpenDuotone,
   PiFilesDuotone,
   PiNewspaperDuotone,
+  PiStackDuotone,
   PiWrenchDuotone,
 } from "react-icons/pi";
 
@@ -87,12 +88,14 @@ export default function ResourcesHub() {
   const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
 
   return (
-    <div className="w-full mt-16 mb-24 pointer-events-auto">
+    <div className="w-full mt-16 mb-24 pointer-events-auto relative">
+      <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
       <div className="max-w-6xl mx-auto mb-10">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
+          <PiStackDuotone className="text-foreground/60" />
           <span className="font-medium">Resources</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">

@@ -7,6 +7,7 @@ import {
   PiSquaresFourDuotone,
   PiNewspaperDuotone,
   PiWrenchDuotone,
+  PiStackDuotone,
 } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
@@ -125,7 +126,10 @@ export default function MarketingHeader() {
                           className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
                           href="/resources"
                         >
-                          <div className="mb-2 text-lg font-medium sm:mt-4">
+                          <div className="mb-3 flex size-10 items-center justify-center rounded-lg border border-border bg-background/80">
+                            <PiStackDuotone className="size-5 text-foreground" />
+                          </div>
+                          <div className="mb-2 text-lg font-medium">
                             Resources Hub
                           </div>
                           <p className="text-muted-foreground text-sm leading-tight">

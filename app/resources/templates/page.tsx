@@ -11,7 +11,7 @@ export default function TemplatesPage() {
       <MarketingHeader />
       <div className="relative w-full">
         <DottedVerticalLines />
-        <div className="relative z-10 w-full pt-32">
+        <div className="relative z-10 w-full pt-24">
           <TemplatesSection />
         </div>
         <div className="relative z-35 w-full">
