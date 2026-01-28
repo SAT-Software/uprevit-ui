@@ -61,6 +61,10 @@ export default function MarketingHeader() {
   const pathname = usePathname();
 
   const isResourcesAndChildPaths = pathname.startsWith("/resources");
+  const isDecoratedMarketingPage =
+    isResourcesAndChildPaths ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/contact");
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -83,7 +87,7 @@ export default function MarketingHeader() {
       className={cn(
         "fixed top-0 w-full h-18 mx-auto flex items-center justify-between z-60 transition-all delay-150 ease-in-out duration-300",
         !isAtTop ? "bg-accent/80 border-b" : "bg-transparent",
-        isResourcesAndChildPaths && "border-b border-dashed border-border/80",
+        isDecoratedMarketingPage && "border-b border-dashed border-border/80"
       )}
       style={{
         backdropFilter: !isAtTop ? "blur(8px)" : "none",

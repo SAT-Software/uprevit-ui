@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 
@@ -39,8 +40,27 @@ export default function CTASection() {
                   <Button size="lg">Get Started</Button>
                 </div>
               </div>
-              <div className="w-full">
-                TODO: Here we need to add some image from the app
+              <div className="w-full flex justify-center md:justify-end">
+                <div className="relative w-[300px] sm:w-[360px] md:w-[420px] lg:w-[480px]">
+                  <div className="absolute -bottom-10 -left-6 h-40 w-56 rounded-full bg-accent/30 blur-3xl" />
+                  <div
+                    className="relative overflow-hidden rounded-2xl border border-border/40 bg-background/5 shadow-[0_45px_110px_-70px_rgba(0,0,0,0.95)]"
+                    style={{
+                      transform:
+                        "perspective(1400px) rotateX(30deg) rotateY(-10deg) rotateZ(-18deg)",
+                      transformOrigin: "center",
+                    }}
+                  >
+                    <Image
+                      src="/features/feature-3.png"
+                      alt="Uprevit compliance workspace preview"
+                      width={1200}
+                      height={800}
+                      className="h-auto w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(255,255,255,0.08),_transparent_55%)]" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
