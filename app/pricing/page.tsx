@@ -176,15 +176,16 @@ export default function PricingPage() {
                         Engage our team for compliance validation, security
                         reviews, and integration scope.
                       </p>
-                      <Link href="mailto:contact@uprevit.com">
-                        <Button
-                          variant="secondary"
-                          className="mt-6 h-12 w-full rounded-xl text-base"
-                        >
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className="mt-6 h-12 w-full rounded-xl text-base"
+                      >
+                        <Link href="mailto:contact@uprevit.com">
                           Talk to Sales
                           <PiArrowRightDuotone className="ml-2 h-4 w-4" />
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
                           "Dedicated success and compliance onboarding",
@@ -270,18 +271,18 @@ export default function PricingPage() {
                         </div>
                       </div>
                       <div className="mt-8 flex flex-wrap items-center gap-2">
-                        <Link href="/resources/templates">
-                          <Button size="lg" variant="outline">
+                        <Button asChild size="lg" variant="outline">
+                          <Link href="/resources/templates">
                             <PiFilesDuotone />
                             View Templates
-                          </Button>
-                        </Link>
-                        <Link href="/resources">
-                          <Button size="lg">
+                          </Link>
+                        </Button>
+                        <Button asChild size="lg">
+                          <Link href="/resources">
                             <PiStackDuotone />
                             Explore Resources
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                       </div>
                       <p className="mt-3 text-xs text-muted-foreground">
                         Built for FDA UDI, EU MDR, and global labeling rollouts.
