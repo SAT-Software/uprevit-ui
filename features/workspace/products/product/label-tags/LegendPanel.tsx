@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -80,8 +79,7 @@ export function LegendPanel({
         },
       });
       return true;
-    } catch (error) {
-      toast.error("Failed to update legend");
+    } catch {
       return false;
     }
   };
