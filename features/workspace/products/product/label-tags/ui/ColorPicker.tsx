@@ -3,6 +3,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { defaultColors } from "@/types/colors";
 import { FC, SVGProps } from "react";
+import { cn } from "@/lib/utils";
 
 const ColorSampleVisual: FC<SVGProps<SVGSVGElement>> = (props) => (
   <svg
@@ -60,22 +61,37 @@ type Props = {
   color: string;
   colors?: string[];
   onValueChange: (color: string) => void;
+  className?: string;
+  itemClassName?: string;
+  size?: "default" | "sm" | "lg" | "icon-sm" | "icon-lg";
+  variant?: "default" | "outline";
 };
 
 const ColorPicker = ({
   color,
   colors = defaultColors,
   onValueChange,
+  className,
+  itemClassName,
+  size,
+  variant,
 }: Props) => {
   return (
     <ToggleGroup
       type="single"
       value={color}
       onValueChange={(v) => v && v !== color && onValueChange(v)}
-      className="flex flex-wrap justify-start max-w-48"
+      size={size}
+      variant={variant}
+      className={cn("flex flex-wrap justify-start max-w-48", className)}
     >
       {colors.map((c) => (
-        <ToggleGroupItem key={c} value={c} title={c}>
+        <ToggleGroupItem
+          key={c}
+          value={c}
+          title={c}
+          className={cn(itemClassName)}
+        >
           {c !== "transparent" && <ColorSampleVisual fill={c} />}
           {c === "transparent" && <TransparentColorSampleVisual />}
         </ToggleGroupItem>
