@@ -43,6 +43,8 @@ import {
 } from "react-icons/pi";
 import EditorToolbar from "./EditorToolbar";
 import EditorToolbox from "./EditorToolbox";
+import { LegendOverlay } from "./LegendOverlay";
+import { LegendItem } from "./legendTypes";
 
 const markerTypes: MarkerTypeList = [
   {
@@ -146,6 +148,8 @@ type Props = {
   targetImageSrc: string;
   variant?: "ghost" | "outline" | "secondary";
   annotation: AnnotationState | null;
+  legendItems?: LegendItem[];
+  showLegendOverlay?: boolean;
   onSave?: (annotation: AnnotationState) => void;
   onStateChange?: (annotation: AnnotationState) => void;
 };
@@ -154,6 +158,8 @@ const Editor = ({
   targetImageSrc,
   variant = "secondary",
   annotation,
+  legendItems = [],
+  showLegendOverlay = false,
   onSave,
   onStateChange,
 }: Props) => {
@@ -400,10 +406,15 @@ const Editor = ({
           onNewMarker={handleNewMarker}
         />
       </div>
-      <div
-        ref={editorContainer}
-        className="flex overflow-hidden bg-slate-50 border-y border-border rounded-none **:bg-no-repeat"
-      ></div>
+      <div className="relative">
+        <div
+          ref={editorContainer}
+          className="flex overflow-hidden bg-slate-50 border-y border-border rounded-none **:bg-no-repeat"
+        ></div>
+        {showLegendOverlay && legendItems.length > 0 && (
+          <LegendOverlay items={legendItems} />
+        )}
+      </div>
       <div>
         <EditorToolbox
           variant={variant}

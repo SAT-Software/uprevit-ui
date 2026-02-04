@@ -10,6 +10,7 @@ import {
   PiCaretRightDuotone,
   PiTagDuotone,
 } from "react-icons/pi";
+import { LegendItem } from "@/features/workspace/products/product/label-tags/legendTypes";
 
 interface LabelTagItem {
   _id: string;
@@ -18,6 +19,7 @@ interface LabelTagItem {
   type?: string;
   image?: string;
   tagged_image?: string;
+  legend_items?: LegendItem[];
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
 }

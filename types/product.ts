@@ -85,6 +85,16 @@ export interface Product {
       description?: string;
       type?: string;
       image?: string;
+      legend_items?: Array<{
+        id: string;
+        shape: string;
+        strokeStyle?: string;
+        strokeColor?: string;
+        strokeWidth?: number;
+        fillColor?: string;
+        fillOpacity?: number;
+        text: string;
+      }>;
     }>;
     tab_completed?: boolean;
   };
@@ -236,6 +246,16 @@ export interface AllTabsData {
     description?: string;
     type?: string;
     image?: string;
+    legend_items?: Array<{
+      id: string;
+      shape: string;
+      strokeStyle?: string;
+      strokeColor?: string;
+      strokeWidth?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+      text: string;
+    }>;
   }>;
   auditLogs: AuditLog[];
 }

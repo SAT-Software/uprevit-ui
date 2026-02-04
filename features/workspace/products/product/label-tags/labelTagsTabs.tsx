@@ -18,6 +18,8 @@ import UnsavedAnnotationDialog from "./UnsavedAnnotationDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
 import { uploadFiles } from "@/utils/uploadthing";
 import { toast } from "sonner";
+import { LegendPanel } from "./LegendPanel";
+import { LegendItem } from "./legendTypes";
 
 interface LabelTagItem {
   _id: string;
@@ -27,6 +29,7 @@ interface LabelTagItem {
   image?: string;
   tagged_image?: string;
   annotation_state?: AnnotationState;
+  legend_items?: LegendItem[];
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
 }
@@ -58,8 +61,6 @@ export default function LabelTagsTabs({
     Record<string, AnnotationState>
   >({});
 
-  console.log("annotations", annotations);
-
   const [renderItem, setRenderItem] = useState<{
     id: string;
     image: string;
@@ -71,6 +72,10 @@ export default function LabelTagsTabs({
     annotation: AnnotationState;
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [legendOverlayById, setLegendOverlayById] = useState<
+    Record<string, boolean>
+  >({});
 
   // Dirty state tracking
   const [currentEditorState, setCurrentEditorState] = useState<
@@ -233,6 +238,13 @@ export default function LabelTagsTabs({
       }
     },
     [getCurrentItemId, isDirty],
+  );
+
+  const handleLegendOverlayToggle = useCallback(
+    (itemId: string, value: boolean) => {
+      setLegendOverlayById((prev) => ({ ...prev, [itemId]: value }));
+    },
+    [],
   );
 
   const handleUnsavedSave = async () => {
@@ -628,8 +640,8 @@ export default function LabelTagsTabs({
                       </div>
 
                       <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex justify-start">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                          <div className="flex-1 min-w-0">
                             {isRedlineView && imageDiff ? (
                               <div className="relative w-full max-w-md">
                                 <RedlineValue
@@ -639,30 +651,6 @@ export default function LabelTagsTabs({
                                 />
                               </div>
                             ) : item.image ? (
-                              // <div className="relative w-full max-w-md">
-                              //   <div
-                              //     className={cn(
-                              //       "aspect-square relative overflow-hidden rounded-lg border bg-muted",
-                              //       isRedlineView && isRemoved
-                              //         ? "border-red-300 opacity-60"
-                              //         : isRedlineView && isAdded
-                              //         ? "border-blue-300"
-                              //         : "border-border"
-                              //     )}
-                              //   >
-                              //     <Image
-                              //       src={item.image}
-                              //       alt={item.name || "label image"}
-                              //       fill
-                              //       className="object-cover"
-                              //       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              //     />
-                              //   </div>
-                              // </div>
-                              // <EditorLabelTag
-                              //   targetImage={item.image}
-                              //   onSave={handleSave}
-                              // />
                               <Editor
                                 targetImageSrc={item.image}
                                 annotation={
@@ -671,6 +659,10 @@ export default function LabelTagsTabs({
                                   item.annotation_state ??
                                   annotations[item._id] ??
                                   null
+                                }
+                                legendItems={item.legend_items ?? []}
+                                showLegendOverlay={
+                                  !!legendOverlayById[item._id]
                                 }
                                 onSave={(newAnnotation) => {
                                   handleSave(
@@ -704,6 +696,17 @@ export default function LabelTagsTabs({
                               </div>
                             )}
                           </div>
+
+                          <LegendPanel
+                            productId={productId}
+                            labelTagId={item._id}
+                            legendItems={item.legend_items ?? []}
+                            isEditable={!isSubmitted && !isRedlineView}
+                            overlayEnabled={!!legendOverlayById[item._id]}
+                            onOverlayToggle={(value) =>
+                              handleLegendOverlayToggle(item._id, value)
+                            }
+                          />
                         </div>
                       </div>
                     </div>
