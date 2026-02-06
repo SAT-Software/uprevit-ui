@@ -1,25 +1,21 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { SavedQuery, QueryCondition } from "@/types/reports";
 
 const LOCAL_STORAGE_KEY = "uprevit_reports_saved_queries";
 
 export function useSavedQueries() {
-  const [queries, setQueries] = useState<SavedQuery[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
+  const [queries, setQueries] = useState<SavedQuery[]>(() => {
+    if (typeof window === "undefined") return [];
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        setQueries(JSON.parse(stored));
-      }
+      return stored ? (JSON.parse(stored) as SavedQuery[]) : [];
     } catch (error) {
       console.error("Failed to load saved queries from localStorage:", error);
+      return [];
     }
-    setIsLoaded(true);
-  }, []);
+  });
 
   const saveQuery = useCallback(
     (
@@ -74,7 +70,6 @@ export function useSavedQueries() {
 
   return {
     queries,
-    isLoaded,
     saveQuery,
     deleteQuery,
     getQuery,

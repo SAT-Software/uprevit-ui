@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -35,7 +35,6 @@ import {
   PiPencilSimpleDuotone,
   PiXCircleDuotone,
   PiCheckCircleDuotone,
-  PiCubeDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
@@ -92,25 +91,29 @@ export default function EditComponentDialog({
   });
   const { mutate: updateComponent, isPending } = useUpdateProductTabData();
 
-  // Set form values when component data changes
-  useEffect(() => {
-    if (component && open) {
-      reset({
-        componentNumber: component.component_number,
-        componentDescription: component.component_description,
-        image: null,
-        labelType: [], // This will be handled by the state
-        dimensions: component.dimensions || "",
-        componentType: component.component_type || "",
-      });
-      setLabelType(
-        (component.label_type || []).map((text, index) => ({
-          id: index.toString(),
-          text,
-        }))
-      );
+  const syncFormWithComponent = () => {
+    reset({
+      componentNumber: component.component_number,
+      componentDescription: component.component_description,
+      image: null,
+      labelType: [],
+      dimensions: component.dimensions || "",
+      componentType: component.component_type || "",
+    });
+    setLabelType(
+      (component.label_type || []).map((text, index) => ({
+        id: index.toString(),
+        text,
+      }))
+    );
+  };
+
+  const handleDialogChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      syncFormWithComponent();
     }
-  }, [component, open, reset]);
+    onOpenChange(nextOpen);
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -162,7 +165,7 @@ export default function EditComponentDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">

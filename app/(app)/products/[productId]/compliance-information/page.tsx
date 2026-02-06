@@ -16,12 +16,25 @@ import DeleteStandardDialog from "@/features/workspace/products/product/complian
 import Link from "next/link";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { cn } from "@/lib/utils";
+import type { DiffItem } from "@/utils/deepDiff";
 
 interface ComplianceItem {
   _id: string;
   standard: string;
   standard_description: string;
 }
+
+type ComplianceItemWithDiff = ComplianceItem & {
+  _isFromDiff?: boolean;
+  _diffPath?: string;
+};
+
+type ComplianceTabsData = {
+  compliance_information?: { data?: ComplianceItem[] };
+  product_information?: {
+    product_data?: { data?: { status?: "draft" | "submitted" | "archived" } };
+  };
+};
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
@@ -39,7 +52,7 @@ export default function Page() {
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
 
-  const diffs = diffRedlineData?.result?.diffs || [];
+  const diffs = diffRedlineData?.result?.diffs ?? [];
 
   console.log("Compliance Redline Debug:", {
     isRedlineView,
@@ -50,7 +63,7 @@ export default function Page() {
 
   // Helper to find a diff by path (checks multiple possible paths)
   const getDiff = (...paths: string[]) => {
-    return diffs.find((d: any) => paths.includes(d.path));
+    return diffs.find((d: DiffItem) => paths.includes(d.path));
   };
 
   // Simple inline component for redline display - accepts path and looks up diff
@@ -61,11 +74,13 @@ export default function Page() {
   }: {
     value: string;
     path: string;
-    formatFn?: (v: any) => string;
+    formatFn?: (v: unknown) => string;
   }) => {
     const diff = getDiff(path);
     if (!isRedlineView || !diff) return <>{value}</>;
-    const format = formatFn || ((v: any) => v?.toString() || "");
+    const format =
+      formatFn ||
+      ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : ""));
 
     const isRemoved = diff.status === "removed";
     const isAdded = diff.status === "added";
@@ -181,9 +196,9 @@ export default function Page() {
     );
   }
 
-  const currentStandards =
-    (data?.result?.data?.compliance_information?.data as ComplianceItem[]) ||
-    [];
+  const allTabsData = (data as { result?: { data?: ComplianceTabsData } })
+    ?.result?.data;
+  const currentStandards = allTabsData?.compliance_information?.data ?? [];
 
   // Merge current standards with added items from diffs (for redline view)
   const standards = (() => {
@@ -192,27 +207,24 @@ export default function Page() {
     // Find all added items from diffs
     const addedItems = diffs
       .filter(
-        (d: any) =>
+        (d) =>
           d.path.startsWith("compliance_information.data[") &&
           d.status === "added" &&
           d.new_value
       )
-      .map((d: any) => ({
-        ...d.new_value,
+      .map((d) => ({
+        ...(d.new_value as ComplianceItem),
         _isFromDiff: true, // Mark as added from diff
         _diffPath: d.path,
       }));
 
     // Combine current standards with added items
-    return [...currentStandards, ...addedItems];
+    return [...currentStandards, ...addedItems] as ComplianceItemWithDiff[];
   })();
-
-  const productName =
-    data?.result?.data?.product_information?.data?.product_name || "Product";
 
   // Check if product is submitted - disable editing buttons
   const isSubmitted =
-    data?.result?.data?.product_information?.product_data?.data?.status ===
+    allTabsData?.product_information?.product_data?.data?.status ===
     "submitted";
 
   return (
@@ -271,7 +283,7 @@ export default function Page() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {standards.map((item: any, idx) => {
+              {standards.map((item: ComplianceItemWithDiff, idx) => {
                 // Check if this item came from diff (added in V2)
                 const isFromDiff = item._isFromDiff === true;
 

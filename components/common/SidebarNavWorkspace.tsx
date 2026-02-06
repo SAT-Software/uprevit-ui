@@ -21,13 +21,15 @@ import {
   PiCreditCardDuotone,
   PiDotsThreeOutlineVerticalDuotone,
   PiGearDuotone,
-  PiNotificationDuotone,
-  PiSignOutDuotone,
   PiSquaresFourDuotone,
-  PiUserCircleDuotone,
 } from "react-icons/pi";
+import type { Workspace } from "@/types/workspace";
 
-export function SidebarNavWorkspace({ workspace }: { workspace: any }) {
+export function SidebarNavWorkspace({
+  workspace,
+}: {
+  workspace: Workspace | null | undefined;
+}) {
   const { isMobile } = useSidebar();
 
   return (

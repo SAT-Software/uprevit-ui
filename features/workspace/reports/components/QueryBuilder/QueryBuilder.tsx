@@ -56,7 +56,7 @@ export function QueryBuilder({
             No conditions added yet
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Click "Add Condition" to start building your query
+            Click &quot;Add Condition&quot; to start building your query
           </p>
         </div>
       ) : (

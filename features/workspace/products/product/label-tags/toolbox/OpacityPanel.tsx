@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PiDropHalfBottomDuotone } from "react-icons/pi";
 import { Slider } from "@/components/ui/slider";
@@ -8,18 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 
-const OpacityPanel = ({ markerEditor }: PanelProps) => {
-  const [opacity, setOpacity] = useState(markerEditor.opacity);
+let markerEditorIdCounter = 0;
+const markerEditorIds = new WeakMap<object, number>();
+
+const getMarkerEditorKey = (editor: object) => {
+  if (!markerEditorIds.has(editor)) {
+    markerEditorIdCounter += 1;
+    markerEditorIds.set(editor, markerEditorIdCounter);
+  }
+  return markerEditorIds.get(editor) ?? 0;
+};
+
+const OpacityPanelBody = ({ markerEditor }: PanelProps) => {
+  const markerEditorRef = useRef(markerEditor);
+  const [opacity, setOpacity] = useState(() => markerEditor.opacity);
 
   useEffect(() => {
-    setOpacity(markerEditor.opacity);
+    markerEditorRef.current = markerEditor;
   }, [markerEditor]);
 
   const handleOpacityChange = (newValue: number) => {
     if (newValue < 0 || newValue > 1) {
-      setOpacity(markerEditor.opacity);
+      setOpacity(markerEditorRef.current.opacity);
     } else {
-      markerEditor.opacity = newValue;
+      markerEditorRef.current.opacity = newValue;
       setOpacity(newValue);
     }
   };
@@ -52,6 +64,11 @@ const OpacityPanel = ({ markerEditor }: PanelProps) => {
       </div>
     </ToolboxPanel>
   );
+};
+
+const OpacityPanel = (props: PanelProps) => {
+  const markerKey = getMarkerEditorKey(props.markerEditor as object);
+  return <OpacityPanelBody key={markerKey} {...props} />;
 };
 
 export default OpacityPanel;

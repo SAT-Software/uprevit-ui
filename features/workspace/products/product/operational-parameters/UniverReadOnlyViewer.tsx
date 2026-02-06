@@ -27,7 +27,9 @@ export default function UniverReadOnlyViewer({
   variant = "default",
 }: UniverReadOnlyViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const univerAPIRef = useRef<any>(null);
+  const univerAPIRef = useRef<
+    ReturnType<typeof createUniver>["univerAPI"] | null
+  >(null);
 
   useEffect(() => {
     if (!containerRef.current) return;

@@ -61,12 +61,11 @@ const ToolbarMarkersButton = ({
               <div className="flex flex-wrap">
                 {isMarkerTypeGroup(markers) &&
                   markers.markerTypes.map((markerType) => (
-                    <Tooltip>
+                    <Tooltip key={markerType.name}>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          key={markerType.name}
                           // title={markerType.name}
                           onClick={() => handleMarkerSelection(markerType)}
                         >

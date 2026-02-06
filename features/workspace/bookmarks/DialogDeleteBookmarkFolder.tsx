@@ -94,11 +94,11 @@ export default function DialogDeleteBookmarkFolder({
           <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
             <div className="space-y-2">
               <Label htmlFor={inputId}>
-                Type "
+                Type &quot;
                 <span className="font-semibold text-foreground/80">
                   {folderName}
                 </span>
-                " to confirm
+                &quot; to confirm
               </Label>
               <Input
                 id={inputId}

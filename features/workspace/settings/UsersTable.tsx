@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ElementType } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
+  Column,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
@@ -53,9 +54,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<User, unknown>;
   title: string;
-  icon: any;
+  icon: ElementType;
 }) => {
   return (
     <button

@@ -23,7 +23,7 @@ import {
   PolygonMarker,
   TextMarker,
 } from "@markerjs/markerjs3";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PiArrowUpRightDuotone,
   PiBezierCurveDuotone,
@@ -167,6 +167,7 @@ const Editor = ({
   const editor = useRef<MarkerArea | null>(null);
   const imageNaturalWidth = useRef<number>(0);
   const containerMaxWidthRef = useRef<number>(0);
+  const onStateChangeRef = useRef<typeof onStateChange>(onStateChange);
 
   const [editorState, setEditorState] = useState<EditorState>({
     mode: "select",
@@ -181,7 +182,7 @@ const Editor = ({
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
 
-  function handleKeyboardShortcuts(event: KeyboardEvent) {
+  const handleKeyboardShortcuts = useCallback((event: KeyboardEvent) => {
     if (!editor.current || !editorContainer.current) return;
 
     // Only handle shortcuts when the editor container or its children are focused
@@ -196,13 +197,13 @@ const Editor = ({
       event.preventDefault();
       editor.current.deleteSelectedMarkers();
     }
-  }
+  }, []);
 
   const handleToolbarAction = (action: ToolbarAction) => {
     if (editor.current) {
       switch (action) {
         case "select": {
-          setEditorState((prevState: any) => ({
+          setEditorState((prevState) => ({
             ...prevState,
             mode: "select",
           }));
@@ -269,7 +270,7 @@ const Editor = ({
   const handleNewMarker = (markerType: MarkerTypeItem | null) => {
     setCurrentMarkerType(markerType);
     if (editor.current && markerType) {
-      setEditorState((prevState: any) => ({
+      setEditorState((prevState) => ({
         ...prevState,
         mode: "create",
       }));
@@ -281,19 +282,23 @@ const Editor = ({
     }
   };
 
-  const updateCalculatedEditorState = () => {
+  const updateCalculatedEditorState = useCallback(() => {
     if (editor.current) {
       const editorInstance = editor.current;
-      setEditorState((prevState: any) => ({
+      setEditorState((prevState) => ({
         ...prevState,
         canUndo: editorInstance.isUndoPossible,
         canRedo: editorInstance.isRedoPossible,
         canDelete: editorInstance.selectedMarkerEditors.length > 0,
       }));
     }
-  };
+  }, []);
 
   const previousImageSrc = useRef<string | null>(null);
+
+  useEffect(() => {
+    onStateChangeRef.current = onStateChange;
+  }, [onStateChange]);
 
   useEffect(() => {
     const imageChanged =
@@ -335,8 +340,8 @@ const Editor = ({
 
         newEditor.addEventListener("areastatechange", () => {
           updateCalculatedEditorState();
-          if (onStateChange) {
-            onStateChange(newEditor.getState());
+          if (onStateChangeRef.current) {
+            onStateChangeRef.current(newEditor.getState());
           }
         });
 
@@ -351,7 +356,7 @@ const Editor = ({
         });
 
         newEditor.addEventListener("markercreate", () => {
-          setEditorState((prevState: any) => ({
+          setEditorState((prevState) => ({
             ...prevState,
             mode: "select",
           }));
@@ -384,7 +389,7 @@ const Editor = ({
     }
 
     previousImageSrc.current = targetImageSrc;
-  }, [annotation, targetImageSrc]);
+  }, [annotation, targetImageSrc, updateCalculatedEditorState]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyboardShortcuts);

@@ -4,13 +4,12 @@ import LabelTagsTabs from "@/features/workspace/products/product/label-tags/labe
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
-import Link from "next/link";
 import {
-  PiHouseDuotone,
-  PiCaretRightDuotone,
   PiTagDuotone,
 } from "react-icons/pi";
 import { LegendItem } from "@/features/workspace/products/product/label-tags/legendTypes";
+import type { DiffItem } from "@/utils/deepDiff";
+import type { GetSingleTabResponse, ProductDataContent } from "@/types/product";
 
 interface LabelTagItem {
   _id: string;
@@ -23,6 +22,12 @@ interface LabelTagItem {
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
 }
+
+type LabelTagsResponse = GetSingleTabResponse<LabelTagItem[]>;
+type ProductInfoTabData = {
+  product_data?: { data?: ProductDataContent };
+};
+type ProductInfoResponse = { result?: { data?: ProductInfoTabData } };
 
 export default function Page() {
   const { productId } = useParams<{ productId: string }>();
@@ -48,16 +53,14 @@ export default function Page() {
     compareVersionId
   );
 
-  const productName =
-    productInfoData?.result?.data?.data?.product_name || "Product";
-
   // Check if product is submitted - disable editing buttons
-  const isSubmitted =
-    productInfoData?.result?.data?.product_data?.data?.status === "submitted";
+  const productInfo = (productInfoData as ProductInfoResponse | undefined)
+    ?.result?.data;
+  const isSubmitted = productInfo?.product_data?.data?.status === "submitted";
 
   // Filter diffs for label_tags only
-  const allDiffs = diffData?.result?.diffs || [];
-  const labelTagsDiffs = allDiffs.filter((d: any) =>
+  const allDiffs = diffData?.result?.diffs ?? [];
+  const labelTagsDiffs = allDiffs.filter((d: DiffItem) =>
     d.path.startsWith("label_tags.data")
   );
 
@@ -128,35 +131,44 @@ export default function Page() {
     );
   }
 
-  let labelTagsData: LabelTagItem[] = data?.result?.data?.data || [];
+  const labelTagsTabData = (data as LabelTagsResponse | undefined)?.result?.data;
+  let labelTagsData: LabelTagItem[] = labelTagsTabData?.data ?? [];
 
   // In redline view, merge added and removed items from diffs
   if (isRedlineView && labelTagsDiffs.length > 0) {
     // Find whole-row additions (status: 'added' on path like label_tags.data[X])
     const addedItems = labelTagsDiffs
       .filter(
-        (d: any) =>
+        (d) =>
           d.path.match(/^label_tags\.data\[\d+\]$/) &&
           d.status === "added" &&
           d.new_value
       )
-      .map((d: any) => ({
-        ...d.new_value,
-        _isFromDiff: true,
-      }));
+      .map((d) => {
+        const newValue = d.new_value as Partial<LabelTagItem>;
+        return {
+          ...newValue,
+          _id: newValue._id ?? `diff-${d.path}`,
+          _isFromDiff: true,
+        };
+      });
 
     // Find whole-row removals (status: 'removed' on path like label_tags.data[X])
     const removedItems = labelTagsDiffs
       .filter(
-        (d: any) =>
+        (d) =>
           d.path.match(/^label_tags\.data\[\d+\]$/) &&
           d.status === "removed" &&
           d.old_value
       )
-      .map((d: any) => ({
-        ...d.old_value,
-        _isRemovedFromDiff: true,
-      }));
+      .map((d) => {
+        const oldValue = d.old_value as Partial<LabelTagItem>;
+        return {
+          ...oldValue,
+          _id: oldValue._id ?? `diff-${d.path}`,
+          _isRemovedFromDiff: true,
+        };
+      });
 
     // Merge: current items + added items + removed items
     labelTagsData = [...labelTagsData, ...addedItems, ...removedItems];

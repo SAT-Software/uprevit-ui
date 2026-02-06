@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { deepDiff, DiffItem } from "@/utils/deepDiff";
+import type { AllTabsData } from "@/types/product";
 
 interface ProductDiffResult {
   result: {
-    base_version: any;
-    next_version: any;
+    base_version: AllTabsData | null;
+    next_version: AllTabsData | null;
     total_changes: number;
     diffs: DiffItem[];
   };
@@ -35,8 +36,8 @@ async function fetchProductData(
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch product data");
   }
-  const data = await response.json();
-  return data?.result?.data;
+  const data = (await response.json()) as { result?: { data?: AllTabsData } };
+  return data?.result?.data ?? null;
 }
 
 async function getProductDiffRedline({

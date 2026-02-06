@@ -10,24 +10,17 @@ import {
 } from "@/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import { PiImageDuotone } from "react-icons/pi";
 
 export default function DemoSection() {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const badgeVariant =
-    mounted && resolvedTheme === "dark" ? "outline" : "white";
+  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
 
   return (
     <div className="w-full mt-40 mb-20">
       <div className="max-w-6xl mx-auto mb-8 relative">
         <Badge
+          suppressHydrationWarning
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >

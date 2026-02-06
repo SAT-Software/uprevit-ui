@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, type ElementType } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
+  Column,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -39,7 +40,6 @@ import {
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
@@ -54,9 +54,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<User, unknown>;
   title: string;
-  icon: any;
+  icon: ElementType;
 }) => {
   return (
     <button

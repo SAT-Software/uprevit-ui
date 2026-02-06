@@ -1,21 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PiNoteDuotone } from "react-icons/pi";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 import { Textarea } from "@/components/ui/textarea";
 
-const NotesPanel = ({ markerEditor, variant = "ghost" }: PanelProps) => {
+let markerEditorIdCounter = 0;
+const markerEditorIds = new WeakMap<object, number>();
+
+const getMarkerEditorKey = (editor: object) => {
+  if (!markerEditorIds.has(editor)) {
+    markerEditorIdCounter += 1;
+    markerEditorIds.set(editor, markerEditorIdCounter);
+  }
+  return markerEditorIds.get(editor) ?? 0;
+};
+
+const NotesPanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
   // @todo replace with markerEditor.notes in the next release
-  const [notes, setNotes] = useState(markerEditor.marker.notes);
+  const markerEditorRef = useRef(markerEditor);
+  const [notes, setNotes] = useState(() => markerEditor.marker.notes);
 
   useEffect(() => {
-    setNotes(markerEditor.marker.notes);
+    markerEditorRef.current = markerEditor;
   }, [markerEditor]);
 
   const handleNotesChange = (newValue: string) => {
-    markerEditor.marker.notes = newValue;
+    markerEditorRef.current.marker.notes = newValue;
     setNotes(newValue);
   };
 
@@ -35,6 +47,11 @@ const NotesPanel = ({ markerEditor, variant = "ghost" }: PanelProps) => {
       </div>
     </ToolboxPanel>
   );
+};
+
+const NotesPanel = (props: PanelProps) => {
+  const markerKey = getMarkerEditorKey(props.markerEditor as object);
+  return <NotesPanelBody key={markerKey} {...props} />;
 };
 
 export default NotesPanel;

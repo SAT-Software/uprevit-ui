@@ -1,8 +1,8 @@
 export interface DiffItem {
   path: string;
   status: "added" | "removed" | "modified";
-  old_value?: any;
-  new_value?: any;
+  old_value?: unknown;
+  new_value?: unknown;
 }
 
 // Fields to skip during comparison (internal/meta fields)
@@ -11,14 +11,18 @@ const SKIP_FIELDS = ["_id", "parent_id", "auditLogs"];
 /**
  * Check if a value looks like a MongoDB ObjectId string (24 hex characters)
  */
-function isObjectIdString(value: any): boolean {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isObjectIdString(value: unknown): value is string {
   return typeof value === "string" && /^[a-f\d]{24}$/i.test(value);
 }
 
 /**
  * Check if a value looks like an ISO date string
  */
-function isDateString(value: any): boolean {
+function isDateString(value: unknown): value is string {
   if (typeof value !== "string") return false;
   const date = new Date(value);
   return !isNaN(date.getTime()) && value.includes("T");
@@ -28,7 +32,11 @@ function isDateString(value: any): boolean {
  * Deep diff comparison between two objects (base version and next version)
  * Returns an array of differences with paths, status, and values
  */
-export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
+export function deepDiff(
+  base: unknown,
+  next: unknown,
+  path: string = ""
+): DiffItem[] {
   const diffs: DiffItem[] = [];
 
   // Both null/undefined - no diff
@@ -112,20 +120,23 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
 
   // Arrays - compare with parent_id-based matching when items have parent_id fields
   if (Array.isArray(base) || Array.isArray(next)) {
-    const baseArr = base || [];
-    const nextArr = next || [];
+    const baseArr = Array.isArray(base) ? base : [];
+    const nextArr = Array.isArray(next) ? next : [];
 
     // Check if array items are objects (could have _id/parent_id)
-    const hasObjectItems = (arr: any[]) =>
-      arr.length === 0 ||
-      (arr[0] && typeof arr[0] === "object" && !Array.isArray(arr[0]));
+    const hasObjectItems = (arr: unknown[]) =>
+      arr.length === 0 || isRecord(arr[0]);
 
     // Check if items have parent_id (for version tracking) - check both arrays
-    const hasParentIds = (baseArr: any[], nextArr: any[]) => {
+    const hasParentIds = (baseItems: unknown[], nextItems: unknown[]) => {
       // If next array items have parent_id, use parent_id matching
-      const nextHasParentId = nextArr.some((item: any) => item?.parent_id);
+      const nextHasParentId = nextItems.some(
+        (item) => isRecord(item) && Boolean(item.parent_id)
+      );
       // If base array items have _id, they could be matched
-      const baseHasIds = baseArr.some((item: any) => item?._id);
+      const baseHasIds = baseItems.some(
+        (item) => isRecord(item) && Boolean(item._id)
+      );
       return nextHasParentId && baseHasIds;
     };
 
@@ -137,24 +148,29 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
       // Use parent_id-based matching (for arrays like symbols_graphics with _id)
 
       // Get the _id from an item (base version items use _id)
-      const getBaseId = (item: any): string => {
-        if (!item) return "";
-        if (item._id) return String(item._id);
-        return "";
+      const getBaseId = (item: unknown): string => {
+        if (!isRecord(item)) return "";
+        return item._id ? String(item._id) : "";
       };
 
-      const baseMap = new Map<string, { item: any; index: number }>();
-      baseArr.forEach((item: any, index: number) => {
+      const baseMap = new Map<
+        string,
+        { item: Record<string, unknown>; index: number }
+      >();
+      baseArr.forEach((item, index) => {
         const id = getBaseId(item);
-        if (id) baseMap.set(id, { item, index });
+        if (id && isRecord(item)) baseMap.set(id, { item, index });
       });
 
       // Track which base items have been matched
       const matchedBaseIds = new Set<string>();
 
       // Process NEXT items - find their parent in BASE using parent_id
-      nextArr.forEach((nextItem: any, nextIndex: number) => {
-        const parentId = nextItem?.parent_id ? String(nextItem.parent_id) : "";
+      nextArr.forEach((nextItem, nextIndex) => {
+        const parentId =
+          isRecord(nextItem) && nextItem.parent_id
+            ? String(nextItem.parent_id)
+            : "";
 
         if (parentId && baseMap.has(parentId)) {
           // Found matching base item - compare for modifications
@@ -163,7 +179,7 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
 
           const itemPath = path ? `${path}[${nextIndex}]` : `[${nextIndex}]`;
           diffs.push(...deepDiff(baseEntry.item, nextItem, itemPath));
-        } else if (nextItem) {
+        } else if (nextItem != null) {
           // No parent_id OR parent_id doesn't match any base item = NEW item
           const itemPath = path ? `${path}[${nextIndex}]` : `[${nextIndex}]`;
           diffs.push({
@@ -200,17 +216,16 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
   }
 
   // Objects - recurse into each key
-  const allKeys = new Set([
-    ...Object.keys(base || {}),
-    ...Object.keys(next || {}),
-  ]);
+  const baseObj = isRecord(base) ? base : {};
+  const nextObj = isRecord(next) ? next : {};
+  const allKeys = new Set([...Object.keys(baseObj), ...Object.keys(nextObj)]);
 
   for (const key of allKeys) {
     // Skip internal fields we don't want to compare
     if (SKIP_FIELDS.includes(key)) continue;
 
     const newPath = path ? `${path}.${key}` : key;
-    diffs.push(...deepDiff(base?.[key], next?.[key], newPath));
+    diffs.push(...deepDiff(baseObj[key], nextObj[key], newPath));
   }
 
   return diffs;
@@ -219,11 +234,11 @@ export function deepDiff(base: any, next: any, path: string = ""): DiffItem[] {
 /**
  * Sanitize value for comparison (ensure consistent types)
  */
-function sanitizeValue(value: any): any {
+function sanitizeValue(value: unknown): unknown {
   if (value == null) return null;
   if (Array.isArray(value)) return value.map(sanitizeValue);
-  if (typeof value === "object") {
-    const result: Record<string, any> = {};
+  if (isRecord(value)) {
+    const result: Record<string, unknown> = {};
     for (const key of Object.keys(value)) {
       result[key] = sanitizeValue(value[key]);
     }

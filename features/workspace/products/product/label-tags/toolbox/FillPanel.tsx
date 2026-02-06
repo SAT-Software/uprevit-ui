@@ -1,21 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PiPaintBucketDuotone } from "react-icons/pi";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 import ColorPicker from "../ui/ColorPicker";
 import { defaultColorsWithTransparent } from "@/types/colors";
 
-const FillPanel = ({ markerEditor, variant = "ghost" }: PanelProps) => {
-  const [fillColor, setFillColor] = useState(markerEditor.fillColor);
+let markerEditorIdCounter = 0;
+const markerEditorIds = new WeakMap<object, number>();
+
+const getMarkerEditorKey = (editor: object) => {
+  if (!markerEditorIds.has(editor)) {
+    markerEditorIdCounter += 1;
+    markerEditorIds.set(editor, markerEditorIdCounter);
+  }
+  return markerEditorIds.get(editor) ?? 0;
+};
+
+const FillPanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
+  const markerEditorRef = useRef(markerEditor);
+  const [fillColor, setFillColor] = useState(() => markerEditor.fillColor);
 
   useEffect(() => {
-    setFillColor(markerEditor.fillColor);
+    markerEditorRef.current = markerEditor;
   }, [markerEditor]);
 
   const handleFillColorChange = (newValue: string) => {
-    markerEditor.fillColor = newValue;
+    markerEditorRef.current.fillColor = newValue;
     setFillColor(newValue);
   };
 
@@ -30,6 +42,11 @@ const FillPanel = ({ markerEditor, variant = "ghost" }: PanelProps) => {
       </div>
     </ToolboxPanel>
   );
+};
+
+const FillPanel = (props: PanelProps) => {
+  const markerKey = getMarkerEditorKey(props.markerEditor as object);
+  return <FillPanelBody key={markerKey} {...props} />;
 };
 
 export default FillPanel;

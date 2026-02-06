@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ColumnDef,
   ColumnFiltersState,
+  Column,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -17,7 +18,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { usePathname } from "next/navigation";
-import { Fragment, useState } from "react";
+import { Fragment, useState, type ElementType } from "react";
 import {
   PiCaretCircleDoubleLeftDuotone,
   PiCaretCircleDoubleRightDuotone,
@@ -65,6 +66,7 @@ import { advancedFilterFn } from "@/lib/table-filters";
 import Image from "next/image";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 import EditComponentDialog from "./EditComponentDialog";
+import type { DiffItem } from "@/utils/deepDiff";
 
 type ComponentItem = {
   _id: string;
@@ -77,11 +79,14 @@ type ComponentItem = {
   _isFromDiff?: boolean;
 };
 
-type DiffItem = {
-  path: string;
-  status: "added" | "removed" | "modified";
-  old_value?: any;
-  new_value?: any;
+type TableMeta = {
+  isSubmitted?: boolean;
+  isRedlineView?: boolean;
+  diffs?: DiffItem[];
+  getDiff?: (path: string) => DiffItem | null;
+  getRowStatus?: (
+    rowIndex: number
+  ) => "added" | "removed" | "modified" | null;
 };
 
 const RedlineCell = ({
@@ -89,11 +94,14 @@ const RedlineCell = ({
   diff,
   formatFn,
 }: {
-  value: any;
+  value: unknown;
   diff: DiffItem | null;
-  formatFn?: (v: any) => React.ReactNode;
+  formatFn?: (v: unknown) => React.ReactNode;
 }) => {
-  const format = formatFn || ((v: any) => v?.toString() || "-");
+  const format =
+    formatFn ||
+    ((v: unknown) =>
+      typeof v === "string" ? v : v != null ? String(v) : "-");
 
   if (!diff) return <>{format(value)}</>;
 
@@ -123,9 +131,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column?: any;
+  column?: Column<ComponentItem, unknown>;
   title: string;
-  icon: any;
+  icon: ElementType;
 }) => {
   if (!column) {
     return (
@@ -200,18 +208,22 @@ const columns: ColumnDef<ComponentItem>[] = [
       <SortableHeader title="Image" icon={PiImageDuotone} />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(`label_components.data[${row.index}].image`)
         : null;
+      const newImageUrl =
+        diff?.status === "added" && typeof diff.new_value === "string"
+          ? diff.new_value
+          : "";
 
       // For image, show both old and new if changed
-      if (diff && diff.status === "added" && diff.new_value) {
+      if (diff && diff.status === "added" && newImageUrl) {
         return (
           <div className="flex flex-col gap-1">
             <span className="text-[9px] text-blue-600 font-medium">NEW</span>
             <Image
-              src={diff.new_value}
+              src={newImageUrl}
               alt={row.original.component_number}
               width={48}
               height={48}
@@ -244,7 +256,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       <SortableHeader column={column} title="Label Type" icon={PiTagDuotone} />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const currentTypes = row.getValue("label_type") as string[];
 
       // Find all label_type diffs
@@ -309,7 +321,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(`label_components.data[${row.index}].component_number`)
         : null;
@@ -322,7 +334,7 @@ const columns: ColumnDef<ComponentItem>[] = [
               diff={diff}
               formatFn={(v) => (
                 <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {v}
+                  {typeof v === "string" ? v : String(v ?? "")}
                 </span>
               )}
             />
@@ -346,7 +358,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(
             `label_components.data[${row.index}].component_description`,
@@ -380,7 +392,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(`label_components.data[${row.index}].dimensions`)
         : null;
@@ -407,7 +419,7 @@ const columns: ColumnDef<ComponentItem>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(`label_components.data[${row.index}].component_type`)
         : null;
@@ -600,7 +612,8 @@ export default function ProductComponentDetailsTable({
                           ? getDiff(`label_components.data[${row.index}].image`)
                           : null;
                         const addedImageUrl =
-                          imageDiff?.status === "added"
+                          imageDiff?.status === "added" &&
+                          typeof imageDiff.new_value === "string"
                             ? imageDiff.new_value
                             : null;
 

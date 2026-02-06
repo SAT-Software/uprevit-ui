@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -87,24 +87,29 @@ export default function EditOtherComponentsDialog({
   });
   const [isImageRemoved, setIsImageRemoved] = useState(false);
 
-  useEffect(() => {
+  const buildTags = (labels: string[]) =>
+    labels.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }));
+
+  const syncFormWithComponent = () => {
     reset({
       componentName: otherComponent.componentName,
       componentDescription: otherComponent.description,
-      labelPresence: otherComponent.labelPresence.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      })),
+      labelPresence: buildTags(otherComponent.labelPresence),
       image: null,
     });
-    setLabelPresence(
-      otherComponent.labelPresence.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      }))
-    );
+    setLabelPresence(buildTags(otherComponent.labelPresence));
     setIsImageRemoved(false);
-  }, [otherComponent, reset]);
+  };
+
+  const handleDialogChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      syncFormWithComponent();
+    }
+    onOpenChange(nextOpen);
+  };
 
   const { mutate: updateOtherCompsData, isPending } = useUpdateProductTabData();
 
@@ -160,7 +165,7 @@ export default function EditOtherComponentsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
