@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import type { DiffItem } from "@/utils/deepDiff";
+import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
 interface ComponentItem {
   _id: string;
@@ -16,7 +17,9 @@ interface ComponentItem {
   label_type: string[];
   dimensions: string;
   component_type: string;
-  _isFromDiff?: boolean;
+  _redlineStatus?: RedlineStatus;
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 }
 
 interface LabelComponentItem {
@@ -28,6 +31,16 @@ interface LabelComponentItem {
   dimensions: string;
   component_type: string;
 }
+
+const mapComponentItem = (item: LabelComponentItem): ComponentItem => ({
+  _id: item._id,
+  component_number: item.component_number || "",
+  image: item.image || "",
+  component_description: item.component_description || "",
+  label_type: item.label_type || [],
+  dimensions: item.dimensions || "",
+  component_type: item.component_type || "",
+});
 
 export default function Page() {
   const { productId } = useParams<{ productId: string }>();
@@ -76,45 +89,41 @@ export default function Page() {
     );
   }
 
-  const currentComponents = (componentsData?.result?.data?.data || []).map(
-    (item: LabelComponentItem) => ({
-      _id: item._id,
-      component_number: item.component_number || "",
-      image: item.image || "",
-      component_description: item.component_description || "",
-      label_type: item.label_type || [],
-      dimensions: item.dimensions || "",
-      component_type: item.component_type || "",
-    })
-  ) as ComponentItem[];
+  const currentComponentsRaw =
+    (componentsData?.result?.data?.data ?? []) as LabelComponentItem[];
+  const currentComponents = currentComponentsRaw.map(mapComponentItem);
+  const baseComponents =
+    (diffData?.result?.base_version?.label_components?.data ??
+      []) as LabelComponentItem[];
+  const nextComponents =
+    (diffData?.result?.next_version?.label_components?.data ??
+      currentComponentsRaw) as LabelComponentItem[];
 
-  // Merge with added items from diffs for redline view
   const components = (() => {
     if (!isRedlineView) return currentComponents;
 
-    // Find whole-item additions (e.g., label_components.data[1] added)
-    const addedItems = labelComponentDiffs
-      .filter(
-        (d) =>
-          d.path.match(/^label_components\.data\[\d+\]$/) &&
-          d.status === "added" &&
-          d.new_value
-      )
-      .map((d) => {
-        const newValue = d.new_value as Partial<LabelComponentItem>;
-        return {
-          _id: newValue._id || `diff-${d.path}`,
-          component_number: newValue.component_number || "",
-          image: newValue.image || "",
-          component_description: newValue.component_description || "",
-          label_type: newValue.label_type || [],
-          dimensions: newValue.dimensions || "",
-          component_type: newValue.component_type || "",
-          _isFromDiff: true,
-        };
-      });
+    const redlineItems = buildRedlineArray(baseComponents, nextComponents, {
+      getId: (item) => item._id,
+      getParentId: (item) => {
+        const parentId = (item as { parent_id?: string | null }).parent_id;
+        return parentId ? String(parentId) : undefined;
+      },
+      getFallbackKey: (item) =>
+        `${item.component_number}-${item.component_type}`,
+    });
 
-    return [...currentComponents, ...addedItems];
+    return redlineItems
+      .map((item) => {
+        const data = item.next ?? item.base;
+        if (!data) return null;
+        return {
+          ...mapComponentItem(data as LabelComponentItem),
+          _redlineStatus: item.status,
+          _redlineDiffs: item.diffs,
+          _redlineId: item.id,
+        };
+      })
+      .filter(Boolean) as ComponentItem[];
   })();
 
   return (
@@ -153,7 +162,6 @@ export default function Page() {
             data={components}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
-            diffs={labelComponentDiffs}
           />
         </div>
       </div>

@@ -73,20 +73,16 @@ type Item = {
   componentImage: string;
   note?: string;
   presentOnLabels: string[];
-  _isFromDiff?: boolean;
-  _isRemovedFromDiff?: boolean;
-  _originalIndex?: number;
+  _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 };
 
 type TableMeta = {
   isSubmitted?: boolean;
   isRedlineView?: boolean;
-  diffs?: DiffItem[];
-  getDiff?: (path: string) => DiffItem | null;
-  getRowStatus?: (
-    rowIndex: number,
-    originalIndex: number
-  ) => "added" | "removed" | "modified" | null;
+  getFieldDiff?: (row: Item, field: string, value?: unknown) => DiffItem | null;
+  getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
 };
 
 // Helper component for displaying redline values
@@ -205,9 +201,52 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentImage",
     header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta | undefined;
       const image = row.original.componentImage;
       const hasImage = typeof image === "string" && image.trim() !== "";
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, "image", image)
+        : null;
+      const newImageUrl =
+        diff?.status === "added" && typeof diff.new_value === "string"
+          ? diff.new_value
+          : "";
+      const removedImageUrl =
+        diff?.status === "removed" && typeof diff.old_value === "string"
+          ? diff.old_value
+          : "";
+
+      if (diff && diff.status === "added" && newImageUrl) {
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="text-[9px] text-blue-600 font-medium">NEW</span>
+            <Image
+              src={newImageUrl}
+              alt={row.original.componentName}
+              width={48}
+              height={48}
+              className="object-cover rounded-md border border-blue-300 min-h-12"
+            />
+          </div>
+        );
+      }
+
+      if (diff && diff.status === "removed" && removedImageUrl) {
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="text-[9px] text-red-600 font-medium">REMOVED</span>
+            <Image
+              src={removedImageUrl}
+              alt={row.original.componentName}
+              width={48}
+              height={48}
+              className="object-cover rounded-md border border-red-300 min-h-12 opacity-70"
+            />
+          </div>
+        );
+      }
+
       return hasImage ? (
         <Image
           src={image}
@@ -236,9 +275,12 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
-      const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].text`)
+        ? meta.getFieldDiff?.(
+            row.original,
+            "text",
+            row.getValue("componentName"),
+          )
         : null;
       return diff ? (
         <RedlineCell
@@ -267,16 +309,19 @@ const columns: ColumnDef<Item>[] = [
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
-      const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].description`)
+        ? meta.getFieldDiff?.(
+            row.original,
+            "description",
+            row.getValue("componentDescription"),
+          )
         : null;
       return diff ? (
         <RedlineCell
           value={row.getValue("componentDescription")}
           diff={diff}
           formatFn={(v) => (
-            <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+            <div className="max-w-xs whitespace-pre-line text-sm">
               {typeof v === "string" ? v : v != null ? String(v) : "-"}
             </div>
           )}
@@ -301,23 +346,28 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const labels = row.getValue("presentOnLabels") as string[];
-      const originalIndex = row.original._originalIndex ?? row.index;
 
       // Check for added and removed label presence values
       let addedLabels: string[] = [];
       let removedLabels: string[] = [];
-      if (meta?.isRedlineView && meta.diffs) {
-        const labelDiffs = (meta.diffs as DiffItem[]).filter((d) =>
-          d.path.startsWith(
-            `symbols_graphics.data[${originalIndex}].label_presence`,
-          ),
-        );
-        addedLabels = labelDiffs
-          .filter((d) => d.status === "added" && d.new_value)
-          .map((d) => d.new_value as string);
-        removedLabels = labelDiffs
-          .filter((d) => d.status === "removed" && d.old_value)
-          .map((d) => d.old_value as string);
+      if (meta?.isRedlineView) {
+        const rowStatus = row.original._redlineStatus;
+        const rowDiffs = row.original._redlineDiffs ?? [];
+        if (rowStatus === "added") {
+          addedLabels = labels;
+        } else if (rowStatus === "removed") {
+          removedLabels = labels;
+        } else {
+          const labelDiffs = rowDiffs.filter((d) =>
+            d.path.startsWith("label_presence"),
+          );
+          addedLabels = labelDiffs
+            .filter((d) => d.status === "added" && d.new_value)
+            .map((d) => d.new_value as string);
+          removedLabels = labelDiffs
+            .filter((d) => d.status === "removed" && d.old_value)
+            .map((d) => d.old_value as string);
+        }
       }
 
       // Merge current with added and removed for display
@@ -378,12 +428,10 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
   data: dataProp,
   isSubmitted = false,
   isRedlineView = false,
-  diffs = [],
 }: {
   data?: Item[];
   isSubmitted?: boolean;
   isRedlineView?: boolean;
-  diffs?: DiffItem[];
 }) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -395,26 +443,34 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  // Helper to find a diff by path
-  const getDiff = (path: string): DiffItem | null => {
-    return diffs.find((d) => d.path === path) || null;
+  const getRowStatus = (row: Item) => {
+    if (!isRedlineView) return null;
+    const status = row._redlineStatus;
+    if (!status || status === "unchanged") return null;
+    return status === "modified" ? "modified" : status;
   };
 
-  // Check if a row has any changes (using original index for correct diff matching)
-  const getRowStatus = (rowIndex: number, originalIndex: number) => {
-    const isFromDiff = dataProp?.[rowIndex]?._isFromDiff;
-    if (isFromDiff) return "added";
-
-    const isRemovedFromDiff = dataProp?.[rowIndex]?._isRemovedFromDiff;
-    if (isRemovedFromDiff) return "removed";
-
-    const rowDiff = getDiff(`symbols_graphics.data[${originalIndex}]`);
-    if (rowDiff) return rowDiff.status;
-
-    const hasFieldDiff = diffs.some((d) =>
-      d.path.startsWith(`symbols_graphics.data[${originalIndex}].`),
-    );
-    return hasFieldDiff ? "modified" : null;
+  const getFieldDiff = (row: Item, field: string, value?: unknown) => {
+    if (!isRedlineView) return null;
+    const status = row._redlineStatus;
+    const rawValue = value ?? (row as Record<string, unknown>)[field];
+    if (status === "added") {
+      return {
+        path: field,
+        status: "added",
+        old_value: null,
+        new_value: rawValue,
+      } as DiffItem;
+    }
+    if (status === "removed") {
+      return {
+        path: field,
+        status: "removed",
+        old_value: rawValue,
+        new_value: null,
+      } as DiffItem;
+    }
+    return row._redlineDiffs?.find((d) => d.path === field) ?? null;
   };
 
   const table = useReactTable({
@@ -433,7 +489,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
-    meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
+    meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
   });
 
   return (
@@ -482,8 +538,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const originalIndex = row.original._originalIndex ?? row.index;
-                const rowStatus = getRowStatus(row.index, originalIndex);
+                const rowStatus = getRowStatus(row.original);
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
@@ -530,23 +585,60 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <div className="flex flex-col items-center py-4">
                             {(() => {
+                              const meta = table.options.meta as
+                                | TableMeta
+                                | undefined;
                               const image = row.original.componentImage;
+                              const imageDiff = meta?.isRedlineView
+                                ? meta.getFieldDiff?.(
+                                    row.original,
+                                    "image",
+                                    image,
+                                  )
+                                : null;
+                              const displayImage =
+                                imageDiff?.status === "added" &&
+                                typeof imageDiff.new_value === "string"
+                                  ? imageDiff.new_value
+                                  : imageDiff?.status === "removed" &&
+                                      typeof imageDiff.old_value === "string"
+                                    ? imageDiff.old_value
+                                    : image;
                               const hasImage =
-                                typeof image === "string" && image.trim() !== "";
+                                typeof displayImage === "string" &&
+                                displayImage.trim() !== "";
+                              const borderClass =
+                                imageDiff?.status === "added"
+                                  ? "border-2 border-blue-400"
+                                  : imageDiff?.status === "removed"
+                                    ? "border-2 border-red-300 opacity-70"
+                                    : "";
                               return hasImage ? (
-                                <Image
-                                  src={image}
-                                  alt={row.original.componentName}
-                                  width={200}
-                                  height={200}
-                                  className="rounded mb-3"
-                                  style={{
-                                    width: "70%",
-                                    height: "auto",
-                                    maxWidth: 280,
-                                  }}
-                                  priority
-                                />
+                                <div className="relative">
+                                  {imageDiff?.status === "added" && (
+                                    <span className="absolute top-2 left-2 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                                      NEW
+                                    </span>
+                                  )}
+                                  {imageDiff?.status === "removed" && (
+                                    <span className="absolute top-2 left-2 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                                      REMOVED
+                                    </span>
+                                  )}
+                                  <Image
+                                    src={displayImage}
+                                    alt={row.original.componentName}
+                                    width={200}
+                                    height={200}
+                                    className={`rounded mb-3 ${borderClass}`}
+                                    style={{
+                                      width: "70%",
+                                      height: "auto",
+                                      maxWidth: 280,
+                                    }}
+                                    priority
+                                  />
+                                </div>
                               ) : (
                                 <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md">
                                   <PiImageDuotone className="w-full h-full p-2" />

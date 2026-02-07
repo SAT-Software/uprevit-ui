@@ -112,6 +112,7 @@ export function useUpdateProductTabData() {
     onSuccess: () => {
       toast.success("Changes were saved successfully");
       queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
+      queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
     },
     onError: (error, _params, context) => {
       console.error(error.message || "Failed to make changes");

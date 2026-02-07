@@ -10,6 +10,7 @@ import {
 import { LegendItem } from "@/features/workspace/products/product/label-tags/legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
 import type { GetSingleTabResponse, ProductDataContent } from "@/types/product";
+import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
 interface LabelTagItem {
   _id: string;
@@ -19,8 +20,9 @@ interface LabelTagItem {
   image?: string;
   tagged_image?: string;
   legend_items?: LegendItem[];
-  _isFromDiff?: boolean;
-  _isRemovedFromDiff?: boolean;
+  _redlineStatus?: RedlineStatus;
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 }
 
 type LabelTagsResponse = GetSingleTabResponse<LabelTagItem[]>;
@@ -132,49 +134,38 @@ export default function Page() {
   }
 
   const labelTagsTabData = (data as LabelTagsResponse | undefined)?.result?.data;
-  let labelTagsData: LabelTagItem[] = labelTagsTabData?.data ?? [];
+  const currentLabelTags = labelTagsTabData?.data ?? [];
+  const baseLabelTags =
+    (diffData?.result?.base_version?.label_tags?.data ?? []) as LabelTagItem[];
+  const nextLabelTags =
+    (diffData?.result?.next_version?.label_tags?.data ??
+      currentLabelTags) as LabelTagItem[];
 
-  // In redline view, merge added and removed items from diffs
-  if (isRedlineView && labelTagsDiffs.length > 0) {
-    // Find whole-row additions (status: 'added' on path like label_tags.data[X])
-    const addedItems = labelTagsDiffs
-      .filter(
-        (d) =>
-          d.path.match(/^label_tags\.data\[\d+\]$/) &&
-          d.status === "added" &&
-          d.new_value
-      )
-      .map((d) => {
-        const newValue = d.new_value as Partial<LabelTagItem>;
+  const labelTagsData: LabelTagItem[] = (() => {
+    if (!isRedlineView) return currentLabelTags;
+
+    const redlineItems = buildRedlineArray(baseLabelTags, nextLabelTags, {
+      getId: (item) => item._id,
+      getParentId: (item) => {
+        const parentId = (item as { parent_id?: string | null }).parent_id;
+        return parentId ? String(parentId) : undefined;
+      },
+      getFallbackKey: (item) => `${item.name}-${item.type}`,
+    });
+
+    return redlineItems
+      .map((item) => {
+        const dataItem = item.next ?? item.base;
+        if (!dataItem) return null;
         return {
-          ...newValue,
-          _id: newValue._id ?? `diff-${d.path}`,
-          _isFromDiff: true,
+          ...dataItem,
+          _redlineStatus: item.status,
+          _redlineDiffs: item.diffs,
+          _redlineId: item.id,
         };
-      });
-
-    // Find whole-row removals (status: 'removed' on path like label_tags.data[X])
-    const removedItems = labelTagsDiffs
-      .filter(
-        (d) =>
-          d.path.match(/^label_tags\.data\[\d+\]$/) &&
-          d.status === "removed" &&
-          d.old_value
-      )
-      .map((d) => {
-        const oldValue = d.old_value as Partial<LabelTagItem>;
-        return {
-          ...oldValue,
-          _id: oldValue._id ?? `diff-${d.path}`,
-          _isRemovedFromDiff: true,
-        };
-      });
-
-    // Merge: current items + added items + removed items
-    labelTagsData = [...labelTagsData, ...addedItems, ...removedItems];
-  }
-
-  console.log("label tags diff data", diffData);
+      })
+      .filter(Boolean) as LabelTagItem[];
+  })();
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
@@ -194,7 +185,6 @@ export default function Page() {
           productId={productId}
           isSubmitted={isSubmitted}
           isRedlineView={isRedlineView}
-          diffs={labelTagsDiffs}
         />
       </div>
     </div>
