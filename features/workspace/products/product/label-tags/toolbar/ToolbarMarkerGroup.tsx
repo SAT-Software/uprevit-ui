@@ -3,15 +3,8 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Toggle } from "@/components/ui/toggle";
 
 import { MarkerTypeGroup, MarkerTypeItem } from "@/types/toolbar";
-import { PiCaretDown } from "react-icons/pi";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Tooltip,
@@ -36,11 +29,8 @@ const ToolbarMarkerGroup = ({
     markers.markerTypes[0]
   );
 
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
   const handleMarkerSelection = (markerType: MarkerTypeItem) => {
     setCurrentMarkerType(markerType);
-    setPopoverOpen(false);
     onSelectionChange(markerType);
   };
 
@@ -57,13 +47,15 @@ const ToolbarMarkerGroup = ({
         <currentMarkerType.icon />
       </Toggle> */}
       <ButtonGroup>
-        {markers.markerTypes.map((markerType) => (
-          <Tooltip>
+        {markers.markerTypes.map((markerType) => {
+          const isActive =
+            toggled && currentMarkerType.name === markerType.name;
+          return (
+          <Tooltip key={markerType.name}>
             <TooltipTrigger asChild>
               <Button
-                variant="secondary"
+                variant={isActive ? "secondary" : variant}
                 size="icon-sm"
-                key={markerType.name}
                 // title={markerType.name}
                 onClick={() => handleMarkerSelection(markerType)}
               >
@@ -74,7 +66,8 @@ const ToolbarMarkerGroup = ({
               <p>{markerType.name}</p>
             </TooltipContent>
           </Tooltip>
-        ))}
+        );
+        })}
       </ButtonGroup>
       {/* <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>

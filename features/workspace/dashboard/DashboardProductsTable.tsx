@@ -7,11 +7,11 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  Column,
 } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -23,7 +23,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { AuditLog } from "@/types/product";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ElementType } from "react";
 import {
   PiBuildingsDuotone,
   PiCaretDownDuotone,
@@ -74,9 +74,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column: any;
+  column: Column<Item, unknown>;
   title: string;
-  icon: any;
+  icon: ElementType;
 }) => {
   return (
     <button
@@ -201,7 +201,7 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row }) => {
       const progress = (row.getValue("complete_count") as number) || 0;
 
-      let tabsCompleted: string[] = [];
+      const tabsCompleted: string[] = [];
 
       if (row.original) {
         if (row.original.product_information?.tab_completed)
@@ -327,10 +327,10 @@ export default function DashboardProductsTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const router = useRouter();
 
-  const recentProductsData = useMemo(
+  const recentProductsData = useMemo<Item[]>(
     () =>
       Array.isArray(data?.result?.products)
-        ? data.result.products.slice(0, 5)
+        ? (data.result.products.slice(0, 5) as Item[])
         : [],
     [data]
   );

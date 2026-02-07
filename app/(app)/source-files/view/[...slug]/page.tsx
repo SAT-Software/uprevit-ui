@@ -33,7 +33,6 @@ import {
   PiFileDuotone,
   PiFilePdfDuotone,
   PiGridFourDuotone,
-  PiImageDuotone,
   PiLinkSimpleDuotone,
   PiListDuotone,
   PiSquareDuotone,
@@ -45,8 +44,13 @@ import { Spinner } from "@/components/ui/spinner";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
-  parentId?: string;
+  parentId?: string | null;
 }
+
+type ProductLinkItem = {
+  _id: string;
+  product_name?: string;
+};
 
 type FileKind = "image" | "pdf" | "word" | "docx" | "doc" | "other";
 
@@ -120,7 +124,7 @@ export default function ProductSourceFilesPage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
+    } catch {
       toast.error("Failed to download file. Please try again.");
     }
   };
@@ -130,7 +134,7 @@ export default function ProductSourceFilesPage() {
   );
   const { data: currentFolderData } = useGetCurrentSourceFilesFolder(slug);
   const { data: productsData } = useGetAllProducts();
-  const products = productsData?.result?.products ?? [];
+  const products = (productsData?.result?.products ?? []) as ProductLinkItem[];
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
 
@@ -149,7 +153,7 @@ export default function ProductSourceFilesPage() {
   const folder = data?.result;
   const currentFolder = currentFolderData?.result;
   const linkedProduct = products.find(
-    (product: any) => product._id === currentFolder?.product_id
+    (product) => product._id === currentFolder?.product_id
   );
 
   if (isLoading) {

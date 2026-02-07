@@ -16,6 +16,20 @@ import {
 import { ProductsByDepartmentChart } from "@/features/workspace/analytics/ProductsByDepartmentBarChart";
 import { ProductsByProjectChart } from "@/features/workspace/analytics/ProductsByProjectBarChart";
 import { ProductsOverTimeChart } from "@/features/workspace/analytics/ProductsVsTimeLineChart";
+import type { Department } from "@/types/department";
+import type { Project } from "@/types/project";
+
+type ProductAnalyticsItem = {
+  _id?: string;
+  status?: "draft" | "submitted" | "archived";
+  target_date?: string | null;
+  department_id?: string;
+  project_id?: string;
+  auditLogs?: Array<{ actionAt?: string | Date }>;
+  createdAt?: string;
+  department?: Array<{ department_name?: string }>;
+  project?: Array<{ project_name?: string }>;
+};
 
 export default function AnalyticsPage() {
   const { data: productsData, isLoading: productsLoading } =
@@ -31,20 +45,21 @@ export default function AnalyticsPage() {
     productsLoading || archivedLoading || departmentsLoading || projectsLoading;
 
   const analytics = useMemo(() => {
-    const products = productsData?.result?.products || [];
-    const archivedProducts = archivedProductsData?.result?.products || [];
-    const departments = departmentsData?.data || [];
-    const projects = projectsData?.data || [];
+    const products =
+      (productsData?.result?.products as ProductAnalyticsItem[]) || [];
+    const archivedProducts =
+      (archivedProductsData?.result?.products as ProductAnalyticsItem[]) || [];
+    const departments = (departmentsData?.data as Department[]) || [];
+    const projects = (projectsData?.data as Project[]) || [];
 
     const totalProducts = products.length;
-    const draftCount = products.filter((p: any) => p.status === "draft").length;
-    const submittedCount = products.filter(
-      (p: any) => p.status === "submitted"
-    ).length;
+    const draftCount = products.filter((p) => p.status === "draft").length;
+    const submittedCount = products.filter((p) => p.status === "submitted")
+      .length;
     const archivedCount = archivedProducts.length;
 
     const today = new Date();
-    const overdueCount = products.filter((p: any) => {
+    const overdueCount = products.filter((p) => {
       if (p.status === "archived" || p.status === "submitted") return false;
       if (!p.target_date) return false;
       return new Date(p.target_date) < today;
@@ -66,8 +81,8 @@ export default function AnalyticsPage() {
 
     const departmentCounts: Record<string, { name: string; count: number }> =
       {};
-    products.forEach((p: any) => {
-      const deptId = p.department_id;
+    products.forEach((p) => {
+      const deptId = p.department_id ?? "unknown";
       const deptName = p.department?.[0]?.department_name || "Unknown";
       if (!departmentCounts[deptId]) {
         departmentCounts[deptId] = { name: deptName, count: 0 };
@@ -75,12 +90,12 @@ export default function AnalyticsPage() {
       departmentCounts[deptId].count++;
     });
     const departmentData = Object.entries(departmentCounts)
-      .map(([id, data]) => ({ department: data.name, products: data.count }))
+      .map(([, data]) => ({ department: data.name, products: data.count }))
       .sort((a, b) => b.products - a.products);
 
     const projectCounts: Record<string, { name: string; count: number }> = {};
-    products.forEach((p: any) => {
-      const projId = p.project_id;
+    products.forEach((p) => {
+      const projId = p.project_id ?? "unknown";
       const projName = p.project?.[0]?.project_name || "Unknown";
       if (!projectCounts[projId]) {
         projectCounts[projId] = { name: projName, count: 0 };
@@ -88,11 +103,11 @@ export default function AnalyticsPage() {
       projectCounts[projId].count++;
     });
     const projectData = Object.entries(projectCounts)
-      .map(([id, data]) => ({ project: data.name, products: data.count }))
+      .map(([, data]) => ({ project: data.name, products: data.count }))
       .sort((a, b) => b.products - a.products);
 
     const dailyData: Record<string, number> = {};
-    products.forEach((p: any) => {
+    products.forEach((p) => {
       const createdAt = p.auditLogs?.[0]?.actionAt || p.createdAt;
       if (createdAt) {
         const date = new Date(createdAt);

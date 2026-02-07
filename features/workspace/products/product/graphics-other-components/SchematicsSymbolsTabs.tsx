@@ -19,6 +19,7 @@ import {
 } from "react-icons/pi";
 import { useState } from "react";
 import SymbolsGraphicsPageOtherComponentsTable from "./SymbolsGraphicsPageOtherComponentsTable";
+import type { DiffItem } from "@/utils/deepDiff";
 
 interface SymbolData {
   id: string;
@@ -51,13 +52,6 @@ interface OtherComponentData {
   componentDescription: string;
   componentImage: string;
   presentOnLabels: string[];
-}
-
-interface DiffItem {
-  path: string;
-  status: "added" | "removed" | "modified";
-  old_value?: any;
-  new_value?: any;
 }
 
 interface SchematicsSymbolsTabsProps {

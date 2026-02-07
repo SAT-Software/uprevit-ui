@@ -34,6 +34,11 @@ interface FormValues {
   folderName: string;
 }
 
+type ProductLinkItem = {
+  _id: string;
+  product_name: string;
+};
+
 export default function DialogAddProductFolder({
   parentId,
   folderId,
@@ -62,7 +67,8 @@ export default function DialogAddProductFolder({
 
   const { data: productsData, isLoading: productsLoading } =
     useGetAllProducts();
-  const products = productsData?.result?.products ?? [];
+  const products =
+    (productsData?.result?.products as ProductLinkItem[]) ?? [];
   const [selectedProductId, setSelectedProductId] = useState("");
   const noneProductValue = "none";
 
@@ -179,7 +185,7 @@ export default function DialogAddProductFolder({
                         No products found
                       </SelectItem>
                     )}
-                    {products.map((product: any) => (
+                    {products.map((product) => (
                       <SelectItem key={product._id} value={product._id}>
                         {product.product_name}
                       </SelectItem>

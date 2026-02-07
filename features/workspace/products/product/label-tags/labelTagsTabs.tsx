@@ -20,6 +20,7 @@ import { uploadFiles } from "@/utils/uploadthing";
 import { toast } from "sonner";
 import { LegendPanel } from "./LegendPanel";
 import { LegendItem } from "./legendTypes";
+import type { DiffItem } from "@/utils/deepDiff";
 
 interface LabelTagItem {
   _id: string;
@@ -32,13 +33,6 @@ interface LabelTagItem {
   legend_items?: LegendItem[];
   _isFromDiff?: boolean;
   _isRemovedFromDiff?: boolean;
-}
-
-interface DiffItem {
-  path: string;
-  status: "added" | "removed" | "modified";
-  old_value?: any;
-  new_value?: any;
 }
 
 interface LabelTagsTabsProps {
@@ -358,27 +352,32 @@ export default function LabelTagsTabs({
   }: {
     value: string;
     diff: DiffItem | undefined;
-    formatFn?: (v: any) => string;
+    formatFn?: (v: unknown) => string;
     isImage?: boolean;
   }) => {
     if (!isRedlineView || !diff) return <>{value}</>;
 
-    const format = formatFn || ((v: any) => v?.toString() || "");
+    const format =
+      formatFn ||
+      ((v: unknown) =>
+        typeof v === "string" ? v : v != null ? String(v) : "");
     const isRemoved = diff.status === "removed";
     const isAdded = diff.status === "added";
+    const oldValue = typeof diff.old_value === "string" ? diff.old_value : "";
+    const newValue = typeof diff.new_value === "string" ? diff.new_value : "";
 
     if (isImage) {
       return (
         <div className="flex flex-col gap-2">
-          {(diff.old_value || isRemoved) && (
+          {(oldValue || isRemoved) && (
             <div className="relative">
               <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
                 OLD
               </span>
-              {diff.old_value ? (
+              {oldValue ? (
                 <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-red-300 bg-red-50/30 opacity-60">
                   <Image
-                    src={diff.old_value}
+                    src={oldValue}
                     alt="Previous image"
                     fill
                     className="object-cover"
@@ -393,20 +392,20 @@ export default function LabelTagsTabs({
               )}
             </div>
           )}
-          {diff.old_value && diff.new_value && !isRemoved && !isAdded && (
+          {oldValue && newValue && !isRemoved && !isAdded && (
             <div className="flex items-center justify-center">
               <PiArrowRightBold className="text-muted-foreground/50 rotate-90" />
             </div>
           )}
-          {(diff.new_value || isAdded) && !isRemoved && (
+          {(newValue || isAdded) && !isRemoved && (
             <div className="relative">
               <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
                 NEW
               </span>
-              {diff.new_value ? (
+              {newValue ? (
                 <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-blue-300 bg-blue-50/30">
                   <Image
-                    src={diff.new_value}
+                    src={newValue}
                     alt="New image"
                     fill
                     className="object-cover"
@@ -427,7 +426,7 @@ export default function LabelTagsTabs({
 
     return (
       <span className="inline-flex flex-wrap items-center gap-2">
-        {(diff.old_value !== null || isRemoved) && (
+        {(diff.old_value != null || isRemoved) && (
           <span className="relative group/old">
             <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
               {format(diff.old_value) || ""}
@@ -435,14 +434,14 @@ export default function LabelTagsTabs({
           </span>
         )}
 
-        {diff.old_value !== null &&
-          diff.new_value !== null &&
+        {diff.old_value != null &&
+          diff.new_value != null &&
           !isRemoved &&
           !isAdded && (
             <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
           )}
 
-        {(diff.new_value !== null || isAdded) && !isRemoved && (
+        {(diff.new_value != null || isAdded) && !isRemoved && (
           <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
             {format(diff.new_value) || ""}
           </span>

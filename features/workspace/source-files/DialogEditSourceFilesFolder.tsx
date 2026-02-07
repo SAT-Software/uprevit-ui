@@ -35,6 +35,11 @@ interface FormValues {
   folderName: string;
 }
 
+type ProductLinkItem = {
+  _id: string;
+  product_name: string;
+};
+
 export default function DialogEditSourceFilesFolder({
   currentFolder,
   folderId,
@@ -48,7 +53,8 @@ export default function DialogEditSourceFilesFolder({
   const [selectedProductId, setSelectedProductId] = useState("");
   const { data: productsData, isLoading: productsLoading } =
     useGetAllProducts();
-  const products = productsData?.result?.products ?? [];
+  const products =
+    (productsData?.result?.products as ProductLinkItem[]) ?? [];
   const isRootFolder = currentFolder?.parentId == null;
   const noneProductValue = "none";
 
@@ -177,7 +183,7 @@ export default function DialogEditSourceFilesFolder({
                         No products found
                       </SelectItem>
                     )}
-                    {products.map((product: any) => (
+                    {products.map((product) => (
                       <SelectItem key={product._id} value={product._id}>
                         {product.product_name}
                       </SelectItem>

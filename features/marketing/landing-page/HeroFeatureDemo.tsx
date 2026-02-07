@@ -3,7 +3,6 @@
 import { Card } from "@/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
 const screenshots = [
   "/features/feature-0.png",
@@ -26,20 +25,6 @@ export default function HeroFeatureDemo({
 }: {
   activeIndex: number;
 }) {
-  const [displayIndex, setDisplayIndex] = useState(activeIndex);
-  const [opacity, setOpacity] = useState(1);
-
-  useEffect(() => {
-    if (activeIndex !== displayIndex) {
-      setOpacity(0);
-      const timer = setTimeout(() => {
-        setDisplayIndex(activeIndex);
-        setOpacity(1);
-      }, 3000); // Wait for transition out
-      return () => clearTimeout(timer);
-    }
-  }, [activeIndex, displayIndex]);
-
   return (
     <div className="relative w-full mx-auto mt-20 mb-20 px-4 lg:px-0">
       <div className="max-w-6xl mx-auto relative">

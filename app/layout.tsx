@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Poppins } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/sonner";

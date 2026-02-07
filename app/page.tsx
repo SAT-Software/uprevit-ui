@@ -14,14 +14,6 @@ import FAQSection from "@/features/marketing/landing-page/FAQSection";
 import CTASection from "@/features/marketing/landing-page/CTASection";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 
-const features = [
-  { id: 0, name: "Labeling Standards", color: "amber" },
-  { id: 1, name: "Product Specifications", color: "blue" },
-  { id: 2, name: "Source Files", color: "emerald" },
-  { id: 3, name: "Label Components", color: "violet" },
-  { id: 4, name: "Symbols-Graphics", color: "orange" },
-];
-
 const items = [
   {
     circleIndex: 0,

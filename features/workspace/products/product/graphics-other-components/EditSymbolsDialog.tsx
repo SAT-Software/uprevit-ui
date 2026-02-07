@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState } from "react";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -88,24 +88,29 @@ export default function EditSymbolsDialog({
 
   const [isImageRemoved, setIsImageRemoved] = useState(false);
 
-  useEffect(() => {
+  const buildTags = (labels: string[]) =>
+    labels.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }));
+
+  const syncFormWithSymbol = () => {
     reset({
       componentName: symbol.componentName,
       textPresent: symbol.textPresent ? "yes" : "no",
-      labelPresence: symbol.symbolsTextPresent.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      })),
+      labelPresence: buildTags(symbol.symbolsTextPresent),
       image: null,
     });
-    setLabelPresence(
-      symbol.symbolsTextPresent.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      }))
-    );
+    setLabelPresence(buildTags(symbol.symbolsTextPresent));
     setIsImageRemoved(false);
-  }, [symbol, reset]);
+  };
+
+  const handleDialogChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      syncFormWithSymbol();
+    }
+    onOpenChange(nextOpen);
+  };
 
   const { mutate: updateSymbolsData, isPending } = useUpdateProductTabData();
 
@@ -161,7 +166,7 @@ export default function EditSymbolsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">

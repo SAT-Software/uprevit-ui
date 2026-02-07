@@ -4,12 +4,10 @@ import SchematicsSymbolsTabs from "@/features/workspace/products/product/graphic
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
-import Link from "next/link";
 import {
-  PiHouseDuotone,
-  PiCaretRightDuotone,
   PiShapesDuotone,
 } from "react-icons/pi";
+import type { DiffItem } from "@/utils/deepDiff";
 
 interface SymbolGraphicItem {
   _id: string;
@@ -51,8 +49,8 @@ export default function Page() {
     "submitted";
 
   // Filter diffs for symbols_graphics only
-  const allDiffs = diffData?.result?.diffs || [];
-  const symbolsGraphicsDiffs = allDiffs.filter((d: any) =>
+  const allDiffs = diffData?.result?.diffs ?? [];
+  const symbolsGraphicsDiffs = allDiffs.filter((d: DiffItem) =>
     d.path.startsWith("symbols_graphics.data")
   );
 
@@ -123,12 +121,15 @@ export default function Page() {
 
   // Get the appropriate data source
   // In redline view, use next_version data for correct ordering (follows new version sequence)
-  const symbolsGraphicsData =
+  const symbolsGraphicsData: SymbolGraphicItem[] =
     isRedlineView && diffData?.result?.next_version
-      ? diffData.result.next_version.symbols_graphics?.data || []
-      : data?.result?.data?.symbols_graphics?.data || [];
+      ? (diffData.result.next_version.symbols_graphics?.data as
+          | SymbolGraphicItem[]
+          | undefined) || []
+      : (data?.result?.data?.symbols_graphics?.data as SymbolGraphicItem[]) ||
+        [];
 
-  let symbolsGraphics = (symbolsGraphicsData as SymbolGraphicItem[]) || [];
+  let symbolsGraphics = symbolsGraphicsData || [];
 
   // In redline view, mark added items and append removed items
   if (isRedlineView && symbolsGraphicsDiffs.length > 0) {
@@ -136,11 +137,11 @@ export default function Page() {
     const addedIndices = new Set(
       symbolsGraphicsDiffs
         .filter(
-          (d: any) =>
+          (d) =>
             d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
             d.status === "added"
         )
-        .map((d: any) => {
+        .map((d) => {
           const match = d.path.match(/\[(\d+)\]$/);
           return match ? parseInt(match[1]) : -1;
         })
@@ -157,13 +158,13 @@ export default function Page() {
     // These need to be appended at the end since they don't exist in new version
     const removedItems = symbolsGraphicsDiffs
       .filter(
-        (d: any) =>
+        (d) =>
           d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
           d.status === "removed" &&
           d.old_value
       )
-      .map((d: any) => ({
-        ...d.old_value,
+      .map((d) => ({
+        ...(d.old_value as SymbolGraphicItem),
         _isRemovedFromDiff: true,
       }));
 

@@ -5,8 +5,7 @@ import { toast } from "sonner";
 
 type UpdateProductProps = Partial<Product> & {
   action?: string;
-  data?: any;
-  [key: string]: any;
+  data?: unknown;
 };
 
 export function useUpdateProduct() {

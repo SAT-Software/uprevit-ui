@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PiTextAaDuotone } from "react-icons/pi";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
@@ -20,33 +20,44 @@ type Props = {
   markerEditor: TextMarkerEditor;
 } & PanelProps;
 
-const FontPanel = ({ markerEditor, variant = "secondary" }: Props) => {
-  const [color, setColor] = useState(markerEditor.color);
-  const [fontFamily, setFontFamily] = useState(markerEditor.fontFamily);
-  const [fontSize, setFontSize] = useState(markerEditor.fontSize.value);
+let markerEditorIdCounter = 0;
+const markerEditorIds = new WeakMap<object, number>();
+
+const getMarkerEditorKey = (editor: object) => {
+  if (!markerEditorIds.has(editor)) {
+    markerEditorIdCounter += 1;
+    markerEditorIds.set(editor, markerEditorIdCounter);
+  }
+  return markerEditorIds.get(editor) ?? 0;
+};
+
+const FontPanelBody = ({ markerEditor, variant = "secondary" }: Props) => {
+  const markerEditorRef = useRef(markerEditor);
+  const [color, setColor] = useState(() => markerEditor.color);
+  const [fontFamily, setFontFamily] = useState(() => markerEditor.fontFamily);
+  const [fontSize, setFontSize] = useState(() => markerEditor.fontSize.value);
 
   useEffect(() => {
-    setColor(markerEditor.color);
-    setFontFamily(markerEditor.fontFamily);
-    setFontSize(markerEditor.fontSize.value);
+    markerEditorRef.current = markerEditor;
   }, [markerEditor]);
 
   const handleColorChange = (newValue: string) => {
-    markerEditor.color = newValue;
+    markerEditorRef.current.color = newValue;
     setColor(newValue);
   };
 
   const handleFontFamilyChange = (newValue: string) => {
-    markerEditor.fontFamily = newValue;
+    markerEditorRef.current.fontFamily = newValue;
     setFontFamily(newValue);
   };
 
   const handleFontSizeChange = (newValue: string) => {
     const newValueNum = parseFloat(newValue);
-    markerEditor.fontSize = {
+    const currentFontSize = markerEditorRef.current.fontSize;
+    markerEditorRef.current.fontSize = {
       value: newValueNum,
-      units: markerEditor.fontSize.units,
-      step: markerEditor.fontSize.step,
+      units: currentFontSize.units,
+      step: currentFontSize.step,
     };
     setFontSize(newValueNum);
   };
@@ -104,6 +115,11 @@ const FontPanel = ({ markerEditor, variant = "secondary" }: Props) => {
       </div>
     </ToolboxPanel>
   );
+};
+
+const FontPanel = (props: Props) => {
+  const markerKey = getMarkerEditorKey(props.markerEditor as object);
+  return <FontPanelBody key={markerKey} {...props} />;
 };
 
 export default FontPanel;

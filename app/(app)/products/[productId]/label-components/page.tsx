@@ -6,6 +6,7 @@ import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDi
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
+import type { DiffItem } from "@/utils/deepDiff";
 
 interface ComponentItem {
   _id: string;
@@ -50,8 +51,8 @@ export default function Page() {
     componentsData?.result?.data?.product_data?.data?.status === "submitted";
 
   // Filter diffs for label_components only
-  const allDiffs = diffData?.result?.diffs || [];
-  const labelComponentDiffs = allDiffs.filter((d: any) =>
+  const allDiffs = diffData?.result?.diffs ?? [];
+  const labelComponentDiffs = allDiffs.filter((d: DiffItem) =>
     d.path.startsWith("label_components.data")
   );
 
@@ -94,21 +95,24 @@ export default function Page() {
     // Find whole-item additions (e.g., label_components.data[1] added)
     const addedItems = labelComponentDiffs
       .filter(
-        (d: any) =>
+        (d) =>
           d.path.match(/^label_components\.data\[\d+\]$/) &&
           d.status === "added" &&
           d.new_value
       )
-      .map((d: any) => ({
-        _id: d.new_value._id || `diff-${d.path}`,
-        component_number: d.new_value.component_number || "",
-        image: d.new_value.image || "",
-        component_description: d.new_value.component_description || "",
-        label_type: d.new_value.label_type || [],
-        dimensions: d.new_value.dimensions || "",
-        component_type: d.new_value.component_type || "",
-        _isFromDiff: true,
-      }));
+      .map((d) => {
+        const newValue = d.new_value as Partial<LabelComponentItem>;
+        return {
+          _id: newValue._id || `diff-${d.path}`,
+          component_number: newValue.component_number || "",
+          image: newValue.image || "",
+          component_description: newValue.component_description || "",
+          label_type: newValue.label_type || [],
+          dimensions: newValue.dimensions || "",
+          component_type: newValue.component_type || "",
+          _isFromDiff: true,
+        };
+      });
 
     return [...currentComponents, ...addedItems];
   })();

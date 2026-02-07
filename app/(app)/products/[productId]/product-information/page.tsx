@@ -14,11 +14,13 @@ import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import { cn } from "@/lib/utils";
 import { AuditLog } from "@/types/audit-log";
+import type { ProductMetadata } from "@/types/product";
 import { SourceFilesFolder } from "@/types/source-files";
 import {
   formatToLocalDate,
   formatToLocalDateTime,
 } from "@/utils/formatDateAndTimeLocal";
+import type { DiffItem } from "@/utils/deepDiff";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -33,6 +35,97 @@ import {
   PiMapPinDuotone,
   PiTagDuotone,
 } from "react-icons/pi";
+
+type ProductEditData = {
+  id?: string;
+  product_name?: string;
+  product_description?: string;
+  target_date?: string;
+  completion_date?: string;
+  market_geography?: string;
+  country_of_origin?: string;
+  oem_contract_manufacturer?: string;
+  commercial_clinical?: string;
+  manufacturing_location?: string;
+};
+
+type ProductCustomField = {
+  _id?: string;
+  label?: string;
+  value?: string;
+};
+
+type ProductMetadataView = Omit<ProductMetadata, "status"> & {
+  status?: "draft" | "submitted" | "archived";
+};
+
+type ProductInformationTabPayload = {
+  data?: ProductEditData;
+  custom_fields?: ProductCustomField[];
+  product_data?: { data?: ProductMetadataView };
+  auditLogs?: AuditLog[];
+};
+
+type ProductInformationTabResponse = {
+  result?: { data?: ProductInformationTabPayload };
+};
+
+type RedlineValueProps = {
+  value: string;
+  diff?: DiffItem | null;
+  formatFn?: (v: unknown) => string;
+  isRedlineView: boolean;
+};
+
+function RedlineValue({
+  value,
+  diff,
+  formatFn,
+  isRedlineView,
+}: RedlineValueProps) {
+  if (!isRedlineView || !diff) return <>{value}</>;
+  const format =
+    formatFn ||
+    ((v: unknown) => {
+      if (v && typeof v === "object" && "value" in v) {
+        const objectValue = (v as { value?: unknown }).value;
+        return typeof objectValue === "string"
+          ? objectValue
+          : objectValue != null
+            ? String(objectValue)
+            : "";
+      }
+      return typeof v === "string" ? v : v != null ? String(v) : "";
+    });
+
+  const isRemoved = diff.status === "removed";
+  const isAdded = diff.status === "added";
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {(diff.old_value !== null || isRemoved) && (
+        <span className="relative group/old">
+          <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
+            {format(diff.old_value) || ""}
+          </span>
+        </span>
+      )}
+
+      {diff.old_value !== null &&
+        diff.new_value !== null &&
+        !isRemoved &&
+        !isAdded && (
+          <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
+        )}
+
+      {(diff.new_value !== null || isAdded) && !isRemoved && (
+        <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
+          {format(diff.new_value) || ""}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
@@ -54,14 +147,14 @@ export default function Page() {
 
   const linkedFolders = (linkedFoldersData?.result || []) as SourceFilesFolder[];
 
-  const diffs = diffRedlineData?.result?.diffs || [];
+  const diffs = diffRedlineData?.result?.diffs ?? [];
   const getDiff = (...paths: string[]) => {
-    return diffs.find((d: any) => paths.includes(d.path));
+    return diffs.find((d: DiffItem) => paths.includes(d.path));
   };
 
   const getFieldDiffs = (basePath: string) => {
     return diffs.filter(
-      (d: any) => d.path === basePath || d.path.startsWith(basePath + ".")
+      (d: DiffItem) => d.path === basePath || d.path.startsWith(basePath + ".")
     );
   };
 
@@ -72,7 +165,7 @@ export default function Page() {
     const fieldDiffs = getFieldDiffs(basePath);
     if (fieldDiffs.length === 0) return null;
 
-    const wholeDiff = fieldDiffs.find((d: any) => d.path === basePath);
+    const wholeDiff = fieldDiffs.find((d: DiffItem) => d.path === basePath);
     if (wholeDiff) return wholeDiff.status;
 
     return "modified";
@@ -80,65 +173,27 @@ export default function Page() {
 
   const getCustomFieldValueDiff = (basePath: string) => {
     return diffs.find(
-      (d: any) => d.path === `${basePath}.value` || d.path === basePath
+      (d: DiffItem) => d.path === `${basePath}.value` || d.path === basePath
     );
   };
 
-  // Simple inline component for redline display
-  const RedlineValue = ({
-    value,
-    diff,
-    formatFn,
-  }: {
-    value: string;
-    diff: any;
-    formatFn?: (v: any) => string;
-  }) => {
-    if (!isRedlineView || !diff) return <>{value}</>;
-    // Default format: if value is an object (like custom field), extract .value property
-    const format =
-      formatFn ||
-      ((v: any) => {
-        if (v && typeof v === "object") return v.value?.toString() || "";
-        return v?.toString() || "";
-      });
-
-    const isRemoved = diff.status === "removed";
-    const isAdded = diff.status === "added";
-
-    return (
-      <span className="inline-flex flex-wrap items-center gap-2">
-        {/* Old value - show for modified and removed */}
-        {(diff.old_value !== null || isRemoved) && (
-          <span className="relative group/old">
-            <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
-              {format(diff.old_value) || ""}
-            </span>
-          </span>
-        )}
-
-        {/* Arrow separator for modified */}
-        {diff.old_value !== null &&
-          diff.new_value !== null &&
-          !isRemoved &&
-          !isAdded && (
-            <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
-          )}
-
-        {/* New value - show for modified and added */}
-        {(diff.new_value !== null || isAdded) && !isRemoved && (
-          <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
-            {format(diff.new_value) || ""}
-          </span>
-        )}
-      </span>
-    );
-  };
-
-  const productData = { ...data?.result?.data?.data, id: productId };
-  const customFieldsData = data?.result?.data?.custom_fields;
-  const productMetadata = data?.result?.data?.product_data?.data;
-  const productAuditLog = data?.result?.data?.auditLogs;
+  const productTabData = (data as ProductInformationTabResponse | undefined)
+    ?.result?.data;
+  const productData = useMemo(() => {
+    const baseData = productTabData?.data;
+    return baseData ? { ...baseData, id: productId } : undefined;
+  }, [productTabData?.data, productId]);
+  const customFieldsData = productTabData?.custom_fields;
+  const productMetadata = productTabData?.product_data?.data;
+  const productAuditLog = productTabData?.auditLogs;
+  const productMetadataForDialog = productMetadata as ProductMetadata | undefined;
+  const customFieldsForDialog = (customFieldsData ?? []).map(
+    (field, index) => ({
+      _id: field._id ?? `custom-${index}`,
+      label: field.label ?? "",
+      value: field.value ?? "",
+    })
+  );
 
   const auditLogs = (productAuditLog as AuditLog[]) || [];
   const creationLog = auditLogs.find((log) => log.action === "create");
@@ -184,13 +239,12 @@ export default function Page() {
     ];
 
     if (customFieldsData && customFieldsData.length > 0) {
-      const customFieldsWithIcons = customFieldsData.map(
-        (field: any, idx: number) => ({
-          ...field,
-          icon: PiTagDuotone,
-          diffPath: `product_information.custom_fields[${idx}]`,
-        })
-      );
+      const customFieldsWithIcons = customFieldsData.map((field, idx) => ({
+        label: field.label ?? "Custom Field",
+        value: field.value ?? "N/A",
+        icon: PiTagDuotone,
+        diffPath: `product_information.custom_fields[${idx}]`,
+      }));
       return [...baseFields, ...customFieldsWithIcons];
     }
 
@@ -284,6 +338,7 @@ export default function Page() {
                   "product_description",
                   "product_information.data.product_description"
                 )}
+                isRedlineView={isRedlineView}
               />
             </p>
             <div className="flex flex-col items-start gap-2 text-xs text-muted-foreground w-full mt-auto">
@@ -314,7 +369,10 @@ export default function Page() {
                         "actual_completion_date",
                         "product_information.data.actual_completion_date"
                       )}
-                      formatFn={(v) => v?.slice?.(0, 10) || "N/A"}
+                      formatFn={(v) =>
+                        typeof v === "string" ? v.slice(0, 10) : "N/A"
+                      }
+                      isRedlineView={isRedlineView}
                     />
                   </span>
                 </span>
@@ -392,15 +450,19 @@ export default function Page() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-2 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <EditProductDialog
-                product={productData!}
-                productMetadata={productMetadata!}
-              />
-              <ProductInformationCustomFieldEditDialog
-                product={productData!}
-                productMetadata={productMetadata!}
-                customFieldsData={customFieldsData!}
-              />
+              {productData && productMetadataForDialog && (
+                <>
+                  <EditProductDialog
+                    product={productData}
+                    productMetadata={productMetadataForDialog}
+                  />
+                  <ProductInformationCustomFieldEditDialog
+                    product={productData}
+                    productMetadata={productMetadataForDialog}
+                    customFieldsData={customFieldsForDialog}
+                  />
+                </>
+              )}
             </div>
 
             {/* Audit Badges */}
@@ -536,7 +598,11 @@ export default function Page() {
                     )}
                     title={field.value}
                   >
-                    <RedlineValue value={field.value} diff={valueDiff} />
+                    <RedlineValue
+                      value={field.value}
+                      diff={valueDiff}
+                      isRedlineView={isRedlineView}
+                    />
                   </div>
                 </div>
               );

@@ -56,11 +56,15 @@ export default function Page() {
     compareVersionId,
   );
 
-  const workbookData = productTabData?.result?.data?.data?.workbook_data;
+  const workbookData =
+    productTabData?.result?.data?.data
+      ?.workbook_data as ProductDataTableSchema | undefined;
   const baseVersionWorkbook =
-    diffData?.result?.base_version?.product_data?.data?.workbook_data;
+    diffData?.result?.base_version?.product_data?.data
+      ?.workbook_data as ProductDataTableSchema | undefined;
   const nextVersionWorkbook =
-    diffData?.result?.next_version?.product_data?.data?.workbook_data;
+    diffData?.result?.next_version?.product_data?.data
+      ?.workbook_data as ProductDataTableSchema | undefined;
   const resolvedWorkbookData =
     isRedlineView && nextVersionWorkbook ? nextVersionWorkbook : workbookData;
 

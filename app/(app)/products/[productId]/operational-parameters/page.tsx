@@ -9,17 +9,16 @@ import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useParams, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  PiHouseDuotone,
-  PiCaretRightDuotone,
   PiFloppyDiskDuotone,
   PiSlidersHorizontalDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
 import dynamic from "next/dynamic";
+import type { DiffItem } from "@/utils/deepDiff";
+import type { IWorkbookData } from "@univerjs/core";
 
 // Dynamic import for read-only viewer (SSR disabled)
 const UniverReadOnlyViewer = dynamic(
@@ -60,22 +59,21 @@ export default function Page() {
     compareVersionId
   );
 
-  const productName =
-    productInfoData?.result?.data?.data?.product_name || "Product";
-
   // Check if product is submitted - disable editing buttons
   const isSubmitted =
     productInfoData?.result?.data?.product_data?.data?.status === "submitted";
 
   // Extract base and next version workbook data for redline view
   const baseVersionWorkbook =
-    diffData?.result?.base_version?.operational_parameters?.data?.workbook_data;
+    diffData?.result?.base_version?.operational_parameters?.data
+      ?.workbook_data as IWorkbookData | undefined;
   const nextVersionWorkbook =
-    diffData?.result?.next_version?.operational_parameters?.data?.workbook_data;
+    diffData?.result?.next_version?.operational_parameters?.data
+      ?.workbook_data as IWorkbookData | undefined;
 
   // Filter diffs for operational_parameters only
-  const allDiffs = diffData?.result?.diffs || [];
-  const operationalParamsDiffs = allDiffs.filter((d: any) =>
+  const allDiffs = diffData?.result?.diffs ?? [];
+  const operationalParamsDiffs = allDiffs.filter((d: DiffItem) =>
     d.path.startsWith("operational_parameters")
   );
 

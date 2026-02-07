@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, SVGProps, useEffect, useState } from "react";
+import { FC, SVGProps, useEffect, useRef, useState } from "react";
 
 import {
   PiPenDuotone,
@@ -33,47 +33,56 @@ const StrokeStyleVisual: FC<SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-const StrokePanel = ({ markerEditor, variant = "ghost" }: PanelProps) => {
-  const [strokeWidth, setStrokeWidth] = useState(markerEditor.strokeWidth);
-  const [strokeStyle, setStrokeStyle] = useState(
-    markerEditor.strokeDasharray === "" ? "0" : markerEditor.strokeDasharray
+let markerEditorIdCounter = 0;
+const markerEditorIds = new WeakMap<object, number>();
+
+const getMarkerEditorKey = (editor: object) => {
+  if (!markerEditorIds.has(editor)) {
+    markerEditorIdCounter += 1;
+    markerEditorIds.set(editor, markerEditorIdCounter);
+  }
+  return markerEditorIds.get(editor) ?? 0;
+};
+
+const StrokePanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
+  const markerEditorRef = useRef(markerEditor);
+  const [strokeWidth, setStrokeWidth] = useState(
+    () => markerEditor.strokeWidth
   );
-  const [strokeColor, setStrokeColor] = useState(markerEditor.strokeColor);
-  const [arrowType, setArrowType] = useState(
+  const [strokeStyle, setStrokeStyle] = useState(
+    () => (markerEditor.strokeDasharray === "" ? "0" : markerEditor.strokeDasharray)
+  );
+  const [strokeColor, setStrokeColor] = useState(
+    () => markerEditor.strokeColor
+  );
+  const [arrowType, setArrowType] = useState(() =>
     markerEditor.is(ArrowMarkerEditor) ? markerEditor.arrowType : "none"
   );
 
   useEffect(() => {
-    setStrokeWidth(markerEditor.strokeWidth);
-    setStrokeStyle(
-      markerEditor.strokeDasharray === "" ? "0" : markerEditor.strokeDasharray
-    );
-    setStrokeColor(markerEditor.strokeColor);
-    setArrowType(
-      markerEditor.is(ArrowMarkerEditor) ? markerEditor.arrowType : "none"
-    );
+    markerEditorRef.current = markerEditor;
   }, [markerEditor]);
 
   const handleStrokeWidthChange = (newValue: number) => {
-    markerEditor.strokeWidth = newValue;
+    markerEditorRef.current.strokeWidth = newValue;
     setStrokeWidth(newValue);
   };
 
   const handleStrokeStyleChange = (newValue: string) => {
-    markerEditor.strokeDasharray = newValue;
+    markerEditorRef.current.strokeDasharray = newValue;
     setStrokeStyle(newValue);
   };
 
   const handleStrokeColorChange = (newValue: string) => {
-    markerEditor.strokeColor = newValue;
+    markerEditorRef.current.strokeColor = newValue;
     setStrokeColor(newValue);
   };
 
   const handleArrowTypeChange = (newValue: ArrowType) => {
-    if (!markerEditor.is(ArrowMarkerEditor)) {
+    if (!markerEditorRef.current.is(ArrowMarkerEditor)) {
       return;
     }
-    markerEditor.arrowType = newValue;
+    markerEditorRef.current.arrowType = newValue;
     setArrowType(newValue);
   };
 
@@ -156,6 +165,11 @@ const StrokePanel = ({ markerEditor, variant = "ghost" }: PanelProps) => {
       </div>
     </ToolboxPanel>
   );
+};
+
+const StrokePanel = (props: PanelProps) => {
+  const markerKey = getMarkerEditorKey(props.markerEditor as object);
+  return <StrokePanelBody key={markerKey} {...props} />;
 };
 
 export default StrokePanel;

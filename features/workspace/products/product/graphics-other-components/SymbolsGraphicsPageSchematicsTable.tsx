@@ -3,6 +3,7 @@
 import {
   ColumnDef,
   ColumnFiltersState,
+  Column,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -15,7 +16,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Fragment, useState } from "react";
+import { Fragment, useState, type ElementType } from "react";
 import { usePathname } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +64,7 @@ import {
 } from "react-icons/pi";
 import EditSchematicsDialog from "./EditSchematicsDialog";
 import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
+import type { DiffItem } from "@/utils/deepDiff";
 
 type Item = {
   id: string;
@@ -75,12 +77,15 @@ type Item = {
   _originalIndex?: number;
 };
 
-// Type for diff data
-type DiffItem = {
-  path: string;
-  status: "added" | "removed" | "modified";
-  old_value?: any;
-  new_value?: any;
+type TableMeta = {
+  isSubmitted?: boolean;
+  isRedlineView?: boolean;
+  diffs?: DiffItem[];
+  getDiff?: (path: string) => DiffItem | null;
+  getRowStatus?: (
+    rowIndex: number,
+    originalIndex: number
+  ) => "added" | "removed" | "modified" | null;
 };
 
 // Helper component for displaying redline values
@@ -90,12 +95,15 @@ const RedlineCell = ({
   formatFn,
   showBadgeStyle = false,
 }: {
-  value: any;
+  value: unknown;
   diff: DiffItem | null;
-  formatFn?: (v: any, isOld?: boolean, isNew?: boolean) => React.ReactNode;
+  formatFn?: (v: unknown, isOld?: boolean, isNew?: boolean) => React.ReactNode;
   showBadgeStyle?: boolean;
 }) => {
-  const format = formatFn || ((v: any) => v?.toString() || "-");
+  const format =
+    formatFn ||
+    ((v: unknown) =>
+      typeof v === "string" ? v : v != null ? String(v) : "-");
   if (!diff) return <>{format(value)}</>;
 
   const isAdded = diff.status === "added";
@@ -136,9 +144,9 @@ const SortableHeader = ({
   title,
   icon: Icon,
 }: {
-  column?: any;
+  column?: Column<Item, unknown>;
   title: string;
-  icon: any;
+  icon: ElementType;
 }) => {
   if (!column) {
     return (
@@ -240,7 +248,7 @@ const columns: ColumnDef<Item>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].text`)
@@ -249,7 +257,11 @@ const columns: ColumnDef<Item>[] = [
         <RedlineCell
           value={row.getValue("componentName")}
           diff={diff}
-          formatFn={(v) => <span className="font-medium">{v}</span>}
+          formatFn={(v) => (
+            <span className="font-medium">
+              {typeof v === "string" ? v : String(v ?? "")}
+            </span>
+          )}
         />
       ) : (
         <span className="font-medium">{row.getValue("componentName")}</span>
@@ -267,7 +279,7 @@ const columns: ColumnDef<Item>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const originalIndex = row.original._originalIndex ?? row.index;
       const diff = meta?.isRedlineView
         ? meta.getDiff?.(`symbols_graphics.data[${originalIndex}].description`)
@@ -278,7 +290,7 @@ const columns: ColumnDef<Item>[] = [
           diff={diff}
           formatFn={(v) => (
             <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
-              {v || "-"}
+              {typeof v === "string" ? v : v != null ? String(v) : "-"}
             </div>
           )}
         />
@@ -300,7 +312,7 @@ const columns: ColumnDef<Item>[] = [
       />
     ),
     cell: ({ row, table }) => {
-      const meta = table.options.meta as any;
+      const meta = table.options.meta as TableMeta | undefined;
       const labels = row.getValue("presentOnLabels") as string[];
       const originalIndex = row.original._originalIndex ?? row.index;
 

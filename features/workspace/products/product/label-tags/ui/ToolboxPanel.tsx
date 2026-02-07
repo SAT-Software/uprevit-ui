@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, type ElementType } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
 
 type Props = {
   title: string;
-  icon: any;
+  icon: ElementType;
   variant?: "ghost" | "outline" | "secondary";
   children: ReactNode;
 } & React.ComponentProps<"div">;

@@ -17,6 +17,8 @@ import {
   PiWarningCircleDuotone,
 } from "react-icons/pi";
 import { toast } from "sonner";
+import type { DiffItem } from "@/utils/deepDiff";
+import type { IWorkbookData } from "@univerjs/core";
 
 // Dynamic import for read-only viewer (SSR disabled) - reusing from operational-parameters
 const UniverReadOnlyViewer = dynamic(
@@ -56,22 +58,21 @@ export default function Page() {
     compareVersionId
   );
 
-  const productName =
-    productInfoData?.result?.data?.data?.product_name || "Product";
-
   // Check if product is submitted - disable editing buttons
   const isSubmitted =
     productInfoData?.result?.data?.product_data?.data?.status === "submitted";
 
   // Extract base and next version workbook data for redline view
   const baseVersionWorkbook =
-    diffData?.result?.base_version?.product_data?.data?.workbook_data;
+    diffData?.result?.base_version?.product_data?.data
+      ?.workbook_data as IWorkbookData | undefined;
   const nextVersionWorkbook =
-    diffData?.result?.next_version?.product_data?.data?.workbook_data;
+    diffData?.result?.next_version?.product_data?.data
+      ?.workbook_data as IWorkbookData | undefined;
 
   // Filter diffs for product_data only
-  const allDiffs = diffData?.result?.diffs || [];
-  const productDataDiffs = allDiffs.filter((d: any) =>
+  const allDiffs = diffData?.result?.diffs ?? [];
+  const productDataDiffs = allDiffs.filter((d: DiffItem) =>
     d.path.startsWith("product_data")
   );
 

@@ -32,12 +32,12 @@ interface TimeData {
 }
 
 interface Department {
-  _id: string;
+  _id?: string;
   department_name: string;
 }
 
 interface Project {
-  _id: string;
+  _id?: string;
   project_name: string;
 }
 

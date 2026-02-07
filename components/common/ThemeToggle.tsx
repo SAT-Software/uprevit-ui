@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,13 +12,7 @@ import { PiMoonDuotone, PiSunDuotone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ background }: { background?: string }) {
-  const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Avoid hydration mismatch by only rendering after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -31,11 +24,8 @@ export function ThemeToggle({ background }: { background?: string }) {
         asChild
       >
         <Button variant="outline" className="size-8" size="icon">
-          {mounted && resolvedTheme === "dark" ? (
-            <PiMoonDuotone className="h-3 w-3" />
-          ) : (
-            <PiSunDuotone className="h-3 w-3" />
-          )}
+          <PiSunDuotone className="h-3 w-3 dark:hidden" />
+          <PiMoonDuotone className="h-3 w-3 hidden dark:block" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
