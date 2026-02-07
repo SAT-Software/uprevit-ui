@@ -44,7 +44,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
-  parentId?: string;
+  parentId?: string | null;
 }
 
 type ProductLinkItem = {

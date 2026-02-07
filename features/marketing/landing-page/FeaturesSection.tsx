@@ -1,23 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
-import { PiBoundingBoxDuotone, PiImageDuotone } from "react-icons/pi";
+import { PiBoundingBoxDuotone } from "react-icons/pi";
 import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";
 import { Worksteps } from "./Worksteps";
 import { LabelDataTaggingCard } from "./LabelDataTaggingCard";
-import { useTheme } from "next-themes";
-
 export default function FeaturesSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="w-full mt-40 mb-20 pointer-events-auto">
       <div className="max-w-6xl mx-auto mb-8">
         <Badge
-          suppressHydrationWarning
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
+          variant="outline"
+          className="mb-8 z-60 bg-white text-foreground shadow-md px-2 py-0.5 dark:bg-transparent"
         >
           <PiBoundingBoxDuotone className="mr-1 text-foreground/50" />
           <span className="font-medium">Features</span>

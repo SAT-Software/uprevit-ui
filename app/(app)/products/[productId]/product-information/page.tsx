@@ -450,15 +450,19 @@ export default function Page() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-2 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <EditProductDialog
-                product={productData!}
-                productMetadata={productMetadataForDialog!}
-              />
-              <ProductInformationCustomFieldEditDialog
-                product={productData!}
-                productMetadata={productMetadataForDialog!}
-                customFieldsData={customFieldsForDialog}
-              />
+              {productData && productMetadataForDialog && (
+                <>
+                  <EditProductDialog
+                    product={productData}
+                    productMetadata={productMetadataForDialog}
+                  />
+                  <ProductInformationCustomFieldEditDialog
+                    product={productData}
+                    productMetadata={productMetadataForDialog}
+                    customFieldsData={customFieldsForDialog}
+                  />
+                </>
+              )}
             </div>
 
             {/* Audit Badges */}
