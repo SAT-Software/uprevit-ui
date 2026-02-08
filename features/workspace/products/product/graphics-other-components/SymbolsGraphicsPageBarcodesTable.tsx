@@ -101,8 +101,7 @@ const RedlineCell = ({
 }) => {
   const format =
     formatFn ||
-    ((v: unknown) =>
-      typeof v === "string" ? v : v != null ? String(v) : "-");
+    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
   if (!diff) return <>{format(value)}</>;
 
   const isAdded = diff.status === "added";
@@ -271,7 +270,7 @@ const columns: ColumnDef<Item>[] = [
       const diff = meta?.isRedlineView
         ? meta.getFieldDiff?.(
             row.original,
-            "description",
+            "componentDescription",
             row.getValue("componentDescription"),
           )
         : null;
@@ -578,7 +577,8 @@ export default function SymbolsGraphicsPageBarcodesTable({
                             {(() => {
                               const image = row.original.componentImage;
                               const hasImage =
-                                typeof image === "string" && image.trim() !== "";
+                                typeof image === "string" &&
+                                image.trim() !== "";
                               return hasImage ? (
                                 <Image
                                   src={image}
