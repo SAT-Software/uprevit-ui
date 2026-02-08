@@ -92,15 +92,22 @@ export default function Page() {
   const currentComponentsRaw =
     (componentsData?.result?.data?.data ?? []) as LabelComponentItem[];
   const currentComponents = currentComponentsRaw.map(mapComponentItem);
+  const hasDiffVersions = Boolean(
+    diffData?.result?.base_version && diffData?.result?.next_version
+  );
   const baseComponents =
-    (diffData?.result?.base_version?.label_components?.data ??
-      []) as LabelComponentItem[];
+    hasDiffVersions
+      ? ((diffData?.result?.base_version?.label_components?.data ??
+          []) as LabelComponentItem[])
+      : [];
   const nextComponents =
-    (diffData?.result?.next_version?.label_components?.data ??
-      currentComponentsRaw) as LabelComponentItem[];
+    hasDiffVersions
+      ? ((diffData?.result?.next_version?.label_components?.data ??
+          []) as LabelComponentItem[])
+      : [];
 
   const components = (() => {
-    if (!isRedlineView) return currentComponents;
+    if (!isRedlineView || !hasDiffVersions) return currentComponents;
 
     const redlineItems = buildRedlineArray(baseComponents, nextComponents, {
       getId: (item) => item._id,

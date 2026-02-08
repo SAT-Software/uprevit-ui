@@ -237,7 +237,7 @@ const columns: ColumnDef<Item>[] = [
       const diff = meta?.isRedlineView
         ? meta.getFieldDiff?.(
             row.original,
-            "text",
+            "componentName",
             row.getValue("componentName"),
           )
         : null;

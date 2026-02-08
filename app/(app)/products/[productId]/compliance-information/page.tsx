@@ -188,15 +188,23 @@ export default function Page() {
     ?.result?.data;
   const currentStandards =
     (allTabsData?.compliance_information?.data ?? []) as unknown as ComplianceItem[];
+  const hasDiffVersions = Boolean(
+    diffRedlineData?.result?.base_version && diffRedlineData?.result?.next_version
+  );
   const baseStandards =
-    (diffRedlineData?.result?.base_version?.compliance_information?.data ??
-      []) as unknown as ComplianceItem[];
+    hasDiffVersions
+      ? ((diffRedlineData?.result?.base_version?.compliance_information?.data ??
+          []) as unknown as ComplianceItem[])
+      : [];
   const nextStandards =
-    (diffRedlineData?.result?.next_version?.compliance_information?.data ??
-      currentStandards) as unknown as ComplianceItem[];
+    hasDiffVersions
+      ? ((diffRedlineData?.result?.next_version?.compliance_information?.data ??
+          []) as unknown as ComplianceItem[])
+      : [];
 
   const standards = (() => {
-    if (!isRedlineView) return currentStandards as ComplianceItemWithDiff[];
+    if (!isRedlineView || !hasDiffVersions)
+      return currentStandards as ComplianceItemWithDiff[];
 
     const redlineItems = buildRedlineArray(baseStandards, nextStandards, {
       getId: (item) => item._id,
@@ -207,10 +215,10 @@ export default function Page() {
 
     return redlineItems
       .map((item) => {
-        const data = item.next ?? item.base;
-        if (!data) return null;
+        const itemData = item.next ?? item.base;
+        if (!itemData) return null;
         return {
-          ...(data as ComplianceItem),
+          ...(itemData as ComplianceItem),
           _redlineStatus: item.status,
           _redlineDiffs: item.diffs,
           _redlineId: item.id,

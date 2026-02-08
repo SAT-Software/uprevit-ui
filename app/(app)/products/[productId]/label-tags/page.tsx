@@ -135,14 +135,20 @@ export default function Page() {
 
   const labelTagsTabData = (data as LabelTagsResponse | undefined)?.result?.data;
   const currentLabelTags = labelTagsTabData?.data ?? [];
+  const hasDiffVersions = Boolean(
+    diffData?.result?.base_version && diffData?.result?.next_version
+  );
   const baseLabelTags =
-    (diffData?.result?.base_version?.label_tags?.data ?? []) as LabelTagItem[];
+    hasDiffVersions
+      ? ((diffData?.result?.base_version?.label_tags?.data ?? []) as LabelTagItem[])
+      : [];
   const nextLabelTags =
-    (diffData?.result?.next_version?.label_tags?.data ??
-      currentLabelTags) as LabelTagItem[];
+    hasDiffVersions
+      ? ((diffData?.result?.next_version?.label_tags?.data ?? []) as LabelTagItem[])
+      : [];
 
   const labelTagsData: LabelTagItem[] = (() => {
-    if (!isRedlineView) return currentLabelTags;
+    if (!isRedlineView || !hasDiffVersions) return currentLabelTags;
 
     const redlineItems = buildRedlineArray(baseLabelTags, nextLabelTags, {
       getId: (item) => item._id,

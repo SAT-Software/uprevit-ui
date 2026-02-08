@@ -25,14 +25,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 const defaultGetId = <T>(item: T): string | undefined => {
   if (!isRecord(item)) return undefined;
   const candidate = item._id;
-  if (candidate === null) return undefined;
+  if (candidate == null) return undefined;
   return String(candidate);
 };
 
 const defaultGetParentId = <T>(item: T): string | undefined => {
   if (!isRecord(item)) return undefined;
   const candidate = item.parent_id;
-  if (candidate === null) return undefined;
+  if (candidate == null) return undefined;
   return String(candidate);
 };
 
@@ -46,14 +46,22 @@ export function buildRedlineArray<T>(
   const getFallbackKey = options.getFallbackKey;
 
   const baseById = new Map<string, Entry<T>>();
-  const baseByFallback = new Map<string, Entry<T>>();
+  const baseByFallback = new Map<string, Entry<T>[]>();
   const usedBaseIndices = new Set<number>();
 
   baseItems.forEach((item, index) => {
     const id = getId(item);
     if (id) baseById.set(id, { item, index });
     const fallbackKey = getFallbackKey?.(item);
-    if (fallbackKey) baseByFallback.set(fallbackKey, { item, index });
+    if (fallbackKey) {
+      const entries = baseByFallback.get(fallbackKey);
+      const entry = { item, index };
+      if (entries) {
+        entries.push(entry);
+      } else {
+        baseByFallback.set(fallbackKey, [entry]);
+      }
+    }
   });
 
   const pickEntry = (map: Map<string, Entry<T>>, key?: string | null) => {
@@ -61,6 +69,13 @@ export function buildRedlineArray<T>(
     const entry = map.get(key);
     if (!entry || usedBaseIndices.has(entry.index)) return undefined;
     return entry;
+  };
+
+  const pickFallbackEntry = (key?: string | null) => {
+    if (!key) return undefined;
+    const entries = baseByFallback.get(key);
+    if (!entries) return undefined;
+    return entries.find((entry) => !usedBaseIndices.has(entry.index));
   };
 
   const results: RedlineArrayItem<T>[] = [];
@@ -73,7 +88,7 @@ export function buildRedlineArray<T>(
     const baseEntry =
       pickEntry(baseById, parentId) ||
       pickEntry(baseById, nextId) ||
-      pickEntry(baseByFallback, fallbackKey);
+      pickFallbackEntry(fallbackKey);
 
     const baseItem = baseEntry?.item ?? null;
     if (baseEntry) usedBaseIndices.add(baseEntry.index);

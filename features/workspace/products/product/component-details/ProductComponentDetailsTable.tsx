@@ -333,10 +333,10 @@ const columns: ColumnDef<ComponentItem>[] = [
                   variant="outline"
                   className={`text-xs ${
                     isNewlyAdded
-                      ? "border-blue-400 text-blue-700 bg-blue-50"
+                      ? "border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500"
                       : isRemoved
-                        ? "border-red-400 text-red-700 bg-red-50 line-through"
-                      : ""
+                        ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
+                        : ""
                   }`}
                 >
                   {type}
