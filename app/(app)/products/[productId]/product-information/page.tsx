@@ -21,9 +21,11 @@ import {
   formatToLocalDateTime,
 } from "@/utils/formatDateAndTimeLocal";
 import type { DiffItem } from "@/utils/deepDiff";
+import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import type { IconType } from "react-icons";
 import {
   PiArrowRightBold,
   PiBuildingsDuotone,
@@ -53,6 +55,19 @@ type ProductCustomField = {
   _id?: string;
   label?: string;
   value?: string;
+  field_name?: string;
+  field_value?: string;
+  parent_id?: string | null;
+};
+
+type ProductCustomFieldView = {
+  _id?: string;
+  label: string;
+  value: string;
+  parent_id?: string | null;
+  _redlineStatus?: RedlineStatus;
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 };
 
 type ProductMetadataView = Omit<ProductMetadata, "status"> & {
@@ -127,6 +142,28 @@ function RedlineValue({
   );
 }
 
+type ProductInfoField = {
+  label: string;
+  value: string;
+  icon: IconType;
+  diffPath?: string;
+  isCustomField?: boolean;
+  redlineStatus?: RedlineStatus;
+  redlineDiffs?: DiffItem[];
+};
+
+const normalizeCustomField = (
+  field?: ProductCustomField | null
+): ProductCustomFieldView | null => {
+  if (!field) return null;
+  return {
+    _id: field._id,
+    parent_id: field.parent_id ?? null,
+    label: field.label ?? field.field_name ?? "Custom Field",
+    value: field.value ?? field.field_value ?? "",
+  };
+};
+
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
@@ -152,29 +189,30 @@ export default function Page() {
     return diffs.find((d: DiffItem) => paths.includes(d.path));
   };
 
-  const getFieldDiffs = (basePath: string) => {
-    return diffs.filter(
-      (d: DiffItem) => d.path === basePath || d.path.startsWith(basePath + ".")
-    );
-  };
-
-  // Helper to get overall status for a field (checks any nested diffs)
-  const getFieldStatus = (
-    basePath: string
-  ): "added" | "removed" | "modified" | null => {
-    const fieldDiffs = getFieldDiffs(basePath);
-    if (fieldDiffs.length === 0) return null;
-
-    const wholeDiff = fieldDiffs.find((d: DiffItem) => d.path === basePath);
-    if (wholeDiff) return wholeDiff.status;
-
-    return "modified";
-  };
-
-  const getCustomFieldValueDiff = (basePath: string) => {
-    return diffs.find(
-      (d: DiffItem) => d.path === `${basePath}.value` || d.path === basePath
-    );
+  const getCustomFieldDiff = (
+    field: ProductInfoField,
+    key: "label" | "value"
+  ) => {
+    if (!isRedlineView || !field.isCustomField) return null;
+    const status = field.redlineStatus;
+    const rawValue = key === "label" ? field.label : field.value;
+    if (status === "added") {
+      return {
+        path: key,
+        status: "added",
+        old_value: null,
+        new_value: rawValue,
+      } as DiffItem;
+    }
+    if (status === "removed") {
+      return {
+        path: key,
+        status: "removed",
+        old_value: rawValue,
+        new_value: null,
+      } as DiffItem;
+    }
+    return field.redlineDiffs?.find((d) => d.path === key) ?? null;
   };
 
   const productTabData = (data as ProductInformationTabResponse | undefined)
@@ -187,6 +225,60 @@ export default function Page() {
   const productMetadata = productTabData?.product_data?.data;
   const productAuditLog = productTabData?.auditLogs;
   const productMetadataForDialog = productMetadata as ProductMetadata | undefined;
+  const customFieldsView = useMemo(() => {
+    const normalizedCurrent = (customFieldsData ?? [])
+      .map(normalizeCustomField)
+      .filter(
+        (field): field is ProductCustomFieldView => field !== null
+      );
+
+    if (!isRedlineView) {
+      return normalizedCurrent;
+    }
+
+    const baseCustomFields =
+      diffRedlineData?.result?.base_version?.product_information?.custom_fields ??
+      [];
+    const nextCustomFields =
+      diffRedlineData?.result?.next_version?.product_information?.custom_fields ??
+      customFieldsData ??
+      [];
+
+    const normalizedBase = (baseCustomFields ?? [])
+      .map(normalizeCustomField)
+      .filter(
+        (field): field is ProductCustomFieldView => field !== null
+      );
+    const normalizedNext = (nextCustomFields ?? [])
+      .map(normalizeCustomField)
+      .filter(
+        (field): field is ProductCustomFieldView => field !== null
+      );
+
+    const redlineItems = buildRedlineArray(normalizedBase, normalizedNext, {
+      getId: (item) => item._id,
+      getParentId: (item) => item.parent_id ?? undefined,
+      getFallbackKey: (item) => item.label,
+    });
+
+    return redlineItems
+      .map((item) => {
+        const data = item.next ?? item.base;
+        if (!data) return null;
+        return {
+          ...data,
+          _redlineStatus: item.status,
+          _redlineDiffs: item.diffs,
+          _redlineId: item.id,
+        };
+      })
+      .filter(Boolean) as ProductCustomFieldView[];
+  }, [
+    customFieldsData,
+    diffRedlineData?.result?.base_version?.product_information?.custom_fields,
+    diffRedlineData?.result?.next_version?.product_information?.custom_fields,
+    isRedlineView,
+  ]);
   const customFieldsForDialog = (customFieldsData ?? []).map(
     (field, index) => ({
       _id: field._id ?? `custom-${index}`,
@@ -205,7 +297,7 @@ export default function Page() {
 
   const fields = useMemo(() => {
     if (!productData) return [];
-    const baseFields = [
+    const baseFields: ProductInfoField[] = [
       {
         label: "Market / Geography",
         value: productData.market_geography || "N/A",
@@ -238,18 +330,22 @@ export default function Page() {
       },
     ];
 
-    if (customFieldsData && customFieldsData.length > 0) {
-      const customFieldsWithIcons = customFieldsData.map((field, idx) => ({
-        label: field.label ?? "Custom Field",
-        value: field.value ?? "N/A",
-        icon: PiTagDuotone,
-        diffPath: `product_information.custom_fields[${idx}]`,
-      }));
+    if (customFieldsView.length > 0) {
+      const customFieldsWithIcons: ProductInfoField[] = customFieldsView.map(
+        (field) => ({
+          label: field.label || "Custom Field",
+          value: field.value || "N/A",
+          icon: PiTagDuotone,
+          isCustomField: true,
+          redlineStatus: field._redlineStatus,
+          redlineDiffs: field._redlineDiffs,
+        })
+      );
       return [...baseFields, ...customFieldsWithIcons];
     }
 
     return baseFields;
-  }, [productData, customFieldsData]);
+  }, [customFieldsView, productData]);
 
   if (isLoading) {
     return (
@@ -288,8 +384,6 @@ export default function Page() {
   }
 
   if (isError || !productData) return notFound();
-
-  console.log("diff product Data", diffRedlineData);
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
@@ -511,18 +605,25 @@ export default function Page() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mx-2">
             {fields.map((field, idx) => {
-              // For custom fields (with array index), check for nested diffs
-              const isCustomField = field.diffPath.includes("custom_fields[");
+              const isCustomField = Boolean(field.isCustomField);
 
-              // Get status using appropriate method
               const fieldStatus = isCustomField
-                ? getFieldStatus(field.diffPath)
-                : getDiff(field.diffPath)?.status || null;
+                ? field.redlineStatus && field.redlineStatus !== "unchanged"
+                  ? field.redlineStatus
+                  : null
+                : field.diffPath
+                  ? getDiff(field.diffPath)?.status || null
+                  : null;
 
-              // Get value diff for RedlineValue component
               const valueDiff = isCustomField
-                ? getCustomFieldValueDiff(field.diffPath)
-                : getDiff(field.diffPath);
+                ? getCustomFieldDiff(field, "value")
+                : field.diffPath
+                  ? getDiff(field.diffPath)
+                  : null;
+
+              const labelDiff = isCustomField
+                ? getCustomFieldDiff(field, "label")
+                : null;
 
               const isRemoved = fieldStatus === "removed";
               const isAdded = fieldStatus === "added";
@@ -571,7 +672,15 @@ export default function Page() {
                           "line-through text-red-500/70"
                       )}
                     >
-                      {field.label}
+                      {labelDiff ? (
+                        <RedlineValue
+                          value={field.label}
+                          diff={labelDiff}
+                          isRedlineView={isRedlineView}
+                        />
+                      ) : (
+                        field.label
+                      )}
                     </span>
                     {isRedlineView && isAdded && (
                       <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">

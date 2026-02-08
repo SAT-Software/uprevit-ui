@@ -19,7 +19,6 @@ import {
 } from "react-icons/pi";
 import { useState } from "react";
 import SymbolsGraphicsPageOtherComponentsTable from "./SymbolsGraphicsPageOtherComponentsTable";
-import type { DiffItem } from "@/utils/deepDiff";
 
 interface SymbolData {
   id: string;
@@ -62,7 +61,6 @@ interface SchematicsSymbolsTabsProps {
   productId: string;
   isSubmitted?: boolean;
   isRedlineView?: boolean;
-  diffs?: DiffItem[];
 }
 
 export default function SchematicsSymbolsTabs({
@@ -73,7 +71,6 @@ export default function SchematicsSymbolsTabs({
   productId,
   isSubmitted = false,
   isRedlineView = false,
-  diffs = [],
 }: SchematicsSymbolsTabsProps) {
   const [activeTab, setActiveTab] = useState("tab-1");
 
@@ -167,7 +164,6 @@ export default function SchematicsSymbolsTabs({
             data={symbolsData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
-            diffs={diffs}
           />
         </TabsContent>
         <TabsContent value="tab-2" className="h-full mt-0">
@@ -175,7 +171,6 @@ export default function SchematicsSymbolsTabs({
             data={schematicsData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
-            diffs={diffs}
           />
         </TabsContent>
         <TabsContent value="tab-3" className="h-full mt-0">
@@ -183,7 +178,6 @@ export default function SchematicsSymbolsTabs({
             data={barcodesData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
-            diffs={diffs}
           />
         </TabsContent>
         <TabsContent value="tab-4" className="h-full mt-0">
@@ -191,7 +185,6 @@ export default function SchematicsSymbolsTabs({
             data={otherComponentsData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
-            diffs={diffs}
           />
         </TabsContent>
       </div>

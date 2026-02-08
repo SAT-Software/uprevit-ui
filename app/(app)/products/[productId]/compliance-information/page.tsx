@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { cn } from "@/lib/utils";
 import type { DiffItem } from "@/utils/deepDiff";
+import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
 interface ComplianceItem {
   _id: string;
@@ -25,8 +26,9 @@ interface ComplianceItem {
 }
 
 type ComplianceItemWithDiff = ComplianceItem & {
-  _isFromDiff?: boolean;
-  _diffPath?: string;
+  _redlineStatus?: RedlineStatus;
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 };
 
 type ComplianceTabsData = {
@@ -54,29 +56,15 @@ export default function Page() {
 
   const diffs = diffRedlineData?.result?.diffs ?? [];
 
-  console.log("Compliance Redline Debug:", {
-    isRedlineView,
-    diffRedlineLoading,
-    diffs,
-    diffRedlineData,
-  });
-
-  // Helper to find a diff by path (checks multiple possible paths)
-  const getDiff = (...paths: string[]) => {
-    return diffs.find((d: DiffItem) => paths.includes(d.path));
-  };
-
-  // Simple inline component for redline display - accepts path and looks up diff
   const RedlineValue = ({
     value,
-    path,
+    diff,
     formatFn,
   }: {
     value: string;
-    path: string;
+    diff?: DiffItem | null;
     formatFn?: (v: unknown) => string;
   }) => {
-    const diff = getDiff(path);
     if (!isRedlineView || !diff) return <>{value}</>;
     const format =
       formatFn ||
@@ -86,11 +74,11 @@ export default function Page() {
     const isAdded = diff.status === "added";
 
     return (
-      <span className="inline-flex flex-wrap items-center gap-2">
+      <span className="inline-flex max-w-full flex-wrap items-center gap-2 whitespace-normal break-words">
         {/* Old value - show for modified and removed */}
         {(diff.old_value !== null || isRemoved) && (
-          <span className="relative group/old">
-            <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
+          <span className="relative group/old max-w-full">
+            <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20 max-w-full whitespace-pre-wrap break-words">
               {format(diff.old_value) || ""}
             </span>
           </span>
@@ -101,12 +89,12 @@ export default function Page() {
           diff.new_value !== null &&
           !isRemoved &&
           !isAdded && (
-            <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
+            <PiArrowRightBold className="text-muted-foreground/50 text-xs shrink-0" />
           )}
 
         {/* New value - show for modified and added */}
         {(diff.new_value !== null || isAdded) && !isRemoved && (
-          <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
+          <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm max-w-full whitespace-pre-wrap break-words">
             {format(diff.new_value) || ""}
           </span>
         )}
@@ -198,28 +186,45 @@ export default function Page() {
 
   const allTabsData = (data as { result?: { data?: ComplianceTabsData } })
     ?.result?.data;
-  const currentStandards = allTabsData?.compliance_information?.data ?? [];
+  const currentStandards =
+    (allTabsData?.compliance_information?.data ?? []) as unknown as ComplianceItem[];
+  const hasDiffVersions = Boolean(
+    diffRedlineData?.result?.base_version && diffRedlineData?.result?.next_version
+  );
+  const baseStandards =
+    hasDiffVersions
+      ? ((diffRedlineData?.result?.base_version?.compliance_information?.data ??
+          []) as unknown as ComplianceItem[])
+      : [];
+  const nextStandards =
+    hasDiffVersions
+      ? ((diffRedlineData?.result?.next_version?.compliance_information?.data ??
+          []) as unknown as ComplianceItem[])
+      : [];
 
-  // Merge current standards with added items from diffs (for redline view)
   const standards = (() => {
-    if (!isRedlineView) return currentStandards;
+    if (!isRedlineView || !hasDiffVersions)
+      return currentStandards as ComplianceItemWithDiff[];
 
-    // Find all added items from diffs
-    const addedItems = diffs
-      .filter(
-        (d) =>
-          d.path.startsWith("compliance_information.data[") &&
-          d.status === "added" &&
-          d.new_value
-      )
-      .map((d) => ({
-        ...(d.new_value as ComplianceItem),
-        _isFromDiff: true, // Mark as added from diff
-        _diffPath: d.path,
-      }));
+    const redlineItems = buildRedlineArray(baseStandards, nextStandards, {
+      getId: (item) => item._id,
+      getParentId: (item) =>
+        "parent_id" in item && item.parent_id ? String(item.parent_id) : undefined,
+      getFallbackKey: (item) => `${item.standard}-${item.standard_description}`,
+    });
 
-    // Combine current standards with added items
-    return [...currentStandards, ...addedItems] as ComplianceItemWithDiff[];
+    return redlineItems
+      .map((item) => {
+        const itemData = item.next ?? item.base;
+        if (!itemData) return null;
+        return {
+          ...(itemData as ComplianceItem),
+          _redlineStatus: item.status,
+          _redlineDiffs: item.diffs,
+          _redlineId: item.id,
+        };
+      })
+      .filter(Boolean) as ComplianceItemWithDiff[];
   })();
 
   // Check if product is submitted - disable editing buttons
@@ -283,36 +288,56 @@ export default function Page() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {standards.map((item: ComplianceItemWithDiff, idx) => {
-                // Check if this item came from diff (added in V2)
-                const isFromDiff = item._isFromDiff === true;
+              {standards.map((item: ComplianceItemWithDiff) => {
+                const itemStatus = item._redlineStatus;
+                const hasAnyDiff =
+                  Boolean(itemStatus) && itemStatus !== "unchanged";
+                const isAdded = itemStatus === "added";
+                const isRemoved = itemStatus === "removed";
+                const isModified = itemStatus === "modified";
 
-                // Check for item-level diff (whole item added/removed)
-                const itemDiff = isFromDiff
-                  ? { status: "added" } // Items from diff are always "added"
-                  : getDiff(`compliance_information.data[${idx}]`);
+                const standardDiff: DiffItem | null = isRedlineView
+                  ? itemStatus === "added"
+                    ? {
+                        path: "standard",
+                        status: "added" as const,
+                        old_value: null,
+                        new_value: item.standard,
+                      }
+                    : itemStatus === "removed"
+                      ? {
+                          path: "standard",
+                          status: "removed" as const,
+                          old_value: item.standard,
+                          new_value: null,
+                        }
+                      : item._redlineDiffs?.find((d) => d.path === "standard") ??
+                        null
+                  : null;
 
-                // Check for field-level diffs (property modified)
-                const standardDiff = getDiff(
-                  `compliance_information.data[${idx}].standard`
-                );
-                const descDiff = getDiff(
-                  `compliance_information.data[${idx}].standard_description`
-                );
-
-                // Determine card status based on diffs
-                const isAdded = isFromDiff || itemDiff?.status === "added";
-                const isRemoved = itemDiff?.status === "removed";
-                const isModified =
-                  !isAdded &&
-                  !isRemoved &&
-                  (standardDiff?.status === "modified" ||
-                    descDiff?.status === "modified");
-                const hasAnyDiff = isAdded || isRemoved || isModified;
+                const descDiff: DiffItem | null = isRedlineView
+                  ? itemStatus === "added"
+                    ? {
+                        path: "standard_description",
+                        status: "added" as const,
+                        old_value: null,
+                        new_value: item.standard_description,
+                      }
+                    : itemStatus === "removed"
+                      ? {
+                          path: "standard_description",
+                          status: "removed" as const,
+                          old_value: item.standard_description,
+                          new_value: null,
+                        }
+                      : item._redlineDiffs?.find(
+                          (d) => d.path === "standard_description"
+                        ) ?? null
+                  : null;
 
                 return (
                   <div
-                    key={item._id}
+                    key={item._redlineId ?? item._id}
                     className={cn(
                       "flex flex-col gap-3 p-4 border rounded-xl bg-card hover:bg-accent/5 transition-all duration-200 group",
                       isRedlineView &&
@@ -327,8 +352,8 @@ export default function Page() {
                       !isRedlineView || !hasAnyDiff ? "border-border" : ""
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
                         <div
                           className={cn(
                             "p-2 rounded-lg bg-green-500/10 text-green-600 group-hover:bg-green-500/20 transition-colors",
@@ -345,36 +370,40 @@ export default function Page() {
                         >
                           <PiShieldCheckDuotone className="w-4 h-4" />
                         </div>
-                        <span
-                          className={cn(
-                            "font-semibold text-base text-foreground truncate",
-                            isRedlineView &&
-                              isRemoved &&
-                              "line-through text-red-500/70"
-                          )}
-                        >
-                          <RedlineValue
-                            value={item.standard}
-                            path={`compliance_information.data[${idx}].standard`}
-                          />
-                        </span>
-                        {isRedlineView && isAdded && (
-                          <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
-                            NEW
-                          </span>
-                        )}
-                        {isRedlineView && isRemoved && (
-                          <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
-                            REMOVED
-                          </span>
-                        )}
-                        {isRedlineView && isModified && (
-                          <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
-                            MODIFIED
-                          </span>
-                        )}
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <span
+                              className={cn(
+                                "font-semibold text-base text-foreground break-words min-w-0",
+                                isRedlineView &&
+                                  isRemoved &&
+                                  "line-through text-red-500/70"
+                              )}
+                            >
+                              <RedlineValue
+                                value={item.standard}
+                                diff={standardDiff}
+                              />
+                            </span>
+                            {isRedlineView && isAdded && (
+                              <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                                NEW
+                              </span>
+                            )}
+                            {isRedlineView && isRemoved && (
+                              <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                                REMOVED
+                              </span>
+                            )}
+                            {isRedlineView && isModified && (
+                              <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                                MODIFIED
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex shrink-0 items-center gap-1 self-start">
                         <EditStandardDialog
                           productId={productId}
                           standards={item}
@@ -390,7 +419,7 @@ export default function Page() {
                     </div>
                     <p
                       className={cn(
-                        "text-sm text-muted-foreground leading-relaxed line-clamp-3",
+                        "text-sm text-muted-foreground leading-relaxed line-clamp-3 break-words",
                         isRedlineView &&
                           isRemoved &&
                           "line-through text-red-500/70"
@@ -401,7 +430,7 @@ export default function Page() {
                           item.standard_description ||
                           "No description provided."
                         }
-                        path={`compliance_information.data[${idx}].standard_description`}
+                        diff={descDiff}
                       />
                     </p>
                   </div>

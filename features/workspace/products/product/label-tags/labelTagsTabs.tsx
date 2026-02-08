@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
 import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
@@ -31,8 +31,9 @@ interface LabelTagItem {
   tagged_image?: string;
   annotation_state?: AnnotationState;
   legend_items?: LegendItem[];
-  _isFromDiff?: boolean;
-  _isRemovedFromDiff?: boolean;
+  _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 }
 
 interface LabelTagsTabsProps {
@@ -40,7 +41,6 @@ interface LabelTagsTabsProps {
   productId: string;
   isSubmitted?: boolean;
   isRedlineView?: boolean;
-  diffs?: DiffItem[];
 }
 
 export default function LabelTagsTabs({
@@ -48,7 +48,6 @@ export default function LabelTagsTabs({
   productId,
   isSubmitted = false,
   isRedlineView = false,
-  diffs = [],
 }: LabelTagsTabsProps) {
   const [activeTab, setActiveTab] = useState("");
   const [annotations, setAnnotations] = useState<
@@ -185,6 +184,47 @@ export default function LabelTagsTabs({
     ),
   ];
 
+  const typeStatusMap = useMemo(() => {
+    const accumulator = new Map<
+      string,
+      { hasAdded: boolean; hasRemoved: boolean; hasCurrent: boolean }
+    >();
+
+    labelTagsData.forEach((item) => {
+      const type = item.type;
+      if (!type) return;
+      const entry = accumulator.get(type) ?? {
+        hasAdded: false,
+        hasRemoved: false,
+        hasCurrent: false,
+      };
+      if (item._redlineStatus === "added") {
+        entry.hasAdded = true;
+      } else if (item._redlineStatus === "removed") {
+        entry.hasRemoved = true;
+      } else {
+        entry.hasCurrent = true;
+      }
+      accumulator.set(type, entry);
+    });
+
+    const result: Record<string, "added" | "removed" | "modified" | null> =
+      {};
+    accumulator.forEach((entry, type) => {
+      if (entry.hasAdded && !entry.hasCurrent && !entry.hasRemoved) {
+        result[type] = "added";
+      } else if (entry.hasRemoved && !entry.hasCurrent && !entry.hasAdded) {
+        result[type] = "removed";
+      } else if (entry.hasAdded || entry.hasRemoved) {
+        result[type] = "modified";
+      } else {
+        result[type] = null;
+      }
+    });
+
+    return result;
+  }, [labelTagsData]);
+
   const effectiveActiveTab =
     activeTab || filteredLabelTypesForTabs[0] || "tab-1";
 
@@ -320,28 +360,38 @@ export default function LabelTagsTabs({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasAnyDirtyItems]);
 
-  const getDiff = (index: number, property?: string) => {
-    const basePath = `label_tags.data[${index}]`;
-    if (property) {
-      return diffs.find((d) => d.path === `${basePath}.${property}`);
-    }
-    return diffs.find((d) => d.path === basePath);
-  };
-
   const getItemStatus = (
     item: LabelTagItem,
-    index: number,
   ): "added" | "removed" | "modified" | null => {
-    if (item._isFromDiff) return "added";
-    if (item._isRemovedFromDiff) return "removed";
+    const status = item._redlineStatus;
+    if (!status || status === "unchanged") return null;
+    return status;
+  };
 
-    // Check if this item has any modifications
-    const itemDiffs = diffs.filter((d) =>
-      d.path.startsWith(`label_tags.data[${index}].`),
-    );
-    if (itemDiffs.length > 0) return "modified";
-
-    return null;
+  const getFieldDiff = (
+    item: LabelTagItem,
+    field: "name" | "description" | "image" | "type"
+  ) => {
+    if (!isRedlineView) return undefined;
+    const status = item._redlineStatus;
+    const rawValue = item[field] ?? "";
+    if (status === "added") {
+      return {
+        path: field,
+        status: "added" as const,
+        old_value: null,
+        new_value: rawValue,
+      } as DiffItem;
+    }
+    if (status === "removed") {
+      return {
+        path: field,
+        status: "removed" as const,
+        old_value: rawValue,
+        new_value: null,
+      } as DiffItem;
+    }
+    return item._redlineDiffs?.find((d) => d.path === field);
   };
 
   const RedlineValue = ({
@@ -427,7 +477,10 @@ export default function LabelTagsTabs({
     return (
       <span className="inline-flex flex-wrap items-center gap-2">
         {(diff.old_value != null || isRemoved) && (
-          <span className="relative group/old">
+          <span className="inline-flex items-center gap-1">
+            <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full shadow-sm">
+              OLD
+            </span>
             <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
               {format(diff.old_value) || ""}
             </span>
@@ -442,8 +495,13 @@ export default function LabelTagsTabs({
           )}
 
         {(diff.new_value != null || isAdded) && !isRemoved && (
-          <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
-            {format(diff.new_value) || ""}
+          <span className="inline-flex items-center gap-1">
+            <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full shadow-sm">
+              NEW
+            </span>
+            <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
+              {format(diff.new_value) || ""}
+            </span>
           </span>
         )}
       </span>
@@ -512,9 +570,41 @@ export default function LabelTagsTabs({
           <ScrollArea className="flex-1 pb-2">
             <TabsList>
               {filteredLabelTypesForTabs?.map((type, i) => {
+                const typeStatus = typeStatusMap[type];
+                const isTypeAdded = isRedlineView && typeStatus === "added";
+                const isTypeRemoved = isRedlineView && typeStatus === "removed";
+                const isTypeModified =
+                  isRedlineView && typeStatus === "modified";
                 return (
-                  <TabsTrigger key={`${i}-${type}`} value={type}>
-                    {type}
+                  <TabsTrigger
+                    key={`${i}-${type}`}
+                    value={type}
+                    className={cn(
+                      "gap-2",
+                      isTypeAdded &&
+                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800",
+                      isTypeRemoved &&
+                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800",
+                      isTypeModified &&
+                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800",
+                    )}
+                  >
+                    <span>{type}</span>
+                    {isTypeAdded && (
+                      <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                        NEW
+                      </span>
+                    )}
+                    {isTypeRemoved && (
+                      <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                        REMOVED
+                      </span>
+                    )}
+                    {isTypeModified && (
+                      <span className="text-[9px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                        MOD
+                      </span>
+                    )}
                   </TabsTrigger>
                 );
               })}
@@ -528,17 +618,14 @@ export default function LabelTagsTabs({
                 (item: LabelTagItem) => item.type === type,
               );
               return currentTabData.map((item: LabelTagItem, i) => {
-                const originalIndex = labelTagsData.findIndex(
-                  (d) => d._id === item._id,
-                );
-                const itemStatus = getItemStatus(item, originalIndex);
+                const itemStatus = getItemStatus(item);
                 const isRemoved = itemStatus === "removed";
                 const isAdded = itemStatus === "added";
                 const isModified = itemStatus === "modified";
 
-                const nameDiff = getDiff(originalIndex, "name");
-                const descriptionDiff = getDiff(originalIndex, "description");
-                const imageDiff = getDiff(originalIndex, "image");
+                const nameDiff = getFieldDiff(item, "name");
+                const descriptionDiff = getFieldDiff(item, "description");
+                const imageDiff = getFieldDiff(item, "image");
 
                 return (
                   <TabsContent key={`${i}-${type}`} value={type}>

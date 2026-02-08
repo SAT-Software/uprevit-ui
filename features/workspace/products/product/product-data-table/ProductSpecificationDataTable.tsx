@@ -1627,6 +1627,9 @@ export function ProductSpecificationDataTable({
                           style={{
                             backgroundColor:
                               format?.bgColor || "var(--background)",
+                            boxShadow: showHighlightDiff
+                              ? "inset 0 0 0 9999px rgba(251, 191, 36, 0.12)"
+                              : undefined,
                             color: showInlineDiff
                               ? "transparent"
                               : format?.textColor || "inherit",

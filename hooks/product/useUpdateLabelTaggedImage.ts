@@ -49,6 +49,7 @@ export function useUpdateLabelTaggedImage() {
     onSuccess: () => {
       toast.success("Tagged image saved successfully");
       queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
+      queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
     },
     onError: (error) => {
       console.error(error.message || "Failed to save tagged image");

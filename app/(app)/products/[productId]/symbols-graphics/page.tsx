@@ -8,6 +8,7 @@ import {
   PiShapesDuotone,
 } from "react-icons/pi";
 import type { DiffItem } from "@/utils/deepDiff";
+import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
 interface SymbolGraphicItem {
   _id: string;
@@ -18,9 +19,9 @@ interface SymbolGraphicItem {
   label_presence: string[];
   entity: string;
   count?: number;
-  _isFromDiff?: boolean;
-  _isRemovedFromDiff?: boolean;
-  _originalIndex?: number;
+  _redlineStatus?: RedlineStatus;
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 }
 
 export default function Page() {
@@ -41,8 +42,6 @@ export default function Page() {
     compareVersionId
   );
 
-  console.log("graphics page diff data", diffData);
-
   // Check if product is submitted - disable editing buttons
   const isSubmitted =
     data?.result?.data?.product_information?.product_data?.data?.status ===
@@ -53,8 +52,6 @@ export default function Page() {
   const symbolsGraphicsDiffs = allDiffs.filter((d: DiffItem) =>
     d.path.startsWith("symbols_graphics.data")
   );
-
-  console.log("graphics page diff data", symbolsGraphicsDiffs);
 
   if (isLoading) {
     return (
@@ -119,71 +116,52 @@ export default function Page() {
     );
   }
 
-  // Get the appropriate data source
-  // In redline view, use next_version data for correct ordering (follows new version sequence)
-  const symbolsGraphicsData: SymbolGraphicItem[] =
-    isRedlineView && diffData?.result?.next_version
-      ? (diffData.result.next_version.symbols_graphics?.data as
-          | SymbolGraphicItem[]
-          | undefined) || []
-      : (data?.result?.data?.symbols_graphics?.data as SymbolGraphicItem[]) ||
-        [];
+  const currentSymbolsGraphics =
+    (data?.result?.data?.symbols_graphics?.data as SymbolGraphicItem[]) || [];
+  const baseSymbolsGraphics =
+    (diffData?.result?.base_version?.symbols_graphics?.data ??
+      []) as SymbolGraphicItem[];
+  const nextSymbolsGraphics =
+    (diffData?.result?.next_version?.symbols_graphics?.data ??
+      currentSymbolsGraphics) as SymbolGraphicItem[];
 
-  let symbolsGraphics = symbolsGraphicsData || [];
+  const symbolsGraphics = (() => {
+    if (!isRedlineView) return currentSymbolsGraphics;
 
-  // In redline view, mark added items and append removed items
-  if (isRedlineView && symbolsGraphicsDiffs.length > 0) {
-    // Get indices of whole-row additions to mark them
-    const addedIndices = new Set(
-      symbolsGraphicsDiffs
-        .filter(
-          (d) =>
-            d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
-            d.status === "added"
-        )
-        .map((d) => {
-          const match = d.path.match(/\[(\d+)\]$/);
-          return match ? parseInt(match[1]) : -1;
-        })
-        .filter((idx: number) => idx >= 0)
+    const redlineItems = buildRedlineArray(
+      baseSymbolsGraphics,
+      nextSymbolsGraphics,
+      {
+        getId: (item) => item._id,
+        getParentId: (item) => {
+          const parentId = (item as { parent_id?: string | null }).parent_id;
+          return parentId ? String(parentId) : undefined;
+        },
+        getFallbackKey: (item) => `${item.text}-${item.entity}`,
+      }
     );
 
-    // Mark added items in the new version data
-    symbolsGraphics = symbolsGraphics.map((item, index) => ({
-      ...item,
-      _isFromDiff: addedIndices.has(index),
-    }));
+    return redlineItems
+      .map((item) => {
+        const dataItem = item.next ?? item.base;
+        if (!dataItem) return null;
+        return {
+          ...dataItem,
+          _redlineStatus: item.status,
+          _redlineDiffs: item.diffs,
+          _redlineId: item.id,
+        };
+      })
+      .filter(Boolean) as SymbolGraphicItem[];
+  })();
 
-    // Find whole-row removals (items that existed in old version but are deleted)
-    // These need to be appended at the end since they don't exist in new version
-    const removedItems = symbolsGraphicsDiffs
-      .filter(
-        (d) =>
-          d.path.match(/^symbols_graphics\.data\[\d+\]$/) &&
-          d.status === "removed" &&
-          d.old_value
-      )
-      .map((d) => ({
-        ...(d.old_value as SymbolGraphicItem),
-        _isRemovedFromDiff: true,
-      }));
-
-    // Append removed items at the end
-    symbolsGraphics = [...symbolsGraphics, ...removedItems];
-  }
-
-  // Group items by normalized entity (lowercase), preserving original index for diff lookups
   const entityGroups: Record<string, SymbolGraphicItem[]> = {};
-  symbolsGraphics.forEach((item, index) => {
+  symbolsGraphics.forEach((item) => {
     const key = item.entity.toLowerCase();
     if (!entityGroups[key]) {
       entityGroups[key] = [];
     }
-    // Preserve original index for correct diff path matching
-    entityGroups[key].push({
-      ...item,
-      _originalIndex: item._originalIndex ?? index,
-    });
+    entityGroups[key].push(item);
   });
 
   // Map grouped data to expected prop names for SchematicsSymbolsTabs
@@ -193,9 +171,9 @@ export default function Page() {
     componentDescription: item.description,
     componentImage: item.image,
     presentOnLabels: item.label_presence,
-    _isFromDiff: item._isFromDiff,
-    _isRemovedFromDiff: item._isRemovedFromDiff,
-    _originalIndex: item._originalIndex,
+    _redlineStatus: item._redlineStatus,
+    _redlineDiffs: item._redlineDiffs,
+    _redlineId: item._redlineId,
   }));
 
   const barcodesData = (entityGroups["barcodes"] || []).map((item) => ({
@@ -205,9 +183,9 @@ export default function Page() {
     componentImage: item.image,
     presentOnLabels: item.label_presence,
     count: item.count,
-    _isFromDiff: item._isFromDiff,
-    _isRemovedFromDiff: item._isRemovedFromDiff,
-    _originalIndex: item._originalIndex,
+    _redlineStatus: item._redlineStatus,
+    _redlineDiffs: item._redlineDiffs,
+    _redlineId: item._redlineId,
   }));
 
   const otherComponentsData = (entityGroups["other components"] || []).map(
@@ -217,9 +195,9 @@ export default function Page() {
       componentDescription: item.description,
       componentImage: item.image,
       presentOnLabels: item.label_presence,
-      _isFromDiff: item._isFromDiff,
-      _isRemovedFromDiff: item._isRemovedFromDiff,
-      _originalIndex: item._originalIndex,
+      _redlineStatus: item._redlineStatus,
+      _redlineDiffs: item._redlineDiffs,
+      _redlineId: item._redlineId,
     })
   );
 
@@ -230,9 +208,9 @@ export default function Page() {
     componentImage: item.image,
     symbolsTextPresent: item.label_presence,
     textPresent: item.text_present,
-    _isFromDiff: item._isFromDiff,
-    _isRemovedFromDiff: item._isRemovedFromDiff,
-    _originalIndex: item._originalIndex,
+    _redlineStatus: item._redlineStatus,
+    _redlineDiffs: item._redlineDiffs,
+    _redlineId: item._redlineId,
   }));
 
   return (
@@ -256,7 +234,6 @@ export default function Page() {
           productId={productId as string}
           isSubmitted={isSubmitted}
           isRedlineView={isRedlineView}
-          diffs={symbolsGraphicsDiffs}
         />
       </div>
     </div>

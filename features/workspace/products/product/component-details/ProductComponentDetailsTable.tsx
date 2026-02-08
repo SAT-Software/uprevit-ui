@@ -76,17 +76,24 @@ type ComponentItem = {
   label_type: string[];
   dimensions: string;
   component_type: string;
-  _isFromDiff?: boolean;
+  _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
 };
 
 type TableMeta = {
   isSubmitted?: boolean;
   isRedlineView?: boolean;
-  diffs?: DiffItem[];
-  getDiff?: (path: string) => DiffItem | null;
-  getRowStatus?: (
-    rowIndex: number
-  ) => "added" | "removed" | "modified" | null;
+  getFieldDiff?: (
+    row: ComponentItem,
+    field: string,
+    value?: unknown
+  ) => DiffItem | null;
+  getRowStatus?: (row: ComponentItem) =>
+    | "added"
+    | "removed"
+    | "modified"
+    | null;
 };
 
 const RedlineCell = ({
@@ -210,11 +217,15 @@ const columns: ColumnDef<ComponentItem>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`label_components.data[${row.index}].image`)
+        ? meta.getFieldDiff?.(row.original, "image", row.original.image)
         : null;
       const newImageUrl =
         diff?.status === "added" && typeof diff.new_value === "string"
           ? diff.new_value
+          : "";
+      const removedImageUrl =
+        diff?.status === "removed" && typeof diff.old_value === "string"
+          ? diff.old_value
           : "";
 
       // For image, show both old and new if changed
@@ -228,6 +239,21 @@ const columns: ColumnDef<ComponentItem>[] = [
               width={48}
               height={48}
               className="object-cover rounded-md border border-blue-300 min-h-12"
+            />
+          </div>
+        );
+      }
+
+      if (diff && diff.status === "removed" && removedImageUrl) {
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="text-[9px] text-red-600 font-medium">REMOVED</span>
+            <Image
+              src={removedImageUrl}
+              alt={row.original.component_number}
+              width={48}
+              height={48}
+              className="object-cover rounded-md border border-red-300 min-h-12 opacity-70"
             />
           </div>
         );
@@ -261,17 +287,27 @@ const columns: ColumnDef<ComponentItem>[] = [
 
       // Find all label_type diffs
       let addedTypes: string[] = [];
+      let removedTypes: string[] = [];
+      const rowStatus = row.original._redlineStatus;
+      const rowDiffs = row.original._redlineDiffs ?? [];
 
-      if (meta?.isRedlineView && meta.diffs) {
-        // Find diffs for label_type additions for THIS row (data[row.index])
-        const rowLabelTypeDiffs = (meta.diffs as DiffItem[]).filter((d) =>
-          d.path.startsWith(`label_components.data[${row.index}].label_type`),
-        );
+      if (meta?.isRedlineView) {
+        if (rowStatus === "added") {
+          addedTypes = currentTypes;
+        } else if (rowStatus === "removed") {
+          removedTypes = currentTypes;
+        } else if (rowDiffs.length > 0) {
+          const rowLabelTypeDiffs = rowDiffs.filter((d) =>
+            d.path.startsWith("label_type"),
+          );
 
-        // Get all newly added label type values for this row
-        addedTypes = rowLabelTypeDiffs
-          .filter((d) => d.status === "added" && d.new_value)
-          .map((d) => d.new_value as string);
+          addedTypes = rowLabelTypeDiffs
+            .filter((d) => d.status === "added" && d.new_value)
+            .map((d) => d.new_value as string);
+          removedTypes = rowLabelTypeDiffs
+            .filter((d) => d.status === "removed" && d.old_value)
+            .map((d) => d.old_value as string);
+        }
       }
 
       // Merge current types with added types (for redline view)
@@ -280,6 +316,7 @@ const columns: ColumnDef<ComponentItem>[] = [
         ? [
             ...currentTypes,
             ...addedTypes.filter((t) => !currentTypes.includes(t)),
+            ...removedTypes.filter((t) => !currentTypes.includes(t)),
           ]
         : currentTypes;
 
@@ -289,14 +326,17 @@ const columns: ColumnDef<ComponentItem>[] = [
             displayTypes.map((type, index) => {
               // Check if this specific type value was added
               const isNewlyAdded = addedTypes.includes(type);
+              const isRemoved = removedTypes.includes(type);
               return (
                 <Badge
                   key={index}
                   variant="outline"
                   className={`text-xs ${
                     isNewlyAdded
-                      ? "border-blue-400 text-blue-700 bg-blue-50"
-                      : ""
+                      ? "border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500"
+                      : isRemoved
+                        ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
+                        : ""
                   }`}
                 >
                   {type}
@@ -323,7 +363,11 @@ const columns: ColumnDef<ComponentItem>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`label_components.data[${row.index}].component_number`)
+        ? meta.getFieldDiff?.(
+            row.original,
+            "component_number",
+            row.getValue("component_number"),
+          )
         : null;
 
       return (
@@ -360,8 +404,10 @@ const columns: ColumnDef<ComponentItem>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(
-            `label_components.data[${row.index}].component_description`,
+        ? meta.getFieldDiff?.(
+            row.original,
+            "component_description",
+            row.getValue("component_description"),
           )
         : null;
 
@@ -394,7 +440,11 @@ const columns: ColumnDef<ComponentItem>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`label_components.data[${row.index}].dimensions`)
+        ? meta.getFieldDiff?.(
+            row.original,
+            "dimensions",
+            row.getValue("dimensions"),
+          )
         : null;
 
       return (
@@ -421,7 +471,11 @@ const columns: ColumnDef<ComponentItem>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const diff = meta?.isRedlineView
-        ? meta.getDiff?.(`label_components.data[${row.index}].component_type`)
+        ? meta.getFieldDiff?.(
+            row.original,
+            "component_type",
+            row.getValue("component_type"),
+          )
         : null;
 
       return (
@@ -455,12 +509,10 @@ export default function ProductComponentDetailsTable({
   data,
   isSubmitted = false,
   isRedlineView = false,
-  diffs = [],
 }: {
   data: ComponentItem[];
   isSubmitted?: boolean;
   isRedlineView?: boolean;
-  diffs?: DiffItem[];
 }) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -475,25 +527,38 @@ export default function ProductComponentDetailsTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  // Helper to find a diff by path
-  const getDiff = (path: string): DiffItem | null => {
-    return diffs.find((d) => d.path === path) || null;
+  const getRowStatus = (row: ComponentItem) => {
+    if (!isRedlineView) return null;
+    const status = row._redlineStatus;
+    if (!status || status === "unchanged") return null;
+    return status === "modified" ? "modified" : status;
   };
 
-  // Check if a row has any changes
-  const getRowStatus = (rowIndex: number) => {
-    const isFromDiff = data[rowIndex]?._isFromDiff;
-    if (isFromDiff) return "added";
-
-    // Check for whole-row addition/removal
-    const rowDiff = getDiff(`label_components.data[${rowIndex}]`);
-    if (rowDiff) return rowDiff.status;
-
-    // Check for any field-level changes
-    const hasFieldDiff = diffs.some((d) =>
-      d.path.startsWith(`label_components.data[${rowIndex}].`),
-    );
-    return hasFieldDiff ? "modified" : null;
+  const getFieldDiff = (
+    row: ComponentItem,
+    field: string,
+    value?: unknown
+  ): DiffItem | null => {
+    if (!isRedlineView) return null;
+    const status = row._redlineStatus;
+    const rawValue = value ?? (row as Record<string, unknown>)[field];
+    if (status === "added") {
+      return {
+        path: field,
+        status: "added",
+        old_value: null,
+        new_value: rawValue,
+      } as DiffItem;
+    }
+    if (status === "removed") {
+      return {
+        path: field,
+        status: "removed",
+        old_value: rawValue,
+        new_value: null,
+      } as DiffItem;
+    }
+    return row._redlineDiffs?.find((d) => d.path === field) ?? null;
   };
 
   const table = useReactTable({
@@ -512,7 +577,7 @@ export default function ProductComponentDetailsTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
-    meta: { isSubmitted, isRedlineView, diffs, getDiff, getRowStatus },
+    meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
   });
 
   return (
@@ -561,7 +626,7 @@ export default function ProductComponentDetailsTable({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const rowStatus = getRowStatus(row.index);
+                const rowStatus = getRowStatus(row.original);
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
@@ -609,7 +674,7 @@ export default function ProductComponentDetailsTable({
                       (() => {
                         // Check if image was added in redline view
                         const imageDiff = isRedlineView
-                          ? getDiff(`label_components.data[${row.index}].image`)
+                          ? getFieldDiff(row.original, "image", row.original.image)
                           : null;
                         const addedImageUrl =
                           imageDiff?.status === "added" &&
