@@ -23,6 +23,7 @@ import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/product";
 import { useParams, usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   PiCircleDuotone,
   PiExportDuotone,
@@ -38,6 +39,7 @@ import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductUpdateProgress } from "./ProductUpdateProgress";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { toast } from "sonner";
 
 export type Item = {
   productId: string;
@@ -63,6 +65,7 @@ export type Item = {
 const TOTAL_TABS = 7;
 
 export function ProductHeader() {
+  const queryClient = useQueryClient();
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -89,6 +92,40 @@ export function ProductHeader() {
   };
 
   const currentTab = getCurrentTab();
+
+  const tabCompletionConfig: Record<string, { tab: string; action: string }> = {
+    "product-information": {
+      tab: "product-information",
+      action: "update_product_information_completion",
+    },
+    "compliance-information": {
+      tab: "compliance-information",
+      action: "update_compliance_tab_completion",
+    },
+    "label-components": {
+      tab: "label-components",
+      action: "update_label_component_tab_completion",
+    },
+    "symbols-graphics": {
+      tab: "symbols-graphics",
+      action: "update_symbols_graphics_tab_completion",
+    },
+    "product-specifications": {
+      tab: "product-specifications",
+      action: "update_product_data_tab_completion",
+    },
+    "operational-parameters": {
+      tab: "operational-parameters",
+      action: "update_operational_parameters_tab_completion",
+    },
+    "label-tags": {
+      tab: "label-tags",
+      action: "update_label_tags_tab_completion",
+    },
+  };
+
+  const currentTabConfig = tabCompletionConfig[currentTab ?? ""];
+  const isTabCompletionEnabled = Boolean(currentTabConfig);
 
   const allTabsData = productData?.result?.data;
   const productCoreData = allTabsData?.product_information?.product_data?.data;
@@ -222,7 +259,16 @@ export function ProductHeader() {
   );
 
   const handleToggleTab = async () => {
-    if (!currentTab || !product || isSyncingStatus || isReadOnly) return;
+    if (
+      !currentTab ||
+      !product ||
+      !currentTabConfig ||
+      !isTabCompletionEnabled ||
+      isSyncingStatus ||
+      isReadOnly
+    ) {
+      return;
+    }
 
     const updatedTabsCompleted = isCurrentTabCompleted
       ? tabsCompleted.filter((tab: string) => tab !== currentTab)
@@ -232,48 +278,34 @@ export function ProductHeader() {
       (updatedTabsCompleted.length / TOTAL_TABS) * 100,
     );
 
-    const tabMapping: Record<string, string> = {
-      "product-information": "product-information",
-      "compliance-information": "compliance-information",
-      "label-components": "label-components",
-      "symbols-graphics": "symbols-graphics",
-      "product-specifications": "product-specifications",
-      "operational-parameters": "operational-parameters",
-      "label-tags": "label-tags",
-    };
-
-    const actionMapping: Record<string, string> = {
-      "product-information": "update_product_information_completion",
-      "compliance-information": "update_compliance_tab_completion",
-      "label-components": "update_label_component_tab_completion",
-      "symbols-graphics": "update_symbols_graphics_tab_completion",
-      "product-specifications": "update_product_data_tab_completion",
-      "operational-parameters": "update_operational_parameters_tab_completion",
-      "label-tags": "update_label_tags_tab_completion",
-    };
-
-    const backendTabName = tabMapping[currentTab];
-    const actionName = actionMapping[currentTab];
-
-    if (backendTabName) {
-      await Promise.all([
-        updateProductTabData({
-          id: productId,
-          action: actionName,
-          tab: backendTabName,
-          data: {
-            tab_completed: !isCurrentTabCompleted,
-          },
-        }),
-        updateProduct({
+    const results = await Promise.allSettled([
+      updateProductTabData({
+        id: productId,
+        action: currentTabConfig.action,
+        tab: currentTabConfig.tab,
+        data: {
+          tab_completed: !isCurrentTabCompleted,
+        },
+      }),
+      updateProduct({
+        _id: productId,
+        action: "update-product",
+        data: {
           _id: productId,
-          action: "update-product",
-          data: {
-            _id: productId,
-            complete_count: newCompletionPercentage,
-          },
-        }),
+          complete_count: newCompletionPercentage,
+        },
+      }),
+    ]);
+
+    const hasFailure = results.some((result) => result.status === "rejected");
+
+    if (hasFailure) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
+        queryClient.invalidateQueries({ queryKey: ["all-products"] }),
+        queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
       ]);
+      toast.error("Failed to update tab completion. Please try again.");
     }
   };
 
@@ -480,34 +512,34 @@ export function ProductHeader() {
             totalTabs={TOTAL_TABS}
             productStatus={productCoreData?.status}
           />
-          <ToggleTabCompletionDialog
-            tabName={currentTab}
-            isCompleted={isCurrentTabCompleted}
-            onConfirm={handleToggleTab}
-            disabled={!currentTab || !product || isSyncingStatus || isReadOnly}
-          >
-            <Button
-              variant="secondary"
-              size="default"
-              className="px-1"
-              disabled={
-                !currentTab || !product || isSyncingStatus || isReadOnly
-              }
-              title={isReadOnly ? "Cannot edit submitted product" : undefined}
+          {isTabCompletionEnabled ? (
+            <ToggleTabCompletionDialog
+              tabName={currentTab}
+              isCompleted={isCurrentTabCompleted}
+              onConfirm={handleToggleTab}
+              disabled={!product || isSyncingStatus || isReadOnly}
             >
-              <span className={toggleButtonIconClasses}>
-                {toggleButtonIcon}
-              </span>
-              <span className="flex flex-col items-start leading-tight">
-                <span className="text-xs font-semibold">
-                  {toggleButtonTitle}
+              <Button
+                variant="secondary"
+                size="default"
+                className="px-1"
+                disabled={!product || isSyncingStatus || isReadOnly}
+                title={isReadOnly ? "Cannot edit submitted product" : undefined}
+              >
+                <span className={toggleButtonIconClasses}>
+                  {toggleButtonIcon}
                 </span>
-                <span className="text-[0.65rem] font-medium text-muted-foreground">
-                  {toggleButtonSubtitle}
+                <span className="flex flex-col items-start leading-tight">
+                  <span className="text-xs font-semibold">
+                    {toggleButtonTitle}
+                  </span>
+                  <span className="text-[0.65rem] font-medium text-muted-foreground">
+                    {toggleButtonSubtitle}
+                  </span>
                 </span>
-              </span>
-            </Button>
-          </ToggleTabCompletionDialog>
+              </Button>
+            </ToggleTabCompletionDialog>
+          ) : null}
         </ButtonGroup>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">

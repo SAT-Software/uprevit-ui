@@ -8,7 +8,19 @@ import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files
 import { SourceFilesFolder } from "@/types/source-files";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PiBookmarkSimpleDuotone, PiFolderSimpleDuotone, PiWarningCircleDuotone } from "react-icons/pi";
+import {
+  PiBookmarkSimpleDuotone,
+  PiFolderSimpleDuotone,
+  PiWarningCircleDuotone,
+  PiClockCounterClockwiseDuotone,
+} from "react-icons/pi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useState } from "react";
+import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
@@ -53,6 +65,7 @@ function FolderErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 function SourceFilesPage() {
+  const [showLogs, setShowLogs] = useState(false);
   const {
     data: foldersData,
     isLoading: foldersLoading,
@@ -70,9 +83,11 @@ function SourceFilesPage() {
     isError: bookmarkedError,
   } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
 
-  const bookmarkedFolders = bookmarkedData?.result.filter(
-    (folder: BookmarkedSourceFilesFolder) => folder.parentId === null
+  const bookmarkedFolders = (bookmarkedData?.result ?? []).filter(
+    (folder: BookmarkedSourceFilesFolder) => folder.parentId === null,
   );
+
+  const workspaceId = auth?.user?.profile?.workspaceId as string | undefined;
 
   if (foldersLoading) {
     return (
@@ -135,8 +150,7 @@ function SourceFilesPage() {
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full">
-        {/* Main Header */}
+      <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full overflow-hidden">
         <div className="flex items-center justify-between w-full p-4">
           <div className="flex items-center gap-2">
             <h1 className="text-base font-semibold">Source Files</h1>
@@ -145,57 +159,83 @@ function SourceFilesPage() {
               Manage and view all source files and folders
             </p>
           </div>
-          <DialogAddProductFolder />
-        </div>
-
-        {/* Content */}
-        <div className="flex flex-col w-full ">
-          {/* Bookmarked Folders Section */}
-          {(bookmarkedLoading ||
-            (bookmarkedFolders && bookmarkedFolders.length > 0)) && (
-            <div className="flex flex-col gap-4 px-4 pb-4 border-b border-border">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-muted-foreground">
-                  Bookmarked Folders
-                </h2>
-              </div>
-              {bookmarkedLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
-                  {[...Array(3)].map((_, index) => (
-                    <FolderLoadingCard key={index} />
-                  ))}
-                </div>
-              ) : bookmarkedError ? (
-                <div className="flex items-center justify-center h-[100px] gap-2">
-                  <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
-                  <p className="text-sm text-destructive">
-                    Failed to load bookmarked folders.
-                  </p>
-                </div>
-              ) : (
-                <SourceFilesFoldersCard folders={bookmarkedFolders} />
-              )}
-            </div>
-          )}
-
-          {/* All Folders Section */}
-          <div className="flex flex-col gap-4 p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-muted-foreground">
-                All Folders
-              </h2>
-            </div>
-            {sourceFilesFolders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[200px] gap-4 text-muted-foreground">
-                <PiBookmarkSimpleDuotone className="w-16 h-16" />
-                <p className="text-lg">No folders created yet.</p>
-                <p className="text-sm">Create a new folder to get started.</p>
-              </div>
-            ) : (
-              <SourceFilesFoldersCard folders={sourceFilesFolders} />
-            )}
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant={showLogs ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={() => setShowLogs((current) => !current)}
+                  aria-label={showLogs ? "Show folders" : "Show source file logs"}
+                >
+                  <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+                  Logs
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{showLogs ? "Show Folders" : "Show Logs"}</TooltipContent>
+            </Tooltip>
+            <DialogAddProductFolder />
           </div>
         </div>
+
+        {showLogs ? (
+          <div className="w-full h-full px-4 pb-4 pt-4 border-t border-border">
+            <ActivityLogsPanel
+              scopeType="source-files"
+              scopeId={workspaceId}
+              title="Source Files Logs"
+              description="Track source file and folder actions across the workspace."
+              showHeader={false}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col w-full">
+            {(bookmarkedLoading ||
+              (bookmarkedFolders && bookmarkedFolders.length > 0)) && (
+              <div className="flex flex-col gap-4 px-4 pb-4 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-muted-foreground">
+                    Bookmarked Folders
+                  </h2>
+                </div>
+                {bookmarkedLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
+                    {[...Array(3)].map((_, index) => (
+                      <FolderLoadingCard key={index} />
+                    ))}
+                  </div>
+                ) : bookmarkedError ? (
+                  <div className="flex items-center justify-center h-[100px] gap-2">
+                    <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
+                    <p className="text-sm text-destructive">
+                      Failed to load bookmarked folders.
+                    </p>
+                  </div>
+                ) : (
+                  <SourceFilesFoldersCard folders={bookmarkedFolders} />
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4 p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-muted-foreground">
+                  All Folders
+                </h2>
+              </div>
+              {sourceFilesFolders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[200px] gap-4 text-muted-foreground">
+                  <PiBookmarkSimpleDuotone className="w-16 h-16" />
+                  <p className="text-lg">No folders created yet.</p>
+                  <p className="text-sm">Create a new folder to get started.</p>
+                </div>
+              ) : (
+                <SourceFilesFoldersCard folders={sourceFilesFolders} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
