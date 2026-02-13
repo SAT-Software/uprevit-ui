@@ -39,6 +39,7 @@ import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductUpdateProgress } from "./ProductUpdateProgress";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { toast } from "sonner";
 
 export type Item = {
   productId: string;
@@ -304,6 +305,7 @@ export function ProductHeader() {
         queryClient.invalidateQueries({ queryKey: ["all-products"] }),
         queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
       ]);
+      toast.error("Failed to update tab completion. Please try again.");
     }
   };
 
