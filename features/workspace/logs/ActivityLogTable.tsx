@@ -65,7 +65,15 @@ const formatValue = (value: unknown) => {
     return String(value);
   }
 
-  const serialized = JSON.stringify(value);
+  let serialized: string;
+
+  try {
+    const maybeSerialized = JSON.stringify(value);
+    serialized = typeof maybeSerialized === "string" ? maybeSerialized : String(value);
+  } catch {
+    serialized = String(value);
+  }
+
   return serialized.length > 120
     ? `${serialized.slice(0, 117)}...`
     : serialized;

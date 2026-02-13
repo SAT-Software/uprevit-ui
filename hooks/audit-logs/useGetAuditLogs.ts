@@ -44,8 +44,6 @@ async function getAuditLogs(
     if (value) params.set(key, value);
   }
 
-  console.log("params", params.toString());
-
   const response = await fetch(`/api/audit-logs?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${auth?.user?.access_token}`,

@@ -28,6 +28,7 @@ const actionFilters = [
   { value: "create", label: "Create" },
   { value: "update", label: "Update" },
   { value: "delete", label: "Delete" },
+  { value: "move", label: "Move" },
   { value: "archive", label: "Archive" },
   { value: "restore", label: "Restore" },
   { value: "submit", label: "Submit" },

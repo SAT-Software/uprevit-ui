@@ -83,8 +83,8 @@ function SourceFilesPage() {
     isError: bookmarkedError,
   } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
 
-  const bookmarkedFolders = bookmarkedData?.result.filter(
-    (folder: BookmarkedSourceFilesFolder) => folder.parentId === null
+  const bookmarkedFolders = (bookmarkedData?.result ?? []).filter(
+    (folder: BookmarkedSourceFilesFolder) => folder.parentId === null,
   );
 
   const workspaceId = auth?.user?.profile?.workspaceId as string | undefined;

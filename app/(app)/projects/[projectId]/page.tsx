@@ -48,6 +48,8 @@ export default function ProjectDetailPage() {
   const { data, isLoading, isError } = useGetProjectById(projectId);
   const { data: productsData } = useGetAllProducts();
 
+  if (!projectId) return notFound();
+
   const project = data?.project;
   const products =
     productsData?.result?.products?.filter(
@@ -185,7 +187,7 @@ export default function ProjectDetailPage() {
               <UpdateProjectDialog project={project} />
               <ShareProjectDialog project={project} />
               <DialogArchiveEntity
-                id={projectId ?? ""}
+                id={projectId}
                 entityName={project.project_name}
                 entityType="project"
               />
@@ -293,7 +295,7 @@ export default function ProjectDetailPage() {
               <UpdateProjectDialog project={project} />
               <ShareProjectDialog project={project} />
               <DialogArchiveEntity
-                id={projectId ?? ""}
+                id={projectId}
                 entityName={project.project_name}
                 entityType="project"
               />
