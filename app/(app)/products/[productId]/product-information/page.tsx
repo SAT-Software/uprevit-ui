@@ -1,11 +1,17 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
 import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
@@ -30,6 +36,7 @@ import {
   PiArrowRightBold,
   PiBuildingsDuotone,
   PiCalendarDuotone,
+  PiClockCounterClockwiseDuotone,
   PiFlagDuotone,
   PiFlaskDuotone,
   PiFolderSimpleDuotone,
@@ -544,6 +551,19 @@ export default function Page() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-2 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
+              {productId ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/products/${productId}/logs`}>
+                        <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+                        Logs
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show Product Logs</TooltipContent>
+                </Tooltip>
+              ) : null}
               {productData && productMetadataForDialog && (
                 <>
                   <EditProductDialog

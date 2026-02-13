@@ -3,13 +3,20 @@
 import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   PiCalendarDuotone,
   PiKanbanDuotone,
   PiBuildingsDuotone,
   PiUserCircleGearDuotone,
+  PiClockCounterClockwiseDuotone,
 } from "react-icons/pi";
 import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
 import ShareDepartmentDialog from "@/features/workspace/departments/ShareDepartmentDialog";
@@ -17,6 +24,9 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
 import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
 
 interface DepartmentUser {
   _id: string;
@@ -28,6 +38,12 @@ interface DepartmentUser {
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
   const departmentId = params?.departmentId;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
+  const activeTab = searchParams.get("tab") === "logs" && isAdmin ? "logs" : "overview";
+  const isLogsView = activeTab === "logs";
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId);
   const { data: projectsData } = useGetAllProjects();
@@ -41,15 +57,6 @@ export default function DepartmentDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
-        {/* Breadcrumbs Skeleton */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-          <div className="h-4 w-4 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-20 bg-background rounded animate-pulse" />
-          <div className="h-3 w-3 bg-background rounded animate-pulse" />
-          <div className="h-4 w-32 bg-background rounded animate-pulse" />
-        </div>
-
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
           {/* Header Section Skeleton */}
           <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
@@ -133,6 +140,72 @@ export default function DepartmentDetailPage() {
     }).format(date);
   };
 
+  const handleLogsToggle = () => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (isLogsView) {
+      nextParams.delete("tab");
+    } else {
+      nextParams.set("tab", "logs");
+    }
+
+    const query = nextParams.toString();
+    router.replace(query ? `/departments/${departmentId}?${query}` : `/departments/${departmentId}`);
+  };
+
+  if (isLogsView) {
+    return (
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold">Department Logs</h1>
+              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
+              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
+                {department.department_name}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {isAdmin ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleLogsToggle}
+                      aria-label="Show department overview"
+                    >
+                      <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+                      Logs
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show Overview</TooltipContent>
+                </Tooltip>
+              ) : null}
+              <UpdateDepartmentDialog department={department} />
+              <ShareDepartmentDialog department={department} />
+              <DialogArchiveEntity
+                id={departmentId ?? ""}
+                entityName={department.department_name}
+                entityType="department"
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-hidden p-4">
+            <ActivityLogsPanel
+              scopeType="department"
+              scopeId={departmentId}
+              title="Department Logs"
+              description={`Showing activity for ${department.department_name}.`}
+              showHeader={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
       <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
@@ -200,6 +273,23 @@ export default function DepartmentDetailPage() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
+              {isAdmin ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogsToggle}
+                      aria-label="Show department logs"
+                    >
+                      <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+                      Logs
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show Logs</TooltipContent>
+                </Tooltip>
+              ) : null}
               <UpdateDepartmentDialog department={department} />
               <ShareDepartmentDialog department={department} />
               <DialogArchiveEntity
@@ -237,7 +327,6 @@ export default function DepartmentDetailPage() {
           </div>
         </div>
 
-        {/* Projects Section */}
         <div className="flex flex-col gap-2 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

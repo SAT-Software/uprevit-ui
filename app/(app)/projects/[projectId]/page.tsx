@@ -3,13 +3,20 @@
 import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import Image from "next/image";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   PiCalendarDuotone,
   PiKanbanDuotone,
   PiBuildingsDuotone,
   PiUserCircleGearDuotone,
+  PiClockCounterClockwiseDuotone,
 } from "react-icons/pi";
 import ProjectPageProductsTable from "@/features/workspace/projects/ProjectPageProductsTable";
 import ShareProjectDialog from "@/features/workspace/projects/ShareProjectDialog";
@@ -17,6 +24,9 @@ import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { Item } from "@/features/workspace/projects/ProjectPageProductsTable";
 import { AuditLog } from "@/types/audit-log";
 import UpdateProjectDialog from "@/features/workspace/projects/UpdateProjectDialog";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
 
 interface ProjectUser {
   _id: string;
@@ -28,6 +38,12 @@ interface ProjectUser {
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
   const projectId = params?.projectId;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
+  const activeTab = searchParams.get("tab") === "logs" && isAdmin ? "logs" : "overview";
+  const isLogsView = activeTab === "logs";
 
   const { data, isLoading, isError } = useGetProjectById(projectId);
   const { data: productsData } = useGetAllProducts();
@@ -124,6 +140,72 @@ export default function ProjectDetailPage() {
     }).format(date);
   };
 
+  const handleLogsToggle = () => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (isLogsView) {
+      nextParams.delete("tab");
+    } else {
+      nextParams.set("tab", "logs");
+    }
+
+    const query = nextParams.toString();
+    router.replace(query ? `/projects/${projectId}?${query}` : `/projects/${projectId}`);
+  };
+
+  if (isLogsView) {
+    return (
+      <div className="flex flex-col gap-2 p-2 h-full">
+        <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold">Project Logs</h1>
+              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
+              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
+                {project.project_name}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {isAdmin ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleLogsToggle}
+                      aria-label="Show project overview"
+                    >
+                      <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+                      Logs
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show Overview</TooltipContent>
+                </Tooltip>
+              ) : null}
+              <UpdateProjectDialog project={project} />
+              <ShareProjectDialog project={project} />
+              <DialogArchiveEntity
+                id={projectId ?? ""}
+                entityName={project.project_name}
+                entityType="project"
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-hidden p-4">
+            <ActivityLogsPanel
+              scopeType="project"
+              scopeId={projectId}
+              title="Project Logs"
+              description={`Showing activity for ${project.project_name}.`}
+              showHeader={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
       <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
@@ -191,6 +273,23 @@ export default function ProjectDetailPage() {
           {/* Actions & Meta */}
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
             <div className="flex items-center gap-2 w-full md:w-auto">
+              {isAdmin ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogsToggle}
+                      aria-label="Show project logs"
+                    >
+                      <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+                      Logs
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show Logs</TooltipContent>
+                </Tooltip>
+              ) : null}
               <UpdateProjectDialog project={project} />
               <ShareProjectDialog project={project} />
               <DialogArchiveEntity
@@ -228,7 +327,6 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        {/* Products Section */}
         <div className="flex flex-col gap-2 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
