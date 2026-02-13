@@ -120,7 +120,7 @@ export function ActivityLogsPanel({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {isError ? (
           <div className="h-28 rounded-xl border border-destructive/30 bg-destructive/5 flex items-center justify-center text-sm text-destructive">
             {error?.message || "Failed to load logs"}

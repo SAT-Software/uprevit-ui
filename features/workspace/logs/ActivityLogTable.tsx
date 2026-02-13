@@ -261,9 +261,9 @@ export function ActivityLogTable({
   const canGoNext = hasNextPage ?? page < totalPages;
 
   return (
-    <div className="space-y-2 h-full min-h-0 flex flex-col">
+    <div className="space-y-2 flex flex-col">
       <div
-        className="bg-background overflow-auto rounded-xl border relative flex-1 min-h-0"
+        className="bg-background overflow-auto rounded-xl border relative"
         aria-busy={isInitialLoading || isRefreshing}
       >
         {isRefreshing ? (
