@@ -11,18 +11,20 @@ import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData
 import { type ProductDataTableSchema } from "@/types/product-data-table";
 import { parseProductSpecDataFromDatabase } from "@/utils/product/product-spec";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   PiCloudCheckDuotone,
   PiFloppyDiskDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
+import { toast } from "sonner";
 
-const AUTO_SAVE_STORAGE_KEY = "product-data-table-auto-save";
+const AUTO_SAVE_STORAGE_KEY_PREFIX = "operational-parameters-auto-save";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId ?? "";
+  const autoSaveStorageKey = `${AUTO_SAVE_STORAGE_KEY_PREFIX}-${productId}`;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
@@ -31,7 +33,7 @@ export default function Page() {
   );
   const [autoSave, setAutoSave] = useState(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(AUTO_SAVE_STORAGE_KEY);
+      const stored = localStorage.getItem(autoSaveStorageKey);
       return stored !== "false";
     }
     return true;
@@ -42,6 +44,9 @@ export default function Page() {
   const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
   const isFirstRender = useRef(true);
   const onSaveSuccessRef = useRef<() => void>(() => {});
+  const saveDataToDBRef = useRef<(data: ProductDataTableSchema) => void>(() => {
+    // no-op
+  });
 
   const {
     data: operationalTabData,
@@ -83,31 +88,38 @@ export default function Page() {
 
   function handleAutoSaveToggle(checked: boolean) {
     setAutoSave(checked);
-    localStorage.setItem(AUTO_SAVE_STORAGE_KEY, String(checked));
+    localStorage.setItem(autoSaveStorageKey, String(checked));
     if (!checked && debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
   }
 
-  function saveDataToDB(data: ProductDataTableSchema) {
-    if (isSubmitted) return;
+  const saveDataToDB = useCallback(
+    (data: ProductDataTableSchema) => {
+      if (isSubmitted) return;
 
-    const payload = {
-      id: productId,
-      tab: "operational-parameters",
-      action: "add_operational_parameters",
-      data: { workbook_data: data },
-    };
+      const payload = {
+        id: productId,
+        tab: "operational-parameters",
+        action: "add_operational_parameters",
+        data: { workbook_data: data },
+      };
 
-    updateTabData(payload, {
-      onSuccess: () => {
-        setHasUnsavedChanges(false);
-        setLastSavedAt(new Date());
-        onSaveSuccessRef.current();
-      },
-    });
-  }
+      updateTabData(payload, {
+        onSuccess: () => {
+          setHasUnsavedChanges(false);
+          setLastSavedAt(new Date());
+          onSaveSuccessRef.current();
+        },
+        onError: (error) => {
+          console.error("Failed to save operational parameters:", error);
+          toast.error("Failed to save operational parameters");
+        },
+      });
+    },
+    [isSubmitted, productId, updateTabData],
+  );
 
   function handleAutoSave(data: ProductDataTableSchema) {
     if (isSubmitted) return;
@@ -119,6 +131,7 @@ export default function Page() {
     }
 
     setHasUnsavedChanges(true);
+    setLastSavedAt(null);
     pendingDataRef.current = data;
 
     if (autoSave) {
@@ -146,9 +159,18 @@ export default function Page() {
   }
 
   useEffect(() => {
+    saveDataToDBRef.current = saveDataToDB;
+  }, [saveDataToDB]);
+
+  useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+
+        if (pendingDataRef.current) {
+          saveDataToDBRef.current(pendingDataRef.current);
+        }
       }
     };
   }, []);
@@ -295,13 +317,13 @@ export default function Page() {
                 <Spinner className="w-4 h-4" />
                 <span className="text-xs">Saving...</span>
               </div>
+            ) : hasEditableUnsavedChanges ? (
+              <span className="text-xs text-amber-600">Unsaved changes</span>
             ) : lastSavedAt ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
                 <span className="text-xs">Saved</span>
               </div>
-            ) : hasEditableUnsavedChanges ? (
-              <span className="text-xs text-amber-600">Unsaved changes</span>
             ) : null}
 
             <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/50">
