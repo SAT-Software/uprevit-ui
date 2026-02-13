@@ -59,6 +59,10 @@ export default function Page() {
   const workbookData =
     operationalTabData?.result?.data?.data
       ?.workbook_data as ProductDataTableSchema | undefined;
+  const isSubmitted =
+    operationalTabData?.result?.data?.product_data?.data?.status ===
+    "submitted";
+  const hasEditableUnsavedChanges = hasUnsavedChanges && !isSubmitted;
   const baseVersionWorkbook =
     diffData?.result?.base_version?.operational_parameters?.data
       ?.workbook_data as ProductDataTableSchema | undefined;
@@ -87,6 +91,8 @@ export default function Page() {
   }
 
   function saveDataToDB(data: ProductDataTableSchema) {
+    if (isSubmitted) return;
+
     const payload = {
       id: productId,
       tab: "operational-parameters",
@@ -104,6 +110,8 @@ export default function Page() {
   }
 
   function handleAutoSave(data: ProductDataTableSchema) {
+    if (isSubmitted) return;
+
     if (isFirstRender.current) {
       isFirstRender.current = false;
       pendingDataRef.current = data;
@@ -126,6 +134,8 @@ export default function Page() {
   }
 
   function handleManualSave() {
+    if (isSubmitted) return;
+
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
@@ -144,9 +154,23 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    if (!isSubmitted) return;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    pendingDataRef.current = null;
+  }, [isSubmitted]);
+
+  useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const hasPendingAutoSave = !!debounceTimerRef.current;
-      if (hasUnsavedChanges && (!autoSave || hasPendingAutoSave)) {
+      if (
+        hasEditableUnsavedChanges &&
+        (!autoSave || hasPendingAutoSave)
+      ) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -154,7 +178,7 @@ export default function Page() {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges, autoSave]);
+  }, [hasEditableUnsavedChanges, autoSave]);
 
   if (isLoading) {
     return (
@@ -276,7 +300,7 @@ export default function Page() {
                 <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
                 <span className="text-xs">Saved</span>
               </div>
-            ) : hasUnsavedChanges ? (
+            ) : hasEditableUnsavedChanges ? (
               <span className="text-xs text-amber-600">Unsaved changes</span>
             ) : null}
 
@@ -286,15 +310,20 @@ export default function Page() {
                 checked={autoSave}
                 onCheckedChange={handleAutoSaveToggle}
                 className="scale-75"
-                disabled={isRedlineView}
+                disabled={isRedlineView || isSubmitted}
               />
             </div>
 
             <Button
               size="sm"
-              variant={hasUnsavedChanges ? "default" : "outline"}
+              variant={hasEditableUnsavedChanges ? "default" : "outline"}
               onClick={handleManualSave}
-              disabled={isSaving || !hasUnsavedChanges || isRedlineView}
+              disabled={
+                isSaving ||
+                !hasEditableUnsavedChanges ||
+                isRedlineView ||
+                isSubmitted
+              }
               className="gap-1.5"
             >
               {isSaving ? (
@@ -309,7 +338,9 @@ export default function Page() {
 
         <ProductSpecificationDataTable
           initialData={initialData}
-          onDataChange={isRedlineView ? undefined : handleAutoSave}
+          onDataChange={
+            isRedlineView || isSubmitted ? undefined : handleAutoSave
+          }
           onSaveSuccess={(clearHistory) => {
             onSaveSuccessRef.current = clearHistory;
           }}
