@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PiCircleNotchDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import { Input } from "@/components/ui/input";
@@ -46,8 +46,17 @@ export function ActivityLogsPanel({
   const auth = useAuth();
   const workspaceId = auth.user?.profile?.workspaceId as string | undefined;
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [action, setAction] = useState("all");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 600);
+
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   const filters = useMemo(
     () => ({
@@ -56,10 +65,10 @@ export function ActivityLogsPanel({
       scopeId,
       page,
       limit: 10,
-      search: search.trim() || undefined,
+      search: debouncedSearch.trim() || undefined,
       actions: action === "all" ? undefined : [action],
     }),
-    [action, page, scopeId, scopeType, search, workspaceId],
+    [action, debouncedSearch, page, scopeId, scopeType, workspaceId],
   );
 
   const { data, isLoading, isFetching, isError, error } =

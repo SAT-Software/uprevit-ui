@@ -69,7 +69,8 @@ const formatValue = (value: unknown) => {
 
   try {
     const maybeSerialized = JSON.stringify(value);
-    serialized = typeof maybeSerialized === "string" ? maybeSerialized : String(value);
+    serialized =
+      typeof maybeSerialized === "string" ? maybeSerialized : String(value);
   } catch {
     serialized = String(value);
   }
@@ -102,7 +103,7 @@ const SortableHeader = ({
   return (
     <button
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      className="h-8 w-full flex items-center justify-between gap-2 hover:bg-muted/50 rounded-md px-2"
+      className="h-8 w-full flex items-center justify-between gap-2 hover:bg-muted/50 rounded-md px-2 cursor-pointer"
     >
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -494,7 +495,11 @@ export function ActivityLogTable({
       </div>
 
       <div className="flex items-center justify-between gap-8">
-        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
+        <div className="text-[11px] text-muted-foreground">
+          Sorting applies to current page only.
+        </div>
+
+        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap gap-8 items-center">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
             aria-live="polite"
@@ -504,67 +509,67 @@ export function ActivityLogTable({
             </span>{" "}
             of <span className="text-foreground">{totalCount}</span>
           </p>
-        </div>
 
-        <div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => onPageChange(1)}
-                  disabled={!canGoPrev}
-                  aria-label="Go to first page"
-                >
-                  <PiCaretCircleDoubleLeftDuotone
-                    size={16}
-                    aria-hidden="true"
-                  />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => onPageChange(page - 1)}
-                  disabled={!canGoPrev}
-                  aria-label="Go to previous page"
-                >
-                  <PiCaretCircleLeftDuotone size={16} aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => onPageChange(page + 1)}
-                  disabled={!canGoNext}
-                  aria-label="Go to next page"
-                >
-                  <PiCaretCircleRightDuotone size={16} aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => onPageChange(totalPages)}
-                  disabled={!canGoNext}
-                  aria-label="Go to last page"
-                >
-                  <PiCaretCircleDoubleRightDuotone
-                    size={16}
-                    aria-hidden="true"
-                  />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <div>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => onPageChange(1)}
+                    disabled={!canGoPrev}
+                    aria-label="Go to first page"
+                  >
+                    <PiCaretCircleDoubleLeftDuotone
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </PaginationItem>
+                <PaginationItem>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => onPageChange(page - 1)}
+                    disabled={!canGoPrev}
+                    aria-label="Go to previous page"
+                  >
+                    <PiCaretCircleLeftDuotone size={16} aria-hidden="true" />
+                  </Button>
+                </PaginationItem>
+                <PaginationItem>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => onPageChange(page + 1)}
+                    disabled={!canGoNext}
+                    aria-label="Go to next page"
+                  >
+                    <PiCaretCircleRightDuotone size={16} aria-hidden="true" />
+                  </Button>
+                </PaginationItem>
+                <PaginationItem>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => onPageChange(totalPages)}
+                    disabled={!canGoNext}
+                    aria-label="Go to last page"
+                  >
+                    <PiCaretCircleDoubleRightDuotone
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
     </div>

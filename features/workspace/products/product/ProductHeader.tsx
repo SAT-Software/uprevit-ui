@@ -23,6 +23,7 @@ import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/product";
 import { useParams, usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   PiCircleDuotone,
   PiExportDuotone,
@@ -63,6 +64,7 @@ export type Item = {
 const TOTAL_TABS = 7;
 
 export function ProductHeader() {
+  const queryClient = useQueryClient();
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -256,7 +258,14 @@ export function ProductHeader() {
   );
 
   const handleToggleTab = async () => {
-    if (!currentTab || !product || !isTabCompletionEnabled || isSyncingStatus || isReadOnly) {
+    if (
+      !currentTab ||
+      !product ||
+      !currentTabConfig ||
+      !isTabCompletionEnabled ||
+      isSyncingStatus ||
+      isReadOnly
+    ) {
       return;
     }
 
@@ -268,7 +277,7 @@ export function ProductHeader() {
       (updatedTabsCompleted.length / TOTAL_TABS) * 100,
     );
 
-    await Promise.all([
+    const results = await Promise.allSettled([
       updateProductTabData({
         id: productId,
         action: currentTabConfig.action,
@@ -286,6 +295,16 @@ export function ProductHeader() {
         },
       }),
     ]);
+
+    const hasFailure = results.some((result) => result.status === "rejected");
+
+    if (hasFailure) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
+        queryClient.invalidateQueries({ queryKey: ["all-products"] }),
+        queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
+      ]);
+    }
   };
 
   const versions = versionsData?.result?.versions || [];
