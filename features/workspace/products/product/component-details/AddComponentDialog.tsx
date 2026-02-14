@@ -35,10 +35,10 @@ import { uploadFiles } from "@/utils/uploadthing";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
-  PiCubeDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 
 type FormData = {
   componentNumber: string;
@@ -76,6 +76,8 @@ export default function AddComponentDialog({
     },
   });
   const { mutate: addComponent, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadImage, isPending: isUploadingImage } =
+    useUploadFilesToS3();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -89,6 +91,12 @@ export default function AddComponentDialog({
           files: [data.image.file],
         });
 
+        const uploadRes = await uploadImage({
+          file: data.image.file,
+          contentType: data.image.file.type,
+        });
+
+        console.log("S3 upload response:", uploadRes);
         console.log("UploadThing response:", utRes);
       }
       setUploadingImage(false);
@@ -284,16 +292,16 @@ export default function AddComponentDialog({
             disabled={isPending || uploadingImage}
             variant="default"
           >
-            {isPending || uploadingImage ? (
+            {isPending || isUploadingImage || uploadingImage ? (
               <Spinner />
             ) : (
               <PiPlusCircleDuotone />
             )}
             {isPending
               ? "Adding..."
-              : uploadingImage
-              ? "Uploading..."
-              : "Add Component"}
+              : isUploadingImage || uploadingImage
+                ? "Uploading..."
+                : "Add Component"}
           </Button>
         </DialogFooter>
       </DialogContent>
