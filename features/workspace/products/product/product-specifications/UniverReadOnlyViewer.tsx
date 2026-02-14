@@ -17,10 +17,6 @@ interface UniverReadOnlyViewerProps {
   variant?: "old" | "new" | "default";
 }
 
-/**
- * A minimal read-only Univer spreadsheet viewer for diff comparison
- * No toolbar, no editing - just displays the spreadsheet data
- */
 export default function UniverReadOnlyViewer({
   workbookData,
   label,
@@ -51,7 +47,6 @@ export default function UniverReadOnlyViewer({
 
     univerAPIRef.current = univerAPI;
 
-    // Use passed data or create empty workbook
     const data: IWorkbookData = workbookData || {
       id: "empty-workbook",
       name: "Empty",

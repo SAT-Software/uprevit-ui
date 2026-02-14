@@ -20,11 +20,11 @@ import { toast } from "sonner";
 import type { DiffItem } from "@/utils/deepDiff";
 import type { IWorkbookData } from "@univerjs/core";
 
-// Dynamic import for read-only viewer (SSR disabled) - reusing from operational-parameters
+// Dynamic import for read-only viewer (SSR disabled)
 const UniverReadOnlyViewer = dynamic(
   () =>
     import(
-      "@/features/workspace/products/product/operational-parameters/UniverReadOnlyViewer"
+      "@/features/workspace/products/product/product-specifications/UniverReadOnlyViewer"
     ),
   { ssr: false }
 );

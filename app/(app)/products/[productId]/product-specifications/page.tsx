@@ -18,11 +18,12 @@ import {
   PiWarningCircleDuotone,
 } from "react-icons/pi";
 
-const AUTO_SAVE_STORAGE_KEY = "product-data-table-auto-save";
+const AUTO_SAVE_STORAGE_KEY_PREFIX = "product-specifications-auto-save";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId ?? "";
+  const autoSaveStorageKey = `${AUTO_SAVE_STORAGE_KEY_PREFIX}-${productId}`;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
@@ -31,7 +32,7 @@ export default function Page() {
   );
   const [autoSave, setAutoSave] = useState(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(AUTO_SAVE_STORAGE_KEY);
+      const stored = localStorage.getItem(autoSaveStorageKey);
       return stored !== "false";
     }
     return true;
@@ -79,7 +80,7 @@ export default function Page() {
 
   function handleAutoSaveToggle(checked: boolean) {
     setAutoSave(checked);
-    localStorage.setItem(AUTO_SAVE_STORAGE_KEY, String(checked));
+    localStorage.setItem(autoSaveStorageKey, String(checked));
     if (!checked && debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
