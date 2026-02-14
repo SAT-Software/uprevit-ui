@@ -49,6 +49,7 @@ export interface Product {
       component_type: string;
       component_description: string;
       image?: string;
+      key?: string;
     }>;
     tab_completed?: boolean;
   };
@@ -228,6 +229,7 @@ export interface AllTabsData {
     component_type: string;
     component_description: string;
     image?: string;
+    key?: string;
   }>;
   symbols_graphics: TabWithArrayData<{
     _id?: string;

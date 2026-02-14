@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "r7codfanye.ufs.sh" },
       { protocol: "https", hostname: "utfs.io" },
+      {
+        protocol: "https",
+        hostname: "uprevit-storage-dev-and-test.s3.us-east-1.amazonaws.com",
+      },
     ],
   },
 

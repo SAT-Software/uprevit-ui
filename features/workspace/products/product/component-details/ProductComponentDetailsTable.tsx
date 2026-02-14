@@ -73,6 +73,7 @@ type ComponentItem = {
   component_number: string;
   component_description: string;
   image: string;
+  key?: string;
   label_type: string[];
   dimensions: string;
   component_type: string;
@@ -87,13 +88,11 @@ type TableMeta = {
   getFieldDiff?: (
     row: ComponentItem,
     field: string,
-    value?: unknown
+    value?: unknown,
   ) => DiffItem | null;
-  getRowStatus?: (row: ComponentItem) =>
-    | "added"
-    | "removed"
-    | "modified"
-    | null;
+  getRowStatus?: (
+    row: ComponentItem,
+  ) => "added" | "removed" | "modified" | null;
 };
 
 const RedlineCell = ({
@@ -107,8 +106,7 @@ const RedlineCell = ({
 }) => {
   const format =
     formatFn ||
-    ((v: unknown) =>
-      typeof v === "string" ? v : v != null ? String(v) : "-");
+    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
 
   if (!diff) return <>{format(value)}</>;
 
@@ -537,7 +535,7 @@ export default function ProductComponentDetailsTable({
   const getFieldDiff = (
     row: ComponentItem,
     field: string,
-    value?: unknown
+    value?: unknown,
   ): DiffItem | null => {
     if (!isRedlineView) return null;
     const status = row._redlineStatus;
@@ -674,7 +672,11 @@ export default function ProductComponentDetailsTable({
                       (() => {
                         // Check if image was added in redline view
                         const imageDiff = isRedlineView
-                          ? getFieldDiff(row.original, "image", row.original.image)
+                          ? getFieldDiff(
+                              row.original,
+                              "image",
+                              row.original.image,
+                            )
                           : null;
                         const addedImageUrl =
                           imageDiff?.status === "added" &&

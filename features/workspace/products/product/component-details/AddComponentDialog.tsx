@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -83,21 +83,22 @@ export default function AddComponentDialog({
     try {
       console.log("Form data:", data);
       setUploadingImage(true);
-      let utRes;
+      // let utRes;
+      let uploadRes;
 
       // Only upload if there's an image file
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
-        });
+        // utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
 
-        const uploadRes = await uploadImage({
+        uploadRes = await uploadImage({
           file: data.image.file,
           contentType: data.image.file.type,
         });
 
         console.log("S3 upload response:", uploadRes);
-        console.log("UploadThing response:", utRes);
+        // console.log("UploadThing response:", utRes);
       }
       setUploadingImage(false);
       const newComponentData = {
@@ -107,7 +108,8 @@ export default function AddComponentDialog({
         data: [
           {
             component_number: data.componentNumber,
-            image: utRes?.[0]?.ufsUrl || null,
+            // image: utRes?.[0]?.ufsUrl || null,
+            key: uploadRes?.key,
             component_description: data.componentDescription,
             label_type: (Array.isArray(labelType)
               ? labelType

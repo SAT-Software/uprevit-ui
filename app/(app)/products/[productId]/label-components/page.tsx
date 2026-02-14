@@ -14,6 +14,7 @@ interface ComponentItem {
   component_number: string;
   component_description: string;
   image: string;
+  key?: string;
   label_type: string[];
   dimensions: string;
   component_type: string;
@@ -27,6 +28,7 @@ interface LabelComponentItem {
   component_number: string;
   component_description: string;
   image: string;
+  key?: string;
   label_type: string[];
   dimensions: string;
   component_type: string;
@@ -36,6 +38,7 @@ const mapComponentItem = (item: LabelComponentItem): ComponentItem => ({
   _id: item._id,
   component_number: item.component_number || "",
   image: item.image || "",
+  key: item.key,
   component_description: item.component_description || "",
   label_type: item.label_type || [],
   dimensions: item.dimensions || "",
@@ -57,7 +60,7 @@ export default function Page() {
   // Only fetch redline data when compareVersion is in URL
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId as string,
-    compareVersionId
+    compareVersionId,
   );
 
   const isSubmitted =
@@ -66,7 +69,7 @@ export default function Page() {
   // Filter diffs for label_components only
   const allDiffs = diffData?.result?.diffs ?? [];
   const labelComponentDiffs = allDiffs.filter((d: DiffItem) =>
-    d.path.startsWith("label_components.data")
+    d.path.startsWith("label_components.data"),
   );
 
   if (isLoading) {
@@ -89,22 +92,20 @@ export default function Page() {
     );
   }
 
-  const currentComponentsRaw =
-    (componentsData?.result?.data?.data ?? []) as LabelComponentItem[];
+  const currentComponentsRaw = (componentsData?.result?.data?.data ??
+    []) as LabelComponentItem[];
   const currentComponents = currentComponentsRaw.map(mapComponentItem);
   const hasDiffVersions = Boolean(
-    diffData?.result?.base_version && diffData?.result?.next_version
+    diffData?.result?.base_version && diffData?.result?.next_version,
   );
-  const baseComponents =
-    hasDiffVersions
-      ? ((diffData?.result?.base_version?.label_components?.data ??
-          []) as LabelComponentItem[])
-      : [];
-  const nextComponents =
-    hasDiffVersions
-      ? ((diffData?.result?.next_version?.label_components?.data ??
-          []) as LabelComponentItem[])
-      : [];
+  const baseComponents = hasDiffVersions
+    ? ((diffData?.result?.base_version?.label_components?.data ??
+        []) as LabelComponentItem[])
+    : [];
+  const nextComponents = hasDiffVersions
+    ? ((diffData?.result?.next_version?.label_components?.data ??
+        []) as LabelComponentItem[])
+    : [];
 
   const components = (() => {
     if (!isRedlineView || !hasDiffVersions) return currentComponents;
