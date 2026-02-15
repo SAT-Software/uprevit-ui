@@ -114,7 +114,6 @@ export default function EditComponentDialog({
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Edit form data:", data);
       setUploadingImage(true);
       let uploadRes;
 
@@ -127,8 +126,6 @@ export default function EditComponentDialog({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
         });
-
-        console.log("S3 upload response:", uploadRes);
       }
       setUploadingImage(false);
 

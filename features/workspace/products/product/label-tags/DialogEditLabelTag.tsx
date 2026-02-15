@@ -81,7 +81,6 @@ export default function DialogEditLabelTag({
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
 

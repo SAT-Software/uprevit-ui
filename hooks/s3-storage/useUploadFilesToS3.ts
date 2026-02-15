@@ -34,7 +34,39 @@ export function useUploadFilesToS3() {
         throw new Error(text || "Failed to get signed URL");
       }
 
-      const { uploadUrl, key } = await res.json();
+      const presignResponse = (await res.json()) as {
+        uploadUrl?: unknown;
+        key?: unknown;
+        message?: unknown;
+        error?: unknown;
+      };
+
+      const uploadUrl =
+        typeof presignResponse.uploadUrl === "string"
+          ? presignResponse.uploadUrl.trim()
+          : "";
+      const key =
+        typeof presignResponse.key === "string"
+          ? presignResponse.key.trim()
+          : "";
+      const details =
+        typeof presignResponse.message === "string"
+          ? presignResponse.message
+          : typeof presignResponse.error === "string"
+            ? presignResponse.error
+            : "";
+
+      if (!uploadUrl) {
+        throw new Error(
+          `Missing uploadUrl in presign-upload response (status ${res.status})${details ? `: ${details}` : ""}`,
+        );
+      }
+
+      if (!key) {
+        throw new Error(
+          `Missing key in presign-upload response (status ${res.status})${details ? `: ${details}` : ""}`,
+        );
+      }
 
       const putRes = await fetch(uploadUrl, {
         method: "PUT",
