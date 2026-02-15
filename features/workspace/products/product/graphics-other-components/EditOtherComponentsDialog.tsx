@@ -23,7 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPencilSimpleDuotone,
   PiXCircleDuotone,
@@ -36,6 +37,7 @@ type Item = {
   id: string;
   componentName: string;
   componentImage: string;
+  key?: string;
   description: string;
   labelPresence: string[];
 };
@@ -112,16 +114,23 @@ export default function EditOtherComponentsDialog({
   };
 
   const { mutate: updateOtherCompsData, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
 
   const onSubmit = async (data: FormData) => {
     try {
       setUploadingImage(true);
-      let utRes;
+      let uploadedImageKey: string | undefined;
 
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // const utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        const s3UploadResult = await uploadFileToS3({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
+
+        uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
 
@@ -129,8 +138,8 @@ export default function EditOtherComponentsDialog({
       if (isImageRemoved) {
         finalImage = "";
       }
-      if (utRes?.[0]?.ufsUrl) {
-        finalImage = utRes[0].ufsUrl;
+      if (uploadedImageKey) {
+        finalImage = "";
       }
 
       const updatedOtherCompsData = {
@@ -141,6 +150,8 @@ export default function EditOtherComponentsDialog({
           id: otherComponent.id,
           text: data.componentName,
           image: finalImage,
+          ...(uploadedImageKey !== undefined && { key: uploadedImageKey }),
+          ...(isImageRemoved && uploadedImageKey === undefined && { key: "" }),
           entity: "Other Components",
           description: data.componentDescription,
           label_presence: labelPresence.map((tag: Tag) => tag.text),

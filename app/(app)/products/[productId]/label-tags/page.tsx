@@ -18,7 +18,9 @@ interface LabelTagItem {
   description?: string;
   type?: string;
   image?: string;
+  key?: string;
   tagged_image?: string;
+  tagged_image_key?: string;
   legend_items?: LegendItem[];
   _redlineStatus?: RedlineStatus;
   _redlineDiffs?: DiffItem[];

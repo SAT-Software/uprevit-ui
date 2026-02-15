@@ -71,6 +71,7 @@ type Item = {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  key?: string;
   presentOnLabels: string[];
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
@@ -696,6 +697,7 @@ function RowActions({
     componentName: item.componentName,
     description: item.componentDescription,
     componentImage: item.componentImage,
+    key: item.key,
     labelPresence: item.presentOnLabels,
   };
 

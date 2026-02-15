@@ -24,7 +24,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -93,6 +94,7 @@ export default function AddBarcodesDialog({
   const barcodeTypeInput = watch("barcodeTypeInput");
 
   const { mutate: addBarcodesData, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
 
   const onSubmit = async (data: FormData) => {
     // Validate that at least one barcode type is selected/entered
@@ -105,12 +107,18 @@ export default function AddBarcodesDialog({
 
     try {
       setUploadingImage(true);
-      let utRes;
+      let uploadedImageKey: string | undefined;
 
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // const utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        const s3UploadResult = await uploadFileToS3({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
+
+        uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
       const newBarcodesData = {
@@ -120,7 +128,8 @@ export default function AddBarcodesDialog({
         data: [
           {
             text: componentName,
-            image: utRes?.[0]?.ufsUrl || null,
+            image: null,
+            key: uploadedImageKey,
             entity: "Barcodes",
             label_presence: (Array.isArray(labelPresence)
               ? labelPresence

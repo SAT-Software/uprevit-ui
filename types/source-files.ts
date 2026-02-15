@@ -7,4 +7,5 @@ export interface SourceFilesFolder {
   parentId?: string | null;
   product_id?: string | null;
   url?: string;
+  key?: string;
 }

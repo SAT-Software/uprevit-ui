@@ -16,7 +16,8 @@ import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
 import UnsavedAnnotationDialog from "./UnsavedAnnotationDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { toast } from "sonner";
 import { LegendPanel } from "./LegendPanel";
 import { LegendItem } from "./legendTypes";
@@ -28,7 +29,9 @@ interface LabelTagItem {
   description?: string;
   type?: string;
   image?: string;
+  key?: string;
   tagged_image?: string;
+  tagged_image_key?: string;
   annotation_state?: AnnotationState;
   legend_items?: LegendItem[];
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
@@ -89,6 +92,7 @@ export default function LabelTagsTabs({
 
   const { mutateAsync: updateLabelTaggedImage, isPending: isUpdating } =
     useUpdateLabelTaggedImage();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
 
   const handleSave = (
     itemId: string,
@@ -122,17 +126,22 @@ export default function LabelTagsTabs({
           type: "image/png",
         });
 
-        const utRes = await uploadFiles("imageUploader", { files: [file] });
-        const uploadedUrl = utRes?.[0]?.ufsUrl || "";
+        // const utRes = await uploadFiles("imageUploader", { files: [file] });
+        const s3UploadResult = await uploadFileToS3({
+          file,
+          contentType: file.type || "application/octet-stream",
+        });
+        const uploadedKey = s3UploadResult.key;
 
-        if (!uploadedUrl) {
-          throw new Error("Failed to get uploaded image URL");
+        if (!uploadedKey) {
+          throw new Error("Failed to get uploaded image key");
         }
 
         await updateLabelTaggedImage({
           productId,
           labelTagId: pendingSave.itemId,
-          taggedImage: uploadedUrl,
+          taggedImage: "",
+          taggedImageKey: uploadedKey,
           annotationState: pendingSave.annotation,
         });
 
@@ -173,7 +182,7 @@ export default function LabelTagsTabs({
         isRenderingRef.current = false;
       }
     },
-    [pendingSave, productId, updateLabelTaggedImage],
+    [pendingSave, productId, updateLabelTaggedImage, uploadFileToS3],
   );
 
   const filteredLabelTypesForTabs: string[] = [

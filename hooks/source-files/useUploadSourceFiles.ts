@@ -6,7 +6,8 @@ type UploadSourceFilesRequest = {
   workspace_id: string;
   name: string;
   type: string;
-  url: string;
+  url?: string;
+  key?: string;
   folderId: string;
   parentId: string;
 };

@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFiles";
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { SourceFilesFolder } from "@/types/source-files";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
 import { useState } from "react";
 import {
   PiCloudArrowUpDuotone,
@@ -36,6 +37,7 @@ export default function DialogUploadSourceFiles({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadToBackend } = useUploadSourceFiles(folderId);
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const auth = useAuth();
   const workspaceId = auth?.user?.profile?.workspaceId;
 
@@ -44,40 +46,21 @@ export default function DialogUploadSourceFiles({
     try {
       console.log("selectedFiles", selectedFiles);
       setIsUploading(true);
-      const utRes = await uploadFiles("imageUploader", {
-        files: selectedFiles,
-      });
+      // const utRes = await uploadFiles("imageUploader", {
+      //   files: selectedFiles,
+      // });
 
-      // Map UploadThing response to backend format
-      type UploadThingFile = {
-        name?: string;
-        fileName?: string;
-        key?: string;
-        url?: string;
-        ufsUrl?: string;
-        fileUrl?: string;
-      };
-      const filesPayload = (
-        Array.isArray(utRes) ? (utRes as UploadThingFile[]) : []
-      )
-        .map((f) => {
-          const name = f?.name ?? f?.fileName ?? f?.key ?? "file";
-          const url = f?.url ?? f?.ufsUrl ?? f?.fileUrl;
-          if (!url) return null;
-          return { file_name: name as string, url: url as string };
-        })
-        .filter(Boolean) as { file_name: string; url: string }[];
+      for (const file of selectedFiles) {
+        const s3UploadResult = await uploadFileToS3({
+          file,
+          contentType: file.type || "application/octet-stream",
+        });
 
-      if (!filesPayload.length) {
-        throw new Error("No uploaded file URLs returned");
-      }
-
-      for (const file of filesPayload) {
         await uploadToBackend({
           workspace_id: workspaceId as string,
-          name: file.file_name,
+          name: file.name,
           type: "file",
-          url: file.url,
+          key: s3UploadResult.key,
           folderId: folder._id,
           parentId: currentFolder._id,
         });

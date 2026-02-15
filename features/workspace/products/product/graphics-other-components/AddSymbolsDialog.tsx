@@ -24,7 +24,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -66,18 +67,25 @@ export default function AddSymbolsDialog({
     },
   });
   const { mutate: addSymbolsData, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
 
   const onSubmit = async (data: FormData) => {
     if (isPending || uploadingImage) return;
 
     setUploadingImage(true);
     try {
-      let utRes;
+      let uploadedImageKey: string | undefined;
 
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // const utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        const s3UploadResult = await uploadFileToS3({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
+
+        uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
 
@@ -88,7 +96,8 @@ export default function AddSymbolsDialog({
         data: [
           {
             text: data.componentName,
-            image: utRes?.[0]?.ufsUrl || null,
+            image: null,
+            key: uploadedImageKey,
             entity: "Symbols",
             text_present: data.textPresent === "yes",
             label_presence: (Array.isArray(labelPresence)

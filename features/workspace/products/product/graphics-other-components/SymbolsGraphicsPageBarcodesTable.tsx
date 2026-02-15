@@ -72,6 +72,7 @@ type Item = {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  key?: string;
   note?: string;
   presentOnLabels: string[];
   count?: number;
@@ -693,6 +694,7 @@ function RowActions({
     componentName: item.componentName,
     description: item.componentDescription,
     componentImage: item.componentImage,
+    key: item.key,
     labelPresence: item.presentOnLabels,
     count: item.count,
   };

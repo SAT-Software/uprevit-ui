@@ -13,6 +13,7 @@ import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 interface SymbolGraphicItem {
   _id: string;
   image: string;
+  key?: string;
   text: string;
   description: string;
   text_present: boolean;
@@ -170,6 +171,7 @@ export default function Page() {
     componentName: item.text,
     componentDescription: item.description,
     componentImage: item.image,
+    key: item.key,
     presentOnLabels: item.label_presence,
     _redlineStatus: item._redlineStatus,
     _redlineDiffs: item._redlineDiffs,
@@ -181,6 +183,7 @@ export default function Page() {
     componentName: item.text,
     componentDescription: item.description,
     componentImage: item.image,
+    key: item.key,
     presentOnLabels: item.label_presence,
     count: item.count,
     _redlineStatus: item._redlineStatus,
@@ -194,6 +197,7 @@ export default function Page() {
       componentName: item.text,
       componentDescription: item.description,
       componentImage: item.image,
+      key: item.key,
       presentOnLabels: item.label_presence,
       _redlineStatus: item._redlineStatus,
       _redlineDiffs: item._redlineDiffs,
@@ -206,6 +210,7 @@ export default function Page() {
     id: item._id,
     componentName: item.text,
     componentImage: item.image,
+    key: item.key,
     symbolsTextPresent: item.label_presence,
     textPresent: item.text_present,
     _redlineStatus: item._redlineStatus,

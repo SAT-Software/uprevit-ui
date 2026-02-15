@@ -24,6 +24,7 @@ interface SymbolData {
   id: string;
   componentName: string;
   componentImage: string;
+  key?: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
 }
@@ -33,6 +34,7 @@ interface SchematicData {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  key?: string;
   presentOnLabels: string[];
 }
 
@@ -41,6 +43,7 @@ interface BarcodesData {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  key?: string;
   presentOnLabels: string[];
   count?: number;
 }
@@ -50,6 +53,7 @@ interface OtherComponentData {
   componentName: string;
   componentDescription: string;
   componentImage: string;
+  key?: string;
   presentOnLabels: string[];
 }
 
