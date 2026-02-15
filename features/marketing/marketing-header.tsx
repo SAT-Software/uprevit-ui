@@ -182,14 +182,16 @@ export default function MarketingHeader() {
             >
               {auth.isAuthenticated ? "Learn More" : "Log in"}
             </Button>
-            <Button
-              variant="default"
-              size="default"
-              className="w-fit"
-              onClick={handleGetStarted}
-            >
-              {auth.isAuthenticated ? "Dashboard" : "Sign Up"}
-            </Button>
+            {auth.isAuthenticated ? (
+              <Button
+                variant="default"
+                size="default"
+                className="w-fit"
+                onClick={handleGetStarted}
+              >
+                Dashboard
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>

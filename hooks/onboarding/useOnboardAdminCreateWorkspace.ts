@@ -44,11 +44,27 @@ export function useOnboardAdminCreateWorkspace() {
 
       return response.json().catch(() => null);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Workspace created successfully");
-      queryClient.invalidateQueries({ queryKey: ["workspace"] });
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["workspace"] }),
+        queryClient.invalidateQueries({ queryKey: ["user"] }),
+      ]);
+
+      try {
+        await auth.signinSilent();
+        router.replace("/dashboard");
+        return;
+      } catch (silentRefreshError) {
+        console.warn("Silent auth refresh failed, redirecting to refresh claims", silentRefreshError);
+      }
+
+      try {
+        await auth.signinRedirect();
+      } catch (redirectError) {
+        console.error("Session refresh redirect failed", redirectError);
+        router.replace("/auth/callback");
+      }
     },
     onError: (error) => {
       console.error(error.message || "Failed to create workspace");

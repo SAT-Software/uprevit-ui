@@ -23,8 +23,8 @@ import {
   OnboardAdminWorkspacePayload,
   useOnboardAdminCreateWorkspace,
 } from "@/hooks/onboarding/useOnboardAdminCreateWorkspace";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { Workspace } from "@/types/workspace";
-import { uploadFiles } from "@/utils/uploadthing";
 import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
 import { PiBuildingsDuotone } from "react-icons/pi";
@@ -41,6 +41,7 @@ export default function OnboardingCreateWorkspacePage() {
   const auth = useAuth();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const { mutate: createWorkspace, isPending } =
     useOnboardAdminCreateWorkspace();
 
@@ -76,14 +77,9 @@ export default function OnboardingCreateWorkspacePage() {
       const previewUrl = URL.createObjectURL(file);
       setLogoPreview(previewUrl);
 
-      const utRes = await uploadFiles("imageUploader", {
-        files: [file],
-      });
+      const uploadResult = await uploadFileToS3({ file });
 
-      const uploadedUrl = utRes?.[0]?.ufsUrl;
-      if (!uploadedUrl) throw new Error("Logo upload failed");
-
-      setValue("logo", uploadedUrl, {
+      setValue("logo", uploadResult.key, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,

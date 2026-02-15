@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { OnboardingShell } from "@/components/onboarding-shell";
@@ -13,21 +13,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import {
-  InputGroup,
-  // InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "@/components/ui/input-group";
+import { FieldError, FieldLabel } from "@/components/ui/field";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import { useOnboardUser } from "@/hooks/onboarding/useOnboardUser";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUser } from "@/hooks/user/useGetUser";
-import { uploadFiles } from "@/utils/uploadthing";
 import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
 import { PiUserCircleDuotone } from "react-icons/pi";
 import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
 
 type UserFormValues = {
   profileAvatar?: string;
@@ -41,6 +36,7 @@ type UserFormValues = {
 export default function OnboardUserPage() {
   const auth = useAuth();
   const { mutate: onboardUser, isPending } = useOnboardUser();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const { data: userData } = useGetUser();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
@@ -57,8 +53,25 @@ export default function OnboardUserPage() {
     mode: "onChange",
   });
 
+  const existingProfileAvatarValue =
+    typeof userProfile?.profileAvatarKey === "string"
+      ? userProfile.profileAvatarKey
+      : typeof userProfile?.profileAvatar === "string"
+        ? userProfile.profileAvatar
+        : "";
+
+  useEffect(() => {
+    if (!existingProfileAvatarValue) return;
+    setValue("profileAvatar", existingProfileAvatarValue, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: false,
+    });
+  }, [existingProfileAvatarValue, setValue]);
+
   const profileAvatar = watch("profileAvatar");
-  const currentAvatar = avatarPreview || profileAvatar;
+  const currentAvatar =
+    avatarPreview || (profileAvatar ? userProfile?.profileAvatar : "");
   const inputGroupClass = "bg-background/75 shadow-none";
 
   const onSubmit = (values: UserFormValues) => {
@@ -81,30 +94,30 @@ export default function OnboardUserPage() {
 
     try {
       setUploadingAvatar(true);
-
-      // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
-      // Upload the file
-      const utRes = await uploadFiles("imageUploader", {
-        files: [file],
+      const uploadResult = await uploadFileToS3({ file });
+      setValue("profileAvatar", uploadResult.key, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
       });
-
-      if (utRes && utRes[0]?.ufsUrl) {
-        setValue("profileAvatar", utRes[0].ufsUrl);
-      }
     } catch (error) {
       console.error("Failed to upload avatar:", error);
-      // Reset preview on error
       setAvatarPreview("");
+      toast.error("Failed to upload profile picture");
     } finally {
       setUploadingAvatar(false);
     }
   };
 
   const removeAvatar = () => {
-    setValue("profileAvatar", "");
+    setValue("profileAvatar", "", {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
     setAvatarPreview("");
   };
 
@@ -132,7 +145,7 @@ export default function OnboardUserPage() {
             >
               <input type="hidden" {...register("profileAvatar")} />
 
-              <div className="space-y-0">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
                   <FieldLabel htmlFor="profile-avatar">
                     Profile picture
@@ -141,7 +154,7 @@ export default function OnboardUserPage() {
                     Optional
                   </span>
                 </div>
-                <div className="flex items-center gap-4 rounded-xl bg-muted/35 py-2 ring-1 ring-border/50">
+                <div className="flex items-center gap-4 rounded-xl bg-muted/35 p-3 ring-1 ring-border/50">
                   <div className="relative">
                     <Avatar className="h-16 w-16">
                       <AvatarImage
@@ -184,7 +197,7 @@ export default function OnboardUserPage() {
                       </Button>
                     </div>
 
-                    {watch("profileAvatar") && (
+                    {profileAvatar && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -205,7 +218,6 @@ export default function OnboardUserPage() {
                 <div className="space-y-2">
                   <Label htmlFor="name">Full name</Label>
                   <InputGroup className={inputGroupClass}>
-                    {/* <InputGroupAddon align="inline-start">NM</InputGroupAddon> */}
                     <InputGroupInput
                       id="name"
                       placeholder="Enter your full name"
@@ -229,7 +241,6 @@ export default function OnboardUserPage() {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <InputGroup className={inputGroupClass}>
-                    {/* <InputGroupAddon align="inline-start">@</InputGroupAddon> */}
                     <InputGroupInput
                       id="email"
                       placeholder="Enter your email"
@@ -248,8 +259,7 @@ export default function OnboardUserPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="designation">Role / Designation</Label>
-                <InputGroup>
-                  {/* <InputGroupAddon align="inline-start">RL</InputGroupAddon> */}
+                <InputGroup className={inputGroupClass}>
                   <InputGroupInput
                     id="designation"
                     placeholder="Enter your role or designation"
@@ -279,7 +289,6 @@ export default function OnboardUserPage() {
                     </span>
                   </div>
                   <InputGroup className={inputGroupClass}>
-                    {/* <InputGroupAddon align="inline-start">LOC</InputGroupAddon> */}
                     <InputGroupInput
                       id="location"
                       placeholder="Enter your location"
@@ -307,7 +316,6 @@ export default function OnboardUserPage() {
                     </span>
                   </div>
                   <InputGroup className={inputGroupClass}>
-                    {/* <InputGroupAddon align="inline-start">TEL</InputGroupAddon> */}
                     <InputGroupInput
                       id="phone"
                       placeholder="Enter your phone number"

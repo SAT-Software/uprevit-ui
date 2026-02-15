@@ -16,7 +16,6 @@ import {
 import { useUpdateUser } from "@/hooks/user/useUpdateUser";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { User } from "@/types/user";
-import { uploadFiles } from "@/utils/uploadthing";
 import {
   PiPencilSimpleDuotone,
   PiXCircleDuotone,
@@ -25,6 +24,7 @@ import {
   PiTrashDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 
 interface DialogUpdateProfileProps {
   userProfile: User;
@@ -34,8 +34,13 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const { mutate: updateUserMutation, isPending } = useUpdateUser();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const existingProfileAvatarValue =
+    typeof userProfile?.profileAvatarKey === "string"
+      ? userProfile.profileAvatarKey
+      : userProfile?.profileAvatar;
 
   const {
     register,
@@ -51,7 +56,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
       designation: userProfile?.designation,
       location: userProfile?.location,
       phone: userProfile?.phone,
-      profileAvatar: userProfile?.profileAvatar,
+      profileAvatar: existingProfileAvatarValue,
     },
   });
 
@@ -84,14 +89,12 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
-      // Upload the file
-      const utRes = await uploadFiles("imageUploader", {
-        files: [file],
+      const uploadResult = await uploadFileToS3({ file });
+      setValue("profileAvatar", uploadResult.key, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
       });
-
-      if (utRes && utRes[0]?.ufsUrl) {
-        setValue("profileAvatar", utRes[0].ufsUrl);
-      }
     } catch (error) {
       console.error("Failed to upload avatar:", error);
       // Reset preview on error
@@ -102,12 +105,16 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   };
 
   const removeAvatar = () => {
-    setValue("profileAvatar", "");
+    setValue("profileAvatar", "", {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
     setAvatarPreview("");
   };
 
   const currentAvatar =
-    avatarPreview || watch("profileAvatar") || userProfile?.profileAvatar;
+    avatarPreview || (watch("profileAvatar") ? userProfile?.profileAvatar : "");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -135,6 +142,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
           noValidate
           className="overflow-y-auto"
         >
+          <input type="hidden" {...register("profileAvatar")} />
           <div className="p-4 space-y-6">
             <div className="flex items-center gap-6">
               <div className="relative group">

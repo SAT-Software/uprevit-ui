@@ -4,20 +4,30 @@ import { AppHeader } from "@/components/common/AppHeader";
 import { MainContentWrapper } from "@/components/common/MainContentWrapper";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { AppSidebar } from "@/components/common/AppSidebar";
 
+const getProfileValue = (
+  profile: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined => {
+  const value = profile?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+};
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
-  const { data: userProfileData } = useGetUser();
+  const { data: userProfileData, isLoading: isUserLoading } = useGetUser();
+
+  const profile = auth.user?.profile as Record<string, unknown> | undefined;
+  const userIdFromToken = getProfileValue(profile, "userId");
+  const tokenWorkspaceId = getProfileValue(profile, "workspaceId");
+  const tokenStatus = getProfileValue(profile, "status");
 
   useEffect(() => {
-    // Don't redirect while auth is still loading - this prevents
-    // redirecting to root on page refresh before auth state is restored
     if (auth.isLoading) return;
 
     if (!auth.isAuthenticated || !auth.user?.profile) {
@@ -25,22 +35,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (auth.isAuthenticated) {
-      const workspaceId = auth.user?.profile?.workspaceId;
-      // const status = auth.user?.profile?.status;
-      const status = userProfileData?.user?.status;
+    if (userIdFromToken && isUserLoading) return;
 
-      if (status === "invited") {
-        router.replace("/onboarding/onboard-user");
-      }
+    const status = userProfileData?.user?.status || tokenStatus;
+    const workspaceId = userProfileData?.user?.workspaceId || tokenWorkspaceId;
 
-      if (status !== "active" && !workspaceId) {
-        router.replace("/onboarding/create-workspace");
-      }
+    if (status === "invited") {
+      router.replace("/onboarding/onboard-user");
+      return;
     }
-  }, [auth, router, pathname, userProfileData]);
 
-  if (auth.isLoading) {
+    if (!workspaceId) {
+      router.replace("/onboarding/create-workspace");
+    }
+  }, [
+    auth.isAuthenticated,
+    auth.isLoading,
+    auth.user?.profile,
+    isUserLoading,
+    router,
+    tokenStatus,
+    tokenWorkspaceId,
+    userIdFromToken,
+    userProfileData?.user?.status,
+    userProfileData?.user?.workspaceId,
+  ]);
+
+  if (auth.isLoading || (userIdFromToken && isUserLoading)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <p>Loading...</p>
