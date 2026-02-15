@@ -5,6 +5,7 @@ export interface Department {
   department_name: string;
   department_description: string;
   image?: string;
+  imageKey?: string;
   manager?: string;
   admin_id: string;
   workspace_id: string;

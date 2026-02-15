@@ -6,6 +6,7 @@ export interface Project {
   project_number: string;
   project_description: string;
   image?: string;
+  imageKey?: string;
   project_manager: string;
   department_id: string;
   admin_id: string;

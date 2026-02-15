@@ -30,9 +30,9 @@ import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
-import { uploadFiles } from "@/utils/uploadthing";
 
 interface User {
   _id: string;
@@ -57,6 +57,7 @@ export default function CreateDepartmentDialog() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { mutate: createDepartment, isPending } = useCreateDepartment();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const { data: usersData } = useGetAllUsersByWorkspace();
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
@@ -91,16 +92,14 @@ export default function CreateDepartmentDialog() {
 
   async function onSubmit(data: FormValues) {
     try {
-      let utRes;
-      if (departmentImage) {
+      let imageKey = "";
+
+      if (departmentImage instanceof File) {
         setUploadingImage(true);
-        utRes = await uploadFiles("imageUploader", {
-          files: [departmentImage as File],
-        });
+        const uploadedImage = await uploadFileToS3({ file: departmentImage });
+        imageKey = uploadedImage.key;
         setUploadingImage(false);
       }
-
-      if (!utRes && departmentImage) throw new Error("Image upload failed");
 
       createDepartment(
         {
@@ -108,7 +107,7 @@ export default function CreateDepartmentDialog() {
           department_description: data.department_description,
           manager: data.manager,
           users: selectedUsers.map((user) => user._id),
-          image: utRes?.[0]?.ufsUrl || "",
+          image: imageKey,
           admin_id: userId as string,
           workspace_id: workspaceId as string,
         },
@@ -126,6 +125,9 @@ export default function CreateDepartmentDialog() {
       );
     } catch (error) {
       console.error("Error uploading department image:", error);
+      toast.error("Failed to upload department image");
+    } finally {
+      setUploadingImage(false);
     }
   }
 
