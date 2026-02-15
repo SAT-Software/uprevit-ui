@@ -49,6 +49,7 @@ export interface Product {
       component_type: string;
       component_description: string;
       image?: string;
+      key?: string;
     }>;
     tab_completed?: boolean;
   };
@@ -56,6 +57,7 @@ export interface Product {
     data?: Array<{
       _id?: string;
       image: string;
+      key?: string;
       text: string;
       description?: string;
       text_present?: boolean;
@@ -85,6 +87,9 @@ export interface Product {
       description?: string;
       type?: string;
       image?: string;
+      key?: string;
+      tagged_image?: string;
+      tagged_image_key?: string;
       legend_items?: Array<{
         id: string;
         shape: string;
@@ -228,10 +233,12 @@ export interface AllTabsData {
     component_type: string;
     component_description: string;
     image?: string;
+    key?: string;
   }>;
   symbols_graphics: TabWithArrayData<{
     _id?: string;
     image: string;
+    key?: string;
     text: string;
     description?: string;
     text_present?: boolean;
@@ -246,6 +253,9 @@ export interface AllTabsData {
     description?: string;
     type?: string;
     image?: string;
+    key?: string;
+    tagged_image?: string;
+    tagged_image_key?: string;
     legend_items?: Array<{
       id: string;
       shape: string;

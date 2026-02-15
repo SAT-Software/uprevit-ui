@@ -31,14 +31,14 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
-  PiCubeDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 
 type FormData = {
   componentNumber: string;
@@ -76,20 +76,29 @@ export default function AddComponentDialog({
     },
   });
   const { mutate: addComponent, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadImage, isPending: isUploadingImage } =
+    useUploadFilesToS3();
 
   const onSubmit = async (data: FormData) => {
     try {
       console.log("Form data:", data);
       setUploadingImage(true);
-      let utRes;
+      // let utRes;
+      let uploadRes;
 
       // Only upload if there's an image file
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+
+        uploadRes = await uploadImage({
+          file: data.image.file,
+          contentType: data.image.file.type,
         });
 
-        console.log("UploadThing response:", utRes);
+        console.log("S3 upload response:", uploadRes);
+        // console.log("UploadThing response:", utRes);
       }
       setUploadingImage(false);
       const newComponentData = {
@@ -99,7 +108,8 @@ export default function AddComponentDialog({
         data: [
           {
             component_number: data.componentNumber,
-            image: utRes?.[0]?.ufsUrl || null,
+            // image: utRes?.[0]?.ufsUrl || null,
+            key: uploadRes?.key,
             component_description: data.componentDescription,
             label_type: (Array.isArray(labelType)
               ? labelType
@@ -284,16 +294,16 @@ export default function AddComponentDialog({
             disabled={isPending || uploadingImage}
             variant="default"
           >
-            {isPending || uploadingImage ? (
+            {isPending || isUploadingImage || uploadingImage ? (
               <Spinner />
             ) : (
               <PiPlusCircleDuotone />
             )}
             {isPending
               ? "Adding..."
-              : uploadingImage
-              ? "Uploading..."
-              : "Add Component"}
+              : isUploadingImage || uploadingImage
+                ? "Uploading..."
+                : "Add Component"}
           </Button>
         </DialogFooter>
       </DialogContent>

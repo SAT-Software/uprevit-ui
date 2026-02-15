@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -30,7 +30,8 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPencilSimpleDuotone,
   PiXCircleDuotone,
@@ -44,6 +45,7 @@ type ComponentItem = {
   component_number: string;
   component_description: string;
   image: string;
+  key?: string;
   label_type: string[];
   dimensions: string;
   component_type: string;
@@ -71,7 +73,11 @@ export default function EditComponentDialog({
 }) {
   const id = useId();
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [labelType, setLabelType] = useState<Tag[]>([]);
+  const buildTags = (labels: string[]) =>
+    labels.map((text, index) => ({
+      id: `tag-${index}-${text}`,
+      text,
+    }));
   const {
     register,
     handleSubmit,
@@ -81,53 +87,45 @@ export default function EditComponentDialog({
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      componentNumber: "",
-      componentDescription: "",
+      componentNumber: component.component_number || "",
+      componentDescription: component.component_description || "",
       image: null,
-      labelType: [],
-      dimensions: "",
-      componentType: "",
+      labelType: buildTags(component.label_type || []),
+      dimensions: component.dimensions || "",
+      componentType: component.component_type || "",
     },
   });
   const { mutate: updateComponent, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadImage, isPending: isUploadingImage } =
+    useUploadFilesToS3();
 
-  const syncFormWithComponent = () => {
-    reset({
-      componentNumber: component.component_number,
-      componentDescription: component.component_description,
-      image: null,
-      labelType: [],
-      dimensions: component.dimensions || "",
-      componentType: component.component_type || "",
-    });
-    setLabelType(
-      (component.label_type || []).map((text, index) => ({
-        id: index.toString(),
-        text,
-      }))
-    );
-  };
-
-  const handleDialogChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      syncFormWithComponent();
+  useEffect(() => {
+    if (open) {
+      reset({
+        componentNumber: component.component_number || "",
+        componentDescription: component.component_description || "",
+        image: null,
+        labelType: buildTags(component.label_type || []),
+        dimensions: component.dimensions || "",
+        componentType: component.component_type || "",
+      });
     }
-    onOpenChange(nextOpen);
-  };
+  }, [open, component, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Edit form data:", data);
       setUploadingImage(true);
-      let utRes;
+      let uploadRes;
 
       // Only upload if there's a new image file
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        uploadRes = await uploadImage({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
-
-        console.log("UploadThing response:", utRes);
       }
       setUploadingImage(false);
 
@@ -138,12 +136,10 @@ export default function EditComponentDialog({
         data: {
           id: component._id,
           component_number: data.componentNumber,
-          image: utRes?.[0]?.ufsUrl || component.image,
+          image: uploadRes?.key ? "" : component.image,
+          ...(uploadRes?.key && { key: uploadRes.key }),
           component_description: data.componentDescription,
-          label_type: (Array.isArray(labelType)
-            ? labelType
-            : JSON.parse(labelType || "[]")
-          ).map((tag: Tag) => tag.text),
+          label_type: (data.labelType || []).map((tag: Tag) => tag.text),
           dimensions: data.dimensions,
           component_type: data.componentType,
         },
@@ -165,7 +161,7 @@ export default function EditComponentDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
@@ -237,6 +233,7 @@ export default function EditComponentDialog({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Preprinted">Preprinted</SelectItem>
+                        <SelectItem value="Pre-printed">Pre-printed</SelectItem>
                         <SelectItem value="Blank">Blank</SelectItem>
                         <SelectItem value="N/A">N/A</SelectItem>
                       </SelectContent>
@@ -268,16 +265,17 @@ export default function EditComponentDialog({
                 />
               </div>
               <div className="space-y-2">
-                <TagInput
-                  label="Label Type"
-                  tags={labelType}
-                  setTags={setLabelType}
-                  placeholder="Add label type and press Enter"
-                />
-                <input
-                  type="hidden"
-                  {...register("labelType")}
-                  value={JSON.stringify(labelType)}
+                <Controller
+                  name="labelType"
+                  control={control}
+                  render={({ field }) => (
+                    <TagInput
+                      label="Label Type"
+                      tags={field.value || []}
+                      setTags={field.onChange}
+                      placeholder="Add label type and press Enter"
+                    />
+                  )}
                 />
                 <p className="text-xs text-muted-foreground -mt-1">
                   Press Enter to add a label type. You can add multiple label
@@ -307,14 +305,14 @@ export default function EditComponentDialog({
             disabled={isPending || uploadingImage}
             variant="default"
           >
-            {isPending || uploadingImage ? (
+            {isPending || uploadingImage || isUploadingImage ? (
               <Spinner />
             ) : (
               <PiCheckCircleDuotone />
             )}
             {isPending
               ? "Updating..."
-              : uploadingImage
+              : uploadingImage || isUploadingImage
               ? "Uploading..."
               : "Update Component"}
           </Button>

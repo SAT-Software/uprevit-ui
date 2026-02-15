@@ -24,7 +24,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { TagInput, Tag } from "@/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -64,16 +65,23 @@ export default function AddOtherCompsDialog({
     },
   });
   const { mutate: addOtherCompsData, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
 
   const onSubmit = async (data: FormData) => {
     try {
       setUploadingImage(true);
-      let utRes;
+      let uploadedImageKey: string | undefined;
 
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // const utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        const s3UploadResult = await uploadFileToS3({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
+
+        uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
       const newOtherCompsData = {
@@ -83,7 +91,8 @@ export default function AddOtherCompsDialog({
         data: [
           {
             text: data.componentName,
-            image: utRes?.[0]?.ufsUrl || null,
+            image: null,
+            key: uploadedImageKey,
             entity: "Other Components",
             label_presence: labelPresence.map((tag: Tag) => tag.text),
             description: data.componentDescription,

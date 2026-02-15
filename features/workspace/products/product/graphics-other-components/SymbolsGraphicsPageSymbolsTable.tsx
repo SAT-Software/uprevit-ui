@@ -70,6 +70,7 @@ type Item = {
   id: string;
   componentName: string;
   componentImage: string;
+  key?: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
@@ -755,7 +756,7 @@ function RowActions({
 
       <EditSymbolsDialog
         productId={getProductId()}
-        symbol={item}
+        symbol={{ ...item, key: item.key }}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />

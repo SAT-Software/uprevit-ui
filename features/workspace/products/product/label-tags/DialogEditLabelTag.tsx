@@ -22,8 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPencilSimpleDuotone,
   PiXCircleDuotone,
@@ -45,6 +46,7 @@ interface LabelTagItem {
   description?: string;
   type?: string;
   image?: string;
+  key?: string;
   tagged_image?: string;
 }
 
@@ -61,6 +63,7 @@ export default function DialogEditLabelTag({
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const { mutate: updateLabelTag, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const {
     register,
     handleSubmit,
@@ -78,9 +81,8 @@ export default function DialogEditLabelTag({
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
       setUploadingImage(true);
-      let utRes;
+      let uploadedImageKey: string | undefined;
 
       // Only upload if there's a new image file
       if (
@@ -88,13 +90,19 @@ export default function DialogEditLabelTag({
         typeof data.image !== "string" &&
         data.image.file instanceof File
       ) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // const utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        const s3UploadResult = await uploadFileToS3({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
 
-        console.log("UploadThing response:", utRes);
+        uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
+
+      const hasRemovedExistingImage = data.image === null && Boolean(labelTag.image);
 
       const editLabelTagData = {
         id: productId,
@@ -105,9 +113,15 @@ export default function DialogEditLabelTag({
           name: data.name,
           description: data.description,
           type: data.type,
-          image:
-            utRes?.[0]?.ufsUrl ||
-            (typeof data.image === "string" ? data.image : ""),
+          image: uploadedImageKey
+            ? ""
+            : hasRemovedExistingImage
+            ? ""
+            : typeof data.image === "string"
+            ? data.image
+            : "",
+          ...(uploadedImageKey !== undefined && { key: uploadedImageKey }),
+          ...(hasRemovedExistingImage && uploadedImageKey === undefined && { key: "" }),
         },
       };
 

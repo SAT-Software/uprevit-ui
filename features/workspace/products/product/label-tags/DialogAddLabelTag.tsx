@@ -22,8 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-import { uploadFiles } from "@/utils/uploadthing";
+// import { uploadFiles } from "@/utils/uploadthing";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -50,6 +51,7 @@ export default function DialogAddLabelTag({
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const { mutate: addLabelTag, isPending } = useUpdateProductTabData();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const {
     register,
     handleSubmit,
@@ -70,15 +72,19 @@ export default function DialogAddLabelTag({
     try {
       console.log("Form data:", data);
       setUploadingImage(true);
-      let utRes;
+      let uploadedImageKey: string | undefined;
 
       // Only upload if there's an image file
       if (data.image && data.image.file instanceof File) {
-        utRes = await uploadFiles("imageUploader", {
-          files: [data.image.file],
+        // const utRes = await uploadFiles("imageUploader", {
+        //   files: [data.image.file],
+        // });
+        const s3UploadResult = await uploadFileToS3({
+          file: data.image.file,
+          contentType: data.image.file.type || "application/octet-stream",
         });
 
-        console.log("UploadThing response:", utRes);
+        uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
 
@@ -91,7 +97,8 @@ export default function DialogAddLabelTag({
             name: data.name,
             description: data.description,
             type: data.type,
-            image: utRes?.[0]?.ufsUrl || "",
+            image: "",
+            key: uploadedImageKey,
           },
         ],
       };

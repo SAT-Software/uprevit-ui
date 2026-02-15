@@ -5,7 +5,8 @@ import { toast } from "sonner";
 interface UpdateLabelTaggedImageParams {
   productId: string;
   labelTagId: string;
-  taggedImage: string;
+  taggedImage?: string;
+  taggedImageKey?: string;
   annotationState: object;
 }
 
@@ -27,6 +28,7 @@ export function useUpdateLabelTaggedImage() {
         data: {
           id: params.labelTagId,
           tagged_image: params.taggedImage,
+          tagged_image_key: params.taggedImageKey,
           annotation_state: params.annotationState,
         },
       };
