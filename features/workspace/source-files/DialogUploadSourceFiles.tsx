@@ -44,7 +44,6 @@ export default function DialogUploadSourceFiles({
   const handleUploadClick = async () => {
     if (!selectedFiles.length) return;
     try {
-      console.log("selectedFiles", selectedFiles);
       setIsUploading(true);
       // const utRes = await uploadFiles("imageUploader", {
       //   files: selectedFiles,
@@ -53,7 +52,8 @@ export default function DialogUploadSourceFiles({
       for (const file of selectedFiles) {
         const s3UploadResult = await uploadFileToS3({
           file,
-          contentType: file.type || "application/octet-stream",
+          contentType: file.type,
+          uploadScope: "source-files",
         });
 
         await uploadToBackend({
@@ -104,7 +104,10 @@ export default function DialogUploadSourceFiles({
         </DialogHeader>
 
         <div className="p-4 flex-1 overflow-y-auto">
-          <UploadSourceFiles onSelectionChange={setSelectedFiles} />
+          <UploadSourceFiles
+            onSelectionChange={setSelectedFiles}
+            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.psd,.ai"
+          />
         </div>
 
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">

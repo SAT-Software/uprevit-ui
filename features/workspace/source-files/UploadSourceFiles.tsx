@@ -151,7 +151,7 @@ export default function Component({
             Drag & drop or click to browse
           </p>
           <div className="text-muted-foreground/70 flex flex-wrap justify-center gap-1 text-xs">
-            <span>All files</span>
+            <span>Supported files only</span>
             <span>∙</span>
             <span>Max {maxFiles} files</span>
             <span>∙</span>
