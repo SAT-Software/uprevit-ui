@@ -372,10 +372,10 @@ function ProfileBg({
     : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-      initialFiles,
-    });
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+		initialFiles,
+	});
 
   const fileItem = files[0];
   const ImageFile = fileItem?.file;

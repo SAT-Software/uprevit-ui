@@ -25,6 +25,7 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 
 interface DialogUpdateProfileProps {
   userProfile: User;
@@ -113,8 +114,12 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
     setAvatarPreview("");
   };
 
+  const profileAvatarValue = watch("profileAvatar");
   const currentAvatar =
-    avatarPreview || (watch("profileAvatar") ? userProfile?.profileAvatar : "");
+    avatarPreview ||
+    (profileAvatarValue
+      ? resolveAssetUrl(profileAvatarValue, userProfile?.profileAvatar)
+      : "");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -160,7 +165,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
                     <PiCameraDuotone size={16} />
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
                       onChange={handleAvatarChange}
                       disabled={uploadingAvatar}
                       className="hidden"

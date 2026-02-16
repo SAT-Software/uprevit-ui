@@ -29,6 +29,7 @@ import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 
 interface DialogUpdateWorkspaceProps {
   workspaceData: Workspace;
@@ -126,8 +127,10 @@ export function DialogUpdateWorkspace({
     setLogoPreview("");
   };
 
+  const logoValue = watch("logo");
   const currentLogo =
-    logoPreview || (watch("logo") ? workspaceData?.logo : "");
+    logoPreview ||
+    (logoValue ? resolveAssetUrl(logoValue, workspaceData?.logo) : "");
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen && !isAdmin) {
@@ -192,7 +195,7 @@ export function DialogUpdateWorkspace({
                     <PiCameraDuotone size={16} />
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
                       onChange={handleLogoChange}
                       disabled={uploadingLogo}
                       className="hidden"

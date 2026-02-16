@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { OnboardingShell } from "@/components/onboarding-shell";
@@ -39,6 +39,7 @@ type WorkspaceFormValues = Pick<
 export default function OnboardingCreateWorkspacePage() {
   const id = useId();
   const auth = useAuth();
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -94,6 +95,10 @@ export default function OnboardingCreateWorkspacePage() {
   };
 
   const removeWorkspaceLogo = () => {
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+
     setValue("logo", "", {
       shouldDirty: true,
       shouldTouch: true,
@@ -188,9 +193,10 @@ export default function OnboardingCreateWorkspacePage() {
                   <div className="flex flex-col gap-2">
                     <div className="relative">
                       <input
+                        ref={logoInputRef}
                         id={`${id}-logo-upload`}
                         type="file"
-                        accept="image/*"
+                        accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
                         onChange={handleWorkspaceLogoChange}
                         disabled={uploadingLogo}
                         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
@@ -342,10 +348,12 @@ export default function OnboardingCreateWorkspacePage() {
               <div className="flex items-center justify-end gap-3 pt-4">
                 <Button
                   type="submit"
-                  disabled={!isValid || isPending}
+                  disabled={!isValid || isPending || uploadingLogo}
                   className="gap-2 px-6"
                 >
-                  {isPending ? (
+                  {uploadingLogo ? (
+                    "Uploading logo..."
+                  ) : isPending ? (
                     "Creating workspace..."
                   ) : (
                     <>

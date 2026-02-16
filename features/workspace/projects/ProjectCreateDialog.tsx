@@ -400,9 +400,9 @@ function ProfileBg({
   setProjectImage: (file: File | FileMetadata) => void;
 }) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-    });
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+	});
 
   const ImageFile = files[0]?.file;
 

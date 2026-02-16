@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { useOnboardUser } from "@/hooks/onboarding/useOnboardUser";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUser } from "@/hooks/user/useGetUser";
+import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
 import { PiUserCircleDuotone } from "react-icons/pi";
@@ -49,8 +50,17 @@ export default function OnboardUserPage() {
     formState: { errors, isValid },
     watch,
     setValue,
+    reset,
   } = useForm<UserFormValues>({
     mode: "onChange",
+    defaultValues: {
+      profileAvatar: "",
+      name: "",
+      email: "",
+      designation: "",
+      location: "",
+      phone: "",
+    },
   });
 
   const existingProfileAvatarValue =
@@ -61,17 +71,24 @@ export default function OnboardUserPage() {
         : "";
 
   useEffect(() => {
-    if (!existingProfileAvatarValue) return;
-    setValue("profileAvatar", existingProfileAvatarValue, {
-      shouldDirty: false,
-      shouldTouch: false,
-      shouldValidate: false,
+    if (!userProfile) return;
+
+    reset({
+      profileAvatar: existingProfileAvatarValue,
+      name: userProfile.name || "",
+      email: userProfile.email || "",
+      designation: userProfile.designation || "",
+      location: userProfile.location || "",
+      phone: userProfile.phone || "",
     });
-  }, [existingProfileAvatarValue, setValue]);
+  }, [existingProfileAvatarValue, reset, userProfile]);
 
   const profileAvatar = watch("profileAvatar");
   const currentAvatar =
-    avatarPreview || (profileAvatar ? userProfile?.profileAvatar : "");
+    avatarPreview ||
+    (profileAvatar
+      ? resolveAssetUrl(profileAvatar, userProfile?.profileAvatar)
+      : "");
   const inputGroupClass = "bg-background/75 shadow-none";
 
   const onSubmit = (values: UserFormValues) => {
@@ -176,7 +193,7 @@ export default function OnboardUserPage() {
                     <div className="relative">
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
                         onChange={handleAvatarChange}
                         disabled={uploadingAvatar}
                         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
@@ -222,7 +239,6 @@ export default function OnboardUserPage() {
                       id="name"
                       placeholder="Enter your full name"
                       className="h-10"
-                      defaultValue={userProfile?.name || ""}
                       aria-invalid={Boolean(errors.name)}
                       {...register("name", {
                         required: "Full name is required",
@@ -246,7 +262,6 @@ export default function OnboardUserPage() {
                       placeholder="Enter your email"
                       className="h-10"
                       disabled
-                      defaultValue={userProfile?.email || ""}
                       aria-invalid={Boolean(errors.email)}
                       {...register("email")}
                     />
@@ -293,7 +308,6 @@ export default function OnboardUserPage() {
                       id="location"
                       placeholder="Enter your location"
                       className="h-10"
-                      defaultValue={userProfile?.location || ""}
                       aria-invalid={Boolean(errors.location)}
                       {...register("location", {
                         maxLength: {
@@ -320,7 +334,6 @@ export default function OnboardUserPage() {
                       id="phone"
                       placeholder="Enter your phone number"
                       className="h-10"
-                      defaultValue={userProfile?.phone || ""}
                       aria-invalid={Boolean(errors.phone)}
                       {...register("phone", {
                         maxLength: {
@@ -339,10 +352,12 @@ export default function OnboardUserPage() {
               <div className="flex items-center justify-end gap-3 pt-4">
                 <Button
                   type="submit"
-                  disabled={!isValid || isPending}
+                  disabled={!isValid || isPending || uploadingAvatar}
                   className="gap-2 px-6"
                 >
-                  {isPending ? (
+                  {uploadingAvatar ? (
+                    "Uploading avatar..."
+                  ) : isPending ? (
                     "Creating profile..."
                   ) : (
                     <>

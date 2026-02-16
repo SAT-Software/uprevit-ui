@@ -138,7 +138,7 @@ export default function UpdateProjectDialog({
           image: imageUrlToSend,
           admin_id: project!.admin_id,
           workspace_id: project!.workspace_id,
-          department_id: project!.department_id,
+          department_id: data.department || project!.department_id,
         },
         {
           onSuccess: () => {
@@ -428,10 +428,10 @@ function ProfileBg({
     : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-      initialFiles,
-    });
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+		initialFiles,
+	});
 
   const fileItem = files[0];
   const ImageFile = fileItem?.file;
