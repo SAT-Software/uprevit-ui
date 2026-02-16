@@ -26,9 +26,9 @@ import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { useCreateProject } from "@/hooks/project/useCreateProject";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Department } from "@/types/department";
-import { uploadFiles } from "@/utils/uploadthing";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
 import { useId, useState } from "react";
@@ -76,6 +76,7 @@ export default function ProjectCreateDialog({
   const { data: departmentsData } = useGetAllDepartments();
   const { data: usersData } = useGetAllUsersByWorkspace();
   const { mutate: createProject, isPending } = useCreateProject();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
   const workspaceId = auth?.user?.profile?.workspaceId;
@@ -114,18 +115,13 @@ export default function ProjectCreateDialog({
 
   async function onSubmit(data: FormValues) {
     try {
-      let utRes;
-      console.log("image in project:", projectImage);
-      if (projectImage) {
-        setUploadingImage(true);
-        utRes = await uploadFiles("imageUploader", {
-          files: [projectImage as File],
-        });
-        setUploadingImage(false);
-      }
+      let imageKey = "";
 
-      if (!utRes && projectImage) {
-        throw new Error("Image upload failed");
+      if (projectImage instanceof File) {
+        setUploadingImage(true);
+        const uploadedImage = await uploadFileToS3({ file: projectImage });
+        imageKey = uploadedImage.key;
+        setUploadingImage(false);
       }
 
       createProject(
@@ -136,7 +132,7 @@ export default function ProjectCreateDialog({
           project_number: data.project_number,
           department_id: data.department,
           users: selectedUsers.map((user) => user._id),
-          image: utRes?.[0]?.ufsUrl || "",
+          image: imageKey,
           admin_id: userId as string,
           workspace_id: workspaceId as string,
         },
@@ -154,6 +150,9 @@ export default function ProjectCreateDialog({
       );
     } catch (error) {
       console.error("Error uploading project image:", error);
+      toast.error("Failed to upload project image");
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -401,9 +400,9 @@ function ProfileBg({
   setProjectImage: (file: File | FileMetadata) => void;
 }) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-    });
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+	});
 
   const ImageFile = files[0]?.file;
 

@@ -89,11 +89,8 @@ function LoginPage() {
                   Log in
                 </Button>
               </div>
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a href="/signup" className="underline underline-offset-4">
-                  Sign up
-                </a>
+              <div className="text-center text-sm text-muted-foreground">
+                Access is provisioned by your workspace admin.
               </div>
               <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
                 By clicking continue, you agree to our{" "}

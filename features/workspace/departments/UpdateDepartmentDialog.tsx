@@ -31,15 +31,10 @@ import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
-import { uploadFiles } from "@/utils/uploadthing";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface User {
   _id: string;
@@ -69,17 +64,19 @@ export default function UpdateDepartmentDialog({
 
   const [open, setOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>(
-    department?.users ?? []
+    department?.users ?? [],
   );
   const [newDepartmentImage, setNewDepartmentImage] = useState<File | null>(
-    null
+    null,
   );
   const [removeDepartmentImage, setRemoveDepartmentImage] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { mutate: updateDepartment, isPending } = useUpdateDepartment();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
+  const existingImageValue = department?.imageKey || department?.image || "";
 
   const {
     register,
@@ -105,43 +102,46 @@ export default function UpdateDepartmentDialog({
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    let imageUrlToSend: string;
-    if (removeDepartmentImage) {
-      imageUrlToSend = "";
-    } else if (newDepartmentImage) {
-      setUploadingImage(true);
-      const utRes = await uploadFiles("imageUploader", {
-        files: [newDepartmentImage],
-      });
-      setUploadingImage(false);
-      if (!utRes?.[0]?.ufsUrl) {
-        throw new Error("Image upload failed");
+    try {
+      let imageUrlToSend: string;
+      if (removeDepartmentImage) {
+        imageUrlToSend = "";
+      } else if (newDepartmentImage) {
+        setUploadingImage(true);
+        const uploadedImage = await uploadFileToS3({
+          file: newDepartmentImage,
+        });
+        imageUrlToSend = uploadedImage.key;
+      } else {
+        imageUrlToSend = existingImageValue;
       }
-      imageUrlToSend = utRes[0].ufsUrl;
-    } else {
-      imageUrlToSend = department?.image || "";
-    }
 
-    updateDepartment(
-      {
-        _id: department!._id,
-        department_name: data.department_name,
-        department_description: data.department_description,
-        manager: data.manager,
-        users: selectedUsers.map((user) => user._id),
-        image: imageUrlToSend,
-        admin_id: department!.admin_id,
-        workspace_id: department!.workspace_id,
-      },
-      {
-        onSuccess: () => {
-          reset();
-          setNewDepartmentImage(null);
-          setRemoveDepartmentImage(false);
-          setOpen(false);
+      updateDepartment(
+        {
+          _id: department!._id,
+          department_name: data.department_name,
+          department_description: data.department_description,
+          manager: data.manager,
+          users: selectedUsers.map((user) => user._id),
+          image: imageUrlToSend,
+          admin_id: department!.admin_id,
+          workspace_id: department!.workspace_id,
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            reset();
+            setNewDepartmentImage(null);
+            setRemoveDepartmentImage(false);
+            setOpen(false);
+          },
+        },
+      );
+    } catch (error) {
+      console.error("Error uploading department image:", error);
+      toast.error("Failed to upload department image");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   return (
@@ -341,8 +341,8 @@ export default function UpdateDepartmentDialog({
             {uploadingImage
               ? "Uploading..."
               : isPending
-              ? "Updating..."
-              : "Update Department"}
+                ? "Updating..."
+                : "Update Department"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -372,10 +372,10 @@ function ProfileBg({
     : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-      initialFiles,
-    });
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+		initialFiles,
+	});
 
   const fileItem = files[0];
   const ImageFile = fileItem?.file;

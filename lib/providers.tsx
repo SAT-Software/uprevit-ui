@@ -12,7 +12,7 @@ import { AuthProvider } from "react-oidc-context";
 const cognitoAuthConfig = {
   authority: process.env.NEXT_PUBLIC_COGNITO_AUTHORITY!,
   client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
-  redirect_uri: `${process.env.NEXT_PUBLIC_REDIRECT_URI!}/dashboard`,
+  redirect_uri: `${process.env.NEXT_PUBLIC_REDIRECT_URI!}/auth/callback`,
   response_type: "code",
   scope: "email openid phone",
 };

@@ -5,6 +5,7 @@ export interface Workspace {
   companyId: string;
   description: string;
   logo?: string;
+  logoKey?: string;
   plan?: string;
   planName?: string;
   planId?: string;

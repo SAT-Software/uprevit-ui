@@ -33,6 +33,6 @@ export function useGetUser() {
   return useQuery({
     queryKey: ["user", userId],
     queryFn: ({ signal }) => getUserById(userId as string, { signal, auth }),
-    enabled: auth.isAuthenticated,
+    enabled: auth.isAuthenticated && Boolean(userId),
   });
 }

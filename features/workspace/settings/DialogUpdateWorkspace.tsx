@@ -17,7 +17,6 @@ import {
 import { useUpdateWorkspace } from "@/hooks/workspace/useUpdateWorkspace";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Workspace } from "@/types/workspace";
-import { uploadFiles } from "@/utils/uploadthing";
 import {
   PiPencilSimpleDuotone,
   PiXCircleDuotone,
@@ -29,6 +28,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 
 interface DialogUpdateWorkspaceProps {
   workspaceData: Workspace;
@@ -40,10 +41,15 @@ export function DialogUpdateWorkspace({
   const id = useId();
   const [open, setOpen] = useState(false);
   const { mutate: updateWorkspaceMutation, isPending } = useUpdateWorkspace();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
+  const existingLogoValue =
+    typeof workspaceData?.logoKey === "string"
+      ? workspaceData.logoKey
+      : workspaceData?.logo;
 
   const {
     register,
@@ -57,7 +63,7 @@ export function DialogUpdateWorkspace({
       workspaceName: workspaceData?.workspaceName,
       companyName: workspaceData?.companyName,
       description: workspaceData?.description,
-      logo: workspaceData?.logo,
+      logo: existingLogoValue,
     },
   });
 
@@ -97,14 +103,12 @@ export function DialogUpdateWorkspace({
       const previewUrl = URL.createObjectURL(file);
       setLogoPreview(previewUrl);
 
-      // Upload the file
-      const utRes = await uploadFiles("imageUploader", {
-        files: [file],
+      const uploadResult = await uploadFileToS3({ file });
+      setValue("logo", uploadResult.key, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
       });
-
-      if (utRes && utRes[0]?.ufsUrl) {
-        setValue("logo", utRes[0].ufsUrl);
-      }
     } catch (error) {
       console.error("Failed to upload logo:", error);
       // Reset preview on error
@@ -115,11 +119,18 @@ export function DialogUpdateWorkspace({
   };
 
   const removeLogo = () => {
-    setValue("logo", "");
+    setValue("logo", "", {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
     setLogoPreview("");
   };
 
-  const currentLogo = logoPreview || watch("logo") || workspaceData?.logo;
+  const logoValue = watch("logo");
+  const currentLogo =
+    logoPreview ||
+    (logoValue ? resolveAssetUrl(logoValue, workspaceData?.logo) : "");
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen && !isAdmin) {
@@ -159,6 +170,7 @@ export function DialogUpdateWorkspace({
           noValidate
           className="overflow-y-auto"
         >
+          <input type="hidden" {...register("logo")} />
           <div className="p-4 space-y-6">
             <div className="flex items-center gap-6">
               <div className="relative group">
@@ -183,7 +195,7 @@ export function DialogUpdateWorkspace({
                     <PiCameraDuotone size={16} />
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
                       onChange={handleLogoChange}
                       disabled={uploadingLogo}
                       className="hidden"

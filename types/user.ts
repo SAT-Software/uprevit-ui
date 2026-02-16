@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   profileAvatar: string;
+  profileAvatarKey?: string;
   designation: string;
   phone?: string;
   userType?: "user" | "admin";

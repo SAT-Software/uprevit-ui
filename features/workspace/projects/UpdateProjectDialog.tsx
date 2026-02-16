@@ -31,6 +31,7 @@ import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import type { Project } from "@/types/project";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
@@ -43,7 +44,6 @@ import {
 } from "@/components/ui/select";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { Department } from "@/types/department";
-import { uploadFiles } from "@/utils/uploadthing";
 
 interface User {
   _id: string;
@@ -78,8 +78,10 @@ export default function UpdateProjectDialog({
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
+  const existingImageValue = project?.imageKey || project?.image || "";
 
   type FormValues = {
     project_name: string;
@@ -113,45 +115,46 @@ export default function UpdateProjectDialog({
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    let imageUrlToSend: string;
-    if (removeProjectImage) {
-      imageUrlToSend = "";
-    } else if (newProjectImage) {
-      setUploadingImage(true);
-      const utRes = await uploadFiles("imageUploader", {
-        files: [newProjectImage],
-      });
-      setUploadingImage(false);
-      if (!utRes?.[0]?.ufsUrl) {
-        throw new Error("Image upload failed");
+    try {
+      let imageUrlToSend: string;
+      if (removeProjectImage) {
+        imageUrlToSend = "";
+      } else if (newProjectImage) {
+        setUploadingImage(true);
+        const uploadedImage = await uploadFileToS3({ file: newProjectImage });
+        imageUrlToSend = uploadedImage.key;
+      } else {
+        imageUrlToSend = existingImageValue;
       }
-      imageUrlToSend = utRes[0].ufsUrl;
-    } else {
-      imageUrlToSend = project?.image || "";
-    }
 
-    updateProject(
-      {
-        _id: project!._id,
-        project_name: data.project_name,
-        project_description: data.project_description,
-        project_manager: data.project_manager,
-        project_number: data.project_number,
-        users: selectedUsers.map((user) => user._id),
-        image: imageUrlToSend,
-        admin_id: project!.admin_id,
-        workspace_id: project!.workspace_id,
-        department_id: project!.department_id,
-      },
-      {
-        onSuccess: () => {
-          reset();
-          setNewProjectImage(null);
-          setRemoveProjectImage(false);
-          setOpen(false);
+      updateProject(
+        {
+          _id: project!._id,
+          project_name: data.project_name,
+          project_description: data.project_description,
+          project_manager: data.project_manager,
+          project_number: data.project_number,
+          users: selectedUsers.map((user) => user._id),
+          image: imageUrlToSend,
+          admin_id: project!.admin_id,
+          workspace_id: project!.workspace_id,
+          department_id: data.department || project!.department_id,
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            reset();
+            setNewProjectImage(null);
+            setRemoveProjectImage(false);
+            setOpen(false);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error uploading project image:", error);
+      toast.error("Failed to upload project image");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   return (
@@ -425,10 +428,10 @@ function ProfileBg({
     : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-      initialFiles,
-    });
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+		initialFiles,
+	});
 
   const fileItem = files[0];
   const ImageFile = fileItem?.file;

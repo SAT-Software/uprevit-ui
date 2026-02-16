@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { useId } from "react";
+import { useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { OnboardingShell } from "@/components/onboarding-shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,15 +12,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   OnboardAdminWorkspacePayload,
   useOnboardAdminCreateWorkspace,
 } from "@/hooks/onboarding/useOnboardAdminCreateWorkspace";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { Workspace } from "@/types/workspace";
+import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
+import { PiBuildingsDuotone } from "react-icons/pi";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 
@@ -32,15 +39,18 @@ type WorkspaceFormValues = Pick<
 export default function OnboardingCreateWorkspacePage() {
   const id = useId();
   const auth = useAuth();
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string>("");
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const { mutate: createWorkspace, isPending } =
     useOnboardAdminCreateWorkspace();
-
-  console.log("auth", auth);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
+    setValue,
     watch,
   } = useForm<WorkspaceFormValues>({
     mode: "onChange",
@@ -54,6 +64,48 @@ export default function OnboardingCreateWorkspacePage() {
   });
 
   const logo = watch("logo");
+  const currentLogo = logoPreview || logo;
+  const inputGroupClass = "bg-background/75 shadow-none";
+
+  const handleWorkspaceLogoChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingLogo(true);
+      const previewUrl = URL.createObjectURL(file);
+      setLogoPreview(previewUrl);
+
+      const uploadResult = await uploadFileToS3({ file });
+
+      setValue("logo", uploadResult.key, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+    } catch (error) {
+      console.error("Failed to upload workspace logo:", error);
+      setLogoPreview("");
+      toast.error("Failed to upload workspace logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const removeWorkspaceLogo = () => {
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+
+    setValue("logo", "", {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+    setLogoPreview("");
+  };
 
   const onSubmit = (values: WorkspaceFormValues) => {
     try {
@@ -83,53 +135,118 @@ export default function OnboardingCreateWorkspacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Top brand bar */}
-      <header className="w-full flex items-center justify-between px-8 py-4 border-b bg-background/80 backdrop-blur">
-        <div className="flex items-center gap-2">
-          <Image
-            src="/logo.svg"
-            alt="Uprevit"
-            width={28}
-            height={28}
-            className="h-10 w-10"
-          />
-          <div className="flex flex-col">
-            <span className="font-semibold tracking-tight">
-              Create your workspace
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Configure the workspace that powers your labeling workflows.
-            </span>
-          </div>
-        </div>
-      </header>
+    <OnboardingShell
+      title="Create your workspace"
+      description="Set up your organization workspace to centralize labeling documentation, reviews, and compliance workflows."
+    >
+      <div className="mx-auto w-full max-w-3xl bg-accent">
+        <Card className="border from-background/95 to-background/80 shadow-[0_28px_80px_-52px_hsl(var(--foreground)/0.55)] ring-1 ring-border/45 backdrop-blur-sm">
+          <CardHeader className="space-y-0">
+            <CardTitle className="text-base font-semibold tracking-tight">
+              Workspace details
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Add the basics now. You can update all workspace details later
+              from Settings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-4"
+              noValidate
+            >
+              <input type="hidden" {...register("logo")} />
 
-      <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-5xl grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(260px,0.9fr)]">
-          {/* Left: Form */}
-          <Card className="border border-border/80 shadow-sm">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-semibold tracking-tight">
-                Set up your workspace
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Provide a few details so your team can easily recognize this
-                workspace. You can edit everything later from Settings.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="space-y-5"
-                noValidate
-              >
-                {/* Workspace Name */}
-                <div className="space-y-1.5">
-                  <Label htmlFor={`${id}-workspaceName`}>Workspace name</Label>
-                  <Input
+              <div className="space-y-0">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor={`${id}-logo-upload`}>Workspace logo</Label>
+                  <span className="text-[10px] text-muted-foreground">
+                    Optional
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 rounded-xl bg-muted/35 py-2 ring-1 ring-border/50">
+                  <div className="relative">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-border/70 bg-muted">
+                      {currentLogo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={currentLogo}
+                          alt="Workspace logo preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                          <PiBuildingsDuotone className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+
+                    {uploadingLogo && (
+                      <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/45">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="relative">
+                      <input
+                        ref={logoInputRef}
+                        id={`${id}-logo-upload`}
+                        type="file"
+                        accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
+                        onChange={handleWorkspaceLogoChange}
+                        disabled={uploadingLogo}
+                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                        aria-label="Upload workspace logo"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingLogo}
+                        className="w-fit cursor-pointer"
+                        asChild
+                      >
+                        <span>
+                          <ImagePlusIcon className="mr-2 h-4 w-4" />
+                          {uploadingLogo ? "Uploading..." : "Upload Logo"}
+                        </span>
+                      </Button>
+                    </div>
+
+                    {logo && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeWorkspaceLogo}
+                        disabled={uploadingLogo}
+                        className="w-fit text-destructive hover:text-destructive"
+                      >
+                        <XIcon className="mr-2 h-4 w-4" />
+                        Remove
+                      </Button>
+                    )}
+
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG, or WEBP recommended for best clarity.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-workspaceName`}>Workspace name</Label>
+                <InputGroup className={inputGroupClass}>
+                  {/* <InputGroupAddon align="inline-start">WS</InputGroupAddon> */}
+                  <InputGroupInput
                     id={`${id}-workspaceName`}
                     placeholder="e.g. MedTech Labeling Team"
+                    // className="h-10"
+                    aria-invalid={Boolean(errors.workspaceName)}
                     {...register("workspaceName", {
                       required: "Workspace name is required",
                       maxLength: {
@@ -138,27 +255,33 @@ export default function OnboardingCreateWorkspacePage() {
                       },
                     })}
                   />
-                  {errors.workspaceName && (
-                    <p className="text-xs text-destructive">
-                      {errors.workspaceName.message}
-                    </p>
-                  )}
-                </div>
+                </InputGroup>
+                {errors.workspaceName && (
+                  <p className="text-xs text-destructive">
+                    {errors.workspaceName.message}
+                  </p>
+                )}
+              </div>
 
-                {/* Company Name */}
-                <div className="space-y-1.5">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
                   <Label htmlFor={`${id}-companyName`}>Company name</Label>
-                  <Input
-                    id={`${id}-companyName`}
-                    placeholder="e.g. Uprevit Medical Devices Pvt Ltd"
-                    {...register("companyName", {
-                      required: "Company name is required",
-                      maxLength: {
-                        value: 120,
-                        message: "Company name must be at most 120 characters",
-                      },
-                    })}
-                  />
+                  <InputGroup className={inputGroupClass}>
+                    <InputGroupAddon align="inline-start">CO</InputGroupAddon>
+                    <InputGroupInput
+                      id={`${id}-companyName`}
+                      placeholder="e.g. Uprevit Medical Devices Pvt Ltd"
+                      aria-invalid={Boolean(errors.companyName)}
+                      {...register("companyName", {
+                        required: "Company name is required",
+                        maxLength: {
+                          value: 120,
+                          message:
+                            "Company name must be at most 120 characters",
+                        },
+                      })}
+                    />
+                  </InputGroup>
                   {errors.companyName && (
                     <p className="text-xs text-destructive">
                       {errors.companyName.message}
@@ -166,42 +289,47 @@ export default function OnboardingCreateWorkspacePage() {
                   )}
                 </div>
 
-                {/* Company ID */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label htmlFor={`${id}-companyId`}>Company ID</Label>
-                  <Input
-                    id={`${id}-companyId`}
-                    placeholder="e.g. MED-REG-10293 or internal org ID"
-                    {...register("companyId", {
-                      required: "Company ID is required",
-                      maxLength: {
-                        value: 80,
-                        message: "Company ID must be at most 80 characters",
-                      },
-                    })}
-                  />
+                  <InputGroup className={inputGroupClass}>
+                    <InputGroupAddon align="inline-start">ID</InputGroupAddon>
+                    <InputGroupInput
+                      id={`${id}-companyId`}
+                      placeholder="e.g. MED-REG-10293"
+                      aria-invalid={Boolean(errors.companyId)}
+                      {...register("companyId", {
+                        required: "Company ID is required",
+                        maxLength: {
+                          value: 80,
+                          message: "Company ID must be at most 80 characters",
+                        },
+                      })}
+                    />
+                  </InputGroup>
                   {errors.companyId && (
                     <p className="text-xs text-destructive">
                       {errors.companyId.message}
                     </p>
                   )}
                 </div>
+              </div>
 
-                {/* Description */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <Label htmlFor={`${id}-description`}>
-                      Workspace description
-                    </Label>
-                    <span className="text-[10px] text-muted-foreground">
-                      Optional
-                    </span>
-                  </div>
-                  <Textarea
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor={`${id}-description`}>
+                    Workspace description
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground">
+                    Optional
+                  </span>
+                </div>
+                <InputGroup className={inputGroupClass}>
+                  <InputGroupTextarea
                     id={`${id}-description`}
                     placeholder="Describe how your organization will use Uprevit for medical device labeling and documentation."
                     rows={4}
-                    className="resize-none"
+                    className="min-h-28"
+                    aria-invalid={Boolean(errors.description)}
                     {...register("description", {
                       maxLength: {
                         value: 240,
@@ -209,107 +337,36 @@ export default function OnboardingCreateWorkspacePage() {
                       },
                     })}
                   />
-                  {errors.description && (
-                    <p className="text-xs text-destructive">
-                      {errors.description.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Logo URL */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <Label htmlFor={`${id}-logo`}>Workspace logo URL</Label>
-                    <span className="text-[10px] text-muted-foreground">
-                      Optional
-                    </span>
-                  </div>
-                  <Input
-                    id={`${id}-logo`}
-                    placeholder="Paste an image URL or leave blank to use default"
-                    {...register("logo", {
-                      pattern: {
-                        value:
-                          /^(https?:\/\/.*\.(?:png|jpg|jpeg|svg|webp|gif|bmp))$/i,
-                        message: "Enter a valid image URL",
-                      },
-                    })}
-                  />
-                  {errors.logo && (
-                    <p className="text-xs text-destructive">
-                      {errors.logo.message}
-                    </p>
-                  )}
-
-                  {logo && !errors.logo && (
-                    <div className="flex items-center gap-3 pt-2">
-                      <div className="relative h-8 w-8 rounded-md overflow-hidden border bg-muted">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={logo}
-                          alt="Workspace logo preview"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Preview of your workspace logo.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="pt-4 flex items-center justify-end gap-3">
-                  <Button
-                    type="submit"
-                    disabled={!isValid || isPending}
-                    className="px-6"
-                  >
-                    {isPending ? "Creating workspace..." : "Create workspace"}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Right: Contextual panel */}
-          <Card className="hidden lg:flex flex-col justify-between border border-border/80 bg-muted/40">
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">
-                Welcome to Uprevit
-              </CardTitle>
-              <CardDescription className="text-xs leading-relaxed">
-                Your workspace connects teams, departments, projects, and
-                products into a single source of truth for compliant medical
-                device labeling.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5 text-xs text-muted-foreground">
-              <div className="space-y-1.5">
-                <p className="font-medium text-foreground">
-                  After creating your workspace
-                </p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Invite collaborators to join your organization.</li>
-                  <li>
-                    Create departments and projects for each product line.
-                  </li>
-                  <li>
-                    Upload source files and manage label content centrally.
-                  </li>
-                </ul>
+                </InputGroup>
+                {errors.description && (
+                  <p className="text-xs text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
-              <div className="space-y-1.5">
-                <p className="font-medium text-foreground">Safe to iterate</p>
-                <p>
-                  All details here can be updated anytime from Settings without
-                  impacting your existing projects or audit history.
-                </p>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <Button
+                  type="submit"
+                  disabled={!isValid || isPending || uploadingLogo}
+                  className="gap-2 px-6"
+                >
+                  {uploadingLogo ? (
+                    "Uploading logo..."
+                  ) : isPending ? (
+                    "Creating workspace..."
+                  ) : (
+                    <>
+                      Create workspace
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </OnboardingShell>
   );
 }

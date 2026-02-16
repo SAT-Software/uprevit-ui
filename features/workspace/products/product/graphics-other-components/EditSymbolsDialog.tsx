@@ -344,7 +344,7 @@ function ComponentImage({
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
     useFileUpload({
-      accept: "image/*",
+      accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
       onFilesChange: (newFiles) => {
         if (newFiles.length > 0) {
           onChange(newFiles[0]);
