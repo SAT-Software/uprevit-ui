@@ -226,7 +226,7 @@ export default function OnboardingCreateWorkspacePage() {
                     )}
 
                     <p className="text-xs text-muted-foreground">
-                      PNG, JPG, or SVG recommended for best clarity.
+                      PNG, JPG, or WEBP recommended for best clarity.
                     </p>
                   </div>
                 </div>

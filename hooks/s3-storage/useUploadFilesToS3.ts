@@ -13,7 +13,6 @@ const PRODUCT_ASSET_CONTENT_TYPES = new Set([
   "image/jpeg",
   "image/webp",
   "image/gif",
-  "image/svg+xml",
 ]);
 
 const SOURCE_FILE_EXTRA_CONTENT_TYPES = new Set([
@@ -38,7 +37,6 @@ const EXTENSION_CONTENT_TYPE_MAP: Record<string, string> = {
   jpeg: "image/jpeg",
   webp: "image/webp",
   gif: "image/gif",
-  svg: "image/svg+xml",
   pdf: "application/pdf",
   xls: "application/vnd.ms-excel",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
