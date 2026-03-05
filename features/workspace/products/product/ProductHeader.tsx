@@ -364,15 +364,41 @@ export function ProductHeader() {
           <Select
             onValueChange={(value) => {
               if (value === "excel") {
-                exportExcel({
-                  productId,
-                  productName: product?.productName,
-                });
+                exportExcel(
+                  { productId },
+                  {
+                    onSuccess: () => {
+                      toast.success(
+                        "Excel export queued. Check Product Exports for status.",
+                      );
+                    },
+                    onError: (error) => {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : "Failed to queue Excel export",
+                      );
+                    },
+                  },
+                );
               } else if (value === "pdf") {
-                exportPDF({
-                  productId,
-                  productName: product?.productName,
-                });
+                exportPDF(
+                  { productId },
+                  {
+                    onSuccess: () => {
+                      toast.success(
+                        "PDF export queued. Check Product Exports for status.",
+                      );
+                    },
+                    onError: (error) => {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : "Failed to queue PDF export",
+                      );
+                    },
+                  },
+                );
               }
             }}
             disabled={isExportingExcel || isExportingPDF}
@@ -384,9 +410,9 @@ export function ProductHeader() {
                 <PiExportDuotone />
               )}
               {isExportingExcel ? (
-                "Exporting Excel..."
+                "Queueing Excel..."
               ) : isExportingPDF ? (
-                "Exporting PDF..."
+                "Queueing PDF..."
               ) : (
                 <SelectValue placeholder="Export" />
               )}
@@ -395,13 +421,13 @@ export function ProductHeader() {
               <SelectItem value="excel">
                 <div className="flex items-center gap-2">
                   <PiFileXlsDuotone className="size-4" />
-                  <span>Export as Excel</span>
+                  <span>Queue Excel Export</span>
                 </div>
               </SelectItem>
               <SelectItem value="pdf">
                 <div className="flex items-center gap-2">
                   <PiFilePdfDuotone className="size-4" />
-                  <span>Export as PDF</span>
+                  <span>Queue PDF Export</span>
                 </div>
               </SelectItem>
             </SelectContent>

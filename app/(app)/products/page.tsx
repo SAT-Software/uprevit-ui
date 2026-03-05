@@ -2,6 +2,9 @@
 
 import ProductsPageProductTable from "@/features/workspace/products/ProductsPageProductTable";
 import CreateProductDialog from "@/features/workspace/products/CreateProductDialog";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { PiClockDuotone } from "react-icons/pi";
 
 function ProductsPage() {
   return (
@@ -15,7 +18,15 @@ function ProductsPage() {
               Manage and view all products in your workspace
             </p>
           </div>
-          <CreateProductDialog />
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" asChild>
+              <Link href="/products/exports">
+                <PiClockDuotone />
+                Product Exports
+              </Link>
+            </Button>
+            <CreateProductDialog />
+          </div>
         </div>
         <ProductsPageProductTable />
       </div>

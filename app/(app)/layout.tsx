@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { AppSidebar } from "@/components/common/AppSidebar";
+import { ProductExportJobNotifier } from "@/components/common/ProductExportJobNotifier";
 
 const getProfileValue = (
   profile: Record<string, unknown> | undefined,
@@ -74,6 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <AppHeader />
+        <ProductExportJobNotifier />
         <MainContentWrapper>{children}</MainContentWrapper>
       </SidebarInset>
     </SidebarProvider>

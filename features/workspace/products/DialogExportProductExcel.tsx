@@ -18,6 +18,7 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 interface DialogExportProductExcelProps {
   open: boolean;
@@ -45,11 +46,14 @@ export default function DialogExportProductExcel({
     exportExcel(
       {
         productId: product._id,
-        productName: product.product_name,
       },
       {
         onSuccess: () => {
+          toast.success("Excel export queued. Check Product Exports for status.");
           onOpenChange(false);
+        },
+        onError: (error) => {
+          toast.error(error instanceof Error ? error.message : "Failed to queue Excel export");
         },
       }
     );
@@ -82,11 +86,11 @@ export default function DialogExportProductExcel({
             <div className="space-y-1">
               <h4 className="font-medium text-sm">Export to Excel</h4>
               <p className="text-sm text-muted-foreground">
-                Download all data for{" "}
+                Queue an export for{" "}
                 <span className="font-medium text-foreground">
                   {product.product_name || "this product"}
                 </span>{" "}
-                as an Excel spreadsheet.
+                as an Excel spreadsheet. You can download it once processing finishes.
               </p>
             </div>
           </div>
@@ -144,7 +148,7 @@ export default function DialogExportProductExcel({
             disabled={isPending}
           >
             {isPending ? <Spinner /> : <PiDownloadDuotone />}
-            {isPending ? "Exporting..." : "Export Excel"}
+            {isPending ? "Queueing..." : "Queue Excel Export"}
           </Button>
         </DialogFooter>
       </DialogContent>

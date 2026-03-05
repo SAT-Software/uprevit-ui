@@ -1,62 +1,36 @@
 import { useMutation } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { EnqueueProductExportResponse } from "@/types/export-job";
 
 async function exportProductPDF({
   auth,
   productId,
-  productName,
 }: {
   auth: AuthContextProps;
   productId: string;
-  productName?: string;
-}) {
-  const response = await fetch(`/api/products/${productId}/export/pdf`, {
+}): Promise<EnqueueProductExportResponse> {
+  const response = await fetch(`/api/products/${productId}/exports`, {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${auth?.user?.access_token}`,
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ format: "pdf" }),
   });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to export product");
+    throw new Error(text || "Failed to queue product PDF export");
   }
 
-  const base64Data = await response.text();
-
-  // Decode base64 to binary
-  const byteCharacters = atob(base64Data);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  const blob = new Blob([byteArray], {
-    type: "application/pdf",
-  });
-
-  // Trigger download
-  const link = document.createElement("a");
-  link.href = window.URL.createObjectURL(blob);
-  link.download = `${productName || "Product"}_Export.pdf`;
-  link.click();
-
-  // Cleanup
-  window.URL.revokeObjectURL(link.href);
-
-  return blob;
+  return response.json();
 }
 
 export function useExportProductPDF() {
   const auth = useAuth();
 
   return useMutation({
-    mutationFn: ({
-      productId,
-      productName,
-    }: {
-      productId: string;
-      productName?: string;
-    }) => exportProductPDF({ auth, productId, productName }),
+    mutationFn: ({ productId }: { productId: string }) =>
+      exportProductPDF({ auth, productId }),
   });
 }
