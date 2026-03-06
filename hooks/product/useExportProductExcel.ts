@@ -1,62 +1,40 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { EnqueueProductExportResponse } from "@/types/export-job";
 
 async function exportProductExcel({
   auth,
   productId,
-  productName,
 }: {
   auth: AuthContextProps;
   productId: string;
-  productName?: string;
-}) {
-  const response = await fetch(`/api/products/${productId}/export/excel`, {
+}): Promise<EnqueueProductExportResponse> {
+  const response = await fetch(`/api/products/${productId}/exports`, {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${auth?.user?.access_token}`,
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ format: "excel" }),
   });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to export product");
+    throw new Error(text || "Failed to queue product Excel export");
   }
 
-  const base64Data = await response.text();
-
-  // Decode base64 to binary
-  const byteCharacters = atob(base64Data);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  const blob = new Blob([byteArray], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-
-  // Trigger download
-  const link = document.createElement("a");
-  link.href = window.URL.createObjectURL(blob);
-  link.download = `${productName || "Product"}_Export.xlsx`;
-  link.click();
-
-  // Cleanup
-  window.URL.revokeObjectURL(link.href);
-
-  return blob;
+  return response.json();
 }
 
 export function useExportProductExcel() {
   const auth = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      productId,
-      productName,
-    }: {
-      productId: string;
-      productName?: string;
-    }) => exportProductExcel({ auth, productId, productName }),
+    mutationFn: ({ productId }: { productId: string }) =>
+      exportProductExcel({ auth, productId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product-export-jobs"] });
+    },
   });
 }

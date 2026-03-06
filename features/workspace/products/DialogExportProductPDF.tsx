@@ -18,6 +18,7 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
+import { toast } from "sonner";
 
 interface DialogExportProductPDFProps {
   open: boolean;
@@ -45,11 +46,14 @@ export default function DialogExportProductPDF({
     exportPDF(
       {
         productId: product._id,
-        productName: product.product_name,
       },
       {
         onSuccess: () => {
+          toast.success("PDF export queued. Check Product Exports for status.");
           onOpenChange(false);
+        },
+        onError: (error) => {
+          toast.error(error instanceof Error ? error.message : "Failed to queue PDF export");
         },
       }
     );
@@ -82,11 +86,11 @@ export default function DialogExportProductPDF({
             <div className="space-y-1">
               <h4 className="font-medium text-sm">Export to PDF</h4>
               <p className="text-sm text-muted-foreground">
-                Download all data for{" "}
+                Queue an export for{" "}
                 <span className="font-medium text-foreground">
                   {product.product_name || "this product"}
                 </span>{" "}
-                as a PDF file.
+                as a PDF file. You can download it once processing finishes.
               </p>
             </div>
           </div>
@@ -144,7 +148,7 @@ export default function DialogExportProductPDF({
             disabled={isPending}
           >
             {isPending ? <Spinner /> : <PiDownloadDuotone />}
-            {isPending ? "Exporting..." : "Export PDF"}
+            {isPending ? "Queueing..." : "Queue PDF Export"}
           </Button>
         </DialogFooter>
       </DialogContent>

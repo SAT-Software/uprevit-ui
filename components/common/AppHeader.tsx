@@ -19,6 +19,7 @@ import {
   PiChartBarDuotone,
   PiChatTeardropDotsDuotone,
   PiFolderOpenDuotone,
+  PiExportDuotone,
   PiGearDuotone,
   PiHouseDuotone,
   PiKanbanDuotone,
@@ -49,6 +50,11 @@ const pathData = [
     title: "Products",
     url: "/products",
     icon: PiPackageDuotone,
+  },
+  {
+    title: "Product Exports",
+    url: "/products/exports",
+    icon: PiExportDuotone,
   },
   {
     title: "Source Files",
