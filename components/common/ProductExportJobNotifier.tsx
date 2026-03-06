@@ -6,13 +6,32 @@ import { ExportJobStatus } from "@/types/export-job";
 import { toast } from "sonner";
 
 export function ProductExportJobNotifier() {
-  const { data } = useGetProductExportJobs(
+  const { data, refetch } = useGetProductExportJobs(
     { page: 1 },
-    { enabled: true, refetchInterval: 5000 },
+    { enabled: true, refetchInterval: false },
   );
 
   const initializedRef = useRef(false);
   const previousStatusesRef = useRef<Record<string, ExportJobStatus>>({});
+
+  useEffect(() => {
+    const jobs = data?.result?.jobs;
+    const hasInProgressJobs =
+      jobs?.some((job) => job.status === "queued" || job.status === "processing") ||
+      false;
+
+    if (!hasInProgressJobs) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refetch();
+    }, 5000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [data, refetch]);
 
   useEffect(() => {
     const jobs = data?.result?.jobs;

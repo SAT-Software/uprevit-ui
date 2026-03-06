@@ -75,13 +75,21 @@ export default function ProductExportsPage() {
     { enabled: true, refetchInterval: 5000 },
   );
 
-  const { mutate: requestDownload, isPending: isPreparingDownload } =
-    useDownloadProductExportJob();
+  const { mutate: requestDownload } = useDownloadProductExportJob();
+  const [downloadingJobIds, setDownloadingJobIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const jobs = data?.result?.jobs || [];
   const pagination = data?.result?.pagination;
 
   const handleDownload = (jobId: string) => {
+    setDownloadingJobIds((prev) => {
+      const next = new Set(prev);
+      next.add(jobId);
+      return next;
+    });
+
     requestDownload(
       { jobId },
       {
@@ -100,6 +108,13 @@ export default function ProductExportsPage() {
               ? downloadError.message
               : "Failed to prepare download",
           );
+        },
+        onSettled: () => {
+          setDownloadingJobIds((prev) => {
+            const next = new Set(prev);
+            next.delete(jobId);
+            return next;
+          });
         },
       },
     );
@@ -224,11 +239,12 @@ export default function ProductExportsPage() {
                         variant="secondary"
                         size="sm"
                         disabled={
-                          job.status !== "completed" || isPreparingDownload
+                          job.status !== "completed" ||
+                          downloadingJobIds.has(job.jobId)
                         }
                         onClick={() => handleDownload(job.jobId)}
                       >
-                        {isPreparingDownload ? (
+                        {downloadingJobIds.has(job.jobId) ? (
                           <Spinner className="size-3" />
                         ) : (
                           <PiDownloadDuotone />
