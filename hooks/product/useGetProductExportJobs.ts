@@ -5,6 +5,9 @@ import {
   GetProductExportJobsResponse,
 } from "@/types/export-job";
 
+const DEFAULT_ACTIVE_JOB_POLL_INTERVAL = 5000;
+const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
+
 type GetProductExportJobsParams = {
   page?: number;
   status?: ExportJobStatus[];
@@ -27,13 +30,16 @@ async function getProductExportJobs({
     params.set("status", status.join(","));
   }
 
-  const response = await fetch(`/api/products/exports/jobs?${params.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${auth?.user?.access_token}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `/api/products/exports/jobs?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth?.user?.access_token}`,
+        "Content-Type": "application/json",
+      },
+      signal,
     },
-    signal,
-  });
+  );
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
@@ -45,14 +51,31 @@ async function getProductExportJobs({
 
 export function useGetProductExportJobs(
   { page = 1, status }: GetProductExportJobsParams = {},
-  options?: { enabled?: boolean; refetchInterval?: number | false },
+  options?: {
+    enabled?: boolean;
+    pollWhenActive?: boolean;
+    refetchInterval?: number | false;
+  },
 ) {
   const auth = useAuth();
 
   return useQuery({
     queryKey: ["product-export-jobs", page, status?.join(",") || "all"],
-    queryFn: ({ signal }) => getProductExportJobs({ auth, signal, page, status }),
+    queryFn: ({ signal }) =>
+      getProductExportJobs({ auth, signal, page, status }),
     enabled: (options?.enabled ?? true) && auth.isAuthenticated,
-    refetchInterval: options?.refetchInterval,
+    refetchInterval: options?.pollWhenActive
+      ? (query) => {
+          const data = query.state.data;
+          const hasActiveJobs =
+            typeof data?.result.hasActiveJobs === "boolean"
+              ? data.result.hasActiveJobs
+              : (data?.result.jobs ?? []).some((job) =>
+                  ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
+                );
+
+          return hasActiveJobs ? DEFAULT_ACTIVE_JOB_POLL_INTERVAL : false;
+        }
+      : options?.refetchInterval,
   });
 }

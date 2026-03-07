@@ -72,7 +72,7 @@ export default function ProductExportsPage() {
       page,
       status: statuses,
     },
-    { enabled: true, refetchInterval: 5000 },
+    { enabled: true, pollWhenActive: true },
   );
 
   const { mutate: requestDownload } = useDownloadProductExportJob();
