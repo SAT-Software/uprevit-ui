@@ -11,6 +11,7 @@ const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
 type GetProductExportJobsParams = {
   page?: number;
   status?: ExportJobStatus[];
+  targetId?: string;
 };
 
 async function getProductExportJobs({
@@ -18,16 +19,21 @@ async function getProductExportJobs({
   signal,
   page = 1,
   status,
+  targetId,
 }: {
   auth: AuthContextProps;
   signal: AbortSignal;
   page?: number;
   status?: ExportJobStatus[];
+  targetId?: string;
 }): Promise<GetProductExportJobsResponse> {
   const params = new URLSearchParams();
   params.set("page", String(page));
   if (status?.length) {
     params.set("status", status.join(","));
+  }
+  if (targetId) {
+    params.set("targetId", targetId);
   }
 
   const response = await fetch(
@@ -50,19 +56,25 @@ async function getProductExportJobs({
 }
 
 export function useGetProductExportJobs(
-  { page = 1, status }: GetProductExportJobsParams = {},
+  { page = 1, status, targetId }: GetProductExportJobsParams = {},
   options?: {
     enabled?: boolean;
     pollWhenActive?: boolean;
+    activePollIntervalMs?: number;
     refetchInterval?: number | false;
   },
 ) {
   const auth = useAuth();
 
   return useQuery({
-    queryKey: ["product-export-jobs", page, status?.join(",") || "all"],
+    queryKey: [
+      "product-export-jobs",
+      page,
+      status?.join(",") || "all",
+      targetId || "all-targets",
+    ],
     queryFn: ({ signal }) =>
-      getProductExportJobs({ auth, signal, page, status }),
+      getProductExportJobs({ auth, signal, page, status, targetId }),
     enabled: (options?.enabled ?? true) && auth.isAuthenticated,
     refetchInterval: options?.pollWhenActive
       ? (query) => {
@@ -74,7 +86,9 @@ export function useGetProductExportJobs(
                   ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
                 );
 
-          return hasActiveJobs ? DEFAULT_ACTIVE_JOB_POLL_INTERVAL : false;
+          return hasActiveJobs
+            ? options?.activePollIntervalMs ?? DEFAULT_ACTIVE_JOB_POLL_INTERVAL
+            : false;
         }
       : options?.refetchInterval,
   });
