@@ -33,7 +33,6 @@ import {
   PiColumnsDuotone,
   PiDotsThreeCircleVerticalDuotone,
   PiFilePdfDuotone,
-  PiFileXlsDuotone,
   PiGitBranchDuotone,
   PiGitMergeDuotone,
   PiHashDuotone,
@@ -79,7 +78,6 @@ import {
 import DialogArchiveProduct from "./DialogArchiveProduct";
 import DialogBookmarkProduct from "./DialogBookmarkProduct";
 import DialogCreateVersion from "./DialogCreateVersion";
-import DialogExportProductExcel from "./DialogExportProductExcel";
 import DialogExportProductPDF from "./DialogExportProductPDF";
 import DialogShareProduct from "./DialogShareProduct";
 import FilterBuilder from "./tableFilter";
@@ -716,7 +714,6 @@ function RowActions({ row }: { row: { original: Item } }) {
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
-  const [showExportExcelDialog, setShowExportExcelDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
   const canCreateVersion = row.original.status === "submitted";
@@ -762,15 +759,6 @@ function RowActions({ row }: { row: { original: Item } }) {
             >
               <PiGitMergeDuotone />
               New version
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => {
-                setTimeout(() => setShowExportExcelDialog(true), 100);
-              }}
-            >
-              <PiFileXlsDuotone className="h-4 w-4" />
-              <span>Export to Excel</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={(e) => e.stopPropagation()}
@@ -844,11 +832,6 @@ function RowActions({ row }: { row: { original: Item } }) {
       <DialogCreateVersion
         open={showVersionDialog}
         onOpenChange={setShowVersionDialog}
-        product={row.original}
-      />
-      <DialogExportProductExcel
-        open={showExportExcelDialog}
-        onOpenChange={setShowExportExcelDialog}
         product={row.original}
       />
       <DialogExportProductPDF

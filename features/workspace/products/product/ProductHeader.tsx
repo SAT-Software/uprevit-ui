@@ -14,7 +14,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
-import { useExportProductExcel } from "@/hooks/product/useExportProductExcel";
 import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
 import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
@@ -26,9 +25,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   PiCircleDuotone,
-  PiExportDuotone,
   PiFilePdfDuotone,
-  PiFileXlsDuotone,
   PiGitBranchDuotone,
   PiLockKeyDuotone,
   PiPaperPlaneRightDuotone,
@@ -64,7 +61,11 @@ export type Item = {
 
 const TOTAL_TABS = 7;
 
-export function ProductHeader() {
+interface ProductHeaderProps {
+  isExportLocked?: boolean;
+}
+
+export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const queryClient = useQueryClient();
   const params = useParams();
   const pathname = usePathname();
@@ -78,8 +79,6 @@ export function ProductHeader() {
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
     useUpdateProduct();
-  const { mutate: exportExcel, isPending: isExportingExcel } =
-    useExportProductExcel();
   const { mutate: exportPDF, isPending: isExportingPDF } =
     useExportProductPDF();
   const searchParams = useSearchParams();
@@ -133,9 +132,10 @@ export function ProductHeader() {
 
   const isProductComplete = productCoreData?.complete_count === 100;
   const isReadOnly = productCoreData?.status === "submitted";
+  const isEditLocked = isReadOnly || isExportLocked;
 
   const handleSubmit = async () => {
-    if (!productId || isReadOnly) return;
+    if (!productId || isEditLocked) return;
 
     const today = new Date().toISOString();
 
@@ -219,6 +219,8 @@ export function ProductHeader() {
     ? isCurrentTabCompleted
       ? "Unmarking..."
       : "Marking complete..."
+    : isExportLocked
+      ? "Export in progress"
     : isReadOnly
       ? "Submitted"
       : isCurrentTabCompleted
@@ -227,7 +229,9 @@ export function ProductHeader() {
 
   const toggleButtonSubtitle = isSyncingStatus
     ? "Syncing with workspace"
-    : isReadOnly
+    : isExportLocked
+      ? "Export in progress"
+      : isReadOnly
       ? "This product is submitted"
       : isCurrentTabCompleted
         ? "Send back to in-progress"
@@ -235,7 +239,7 @@ export function ProductHeader() {
 
   const toggleButtonIcon = isSyncingStatus ? (
     <Spinner className="size-3" />
-  ) : isReadOnly ? (
+  ) : isEditLocked ? (
     <PiLockKeyDuotone className="size-3 text-amber-600" />
   ) : isCurrentTabCompleted ? (
     <PiCircleDuotone className="size-3 text-emerald-600" />
@@ -245,13 +249,13 @@ export function ProductHeader() {
 
   const toggleButtonClasses = cn(
     "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground rounded-lg border bg-accent",
-    isReadOnly ? "cursor-not-allowed opacity-70" : "cursor-pointer",
+    isEditLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer",
     isCurrentTabCompleted ? "text-foreground" : "text-foreground",
   );
 
   const toggleButtonIconClasses = cn(
     "flex size-7 items-center justify-center rounded-xl border text-base transition-colors border-border bg-muted/60 text-muted-foreground",
-    isReadOnly
+    isEditLocked
       ? "dark:bg-amber-500/20 dark:text-amber-100"
       : isCurrentTabCompleted
         ? "dark:bg-emerald-500/20 dark:text-emerald-100 group-hover:border-foreground/30 group-hover:text-foreground"
@@ -265,7 +269,7 @@ export function ProductHeader() {
       !currentTabConfig ||
       !isTabCompletionEnabled ||
       isSyncingStatus ||
-      isReadOnly
+      isEditLocked
     ) {
       return;
     }
@@ -361,77 +365,39 @@ export function ProductHeader() {
         </p>
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
-          <Select
-            onValueChange={(value) => {
-              if (value === "excel") {
-                exportExcel(
-                  { productId },
-                  {
-                    onSuccess: () => {
-                      toast.success(
-                        "Excel export queued. Check Product Exports for status.",
-                      );
-                    },
-                    onError: (error) => {
-                      toast.error(
-                        error instanceof Error
-                          ? error.message
-                          : "Failed to queue Excel export",
-                      );
-                    },
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 rounded-lg gap-2 px-2"
+            onClick={() => {
+              exportPDF(
+                { productId },
+                {
+                  onSuccess: () => {
+                    toast.success(
+                      "PDF export queued. Check Product Exports for status.",
+                    );
                   },
-                );
-              } else if (value === "pdf") {
-                exportPDF(
-                  { productId },
-                  {
-                    onSuccess: () => {
-                      toast.success(
-                        "PDF export queued. Check Product Exports for status.",
-                      );
-                    },
-                    onError: (error) => {
-                      toast.error(
-                        error instanceof Error
-                          ? error.message
-                          : "Failed to queue PDF export",
-                      );
-                    },
+                  onError: (error) => {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to queue PDF export",
+                    );
                   },
-                );
-              }
+                },
+              );
             }}
-            disabled={isExportingExcel || isExportingPDF}
+            disabled={isExportingPDF || isExportLocked}
+            title={
+              isExportLocked
+                ? "An export is already in progress"
+                : "Queue PDF export"
+            }
           >
-            <SelectTrigger className="h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 whitespace-nowrap">
-              {isExportingExcel || isExportingPDF ? (
-                <Spinner className="size-3" />
-              ) : (
-                <PiExportDuotone />
-              )}
-              {isExportingExcel ? (
-                "Queueing Excel..."
-              ) : isExportingPDF ? (
-                "Queueing PDF..."
-              ) : (
-                <SelectValue placeholder="Export" />
-              )}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="excel">
-                <div className="flex items-center gap-2">
-                  <PiFileXlsDuotone className="size-4" />
-                  <span>Queue Excel Export</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="pdf">
-                <div className="flex items-center gap-2">
-                  <PiFilePdfDuotone className="size-4" />
-                  <span>Queue PDF Export</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            {isExportingPDF ? <Spinner className="size-3" /> : <PiFilePdfDuotone />}
+            {isExportingPDF ? "Queueing PDF..." : "Export PDF"}
+          </Button>
 
           <Select
             value={productId}
@@ -543,14 +509,20 @@ export function ProductHeader() {
               tabName={currentTab}
               isCompleted={isCurrentTabCompleted}
               onConfirm={handleToggleTab}
-              disabled={!product || isSyncingStatus || isReadOnly}
+              disabled={!product || isSyncingStatus || isEditLocked}
             >
               <Button
                 variant="secondary"
                 size="default"
-                className="px-1"
-                disabled={!product || isSyncingStatus || isReadOnly}
-                title={isReadOnly ? "Cannot edit submitted product" : undefined}
+                className={cn(toggleButtonClasses, "px-1")}
+                disabled={!product || isSyncingStatus || isEditLocked}
+                title={
+                  isExportLocked
+                    ? "Editing is disabled while export is in progress"
+                    : isReadOnly
+                      ? "Cannot edit submitted product"
+                      : undefined
+                }
               >
                 <span className={toggleButtonIconClasses}>
                   {toggleButtonIcon}
@@ -572,17 +544,19 @@ export function ProductHeader() {
             <ConfirmSubmitProductDialog
               productName={product?.productName}
               onConfirm={handleSubmit}
-              disabled={!isProductComplete || isReadOnly}
+              disabled={!isProductComplete || isEditLocked}
             >
               <Button
                 size="sm"
-                disabled={!isProductComplete || isReadOnly}
+                disabled={!isProductComplete || isEditLocked}
                 className={cn(
-                  (!isProductComplete || isReadOnly) &&
+                  (!isProductComplete || isEditLocked) &&
                     "opacity-50 cursor-not-allowed",
                 )}
                 title={
-                  isReadOnly
+                  isExportLocked
+                    ? "Cannot submit while export is in progress"
+                    : isReadOnly
                     ? "Product is already submitted"
                     : !isProductComplete
                       ? "Complete all tabs to enable submission"

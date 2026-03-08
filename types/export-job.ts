@@ -48,6 +48,8 @@ export interface GetProductExportJobsResponse {
   message: string;
   result: {
     jobs: ExportJobSummary[];
+    hasActiveJobs?: boolean;
+    activeJobsCount?: number;
     pagination: ExportJobPagination;
   };
 }
