@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +8,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   PiFilePdfDuotone,
   PiMicrosoftExcelLogoDuotone,
+  PiClockCountdownDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,7 +21,7 @@ export type ExportFormat = "pdf" | "excel";
 interface ExportReportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onExport: (header: string, format: ExportFormat) => Promise<void> | void;
+  onExport: (format: ExportFormat) => Promise<void> | void;
   isExporting?: boolean;
   format: ExportFormat;
 }
@@ -36,25 +33,14 @@ export function ExportReportDialog({
   isExporting,
   format,
 }: ExportReportDialogProps) {
-  const [header, setHeader] = useState("");
-
   const handleExport = () => {
-    if (header.trim()) {
-      onExport(header.trim(), format);
-    }
-  };
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setHeader("");
-    }
-    onOpenChange(open);
+    onExport(format);
   };
 
   const isPDF = format === "pdf";
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] p-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -69,27 +55,31 @@ export function ExportReportDialog({
             Export as {isPDF ? "PDF" : "Excel"}
           </DialogTitle>
           <DialogDescription>
-            Enter a header name for your report. This will also be used as the
-            filename.
+            This export will run in the background so you can keep working while
+            the file is generated.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <Label htmlFor="report-header">Report Header</Label>
-          <Input
-            id="report-header"
-            placeholder="e.g., Q4 Product Compliance Report"
-            value={header}
-            onChange={(e) => setHeader(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleExport()}
-            autoFocus
-          />
+        <div className="rounded-lg border bg-muted/30 p-3">
+          <div className="flex items-start gap-2">
+            <PiClockCountdownDuotone className="mt-0.5 size-4 text-muted-foreground" />
+            <div className="space-y-1 text-sm">
+              <p className="font-medium text-foreground">
+                This export will be downloaded in the background.
+              </p>
+              <p className="text-muted-foreground">
+                We will queue a {isPDF ? "PDF" : "Excel"} export for the current
+                filtered results, and you can keep using the app while we show
+                progress in the Exports tab.
+              </p>
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => onOpenChange(false)}
             disabled={isExporting}
           >
             <PiXCircleDuotone />
@@ -97,7 +87,7 @@ export function ExportReportDialog({
           </Button>
           <Button
             onClick={handleExport}
-            disabled={!header.trim() || isExporting}
+            disabled={isExporting}
           >
             {isExporting ? (
               <Spinner />
@@ -106,7 +96,9 @@ export function ExportReportDialog({
             ) : (
               <PiMicrosoftExcelLogoDuotone size={16} />
             )}
-            {isExporting ? "Exporting..." : `Export ${isPDF ? "PDF" : "Excel"}`}
+            {isExporting
+              ? "Starting..."
+              : `Start ${isPDF ? "PDF" : "Excel"} Export`}
           </Button>
         </DialogFooter>
       </DialogContent>

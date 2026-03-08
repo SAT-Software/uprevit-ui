@@ -23,6 +23,7 @@ import { TagInput, Tag } from "@/components/ui/tag-input";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
+  PiExportDuotone,
   PiMagnifyingGlassDuotone,
   PiFloppyDiskDuotone,
   PiFolderOpenDuotone,
@@ -36,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { ExportButtons } from "@/features/workspace/reports/components/ExportButtons";
+import { ReportExportsTable } from "@/features/workspace/reports/components/ReportExportsTable";
 import {
   ExportFormat,
   ExportReportDialog,
@@ -44,8 +46,10 @@ import { LoadQueryDialog } from "@/features/workspace/reports/components/LoadQue
 import { SaveQueryDialog } from "@/features/workspace/reports/components/SaveQueryDialog";
 import { useQueryBuilderState } from "@/features/workspace/reports/hooks/useQueryBuilderState";
 import { useExportExcel, useExportPDF } from "@/hooks/reports/useExportReports";
+import { useGetReportExportJobs } from "@/hooks/reports/useGetReportExportJobs";
 import { useReportsQuery } from "@/hooks/reports/useReportsQuery";
 import { useSavedQueries } from "@/hooks/reports/useSavedQueries";
+import { ExportJobStatus } from "@/types/export-job";
 import { ReportsProduct, SavedQuery, QueryCondition } from "@/types/reports";
 import {
   QUERYABLE_TABS,
@@ -53,6 +57,8 @@ import {
   getFieldsForTab,
   Operator,
 } from "@/data/reports-config";
+
+const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
 
 function ConditionRow({
   condition,
@@ -448,6 +454,10 @@ export default function Page() {
   const reportsQuery = useReportsQuery();
   const exportPDF = useExportPDF();
   const exportExcel = useExportExcel();
+  const { data: exportJobsData } = useGetReportExportJobs(
+    { page: 1 },
+    { enabled: true, pollWhenActive: true },
+  );
   const { queries: savedQueries, saveQuery, deleteQuery } = useSavedQueries();
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -510,30 +520,35 @@ export default function Page() {
     setExportDialogOpen(true);
   };
 
-  const handleExport = async (header: string, format: ExportFormat) => {
+  const handleExport = async (format: ExportFormat) => {
     if (!validateConditions()) {
       toast.error("Please fill in all required fields for each condition.");
       return;
     }
+
     try {
       if (format === "pdf") {
         await exportPDF.mutateAsync({
           conditions: getApiConditions(),
           conditionLogic,
-          reportHeader: header,
         });
-        toast.success("PDF report has been downloaded.");
+        toast.success("PDF export started.");
       } else {
         await exportExcel.mutateAsync({
           conditions: getApiConditions(),
           conditionLogic,
-          reportHeader: header,
         });
-        toast.success("Excel report has been downloaded.");
+        toast.success("Excel export started.");
       }
+
       setExportDialogOpen(false);
-    } catch {
-      toast.error(`Failed to export ${format.toUpperCase()}.`);
+      setActiveTab("exports");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : `Failed to start ${format.toUpperCase()} export.`,
+      );
     }
   };
 
@@ -545,6 +560,34 @@ export default function Page() {
 
   const isQueryValid = validateConditions();
   const hasResults = results && results.products.length > 0;
+  const reportExportJobs = exportJobsData?.result.jobs ?? [];
+  const activeReportExportCount =
+    typeof exportJobsData?.result.activeJobsCount === "number"
+      ? exportJobsData.result.activeJobsCount
+      : reportExportJobs.filter((job) =>
+          ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
+        ).length;
+  const latestReportExportJob = reportExportJobs[0];
+
+  const renderExportTabIndicator = () => {
+    if (activeReportExportCount > 0) {
+      return (
+        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          {activeReportExportCount}
+        </span>
+      );
+    }
+
+    if (latestReportExportJob?.status === "failed") {
+      return <span className="h-2 w-2 rounded-full bg-destructive" />;
+    }
+
+    if (latestReportExportJob?.status === "completed") {
+      return <span className="h-2 w-2 rounded-full bg-emerald-500" />;
+    }
+
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -596,6 +639,11 @@ export default function Page() {
                       >
                         <PiTableDuotone size={14} />
                         Results
+                      </TabsTrigger>
+                      <TabsTrigger value="exports" className="gap-1.5">
+                        <PiExportDuotone size={14} />
+                        Exports
+                        {renderExportTabIndicator()}
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -757,6 +805,32 @@ export default function Page() {
                       />
                     </>
                   )}
+                </TabsContent>
+
+                <TabsContent value="exports" className="mt-0 space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-sm font-semibold">Queued Exports</h3>
+                      {activeReportExportCount > 0 ? (
+                        <Badge className="bg-amber-500 text-white hover:bg-amber-500">
+                          {activeReportExportCount} active
+                        </Badge>
+                      ) : latestReportExportJob?.status === "failed" ? (
+                        <Badge variant="destructive">Latest failed</Badge>
+                      ) : latestReportExportJob?.status === "completed" ? (
+                        <Badge className="bg-emerald-500 text-white hover:bg-emerald-500">
+                          Latest ready
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">No active exports</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Start an export from the Results tab, then download it here
+                      when it is ready.
+                    </p>
+                  </div>
+                  <ReportExportsTable />
                 </TabsContent>
               </CardContent>
             </Tabs>
