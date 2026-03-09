@@ -65,12 +65,12 @@ export function ExportReportDialog({
             <PiClockCountdownDuotone className="mt-0.5 size-4 text-muted-foreground" />
             <div className="space-y-1 text-sm">
               <p className="font-medium text-foreground">
-                This export will be downloaded in the background.
+                This export will be generated in the background.
               </p>
               <p className="text-muted-foreground">
                 We will queue a {isPDF ? "PDF" : "Excel"} export for the current
-                filtered results, and you can keep using the app while we show
-                progress in the Exports tab.
+                filtered results; you can keep using the app while progress is
+                shown in the Exports tab.
               </p>
             </div>
           </div>
