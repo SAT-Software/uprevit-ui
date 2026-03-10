@@ -36,7 +36,7 @@ export interface ExportJobPagination {
   hasPrevPage: boolean;
 }
 
-export interface EnqueueProductExportResponse {
+export interface ExportEnqueueResponse {
   message: string;
   result: {
     jobId: string;
@@ -44,7 +44,7 @@ export interface EnqueueProductExportResponse {
   };
 }
 
-export interface GetProductExportJobsResponse {
+export interface GetExportJobsResponse {
   message: string;
   result: {
     jobs: ExportJobSummary[];
@@ -54,12 +54,12 @@ export interface GetProductExportJobsResponse {
   };
 }
 
-export interface GetProductExportJobResponse {
+export interface GetExportJobResponse {
   message: string;
   result: ExportJobSummary;
 }
 
-export interface DownloadProductExportJobResponse {
+export interface DownloadExportJobResponse {
   message: string;
   result: {
     jobId: string;
@@ -69,3 +69,19 @@ export interface DownloadProductExportJobResponse {
     expiresAt: string;
   };
 }
+
+export type EnqueueProductExportResponse = ExportEnqueueResponse;
+
+export type EnqueueReportExportResponse = ExportEnqueueResponse;
+
+export type GetProductExportJobsResponse = GetExportJobsResponse;
+
+export type GetReportExportJobsResponse = GetExportJobsResponse;
+
+export type GetProductExportJobResponse = GetExportJobResponse;
+
+export type GetReportExportJobResponse = GetExportJobResponse;
+
+export type DownloadProductExportJobResponse = DownloadExportJobResponse;
+
+export type DownloadReportExportJobResponse = DownloadExportJobResponse;

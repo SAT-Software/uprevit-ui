@@ -9,6 +9,7 @@ import { useAuth } from "react-oidc-context";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { AppSidebar } from "@/components/common/AppSidebar";
 import { ProductExportJobNotifier } from "@/components/common/ProductExportJobNotifier";
+import { ReportExportJobNotifier } from "@/components/common/ReportExportJobNotifier";
 
 const getProfileValue = (
   profile: Record<string, unknown> | undefined,
@@ -76,6 +77,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <AppHeader />
         <ProductExportJobNotifier />
+        <ReportExportJobNotifier />
         <MainContentWrapper>{children}</MainContentWrapper>
       </SidebarInset>
     </SidebarProvider>

@@ -35,11 +35,11 @@ export function ExportButtons({
             className="gap-1.5"
           >
             <PiFilePdfDuotone size={16} className="text-red-500" />
-            {isExportingPDF ? "Exporting..." : "PDF"}
+            {isExportingPDF ? "Starting..." : "PDF"}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Export results in PDF</p>
+          <p>Queue PDF export</p>
         </TooltipContent>
       </Tooltip>
 
@@ -53,11 +53,11 @@ export function ExportButtons({
             className="gap-1.5"
           >
             <PiMicrosoftExcelLogoDuotone size={16} className="text-green-600" />
-            {isExportingExcel ? "Exporting..." : "Excel"}
+            {isExportingExcel ? "Starting..." : "Excel"}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Export results in Excel</p>
+          <p>Queue Excel export</p>
         </TooltipContent>
       </Tooltip>
     </div>

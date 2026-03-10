@@ -1,16 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth, AuthContextProps } from "react-oidc-context";
+import { EnqueueReportExportResponse } from "@/types/export-job";
 import { ReportsQueryRequest } from "@/types/reports";
 
 type ExportFormat = "pdf" | "excel";
 
-interface ExportRequest
-  extends Omit<ReportsQueryRequest, "pagination" | "workspaceId"> {
-  format: ExportFormat;
-  reportHeader?: string;
-}
+type ExportRequest = Omit<ReportsQueryRequest, "pagination">;
+type QueueableExportRequest = Omit<ExportRequest, "workspaceId">;
 
-async function exportReports({
+async function enqueueReportExport({
   payload,
   auth,
   format,
@@ -18,8 +16,8 @@ async function exportReports({
   payload: ExportRequest;
   auth: AuthContextProps;
   format: ExportFormat;
-}): Promise<Blob> {
-  const response = await fetch(`/api/reports/export/${format}`, {
+}): Promise<EnqueueReportExportResponse> {
+  const response = await fetch("/api/reports/exports", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${auth?.user?.access_token}`,
@@ -28,85 +26,54 @@ async function exportReports({
     body: JSON.stringify({
       ...payload,
       workspaceId: auth?.user?.profile?.workspaceId,
+      format,
     }),
   });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(text || `Failed to export as ${format.toUpperCase()}`);
+    throw new Error(text || `Failed to queue ${format.toUpperCase()} export`);
   }
 
-  const base64Data = await response.text();
-
-  const byteCharacters = atob(base64Data);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-
-  const mimeType =
-    format === "pdf"
-      ? "application/pdf"
-      : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
-  return new Blob([byteArray], { type: mimeType });
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
-}
-
-function sanitizeFilename(name: string): string {
-  return name
-    .replace(/[<>:"/\\|?*]/g, "")
-    .replace(/\s+/g, "_")
-    .substring(0, 100);
+  return response.json();
 }
 
 export function useExportPDF() {
   const auth = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: Omit<ExportRequest, "format">) => {
-      const blob = await exportReports({
-        payload: { ...payload, format: "pdf" },
+    mutationFn: async (payload: QueueableExportRequest) =>
+      enqueueReportExport({
+        payload: {
+          ...payload,
+          workspaceId: auth?.user?.profile?.workspaceId as string,
+        },
         auth,
         format: "pdf",
-      });
-      const timestamp = new Date().toISOString().split("T")[0];
-      const filename = payload.reportHeader
-        ? `${sanitizeFilename(payload.reportHeader)}_${timestamp}.pdf`
-        : `reports-report-${timestamp}.pdf`;
-      downloadBlob(blob, filename);
-      return blob;
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["report-export-jobs"] });
     },
   });
 }
 
 export function useExportExcel() {
   const auth = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: Omit<ExportRequest, "format">) => {
-      const blob = await exportReports({
-        payload: { ...payload, format: "excel" },
+    mutationFn: async (payload: QueueableExportRequest) =>
+      enqueueReportExport({
+        payload: {
+          ...payload,
+          workspaceId: auth?.user?.profile?.workspaceId as string,
+        },
         auth,
         format: "excel",
-      });
-      const timestamp = new Date().toISOString().split("T")[0];
-      const filename = payload.reportHeader
-        ? `${sanitizeFilename(payload.reportHeader)}_${timestamp}.xlsx`
-        : `reports-report-${timestamp}.xlsx`;
-      downloadBlob(blob, filename);
-      return blob;
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["report-export-jobs"] });
     },
   });
 }
