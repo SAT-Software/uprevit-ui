@@ -88,6 +88,8 @@ export default function DialogDuplicateProduct({
         product_information: allProductTabData.result.data.product_information,
         compliance_information:
           allProductTabData.result.data.compliance_information,
+        languages_information:
+          allProductTabData.result.data.languages_information,
         label_components: allProductTabData.result.data.label_components,
         symbols_graphics: allProductTabData.result.data.symbols_graphics,
         product_data: allProductTabData.result.data.product_data,
