@@ -96,24 +96,37 @@ export default function Page() {
 
     const isRemoved = diff.status === "removed";
     const isAdded = diff.status === "added";
+    const oldValue = format(diff.old_value);
+    const newValue = format(diff.new_value);
+    const hasOldValue = oldValue.trim() !== "";
+    const hasNewValue = newValue.trim() !== "";
+
+    if (!hasOldValue && !hasNewValue) {
+      return null;
+    }
 
     return (
       <span className="inline-flex max-w-full flex-wrap items-center gap-2 whitespace-normal break-words">
-        {(diff.old_value !== null || isRemoved) && (
+        {(diff.old_value !== null || isRemoved) && hasOldValue && (
           <span className="relative group/old max-w-full">
             <span className="max-w-full whitespace-pre-wrap rounded border border-red-200/50 bg-red-100/50 px-1.5 py-0.5 text-sm text-red-600/70 line-through break-words dark:border-red-800/20 dark:bg-red-900/10">
-              {format(diff.old_value) || ""}
+              {oldValue}
             </span>
           </span>
         )}
 
-        {diff.old_value !== null && diff.new_value !== null && !isRemoved && !isAdded && (
+        {diff.old_value !== null &&
+          diff.new_value !== null &&
+          !isRemoved &&
+          !isAdded &&
+          hasOldValue &&
+          hasNewValue && (
           <PiArrowRightBold className="shrink-0 text-xs text-muted-foreground/50" />
         )}
 
-        {(diff.new_value !== null || isAdded) && !isRemoved && (
+        {(diff.new_value !== null || isAdded) && !isRemoved && hasNewValue && (
           <span className="max-w-full whitespace-pre-wrap rounded border border-blue-200 bg-blue-100 px-1.5 py-0.5 text-sm font-semibold text-blue-700 break-words shadow-sm dark:border-blue-800/30 dark:bg-blue-900/30">
-            {format(diff.new_value) || ""}
+            {newValue}
           </span>
         )}
       </span>
@@ -401,19 +414,21 @@ export default function Page() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1 self-start">
-                          <EditStandardDialog
-                            productId={productId}
-                            standards={item}
-                            isSubmitted={isSubmitted}
-                          />
-                          <DeleteStandardDialog
-                            productId={productId}
-                            standardId={item._id}
-                            standardName={item.standard}
-                            isSubmitted={isSubmitted}
-                          />
-                        </div>
+                        {!isRemoved && (
+                          <div className="flex shrink-0 items-center gap-1 self-start">
+                            <EditStandardDialog
+                              productId={productId}
+                              standards={item}
+                              isSubmitted={isSubmitted}
+                            />
+                            <DeleteStandardDialog
+                              productId={productId}
+                              standardId={item._id}
+                              standardName={item.standard}
+                              isSubmitted={isSubmitted}
+                            />
+                          </div>
+                        )}
                       </div>
                       <p
                         className={cn(
@@ -495,6 +510,7 @@ export default function Page() {
                       : isModified
                         ? "Modified"
                         : null;
+                  const countryValue = item.country?.trim() || "";
 
                   const codeDiff: DiffItem | null = isRedlineView
                     ? itemStatus === "added"
@@ -514,9 +530,13 @@ export default function Page() {
 
                   const countryDiff: DiffItem | null = isRedlineView
                     ? itemStatus === "added"
-                      ? createSyntheticDiff("country", "added", item.country || "")
+                      ? countryValue
+                        ? createSyntheticDiff("country", "added", countryValue)
+                        : null
                       : itemStatus === "removed"
-                        ? createSyntheticDiff("country", "removed", item.country || "")
+                        ? countryValue
+                          ? createSyntheticDiff("country", "removed", countryValue)
+                          : null
                         : item._redlineDiffs?.find((diff) => diff.path === "country") ?? null
                     : null;
 
@@ -550,14 +570,14 @@ export default function Page() {
                             >
                               <RedlineValue value={item.name} diff={nameDiff} />
                             </p>
-                            {(item.country || countryDiff) && (
+                            {(countryValue || countryDiff) && (
                               <p
                                 className={cn(
                                   "mt-0.5 text-xs text-muted-foreground",
                                   isRedlineView && isRemoved && "text-red-500/70 line-through"
                                 )}
                               >
-                                <RedlineValue value={item.country || ""} diff={countryDiff} />
+                                <RedlineValue value={countryValue} diff={countryDiff} />
                               </p>
                             )}
                           </div>
