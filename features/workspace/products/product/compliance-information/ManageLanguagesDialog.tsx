@@ -103,15 +103,23 @@ export default function ManageLanguagesDialog({
     );
   }, [catalog, selectedCodes]);
 
+  const selectedCountLabel = useMemo(() => {
+    if (selectedLanguageItems.length === 0) {
+      return "No languages selected";
+    }
+
+    return `${selectedLanguageItems.length} language${selectedLanguageItems.length === 1 ? "" : "s"} selected`;
+  }, [selectedLanguageItems]);
+
   const selectedPreview = useMemo(() => {
-    const previewCodes = selectedLanguageItems.slice(0, 8).map((item) => item.code);
+    const previewCodes = selectedLanguageItems.slice(0, 6).map((item) => item.code);
     const remainingCount = selectedLanguageItems.length - previewCodes.length;
 
     if (previewCodes.length === 0) {
-      return "No languages selected.";
+      return "Choose individual languages or apply a market group.";
     }
 
-    return `${selectedLanguageItems.length} selected: ${previewCodes.join(", ")}${remainingCount > 0 ? ` +${remainingCount} more` : ""}`;
+    return `${previewCodes.join(", ")}${remainingCount > 0 ? ` +${remainingCount} more` : ""}`;
   }, [selectedLanguageItems]);
 
   const toggleLanguage = (code: string) => {
@@ -202,7 +210,7 @@ export default function ManageLanguagesDialog({
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="flex w-full items-center justify-between border-b px-4 py-4 text-sm">
+          <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
               <PiGlobeDuotone className="h-4 w-4" />
               <span>Manage Product Languages</span>
@@ -218,10 +226,15 @@ export default function ManageLanguagesDialog({
           Select individual languages or apply preset market language groups.
         </DialogDescription>
 
-        <div className="grid gap-4 overflow-hidden p-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(260px,0.85fr)]">
-          <section className="flex min-h-0 flex-col rounded-lg border bg-background">
-            <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm font-medium text-foreground">{selectedPreview}</p>
+        <div className="grid gap-4 overflow-hidden p-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.85fr)]">
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border bg-background">
+            <div className="flex flex-col gap-3 border-b bg-muted/30 px-4 py-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Language Catalog</p>
+                <p className="text-xs text-muted-foreground">
+                  Search by code, language, or country. Click anywhere on a row to select or clear it.
+                </p>
+              </div>
               <Button
                 type="button"
                 size="sm"
@@ -242,8 +255,8 @@ export default function ManageLanguagesDialog({
               />
             </div>
 
-            <ScrollArea className="h-[420px]">
-              <div>
+            <ScrollArea className="h-[420px] overflow-hidden">
+              <div className="pb-1">
                 {filteredLanguages.length === 0 ? (
                   <div className="px-4 py-10 text-center text-sm text-muted-foreground">
                     No languages match your search.
@@ -251,18 +264,21 @@ export default function ManageLanguagesDialog({
                 ) : (
                   filteredLanguages.map((language, index) => {
                     const isSelected = selectedCodeSet.has(language.code);
+                    const checkboxId = `${id}-${language.code.toLowerCase()}`;
 
                     return (
-                      <div
+                      <label
                         key={language.code}
+                        htmlFor={checkboxId}
                         className={cn(
-                          "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
+                          "flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors",
                           index !== filteredLanguages.length - 1 && "border-b border-border",
                           isSelected ? "bg-accent/50" : "hover:bg-accent/30"
                         )}
                       >
                         <div className="mt-0.5">
                           <Checkbox
+                            id={checkboxId}
                             checked={isSelected}
                             onCheckedChange={() => toggleLanguage(language.code)}
                           />
@@ -285,7 +301,7 @@ export default function ManageLanguagesDialog({
                             isSelected ? "text-primary opacity-100" : "opacity-0"
                           )}
                         />
-                      </div>
+                      </label>
                     );
                   })
                 )}
@@ -293,16 +309,16 @@ export default function ManageLanguagesDialog({
             </ScrollArea>
           </section>
 
-          <section className="flex min-h-0 flex-col rounded-lg border bg-background">
-            <div className="space-y-1 border-b px-4 py-4">
-              <p className="text-sm font-medium text-foreground">Language Groups</p>
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border bg-background">
+            <div className="space-y-1 border-b bg-primary/5 px-4 py-4">
+              <p className="text-sm font-medium text-foreground">Market Groups</p>
               <p className="text-xs text-muted-foreground">
-                Add common market sets without selecting each language manually.
+                Add common packaging and labeling sets for major launch regions.
               </p>
             </div>
 
-            <ScrollArea className="h-[420px]">
-              <div>
+            <ScrollArea className="h-[420px] overflow-hidden">
+              <div className="pb-1">
                 {COMPLIANCE_LANGUAGE_GROUPS.map((group, index) => {
                   const selectedCount = group.languages.filter((code) =>
                     selectedCodeSet.has(code.toUpperCase())
@@ -314,7 +330,8 @@ export default function ManageLanguagesDialog({
                     <div
                       key={group.id}
                       className={cn(
-                        "px-4 py-3",
+                        "px-4 py-3 transition-colors",
+                        allGroupLanguagesSelected && "bg-muted/25",
                         index !== COMPLIANCE_LANGUAGE_GROUPS.length - 1 &&
                           "border-b border-border"
                       )}
@@ -352,8 +369,19 @@ export default function ManageLanguagesDialog({
           </section>
         </div>
 
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground">
-          {selectedPreview}
+        <div className="border-t bg-muted/20 px-4 py-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="mt-0.5 rounded-md bg-primary/10 p-1 text-primary">
+                <PiCheckCircleDuotone className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{selectedCountLabel}</p>
+                <p className="truncate text-xs text-muted-foreground">{selectedPreview}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">{visibleCodes.length} visible in current search</p>
+          </div>
         </div>
 
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
