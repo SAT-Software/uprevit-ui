@@ -133,7 +133,10 @@ export default function ManageLanguagesDialog({
         return current.filter((code) => !visibleCodes.includes(code));
       }
 
-      visibleCodes.forEach((code) => currentSet.add(code));
+      visibleCodes.forEach((code) => {
+        currentSet.add(code);
+      });
+
       return Array.from(currentSet);
     });
   };
@@ -141,7 +144,11 @@ export default function ManageLanguagesDialog({
   const handleApplyGroup = (codes: string[]) => {
     setSelectedCodes((current) => {
       const next = new Set(current);
-      codes.forEach((code) => next.add(code.toUpperCase()));
+
+      codes.forEach((code) => {
+        next.add(code.toUpperCase());
+      });
+
       return Array.from(next);
     });
   };
@@ -246,17 +253,15 @@ export default function ManageLanguagesDialog({
                     const isSelected = selectedCodeSet.has(language.code);
 
                     return (
-                      <button
+                      <div
                         key={language.code}
-                        type="button"
-                        onClick={() => toggleLanguage(language.code)}
                         className={cn(
                           "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
                           index !== filteredLanguages.length - 1 && "border-b border-border",
                           isSelected ? "bg-accent/50" : "hover:bg-accent/30"
                         )}
                       >
-                        <div className="mt-0.5" onClick={(event) => event.stopPropagation()}>
+                        <div className="mt-0.5">
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={() => toggleLanguage(language.code)}
@@ -280,7 +285,7 @@ export default function ManageLanguagesDialog({
                             isSelected ? "text-primary opacity-100" : "opacity-0"
                           )}
                         />
-                      </button>
+                      </div>
                     );
                   })
                 )}

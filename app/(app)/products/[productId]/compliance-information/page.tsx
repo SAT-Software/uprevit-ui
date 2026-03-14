@@ -550,14 +550,14 @@ export default function Page() {
                             >
                               <RedlineValue value={item.name} diff={nameDiff} />
                             </p>
-                            {item.country && (
+                            {(item.country || countryDiff) && (
                               <p
                                 className={cn(
                                   "mt-0.5 text-xs text-muted-foreground",
                                   isRedlineView && isRemoved && "text-red-500/70 line-through"
                                 )}
                               >
-                                <RedlineValue value={item.country} diff={countryDiff} />
+                                <RedlineValue value={item.country || ""} diff={countryDiff} />
                               </p>
                             )}
                           </div>
