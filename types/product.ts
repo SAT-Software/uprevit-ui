@@ -33,12 +33,17 @@ export interface Product {
   compliance_information?: {
     data?: Array<{
       _id?: string;
-      compliance_type: string;
-      status: string;
-      reference_number?: string;
-      notes?: string;
+      standard: string;
+      standard_description: string;
     }>;
     tab_completed?: boolean;
+  };
+  languages_information?: {
+    data?: Array<{
+      code: string;
+      name: string;
+      country?: string;
+    }>;
   };
   label_components?: {
     data?: Array<{
@@ -220,11 +225,17 @@ export interface AllTabsData {
   product_information: ProductInformationTab;
   compliance_information: TabWithArrayData<{
     _id?: string;
-    compliance_type: string;
-    status: string;
-    reference_number?: string;
-    notes?: string;
+    standard: string;
+    standard_description: string;
   }>;
+  languages_information: {
+    product_data: ProductDataWrapper;
+    data: Array<{
+      code: string;
+      name: string;
+      country?: string;
+    }>;
+  };
   label_components: TabWithArrayData<{
     _id?: string;
     dimensions?: string;
@@ -287,7 +298,7 @@ export interface GetSingleTabResponse<T = unknown> {
     data: {
       product_data: ProductDataWrapper;
       data: T;
-      tab_completed: boolean;
+      tab_completed?: boolean;
       custom_fields?: CustomField[];
       auditLogs: AuditLog[];
     };
