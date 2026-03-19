@@ -16,7 +16,6 @@ import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
 import UnsavedAnnotationDialog from "./UnsavedAnnotationDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
-// import { uploadFiles } from "@/utils/uploadthing";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { toast } from "sonner";
 import { LegendPanel } from "./LegendPanel";
@@ -126,7 +125,6 @@ export default function LabelTagsTabs({
           type: "image/png",
         });
 
-        // const utRes = await uploadFiles("imageUploader", { files: [file] });
         const s3UploadResult = await uploadFileToS3({
           file,
           contentType: file.type || "application/octet-stream",

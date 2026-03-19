@@ -10,17 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
 import {
   PiCreditCardDuotone,
-  PiGearDuotone,
   PiSignOutDuotone,
   PiSquaresFourDuotone,
   PiUserCircleGearDuotone,
@@ -40,7 +34,7 @@ export function UserNav() {
     const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
     const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri
+      logoutUri,
     )}`;
   };
 

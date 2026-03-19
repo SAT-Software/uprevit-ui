@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-// import { uploadFiles } from "@/utils/uploadthing";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
@@ -76,9 +75,6 @@ export default function DialogAddLabelTag({
 
       // Only upload if there's an image file
       if (data.image && data.image.file instanceof File) {
-        // const utRes = await uploadFiles("imageUploader", {
-        //   files: [data.image.file],
-        // });
         const s3UploadResult = await uploadFileToS3({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",

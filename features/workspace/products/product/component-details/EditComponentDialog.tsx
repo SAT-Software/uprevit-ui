@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-// import { uploadFiles } from "@/utils/uploadthing";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
   PiPencilSimpleDuotone,
@@ -119,9 +118,6 @@ export default function EditComponentDialog({
 
       // Only upload if there's a new image file
       if (data.image && data.image.file instanceof File) {
-        // utRes = await uploadFiles("imageUploader", {
-        //   files: [data.image.file],
-        // });
         uploadRes = await uploadImage({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",

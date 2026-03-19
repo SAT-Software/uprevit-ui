@@ -11,7 +11,6 @@ import {
   PiBriefcaseDuotone,
   PiMapPinDuotone,
   PiPhoneDuotone,
-  PiSignOutBold,
   PiSignOutDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
@@ -27,7 +26,7 @@ function ProfileTab() {
     const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
     const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri
+      logoutUri,
     )}`;
   };
 

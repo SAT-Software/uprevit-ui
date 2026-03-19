@@ -13,7 +13,6 @@ import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFil
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { SourceFilesFolder } from "@/types/source-files";
-// import { uploadFiles } from "@/utils/uploadthing";
 import { useState } from "react";
 import {
   PiCloudArrowUpDuotone,
@@ -22,7 +21,7 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
-import { toast } from "sonner"; // Assuming sonner use for toasts if needed, though not used in original, I'll stick to original logic unless error handling needs it.
+import { toast } from "sonner";
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -45,10 +44,6 @@ export default function DialogUploadSourceFiles({
     if (!selectedFiles.length) return;
     try {
       setIsUploading(true);
-      // const utRes = await uploadFiles("imageUploader", {
-      //   files: selectedFiles,
-      // });
-
       for (const file of selectedFiles) {
         const s3UploadResult = await uploadFileToS3({
           file,

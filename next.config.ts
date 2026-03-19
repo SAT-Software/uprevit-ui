@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     const target =
+      process.env.API_PROXY_TARGET ||
       process.env.NEXT_PUBLIC_API_PROXY_TARGET ||
       (process.env.NODE_ENV === "development"
         ? "http://localhost:3000"
