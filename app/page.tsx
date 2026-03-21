@@ -13,6 +13,7 @@ import FeaturesSection from "@/features/marketing/landing-page/FeaturesSection";
 import FAQSection from "@/features/marketing/landing-page/FAQSection";
 import CTASection from "@/features/marketing/landing-page/CTASection";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
+import { ScrollProvider } from "@/lib/scroll-context";
 
 const items = [
   {
@@ -245,41 +246,43 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
-      <MarketingHeader />
-      <div className="relative w-full">
-        <Ripple items={items} />
-        <HeroSection />
-      </div>
-      <div className="relative pointer-events-none w-full mx-auto -mt-50 z-55">
-        <div className="absolute inset-0 w-full max-w-6xl mx-auto pointer-events-none">
-          <div className="absolute top-40 left-0 w-px h-10 bg-border/5 z-40" />
-          <div className="absolute top-40 right-0 w-px h-10 bg-border/5 z-40" />
-          <div className="absolute top-50 left-0 w-px h-10 bg-border/10 z-40" />
-          <div className="absolute top-50 right-0 w-px h-10 bg-border/10 z-40" />
-          <div className="absolute top-60 left-0 w-px h-10 bg-border/20 z-40" />
-          <div className="absolute top-60 right-0 w-px h-10 bg-border/20 z-40" />
-          <div className="absolute top-70 left-0 w-px h-10 bg-border/30 z-40" />
-          <div className="absolute top-70 right-0 w-px h-10 bg-border/30 z-40" />
-          <div className="absolute top-80 left-0 w-px h-10 bg-border/40 z-40" />
-          <div className="absolute top-80 right-0 w-px h-10 bg-border/40 z-40" />
-          <div className="absolute top-90 left-0 w-px h-10 bg-border/50 z-40" />
-          <div className="absolute top-90 right-0 w-px h-10 bg-border/50 z-40" />
-          <div className="absolute top-100 left-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
-          <div className="absolute top-100 right-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+    <ScrollProvider>
+      <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
+        <MarketingHeader />
+        <div className="relative w-full">
+          <Ripple items={items} />
+          <HeroSection />
         </div>
-        <HeroFeatureCards
-          activeIndex={activeFeatureIndex}
-          onActiveChange={setActiveFeatureIndex}
-        />
-        <HeroFeatureDemo activeIndex={activeFeatureIndex} />
-        <DemoSection />
-        <ReportSection />
-        <FeaturesSection />
-        <CTASection />
-        <FAQSection />
-        <FooterSection />
+        <div className="relative pointer-events-none w-full mx-auto -mt-50 z-55">
+          <div className="absolute inset-0 w-full max-w-6xl mx-auto pointer-events-none">
+            <div className="absolute top-40 left-0 w-px h-10 bg-border/5 z-40" />
+            <div className="absolute top-40 right-0 w-px h-10 bg-border/5 z-40" />
+            <div className="absolute top-50 left-0 w-px h-10 bg-border/10 z-40" />
+            <div className="absolute top-50 right-0 w-px h-10 bg-border/10 z-40" />
+            <div className="absolute top-60 left-0 w-px h-10 bg-border/20 z-40" />
+            <div className="absolute top-60 right-0 w-px h-10 bg-border/20 z-40" />
+            <div className="absolute top-70 left-0 w-px h-10 bg-border/30 z-40" />
+            <div className="absolute top-70 right-0 w-px h-10 bg-border/30 z-40" />
+            <div className="absolute top-80 left-0 w-px h-10 bg-border/40 z-40" />
+            <div className="absolute top-80 right-0 w-px h-10 bg-border/40 z-40" />
+            <div className="absolute top-90 left-0 w-px h-10 bg-border/50 z-40" />
+            <div className="absolute top-90 right-0 w-px h-10 bg-border/50 z-40" />
+            <div className="absolute top-100 left-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+            <div className="absolute top-100 right-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+          </div>
+          <HeroFeatureCards
+            activeIndex={activeFeatureIndex}
+            onActiveChange={setActiveFeatureIndex}
+          />
+          <HeroFeatureDemo activeIndex={activeFeatureIndex} />
+          <DemoSection />
+          <ReportSection />
+          <FeaturesSection />
+          <CTASection />
+          <FAQSection />
+          <FooterSection />
+        </div>
       </div>
-    </div>
+    </ScrollProvider>
   );
 }

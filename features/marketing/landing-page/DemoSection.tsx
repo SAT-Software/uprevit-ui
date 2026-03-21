@@ -1,23 +1,19 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
+import { useScrollSection } from "@/lib/scroll-context";
 import { useTheme } from "next-themes";
 import { PiImageDuotone } from "react-icons/pi";
 
 export default function DemoSection() {
   const { resolvedTheme } = useTheme();
   const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
+  const demoRef = useScrollSection("demo");
 
   return (
-    <div className="w-full mt-40 mb-20">
+    <div ref={demoRef} className="w-full mt-40 mb-20">
       <div className="max-w-6xl mx-auto mb-8 relative">
         <Badge
           suppressHydrationWarning
@@ -63,7 +59,7 @@ export default function DemoSection() {
               <CardContent className="p-0 overflow-hidden">
                 <video
                   src="/uprevit-test-demo-1.mp4"
-                  className="overflow-hidden rounded-[8px]"
+                  className="overflow-hidden rounded-xl"
                   autoPlay
                   loop
                   muted

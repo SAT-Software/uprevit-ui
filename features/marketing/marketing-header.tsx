@@ -87,7 +87,7 @@ export default function MarketingHeader() {
       className={cn(
         "fixed top-0 w-full h-18 mx-auto flex items-center justify-between z-60 transition-all delay-150 ease-in-out duration-300",
         !isAtTop ? "bg-accent/80 border-b" : "bg-transparent",
-        isDecoratedMarketingPage && "border-b border-dashed border-border/80"
+        isDecoratedMarketingPage && "border-b border-dashed border-border/80",
       )}
       style={{
         backdropFilter: !isAtTop ? "blur(8px)" : "none",
@@ -100,9 +100,9 @@ export default function MarketingHeader() {
         <div>
           <Link
             href="/"
-            className="flex items-center gap-4 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            className="flex items-center gap-2 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <div className="relative flex aspect-square mb-1 size-8 items-center justify-center">
+            <div className="relative flex aspect-square mb-1 size-7 items-center justify-center">
               <Image
                 src="/log-no-bg-black.svg"
                 alt="Uprevit logo"
@@ -110,8 +110,8 @@ export default function MarketingHeader() {
                 className=""
               />
             </div>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate text-lg text-foreground font-black ">
+            <div className="grid flex-1 text-left leading-tight">
+              <span className="truncate text-lg text-foreground font-extrabold mt-0.5">
                 UPREVIT
               </span>
             </div>

@@ -1,7 +1,10 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { useScrollTo } from "@/lib/scroll-context";
+import Link from "next/link";
 
 export default function HeroSection() {
+  const scrollTo = useScrollTo();
+
   return (
     <div className="max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[800px] h-[800px]">
       <div className="flex items-center mb-4 py-1 px-2 rounded-full border text-xs font-semibold bg-white dark:bg-black text-foreground shadow-lg shadow-foreground">
@@ -10,9 +13,9 @@ export default function HeroSection() {
       </div>
       <div className="flex flex-col items-center gap-4">
         <h1 className="text-6xl font-bold text-center tracking-tighter">
-          Master Your Labels:{" "}
-          <span className="text-muted-foreground/60 tracking-tighter">
-            Master Your Compliance
+          Your QMS, Digitized <br />
+          <span className="text-muted-foreground/70 tracking-tighter">
+            Your Labeling, Validated
           </span>
         </h1>
         <div className="flex flex-col gap-1 items-center mt-4">
@@ -27,10 +30,15 @@ export default function HeroSection() {
           </p>
         </div>
         <div className="mt-8 flex items-center justify-center gap-4">
-          <Button size="lg" variant="outline">
+          <Button onClick={() => scrollTo("demo")} variant="outline" size="lg">
             Learn More
           </Button>
-          <Button size="lg">Get Started</Button>
+          <Link
+            href="/contact"
+            className={buttonVariants({ variant: "default", size: "lg" })}
+          >
+            Contact Us
+          </Link>
         </div>
       </div>
     </div>
