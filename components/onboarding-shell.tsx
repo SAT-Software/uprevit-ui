@@ -4,6 +4,10 @@ import type React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FloatingPaths } from "@/components/floating-paths";
+import { Button } from "@/components/ui/button";
+import { useSignOut } from "@/hooks/auth/useSignOut";
+import { useAuth } from "react-oidc-context";
+import { PiSignOutDuotone } from "react-icons/pi";
 
 type OnboardingShellProps = {
   title: string;
@@ -22,6 +26,9 @@ export function OnboardingShell({
   leftAttribution = "Medical labeling teams",
   leftCode = "uprevit://workspace-ready | fda-udi | eu-mdr | iso-15223",
 }: OnboardingShellProps) {
+  const auth = useAuth();
+  const signOut = useSignOut();
+
   return (
     <main className="relative lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
       <div className="relative hidden h-full flex-col overflow-hidden border-r border-dashed border-border/70 bg-accent/35 p-10 lg:flex dark:bg-accent/20">
@@ -51,6 +58,19 @@ export function OnboardingShell({
       </div>
 
       <div className="relative flex min-h-screen flex-col justify-start px-6 py-8 sm:px-8 lg:max-h-screen lg:justify-center lg:overflow-y-auto lg:px-10 lg:py-10 bg-muted/80">
+        {auth.isAuthenticated && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="absolute top-4 right-4 z-10 sm:top-6 sm:right-6 lg:top-8 lg:right-8"
+          >
+            <PiSignOutDuotone className="h-4 w-4" />
+            Sign out
+          </Button>
+        )}
+
         <div
           aria-hidden
           className="absolute inset-0 isolate -z-10 opacity-60 contain-strict"

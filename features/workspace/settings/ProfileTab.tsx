@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { DialogUpdateProfile } from "./DialogUpdateProfile";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "react-oidc-context";
+import { useSignOut } from "@/hooks/auth/useSignOut";
 import {
   PiEnvelopeDuotone,
   PiBriefcaseDuotone,
@@ -18,17 +19,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function ProfileTab() {
   const auth = useAuth();
+  const signOut = useSignOut();
   const { data, isLoading, error } = useGetUser();
   const userProfile = data?.user;
-
-  const signOutRedirect = () => {
-    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
-    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
-    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri,
-    )}`;
-  };
 
   if (isLoading) {
     return (
@@ -182,13 +175,7 @@ function ProfileTab() {
         </div>
       </div>
       {auth.isAuthenticated && (
-        <Button
-          onClick={async () => {
-            await auth.removeUser();
-            signOutRedirect();
-          }}
-          variant="destructive"
-        >
+        <Button onClick={signOut} variant="destructive">
           <PiSignOutDuotone />
           Sign Out
         </Button>

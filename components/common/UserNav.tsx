@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
 import {
@@ -20,23 +21,13 @@ import {
   PiUserCircleGearDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
-import { useAuth } from "react-oidc-context";
 import { Skeleton } from "../ui/skeleton";
 
 export function UserNav() {
-  const auth = useAuth();
   const { isMobile } = useSidebar();
   const { data: userData, isLoading } = useGetUser();
+  const signOut = useSignOut();
   const user = userData?.user;
-
-  const signOutRedirect = () => {
-    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
-    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
-    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri,
-    )}`;
-  };
 
   if (isLoading)
     return <Skeleton className="h-7 w-7 rounded-full bg-border/80" />;
@@ -104,12 +95,7 @@ export function UserNav() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={async () => {
-              await auth.removeUser();
-              signOutRedirect();
-            }}
-          >
+          <DropdownMenuItem onClick={signOut}>
             <PiSignOutDuotone />
             Log out
           </DropdownMenuItem>
