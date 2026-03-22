@@ -1,14 +1,8 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DecorativeCornerCircle } from "@/components/ui/DecorativeCornerCircle";
-import { PiImageDuotone, PiPresentationChartDuotone } from "react-icons/pi";
 import { useTheme } from "next-themes";
+import { PiPresentationChartDuotone } from "react-icons/pi";
 
 export default function ReportSection() {
   const { resolvedTheme } = useTheme();
@@ -47,8 +41,8 @@ export default function ReportSection() {
             <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
               <CardContent className="p-0 overflow-hidden">
                 <video
-                  src="/uprevit-test-demo-2.mp4"
-                  className="overflow-hidden rounded-[8px]"
+                  src="/Uprevit-Report-Feature-Video.mp4"
+                  className="overflow-hidden rounded-xl"
                   autoPlay
                   loop
                   muted

@@ -41,7 +41,7 @@ export default function HeroFeatureDemo({
         />
 
         <div className="p-1 bg-accent border-border border rounded-[12px] backdrop-blur-sm">
-          <Card className="relative w-full aspect-16/9 mx-auto border-border max-w-6xl overflow-hidden bg-background/50">
+          <Card className="relative w-full aspect-video mx-auto border-border max-w-6xl overflow-hidden bg-background/50">
             <div className="absolute inset-0">
               {screenshots.map((src, idx) => (
                 <div
