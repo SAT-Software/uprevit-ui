@@ -168,6 +168,8 @@ const Editor = ({
   const imageNaturalWidth = useRef<number>(0);
   const containerMaxWidthRef = useRef<number>(0);
   const onStateChangeRef = useRef<typeof onStateChange>(onStateChange);
+  const annotationRef = useRef<AnnotationState | null>(annotation);
+  const initializationIdRef = useRef(0);
 
   const [editorState, setEditorState] = useState<EditorState>({
     mode: "select",
@@ -301,95 +303,119 @@ const Editor = ({
   }, [onStateChange]);
 
   useEffect(() => {
+    annotationRef.current = annotation;
+  }, [annotation]);
+
+  useEffect(() => {
     const imageChanged =
       previousImageSrc.current !== null &&
       previousImageSrc.current !== targetImageSrc;
 
-    if (imageChanged && editor.current && editorContainer.current) {
-      editorContainer.current.removeChild(editor.current);
+    const containerRef = editorContainer.current;
+    if (!containerRef) return;
+
+    if (imageChanged && editor.current && containerRef.contains(editor.current)) {
+      containerRef.removeChild(editor.current);
       editor.current = null;
     }
 
-    if (!editor.current && editorContainer.current) {
-      const targetImg = document.createElement("img");
-      targetImg.src = targetImageSrc;
+    previousImageSrc.current = targetImageSrc;
 
-      const editorAreaWidth = editorContainer.current.clientWidth;
-      const containerMaxWidth = Math.max(editorAreaWidth - 40, 200);
-      const containerRef = editorContainer.current;
+    if (editor.current) return;
 
-      const initializeEditor = (naturalWidth: number) => {
-        if (!containerRef) return;
+    const targetImg = document.createElement("img");
+    targetImg.src = targetImageSrc;
 
-        const naturalHeight = targetImg.naturalHeight;
+    const editorAreaWidth = containerRef.clientWidth;
+    const containerMaxWidth = Math.max(editorAreaWidth - 40, 200);
+    const initializationId = ++initializationIdRef.current;
+    let isCancelled = false;
 
-        imageNaturalWidth.current = naturalWidth;
-        containerMaxWidthRef.current = containerMaxWidth;
-
-        const newEditor = new MarkerArea();
-        newEditor.targetImage = targetImg;
-
-        if (naturalWidth > containerMaxWidth) {
-          const scale = containerMaxWidth / naturalWidth;
-          newEditor.targetWidth = containerMaxWidth;
-          newEditor.targetHeight = Math.round(naturalHeight * scale);
-        } else {
-          newEditor.targetWidth = naturalWidth;
-          newEditor.targetHeight = naturalHeight;
-        }
-
-        newEditor.addEventListener("areastatechange", () => {
-          updateCalculatedEditorState();
-          if (onStateChangeRef.current) {
-            onStateChangeRef.current(newEditor.getState());
-          }
-        });
-
-        newEditor.addEventListener("markerselect", (ev) => {
-          setCurrentMarkerEditor(ev.detail.markerEditor);
-          updateCalculatedEditorState();
-        });
-
-        newEditor.addEventListener("markerdeselect", () => {
-          setCurrentMarkerEditor(null);
-          updateCalculatedEditorState();
-        });
-
-        newEditor.addEventListener("markercreate", () => {
-          setEditorState((prevState) => ({
-            ...prevState,
-            mode: "select",
-          }));
-        });
-
-        containerRef.appendChild(newEditor);
-        editor.current = newEditor;
-
-        if (
-          annotation &&
-          JSON.stringify(annotation) !== JSON.stringify(newEditor.getState())
-        ) {
-          newEditor.restoreState(annotation);
-        }
-      };
-
-      if (targetImg.complete && targetImg.naturalWidth > 0) {
-        initializeEditor(targetImg.naturalWidth);
-      } else {
-        targetImg.onload = () => {
-          initializeEditor(targetImg.naturalWidth);
-        };
+    const initializeEditor = (naturalWidth: number) => {
+      if (
+        isCancelled ||
+        initializationId !== initializationIdRef.current ||
+        editor.current
+      ) {
+        return;
       }
-    } else if (
+
+      const naturalHeight = targetImg.naturalHeight;
+
+      imageNaturalWidth.current = naturalWidth;
+      containerMaxWidthRef.current = containerMaxWidth;
+
+      const newEditor = new MarkerArea();
+      newEditor.targetImage = targetImg;
+
+      if (naturalWidth > containerMaxWidth) {
+        const scale = containerMaxWidth / naturalWidth;
+        newEditor.targetWidth = containerMaxWidth;
+        newEditor.targetHeight = Math.round(naturalHeight * scale);
+      } else {
+        newEditor.targetWidth = naturalWidth;
+        newEditor.targetHeight = naturalHeight;
+      }
+
+      newEditor.addEventListener("areastatechange", () => {
+        updateCalculatedEditorState();
+        if (onStateChangeRef.current) {
+          onStateChangeRef.current(newEditor.getState());
+        }
+      });
+
+      newEditor.addEventListener("markerselect", (ev) => {
+        setCurrentMarkerEditor(ev.detail.markerEditor);
+        updateCalculatedEditorState();
+      });
+
+      newEditor.addEventListener("markerdeselect", () => {
+        setCurrentMarkerEditor(null);
+        updateCalculatedEditorState();
+      });
+
+      newEditor.addEventListener("markercreate", () => {
+        setEditorState((prevState) => ({
+          ...prevState,
+          mode: "select",
+        }));
+      });
+
+      containerRef.replaceChildren();
+      containerRef.appendChild(newEditor);
+      editor.current = newEditor;
+
+      if (
+        annotationRef.current &&
+        JSON.stringify(annotationRef.current) !== JSON.stringify(newEditor.getState())
+      ) {
+        newEditor.restoreState(annotationRef.current);
+      }
+    };
+
+    if (targetImg.complete && targetImg.naturalWidth > 0) {
+      initializeEditor(targetImg.naturalWidth);
+    } else {
+      targetImg.onload = () => {
+        initializeEditor(targetImg.naturalWidth);
+      };
+    }
+
+    return () => {
+      isCancelled = true;
+      targetImg.onload = null;
+    };
+  }, [targetImageSrc, updateCalculatedEditorState]);
+
+  useEffect(() => {
+    if (
       editor.current &&
       annotation &&
       JSON.stringify(annotation) !== JSON.stringify(editor.current.getState())
     ) {
       editor.current.restoreState(annotation);
     }
-
-    previousImageSrc.current = targetImageSrc;
-  }, [annotation, targetImageSrc, updateCalculatedEditorState]);
+  }, [annotation]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyboardShortcuts);

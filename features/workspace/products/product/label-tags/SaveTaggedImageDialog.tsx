@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -31,31 +30,42 @@ export default function SaveTaggedImageDialog({
   onConfirm,
   isPending = false,
 }: SaveTaggedImageDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const isBusy = isPending || isSubmitting;
-
   async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (isPending) return;
     try {
       await onConfirm();
-      // onOpenChange(false);
     } catch (error) {
       console.error("Failed to save tagged image:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5">
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (isPending) return;
+        onOpenChange(nextOpen);
+      }}
+    >
+      <DialogContent
+        className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5"
+        onEscapeKeyDown={(event) => {
+          if (isPending) event.preventDefault();
+        }}
+        onInteractOutside={(event) => {
+          if (isPending) event.preventDefault();
+        }}
+      >
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <p>Save Tagged Image</p>
             <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
+              <button
+                type="button"
+                className="cursor-pointer"
+                disabled={isPending}
+              >
                 <PiXCircleDuotone size={18} />
               </button>
             </DialogClose>
@@ -109,7 +119,7 @@ export default function SaveTaggedImageDialog({
               type="button"
               variant="secondary"
               size="sm"
-              disabled={isBusy}
+              disabled={isPending}
             >
               <PiXCircleDuotone />
               Cancel
@@ -119,10 +129,10 @@ export default function SaveTaggedImageDialog({
             type="button"
             size="sm"
             onClick={handleConfirm}
-            disabled={isBusy}
+            disabled={isPending}
           >
-            {isBusy ? <Spinner /> : <PiCloudArrowUpDuotone />}
-            {isBusy ? "Uploading..." : "Yes, Save Image"}
+            {isPending ? <Spinner /> : <PiCloudArrowUpDuotone />}
+            {isPending ? "Saving..." : "Yes, Save Image"}
           </Button>
         </DialogFooter>
       </DialogContent>

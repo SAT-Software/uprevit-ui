@@ -105,6 +105,7 @@ export default function LabelTagsTabs({
 
   const handleConfirmSave = async () => {
     if (!pendingSave) return;
+    setIsSaving(true);
     setRenderItem({
       id: pendingSave.itemId,
       image: pendingSave.itemImage,
@@ -118,7 +119,6 @@ export default function LabelTagsTabs({
       isRenderingRef.current = true;
 
       try {
-        setIsSaving(true);
         const response = await fetch(dataUrl);
         const blob = await response.blob();
         const file = new File([blob], "tagged-image.png", {
@@ -814,13 +814,21 @@ export default function LabelTagsTabs({
               annotation={annotations[renderItem.id]}
               mode="upload"
               onRendered={handleRendered}
-              onComplete={() => setRenderItem(null)}
+              onComplete={() => {
+                setRenderItem(null);
+                if (!isRenderingRef.current) {
+                  setIsSaving(false);
+                }
+              }}
             />
           )}
 
           <SaveTaggedImageDialog
             open={saveDialogOpen}
             onOpenChange={(open) => {
+              if ((isSaving || isUpdating) && !open) {
+                return;
+              }
               setSaveDialogOpen(open);
               if (!open) {
                 setPendingSave(null);
