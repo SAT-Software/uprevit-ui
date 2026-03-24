@@ -99,10 +99,10 @@ export default function SchematicsSymbolsTabs({
       defaultValue="tab-1"
       value={activeTab}
       onValueChange={setActiveTab}
-      className="flex flex-col h-full gap-0"
+      className="flex h-full min-h-0 flex-col gap-0"
     >
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-border p-2">
+      <div className="flex shrink-0 items-center justify-between border-b border-border p-2">
         <div className="flex items-center gap-2">
           <p className="text-base font-semibold">Symbols & Graphics</p>
           <div className="w-1 h-1 bg-border border border-border rounded-full" />
@@ -134,7 +134,7 @@ export default function SchematicsSymbolsTabs({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="px-2 py-2">
+      <div className="shrink-0 px-2 py-2">
         <ScrollArea className="w-full">
           <TabsList>
             <TabsTrigger value="tab-1">
@@ -162,29 +162,29 @@ export default function SchematicsSymbolsTabs({
       </div>
 
       {/* Tab Contents */}
-      <div className="flex-1 overflow-hidden px-2">
-        <TabsContent value="tab-1" className="h-full mt-0">
+      <div className="flex-1 min-h-0 overflow-hidden px-2 pb-2">
+        <TabsContent value="tab-1" className="mt-0 flex h-full min-h-0 flex-col">
           <SymbolsGraphicsPageSymbolsTable
             data={symbolsData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
           />
         </TabsContent>
-        <TabsContent value="tab-2" className="h-full mt-0">
+        <TabsContent value="tab-2" className="mt-0 flex h-full min-h-0 flex-col">
           <SymbolsGraphicsPageSchematicsTable
             data={schematicsData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
           />
         </TabsContent>
-        <TabsContent value="tab-3" className="h-full mt-0">
+        <TabsContent value="tab-3" className="mt-0 flex h-full min-h-0 flex-col">
           <SymbolsGraphicsPageBarcodesTable
             data={barcodesData}
             isSubmitted={isSubmitted}
             isRedlineView={isRedlineView}
           />
         </TabsContent>
-        <TabsContent value="tab-4" className="h-full mt-0">
+        <TabsContent value="tab-4" className="mt-0 flex h-full min-h-0 flex-col">
           <SymbolsGraphicsPageOtherComponentsTable
             data={otherComponentsData}
             isSubmitted={isSubmitted}

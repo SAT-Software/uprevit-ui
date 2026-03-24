@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "r7codfanye.ufs.sh",
+      },
+      {
+        protocol: "https",
         hostname:
           "uprevit-upload-stage-940900040930-us-east-1-an.s3.us-east-1.amazonaws.com",
       },

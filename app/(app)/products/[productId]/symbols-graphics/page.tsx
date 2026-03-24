@@ -56,8 +56,8 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-2 p-2 min-h-0">
+        <div className="flex w-full flex-1 min-h-0 flex-col gap-6 overflow-auto rounded-xl border border-border bg-background">
           {/* Header Section Skeleton */}
           <div className="flex flex-col md:flex-row gap-2 items-start justify-between border-b px-3 py-2 border-border">
             <div className="flex items-center gap-2">
@@ -95,8 +95,8 @@ export default function Page() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-2 p-2 min-h-0">
+        <div className="flex w-full flex-1 min-h-0 flex-col gap-6 overflow-auto rounded-xl border border-border bg-background">
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="p-3 rounded-full bg-destructive/10">
@@ -219,7 +219,7 @@ export default function Page() {
   }));
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
+    <div className="flex flex-1 flex-col gap-2 p-2 min-h-0 overflow-hidden">
       {isRedlineView && (
         <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
           <span className="text-amber-600 font-medium">
@@ -230,7 +230,7 @@ export default function Page() {
         </div>
       )}
 
-      <div className="flex flex-col gap-0 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex w-full flex-1 min-h-0 flex-col gap-0 overflow-hidden rounded-xl border border-border bg-background">
         <SchematicsSymbolsTabs
           schematicsData={schematicsData}
           barcodesData={barcodesData}

@@ -496,22 +496,24 @@ export default function SymbolsGraphicsPageSymbolsTable({
   });
 
   return (
-    <div className="space-y-2 mt-2 w-full">
-      <TableControls
-        table={table}
-        searchColumnId="componentName"
-        searchPlaceholder="Filter symbols..."
-        filterColumns={[
-          { name: "componentName", label: "Symbol Text", type: "text" },
-          { name: "textPresent", label: "Text Present", type: "boolean" },
-          {
-            name: "symbolsTextPresent",
-            label: "Presence on Labels",
-            type: "text",
-          },
-        ]}
-      />
-      <div className="bg-background overflow-hidden rounded-xl border">
+    <div className="mt-2 flex flex-1 min-h-0 w-full flex-col gap-2">
+      <div className="shrink-0">
+        <TableControls
+          table={table}
+          searchColumnId="componentName"
+          searchPlaceholder="Filter symbols..."
+          filterColumns={[
+            { name: "componentName", label: "Symbol Text", type: "text" },
+            { name: "textPresent", label: "Text Present", type: "boolean" },
+            {
+              name: "symbolsTextPresent",
+              label: "Presence on Labels",
+              type: "text",
+            },
+          ]}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border bg-background">
         <Table>
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -536,7 +538,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="[&_tr:last-child]:border-b">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const rowStatus = getRowStatus(row.original);
@@ -632,7 +634,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
         </Table>
       </div>
       {/* Pagination */}
-      <div className="flex items-center justify-end gap-8">
+      <div className="flex shrink-0 items-center justify-end gap-8">
         {/* Pagination buttons */}
         <div>
           <Pagination>

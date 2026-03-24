@@ -579,24 +579,26 @@ export default function ProductComponentDetailsTable({
   });
 
   return (
-    <div className="space-y-2 w-full p-2">
-      <TableControls
-        table={table}
-        searchColumnId="component_number"
-        searchPlaceholder="Filter components..."
-        filterColumns={[
-          { name: "component_number", label: "Component #", type: "text" },
-          {
-            name: "component_description",
-            label: "Description",
-            type: "text",
-          },
-          { name: "label_type", label: "Label Type", type: "text" },
-          { name: "dimensions", label: "Dimensions", type: "text" },
-          { name: "component_type", label: "Component Type", type: "text" },
-        ]}
-      />
-      <div className="bg-background overflow-hidden rounded-xl border">
+    <div className="flex flex-1 min-h-0 w-full flex-col gap-2 p-2">
+      <div className="shrink-0">
+        <TableControls
+          table={table}
+          searchColumnId="component_number"
+          searchPlaceholder="Filter components..."
+          filterColumns={[
+            { name: "component_number", label: "Component #", type: "text" },
+            {
+              name: "component_description",
+              label: "Description",
+              type: "text",
+            },
+            { name: "label_type", label: "Label Type", type: "text" },
+            { name: "dimensions", label: "Dimensions", type: "text" },
+            { name: "component_type", label: "Component Type", type: "text" },
+          ]}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border bg-background">
         <Table className="">
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -621,7 +623,7 @@ export default function ProductComponentDetailsTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="[&_tr:last-child]:border-b">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const rowStatus = getRowStatus(row.original);
@@ -739,7 +741,7 @@ export default function ProductComponentDetailsTable({
         </Table>
       </div>
       {/* Pagination */}
-      <div className="flex items-center justify-between gap-8">
+      <div className="flex shrink-0 items-center justify-between gap-8">
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"

@@ -74,8 +74,8 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-2 p-2 min-h-0">
+        <div className="flex w-full flex-1 min-h-0 flex-col gap-6 overflow-auto rounded-xl border border-border bg-background">
           <div className="p-6">
             <div className="h-64 w-full bg-muted rounded-xl animate-pulse" />
           </div>
@@ -135,7 +135,7 @@ export default function Page() {
   })();
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
+    <div className="flex flex-1 flex-col gap-2 p-2 min-h-0 overflow-hidden">
       {/* Redline Mode Banner */}
       {isRedlineView && (
         <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
@@ -147,9 +147,9 @@ export default function Page() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-        <div className="flex flex-col gap-0">
-          <div className="flex items-center justify-between border-b border-border p-2">
+      <div className="flex w-full flex-1 min-h-0 flex-col gap-2 overflow-hidden rounded-xl border border-border bg-background">
+        <div className="flex flex-1 min-h-0 flex-col gap-0">
+          <div className="flex shrink-0 items-center justify-between border-b border-border p-2">
             <div className="flex items-center gap-2">
               <p className="text-base font-semibold">Label Components</p>
               <div className="w-1 h-1 bg-border border border-border rounded-full" />
