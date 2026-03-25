@@ -153,7 +153,7 @@ export default function CreateProductDialog() {
         </DialogDescription>
         <form
           id={`create-product-form-${id}`}
-          className="overflow-y-auto"
+          className="create-product-dialog-scrollbar overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
