@@ -42,9 +42,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
+import { ProductImageFrame } from "../ProductImageFrame";
 import {
   PiPencilSimpleDuotone,
   PiTrashDuotone,
@@ -222,12 +222,10 @@ const columns: ColumnDef<Item>[] = [
         return (
           <div className="flex flex-col gap-1">
             <span className="text-[9px] text-blue-600 font-medium">NEW</span>
-            <Image
+            <ProductImageFrame
               src={newImageUrl}
               alt={row.original.componentName}
-              width={48}
-              height={48}
-              className="object-cover rounded-md border border-blue-300 min-h-12"
+              frameClassName="border-blue-300"
             />
           </div>
         );
@@ -237,29 +235,23 @@ const columns: ColumnDef<Item>[] = [
         return (
           <div className="flex flex-col gap-1">
             <span className="text-[9px] text-red-600 font-medium">REMOVED</span>
-            <Image
+            <ProductImageFrame
               src={removedImageUrl}
               alt={row.original.componentName}
-              width={48}
-              height={48}
-              className="object-cover rounded-md border border-red-300 min-h-12 opacity-70"
+              frameClassName="border-red-300"
+              imageClassName="opacity-70"
             />
           </div>
         );
       }
 
       return hasImage ? (
-        <Image
+        <ProductImageFrame
           src={image}
           alt={row.original.componentName}
-          width={48}
-          height={48}
-          className="object-cover rounded-md border min-h-12"
         />
       ) : (
-        <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md">
-          <PiImageDuotone className="w-full h-full p-2" />
-        </div>
+        <ProductImageFrame alt={row.original.componentName} />
       );
     },
     size: 80,
@@ -614,38 +606,37 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                                 imageDiff?.status === "added"
                                   ? "border-2 border-blue-400"
                                   : imageDiff?.status === "removed"
-                                    ? "border-2 border-red-300 opacity-70"
+                                    ? "border-2 border-red-300"
                                     : "";
                               return hasImage ? (
-                                <div className="relative">
-                                  {imageDiff?.status === "added" && (
-                                    <span className="absolute top-2 left-2 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
-                                      NEW
-                                    </span>
-                                  )}
-                                  {imageDiff?.status === "removed" && (
-                                    <span className="absolute top-2 left-2 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
-                                      REMOVED
-                                    </span>
-                                  )}
-                                  <Image
-                                    src={displayImage}
-                                    alt={row.original.componentName}
-                                    width={200}
-                                    height={200}
-                                    className={`rounded mb-3 ${borderClass}`}
-                                    style={{
-                                      width: "70%",
-                                      height: "auto",
-                                      maxWidth: 280,
-                                    }}
-                                    priority
-                                  />
-                                </div>
+                                <ProductImageFrame
+                                  src={displayImage}
+                                  alt={row.original.componentName}
+                                  variant="preview"
+                                  frameClassName={borderClass}
+                                  badge={
+                                    imageDiff?.status === "added" ? (
+                                      <span className="absolute top-2 left-2 z-10 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-700 shadow-sm">
+                                        NEW
+                                      </span>
+                                    ) : imageDiff?.status === "removed" ? (
+                                      <span className="absolute top-2 left-2 z-10 rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-red-700 shadow-sm">
+                                        REMOVED
+                                      </span>
+                                    ) : undefined
+                                  }
+                                  imageClassName={
+                                    imageDiff?.status === "removed"
+                                      ? "opacity-70"
+                                      : undefined
+                                  }
+                                  priority
+                                />
                               ) : (
-                                <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md">
-                                  <PiImageDuotone className="w-full h-full p-2" />
-                                </div>
+                                <ProductImageFrame
+                                  alt={row.original.componentName}
+                                  variant="preview"
+                                />
                               );
                             })()}
                           </div>

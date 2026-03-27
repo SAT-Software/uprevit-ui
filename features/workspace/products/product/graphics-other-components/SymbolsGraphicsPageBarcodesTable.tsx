@@ -42,9 +42,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
+import { ProductImageFrame } from "../ProductImageFrame";
 import {
   PiPencilSimpleDuotone,
   PiTrashDuotone,
@@ -207,17 +207,12 @@ const columns: ColumnDef<Item>[] = [
       const image = row.original.componentImage;
       const hasImage = typeof image === "string" && image.trim() !== "";
       return hasImage ? (
-        <Image
+        <ProductImageFrame
           src={image}
           alt={row.original.componentName}
-          width={48}
-          height={48}
-          className="object-cover rounded-md border min-h-12"
         />
       ) : (
-        <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md">
-          <PiImageDuotone className="w-full h-full p-2" />
-        </div>
+        <ProductImageFrame alt={row.original.componentName} />
       );
     },
     size: 80,
@@ -583,23 +578,17 @@ export default function SymbolsGraphicsPageBarcodesTable({
                                 typeof image === "string" &&
                                 image.trim() !== "";
                               return hasImage ? (
-                                <Image
+                                <ProductImageFrame
                                   src={image}
                                   alt={row.original.componentName}
-                                  width={200}
-                                  height={200}
-                                  className="rounded mb-3"
-                                  style={{
-                                    width: "70%",
-                                    height: "auto",
-                                    maxWidth: 280,
-                                  }}
+                                  variant="preview"
                                   priority
                                 />
                               ) : (
-                                <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md">
-                                  <PiImageDuotone className="w-full h-full p-2" />
-                                </div>
+                                <ProductImageFrame
+                                  alt={row.original.componentName}
+                                  variant="preview"
+                                />
                               );
                             })()}
                           </div>

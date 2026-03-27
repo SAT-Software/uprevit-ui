@@ -63,10 +63,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { advancedFilterFn } from "@/lib/table-filters";
-import Image from "next/image";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 import EditComponentDialog from "./EditComponentDialog";
 import type { DiffItem } from "@/utils/deepDiff";
+import { ProductImageFrame } from "../ProductImageFrame";
 
 type ComponentItem = {
   _id: string;
@@ -231,12 +231,10 @@ const columns: ColumnDef<ComponentItem>[] = [
         return (
           <div className="flex flex-col gap-1">
             <span className="text-[9px] text-blue-600 font-medium">NEW</span>
-            <Image
+            <ProductImageFrame
               src={newImageUrl}
               alt={row.original.component_number}
-              width={48}
-              height={48}
-              className="object-cover rounded-md border border-blue-300 min-h-12"
+              frameClassName="border-blue-300"
             />
           </div>
         );
@@ -246,29 +244,23 @@ const columns: ColumnDef<ComponentItem>[] = [
         return (
           <div className="flex flex-col gap-1">
             <span className="text-[9px] text-red-600 font-medium">REMOVED</span>
-            <Image
+            <ProductImageFrame
               src={removedImageUrl}
               alt={row.original.component_number}
-              width={48}
-              height={48}
-              className="object-cover rounded-md border border-red-300 min-h-12 opacity-70"
+              frameClassName="border-red-300"
+              imageClassName="opacity-70"
             />
           </div>
         );
       }
 
       return row.original.image !== "" ? (
-        <Image
+        <ProductImageFrame
           src={row.original.image}
           alt={row.original.component_number}
-          width={48}
-          height={48}
-          className="object-cover rounded-md border min-h-12"
         />
       ) : (
-        <div className="w-12 h-12 bg-muted text-muted-foreground/60 rounded-md ">
-          <PiImageDuotone className="w-full h-full p-2" />
-        </div>
+        <ProductImageFrame alt={row.original.component_number} />
       );
     },
     size: 80,
@@ -695,29 +687,22 @@ export default function ProductComponentDetailsTable({
                             <TableCell colSpan={row.getVisibleCells().length}>
                               <div className="flex flex-col items-center py-2">
                                 {displayImage ? (
-                                  <div className="relative">
-                                    <Image
-                                      src={displayImage}
-                                      alt={row.original.component_number}
-                                      width={200}
-                                      height={200}
-                                      className={`rounded mb-3 ${
-                                        addedImageUrl && !row.original.image
-                                          ? "border-2 border-blue-400"
-                                          : ""
-                                      }`}
-                                      style={{
-                                        width: "70%",
-                                        height: "auto",
-                                        maxWidth: 280,
-                                      }}
-                                      priority={true}
-                                    />
-                                  </div>
+                                  <ProductImageFrame
+                                    src={displayImage}
+                                    alt={row.original.component_number}
+                                    variant="preview"
+                                    frameClassName={
+                                      addedImageUrl && !row.original.image
+                                        ? "border-2 border-blue-400"
+                                        : undefined
+                                    }
+                                    priority
+                                  />
                                 ) : (
-                                  <div className="w-50 h-50 bg-muted text-muted-foreground/60 rounded-md ">
-                                    <PiImageDuotone className="w-full h-full p-2" />
-                                  </div>
+                                  <ProductImageFrame
+                                    alt={row.original.component_number}
+                                    variant="preview"
+                                  />
                                 )}
                               </div>
                             </TableCell>

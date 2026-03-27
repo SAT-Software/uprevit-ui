@@ -65,11 +65,13 @@ function ConditionRow({
   onUpdate,
   onRemove,
   isFirst,
+  position,
 }: {
   condition: QueryCondition;
   onUpdate: (updates: Partial<Omit<QueryCondition, "id">>) => void;
   onRemove: () => void;
   isFirst: boolean;
+  position: number;
 }) {
   const fields = getFieldsForTab(condition.tab);
   const selectedField = fields.find((f) => f.key === condition.field);
@@ -141,15 +143,15 @@ function ConditionRow({
         )}
       >
         <div className="flex items-center gap-2 shrink-0">
-          <div
-            className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
-              "bg-primary/10 text-primary",
-            )}
-          >
-            {isFirst ? "1" : condition.logic === "OR" ? "OR" : "2"}
+            <div
+              className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                "bg-primary/10 text-primary",
+              )}
+            >
+              {position}
+            </div>
           </div>
-        </div>
 
         <Select
           value={condition.tab}
@@ -157,7 +159,7 @@ function ConditionRow({
             onUpdate({ tab: value, field: "", value: "" })
           }
         >
-          <SelectTrigger className="w-40 shrink-0">
+          <SelectTrigger className="w-44 shrink-0 [&>span]:truncate">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
@@ -174,7 +176,7 @@ function ConditionRow({
           onValueChange={handleFieldChange}
           disabled={!condition.tab}
         >
-          <SelectTrigger className="w-[180px] shrink-0">
+          <SelectTrigger className="w-[220px] shrink-0 [&>span]:truncate">
             <SelectValue placeholder="Field" />
           </SelectTrigger>
           <SelectContent>
@@ -191,7 +193,7 @@ function ConditionRow({
           onValueChange={(value) => onUpdate({ operator: value as Operator })}
           disabled={!condition.field}
         >
-          <SelectTrigger className="w-[140px] shrink-0">
+          <SelectTrigger className="w-[180px] shrink-0 [&>span]:truncate">
             <SelectValue placeholder="Operator" />
           </SelectTrigger>
           <SelectContent>
@@ -757,6 +759,7 @@ export default function Page() {
                             }
                             onRemove={() => removeCondition(condition.id)}
                             isFirst={index === 0}
+                            position={index + 1}
                           />
                         ))}
 
