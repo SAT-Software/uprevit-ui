@@ -8,6 +8,7 @@ import {
   PiShapesDuotone,
 } from "react-icons/pi";
 import type { DiffItem } from "@/utils/deepDiff";
+import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
 interface SymbolGraphicItem {
@@ -47,12 +48,6 @@ export default function Page() {
   const isSubmitted =
     data?.result?.data?.product_information?.product_data?.data?.status ===
     "submitted";
-
-  // Filter diffs for symbols_graphics only
-  const allDiffs = diffData?.result?.diffs ?? [];
-  const symbolsGraphicsDiffs = allDiffs.filter((d: DiffItem) =>
-    d.path.startsWith("symbols_graphics.data")
-  );
 
   if (isLoading) {
     return (
@@ -119,30 +114,41 @@ export default function Page() {
 
   const currentSymbolsGraphics =
     (data?.result?.data?.symbols_graphics?.data as SymbolGraphicItem[]) || [];
+  const hasDiffVersions = Boolean(
+    diffData?.result?.base_version && diffData?.result?.next_version
+  );
   const baseSymbolsGraphics =
-    (diffData?.result?.base_version?.symbols_graphics?.data ??
-      []) as SymbolGraphicItem[];
+    (hasDiffVersions
+      ? diffData?.result?.base_version?.symbols_graphics?.data ?? []
+      : []) as SymbolGraphicItem[];
   const nextSymbolsGraphics =
-    (diffData?.result?.next_version?.symbols_graphics?.data ??
-      currentSymbolsGraphics) as SymbolGraphicItem[];
+    (hasDiffVersions
+      ? diffData?.result?.next_version?.symbols_graphics?.data ??
+        currentSymbolsGraphics
+      : currentSymbolsGraphics) as SymbolGraphicItem[];
+  const symbolsGraphicsRedlineItems =
+    isRedlineView && hasDiffVersions
+      ? buildRedlineArray(
+          baseSymbolsGraphics,
+          nextSymbolsGraphics,
+          {
+            getId: (item) => item._id,
+            getParentId: (item) => {
+              const parentId = (item as { parent_id?: string | null }).parent_id;
+              return parentId ? String(parentId) : undefined;
+            },
+            getFallbackKey: (item) => `${item.text}-${item.entity}`,
+          }
+        )
+      : [];
+  const symbolsGraphicsChangeCount = countChangedRedlineItems(
+    symbolsGraphicsRedlineItems
+  );
 
   const symbolsGraphics = (() => {
-    if (!isRedlineView) return currentSymbolsGraphics;
+    if (!isRedlineView || !hasDiffVersions) return currentSymbolsGraphics;
 
-    const redlineItems = buildRedlineArray(
-      baseSymbolsGraphics,
-      nextSymbolsGraphics,
-      {
-        getId: (item) => item._id,
-        getParentId: (item) => {
-          const parentId = (item as { parent_id?: string | null }).parent_id;
-          return parentId ? String(parentId) : undefined;
-        },
-        getFallbackKey: (item) => `${item.text}-${item.entity}`,
-      }
-    );
-
-    return redlineItems
+    return symbolsGraphicsRedlineItems
       .map((item) => {
         const dataItem = item.next ?? item.base;
         if (!dataItem) return null;
@@ -225,7 +231,7 @@ export default function Page() {
           <span className="text-amber-600 font-medium">
             {isLoadingDiff
               ? "Loading changes..."
-              : `Redline View: ${symbolsGraphicsDiffs.length} changes in Symbols & Graphics`}
+              : `Redline View: ${symbolsGraphicsChangeCount} changes in Symbols & Graphics`}
           </span>
         </div>
       )}

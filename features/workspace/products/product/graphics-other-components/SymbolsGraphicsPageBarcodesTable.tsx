@@ -232,7 +232,7 @@ const columns: ColumnDef<Item>[] = [
       const diff = meta?.isRedlineView
         ? meta.getFieldDiff?.(
             row.original,
-            "componentName",
+            "text",
             row.getValue("componentName"),
           )
         : null;
@@ -266,7 +266,7 @@ const columns: ColumnDef<Item>[] = [
       const diff = meta?.isRedlineView
         ? meta.getFieldDiff?.(
             row.original,
-            "componentDescription",
+            "description",
             row.getValue("componentDescription"),
           )
         : null;

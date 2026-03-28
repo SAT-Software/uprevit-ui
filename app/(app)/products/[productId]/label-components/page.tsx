@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import type { DiffItem } from "@/utils/deepDiff";
+import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
 interface ComponentItem {
@@ -66,12 +67,6 @@ export default function Page() {
   const isSubmitted =
     componentsData?.result?.data?.product_data?.data?.status === "submitted";
 
-  // Filter diffs for label_components only
-  const allDiffs = diffData?.result?.diffs ?? [];
-  const labelComponentDiffs = allDiffs.filter((d: DiffItem) =>
-    d.path.startsWith("label_components.data"),
-  );
-
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-2 p-2 min-h-0">
@@ -106,21 +101,24 @@ export default function Page() {
     ? ((diffData?.result?.next_version?.label_components?.data ??
         []) as LabelComponentItem[])
     : [];
+  const componentRedlineItems =
+    isRedlineView && hasDiffVersions
+      ? buildRedlineArray(baseComponents, nextComponents, {
+          getId: (item) => item._id,
+          getParentId: (item) => {
+            const parentId = (item as { parent_id?: string | null }).parent_id;
+            return parentId ? String(parentId) : undefined;
+          },
+          getFallbackKey: (item) =>
+            `${item.component_number}-${item.component_type}`,
+        })
+      : [];
+  const labelComponentChangeCount = countChangedRedlineItems(componentRedlineItems);
 
   const components = (() => {
     if (!isRedlineView || !hasDiffVersions) return currentComponents;
 
-    const redlineItems = buildRedlineArray(baseComponents, nextComponents, {
-      getId: (item) => item._id,
-      getParentId: (item) => {
-        const parentId = (item as { parent_id?: string | null }).parent_id;
-        return parentId ? String(parentId) : undefined;
-      },
-      getFallbackKey: (item) =>
-        `${item.component_number}-${item.component_type}`,
-    });
-
-    return redlineItems
+    return componentRedlineItems
       .map((item) => {
         const data = item.next ?? item.base;
         if (!data) return null;
@@ -142,7 +140,7 @@ export default function Page() {
           <span className="text-amber-600 font-medium">
             {isLoadingDiff
               ? "Loading changes..."
-              : `Redline View: ${labelComponentDiffs.length} changes in Label Components`}
+              : `Redline View: ${labelComponentChangeCount} changes in Label Components`}
           </span>
         </div>
       )}

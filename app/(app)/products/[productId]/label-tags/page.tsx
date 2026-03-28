@@ -9,6 +9,7 @@ import {
 } from "react-icons/pi";
 import { LegendItem } from "@/features/workspace/products/product/label-tags/legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
+import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import type { GetSingleTabResponse, ProductDataContent } from "@/types/product";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 
@@ -61,12 +62,6 @@ export default function Page() {
   const productInfo = (productInfoData as ProductInfoResponse | undefined)
     ?.result?.data;
   const isSubmitted = productInfo?.product_data?.data?.status === "submitted";
-
-  // Filter diffs for label_tags only
-  const allDiffs = diffData?.result?.diffs ?? [];
-  const labelTagsDiffs = allDiffs.filter((d: DiffItem) =>
-    d.path.startsWith("label_tags.data")
-  );
 
   if (isLoading) {
     return (
@@ -148,20 +143,23 @@ export default function Page() {
     hasDiffVersions
       ? ((diffData?.result?.next_version?.label_tags?.data ?? []) as LabelTagItem[])
       : [];
+  const labelTagRedlineItems =
+    isRedlineView && hasDiffVersions
+      ? buildRedlineArray(baseLabelTags, nextLabelTags, {
+          getId: (item) => item._id,
+          getParentId: (item) => {
+            const parentId = (item as { parent_id?: string | null }).parent_id;
+            return parentId ? String(parentId) : undefined;
+          },
+          getFallbackKey: (item) => `${item.name}-${item.type}`,
+        })
+      : [];
+  const labelTagsChangeCount = countChangedRedlineItems(labelTagRedlineItems);
 
   const labelTagsData: LabelTagItem[] = (() => {
     if (!isRedlineView || !hasDiffVersions) return currentLabelTags;
 
-    const redlineItems = buildRedlineArray(baseLabelTags, nextLabelTags, {
-      getId: (item) => item._id,
-      getParentId: (item) => {
-        const parentId = (item as { parent_id?: string | null }).parent_id;
-        return parentId ? String(parentId) : undefined;
-      },
-      getFallbackKey: (item) => `${item.name}-${item.type}`,
-    });
-
-    return redlineItems
+    return labelTagRedlineItems
       .map((item) => {
         const dataItem = item.next ?? item.base;
         if (!dataItem) return null;
@@ -182,7 +180,7 @@ export default function Page() {
           <span className="text-amber-600 font-medium">
             {isLoadingDiff
               ? "Loading changes..."
-              : `Redline View: ${labelTagsDiffs.length} changes in Label Tags`}
+              : `Redline View: ${labelTagsChangeCount} changes in Label Tags`}
           </span>
         </div>
       )}

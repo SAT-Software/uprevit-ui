@@ -13,6 +13,7 @@ import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline"
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { cn } from "@/lib/utils";
 import type { DiffItem } from "@/utils/deepDiff";
+import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import {
   PiArrowRightBold,
@@ -76,8 +77,6 @@ export default function Page() {
   const { data, isLoading, error } = useGetProductTabData(productId, "all-tabs");
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
-
-  const diffs = diffRedlineData?.result?.diffs ?? [];
 
   const RedlineValue = ({
     value,
@@ -230,18 +229,30 @@ export default function Page() {
     ? ((diffRedlineData?.result?.next_version?.languages_information?.data ??
         []) as unknown as LanguageItem[])
     : [];
+  const standardRedlineItems =
+    isRedlineView && hasDiffVersions
+      ? buildRedlineArray(baseStandards, nextStandards, {
+          getId: (item) => item._id,
+          getFallbackKey: (item) => `${item.standard}-${item.standard_description}`,
+        })
+      : [];
+  const languageRedlineItems =
+    isRedlineView && hasDiffVersions
+      ? buildRedlineArray(baseLanguages, nextLanguages, {
+          getId: (item) => item.code,
+          getFallbackKey: (item) => `${item.code}-${item.name}-${item.country || ""}`,
+        })
+      : [];
+  const complianceChangeCount =
+    countChangedRedlineItems(standardRedlineItems) +
+    countChangedRedlineItems(languageRedlineItems);
 
   const standards = (() => {
     if (!isRedlineView || !hasDiffVersions) {
       return currentStandards as ComplianceItemWithDiff[];
     }
 
-    const redlineItems = buildRedlineArray(baseStandards, nextStandards, {
-      getId: (item) => item._id,
-      getFallbackKey: (item) => `${item.standard}-${item.standard_description}`,
-    });
-
-    return redlineItems
+    return standardRedlineItems
       .map((item) => {
         const itemData = item.next ?? item.base;
         if (!itemData) return null;
@@ -261,12 +272,7 @@ export default function Page() {
       return currentLanguages as LanguageItemWithDiff[];
     }
 
-    const redlineItems = buildRedlineArray(baseLanguages, nextLanguages, {
-      getId: (item) => item.code,
-      getFallbackKey: (item) => `${item.code}-${item.name}-${item.country || ""}`,
-    });
-
-    return redlineItems
+    return languageRedlineItems
       .map((item) => {
         const itemData = item.next ?? item.base;
         if (!itemData) return null;
@@ -291,7 +297,7 @@ export default function Page() {
           <span className="font-medium text-amber-600">
             {diffRedlineLoading
               ? "Loading changes..."
-              : `Redline View: Total ${diffs.length} changes detected`}
+              : `Redline View: ${complianceChangeCount} changes in Compliance Information`}
           </span>
           <span className="text-xs text-muted-foreground">(comparing with previous version)</span>
         </div>

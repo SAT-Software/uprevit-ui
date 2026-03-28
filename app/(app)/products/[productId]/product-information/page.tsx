@@ -27,6 +27,7 @@ import {
   formatToLocalDateTime,
 } from "@/utils/formatDateAndTimeLocal";
 import type { DiffItem } from "@/utils/deepDiff";
+import { hasChangedRedlineStatus } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
@@ -153,14 +154,46 @@ type ProductInfoField = {
   label: string;
   value: string;
   icon: IconType;
-  diffPath?: string;
+  diffKey?: ProductInfoDiffKey;
   isCustomField?: boolean;
   redlineStatus?: RedlineStatus;
   redlineDiffs?: DiffItem[];
 };
 
+const PRODUCT_INFO_DIFF_PATHS = {
+  productName: ["product_information.product_data.data.product_name"],
+  productDescription: [
+    "product_information.product_data.data.product_description",
+  ],
+  targetDate: ["product_information.product_data.data.target_date"],
+  actualCompletionDate: [
+    "product_information.product_data.data.actual_completion_date",
+  ],
+  marketGeography: ["product_information.data.market_geography"],
+  countryOfOrigin: ["product_information.data.country_of_origin"],
+  oemContractManufacturer: [
+    "product_information.data.oem_contract_manufacturer",
+  ],
+  commercialClinical: ["product_information.data.commercial_clinical"],
+  manufacturingLocation: ["product_information.data.manufacturing_location"],
+} as const;
+
+type ProductInfoDiffKey = keyof typeof PRODUCT_INFO_DIFF_PATHS;
+
+const PRODUCT_INFO_COUNTED_DIFF_KEYS: ProductInfoDiffKey[] = [
+  "productName",
+  "productDescription",
+  "targetDate",
+  "actualCompletionDate",
+  "marketGeography",
+  "countryOfOrigin",
+  "oemContractManufacturer",
+  "commercialClinical",
+  "manufacturingLocation",
+];
+
 const normalizeCustomField = (
-  field?: ProductCustomField | null
+  field?: ProductCustomField | null,
 ): ProductCustomFieldView | null => {
   if (!field) return null;
   return {
@@ -180,7 +213,7 @@ export default function Page() {
 
   const { data, isLoading, isError } = useGetProductTabData(
     productId,
-    "product-information"
+    "product-information",
   );
 
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
@@ -189,16 +222,35 @@ export default function Page() {
   const { data: linkedFoldersData, isLoading: linkedFoldersLoading } =
     useGetAllSourceFileFolders(productId);
 
-  const linkedFolders = (linkedFoldersData?.result || []) as SourceFilesFolder[];
+  const linkedFolders = (linkedFoldersData?.result ||
+    []) as SourceFilesFolder[];
 
-  const diffs = diffRedlineData?.result?.diffs ?? [];
-  const getDiff = (...paths: string[]) => {
-    return diffs.find((d: DiffItem) => paths.includes(d.path));
+  const redlineDiffs = diffRedlineData?.result?.diffs;
+  const productInfoDiffLookup = useMemo(() => {
+    const lookup = new Map<ProductInfoDiffKey, DiffItem>();
+    const diffs: DiffItem[] = redlineDiffs ?? [];
+
+    for (const key of Object.keys(
+      PRODUCT_INFO_DIFF_PATHS,
+    ) as ProductInfoDiffKey[]) {
+      const paths = PRODUCT_INFO_DIFF_PATHS[key] as readonly string[];
+      const diff = diffs.find((item) => paths.includes(item.path));
+
+      if (diff) {
+        lookup.set(key, diff);
+      }
+    }
+
+    return lookup;
+  }, [redlineDiffs]);
+
+  const getProductInfoDiff = (key: ProductInfoDiffKey) => {
+    return productInfoDiffLookup.get(key) ?? null;
   };
 
   const getCustomFieldDiff = (
     field: ProductInfoField,
-    key: "label" | "value"
+    key: "label" | "value",
   ) => {
     if (!isRedlineView || !field.isCustomField) return null;
     const status = field.redlineStatus;
@@ -231,36 +283,33 @@ export default function Page() {
   const customFieldsData = productTabData?.custom_fields;
   const productMetadata = productTabData?.product_data?.data;
   const productAuditLog = productTabData?.auditLogs;
-  const productMetadataForDialog = productMetadata as ProductMetadata | undefined;
+  const productMetadataForDialog = productMetadata as
+    | ProductMetadata
+    | undefined;
   const customFieldsView = useMemo(() => {
     const normalizedCurrent = (customFieldsData ?? [])
       .map(normalizeCustomField)
-      .filter(
-        (field): field is ProductCustomFieldView => field !== null
-      );
+      .filter((field): field is ProductCustomFieldView => field !== null);
 
     if (!isRedlineView) {
       return normalizedCurrent;
     }
 
     const baseCustomFields =
-      diffRedlineData?.result?.base_version?.product_information?.custom_fields ??
-      [];
+      diffRedlineData?.result?.base_version?.product_information
+        ?.custom_fields ?? [];
     const nextCustomFields =
-      diffRedlineData?.result?.next_version?.product_information?.custom_fields ??
+      diffRedlineData?.result?.next_version?.product_information
+        ?.custom_fields ??
       customFieldsData ??
       [];
 
     const normalizedBase = (baseCustomFields ?? [])
       .map(normalizeCustomField)
-      .filter(
-        (field): field is ProductCustomFieldView => field !== null
-      );
+      .filter((field): field is ProductCustomFieldView => field !== null);
     const normalizedNext = (nextCustomFields ?? [])
       .map(normalizeCustomField)
-      .filter(
-        (field): field is ProductCustomFieldView => field !== null
-      );
+      .filter((field): field is ProductCustomFieldView => field !== null);
 
     const redlineItems = buildRedlineArray(normalizedBase, normalizedNext, {
       getId: (item) => item._id,
@@ -291,7 +340,7 @@ export default function Page() {
       _id: field._id ?? `custom-${index}`,
       label: field.label ?? "",
       value: field.value ?? "",
-    })
+    }),
   );
 
   const auditLogs = (productAuditLog as AuditLog[]) || [];
@@ -299,8 +348,15 @@ export default function Page() {
   const latestUpdateLog = auditLogs
     .filter((log) => log.action === "update")
     .sort(
-      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime()
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0];
+  const productInfoChangeCount =
+    PRODUCT_INFO_COUNTED_DIFF_KEYS.filter((key) =>
+      productInfoDiffLookup.has(key),
+    ).length +
+    customFieldsView.filter((field) =>
+      hasChangedRedlineStatus(field._redlineStatus),
+    ).length;
 
   const fields = useMemo(() => {
     if (!productData) return [];
@@ -309,31 +365,31 @@ export default function Page() {
         label: "Market / Geography",
         value: productData.market_geography || "N/A",
         icon: PiGlobeDuotone,
-        diffPath: "product_information.data.market_geography",
+        diffKey: "marketGeography",
       },
       {
         label: "Country of Origin",
         value: productData.country_of_origin || "N/A",
         icon: PiFlagDuotone,
-        diffPath: "product_information.data.country_of_origin",
+        diffKey: "countryOfOrigin",
       },
       {
         label: "OEM / Contract manufactured",
         value: productData.oem_contract_manufacturer || "N/A",
         icon: PiBuildingsDuotone,
-        diffPath: "product_information.data.oem_contract_manufacturer",
+        diffKey: "oemContractManufacturer",
       },
       {
         label: "Commercial / Clinical",
         value: productData.commercial_clinical || "N/A",
         icon: PiFlaskDuotone,
-        diffPath: "product_information.data.commercial_clinical",
+        diffKey: "commercialClinical",
       },
       {
         label: "Manufacturing Location",
         value: productData.manufacturing_location || "N/A",
         icon: PiMapPinDuotone,
-        diffPath: "product_information.data.manufacturing_location",
+        diffKey: "manufacturingLocation",
       },
     ];
 
@@ -346,7 +402,7 @@ export default function Page() {
           isCustomField: true,
           redlineStatus: field._redlineStatus,
           redlineDiffs: field._redlineDiffs,
-        })
+        }),
       );
       return [...baseFields, ...customFieldsWithIcons];
     }
@@ -400,7 +456,7 @@ export default function Page() {
           <span className="text-amber-600 font-medium">
             {diffRedlineLoading
               ? "Loading changes..."
-              : `Redline View: Total ${diffs.length} changes detected`}
+              : `Redline View: ${productInfoChangeCount} changes in Product Information`}
           </span>
           <span className="text-muted-foreground text-xs">
             (comparing with previous version)
@@ -415,7 +471,11 @@ export default function Page() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                  {productMetadata?.product_name || "N/A"}
+                  <RedlineValue
+                    value={productMetadata?.product_name || "N/A"}
+                    diff={getProductInfoDiff("productName")}
+                    isRedlineView={isRedlineView}
+                  />
                 </h1>
                 <Badge variant="outline" className="font-normal">
                   <div
@@ -435,10 +495,7 @@ export default function Page() {
                   productMetadata?.product_description ||
                   "No description available."
                 }
-                diff={getDiff(
-                  "product_description",
-                  "product_information.data.product_description"
-                )}
+                diff={getProductInfoDiff("productDescription")}
                 isRedlineView={isRedlineView}
               />
             </p>
@@ -448,9 +505,20 @@ export default function Page() {
                 <span className="truncate">
                   Target:{" "}
                   <span className="font-semibold">
-                    {productMetadata?.target_date
-                      ? formatToLocalDate(productMetadata?.target_date)
-                      : "N/A"}
+                    <RedlineValue
+                      value={
+                        productMetadata?.target_date
+                          ? formatToLocalDate(productMetadata.target_date)
+                          : "N/A"
+                      }
+                      diff={getProductInfoDiff("targetDate")}
+                      formatFn={(v) =>
+                        typeof v === "string" && v
+                          ? formatToLocalDate(v)
+                          : "N/A"
+                      }
+                      isRedlineView={isRedlineView}
+                    />
                   </span>
                 </span>
               </div>
@@ -463,15 +531,14 @@ export default function Page() {
                     <RedlineValue
                       value={
                         formatToLocalDate(
-                          productMetadata?.actual_completion_date
+                          productMetadata?.actual_completion_date,
                         ) || "N/A"
                       }
-                      diff={getDiff(
-                        "actual_completion_date",
-                        "product_information.data.actual_completion_date"
-                      )}
+                      diff={getProductInfoDiff("actualCompletionDate")}
                       formatFn={(v) =>
-                        typeof v === "string" ? v.slice(0, 10) : "N/A"
+                        typeof v === "string" && v
+                          ? formatToLocalDate(v)
+                          : "N/A"
                       }
                       isRedlineView={isRedlineView}
                     />
@@ -631,14 +698,14 @@ export default function Page() {
                 ? field.redlineStatus && field.redlineStatus !== "unchanged"
                   ? field.redlineStatus
                   : null
-                : field.diffPath
-                  ? getDiff(field.diffPath)?.status || null
+                : field.diffKey
+                  ? getProductInfoDiff(field.diffKey)?.status || null
                   : null;
 
               const valueDiff = isCustomField
                 ? getCustomFieldDiff(field, "value")
-                : field.diffPath
-                  ? getDiff(field.diffPath)
+                : field.diffKey
+                  ? getProductInfoDiff(field.diffKey)
                   : null;
 
               const labelDiff = isCustomField
@@ -663,7 +730,7 @@ export default function Page() {
                     isRedlineView &&
                       isModified &&
                       "border-amber-500/50 bg-amber-100/10",
-                    !isRedlineView || !fieldStatus ? "border-border" : ""
+                    !isRedlineView || !fieldStatus ? "border-border" : "",
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -679,7 +746,7 @@ export default function Page() {
                         isRedlineView &&
                           isModified &&
                           "bg-amber-200/40 text-amber-500",
-                        !isRedlineView || !fieldStatus ? "border-border" : ""
+                        !isRedlineView || !fieldStatus ? "border-border" : "",
                       )}
                     >
                       <field.icon className="w-4 h-4" />
@@ -689,7 +756,7 @@ export default function Page() {
                         "text-sm font-medium text-muted-foreground truncate",
                         isRedlineView &&
                           isRemoved &&
-                          "line-through text-red-500/70"
+                          "line-through text-red-500/70",
                       )}
                     >
                       {labelDiff ? (
@@ -723,7 +790,7 @@ export default function Page() {
                       "font-semibold text-lg text-foreground pl-1",
                       isRedlineView &&
                         isRemoved &&
-                        "line-through text-red-500/70"
+                        "line-through text-red-500/70",
                     )}
                     title={field.value}
                   >

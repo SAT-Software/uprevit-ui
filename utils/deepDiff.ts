@@ -7,6 +7,7 @@ export interface DiffItem {
 
 // Fields to skip during comparison (internal/meta fields)
 const SKIP_FIELDS = ["_id", "parent_id", "auditLogs"];
+const ASSET_FIELD_NAMES = new Set(["image", "tagged_image", "key", "tagged_image_key"]);
 
 /**
  * Check if a value looks like a MongoDB ObjectId string (24 hex characters)
@@ -28,6 +29,45 @@ function isDateString(value: unknown): value is string {
   return !isNaN(date.getTime()) && value.includes("T");
 }
 
+function decodeUriSafe(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function extractUploadsKeyFromText(value: string): string | null {
+  const decodedValue = decodeUriSafe(value.trim());
+  const normalizedValue = decodedValue.replace(/\\/g, "/");
+  const uploadsIndex = normalizedValue.indexOf("uploads/");
+
+  if (uploadsIndex === -1) return null;
+
+  const keyWithSuffix = normalizedValue.slice(uploadsIndex);
+  const key = keyWithSuffix.split(/[?#]/, 1)[0]?.trim();
+
+  return key ? key : null;
+}
+
+function getLastPathSegment(path: string): string {
+  const normalizedPath = path.replace(/\[\d+\]/g, "");
+  const segments = normalizedPath.split(".").filter(Boolean);
+  return segments[segments.length - 1] ?? "";
+}
+
+function normalizeComparableValue(path: string, value: unknown): unknown {
+  const fieldName = getLastPathSegment(path);
+  if (!ASSET_FIELD_NAMES.has(fieldName)) return value;
+  if (value == null) return null;
+  if (typeof value !== "string") return value;
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) return null;
+
+  return extractUploadsKeyFromText(trimmedValue) ?? trimmedValue;
+}
+
 /**
  * Deep diff comparison between two objects (base version and next version)
  * Returns an array of differences with paths, status, and values
@@ -38,36 +78,38 @@ export function deepDiff(
   path: string = ""
 ): DiffItem[] {
   const diffs: DiffItem[] = [];
+  const normalizedBase = normalizeComparableValue(path, base);
+  const normalizedNext = normalizeComparableValue(path, next);
 
   // Both null/undefined - no diff
-  if (base == null && next == null) return diffs;
+  if (normalizedBase == null && normalizedNext == null) return diffs;
 
   // Added (base doesn't exist, next does)
-  if (base == null && next != null) {
+  if (normalizedBase == null && normalizedNext != null) {
     diffs.push({
       path,
       status: "added",
       old_value: null,
-      new_value: sanitizeValue(next),
+      new_value: sanitizeValue(normalizedNext),
     });
     return diffs;
   }
 
   // Removed (base exists, next doesn't)
-  if (base != null && next == null) {
+  if (normalizedBase != null && normalizedNext == null) {
     diffs.push({
       path,
       status: "removed",
-      old_value: sanitizeValue(base),
+      old_value: sanitizeValue(normalizedBase),
       new_value: null,
     });
     return diffs;
   }
 
   // Handle ObjectId string comparison (24 hex character strings)
-  if (isObjectIdString(base) || isObjectIdString(next)) {
-    const baseStr = String(base);
-    const nextStr = String(next);
+  if (isObjectIdString(normalizedBase) || isObjectIdString(normalizedNext)) {
+    const baseStr = String(normalizedBase);
+    const nextStr = String(normalizedNext);
     if (baseStr !== nextStr) {
       diffs.push({
         path,
@@ -80,48 +122,52 @@ export function deepDiff(
   }
 
   // Handle Date string comparison
-  if (isDateString(base) || isDateString(next)) {
-    const baseTime = isDateString(base) ? new Date(base).getTime() : null;
-    const nextTime = isDateString(next) ? new Date(next).getTime() : null;
+  if (isDateString(normalizedBase) || isDateString(normalizedNext)) {
+    const baseTime = isDateString(normalizedBase)
+      ? new Date(normalizedBase).getTime()
+      : null;
+    const nextTime = isDateString(normalizedNext)
+      ? new Date(normalizedNext).getTime()
+      : null;
     if (baseTime !== nextTime) {
       diffs.push({
         path,
         status: "modified",
-        old_value: base,
-        new_value: next,
+        old_value: normalizedBase,
+        new_value: normalizedNext,
       });
     }
     return diffs;
   }
 
   // Different types
-  if (typeof base !== typeof next) {
+  if (typeof normalizedBase !== typeof normalizedNext) {
     diffs.push({
       path,
       status: "modified",
-      old_value: sanitizeValue(base),
-      new_value: sanitizeValue(next),
+      old_value: sanitizeValue(normalizedBase),
+      new_value: sanitizeValue(normalizedNext),
     });
     return diffs;
   }
 
   // Primitives (string, number, boolean)
-  if (typeof base !== "object") {
-    if (base !== next) {
+  if (typeof normalizedBase !== "object") {
+    if (normalizedBase !== normalizedNext) {
       diffs.push({
         path,
         status: "modified",
-        old_value: base,
-        new_value: next,
+        old_value: normalizedBase,
+        new_value: normalizedNext,
       });
     }
     return diffs;
   }
 
   // Arrays - compare with parent_id-based matching when items have parent_id fields
-  if (Array.isArray(base) || Array.isArray(next)) {
-    const baseArr = Array.isArray(base) ? base : [];
-    const nextArr = Array.isArray(next) ? next : [];
+  if (Array.isArray(normalizedBase) || Array.isArray(normalizedNext)) {
+    const baseArr = Array.isArray(normalizedBase) ? normalizedBase : [];
+    const nextArr = Array.isArray(normalizedNext) ? normalizedNext : [];
 
     // Check if array items are objects (could have _id/parent_id)
     const hasObjectItems = (arr: unknown[]) =>
@@ -216,8 +262,8 @@ export function deepDiff(
   }
 
   // Objects - recurse into each key
-  const baseObj = isRecord(base) ? base : {};
-  const nextObj = isRecord(next) ? next : {};
+  const baseObj = isRecord(normalizedBase) ? normalizedBase : {};
+  const nextObj = isRecord(normalizedNext) ? normalizedNext : {};
   const allKeys = new Set([...Object.keys(baseObj), ...Object.keys(nextObj)]);
 
   for (const key of allKeys) {
