@@ -21,7 +21,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/CE-symbol.png"
+          src="/CE.png"
           alt="CE Symbol"
           fill
           className="object-contain p-2"
@@ -36,7 +36,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/MD-symbol.png"
+          src="/MD.png"
           alt="MD Symbol"
           fill
           className="object-contain p-2"
@@ -52,7 +52,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/UDI-symbol.png"
+          src="/DMGPKG.png"
           alt="UDI Symbol"
           fill
           className="object-contain p-2"
@@ -67,7 +67,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/2D Barcode-graphic.png"
+          src="/2DBarcode.png"
           alt="Barcode Graphic"
           fill
           className="object-contain p-3"
@@ -83,7 +83,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/FDA-logo.png"
+          src="/FDA.png"
           alt="Barcode Graphic"
           fill
           className="object-contain p-2"
@@ -99,7 +99,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/RX-symbol.png"
+          src="/DoNotReuse.png"
           alt="Barcode Graphic"
           fill
           className="object-contain p-3"
@@ -114,7 +114,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/UKCA-symbol.png"
+          src="/UKCA.png"
           alt="Barcode Graphic"
           fill
           className="object-contain p-3"
@@ -130,7 +130,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/ISO-logo.png"
+          src="/ISO.png"
           alt="Barcode Graphic"
           fill
           className="object-contain p-2"
@@ -161,7 +161,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/CAS_symbol.webp"
+          src="/Sterile.png"
           alt="CAS Symbol"
           fill
           className="object-contain p-2"
@@ -176,7 +176,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/DNR_symbol.png"
+          src="/IFU1.png"
           alt="DNR Symbol"
           fill
           className="object-contain p-2"
@@ -192,7 +192,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/EC-REP_Symbol.webp"
+          src="/Importer.png"
           alt="EC-REP Symbol"
           fill
           className="object-contain p-2"
@@ -207,7 +207,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/IFU_symbol.webp"
+          src="/ISO.png"
           alt="IFU Symbol"
           fill
           className="object-contain p-2"
@@ -223,7 +223,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
         <Image
-          src="/Manufacturer_symbol.png"
+          src="/MFR.png"
           alt="Manufacturer Symbol"
           fill
           className="object-contain p-2"
