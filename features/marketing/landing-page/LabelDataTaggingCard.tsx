@@ -22,7 +22,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
     <div
       className={cn(
         "h-full group bg-background p-8 rounded-xl border border-border flex flex-col relative overflow-hidden",
-        className
+        className,
       )}
     >
       <div className="mb-6 z-10 w-full max-w-lg">
@@ -68,19 +68,19 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
 
             <div className="absolute top-2 right-2 bg-accent/40 backdrop-blur-sm border border-border p-2 rounded-lg text-xs shadow-sm flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-[0.2rem] border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">
                   Variable Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-[0.2rem] border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">
                   Constant Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2 rounded border border-border bg-accent group-hover:border-neutral-500 group-hover:bg-neutral-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-[0.2rem] border border-border bg-accent group-hover:border-neutral-500 group-hover:bg-neutral-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">UDI Barcode</span>
               </div>
             </div>

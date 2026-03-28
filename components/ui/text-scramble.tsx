@@ -1,5 +1,5 @@
 "use client";
-import { type JSX, useCallback, useEffect, useState } from "react";
+import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import { motion, MotionProps } from "motion/react";
 
 export type TextScrambleProps = {
@@ -31,17 +31,22 @@ export function TextScramble({
     Component as keyof JSX.IntrinsicElements
   );
   const [displayText, setDisplayText] = useState(children);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const isAnimatingRef = useRef(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const text = children;
 
   const scramble = useCallback(() => {
-    if (isAnimating) return;
-    setIsAnimating(true);
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
     const steps = duration / speed;
     let step = 0;
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       let scrambled = "";
       const progress = step / steps;
 
@@ -63,19 +68,39 @@ export function TextScramble({
       step++;
 
       if (step > steps) {
-        clearInterval(interval);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         setDisplayText(text);
-        setIsAnimating(false);
+        isAnimatingRef.current = false;
         onScrambleComplete?.();
       }
     }, speed * 1000);
-  }, [characterSet, duration, isAnimating, onScrambleComplete, speed, text]);
+  }, [characterSet, duration, onScrambleComplete, speed, text]);
 
   useEffect(() => {
-    if (!trigger) return;
+    if (!trigger) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
+      isAnimatingRef.current = false;
+      setDisplayText(text);
+      return;
+    }
 
     scramble();
-  }, [scramble, trigger]);
+  }, [scramble, text, trigger]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   return (
     <MotionComponent className={className} {...props}>

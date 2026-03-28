@@ -46,17 +46,23 @@ export default function HeroFeatureDemo({
               {screenshots.map((src, idx) => (
                 <div
                   key={src}
-                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
                     activeIndex === idx
-                      ? "opacity-100 scale-100 translate-y-0"
-                      : "opacity-0 scale-95 translate-y-4"
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-0"
                   }`}
                 >
                   <Image
                     src={src}
                     alt={featureNames[idx]}
                     fill
-                    className="object-cover rounded-b-xl"
+                    className="object-contain rounded-b-xl will-change-transform"
+                    style={{
+                      animation:
+                        activeIndex === idx
+                          ? "hero-feature-zoom-out 5.2s ease-out forwards"
+                          : "none",
+                    }}
                   />
                 </div>
               ))}
@@ -66,6 +72,17 @@ export default function HeroFeatureDemo({
       </div>
       <div className="absolute top-0 left-0 w-full h-px bg-border/60" />
       <div className="absolute bottom-0 left-0 w-full h-px bg-border/60" />
+
+      <style jsx>{`
+        @keyframes hero-feature-zoom-out {
+          from {
+            transform: scale(1.08);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }

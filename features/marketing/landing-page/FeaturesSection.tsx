@@ -5,6 +5,7 @@ import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";
 import { Worksteps } from "./Worksteps";
 import { LabelDataTaggingCard } from "./LabelDataTaggingCard";
+
 export default function FeaturesSection() {
   return (
     <div className="w-full mt-40 mb-20 pointer-events-auto">
