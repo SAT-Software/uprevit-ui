@@ -5,7 +5,7 @@ import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import { Ripple } from "@/components/ui/ripple";
 import Image from "next/image";
-import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
+// import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
 import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
 import DemoSection from "@/features/marketing/landing-page/DemoSection";
 import ReportSection from "@/features/marketing/landing-page/ReportSection";
@@ -274,7 +274,7 @@ export default function Home() {
             activeIndex={activeFeatureIndex}
             onActiveChange={setActiveFeatureIndex}
           />
-          <HeroFeatureDemo activeIndex={activeFeatureIndex} />
+          {/* <HeroFeatureDemo activeIndex={activeFeatureIndex} /> */}
           <DemoSection />
           <ReportSection />
           <FeaturesSection />

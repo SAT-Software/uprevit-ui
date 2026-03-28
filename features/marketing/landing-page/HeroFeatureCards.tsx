@@ -19,7 +19,6 @@ import {
   PiPenNibDuotone,
   PiQrCodeDuotone,
   PiRulerDuotone,
-  PiScissorsDuotone,
   PiSealCheckDuotone,
   PiShapesFill,
   PiStackDuotone,
@@ -90,7 +89,7 @@ export default function HeroFeatureCards({
                   className={cn(
                     "mt-1.5",
                     activeIndex === 0 &&
-                      "bg-amber-100/50 dark:bg-amber-900/50 text-amber-600 border-amber-600"
+                      "bg-amber-100/50 dark:bg-amber-900/50 text-amber-600 border-amber-600",
                   )}
                 >
                   Validated
@@ -149,7 +148,7 @@ export default function HeroFeatureCards({
                   className={cn(
                     "mt-1.5",
                     activeIndex === 1 &&
-                      "bg-blue-100/50 dark:bg-blue-900/50 text-blue-600 border-blue-600"
+                      "bg-blue-100/50 dark:bg-blue-900/50 text-blue-600 border-blue-600",
                   )}
                 >
                   Exclusivity
@@ -199,7 +198,7 @@ export default function HeroFeatureCards({
                   className={cn(
                     "mt-1.5",
                     activeIndex === 2 &&
-                      "bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-600 border-emerald-600"
+                      "bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-600 border-emerald-600",
                   )}
                 >
                   Backed
@@ -249,7 +248,7 @@ export default function HeroFeatureCards({
                   className={cn(
                     "mt-1.5",
                     activeIndex === 3 &&
-                      "bg-violet-100/50 dark:bg-violet-900/50 text-violet-600 border-violet-600"
+                      "bg-violet-100/50 dark:bg-violet-900/50 text-violet-600 border-violet-600",
                   )}
                 >
                   Essential
@@ -299,7 +298,7 @@ export default function HeroFeatureCards({
                   className={cn(
                     "mt-1.5",
                     activeIndex === 4 &&
-                      "bg-orange-100/50 dark:bg-orange-900/50 text-orange-600 border-orange-600"
+                      "bg-orange-100/50 dark:bg-orange-900/50 text-orange-600 border-orange-600",
                   )}
                 >
                   Mandate
@@ -650,7 +649,7 @@ export default function HeroFeatureCards({
                 style={{ transform: "translate(50%, -50%)" }}
               ></div>
             </div>
-            <div className="absolute top-0 left-0 col-start-60 row-start-13">
+            {/* <div className="absolute top-0 left-0 col-start-60 row-start-13">
               <svg
                 className="-translate-x-px text-border"
                 fill="none"
@@ -675,7 +674,7 @@ export default function HeroFeatureCards({
                 className="w-2 h-2 rounded-full border absolute bottom-0 left-px bg-muted z-55"
                 style={{ transform: "translate(-50%, 50%)" }}
               ></div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
