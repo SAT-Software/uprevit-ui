@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { cn } from "@uprevit/ui/lib/utils";
 import {
   PiCubeDuotone,
   PiCalendarBlankDuotone,

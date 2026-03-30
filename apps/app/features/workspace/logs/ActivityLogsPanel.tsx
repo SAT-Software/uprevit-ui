@@ -3,14 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { PiCircleNotchDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
-import { Input } from "@/components/ui/input";
+import { Input } from "@uprevit/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 import { AuditScopeType } from "@/types/audit-log";
 import { useGetAuditLogs } from "@/hooks/audit-logs/useGetAuditLogs";
 import { ActivityLogTable } from "./ActivityLogTable";

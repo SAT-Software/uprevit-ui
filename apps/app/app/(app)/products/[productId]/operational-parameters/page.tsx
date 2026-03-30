@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Switch } from "@uprevit/ui/components/ui/switch";
 import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";

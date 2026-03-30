@@ -1,14 +1,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import DialogAddProductsToFolder from "@/features/workspace/bookmarks/DialogAddProductsToFolder";
 import DialogEditBookmarkFolder from "@/features/workspace/bookmarks/DialogEditBookmarkFolder";
 import DialogDeleteBookmarkFolder from "@/features/workspace/bookmarks/DialogDeleteBookmarkFolder";
 import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
 import { useGetProductsInABookmarkFolder } from "@/hooks/bookmark/useGetProductsInABookmarkFolder";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
 import {
   PiFolderOpenDuotone,
@@ -17,8 +17,8 @@ import {
   PiArrowSquareOutDuotone,
   PiBookmarksDuotone,
 } from "react-icons/pi";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { cn } from "@uprevit/ui/lib/utils";
 
 interface BookmarkProduct {
   _id: string;

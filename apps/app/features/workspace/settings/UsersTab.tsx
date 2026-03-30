@@ -4,7 +4,7 @@ import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { UsersTable } from "./UsersTable";
 import { InviteMembersDialog } from "./InviteMembersDialog";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { PiWarningCircleDuotone } from "react-icons/pi";
 
 const UsersTab = () => {

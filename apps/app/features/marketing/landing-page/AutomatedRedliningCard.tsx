@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,11 +7,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { TextLoop } from "@/components/ui/text-loop";
-import { TextMorph } from "@/components/ui/text-morph";
-import { TextScramble } from "@/components/ui/text-scramble";
-import { cn } from "@/lib/utils";
+} from "@uprevit/ui/components/ui/table";
+import { TextLoop } from "@uprevit/ui/components/ui/text-loop";
+import { TextMorph } from "@uprevit/ui/components/ui/text-morph";
+import { TextScramble } from "@uprevit/ui/components/ui/text-scramble";
+import { cn } from "@uprevit/ui/lib/utils";
 import { useState } from "react";
 import {
   PiCaretCircleDownDuotone,

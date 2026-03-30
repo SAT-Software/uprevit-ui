@@ -15,7 +15,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Table,
   TableBody,
@@ -23,8 +23,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "@uprevit/ui/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
 import {
   PiTrashDuotone,
   PiCrownDuotone,
@@ -39,12 +39,12 @@ import {
   PiInfoDuotone,
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { cn } from "@uprevit/ui/lib/utils";
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { User } from "@/types/user";
 import DialogRemoveUser from "./DialogRemoveUser";
 

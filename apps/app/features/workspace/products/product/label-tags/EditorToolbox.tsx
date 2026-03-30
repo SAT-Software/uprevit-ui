@@ -26,7 +26,7 @@ import FontPanel from "./toolbox/FontPanel";
 import NotesPanel from "./toolbox/NotesPanel";
 import OpacityPanel from "./toolbox/OpacityPanel";
 import StrokePanel from "./toolbox/StrokePanel";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
 
 type Props = {
   editorState: EditorState;

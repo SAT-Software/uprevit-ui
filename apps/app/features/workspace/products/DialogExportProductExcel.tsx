@@ -8,8 +8,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@uprevit/ui/components/ui/dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useExportProductExcel } from "@/hooks/product/useExportProductExcel";
 import {
   PiDownloadDuotone,
@@ -17,7 +17,7 @@ import {
   PiInfoDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { toast } from "sonner";
 
 interface DialogExportProductExcelProps {

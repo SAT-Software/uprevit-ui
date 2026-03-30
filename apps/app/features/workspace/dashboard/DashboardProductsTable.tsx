@@ -10,8 +10,8 @@ import {
   Column,
 } from "@tanstack/react-table";
 
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@uprevit/ui/lib/utils";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@uprevit/ui/components/ui/table";
 import { useRouter } from "next/navigation";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { AuditLog } from "@/types/product";

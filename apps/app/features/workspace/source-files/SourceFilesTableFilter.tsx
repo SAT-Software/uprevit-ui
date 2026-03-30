@@ -3,22 +3,22 @@
 import { useState } from "react";
 import { PiFunnelDuotone, PiPlusDuotone, PiXDuotone } from "react-icons/pi";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+} from "@uprevit/ui/components/ui/dropdown-menu";
+import { cn } from "@uprevit/ui/lib/utils";
 import { ColumnFiltersState, Table } from "@tanstack/react-table";
 import { Item } from "./SourceFilesTable";
 

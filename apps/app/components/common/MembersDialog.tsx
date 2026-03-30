@@ -1,18 +1,18 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@uprevit/ui/components/ui/dialog";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/ui/input-group";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@uprevit/ui/components/ui/input-group";
+import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
 import { useMemo, useState } from "react";
 import { PiMagnifyingGlassDuotone, PiUserDuotone } from "react-icons/pi";
 

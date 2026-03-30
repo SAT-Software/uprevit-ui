@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@uprevit/ui/components/ui/card";
 import {
   ChartContainer,
   ChartLegend,
@@ -17,14 +17,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart";
+} from "@uprevit/ui/components/ui/chart";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 
 interface TimeData {
   date: string; // Format: YYYY-MM-DD

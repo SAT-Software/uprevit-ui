@@ -11,7 +11,7 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -19,15 +19,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@uprevit/ui/components/ui/dropdown-menu";
+import { Input } from "@uprevit/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 
 type ColumnType = "text" | "number" | "boolean" | "array";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -11,17 +11,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+} from "@uprevit/ui/components/ui/select";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
@@ -38,7 +38,7 @@ import {
   PiPlusCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";

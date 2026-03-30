@@ -11,7 +11,7 @@ import ManageLanguagesDialog from "@/features/workspace/products/product/complia
 import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import type { DiffItem } from "@/utils/deepDiff";
 import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";

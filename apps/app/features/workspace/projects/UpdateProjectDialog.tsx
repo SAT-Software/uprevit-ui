@@ -7,7 +7,7 @@ import { useEffect, useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -17,17 +17,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import {
   PiBuildingsDuotone,
   PiPencilCircleDuotone,
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import Image from "next/image";
 import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
@@ -41,7 +41,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { Department } from "@/types/department";
 

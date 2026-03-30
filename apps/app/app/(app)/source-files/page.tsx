@@ -6,8 +6,8 @@ import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSource
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { SourceFilesFolder } from "@/types/source-files";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import {
   PiBookmarkSimpleDuotone,
   PiFolderSimpleDuotone,
@@ -18,7 +18,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 import { useState } from "react";
 import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
 

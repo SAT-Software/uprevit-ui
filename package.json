@@ -8,11 +8,20 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev --filter=@uprevit/app",
-    "build": "turbo build --filter=@uprevit/app",
-    "start": "bun --cwd apps/app run start",
-    "lint": "turbo lint --filter=@uprevit/app",
-    "check-types": "turbo check-types --filter=@uprevit/app"
+    "dev": "turbo dev",
+    "dev:app": "turbo dev --filter=@uprevit/app",
+    "dev:marketing": "turbo dev --filter=@uprevit/marketing",
+    "build": "turbo build",
+    "build:app": "turbo build --filter=@uprevit/app",
+    "build:marketing": "turbo build --filter=@uprevit/marketing",
+    "start:app": "bun --cwd apps/app run start",
+    "start:marketing": "bun --cwd apps/marketing run start",
+    "lint": "turbo lint",
+    "lint:app": "turbo lint --filter=@uprevit/app",
+    "lint:marketing": "turbo lint --filter=@uprevit/marketing",
+    "check-types": "turbo check-types",
+    "check-types:app": "turbo check-types --filter=@uprevit/app",
+    "check-types:marketing": "turbo check-types --filter=@uprevit/marketing"
   },
   "devDependencies": {
     "turbo": "^2.8.21"

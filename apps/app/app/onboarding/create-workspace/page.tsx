@@ -4,21 +4,21 @@ import { useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { OnboardingShell } from "@/components/onboarding-shell";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@uprevit/ui/components/ui/card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupTextarea,
-} from "@/components/ui/input-group";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/input-group";
+import { Label } from "@uprevit/ui/components/ui/label";
 import {
   OnboardAdminWorkspacePayload,
   useOnboardAdminCreateWorkspace,

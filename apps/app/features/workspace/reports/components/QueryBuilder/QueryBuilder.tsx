@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { PiPlusCircleDuotone, PiPlusDuotone } from "react-icons/pi";
 import { QueryCondition } from "@/types/reports";
 import { ConditionRow } from "./ConditionRow";

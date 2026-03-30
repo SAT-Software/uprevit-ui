@@ -3,7 +3,7 @@
 import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
 import Image from "next/image";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 
 export default function FooterSection() {
   return (

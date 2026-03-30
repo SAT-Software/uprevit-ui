@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import Link from "next/link";
 import { PiArrowLeft, PiHouseLine } from "react-icons/pi";
 import { useRouter } from "next/navigation";

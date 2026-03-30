@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Input } from "@uprevit/ui/components/ui/input";
 import {
   type Column,
   ColumnDef,
@@ -41,8 +41,8 @@ import {
   PiPackageDuotone,
 } from "react-icons/pi";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -52,12 +52,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@uprevit/ui/components/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination";
+} from "@uprevit/ui/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -65,9 +65,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@uprevit/ui/components/ui/table";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import { AuditLog } from "@/types/product";
 import {
   PiArchiveDuotone,

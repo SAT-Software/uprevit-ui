@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import SecurityTab from "@/features/workspace/settings/SecurityTab";
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
 import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
@@ -18,7 +18,7 @@ import {
   PiCreditCardDuotone,
 } from "react-icons/pi";
 import { useSearchParams } from "next/navigation";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";

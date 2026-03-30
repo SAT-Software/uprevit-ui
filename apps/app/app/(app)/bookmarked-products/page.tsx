@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useRouter } from "next/navigation";
 import DialogCreateFolder from "@/features/workspace/bookmarks/DialogCreateFolder";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";

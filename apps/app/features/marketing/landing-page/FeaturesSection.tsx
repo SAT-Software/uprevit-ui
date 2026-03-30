@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { PiBoundingBoxDuotone } from "react-icons/pi";
 import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";

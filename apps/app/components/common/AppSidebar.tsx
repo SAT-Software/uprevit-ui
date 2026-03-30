@@ -14,7 +14,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@uprevit/ui/components/ui/sidebar";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -39,9 +39,12 @@ import {
   PiChartBarDuotone,
 } from "react-icons/pi";
 import { usePathname, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Collapsible, CollapsibleContent } from "../ui/collapsible";
-import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@uprevit/ui/lib/utils";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@uprevit/ui/components/ui/collapsible";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 

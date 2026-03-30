@@ -4,24 +4,24 @@ import Link from "next/link";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/card";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
+import { Label } from "@uprevit/ui/components/ui/label";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@uprevit/ui/components/ui/accordion";
 import { useTheme } from "next-themes";
 import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
 import {

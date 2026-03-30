@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 
 export default function CTASection() {
   return (

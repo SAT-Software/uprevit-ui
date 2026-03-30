@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { cn } from "@uprevit/ui/lib/utils";
 
 const PROGRESS_STATES = [
   {

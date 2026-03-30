@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { PiTextAaDuotone } from "react-icons/pi";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
-import { Label } from "@/components/ui/label";
+import { Label } from "@uprevit/ui/components/ui/label";
 import ColorPicker from "../ui/ColorPicker";
 import { TextMarkerEditor } from "@markerjs/markerjs3";
 import {
@@ -13,8 +13,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+} from "@uprevit/ui/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@uprevit/ui/components/ui/toggle-group";
 
 type Props = {
   markerEditor: TextMarkerEditor;

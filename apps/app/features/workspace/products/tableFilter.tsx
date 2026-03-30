@@ -1,20 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@uprevit/ui/components/ui/dropdown-menu";
+import { Input } from "@uprevit/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 import { ColumnFiltersState, Table } from "@tanstack/react-table";
 import type { CSSProperties } from "react";
 import { useState } from "react";

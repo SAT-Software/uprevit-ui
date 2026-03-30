@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -40,7 +40,7 @@ import {
 } from "react-icons/pi";
 
 import TableControls from "@/components/table/TableControls";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,12 +48,12 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@uprevit/ui/components/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination";
+} from "@uprevit/ui/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -61,7 +61,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@uprevit/ui/components/ui/table";
 import { advancedFilterFn } from "@/lib/table-filters";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 import EditComponentDialog from "./EditComponentDialog";

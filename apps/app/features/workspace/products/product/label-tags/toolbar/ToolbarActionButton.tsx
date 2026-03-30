@@ -1,16 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { PiSpinnerDuotone } from "react-icons/pi";
 import { IconType } from "react-icons";
 import { ToolbarAction } from "@/types/toolbar";
-import { Toggle } from "@/components/ui/toggle";
-import { cn } from "@/lib/utils";
+import { Toggle } from "@uprevit/ui/components/ui/toggle";
+import { cn } from "@uprevit/ui/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 
 type Props = {
   icon: IconType;

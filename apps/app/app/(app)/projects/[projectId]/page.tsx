@@ -5,12 +5,12 @@ import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import Image from "next/image";
 import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 import {
   PiCalendarDuotone,
   PiKanbanDuotone,

@@ -2,10 +2,10 @@
 
 import { useAuth } from "react-oidc-context";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import DialogDeleteSourceFile from "@/features/workspace/source-files/DialogDeleteSourceFile";
 import DialogImagePreview from "@/features/workspace/source-files/DialogImagePreview";
@@ -19,7 +19,7 @@ import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurre
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import type { SourceFilesFolder } from "@/types/source-files";
 import { PiFolderSimpleDuotone } from "react-icons/pi";
 import Image from "next/image";
@@ -39,8 +39,8 @@ import {
   PiTrashDuotone,
   PiWarningDuotone,
 } from "react-icons/pi";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;

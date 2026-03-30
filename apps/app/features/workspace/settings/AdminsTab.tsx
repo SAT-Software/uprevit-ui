@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { AdminsTable } from "./AdminsTable";
 import { User } from "@/types/user";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { PiWarningCircleDuotone } from "react-icons/pi";
 
 const AdminsTab = () => {

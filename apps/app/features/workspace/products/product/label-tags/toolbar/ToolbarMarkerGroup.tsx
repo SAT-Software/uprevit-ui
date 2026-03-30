@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 
 import { MarkerTypeGroup, MarkerTypeItem } from "@/types/toolbar";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 
 type Props = {
   markers: MarkerTypeGroup;

@@ -8,10 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
 import { PiFloppyDiskDuotone, PiInfoDuotone } from "react-icons/pi";
 
 interface SaveQueryDialogProps {

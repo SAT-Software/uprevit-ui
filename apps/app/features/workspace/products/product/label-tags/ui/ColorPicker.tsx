@@ -1,9 +1,9 @@
 "use client";
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@uprevit/ui/components/ui/toggle-group";
 import { defaultColors } from "@/types/colors";
 import { FC, SVGProps } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
 const ColorSampleVisual: FC<SVGProps<SVGSVGElement>> = (props) => (
   <svg

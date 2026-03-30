@@ -3,13 +3,13 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@uprevit/ui/components/ui/dropdown-menu";
 import { PiPlusBold, PiUserCirclePlusDuotone } from "react-icons/pi";
 import { PiXBold } from "react-icons/pi";
 import Image from "next/image";

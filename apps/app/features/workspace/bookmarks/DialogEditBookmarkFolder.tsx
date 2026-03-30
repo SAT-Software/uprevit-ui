@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -12,16 +12,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
 import {
   PiPencilDuotone,
   PiCheckCircleDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { useEditBookmarkFolder } from "@/hooks/bookmark/useEditBookmarkFolder";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 interface FormValues {
   folder_name: string;

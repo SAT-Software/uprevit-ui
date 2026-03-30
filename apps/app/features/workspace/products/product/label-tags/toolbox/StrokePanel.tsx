@@ -9,11 +9,11 @@ import {
   PiArrowRightDuotone,
   PiArrowsLeftRightDuotone,
 } from "react-icons/pi";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@uprevit/ui/components/ui/slider";
+import { Input } from "@uprevit/ui/components/ui/input";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
-import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@uprevit/ui/components/ui/toggle-group";
 import { ArrowMarkerEditor, ArrowType } from "@markerjs/markerjs3";
 import ColorPicker from "../ui/ColorPicker";
 

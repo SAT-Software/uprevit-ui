@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -12,19 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { PiPlusCircleDuotone, PiXCircleDuotone } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";

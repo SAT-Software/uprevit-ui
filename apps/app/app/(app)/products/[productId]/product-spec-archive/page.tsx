@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import ProductDataGrid, {
   ProductDataGridRef,
 } from "@/features/workspace/products/product/product-specifications/ProductDataGrid";

@@ -7,7 +7,7 @@ import {
   useFileUpload,
   FileWithPreview,
 } from "@/hooks/general/use-file-upload";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -17,11 +17,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { TagInput, Tag } from "@/components/ui/tag-input";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@uprevit/ui/components/ui/radio-group";
+import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
@@ -30,7 +30,7 @@ import {
   PiXCircleDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type FormData = {
   componentName: string;

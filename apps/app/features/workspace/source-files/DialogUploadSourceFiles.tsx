@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-} from "@/components/ui/dialog";
+} from "@uprevit/ui/components/ui/dialog";
 import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFiles";
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
@@ -19,7 +19,7 @@ import {
   PiXCircleDuotone,
   PiUploadSimpleDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 

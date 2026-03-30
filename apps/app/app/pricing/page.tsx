@@ -5,10 +5,10 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@uprevit/ui/components/ui/accordion";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@uprevit/ui/components/ui/card";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import MarketingHeader from "@/features/marketing/marketing-header";

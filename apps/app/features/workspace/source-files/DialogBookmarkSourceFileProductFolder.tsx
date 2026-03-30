@@ -1,9 +1,9 @@
 import { PiBookmarkSimpleDuotone, PiCheckDuotone } from "react-icons/pi";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
+import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/dialog";
+import { Label } from "@uprevit/ui/components/ui/label";
 
 // Product type definition
 type Product = {

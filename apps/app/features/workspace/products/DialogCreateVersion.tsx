@@ -11,16 +11,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@uprevit/ui/components/ui/dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useCreateProductVersion } from "@/hooks/product/useCreateProductVersion";
 import {
   PiGitMergeDuotone,
   PiInfoDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
-import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 
 interface DialogCreateVersionProps {
   open: boolean;

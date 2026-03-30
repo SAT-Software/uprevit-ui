@@ -1,11 +1,11 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+} from "@uprevit/ui/components/ui/card";
+import { cn } from "@uprevit/ui/lib/utils";
 import {
   PiBarcodeDuotone,
   PiCubeDuotone,

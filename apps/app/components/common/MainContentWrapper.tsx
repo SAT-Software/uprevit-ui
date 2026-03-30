@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
 interface MainContentWrapperProps {
   children: React.ReactNode;

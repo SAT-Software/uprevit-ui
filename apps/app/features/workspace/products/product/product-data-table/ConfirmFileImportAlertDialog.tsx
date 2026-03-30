@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@uprevit/ui/components/ui/alert-dialog";
 
 interface ConfirmFileImportAlertDialogProps {
   open: boolean;

@@ -2,7 +2,7 @@
 
 import { AppHeader } from "@/components/common/AppHeader";
 import { MainContentWrapper } from "@/components/common/MainContentWrapper";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@uprevit/ui/components/ui/sidebar";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";

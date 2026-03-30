@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { PiImageDuotone } from "react-icons/pi";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
 type ProductImageFrameProps = {
   src?: string | null;

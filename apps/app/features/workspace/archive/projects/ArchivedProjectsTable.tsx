@@ -38,13 +38,13 @@ import {
 } from "react-icons/pi";
 import type { IconType } from "react-icons";
 
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Label } from "@uprevit/ui/components/ui/label";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination";
+} from "@uprevit/ui/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -52,8 +52,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+} from "@uprevit/ui/components/ui/table";
+import { cn } from "@uprevit/ui/lib/utils";
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
 

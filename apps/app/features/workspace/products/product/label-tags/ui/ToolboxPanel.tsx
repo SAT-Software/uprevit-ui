@@ -2,19 +2,19 @@
 
 import { ReactNode, useState, type ElementType } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@uprevit/ui/components/ui/popover";
 import { MarkerBaseEditor } from "@markerjs/markerjs3";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 
 type Props = {
   title: string;

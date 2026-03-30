@@ -16,7 +16,7 @@ import { EditorState } from "@/types/editor";
 import ToolbarMarkerGroup from "./toolbar/ToolbarMarkerGroup";
 import ToolbarActionButton from "./toolbar/ToolbarActionButton";
 import ToolbarMarkersButton from "./toolbar/ToolbarMarkersButton";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
 
 type Props = {
   markerTypes: MarkerTypeList;

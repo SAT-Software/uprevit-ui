@@ -5,15 +5,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@uprevit/ui/components/ui/alert-dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import {
   PiTrashDuotone,
   PiXCircleDuotone,
   PiWarningDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type ComponentItem = {
   _id: string;

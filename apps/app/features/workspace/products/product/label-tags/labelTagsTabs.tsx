@@ -1,8 +1,8 @@
 "use client";
 
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import { cn } from "@uprevit/ui/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

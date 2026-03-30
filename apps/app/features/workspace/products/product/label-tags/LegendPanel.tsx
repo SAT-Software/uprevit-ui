@@ -9,22 +9,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@uprevit/ui/components/ui/alert-dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
+} from "@uprevit/ui/components/ui/collapsible";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import { useMemo, useState } from "react";
 import {
   PiCaretRightDuotone,

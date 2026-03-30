@@ -4,7 +4,7 @@ import type React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FloatingPaths } from "@/components/floating-paths";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useAuth } from "react-oidc-context";
 import { PiSignOutDuotone } from "react-icons/pi";

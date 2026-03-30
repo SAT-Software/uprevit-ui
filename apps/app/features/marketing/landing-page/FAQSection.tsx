@@ -1,10 +1,10 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@uprevit/ui/components/ui/accordion";
 import { PiImageDuotone } from "react-icons/pi";
 import { useTheme } from "next-themes";
 

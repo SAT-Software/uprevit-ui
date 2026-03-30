@@ -7,10 +7,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@uprevit/ui/components/ui/table";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { ReportsProduct } from "@/types/reports";
 import { PiFileTextDuotone } from "react-icons/pi";
 import {

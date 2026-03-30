@@ -9,8 +9,8 @@ import {
 } from "react-icons/pi";
 import { PiCheckDuotone, PiCaretUpDownDuotone } from "react-icons/pi";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@uprevit/ui/lib/utils";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -20,8 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/dialog";
+import { Label } from "@uprevit/ui/components/ui/label";
 import {
   Command,
   CommandEmpty,
@@ -29,15 +29,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@uprevit/ui/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@uprevit/ui/components/ui/popover";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useAddProductInBookmarkFolder } from "@/hooks/bookmark/useAddProductInBookmarkFolder";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 interface FormValues {
   productId: string;

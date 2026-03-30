@@ -3,23 +3,23 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Spinner } from "@/components/ui/spinner";
+} from "@uprevit/ui/components/ui/select";
+import { Separator } from "@uprevit/ui/components/ui/separator";
+import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
 import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import { Product } from "@/types/product";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,7 +35,7 @@ import {
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductUpdateProgress } from "./ProductUpdateProgress";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
 import { toast } from "sonner";
 
 export type Item = {

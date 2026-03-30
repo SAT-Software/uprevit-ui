@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { PiFolderSimpleDuotone, PiPlusBold, PiBookmarkSimpleDuotone } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 interface SourceFilesFolder {
   _id: string;

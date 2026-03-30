@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { ProductHeader } from "@/features/workspace/products/product/ProductHeader";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
 import { ExportJobStatus } from "@/types/export-job";
 import { useParams } from "next/navigation";

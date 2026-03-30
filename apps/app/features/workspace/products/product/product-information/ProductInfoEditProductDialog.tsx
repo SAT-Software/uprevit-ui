@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -12,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import {
   PiPencilCircleDuotone,
@@ -23,13 +23,13 @@ import {
   PiXCircleDuotone,
   PiCalendarBlankDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@uprevit/ui/components/ui/popover";
+import { Calendar } from "@uprevit/ui/components/ui/calendar";
 import { ProductMetadata } from "@/types/product";
 import { GEO_MARKETS } from "@/data/geo-markets";
 import {
@@ -39,8 +39,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { cn } from "@/lib/utils";
+} from "@uprevit/ui/components/ui/command";
+import { cn } from "@uprevit/ui/lib/utils";
 import { PiCheck, PiCaretUpDown } from "react-icons/pi";
 import { COUNTRIES } from "@/data/countries";
 import * as Flags from "country-flag-icons/react/3x2";

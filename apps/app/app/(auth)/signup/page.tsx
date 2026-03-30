@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { cn } from "@uprevit/ui/lib/utils";
 import { GalleryVerticalEnd } from "lucide-react";
 import Image from "next/image";
 

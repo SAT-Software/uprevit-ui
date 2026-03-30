@@ -2,7 +2,7 @@
 
 import ProductsPageProductTable from "@/features/workspace/products/ProductsPageProductTable";
 import CreateProductDialog from "@/features/workspace/products/CreateProductDialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
 import { ExportJobStatus } from "@/types/export-job";
 import Link from "next/link";

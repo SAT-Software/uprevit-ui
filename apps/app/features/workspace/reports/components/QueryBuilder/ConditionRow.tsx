@@ -6,9 +6,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@uprevit/ui/components/ui/select";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { PiXCircleDuotone } from "react-icons/pi";
 import { QueryCondition } from "@/types/reports";
 import {
@@ -19,7 +19,7 @@ import {
   isArrayFieldOperator,
   ARRAY_FIELD_OPERATORS,
 } from "@/data/reports-config";
-import { TagInput, Tag } from "@/components/ui/tag-input";
+import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
 
 interface ConditionRowProps {
   condition: QueryCondition;

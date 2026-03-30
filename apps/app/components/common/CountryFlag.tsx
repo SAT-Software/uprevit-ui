@@ -4,7 +4,7 @@ import * as Flags from "country-flag-icons/react/3x2";
 import { PiGlobeDuotone } from "react-icons/pi";
 
 import { COUNTRIES } from "@/data/countries";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
 type CountryFlagProps = {
   country?: string;

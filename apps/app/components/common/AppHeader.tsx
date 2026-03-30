@@ -4,11 +4,11 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
+} from "@uprevit/ui/components/ui/breadcrumb";
+import { Separator } from "@uprevit/ui/components/ui/separator";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import { Product } from "@/types/product";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -27,7 +27,7 @@ import {
   PiPackageDuotone,
   PiPresentationChartDuotone,
 } from "react-icons/pi";
-import { SidebarTrigger } from "../ui/sidebar";
+import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
 import { UserNav } from "./UserNav";
 
 const pathData = [

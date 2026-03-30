@@ -14,7 +14,7 @@ import {
 } from "react-icons/pi";
 
 import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useMemo } from "react";
 
 // Create some dummy initial files

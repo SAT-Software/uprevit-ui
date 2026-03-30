@@ -4,18 +4,18 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { OnboardingShell } from "@/components/onboarding-shell";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { FieldError, FieldLabel } from "@/components/ui/field";
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { Label } from "@/components/ui/label";
+} from "@uprevit/ui/components/ui/card";
+import { FieldError, FieldLabel } from "@uprevit/ui/components/ui/field";
+import { InputGroup, InputGroupInput } from "@uprevit/ui/components/ui/input-group";
+import { Label } from "@uprevit/ui/components/ui/label";
 import { useOnboardUser } from "@/hooks/onboarding/useOnboardUser";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUser } from "@/hooks/user/useGetUser";

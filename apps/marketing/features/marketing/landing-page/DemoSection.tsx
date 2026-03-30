@@ -1,8 +1,8 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
+import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useScrollSection } from "@/lib/scroll-context";
 import { useTheme } from "next-themes";
 import { PiImageDuotone } from "react-icons/pi";

@@ -9,13 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@uprevit/ui/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+} from "@uprevit/ui/components/ui/tooltip";
+import { Button } from "@uprevit/ui/components/ui/button";
 
 interface PageInfoDialogProps {
   title: string;

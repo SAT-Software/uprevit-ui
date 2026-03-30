@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
-import { Ripple } from "@/components/ui/ripple";
+import { Ripple } from "@uprevit/ui/components/ui/ripple";
 import Image from "next/image";
 // import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
 import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";

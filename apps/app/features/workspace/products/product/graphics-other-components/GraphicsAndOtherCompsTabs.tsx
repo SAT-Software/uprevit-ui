@@ -1,12 +1,12 @@
 import { PiHouseDuotone, PiSquaresFourDuotone, PiPackageDuotone } from "react-icons/pi";
 
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs"
+} from "@uprevit/ui/components/ui/tabs"
 
 export default function Component() {
   return (

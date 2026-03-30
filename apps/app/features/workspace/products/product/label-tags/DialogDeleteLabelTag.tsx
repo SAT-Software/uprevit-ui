@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -10,9 +10,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@uprevit/ui/components/ui/alert-dialog";
 import { PiTrashDuotone, PiXCircleDuotone } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 
 interface LabelTagItem {

@@ -1,7 +1,7 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { DecorativeCornerCircleCustom } from "@/components/ui/DecorativeCornerCircle";
+import { Card } from "@uprevit/ui/components/ui/card";
+import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import Image from "next/image";
 
 const screenshots = [

@@ -9,9 +9,9 @@ import {
   PiWrenchDuotone,
   PiStackDuotone,
 } from "react-icons/pi";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
-import { useIsMobile } from "@/hooks/general/use-mobile";
+import { useIsMobile } from "@uprevit/ui/hooks/general/use-mobile";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,7 +20,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from "@uprevit/ui/components/ui/navigation-menu";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 

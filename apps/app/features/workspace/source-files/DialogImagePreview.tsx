@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@uprevit/ui/components/ui/dialog";
+import { cn } from "@uprevit/ui/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Image from "next/image";
 import { PiDownloadSimpleDuotone, PiXCircleDuotone } from "react-icons/pi";

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import Image from "next/image";
 import {
   PiBoundingBoxDuotone,

@@ -3,7 +3,7 @@
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +12,18 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-} from "@/components/ui/dialog";
+} from "@uprevit/ui/components/ui/dialog";
 import {
   Field,
   FieldGroup,
   FieldLabel,
   FieldError,
-} from "@/components/ui/field";
+} from "@uprevit/ui/components/ui/field";
 import {
   InputGroup,
   InputGroupInput,
   InputGroupText,
-} from "@/components/ui/input-group";
+} from "@uprevit/ui/components/ui/input-group";
 import { useInviteWorkspaceMembers } from "@/hooks/workspace/useInviteWorkspaceMembers";
 import { toast } from "sonner";
 import {
@@ -35,7 +35,7 @@ import {
   PiEnvelopeSimpleDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type InviteMembersFormValues = {
   users: { name: string; email: string }[];

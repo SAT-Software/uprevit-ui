@@ -2,24 +2,24 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Card, CardContent, CardHeader } from "@uprevit/ui/components/ui/card";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Input } from "@uprevit/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TagInput, Tag } from "@/components/ui/tag-input";
+} from "@uprevit/ui/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -34,7 +34,7 @@ import {
   PiXCircleDuotone,
   PiCaretDownDuotone,
 } from "react-icons/pi";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
 import { ExportButtons } from "@/features/workspace/reports/components/ExportButtons";
 import { ReportExportsTable } from "@/features/workspace/reports/components/ReportExportsTable";

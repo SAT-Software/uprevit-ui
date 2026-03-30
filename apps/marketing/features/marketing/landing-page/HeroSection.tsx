@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@uprevit/ui/components/ui/button";
 import { useScrollTo } from "@/lib/scroll-context";
 import Link from "next/link";
 

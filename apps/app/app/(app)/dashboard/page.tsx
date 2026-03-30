@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import DashboardProductsTable from "@/features/workspace/dashboard/DashboardProductsTable";
 import DashboardDepartmentsCard from "@/features/workspace/dashboard/DashboardDepartmentsCard";
 import DashboardProjectsCard from "@/features/workspace/dashboard/DashboardProjectsCard";

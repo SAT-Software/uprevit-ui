@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetDashboardStats } from "@/hooks/dashboard/useGetDashboardStats";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import { IconType } from "react-icons";
 import {
   PiBuildingsDuotone,

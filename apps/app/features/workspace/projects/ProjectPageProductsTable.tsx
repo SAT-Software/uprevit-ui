@@ -13,8 +13,8 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@uprevit/ui/lib/utils";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@uprevit/ui/components/ui/table";
 import TableControls from "@/components/table/TableControls";
 import { advancedFilterFn } from "@/lib/table-filters";
 import { useRouter } from "next/navigation";
@@ -40,7 +40,7 @@ import {
   PiKanbanDuotone,
   PiPackageDuotone,
 } from "react-icons/pi";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@uprevit/ui/components/ui/progress";
 import type { IconType } from "react-icons";
 
 export type Item = {

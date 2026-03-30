@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useId } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogTrigger,
   DialogClose,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@uprevit/ui/components/ui/dialog";
 import { useUpdateUser } from "@/hooks/user/useUpdateUser";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { User } from "@/types/user";
@@ -23,7 +23,7 @@ import {
   PiCameraDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 

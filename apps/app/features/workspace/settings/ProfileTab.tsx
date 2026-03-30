@@ -1,10 +1,10 @@
 "use client";
 
 import { useGetUser } from "@/hooks/user/useGetUser";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DialogUpdateProfile } from "./DialogUpdateProfile";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { useAuth } from "react-oidc-context";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import {
@@ -15,7 +15,7 @@ import {
   PiSignOutDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 function ProfileTab() {
   const auth = useAuth();

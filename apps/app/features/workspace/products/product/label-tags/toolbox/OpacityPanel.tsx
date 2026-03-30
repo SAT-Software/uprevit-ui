@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import { PiDropHalfBottomDuotone } from "react-icons/pi";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Slider } from "@uprevit/ui/components/ui/slider";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 
 let markerEditorIdCounter = 0;

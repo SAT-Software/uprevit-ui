@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Separator } from "@uprevit/ui/components/ui/separator";
 
 function BillingTab() {
   return (

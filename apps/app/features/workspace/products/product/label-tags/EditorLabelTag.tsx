@@ -8,7 +8,7 @@ import {
   MarkerArea,
   RectangularBoxMarkerBase,
 } from "@markerjs/markerjs3";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import Image from "next/image";
 import {
   PiArrowUpRightDuotone,

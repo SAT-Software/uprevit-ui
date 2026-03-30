@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { PiNoteDuotone } from "react-icons/pi";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
 
 let markerEditorIdCounter = 0;
 const markerEditorIds = new WeakMap<object, number>();

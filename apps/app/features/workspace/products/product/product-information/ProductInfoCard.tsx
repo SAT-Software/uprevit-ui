@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@uprevit/ui/components/ui/card";
 import { useMemo } from "react";
 
 interface ProductInformationCardProps {

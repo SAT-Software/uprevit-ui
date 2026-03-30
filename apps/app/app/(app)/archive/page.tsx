@@ -1,13 +1,13 @@
 "use client";
 
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 import ArchivedDepartments from "@/features/workspace/archive/departments/ArchivedDepartments";
 import ArchivedProjects from "@/features/workspace/archive/projects/ArchivedProjects";
 import ArchivedProducts from "@/features/workspace/archive/products/ArchivedProducts";

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useId } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
   DialogTrigger,
   DialogClose,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@uprevit/ui/components/ui/dialog";
 import { useUpdateWorkspace } from "@/hooks/workspace/useUpdateWorkspace";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Workspace } from "@/types/workspace";
@@ -24,7 +24,7 @@ import {
   PiCameraDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";

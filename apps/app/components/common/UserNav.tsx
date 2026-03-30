@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +9,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+} from "@uprevit/ui/components/ui/dropdown-menu";
+import { SidebarMenuButton, useSidebar } from "@uprevit/ui/components/ui/sidebar";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
@@ -21,7 +21,7 @@ import {
   PiUserCircleGearDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 export function UserNav() {
   const { isMobile } = useSidebar();

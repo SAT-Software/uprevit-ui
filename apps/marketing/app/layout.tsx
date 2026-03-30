@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import "./globals.css";
-import { ThemeProvider } from "@/lib/theme-provider";
+import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 
 const geist = Geist({
   variable: "--font-geist",

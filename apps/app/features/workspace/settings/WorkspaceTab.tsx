@@ -1,8 +1,8 @@
 "use client";
 
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DialogUpdateWorkspace } from "./DialogUpdateWorkspace";
 import {
   PiBuildingsDuotone,
@@ -16,7 +16,7 @@ import {
   PiWarningCircleDuotone,
 } from "react-icons/pi";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 function WorkspaceTab() {
   const {

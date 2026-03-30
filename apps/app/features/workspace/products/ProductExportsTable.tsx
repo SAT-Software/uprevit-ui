@@ -26,21 +26,21 @@ import {
   PiWarningCircleDuotone,
 } from "react-icons/pi";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination";
+} from "@uprevit/ui/components/ui/pagination";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
+} from "@uprevit/ui/components/ui/select";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -48,7 +48,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@uprevit/ui/components/ui/table";
 import { useDownloadProductExportJob } from "@/hooks/product/useDownloadProductExportJob";
 import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
 import {

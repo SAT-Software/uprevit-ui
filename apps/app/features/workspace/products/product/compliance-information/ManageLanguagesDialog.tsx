@@ -3,8 +3,8 @@
 import { useId, useMemo, useState } from "react";
 
 import { CountryFlag } from "@/components/common/CountryFlag";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -14,16 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Spinner } from "@/components/ui/spinner";
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   COMPLIANCE_LANGUAGES,
   COMPLIANCE_LANGUAGE_GROUPS,
 } from "@/data/compliance-languages";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 import {
   PiCheckCircleDuotone,
   PiGlobeDuotone,

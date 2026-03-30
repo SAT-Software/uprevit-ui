@@ -1,14 +1,14 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 import { useAuth } from "react-oidc-context";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@uprevit/ui/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -18,9 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+} from "@uprevit/ui/components/ui/dialog";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { Input } from "@uprevit/ui/components/ui/input";
 import { useAddSourceFilesFolder } from "@/hooks/source-files/useAddSourceFilesFolder";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import {
@@ -28,7 +28,7 @@ import {
   PiXCircleDuotone,
   PiFolderPlusDuotone,
 } from "react-icons/pi";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 interface FormValues {
   folderName: string;

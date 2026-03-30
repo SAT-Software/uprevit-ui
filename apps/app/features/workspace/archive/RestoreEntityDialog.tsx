@@ -7,9 +7,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+} from "@uprevit/ui/components/ui/alert-dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   PiArrowCounterClockwiseDuotone,
   PiXCircleDuotone,

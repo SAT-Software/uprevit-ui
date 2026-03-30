@@ -1,7 +1,7 @@
 "use client";
 
 import { LegendItem, LegendStrokeStyle } from "./legendTypes";
-import { cn } from "@/lib/utils";
+import { cn } from "@uprevit/ui/lib/utils";
 
 type Props = {
   item: LegendItem;

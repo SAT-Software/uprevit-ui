@@ -1,12 +1,12 @@
 "use client";
 
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@uprevit/ui/components/ui/tooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import Image from "next/image";
 import Link from "next/link";

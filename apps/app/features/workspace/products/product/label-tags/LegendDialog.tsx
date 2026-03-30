@@ -9,12 +9,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+} from "@uprevit/ui/components/ui/dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { Slider } from "@uprevit/ui/components/ui/slider";
+import { ToggleGroup, ToggleGroupItem } from "@uprevit/ui/components/ui/toggle-group";
 import ColorPicker from "./ui/ColorPicker";
 import {
   DEFAULT_LEGEND_ITEM,
@@ -33,7 +33,7 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { defaultColorsWithTransparent } from "@/types/colors";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type LegendDialogProps = {
   open: boolean;
