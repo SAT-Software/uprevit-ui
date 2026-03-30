@@ -14,7 +14,7 @@ applications:
           commands:
             - export BUN_INSTALL="$HOME/.bun"
             - export PATH="$BUN_INSTALL/bin:$PATH"
-            - bun run build:app
+            - bun run --cwd apps/app build
       artifacts:
         baseDirectory: apps/app/.next
         files:
@@ -39,7 +39,7 @@ applications:
           commands:
             - export BUN_INSTALL="$HOME/.bun"
             - export PATH="$BUN_INSTALL/bin:$PATH"
-            - bun run build:marketing
+            - bun run --cwd apps/marketing build
       artifacts:
         baseDirectory: apps/marketing/.next
         files:

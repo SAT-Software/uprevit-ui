@@ -1,9 +1,20 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": ["apps/*/.env*"],
+  "globalEnv": [
+    "API_PROXY_TARGET",
+    "NEXT_PUBLIC_API_PROXY_TARGET",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_CLIENT_ID",
+    "NEXT_PUBLIC_COGNITO_AUTHORITY",
+    "NEXT_PUBLIC_COGNITO_DOMAIN",
+    "NEXT_PUBLIC_LOGOUT_URI"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
