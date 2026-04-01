@@ -1,28 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import HeroSection from "@/features/marketing/landing-page/HeroSection";
-import MarketingHeader from "@/features/marketing/marketing-header";
-import { Ripple } from "@uprevit/ui/components/ui/ripple";
+import { useEffect } from "react";
 import Image from "next/image";
-// import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
-import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
-import DemoSection from "@/features/marketing/landing-page/DemoSection";
-import ReportSection from "@/features/marketing/landing-page/ReportSection";
-import FeaturesSection from "@/features/marketing/landing-page/FeaturesSection";
-import FAQSection from "@/features/marketing/landing-page/FAQSection";
-import CTASection from "@/features/marketing/landing-page/CTASection";
-import FooterSection from "@/features/marketing/landing-page/FooterSection";
-import { ScrollProvider } from "@/lib/scroll-context";
+import { useRouter } from "next/navigation";
+import { useAuth } from "react-oidc-context";
+
+import { useGetUser } from "@/hooks/user/useGetUser";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Ripple } from "@uprevit/ui/components/ui/ripple";
 
 const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/CE.png"
-          alt="CE Symbol"
+          alt="CE symbol"
           fill
           className="object-contain p-2"
         />
@@ -34,10 +28,10 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/MD.png"
-          alt="MD Symbol"
+          alt="Medical device symbol"
           fill
           className="object-contain p-2"
         />
@@ -50,10 +44,10 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/DMGPKG.png"
-          alt="UDI Symbol"
+          alt="Packaging symbol"
           fill
           className="object-contain p-2"
         />
@@ -65,10 +59,10 @@ const items = [
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/2DBarcode.png"
-          alt="Barcode Graphic"
+          alt="2D barcode"
           fill
           className="object-contain p-3"
         />
@@ -81,10 +75,10 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/FDA.png"
-          alt="Barcode Graphic"
+          alt="FDA icon"
           fill
           className="object-contain p-2"
         />
@@ -97,10 +91,10 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/DoNotReuse.png"
-          alt="Barcode Graphic"
+          alt="Do not reuse symbol"
           fill
           className="object-contain p-3"
         />
@@ -112,10 +106,10 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/UKCA.png"
-          alt="Barcode Graphic"
+          alt="UKCA symbol"
           fill
           className="object-contain p-3"
         />
@@ -128,10 +122,10 @@ const items = [
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
         <Image
           src="/ISO.png"
-          alt="Barcode Graphic"
+          alt="ISO symbol"
           fill
           className="object-contain p-2"
         />
@@ -140,149 +134,103 @@ const items = [
     speed: 35,
     reverse: true,
     initialAngle: 90,
-  },
-  {
-    circleIndex: 4,
-    content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
-        <Image
-          src="/WEEE-symbol.webp"
-          alt="Barcode Graphic"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 35,
-    initialAngle: 45,
-  },
-  {
-    circleIndex: 0,
-    content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
-        <Image
-          src="/Sterile.png"
-          alt="CAS Symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 45,
-    initialAngle: 90,
-  },
-  {
-    circleIndex: 0,
-    content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
-        <Image
-          src="/IFU1.png"
-          alt="DNR Symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 45,
-    reverse: true,
-    initialAngle: 270,
-  },
-  {
-    circleIndex: 1,
-    content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
-        <Image
-          src="/Importer.png"
-          alt="EC-REP Symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 50,
-    initialAngle: 90,
-  },
-  {
-    circleIndex: 1,
-    content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
-        <Image
-          src="/ISO.png"
-          alt="IFU Symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 45,
-    reverse: true,
-    initialAngle: 270,
-  },
-  {
-    circleIndex: 2,
-    content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
-        <Image
-          src="/MFR.png"
-          alt="Manufacturer Symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 55,
-    initialAngle: 0,
   },
 ];
 
-export default function Home() {
-  const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
+const getProfileValue = (
+  profile: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined => {
+  const value = profile?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+};
+
+export default function AppEntryPage() {
+  const router = useRouter();
+  const auth = useAuth();
+  const { data: userProfileData, isLoading: isUserLoading } = useGetUser();
+
+  const profile = auth.user?.profile as Record<string, unknown> | undefined;
+  const userIdFromToken = getProfileValue(profile, "userId");
+  const tokenWorkspaceId = getProfileValue(profile, "workspaceId");
+  const tokenStatus = getProfileValue(profile, "status");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveFeatureIndex((prev) => (prev + 1) % 5);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+    if (auth.isLoading || !auth.isAuthenticated) return;
+    if (userIdFromToken && isUserLoading) return;
+
+    const status = userProfileData?.user?.status || tokenStatus;
+    const workspaceId = userProfileData?.user?.workspaceId || tokenWorkspaceId;
+
+    const targetPath =
+      status === "invited"
+        ? "/onboarding/onboard-user"
+        : workspaceId
+          ? "/dashboard"
+          : "/onboarding/create-workspace";
+
+    router.replace(targetPath);
+  }, [
+    auth.isAuthenticated,
+    auth.isLoading,
+    isUserLoading,
+    router,
+    tokenStatus,
+    tokenWorkspaceId,
+    userIdFromToken,
+    userProfileData?.user?.status,
+    userProfileData?.user?.workspaceId,
+  ]);
+
+  const isCheckingAuthenticatedUser =
+    auth.isLoading || (auth.isAuthenticated && userIdFromToken && isUserLoading);
+
+  if (isCheckingAuthenticatedUser) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-accent/40">
+        <p className="text-sm text-muted-foreground">Preparing your workspace...</p>
+      </div>
+    );
+  }
 
   return (
-    <ScrollProvider>
-      <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
-        <MarketingHeader />
-        <div className="relative w-full">
-          <Ripple items={items} />
-          <HeroSection />
-        </div>
-        <div className="relative pointer-events-none w-full mx-auto -mt-50 z-55">
-          <div className="absolute inset-0 w-full max-w-6xl mx-auto pointer-events-none">
-            <div className="absolute top-40 left-0 w-px h-10 bg-border/5 z-40" />
-            <div className="absolute top-40 right-0 w-px h-10 bg-border/5 z-40" />
-            <div className="absolute top-50 left-0 w-px h-10 bg-border/10 z-40" />
-            <div className="absolute top-50 right-0 w-px h-10 bg-border/10 z-40" />
-            <div className="absolute top-60 left-0 w-px h-10 bg-border/20 z-40" />
-            <div className="absolute top-60 right-0 w-px h-10 bg-border/20 z-40" />
-            <div className="absolute top-70 left-0 w-px h-10 bg-border/30 z-40" />
-            <div className="absolute top-70 right-0 w-px h-10 bg-border/30 z-40" />
-            <div className="absolute top-80 left-0 w-px h-10 bg-border/40 z-40" />
-            <div className="absolute top-80 right-0 w-px h-10 bg-border/40 z-40" />
-            <div className="absolute top-90 left-0 w-px h-10 bg-border/50 z-40" />
-            <div className="absolute top-90 right-0 w-px h-10 bg-border/50 z-40" />
-            <div className="absolute top-100 left-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
-            <div className="absolute top-100 right-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
-          </div>
-          <HeroFeatureCards
-            activeIndex={activeFeatureIndex}
-            onActiveChange={setActiveFeatureIndex}
-          />
-          {/* <HeroFeatureDemo activeIndex={activeFeatureIndex} /> */}
-          <DemoSection />
-          <ReportSection />
-          <FeaturesSection />
-          <CTASection />
-          <FAQSection />
-          <FooterSection />
-        </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-accent/50 px-6 py-16">
+      <div className="pointer-events-none absolute inset-0">
+        <Ripple items={items} />
       </div>
-    </ScrollProvider>
+
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center">
+        <div className="mb-5 rounded-full border bg-white px-3 py-1 text-xs font-semibold text-foreground shadow-lg shadow-foreground dark:bg-black">
+          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-primary" />
+          Medical labeling workspace
+        </div>
+
+        <h1 className="text-balance text-5xl font-bold tracking-tighter md:text-6xl">
+          Your QMS, Digitized
+          <br />
+          <span className="text-muted-foreground/70">
+            Your Labeling, Validated
+          </span>
+        </h1>
+
+        <div className="mt-6 flex max-w-2xl flex-col items-center gap-2">
+          <p className="text-xl tracking-tight text-foreground">
+            The unified cloud-based platform for total labeling governance
+          </p>
+          <p className="max-w-xl text-sm text-muted-foreground md:text-base">
+            Streamline your global labeling process with a unified platform that
+            manages labels at the data level, built for medical device teams.
+          </p>
+        </div>
+
+        <Button
+          size="lg"
+          className="mt-10 min-w-52"
+          onClick={() => auth.signinRedirect()}
+        >
+          Continue to sign in
+        </Button>
+      </div>
+    </div>
   );
 }
