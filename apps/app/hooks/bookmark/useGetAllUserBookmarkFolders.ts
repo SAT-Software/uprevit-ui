@@ -1,6 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
+type BookmarkFoldersResponse = {
+  result: {
+    bookmarked_product_folders: {
+      _id: string;
+      folder_name: string;
+      products: string[];
+    }[];
+  };
+};
+
+const EMPTY_BOOKMARK_FOLDERS_RESPONSE: BookmarkFoldersResponse = {
+  result: {
+    bookmarked_product_folders: [],
+  },
+};
+
 async function getAllUserBookmarkFolders({
   signal,
   auth,
@@ -17,12 +33,30 @@ async function getAllUserBookmarkFolders({
     },
     signal,
   });
+  if (response.status === 404) {
+    return EMPTY_BOOKMARK_FOLDERS_RESPONSE;
+  }
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch user bookmark folders");
   }
-  const data = await response.json();
-  return data;
+  const data = (await response.json().catch(() => null)) as
+    | Partial<BookmarkFoldersResponse>
+    | null;
+
+  return {
+    ...EMPTY_BOOKMARK_FOLDERS_RESPONSE,
+    ...data,
+    result: {
+      ...EMPTY_BOOKMARK_FOLDERS_RESPONSE.result,
+      ...(data?.result ?? {}),
+      bookmarked_product_folders: Array.isArray(
+        data?.result?.bookmarked_product_folders
+      )
+        ? data.result.bookmarked_product_folders
+        : [],
+    },
+  };
 }
 
 export function useGetAllUserBookmarkFolders() {

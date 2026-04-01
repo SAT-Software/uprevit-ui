@@ -34,7 +34,6 @@ import {
   PiPictureInPictureDuotone,
   PiPackageDuotone,
   PiTagChevronDuotone,
-  PiSquaresFourDuotone,
   PiDotsThreeOutlineVerticalDuotone,
   PiChartBarDuotone,
 } from "react-icons/pi";
@@ -204,9 +203,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuButton
                       asChild
                       className={cn(
-                        "h-7",
+                        "h-7 border border-transparent",
                         pathname.startsWith(item.url)
-                          ? "bg-sidebar-accent border border-sidebar-border rounded text-sidebar-primary"
+                          ? "bg-sidebar-accent border-sidebar-border rounded text-sidebar-primary"
                           : ""
                       )}
                     >

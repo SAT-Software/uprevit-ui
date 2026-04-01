@@ -1,6 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
-import { SidebarMenuButton, useSidebar } from "@uprevit/ui/components/ui/sidebar";
+import { SidebarMenuButton } from "@uprevit/ui/components/ui/sidebar";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
@@ -24,7 +28,6 @@ import {
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 export function UserNav() {
-  const { isMobile } = useSidebar();
   const { data: userData, isLoading } = useGetUser();
   const signOut = useSignOut();
   const user = userData?.user;
@@ -40,13 +43,13 @@ export function UserNav() {
           className="data-[state=open]:text-sidebar-accent-foreground"
         >
           <div className="relative mr-1">
-            <Avatar className="h-7 w-7 rounded-full">
+            <Avatar className="h-8 w-8 rounded-full">
               <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-full">
-                {user?.name.charAt(0)}
+              <AvatarFallback className="rounded-full border border-border bg-background text-foreground dark:bg-accent dark:text-accent-foreground">
+                {user?.name?.charAt(0) ?? "U"}
               </AvatarFallback>
             </Avatar>
-            <span className="-end-1 -top-1 absolute size-3 rounded-full border-2 border-background bg-emerald-500">
+            <span className="end-0 -top-0.5 absolute size-3 rounded-full border-2 border-background bg-emerald-500">
               <span className="sr-only">Online</span>
             </span>
           </div>
@@ -54,15 +57,16 @@ export function UserNav() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-        side={isMobile ? "bottom" : "right"}
+        side="bottom"
         align="end"
-        sideOffset={4}
+        sideOffset={8}
+        collisionPadding={8}
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-full">
               <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-full">
+              <AvatarFallback className="rounded-full border border-border bg-background text-foreground dark:bg-accent dark:text-accent-foreground">
                 <PiUserCircleGearDuotone size={20} />
               </AvatarFallback>
             </Avatar>

@@ -63,53 +63,9 @@ function BookmarkedProductsPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useGetAllUserBookmarkFolders();
 
-  const allBookmarkFolders = data?.result?.bookmarked_product_folders;
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full overflow-y-auto">
-          <div className="flex flex-wrap gap-2 items-center w-full justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold">Bookmarked Products</h1>
-              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-                Manage your product collections and bookmarks
-              </p>
-            </div>
-            <div className="h-8 w-28 bg-muted rounded-md animate-pulse" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
-            {[...Array(8)].map((_, index) => (
-              <FolderLoadingCard key={index} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full overflow-y-auto">
-          <div className="flex flex-wrap gap-2 items-center w-full justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold">Bookmarked Products</h1>
-              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-                Manage your product collections and bookmarks
-              </p>
-            </div>
-            <DialogCreateFolder />
-          </div>
-
-          <FolderErrorState onRetry={() => refetch()} />
-        </div>
-      </div>
-    );
-  }
+  const allBookmarkFolders = data?.result?.bookmarked_product_folders ?? [];
+  const showInitialLoadingState = isLoading && !data;
+  const showErrorState = Boolean(error) && !data;
 
   return (
     <div className="flex flex-col gap-2 p-2 h-full">
@@ -122,10 +78,22 @@ function BookmarkedProductsPage() {
               Manage your product collections and bookmarks
             </p>
           </div>
-          <DialogCreateFolder />
+          {showInitialLoadingState ? (
+            <div className="h-8 w-28 bg-muted rounded-md animate-pulse" />
+          ) : (
+            <DialogCreateFolder />
+          )}
         </div>
 
-        {allBookmarkFolders?.length === 0 ? (
+        {showInitialLoadingState ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
+            {[...Array(8)].map((_, index) => (
+              <FolderLoadingCard key={index} />
+            ))}
+          </div>
+        ) : showErrorState ? (
+          <FolderErrorState onRetry={() => refetch()} />
+        ) : allBookmarkFolders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[400px] w-full gap-4 text-muted-foreground border border-dashed border-border rounded-xl bg-muted/5">
             <div className="p-4 rounded-full bg-muted/30">
               <PiBookmarkSimpleDuotone className="w-12 h-12 text-muted-foreground/50" />
@@ -141,7 +109,7 @@ function BookmarkedProductsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
-            {allBookmarkFolders?.map((folder: BookmarkFolder) => (
+            {allBookmarkFolders.map((folder: BookmarkFolder) => (
               <Card
                 key={folder._id}
                 className="group cursor-pointer border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
