@@ -93,7 +93,7 @@ export function DecorativeCornerCircle({
   return (
     <div
       className={cn(
-        "absolute text-border/60 pointer-events-none hidden md:block",
+        "absolute text-border/60 pointer-events-none hidden min-[1281px]:block",
         positionClass,
         className
       )}
@@ -154,7 +154,7 @@ export function DecorativeCornerCircleCustom({
   return (
     <div
       className={cn(
-        "absolute text-border/80 pointer-events-none hidden md:block",
+        "absolute text-border/80 pointer-events-none hidden min-[1281px]:block",
         positionClassName,
         className
       )}

@@ -454,7 +454,7 @@ export default function HeroFeatureCards({
             </div>
             <div className="absolute top-[calc(var(--row-height)/2)] left-0 col-start-28 col-end-44 row-start-4 row-end-7 h-[calc(100%-var(--row-height)/2)] w-full xl:col-start-23 xl:col-end-39">
               <svg
-                className="-translate-y-px h-[calc(100%+2px)] translate-x-0.5 text-border"
+                className="-translate-y-px h-[calc(100%+3px)] translate-x-0.5 text-border"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="none"

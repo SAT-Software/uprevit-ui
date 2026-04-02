@@ -117,9 +117,17 @@ export default function MarketingHeader() {
                 href="/"
                 className="flex items-center gap-2 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="relative flex aspect-square mb-1 size-7 items-center justify-center">
+                <div className="relative dark:hidden flex aspect-square mb-1 size-7 items-center justify-center">
                   <Image
                     src="/log-no-bg-black.svg"
+                    alt="Uprevit logo"
+                    fill
+                    className=""
+                  />
+                </div>
+                <div className="relative hidden dark:flex aspect-square mb-1 size-7 items-center justify-center">
+                  <Image
+                    src="/log-no-bg-white.svg"
                     alt="Uprevit logo"
                     fill
                     className=""
@@ -320,7 +328,7 @@ export default function MarketingHeader() {
           </div>
         </div>
 
-        <div className=" bg-amber-50/95 px-2 py-2 border-b border-border/70 text-center text-[11px] font-medium text-amber-900 backdrop-blur sm:px-6 md:hidden dark:bg-amber-500/12 dark:text-amber-100">
+        <div className=" bg-amber-50/95 px-2 py-2 border-b border-border/70 text-center text-[11px] font-medium text-amber-900 backdrop-blur sm:px-6 lg:hidden dark:bg-amber-500/12 dark:text-amber-100">
           <div className="mx-auto max-w-6xl">
             For the best experience, please use Uprevit on desktop or laptop
           </div>

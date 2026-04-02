@@ -46,17 +46,17 @@ const CellContent = ({
 }) => {
   if (data.redline) {
     return (
-      <div className="relative min-h-8">
-        <div className="absolute inset-0 flex flex-col gap-0.5">
+      <div className="relative min-h-10 sm:min-h-8">
+        <div className="flex flex-col gap-0.5 sm:absolute sm:inset-0">
           <TextScramble
             trigger={TextScrambleTrigger}
-            className="text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-400 group-data-[active=true]:text-red-500 group-data-[active=true]:dark:text-red-400 transition-all duration-500 ease-in-out line-through opacity-100"
+            className="text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-400 group-data-[active=true]:text-red-500 group-data-[active=true]:dark:text-red-400 transition-all duration-500 ease-in-out line-through opacity-100 leading-tight"
           >
             {data.redline.old}
           </TextScramble>
           <TextScramble
             trigger={TextScrambleTrigger}
-            className="text-muted-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-400 group-data-[active=true]:text-emerald-600 group-data-[active=true]:dark:text-emerald-400 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 group-data-[active=true]:opacity-100 font-medium"
+            className="text-muted-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-400 group-data-[active=true]:text-emerald-600 group-data-[active=true]:dark:text-emerald-400 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 group-data-[active=true]:opacity-100 font-medium leading-tight"
           >
             {data.redline.new}
           </TextScramble>

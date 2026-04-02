@@ -19,8 +19,12 @@ interface LabelDataTaggingCardProps {
 }
 
 export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
-  const { isTouchActive, activateTouch, deactivateTouch, scheduleTouchDeactivate } =
-    useTouchCardActivation();
+  const {
+    isTouchActive,
+    activateTouch,
+    deactivateTouch,
+    scheduleTouchDeactivate,
+  } = useTouchCardActivation();
 
   return (
     <div
@@ -67,10 +71,10 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
                   className="object-contain"
                 />
 
-                <div className="absolute top-12 left-1 w-36 h-7 border border-transparent bg-transparent group-hover:border-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-400" />
-                <div className="absolute top-20 left-8.5 w-22 h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-500" />
-                <div className="absolute top-29 left-8.5 w-16 h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-600" />
-                <div className="absolute bottom-7 right-4.5 w-9 h-9 border border-transparent bg-transparent group-hover:border-yellow-500 group-hover:bg-yellow-500/10 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-700" />
+                <div className="absolute w-0 h-0 hidden sm:block sm:top-12 sm:left-1 sm:w-36 sm:h-7 border border-transparent bg-transparent group-hover:border-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-400" />
+                <div className="absolute w-0 h-0 hidden sm:block   sm:top-20 sm:left-8.5 sm:w-22 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-500" />
+                <div className="absolute w-0 h-0 hidden sm:block   sm:top-29 sm:left-8.5 sm:w-16 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-600" />
+                <div className="absolute w-0 h-0 hidden sm:block  sm:bottom-7 sm:right-4.5 sm:w-9 sm:h-9 border border-transparent bg-transparent group-hover:border-yellow-500 group-hover:bg-yellow-500/10 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-700" />
               </div>
             </div>
 
