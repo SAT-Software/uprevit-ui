@@ -8,7 +8,12 @@ import {
 } from "@uprevit/ui/components/ui/accordion";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@uprevit/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@uprevit/ui/components/ui/card";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
@@ -58,10 +63,10 @@ export default function PricingPage() {
       <MarketingHeader />
       <div className="relative w-full">
         <DottedVerticalLines />
-        <div className="relative z-10 w-full pt-24">
+        <div className="relative z-10 w-full pt-20 md:pt-24">
           <div className="relative w-full mt-10 mb-20 pointer-events-auto">
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-            <div className="max-w-6xl mx-auto mb-10">
+            <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
               <Badge
                 variant={badgeVariant}
                 className="mb-8 z-60 dark:px-2 dark:py-0.5"
@@ -70,11 +75,11 @@ export default function PricingPage() {
                 <span className="font-medium">Pricing</span>
               </Badge>
               <div className="w-full flex flex-col md:flex-row items-start gap-4">
-                <h1 className="text-4xl md:text-5xl font-medium">
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                   Pricing built for regulated teams
                 </h1>
               </div>
-              <p className="mt-4 text-lg text-muted-foreground max-w-3xl">
+              <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
                 Transparent, scalable pricing designed for medical device
                 organizations. Start small, grow confidently, and keep
                 compliance airtight at every stage.
@@ -84,9 +89,9 @@ export default function PricingPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="hidden md:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-r border-dashed border-border relative overflow-hidden">
+              <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  <div className="hidden lg:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-r border-dashed border-border relative overflow-hidden">
                     <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
                       {Array.from({ length: 60 }).map((_, index) => (
                         <span
@@ -102,15 +107,17 @@ export default function PricingPage() {
                       />
                     ))}
                   </div>
-                  <Card className="relative overflow-hidden rounded-2xl max-w-90 border-border/70 bg-background shadow-[0_28px_55px_-45px_rgba(15,15,15,0.45)]">
-                    <CardHeader className="pb-8">
+                  <Card className="relative w-full overflow-hidden rounded-2xl lg:max-w-90 border-border/70 bg-background shadow-[0_28px_55px_-45px_rgba(15,15,15,0.45)]">
+                    <CardHeader className="pb-6 md:pb-8">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl">Startup</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-end gap-3">
-                        <span className="text-5xl font-semibold">$20</span>
+                        <span className="text-4xl md:text-5xl font-semibold">
+                          $20
+                        </span>
                         <span className="text-muted-foreground pb-1">
                           per user / month
                         </span>
@@ -139,7 +146,7 @@ export default function PricingPage() {
                       </ul>
                     </CardContent>
                   </Card>
-                  <div className="hidden md:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-x border-dashed border-border relative overflow-hidden">
+                  <div className="hidden lg:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-x border-dashed border-border relative overflow-hidden">
                     <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
                       {Array.from({ length: 60 }).map((_, index) => (
                         <span
@@ -157,9 +164,9 @@ export default function PricingPage() {
                   </div>
                   <Card
                     id="enterprise"
-                    className="relative overflow-hidden rounded-2xl max-w-90 border-border/70 bg-background/80 shadow-[0_24px_50px_-42px_rgba(15,15,15,0.35)]"
+                    className="relative w-full overflow-hidden rounded-2xl lg:max-w-90 border-border/70 bg-background/80 shadow-[0_24px_50px_-42px_rgba(15,15,15,0.35)]"
                   >
-                    <CardHeader className="pb-8">
+                    <CardHeader className="pb-6 md:pb-8">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl">Enterprise</CardTitle>
                         {/* <Badge variant="outline">Custom</Badge> */}
@@ -167,7 +174,9 @@ export default function PricingPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-end gap-3 h-12">
-                        <span className="text-4xl font-semibold">Custom</span>
+                        <span className="text-3xl md:text-4xl font-semibold">
+                          Custom
+                        </span>
                         <span className="text-muted-foreground pb-1">
                           tailored pricing
                         </span>
@@ -202,7 +211,7 @@ export default function PricingPage() {
                       </ul>
                     </CardContent>
                   </Card>
-                  <div className="hidden md:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-l border-dashed border-border relative overflow-hidden">
+                  <div className="hidden lg:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-l border-dashed border-border relative overflow-hidden">
                     <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
                       {Array.from({ length: 60 }).map((_, index) => (
                         <span
@@ -225,8 +234,8 @@ export default function PricingPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto mt-16">
-                <div className="rounded-2xl border bg-background/80 p-8 md:p-12">
+              <div className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0">
+                <div className="rounded-2xl border bg-background/80 p-6 md:p-8 lg:p-12">
                   <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 items-stretch">
                     <div className="flex flex-col">
                       <Badge
@@ -235,7 +244,7 @@ export default function PricingPage() {
                       >
                         For medical device teams
                       </Badge>
-                      <h2 className="mt-6 text-4xl md:text-5xl font-semibold tracking-tight leading-tightest">
+                      <h2 className="mt-6 text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tightest">
                         Optimized for medical device organizations
                       </h2>
                       <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-xl leading-tight">
@@ -291,7 +300,7 @@ export default function PricingPage() {
 
                     <div className="relative">
                       <div className="h-full rounded-3xl border bg-muted/20 p-2">
-                        <div className="rounded-2xl border bg-background p-8 shadow-sm">
+                        <div className="rounded-2xl border bg-background p-5 md:p-6 lg:p-8 shadow-sm">
                           <div className="flex items-center justify-between">
                             <div className="text-base font-semibold">
                               Regulatory Workspaces
@@ -369,7 +378,10 @@ export default function PricingPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div id="faq" className="max-w-6xl mx-auto mt-20">
+              <div
+                id="faq"
+                className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0"
+              >
                 <div className="flex flex-col items-center text-center mb-10">
                   <Badge
                     variant={badgeVariant}
@@ -378,10 +390,10 @@ export default function PricingPage() {
                     <PiQuestionDuotone className="mr-1 text-foreground/50" />
                     <span className="font-medium">FAQ</span>
                   </Badge>
-                  <h2 className="text-3xl md:text-4xl font-medium">
+                  <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Pricing questions, answered
                   </h2>
-                  <p className="text-muted-foreground mt-3 max-w-2xl">
+                  <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
                     Clear, direct answers for regulated teams evaluating Uprevit
                     pricing.
                   </p>
@@ -404,16 +416,16 @@ export default function PricingPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto mt-20">
-                <div className="relative overflow-hidden rounded-2xl border bg-foreground text-background flex items-center h-80">
+              <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
+                <div className="relative overflow-hidden rounded-2xl border bg-foreground dark:bg-background dark:text-foreground text-background flex items-center h-80">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_60%)]" />
-                  <div className="relative w-full p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                  <div className="relative w-full p-6 md:p-8 lg:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
                     <div className="max-w-2xl">
-                      <h2 className="text-3xl md:text-4xl font-semibold">
+                      <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
                         Align every label with global compliance in weeks, not
                         months
                       </h2>
-                      <p className="mt-3 text-background/70">
+                      <p className="mt-3 text-base md:text-lg text-background/70 dark:text-foreground/70 leading-relaxed">
                         See how Uprevit compresses labeling timelines while
                         keeping regulatory confidence high across departments
                         and geographies.
