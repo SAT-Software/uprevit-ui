@@ -54,7 +54,7 @@ export default function StandardsSymbolsSection() {
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      <div className="max-w-6xl mx-auto mb-10">
+      <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
@@ -63,11 +63,11 @@ export default function StandardsSymbolsSection() {
           <span className="font-medium">Standards & Symbols</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium leading-tightest">
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Standards, symbols, and references for global compliance
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-lg text-muted-foreground max-w-md">
+          <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             Centralize symbol guidance and ISO references in one place so teams
             can label confidently across markets.
           </p>
@@ -75,7 +75,7 @@ export default function StandardsSymbolsSection() {
       </div>
 
       <div className="relative w-full">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-15 -left-15"
             rotation={270}
@@ -91,12 +91,12 @@ export default function StandardsSymbolsSection() {
 
           <div className="p-1 bg-accent border-border border rounded-[12px]">
             <div className="flex flex-col gap-1">
-              <div className="flex flex-col lg:flex-row items-start justify-between gap-6 rounded-[10px] border border-border bg-background/80 p-6">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-6 rounded-[10px] border border-border bg-background/80 p-4 md:p-6">
                 <div>
-                  <h2 className="text-lg font-semibold">
+                  <h2 className="text-base md:text-lg font-semibold">
                     Standards & symbol library
                   </h2>
-                  <p className=" text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     One consolidated view for ISO guidance and symbol usage
                     references.
                   </p>
@@ -104,7 +104,7 @@ export default function StandardsSymbolsSection() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-                <div className="rounded-[10px] border border-border bg-background/90 p-6 w-full">
+                <div className="rounded-[10px] border border-border bg-background/90 p-4 md:p-6 w-full">
                   {symbols.map((symbol) => (
                     <div
                       key={symbol.title}
@@ -121,9 +121,9 @@ export default function StandardsSymbolsSection() {
                             {symbol.description}
                           </p>
                         </div>
-                        <div className="mt-5 flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-4">
-                          <PiLinkDuotone className="size-5 text-muted-foreground" />
-                          <span className="text-sm font-medium">
+                        <div className="mt-5 flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3 md:p-4">
+                          <PiLinkDuotone className="size-4 md:size-5 text-muted-foreground shrink-0" />
+                          <span className="text-sm font-medium leading-snug">
                             {symbol.usage}
                           </span>
                         </div>
@@ -145,7 +145,7 @@ export default function StandardsSymbolsSection() {
                   ))}
                 </div>
 
-                <div className="rounded-[10px] flex flex-col gap-4 justify-between border border-border bg-background/90 p-6 w-full">
+                <div className="rounded-[10px] flex flex-col gap-4 justify-between border border-border bg-background/90 p-4 md:p-6 w-full">
                   <div>
                     <div>
                       <div className="flex items-center gap-2">

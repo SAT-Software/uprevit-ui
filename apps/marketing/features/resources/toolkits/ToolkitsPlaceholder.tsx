@@ -47,7 +47,7 @@ export default function ToolkitsPlaceholder() {
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      <div className="max-w-6xl mx-auto mb-10">
+      <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
@@ -56,11 +56,11 @@ export default function ToolkitsPlaceholder() {
           <span className="font-medium">Toolkits</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium leading-tightest">
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Free compliance tools, built with labeling teams
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-lg text-muted-foreground max-w-md">
+          <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             We are building a suite of free tools to reduce manual compliance
             work and keep every label aligned to evolving regulations.
           </p>
@@ -78,7 +78,7 @@ export default function ToolkitsPlaceholder() {
       </div>
 
       <div className="relative w-full mb-40">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-15 -left-15"
             rotation={270}
@@ -94,11 +94,11 @@ export default function ToolkitsPlaceholder() {
 
           <div className="p-1 bg-accent border-border border rounded-[12px]">
             <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-1">
-              <div className="rounded-[10px] border border-border bg-foreground text-background p-6">
+              <div className="rounded-[10px] border border-border bg-foreground dark:bg-background dark:text-foreground text-background p-4 md:p-6">
                 <div className="flex items-center justify-between">
                   <Badge
                     variant="outline"
-                    className="border-background/40 text-background/80"
+                    className="border-background/40 text-background/80 dark:text-foreground/80 dark:border-foreground/20"
                   >
                     Coming soon
                   </Badge>
@@ -106,10 +106,10 @@ export default function ToolkitsPlaceholder() {
                     3 tools in pipeline
                   </span> */}
                 </div>
-                <h3 className="mt-4 text-2xl font-semibold">
+                <h3 className="mt-4 text-xl md:text-2xl font-semibold">
                   Build compliant labels without the manual chase
                 </h3>
-                <p className="mt-3 text-sm text-background/80">
+                <p className="mt-3 text-sm text-background/80 dark:text-foreground/80 leading-relaxed">
                   Each toolkit is designed to remove repetitive work, improve
                   audit readiness, and keep teams aligned on regulatory
                   standards.
@@ -118,7 +118,7 @@ export default function ToolkitsPlaceholder() {
                   {toolkitBenefits.map((benefit) => (
                     <div
                       key={benefit}
-                      className="rounded-lg border border-background/20 bg-background/10 p-3 text-xs text-background/80"
+                      className="rounded-lg border border-background/20 bg-background/10 dark:bg-border/50 dark:text-foreground/80 p-3 text-xs text-background/80"
                     >
                       {benefit}
                     </div>
@@ -131,7 +131,7 @@ export default function ToolkitsPlaceholder() {
                   Notify me on launch
                 </Button>
               </div>
-              <div className="rounded-[10px] border border-border bg-background/80 p-4">
+              <div className="rounded-[10px] border border-border bg-background/80 p-4 md:p-5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-base font-semibold">
                     What&apos;s coming next

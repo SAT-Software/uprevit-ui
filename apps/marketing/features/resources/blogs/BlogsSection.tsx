@@ -81,7 +81,7 @@ export default function BlogsSection() {
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      <div className="max-w-6xl mx-auto mb-12">
+      <div className="max-w-6xl mx-auto mb-12 px-2 md:px-2 lg:px-0">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
@@ -90,11 +90,11 @@ export default function BlogsSection() {
           <span className="font-medium">Blogs</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium leading-tightest">
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Insights for labeling leaders who need clarity fast
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-lg text-muted-foreground max-w-md">
+          <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             Clear, concise analysis of the regulatory shifts that matter most.
             Stay ahead of enforcement changes with practical guidance you can
             act on.
@@ -110,7 +110,7 @@ export default function BlogsSection() {
       </div>
 
       <div className="relative w-full mb-16">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           <DecorativeCornerCircleCustom
             positionClassName="bottom-0 -left-15"
             rotation={0}
@@ -133,7 +133,7 @@ export default function BlogsSection() {
               >
                 <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:120px_120px]" />
                 <div className="absolute inset-0 bg-linear-to-br from-white/12 via-transparent to-white/5" />
-                <div className="relative grid grid-cols-1 lg:grid-cols-[1.25fr_0.75fr] gap-8 p-6 min-h-[420px]">
+                <div className="relative grid grid-cols-1 lg:grid-cols-[1.25fr_0.75fr] gap-8 p-4 md:p-6 min-h-[420px]">
                   <div className="flex flex-col justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-white/70">
@@ -150,10 +150,10 @@ export default function BlogsSection() {
                           Featured
                         </span>
                       </div>
-                      <h3 className="mt-6 text-4xl md:text-5xl font-semibold leading-tight">
+                      <h3 className="mt-6 text-2xl md:text-4xl lg:text-5xl font-semibold leading-tight">
                         {featuredPost.title}
                       </h3>
-                      <p className="mt-4 text-sm text-white/70">
+                      <p className="mt-4 text-sm text-white/70 leading-relaxed">
                         {featuredPost.excerpt}
                       </p>
                     </div>
@@ -188,7 +188,7 @@ export default function BlogsSection() {
       </div>
 
       <div className="relative">
-        <div className="relative max-w-6xl mx-auto">
+        <div className="relative max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-15 -left-15"
             rotation={270}
@@ -226,7 +226,7 @@ export default function BlogsSection() {
                       </div>
                     </div>
                   </div>
-                  <div className="p-5">
+                   <div className="p-4 md:p-5">
                     <h4 className="text-base font-semibold leading-tight">
                       {news.title}
                     </h4>

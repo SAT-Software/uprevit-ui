@@ -76,7 +76,7 @@ export default function TemplatesSection() {
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      <div className="max-w-6xl mx-auto mb-10">
+      <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
@@ -85,11 +85,11 @@ export default function TemplatesSection() {
           <span className="font-medium">Templates</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium leading-tightest">
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Practical templates built for speed
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-lg text-muted-foreground max-w-md">
+          <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             Download ready-to-use assets created by regulatory experts. Stop
             rebuilding the basics and focus on quality review.
           </p>
@@ -106,7 +106,7 @@ export default function TemplatesSection() {
       </div>
 
       <div className="relative w-full">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-15 -left-15"
             rotation={270}
@@ -122,13 +122,13 @@ export default function TemplatesSection() {
 
           <div className="p-1 bg-accent border-border border rounded-[12px]">
             <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_2fr] gap-1">
-              <div className="rounded-[10px] flex flex-col gap-4 justify-between border border-border bg-background/80 p-6">
+              <div className="rounded-[10px] flex flex-col gap-4 justify-between border border-border bg-background/80 p-4 md:p-6">
                 <div>
                   <div>
-                    <div className="flex items-center gap-2 text-base font-semibold">
+                    <div className="flex items-center gap-2 text-sm md:text-base font-semibold">
                       Built for fast adoption
                     </div>
-                    <p className=" text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Each template includes clear guidance so teams can align
                       quickly, reduce review cycles, and keep documentation
                       consistent.
@@ -137,7 +137,7 @@ export default function TemplatesSection() {
                   <div className="mt-6 space-y-4">
                     {toolkitSteps.map((step, index) => (
                       <div key={step.title} className="flex gap-3">
-                        <div className="flex size-8 items-center justify-center rounded-full border border-border text-xs font-semibold">
+                        <div className="flex size-7 md:size-8 items-center justify-center rounded-full border border-border text-[11px] md:text-xs font-semibold shrink-0">
                           {index + 1}
                         </div>
                         <div>
@@ -166,7 +166,7 @@ export default function TemplatesSection() {
                 </div>
               </div>
 
-              <div className="rounded-[10px] border border-border bg-background/80 p-6">
+               <div className="rounded-[10px] border border-border bg-background/80 p-4 md:p-6">
                 <div className="flex flex-wrap items-center gap-2">
                   {tags.map((tag) => (
                     <Button
@@ -194,9 +194,9 @@ export default function TemplatesSection() {
                               {item.title}
                             </h4>
                           </div>
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {item.description}
-                          </p>
+                           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                             {item.description}
+                           </p>
                         </div>
                         <Badge variant="outline" className="text-xs">
                           {item.type}

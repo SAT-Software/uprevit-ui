@@ -90,7 +90,7 @@ export default function ResourcesHub() {
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      <div className="max-w-6xl mx-auto mb-10">
+      <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
         <Badge
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
@@ -99,11 +99,11 @@ export default function ResourcesHub() {
           <span className="font-medium">Resources</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium leading-tightest">
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             The library built for labeling teams
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-lg text-muted-foreground max-w-md">
+          <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             Templates, standards, and expert analysis organized into a single
             hub. Everything you need to move from draft to approved label with
             confidence.
@@ -139,7 +139,7 @@ export default function ResourcesHub() {
       </div>
 
       <div className="relative w-full">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-15 -left-15"
             rotation={270}
@@ -158,16 +158,16 @@ export default function ResourcesHub() {
               {resources.map((resource) => (
                 <div
                   key={resource.id}
-                  className="flex h-full flex-col justify-between rounded-[10px] border border-border bg-background/80 p-6"
+                  className="flex h-full flex-col justify-between rounded-[10px] border border-border bg-background/80 p-4 md:p-6"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-11 items-center justify-center rounded-xl bg-foreground text-background">
-                          <resource.icon className="size-5" />
+                        <div className="flex size-9 md:size-11 shrink-0 items-center justify-center rounded-lg md:rounded-xl bg-foreground text-background">
+                          <resource.icon className="size-4 md:size-5" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-semibold">
+                          <h3 className="text-lg md:text-xl font-semibold">
                             {resource.title}
                           </h3>
                           <p className="text-xs text-muted-foreground">
@@ -176,7 +176,7 @@ export default function ResourcesHub() {
                         </div>
                       </div>
                     </div>
-                    <p className="mt-4 text-sm text-foreground">
+                    <p className="mt-4 text-sm text-foreground leading-relaxed">
                       {resource.description}
                     </p>
                     <div className="mt-4 space-y-2">
