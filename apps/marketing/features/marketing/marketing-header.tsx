@@ -4,12 +4,16 @@ import * as React from "react";
 import Link from "next/link";
 import {
   PiFileTextDuotone,
+  PiListDuotone,
   PiSquaresFourDuotone,
   PiNewspaperDuotone,
   PiWrenchDuotone,
   PiStackDuotone,
+  PiMoneyDuotone,
+  PiAtDuotone,
 } from "react-icons/pi";
 import { cn } from "@uprevit/ui/lib/utils";
+import { Button } from "@uprevit/ui/components/ui/button";
 
 import { useIsMobile } from "@uprevit/ui/hooks/general/use-mobile";
 import {
@@ -21,6 +25,13 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@uprevit/ui/components/ui/navigation-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@uprevit/ui/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
@@ -54,6 +65,7 @@ const resourceLinks = [
 export default function MarketingHeader() {
   const isMobile = useIsMobile();
   const [isAtTop, setIsAtTop] = React.useState(true);
+  const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
   const pathname = usePathname();
 
   const isResourcesAndChildPaths = pathname.startsWith("/resources");
@@ -70,10 +82,20 @@ export default function MarketingHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  React.useEffect(() => {
+    setIsMobileNavOpen(false);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (!isMobile) {
+      setIsMobileNavOpen(false);
+    }
+  }, [isMobile]);
+
   return (
     <div
       className={cn(
-        "fixed top-0 w-full h-18 mx-auto flex items-center justify-between z-60 transition-all delay-150 ease-in-out duration-300",
+        "fixed top-0 w-full h-14 md:h-18 mx-auto flex items-center justify-between z-60 transition-all delay-150 ease-in-out duration-300",
         !isAtTop ? "bg-accent/80 border-b" : "bg-transparent",
         isDecoratedMarketingPage && "border-b border-dashed border-border/80",
       )}
@@ -83,7 +105,9 @@ export default function MarketingHeader() {
       }}
     >
       <div
-        className={"flex items-center justify-between max-w-6xl w-full mx-auto"}
+        className={
+          "flex items-center justify-between max-w-6xl w-full mx-auto px-4 sm:px-6"
+        }
       >
         <div>
           <Link
@@ -106,61 +130,189 @@ export default function MarketingHeader() {
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          <NavigationMenu viewport={isMobile}>
-            <NavigationMenuList className="flex-wrap">
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-                <NavigationMenuContent className="">
-                  <ul className="grid gap-2 md:w-[400px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
-                    <li className="row-span-4">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
-                          href="/resources"
+          <div className="hidden md:flex items-center gap-4">
+            <NavigationMenu viewport={false}>
+              <NavigationMenuList className="flex-wrap">
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+                  <NavigationMenuContent className="md:left-auto md:right-0">
+                    <ul className="grid gap-2 md:w-[400px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
+                      <li className="row-span-4">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
+                            href="/resources"
+                          >
+                            <div className="mb-3 flex size-10 items-center justify-center rounded-lg border border-border bg-background/80">
+                              <PiStackDuotone className="size-5 text-foreground" />
+                            </div>
+                            <div className="mb-2 text-lg font-medium">
+                              Resources Hub
+                            </div>
+                            <p className="text-muted-foreground text-sm leading-tight">
+                              Compliance resources, templates, and tools.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      {resourceLinks.map((link) => (
+                        <ListItem
+                          key={link.title}
+                          href={link.href}
+                          title={link.title}
+                          icon={link.icon}
                         >
-                          <div className="mb-3 flex size-10 items-center justify-center rounded-lg border border-border bg-background/80">
-                            <PiStackDuotone className="size-5 text-foreground" />
+                          {link.description}
+                        </ListItem>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    <Link href="/pricing">Pricing</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    <Link href="/contact">Contact</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+
+          <div className="md:hidden">
+            <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-10 text-foreground"
+                  aria-label="Open navigation menu"
+                >
+                  <PiListDuotone className="size-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="z-95 w-full max-w-none overflow-y-auto border-l border-border bg-background px-0 sm:max-w-sm"
+              >
+                <SheetHeader className="border-b border-border px-4 py-4 text-left">
+                  <SheetTitle className="text-base font-semibold">
+                    Navigation
+                  </SheetTitle>
+                </SheetHeader>
+
+                <div className="flex flex-col px-4">
+                  <div className="flex flex-col gap-2 border-b border-border pb-4">
+                    <Link
+                      href="/pricing"
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border border-border bg-accent/40 px-4 py-3 transition-colors hover:bg-accent",
+                        isResourcesAndChildPaths &&
+                          "border-foreground/20 bg-accent",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-background">
+                          <PiMoneyDuotone className="size-5 text-foreground" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            Pricing
                           </div>
-                          <div className="mb-2 text-lg font-medium">
+                          <p className="text-muted-foreground text-xs leading-snug">
+                            Uprevit pricing plans and details
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border border-border bg-accent/40 px-4 py-3 transition-colors hover:bg-accent",
+                        isResourcesAndChildPaths &&
+                          "border-foreground/20 bg-accent",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-background">
+                          <PiAtDuotone className="size-5 text-foreground" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            Contact
+                          </div>
+                          <p className="text-muted-foreground text-xs leading-snug">
+                            Get in touch with us for demo or support
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/resources"
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border border-border bg-accent/40 px-4 py-3 transition-colors hover:bg-accent",
+                        isResourcesAndChildPaths &&
+                          "border-foreground/20 bg-accent",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-background">
+                          <PiStackDuotone className="size-5 text-foreground" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
                             Resources Hub
                           </div>
-                          <p className="text-muted-foreground text-sm leading-tight">
-                            Compliance resources, templates, and tools.
+                          <p className="text-muted-foreground text-xs leading-snug">
+                            Compliance resources, templates, and tools
                           </p>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+
+                  <div className="border-b border-border py-5">
+                    <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Resources
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {resourceLinks.map((link) => (
+                        <Link
+                          key={link.title}
+                          href={link.href}
+                          className={cn(
+                            "flex items-start gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-accent",
+                            pathname === link.href && "bg-accent",
+                          )}
+                        >
+                          <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background">
+                            <link.icon className="size-4 text-foreground" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-foreground">
+                              {link.title}
+                            </div>
+                            <p className="text-muted-foreground text-xs leading-snug">
+                              {link.description}
+                            </p>
+                          </div>
                         </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    {resourceLinks.map((link) => (
-                      <ListItem
-                        key={link.title}
-                        href={link.href}
-                        title={link.title}
-                        icon={link.icon}
-                      >
-                        {link.description}
-                      </ListItem>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link href="/pricing">Pricing</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link href="/contact">Contact</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </div>

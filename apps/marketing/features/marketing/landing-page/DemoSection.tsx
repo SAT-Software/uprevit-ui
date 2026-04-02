@@ -14,7 +14,7 @@ export default function DemoSection() {
 
   return (
     <div ref={demoRef} className="w-full mt-40 mb-20">
-      <div className="max-w-6xl mx-auto mb-8 relative">
+      <div className="max-w-6xl mx-auto mb-8 relative px-2 md:px-2 lg:px-0">
         <Badge
           suppressHydrationWarning
           variant={badgeVariant}
@@ -24,18 +24,18 @@ export default function DemoSection() {
           <span className="font-medium">Uprevit Demo</span>
         </Badge>
 
-        <div className="w-full flex items-center justify-start text-2xl">
-          <h2 className="text-5xl w-1/2 font-medium mr-16">
+        <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">
+          <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-1/2 font-medium mr-16 mb-4 md:mb-0">
             The FastTrack way to Global labeling compliance
           </h2>
-          <div className="mr-12 h-16 w-px bg-border" />
-          <p className="font-semibold text-muted-foreground/60">
+          <div className="hidden lg:block mr-12 h-16 w-px bg-border" />
+          <p className="text-base md:text-lg lg:text-xl font-semibold text-muted-foreground/60">
             Command Your Labels. <br /> Command Your Compliance.
           </p>
         </div>
       </div>
       <div className="relative w-full">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           {/* Bottom-left corner (medium size) */}
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-15 -left-15"

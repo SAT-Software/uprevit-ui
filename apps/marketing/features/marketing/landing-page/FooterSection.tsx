@@ -7,16 +7,16 @@ import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 
 export default function FooterSection() {
   return (
-    <footer className="w-full bg-black text-background px-6 md:px-20 mt-20 pointer-events-auto z-45">
-      <div className="relative max-w-6xl mx-auto py-16">
+    <footer className="w-full bg-black text-background mt-20 pointer-events-auto z-45">
+      <div className="relative max-w-6xl mx-auto py-16 px-2 md:px-2 lg:px-0">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-16">
           {/* Brand Column */}
           <div className="md:col-span-6 flex flex-col justify-between">
             <div>
-              <h3 className="text-xl font-medium text-gray-300 mb-0">
+              <h3 className="text-lg md:text-xl font-medium text-gray-300 mb-0">
                 The unified cloud-based platform
               </h3>
-              <h3 className="text-xl font-medium text-gray-500 mb-12">
+              <h3 className="text-lg md:text-xl font-medium text-gray-500 mb-12">
                 for total labeling governance
               </h3>
             </div>

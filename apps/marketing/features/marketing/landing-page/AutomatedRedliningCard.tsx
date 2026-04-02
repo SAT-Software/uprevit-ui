@@ -22,6 +22,7 @@ import {
   PiTagDuotone,
   PiTextAlignLeftDuotone,
 } from "react-icons/pi";
+import { useTouchCardActivation } from "./useTouchCardActivation";
 
 type RowData = {
   no: string;
@@ -49,13 +50,13 @@ const CellContent = ({
         <div className="absolute inset-0 flex flex-col gap-0.5">
           <TextScramble
             trigger={TextScrambleTrigger}
-            className="text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-400 transition-all duration-500 ease-in-out line-through opacity-100"
+            className="text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-400 group-data-[active=true]:text-red-500 group-data-[active=true]:dark:text-red-400 transition-all duration-500 ease-in-out line-through opacity-100"
           >
             {data.redline.old}
           </TextScramble>
           <TextScramble
             trigger={TextScrambleTrigger}
-            className="text-muted-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-400 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 font-medium"
+            className="text-muted-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-400 group-data-[active=true]:text-emerald-600 group-data-[active=true]:dark:text-emerald-400 transition-all duration-500 ease-in-out opacity-50 group-hover:opacity-100 group-data-[active=true]:opacity-100 font-medium"
           >
             {data.redline.new}
           </TextScramble>
@@ -263,46 +264,58 @@ const tableData: RowData[] = [
 ];
 
 export function AutomatedRedliningCard() {
-  const [versionText, setVersionText] = useState("1");
   const [TextScrambleTrigger, setTextScrambleTrigger] = useState(false);
+  const { isTouchActive, activateTouch, deactivateTouch, scheduleTouchDeactivate } =
+    useTouchCardActivation();
 
   return (
     <div
       onMouseEnter={() => {
-        setVersionText("2");
         setTextScrambleTrigger(true);
       }}
       onMouseLeave={() => {
-        setVersionText("1");
         setTextScrambleTrigger(false);
       }}
-      className="relative group w-2/3 h-full bg-background p-8 rounded-xl border border-border flex flex-col overflow-hidden group transition-all duration-300 ease-in-out delay-300"
+      onTouchStart={() => {
+        activateTouch();
+        setTextScrambleTrigger(true);
+      }}
+      onTouchEnd={() => {
+        scheduleTouchDeactivate();
+        setTextScrambleTrigger(false);
+      }}
+      onTouchCancel={() => {
+        deactivateTouch();
+        setTextScrambleTrigger(false);
+      }}
+      data-active={isTouchActive ? "true" : undefined}
+      className="lg:relative group w-full lg:w-2/3 h-125 lg:h-full bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col overflow-hidden group transition-all duration-300 ease-in-out delay-300"
     >
       <div className="z-10 flex flex-col h-full">
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
+          <h3 className="text-base md:text-base lg:text-lg font-semibold text-foreground mb-2">
             Automated Redlining
           </h3>
-          <p className="w-2/3 text-muted-foreground leading-relaxed">
+          <p className="text-xs md:text-sm lg:text-base w-full lg:w-2/3 text-muted-foreground leading-relaxed text-balance">
             No manual redlining of older versions. Get automated redlining copy
             with master version
           </p>
         </div>
 
-        <div className="absolute -bottom-16 -right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out delay-300">
+        <div className="lg:absolute -bottom-16 lg:-right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out delay-300">
           <div className="p-1 bg-accent border border-border rounded-2xl">
             <div className="relative h-full bg-background rounded-t-[15px] border border-border shadow-md overflow-hidden flex flex-col">
-              <div className="flex items-center justify-start gap-4 px-2 py-2 border-b bg-muted/30">
+              <div className="flex flex-col items-start gap-2 px-2 py-2 sm:flex-row sm:items-center sm:justify-start sm:gap-4 border-b bg-muted/30">
                 <div className="text-xs font-bold text-foreground">
                   Label Components
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
                     <PiPlusCircleDuotone className="h-2.5 w-2.5 text-muted-foreground" />
                     Version 2
                   </button>
-                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 transition-all duration-300 ease-in-out delay-100">
-                    <PiCaretCircleDownDuotone className="h-2.5 w-2.5 text-muted-foreground group-hover:text-primary" />
+                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 group-data-[active=true]:bg-purple-100/50 group-data-[active=true]:dark:bg-purple-900/50 group-data-[active=true]:border-purple-500 transition-all duration-300 ease-in-out delay-100">
+                    <PiCaretCircleDownDuotone className="h-2.5 w-2.5 text-muted-foreground group-hover:text-primary group-data-[active=true]:text-primary" />
                     View Redline
                   </button>
                 </div>

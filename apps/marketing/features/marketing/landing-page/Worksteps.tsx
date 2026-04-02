@@ -98,15 +98,15 @@ export function Worksteps({ className }: WorkstepsProps) {
       onMouseEnter={updatedSteps}
       onMouseLeave={resetSteps}
       className={cn(
-        "w-full h-full group bg-background p-8 rounded-xl border border-border flex flex-col items-start justify-start relative overflow-hidden",
+        "w-full h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col items-start justify-start relative overflow-hidden",
         className
       )}
     >
       <div className="mb-8 z-10 relative">
-        <h3 className="text-lg font-semibold text-foreground tracking-tight">
+        <h3 className="text-base md:text-base lg:text-lg font-semibold text-foreground tracking-tight">
           Labeling Asset Management
         </h3>
-        <p className="text-muted-foreground text-sm mt-1">
+        <p className="text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
           Your single source of truth for all compliant symbols, schematics, and
           product imagery
         </p>
@@ -118,7 +118,7 @@ export function Worksteps({ className }: WorkstepsProps) {
           aria-hidden="true"
         />
 
-        <div className="space-y-8">
+        <div className="space-y-5 lg:space-y-8">
           {steps.map((step, index) => {
             const isCompleted = step.status === "Completed";
             const isInProgress = step.status === "In Progress";
@@ -162,7 +162,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                     isPending ? "opacity-60" : "opacity-100"
                   )}
                 >
-                  <div className="flex items-center justify-between gap-2 mb-0">
+                  <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 mb-0">
                     <h4
                       className={cn(
                         "text-sm font-semibold transition-colors",
@@ -187,10 +187,10 @@ export function Worksteps({ className }: WorkstepsProps) {
                       {step.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed max-w-[90%]">
-                    {step.description}
-                  </p>
-                </div>
+                   <p className="text-xs text-muted-foreground leading-relaxed max-w-full lg:max-w-[90%]">
+                     {step.description}
+                   </p>
+                 </div>
               </div>
             );
           })}

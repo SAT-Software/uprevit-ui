@@ -34,7 +34,7 @@ export default function HeroFeatureCards({
   onActiveChange: (index: number) => void;
 }) {
   return (
-    <div className="grid group max-w-6xl mx-auto w-full">
+    <div className="hidden md:grid group max-w-6xl mx-auto w-full">
       <div className="col-start-1 row-start-1 transform-none">
         <div className="[--row-height:11.3px]">
           <div className="relative grid grid-cols-[repeat(118,1fr)] grid-rows-[repeat(12,var(--row-height))] gap-y-[19px]">

@@ -6,7 +6,7 @@ export default function CTASection() {
   return (
     <div className="w-full mt-40 mb-20">
       <div className="relative w-full">
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
           {/* Bottom-left corner (large size, custom rotation) */}
           <DecorativeCornerCircleCustom
             positionClassName="-bottom-14 -left-16"
@@ -21,9 +21,9 @@ export default function CTASection() {
           />
 
           <div className="p-1 bg-accent rounded-2xl max-w-6xl mx-auto border border-border">
-            <div className="w-full bg-foreground dark:bg-background rounded-[14px] h-120 text-background dark:text-foreground p-10 gap-10 flex items-center justify-between overflow-hidden">
+            <div className="w-full bg-foreground dark:bg-background rounded-[14px] h-120 text-background dark:text-foreground p-6 md:p-8 lg:p-10 gap-10 flex flex-col lg:flex-row items-center justify-between overflow-hidden">
               <div className="w-full min-w-[30%] flex flex-col items-start justify-between">
-                <h2 className="text-5xl font-bold">
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold">
                   Master Your Labeling Compliance{" "}
                   <span className="text-accent/60 dark:text-foreground/40">
                     Today
@@ -34,10 +34,10 @@ export default function CTASection() {
                 </div>
               </div>
               <div className="w-full flex justify-center md:justify-end">
-                <div className="relative w-[560px] sm:w-[640px] md:w-[720px] lg:w-[900px] -mr-10">
+                <div className="relative w-[360px] sm:w-[640px] md:w-[720px] lg:w-[900px] -mr-5 lg:-mr-10">
                   {/* <div className="absolute -bottom-10 -left-6 h-40 w-56 rounded-full bg-accent/30 blur-3xl" /> */}
                   <div
-                    className="relative top-25"
+                    className="relative top-5 md:top-25"
                     style={{
                       transform:
                         "perspective(900px) rotateX(20deg) rotateY(-5deg) rotateZ(5deg) translateX(-20px)",

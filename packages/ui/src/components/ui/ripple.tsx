@@ -25,81 +25,88 @@ export const Ripple = React.memo(function Ripple({
   items = [],
   ...props
 }: RippleProps) {
+  const sceneSize = mainCircleSize + (numCircles - 1) * 300;
+
   return (
     <div
       className={cn(
         "pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden [mask-image:linear-gradient(to_bottom,white,transparent)] select-none",
-        className
+        className,
       )}
       {...props}
     >
-      {Array.from({ length: numCircles }, (_, i) => {
-        const size = mainCircleSize + i * 300;
-        const opacity = mainCircleOpacity - i * 0.02;
-        const borderStyle = "dashed";
+      <div
+        className="relative origin-center scale-[0.5] sm:scale-[0.6] md:scale-[0.75] lg:scale-100"
+        style={{
+          width: `${sceneSize}px`,
+          height: `${sceneSize}px`,
+        }}
+      >
+        {Array.from({ length: numCircles }, (_, i) => {
+          const size = mainCircleSize + i * 300;
+          const opacity = mainCircleOpacity - i * 0.02;
+          const borderStyle = "dashed";
 
-        // Find items for this circle
-        const circleItems = items.filter((item) => item.circleIndex === i);
+          const circleItems = items.filter((item) => item.circleIndex === i);
 
-        return (
-          <div
-            key={i}
-            className="absolute flex items-center justify-center rounded-full border bg-foreground/5 shadow-xl"
-            style={{
-              width: `${size}px`,
-              height: `${size}px`,
-              opacity,
-              borderStyle,
-              borderWidth: "1px",
-              borderColor: `var(--foreground)`,
-            }}
-          >
-            {circleItems.map((item, idx) => {
-              const speed = item.speed || 20;
-              const reverse = item.reverse;
-              const initialAngle =
-                item.initialAngle !== undefined
-                  ? item.initialAngle
-                  : (360 / circleItems.length) * idx;
+          return (
+            <div
+              key={i}
+              className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-foreground/5 shadow-xl"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                opacity,
+                borderStyle,
+                borderWidth: "1px",
+                borderColor: `var(--foreground)`,
+              }}
+            >
+              {circleItems.map((item, idx) => {
+                const speed = item.speed || 20;
+                const reverse = item.reverse;
+                const initialAngle =
+                  item.initialAngle !== undefined
+                    ? item.initialAngle
+                    : (360 / circleItems.length) * idx;
 
-              const delay = reverse
-                ? -1 * speed * (1 - initialAngle / 360)
-                : -1 * speed * (initialAngle / 360);
+                const delay = reverse
+                  ? -1 * speed * (1 - initialAngle / 360)
+                  : -1 * speed * (initialAngle / 360);
 
-              return (
-                <div key={idx} className="absolute inset-0">
-                  <div
-                    className={cn("absolute inset-0 animate-spin")}
-                    style={{
-                      animationDuration: `${speed}s`,
-                      animationDirection: reverse ? "reverse" : "normal",
-                      animationDelay: `${delay}s`,
-                    }}
-                  >
+                return (
+                  <div key={idx} className="absolute inset-0">
                     <div
-                      className="absolute top-0 left-1/2"
+                      className={cn("absolute inset-0 animate-spin")}
                       style={{
-                        transform: "translate(-50%, -50%)",
+                        animationDuration: `${speed}s`,
+                        animationDirection: reverse ? "reverse" : "normal",
+                        animationDelay: `${delay}s`,
                       }}
                     >
                       <div
-                        className={cn("animate-spin")}
-                        style={{
-                          animationDuration: `${speed}s`,
-                          animationDirection: reverse ? "normal" : "reverse",
-                          animationDelay: `${delay}s`,
-                        }}
+                        className="absolute left-1/2 top-0"
+                        style={{ transform: "translate(-50%, -50%)" }}
                       >
-                        {item.content}
+                        <div
+                          className={cn("animate-spin")}
+                          style={{
+                            animationDuration: `${speed}s`,
+                            animationDirection: reverse ? "normal" : "reverse",
+                            animationDelay: `${delay}s`,
+                          }}
+                        >
+                          {item.content}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 });
