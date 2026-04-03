@@ -68,8 +68,9 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
                   src="/MDR_Label.webp"
                   alt="MDR Label"
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-sm dark:brightness-[0.82] dark:contrast-[0.92]"
                 />
+                <div className="pointer-events-none absolute inset-0 hidden dark:block bg-gradient-to-b from-slate-950/10 via-slate-950/18 to-slate-950/22" />
 
                 <div className="absolute w-0 h-0 hidden sm:block sm:top-12 sm:left-1 sm:w-36 sm:h-7 border border-transparent bg-transparent group-hover:border-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-400" />
                 <div className="absolute w-0 h-0 hidden sm:block   sm:top-20 sm:left-8.5 sm:w-22 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-500" />

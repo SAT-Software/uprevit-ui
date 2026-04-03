@@ -41,9 +41,18 @@ export default function ReportSection() {
 
           <div className="p-1 bg-accent border-border border rounded-[12px] max-w-6xl mx-auto">
             <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
-              <CardContent className="p-0 overflow-hidden">
+              <CardContent className="p-0 overflow-hidden dark:hidden">
                 <video
-                  src="/Uprevit-Report-Feature-Video.mp4"
+                  src="/Report-Light-Demo.mp4"
+                  className="overflow-hidden rounded-xl"
+                  autoPlay
+                  loop
+                  muted
+                />
+              </CardContent>
+              <CardContent className="p-0 overflow-hidden dark:block hidden">
+                <video
+                  src="/Report-Dark-Demo.mp4"
                   className="overflow-hidden rounded-xl"
                   autoPlay
                   loop

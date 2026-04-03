@@ -8,8 +8,12 @@ import {
 import { useTouchCardActivation } from "./useTouchCardActivation";
 
 export function VersionControlCards() {
-  const { isTouchActive, activateTouch, deactivateTouch, scheduleTouchDeactivate } =
-    useTouchCardActivation();
+  const {
+    isTouchActive,
+    activateTouch,
+    deactivateTouch,
+    scheduleTouchDeactivate,
+  } = useTouchCardActivation();
 
   const cards = [
     {
@@ -95,7 +99,7 @@ export function VersionControlCards() {
               className={cn(
                 "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 group-data-[active=true]:-mb-2 transition-all duration-300 ease-in-out delay-300",
                 isActive
-                  ? "shadow-md border-foreground/20 bg-foreground z-50 group-hover:bg-neutral-800 group-hover:dark:bg-neutral-200 group-data-[active=true]:bg-neutral-800 group-data-[active=true]:dark:bg-neutral-200"
+                  ? "shadow-md border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-neutral-800 group-hover:dark:bg-neutral-800 group-data-[active=true]:bg-neutral-800 group-data-[active=true]:dark:bg-neutral-200"
                   : "shadow-sm bg-accent/60 z-40 group-hover:bg-accent group-data-[active=true]:bg-accent",
                 !isActive &&
                   dist === 1 &&
@@ -110,12 +114,12 @@ export function VersionControlCards() {
               <div className="flex items-start justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div
-                      className={cn(
-                        "p-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
-                        isActive
-                          ? "bg-neutral-700 group-hover:dark:bg-neutral-300 text-neutral-300 border border-neutral-600 group-hover:text-purple-400 group-hover:dark:text-purple-600 group-data-[active=true]:dark:bg-neutral-300 group-data-[active=true]:text-purple-400 group-data-[active=true]:dark:text-purple-600"
-                          : "bg-accent/50 text-muted-foreground",
-                      )}
+                    className={cn(
+                      "p-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
+                      isActive
+                        ? "bg-neutral-700 group-hover:dark:bg-neutral-900 text-neutral-300 border border-neutral-600 group-hover:text-purple-400 group-hover:dark:text-purple-600 group-data-[active=true]:dark:bg-neutral-300 group-data-[active=true]:text-purple-400 group-data-[active=true]:dark:text-purple-600"
+                        : "bg-accent/50 text-muted-foreground",
+                    )}
                   >
                     <PiCubeDuotone className="w-3.5 h-3.5" />
                   </div>
@@ -123,7 +127,7 @@ export function VersionControlCards() {
                     <div
                       className={cn(
                         "text-sm font-medium text-background leading-none",
-                        isActive ? "text-background" : "text-muted-foreground",
+                        isActive ? "text-background dark:text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {card.name}
@@ -132,7 +136,7 @@ export function VersionControlCards() {
                       className={cn(
                         "text-[10px] text-muted-foreground mt-0.5",
                         isActive
-                          ? "text-background/50"
+                          ? "text-background/50 dark:text-foreground/50"
                           : "text-muted-foreground",
                       )}
                     >
@@ -163,7 +167,7 @@ export function VersionControlCards() {
                   className={cn(
                     "flex items-center gap-1.5 text-[10px] text-muted-foreground",
                     isActive
-                      ? "text-background/70 group-hover:text-background group-data-[active=true]:text-background"
+                      ? "text-background/70 dark:text-foreground/70 group-hover:text-background group-data-[active=true]:text-background"
                       : "text-muted-foreground",
                   )}
                 >
@@ -173,7 +177,7 @@ export function VersionControlCards() {
                 <div
                   className={cn(
                     "flex items-center gap-1.5 text-[10px] text-muted-foreground",
-                    isActive ? "text-background/70" : "text-muted-foreground",
+                    isActive ? "text-background/70 dark:text-foreground/70" : "text-muted-foreground",
                   )}
                 >
                   <PiCalendarBlankDuotone className="w-3 h-3" />

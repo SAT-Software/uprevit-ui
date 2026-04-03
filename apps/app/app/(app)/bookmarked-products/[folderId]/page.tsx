@@ -34,9 +34,9 @@ export default function FolderPage() {
 
   const { data: foldersData } = useGetAllUserBookmarkFolders();
   const bookmarkFolderName =
-    foldersData?.result?.bookmarked_product_folders?.filter(
-      (folder: BookmarkProduct) => folder._id === folderId
-    )?.[0]?.folder_name;
+    foldersData?.result?.bookmarked_product_folders?.find(
+      (folder) => folder._id === folderId
+    )?.folder_name ?? "";
 
   const {
     data: folderData,

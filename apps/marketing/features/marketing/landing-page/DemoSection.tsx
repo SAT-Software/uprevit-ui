@@ -56,9 +56,18 @@ export default function DemoSection() {
 
           <div className="p-1 bg-accent border-border border rounded-[12px]">
             <Card className="aspect-video mx-auto border-border overflow-hidden">
-              <CardContent className="p-0 overflow-hidden">
+              <CardContent className="p-0 overflow-hidden dark:hidden">
                 <video
-                  src="/Uprevit-ComingSoon-Intro.mp4"
+                  src="/Uprevit-ComingSoon-Intro-Light.mp4"
+                  className="overflow-hidden rounded-xl"
+                  autoPlay
+                  loop
+                  muted
+                />
+              </CardContent>
+              <CardContent className="p-0 overflow-hidden dark:block hidden">
+                <video
+                  src="/Uprevit-ComingSoon-Intro-Dark.mp4"
                   className="overflow-hidden rounded-xl"
                   autoPlay
                   loop
