@@ -1,140 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Ripple } from "@uprevit/ui/components/ui/ripple";
 
-const items = [
-  {
-    circleIndex: 0,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/CE.png"
-          alt="CE symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 55,
-    initialAngle: 0,
-  },
-  {
-    circleIndex: 1,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/MD.png"
-          alt="Medical device symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 35,
-    reverse: true,
-    initialAngle: 180,
-  },
-  {
-    circleIndex: 2,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/DMGPKG.png"
-          alt="Packaging symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 35,
-    initialAngle: 90,
-  },
-  {
-    circleIndex: 3,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/2DBarcode.png"
-          alt="2D barcode"
-          fill
-          className="object-contain p-3"
-        />
-      </div>
-    ),
-    speed: 40,
-    reverse: true,
-    initialAngle: 160,
-  },
-  {
-    circleIndex: 0,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/FDA.png"
-          alt="FDA icon"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 50,
-    reverse: true,
-    initialAngle: 180,
-  },
-  {
-    circleIndex: 1,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/DoNotReuse.png"
-          alt="Do not reuse symbol"
-          fill
-          className="object-contain p-3"
-        />
-      </div>
-    ),
-    speed: 35,
-    initialAngle: 0,
-  },
-  {
-    circleIndex: 2,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/UKCA.png"
-          alt="UKCA symbol"
-          fill
-          className="object-contain p-3"
-        />
-      </div>
-    ),
-    speed: 45,
-    reverse: true,
-    initialAngle: 200,
-  },
-  {
-    circleIndex: 3,
-    content: (
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-foreground bg-neutral-100 dark:bg-neutral-500">
-        <Image
-          src="/ISO.png"
-          alt="ISO symbol"
-          fill
-          className="object-contain p-2"
-        />
-      </div>
-    ),
-    speed: 35,
-    reverse: true,
-    initialAngle: 90,
-  },
+const rippleRingSizes = [
+  "h-[24rem] w-[24rem] sm:h-[42rem] sm:w-[42rem]",
+  "h-[34rem] w-[34rem] sm:h-[58rem] sm:w-[58rem]",
+  "h-[44rem] w-[44rem] sm:h-[75rem] sm:w-[75rem]",
+  "h-[54rem] w-[54rem] sm:h-[90rem] sm:w-[90rem]",
 ];
 
 const getProfileValue = (
@@ -183,20 +60,38 @@ export default function AppEntryPage() {
   ]);
 
   const isCheckingAuthenticatedUser =
-    auth.isLoading || (auth.isAuthenticated && userIdFromToken && isUserLoading);
+    auth.isLoading ||
+    (auth.isAuthenticated && userIdFromToken && isUserLoading);
 
   if (isCheckingAuthenticatedUser) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-accent/40">
-        <p className="text-sm text-muted-foreground">Preparing your workspace...</p>
+        <p className="text-sm text-muted-foreground">
+          Preparing your workspace...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-accent/50 px-6 py-16">
-      <div className="pointer-events-none absolute inset-0">
-        <Ripple items={items} />
+    <div className="relative flex min-h-screen h-full items-center justify-center overflow-hidden bg-accent/50 px-6 py-16">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at center, hsl(var(--accent) / 0.36) 0%, hsl(var(--muted) / 0.22) 38%, hsl(var(--background) / 0.12) 72%, hsl(var(--background) / 0.28) 100%)",
+        }}
+      />
+
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="relative flex items-center justify-center opacity-80">
+          {rippleRingSizes.map((size) => (
+            <div
+              key={size}
+              className={`absolute rounded-full border border-dashed border-foreground/15 bg-accent/5 ${size}`}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center">
