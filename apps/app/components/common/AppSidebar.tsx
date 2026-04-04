@@ -44,6 +44,11 @@ import {
   CollapsibleContent,
 } from "@uprevit/ui/components/ui/collapsible";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
@@ -179,13 +184,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               src="/log-no-bg-black.svg"
               alt="Uprevit logo"
               fill
-              className=""
+              className="object-contain dark:hidden"
+            />
+            <Image
+              src="/log-no-bg-white.svg"
+              alt="Uprevit logo"
+              fill
+              className="hidden object-contain dark:block"
             />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate text-lg text-foreground font-black ">
-              UPREVIT
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="truncate text-lg text-foreground font-black ">
+                UPREVIT
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    aria-label="Alpha release"
+                    className="rounded-full border border-sidebar-border bg-sidebar-accent px-2 py-0.5 text-xs font-semibold text-sidebar-foreground/70"
+                  >
+                    α
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Early preview. Active updates are in progress.
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         </Link>
       </SidebarHeader>

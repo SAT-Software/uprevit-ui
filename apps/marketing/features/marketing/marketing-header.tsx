@@ -26,6 +26,11 @@ import {
   navigationMenuTriggerStyle,
 } from "@uprevit/ui/components/ui/navigation-menu";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -134,9 +139,24 @@ export default function MarketingHeader() {
                   />
                 </div>
                 <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate text-lg text-foreground font-extrabold mt-0.5">
-                    UPREVIT
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-lg text-foreground font-extrabold mt-0.5">
+                      UPREVIT
+                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          aria-label="Alpha release"
+                          className="rounded-full border border-border bg-accent px-2 py-0.5 text-xs font-semibold text-muted-foreground"
+                        >
+                          α
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Early preview. Active updates are in progress.
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
               </Link>
             </div>

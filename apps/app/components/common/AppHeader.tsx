@@ -136,7 +136,7 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 bg-muted flex shrink-0 items-center justify-between px-2 gap-2 border-b border-border transition-[width,height,left] ease-linear duration-200",
+        "fixed top-0 z-50 bg-sidebar flex shrink-0 items-center justify-between px-2 gap-2 border-b border-sidebar-border transition-[width,height,left] ease-linear duration-200",
         // Width and positioning that accounts for sidebar
         "left-0 right-0",
         "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",

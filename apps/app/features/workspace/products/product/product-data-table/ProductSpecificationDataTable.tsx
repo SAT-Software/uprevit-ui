@@ -71,6 +71,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTheme } from "next-themes";
 import {
   PiArrowClockwiseBold,
   PiArrowCounterClockwiseBold,
@@ -167,8 +168,10 @@ const ROW_NUMBER_WIDTH = 50;
 const MIN_COL_WIDTH = 50;
 const MAX_COL_WIDTH = 500;
 
-const DEFAULT_COLORS = [
-  "#ffffff",
+const NO_FILL_COLOR = "transparent";
+
+const LIGHT_FILL_COLORS = [
+  NO_FILL_COLOR,
   "#f9fafb",
   "#fffbeb",
   "#f0fdf4",
@@ -176,6 +179,17 @@ const DEFAULT_COLORS = [
   "#fdf2f8",
   "#fef2f2",
   "#eef2ff",
+];
+
+const DARK_FILL_COLORS = [
+  NO_FILL_COLOR,
+  "#27272a",
+  "#422006",
+  "#052e16",
+  "#172554",
+  "#4a044e",
+  "#450a0a",
+  "#312e81",
 ];
 
 const DEFAULT_TEXT_COLORS = [
@@ -388,10 +402,13 @@ export function ProductSpecificationDataTable({
   redlineMode = "inline",
   redlineBaseData,
 }: ProductSpecificationDataTableProps) {
+  const { resolvedTheme } = useTheme();
   const parentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedData = useRef(false);
   const dndContextId = useId();
+  const fillColors =
+    resolvedTheme === "dark" ? DARK_FILL_COLORS : LIGHT_FILL_COLORS;
 
   useEffect(() => {
     if (!hasLoadedData.current && initialData) {
@@ -824,7 +841,7 @@ export function ProductSpecificationDataTable({
         const prev = cellFormats[key];
         const next = {
           ...prev,
-          bgColor: color === "#ffffff" ? undefined : color,
+          bgColor: color === NO_FILL_COLOR ? undefined : color,
         };
         changes.push({ key, prev, next });
         setCellFormats((f) => ({ ...f, [key]: next }));
@@ -833,7 +850,7 @@ export function ProductSpecificationDataTable({
           const prev = cellFormats[key];
           const next = {
             ...prev,
-            bgColor: color === "#ffffff" ? undefined : color,
+            bgColor: color === NO_FILL_COLOR ? undefined : color,
           };
           changes.push({ key, prev, next });
         });
@@ -842,7 +859,7 @@ export function ProductSpecificationDataTable({
           selectedCells.forEach((key) => {
             updated[key] = {
               ...updated[key],
-              bgColor: color === "#ffffff" ? undefined : color,
+              bgColor: color === NO_FILL_COLOR ? undefined : color,
             };
           });
           return updated;
@@ -1309,13 +1326,21 @@ export function ProductSpecificationDataTable({
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted-foreground">Fill:</span>
           <div className="flex gap-0.5">
-            {DEFAULT_COLORS.map((color) => (
+            {fillColors.map((color) => (
               <button
                 key={`bg-${color}`}
                 onClick={() => applyBgColor(color)}
                 className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all"
-                style={{ backgroundColor: color }}
-                title={color === "#ffffff" ? "No fill" : color}
+                style={
+                  color === NO_FILL_COLOR
+                    ? {
+                        backgroundColor: "var(--background)",
+                        backgroundImage:
+                          "linear-gradient(135deg, transparent 44%, rgba(248, 113, 113, 0.9) 44%, rgba(248, 113, 113, 0.9) 56%, transparent 56%)",
+                      }
+                    : { backgroundColor: color }
+                }
+                title={color === NO_FILL_COLOR ? "No fill" : color}
               />
             ))}
           </div>
