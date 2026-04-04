@@ -1,0 +1,510 @@
+"use client";
+
+import { toast } from "sonner";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { useEffect, useId, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
+import { useFileUpload } from "@/hooks/general/use-file-upload";
+import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { Textarea } from "@uprevit/ui/components/ui/textarea";
+import {
+  PiBuildingsDuotone,
+  PiPencilCircleDuotone,
+  PiXCircleDuotone,
+  PiCheckCircleDuotone,
+} from "react-icons/pi";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import Image from "next/image";
+import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
+import { useUpdateProject } from "@/hooks/project/useUpdateProject";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import type { Project } from "@/types/project";
+import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { Department } from "@/types/department";
+
+interface User {
+  _id: string;
+  name: string;
+  profileAvatar: string;
+  src?: string;
+}
+
+interface ProjectWithUsers extends Omit<Project, "users"> {
+  users?: User[];
+}
+
+interface DialogUpdateProjectProps {
+  project: ProjectWithUsers;
+}
+
+export default function UpdateProjectDialog({
+  project,
+}: DialogUpdateProjectProps) {
+  const { data: departmentsData } = useGetAllDepartments();
+  const departments = departmentsData?.result?.departments || [];
+  const { data: usersData } = useGetAllUsersByWorkspace();
+  const users = usersData?.data;
+  const id = useId();
+
+  const [open, setOpen] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+    project?.users ?? []
+  );
+  const [newProjectImage, setNewProjectImage] = useState<File | null>(null);
+  const [removeProjectImage, setRemoveProjectImage] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const { mutate: updateProject, isPending } = useUpdateProject();
+  const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
+  const existingImageValue = project?.imageKey || project?.image || "";
+
+  type FormValues = {
+    project_name: string;
+    project_number: string;
+    project_manager: string;
+    project_description: string;
+    department: string;
+  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<FormValues>({
+    mode: "onSubmit",
+  });
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const descriptionText = watch("project_description") || "";
+
+  const handleAddUser = (user: User) => {
+    if (!selectedUsers.some((u) => u._id === user._id)) {
+      setSelectedUsers([...selectedUsers, user]);
+    }
+  };
+
+  const handleRemoveUser = (user: User) => {
+    setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
+  };
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      let imageUrlToSend: string;
+      if (removeProjectImage) {
+        imageUrlToSend = "";
+      } else if (newProjectImage) {
+        setUploadingImage(true);
+        const uploadedImage = await uploadFileToS3({ file: newProjectImage });
+        imageUrlToSend = uploadedImage.key;
+      } else {
+        imageUrlToSend = existingImageValue;
+      }
+
+      updateProject(
+        {
+          _id: project!._id,
+          project_name: data.project_name,
+          project_description: data.project_description,
+          project_manager: data.project_manager,
+          project_number: data.project_number,
+          users: selectedUsers.map((user) => user._id),
+          image: imageUrlToSend,
+          admin_id: project!.admin_id,
+          workspace_id: project!.workspace_id,
+          department_id: data.department || project!.department_id,
+        },
+        {
+          onSuccess: () => {
+            reset();
+            setNewProjectImage(null);
+            setRemoveProjectImage(false);
+            setOpen(false);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error uploading project image:", error);
+      toast.error("Failed to upload project image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={(e) => {
+            if (!isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              toast.error("Insufficient privileges, contact Admin");
+              return;
+            }
+          }}
+        >
+          <PiPencilCircleDuotone className="w-4 h-4" />
+          Update
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
+            <p>Update Project</p>
+            <DialogClose asChild>
+              <button type="button" className="cursor-pointer">
+                <PiXCircleDuotone size={18} />
+              </button>
+            </DialogClose>
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="sr-only">
+          Update this project&apos;s details and members.
+        </DialogDescription>
+        <form
+          id={`mutate-project-form-${id}`}
+          className="overflow-y-auto"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
+          <div className="flex gap-4 p-4">
+            <div className="w-1/3">
+              <ProfileBg
+                setNewProjectImage={setNewProjectImage}
+                setRemoveProjectImage={setRemoveProjectImage}
+                imageUrl={project?.image}
+              />
+            </div>
+            <div className="flex-1 space-y-4">
+              <div className="space-y-4">
+                <Label htmlFor={`${id}-project-name`}>Project Name</Label>
+                <div className="flex flex-col gap-2">
+                  <Input
+                    id={`${id}-project-name`}
+                    placeholder="Enter project name"
+                    type="text"
+                    defaultValue={project?.project_name}
+                    aria-invalid={errors.project_name ? "true" : "false"}
+                    {...register("project_name", {
+                      required: "Project name is required",
+                    })}
+                  />
+                  {errors.project_name && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.project_name.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <Label htmlFor={`${id}-project-number`}>Project Number</Label>
+                <div className="flex flex-col gap-2">
+                  <Input
+                    id={`${id}-project-number`}
+                    placeholder="Enter project number"
+                    type="text"
+                    defaultValue={project?.project_number}
+                    aria-invalid={errors.project_number ? "true" : "false"}
+                    {...register("project_number", {
+                      required: "Project number is required",
+                    })}
+                  />
+                  {errors.project_number && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.project_number.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-4 w-full px-4 pb-4">
+            <div className="space-y-2 w-1/2">
+              <Label htmlFor={`${id}-department`}>Department</Label>
+              <Select
+                defaultValue={project?.department_id}
+                onValueChange={(value) => {
+                  const event = { target: { name: "department", value } };
+                  register("department", {
+                    required: "Department is required",
+                  }).onChange(event);
+                }}
+              >
+                <SelectTrigger id={`${id}-department`}>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept: Department) => (
+                    <SelectItem key={dept._id} value={dept._id || ""}>
+                      {dept.department_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.department && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.department.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-4 w-1/2">
+              <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
+              <Input
+                id={`${id}-manager-name`}
+                placeholder="Enter manager's name"
+                defaultValue={project?.project_manager}
+                type="text"
+                aria-invalid={errors.project_manager ? "true" : "false"}
+                {...register("project_manager")}
+              />
+            </div>
+          </div>
+
+          <div className="px-4 pb-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-description`}>Project Description</Label>
+                <Textarea
+                  id={`${id}-description`}
+                  placeholder="Describe the project's purpose and goals"
+                  maxLength={220}
+                  defaultValue={project?.project_description}
+                  aria-describedby={`${id}-description`}
+                  className="h-24 resize-none"
+                  aria-invalid={errors.project_description ? "true" : "false"}
+                  {...register("project_description", {
+                    required: "Description is required",
+                    maxLength: {
+                      value: 220,
+                      message: `Description must be at most ${220} characters`,
+                    },
+                  })}
+                />
+                {errors.project_description && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {errors.project_description.message}
+                  </p>
+                )}
+                <p
+                  id={`${id}-description`}
+                  className="text-muted-foreground mt-2 text-right text-xs"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="tabular-nums">
+                    {220 - descriptionText.length}
+                  </span>{" "}
+                  characters left
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
+                <AddUsersInProjectDropdown
+                  users={users?.map((user: User) => ({
+                    _id: user._id,
+                    name: user.name,
+                    profileAvatar: user.profileAvatar,
+                  }))}
+                  onAddUser={handleAddUser}
+                  onRemoveUser={handleRemoveUser}
+                  selectedUsers={selectedUsers}
+                />
+                <div className="flex items-center justify-end flex-1">
+                  {selectedUsers.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center -space-x-2">
+                        {selectedUsers.slice(0, 4).map((user) => {
+                          if (user.profileAvatar)
+                            return (
+                              <Image
+                                key={user._id}
+                                className="ring-background rounded-full ring-2"
+                                src={user.profileAvatar}
+                                width={32}
+                                height={32}
+                                alt={user.name}
+                              />
+                            );
+                          return (
+                            <div
+                              key={user._id}
+                              className="flex h-8 w-8 items-center justify-center border border-border rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                            >
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {selectedUsers.length} Users
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" size="sm">
+              <PiXCircleDuotone />
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button
+            type="submit"
+            size="sm"
+            variant="default"
+            form={`mutate-project-form-${id}`}
+            disabled={uploadingImage || isPending}
+          >
+            {uploadingImage || isPending ? (
+              <Spinner />
+            ) : (
+              <PiCheckCircleDuotone />
+            )}
+            {uploadingImage
+              ? "Uploading..."
+              : isPending
+              ? "Updating..."
+              : "Update Project"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProfileBg({
+  setNewProjectImage,
+  setRemoveProjectImage,
+  imageUrl,
+}: {
+  setNewProjectImage: (file: File | null) => void;
+  setRemoveProjectImage: (removed: boolean) => void;
+  imageUrl?: string;
+}) {
+  const initialFiles = imageUrl
+    ? [
+        {
+          name: imageUrl.split("/").pop() || "image",
+          size: 0,
+          type: "image/*",
+          url: imageUrl,
+          id: `bg-${imageUrl}`,
+        },
+      ]
+    : [];
+
+  const [{ files }, { removeFile, openFileDialog, getInputProps }] =
+	useFileUpload({
+		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+		initialFiles,
+	});
+
+  const fileItem = files[0];
+  const ImageFile = fileItem?.file;
+  const currentImage =
+    fileItem?.preview ||
+    (ImageFile && !(ImageFile instanceof File)
+      ? (ImageFile as FileMetadata).url
+      : null);
+
+  useEffect(() => {
+    const hadInitialImage = !!imageUrl;
+    if (files.length === 0) {
+      setNewProjectImage(null);
+      setRemoveProjectImage(hadInitialImage);
+    } else {
+      const file = files[0]?.file;
+      if (file instanceof File) {
+        setNewProjectImage(file);
+        setRemoveProjectImage(false);
+      } else {
+        setNewProjectImage(null);
+        setRemoveProjectImage(false);
+      }
+    }
+  }, [files, imageUrl, setNewProjectImage, setRemoveProjectImage]);
+
+  return (
+    <div className="h-40 w-full">
+      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
+        {currentImage ? (
+          <Image
+            className="size-full object-cover rounded-xl"
+            src={currentImage}
+            alt={
+              files[0]?.preview
+                ? "Preview of uploaded image"
+                : "Profile background"
+            }
+            width={512}
+            height={96}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
+            <PiBuildingsDuotone className="w-12 h-12" />
+            <span className="text-xs font-medium">Upload Image</span>
+          </div>
+        )}
+        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
+          <button
+            type="button"
+            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
+            onClick={openFileDialog}
+            aria-label={currentImage ? "Change image" : "Upload image"}
+          >
+            <PiPlusSquareDuotone size={16} aria-hidden="true" />
+          </button>
+          {currentImage && (
+            <button
+              type="button"
+              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
+              onClick={() => removeFile(files[0]?.id)}
+              aria-label="Remove image"
+            >
+              <PiXDuotone size={16} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+      <input
+        {...getInputProps()}
+        className="sr-only"
+        aria-label="Upload image file"
+      />
+    </div>
+  );
+}

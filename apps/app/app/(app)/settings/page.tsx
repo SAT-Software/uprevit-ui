@@ -1,0 +1,123 @@
+"use client";
+
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import SecurityTab from "@/features/workspace/settings/SecurityTab";
+import ProfileTab from "@/features/workspace/settings/ProfileTab";
+import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
+import BillingTab from "@/features/workspace/settings/BillingTab";
+import AdminsTab from "@/features/workspace/settings/AdminsTab";
+import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
+import UsersTab from "@/features/workspace/settings/UsersTab";
+import {
+  PiUserDuotone,
+  PiBriefcaseDuotone,
+  PiUsersDuotone,
+  PiUserGearDuotone,
+  PiShieldCheckDuotone,
+  PiCreditCardDuotone,
+} from "react-icons/pi";
+import { useSearchParams } from "next/navigation";
+import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { toast } from "sonner";
+
+function SettingsPage() {
+  const tab = useSearchParams().get("tab");
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
+  const adminTabs = ["admins", "workspace"];
+  const initialTab =
+    tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  const handleTabChange = (value: string) => {
+    if (adminTabs.includes(value) && !isAdmin) {
+      toast.error("Insufficient privileges, contact Admin");
+      return;
+    }
+    setActiveTab(value);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 p-2">
+      <div className="border border-input bg-background rounded-xl p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-base font-semibold">Settings</h1>
+            <p className="text-sm text-muted-foreground">
+              Manage your account settings and preferences.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <InviteMembersDialog />
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Tabs */}
+      <div className="border border-input bg-background rounded-xl p-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
+          <TabsList>
+            <TabsTrigger value="profile">
+              <PiUserDuotone className="mr-2 h-4 w-4" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="workspace">
+              <PiBriefcaseDuotone className="mr-2 h-4 w-4" />
+              Workspace
+            </TabsTrigger>
+            <TabsTrigger value="users">
+              <PiUsersDuotone className="mr-2 h-4 w-4" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="admins">
+              <PiUserGearDuotone className="mr-2 h-4 w-4" />
+              Admins
+            </TabsTrigger>
+            <TabsTrigger value="security">
+              <PiShieldCheckDuotone className="mr-2 h-4 w-4" />
+              Security
+            </TabsTrigger>
+            <TabsTrigger value="billing">
+              <PiCreditCardDuotone className="mr-2 h-4 w-4" />
+              Billing
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="mt-6">
+            <ProfileTab />
+          </TabsContent>
+
+          <TabsContent value="workspace" className="mt-6">
+            <WorkspaceTab />
+          </TabsContent>
+
+          <TabsContent value="users" className="mt-6">
+            <UsersTab />
+          </TabsContent>
+
+          <TabsContent value="admins" className="mt-6">
+            <AdminsTab />
+          </TabsContent>
+
+          <TabsContent value="security" className="mt-6">
+            <SecurityTab />
+          </TabsContent>
+
+          <TabsContent value="billing" className="mt-6">
+            <BillingTab />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+export default SettingsPage;

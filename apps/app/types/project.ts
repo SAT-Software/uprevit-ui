@@ -1,0 +1,17 @@
+import { AuditLog } from "./audit-log";
+
+export interface Project {
+  _id?: string;
+  project_name: string;
+  project_number: string;
+  project_description: string;
+  image?: string;
+  imageKey?: string;
+  project_manager: string;
+  department_id: string;
+  admin_id: string;
+  workspace_id: string;
+  users?: string[];
+  isArchived?: boolean | null;
+  auditLogs?: AuditLog[];
+}

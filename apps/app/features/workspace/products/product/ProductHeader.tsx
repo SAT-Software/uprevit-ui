@@ -1,0 +1,575 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+
+import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
+import { Separator } from "@uprevit/ui/components/ui/separator";
+import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
+import { useGetAllProductVersions } from "@/hooks/product/useGetAllProductVersions";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
+import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { cn } from "@uprevit/ui/lib/utils";
+import { Product } from "@/types/product";
+import { useParams, usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  PiCircleDuotone,
+  PiFilePdfDuotone,
+  PiGitBranchDuotone,
+  PiLockKeyDuotone,
+  PiPaperPlaneRightDuotone,
+  PiTextStrikethroughDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
+import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
+import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
+import { ProductUpdateProgress } from "./ProductUpdateProgress";
+import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
+import { toast } from "sonner";
+
+export type Item = {
+  productId: string;
+  createdOn: string;
+  createdBy: string;
+  modifiedOn: string;
+  modifiedBy: string;
+  productName: string;
+  description: string;
+  projectId: string;
+  departmentId: string;
+  version: number;
+  isLatest: boolean;
+  parentId: string | null;
+  status: "submitted" | "draft" | "archived";
+  targetDate: string | null;
+  completionDate: string | null;
+  delayReason: string | null;
+  tabsCompleted: string[];
+  completionPercentage: number;
+};
+
+const TOTAL_TABS = 7;
+
+interface ProductHeaderProps {
+  isExportLocked?: boolean;
+}
+
+export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
+  const queryClient = useQueryClient();
+  const params = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const productId = params.productId as string;
+
+  const { data: productData } = useGetProductTabData(productId, "all-tabs");
+  const { data: versionsData, isLoading: isLoadingVersions } =
+    useGetAllProductVersions(productId);
+  const { mutateAsync: updateProductTabData, isPending: isUpdatingTab } =
+    useUpdateProductTabData();
+  const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
+    useUpdateProduct();
+  const { mutate: exportPDF, isPending: isExportingPDF } =
+    useExportProductPDF();
+  const searchParams = useSearchParams();
+  const compareVersionId = searchParams.get("compareVersion");
+  const isRedlineView = !!compareVersionId;
+
+  const getCurrentTab = () => {
+    const pathSegments = pathname.split("/");
+    return pathSegments[pathSegments.length - 1];
+  };
+
+  const currentTab = getCurrentTab();
+
+  const tabCompletionConfig: Record<string, { tab: string; action: string }> = {
+    "product-information": {
+      tab: "product-information",
+      action: "update_product_information_completion",
+    },
+    "compliance-information": {
+      tab: "compliance-information",
+      action: "update_compliance_tab_completion",
+    },
+    "label-components": {
+      tab: "label-components",
+      action: "update_label_component_tab_completion",
+    },
+    "symbols-graphics": {
+      tab: "symbols-graphics",
+      action: "update_symbols_graphics_tab_completion",
+    },
+    "product-specifications": {
+      tab: "product-specifications",
+      action: "update_product_data_tab_completion",
+    },
+    "operational-parameters": {
+      tab: "operational-parameters",
+      action: "update_operational_parameters_tab_completion",
+    },
+    "label-tags": {
+      tab: "label-tags",
+      action: "update_label_tags_tab_completion",
+    },
+  };
+
+  const currentTabConfig = tabCompletionConfig[currentTab ?? ""];
+  const isTabCompletionEnabled = Boolean(currentTabConfig);
+
+  const allTabsData = productData?.result?.data;
+  const productCoreData = allTabsData?.product_information?.product_data?.data;
+  const productInfoData = allTabsData?.product_information?.data;
+
+  const isProductComplete = productCoreData?.complete_count === 100;
+  const isReadOnly = productCoreData?.status === "submitted";
+  const isEditLocked = isReadOnly || isExportLocked;
+
+  const handleSubmit = async () => {
+    if (!productId || isEditLocked) return;
+
+    const today = new Date().toISOString();
+
+    await Promise.all([
+      updateProduct({
+        _id: productId,
+        action: "update-status",
+        data: {
+          status: "submitted",
+        },
+      }),
+      updateProduct({
+        _id: productId,
+        action: "update-product",
+        data: {
+          _id: productId,
+          actual_completion_date: today,
+        },
+      }),
+    ]);
+  };
+
+  const tabsCompleted = useMemo(() => {
+    if (!allTabsData) return [];
+    const completed: string[] = [];
+    if (allTabsData.product_information?.tab_completed)
+      completed.push("product-information");
+    if (allTabsData.compliance_information?.tab_completed)
+      completed.push("compliance-information");
+    if (allTabsData.label_components?.tab_completed)
+      completed.push("label-components");
+    if (allTabsData.symbols_graphics?.tab_completed)
+      completed.push("symbols-graphics");
+    if (allTabsData.product_data?.tab_completed)
+      completed.push("product-specifications");
+    if (allTabsData.operational_parameters?.tab_completed)
+      completed.push("operational-parameters");
+    if (allTabsData.label_tags?.tab_completed) completed.push("label-tags");
+    return completed;
+  }, [allTabsData]);
+
+  const product: Item | null = productCoreData
+    ? {
+        productId: productId || "",
+        createdOn: "",
+        createdBy: "",
+        modifiedOn: "",
+        modifiedBy: "",
+        productName: productCoreData.product_name || "",
+        description: productCoreData.product_description || "",
+        projectId: productCoreData.project_id || "",
+        departmentId: productCoreData.department_id || "",
+        version: productCoreData.version || 1,
+        isLatest: productCoreData.is_latest ?? true,
+        parentId: productCoreData.parent_id || null,
+        status: productCoreData.status || "draft",
+        targetDate: productCoreData.target_date || null,
+        completionDate: productCoreData.actual_completion_date || null,
+        delayReason: null,
+        tabsCompleted: tabsCompleted,
+        completionPercentage: productCoreData.complete_count ?? 0,
+      }
+    : null;
+
+  const completionPercentage = productCoreData?.complete_count ?? 0;
+
+  const isCurrentTabCompleted = currentTab
+    ? tabsCompleted.includes(currentTab)
+    : false;
+
+  const completedTabsCount = tabsCompleted.length;
+  const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
+
+  const handleVersionChange = (versionId: string) => {
+    if (versionId !== productId) {
+      router.push(`/products/${versionId}/${currentTab}`);
+    }
+  };
+
+  const toggleButtonTitle = isSyncingStatus
+    ? isCurrentTabCompleted
+      ? "Unmarking..."
+      : "Marking complete..."
+    : isExportLocked
+      ? "Export in progress"
+    : isReadOnly
+      ? "Submitted"
+      : isCurrentTabCompleted
+        ? "Mark Incomplete"
+        : "Mark Complete";
+
+  const toggleButtonSubtitle = isSyncingStatus
+    ? "Syncing with workspace"
+    : isExportLocked
+      ? "Export in progress"
+      : isReadOnly
+      ? "This product is submitted"
+      : isCurrentTabCompleted
+        ? "Send back to in-progress"
+        : "Mark this tab completed";
+
+  const toggleButtonIcon = isSyncingStatus ? (
+    <Spinner className="size-3" />
+  ) : isEditLocked ? (
+    <PiLockKeyDuotone className="size-3 text-amber-600" />
+  ) : isCurrentTabCompleted ? (
+    <PiCircleDuotone className="size-3 text-emerald-600" />
+  ) : (
+    <PiCircleDuotone className="size-3" />
+  );
+
+  const toggleButtonClasses = cn(
+    "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground rounded-lg border bg-accent",
+    isEditLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer",
+    isCurrentTabCompleted ? "text-foreground" : "text-foreground",
+  );
+
+  const toggleButtonIconClasses = cn(
+    "flex size-7 items-center justify-center rounded-xl border text-base transition-colors border-border bg-muted/60 text-muted-foreground",
+    isEditLocked
+      ? "dark:bg-amber-500/20 dark:text-amber-100"
+      : isCurrentTabCompleted
+        ? "dark:bg-emerald-500/20 dark:text-emerald-100 group-hover:border-foreground/30 group-hover:text-foreground"
+        : "dark:border-border/80 dark:bg-muted/40 group-hover:border-foreground/30 group-hover:text-foreground",
+  );
+
+  const handleToggleTab = async () => {
+    if (
+      !currentTab ||
+      !product ||
+      !currentTabConfig ||
+      !isTabCompletionEnabled ||
+      isSyncingStatus ||
+      isEditLocked
+    ) {
+      return;
+    }
+
+    const updatedTabsCompleted = isCurrentTabCompleted
+      ? tabsCompleted.filter((tab: string) => tab !== currentTab)
+      : [...tabsCompleted, currentTab];
+
+    const newCompletionPercentage = Math.round(
+      (updatedTabsCompleted.length / TOTAL_TABS) * 100,
+    );
+
+    const results = await Promise.allSettled([
+      updateProductTabData({
+        id: productId,
+        action: currentTabConfig.action,
+        tab: currentTabConfig.tab,
+        data: {
+          tab_completed: !isCurrentTabCompleted,
+        },
+      }),
+      updateProduct({
+        _id: productId,
+        action: "update-product",
+        data: {
+          _id: productId,
+          complete_count: newCompletionPercentage,
+        },
+      }),
+    ]);
+
+    const hasFailure = results.some((result) => result.status === "rejected");
+
+    if (hasFailure) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
+        queryClient.invalidateQueries({ queryKey: ["all-products"] }),
+        queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
+      ]);
+      toast.error("Failed to update tab completion. Please try again.");
+    }
+  };
+
+  const versions = versionsData?.result?.versions || [];
+
+  // Get previous versions for redline comparison (versions with lower version number)
+  const currentVersion = product?.version ?? 1;
+  const previousVersions = useMemo(() => {
+    return versions.filter(
+      (v: Product & { _id: string }) =>
+        v.version !== undefined && v.version < currentVersion,
+    );
+  }, [versions, currentVersion]);
+
+  // Handle redline version selection
+  const handleRedlineVersionChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "clear") {
+      params.delete("compareVersion");
+    } else {
+      params.set("compareVersion", value);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // Get selected version info for display
+  const selectedCompareVersion = useMemo(() => {
+    if (!compareVersionId) return null;
+    return versions.find(
+      (v: Product & { _id: string }) => v._id === compareVersionId,
+    );
+  }, [compareVersionId, versions]);
+
+  return (
+    <header
+      className={cn(
+        "fixed top-0 z-50 bg-sidebar flex w-full shrink-0 flex-wrap items-center justify-between gap-3 border-b border-sidebar-border px-2 py-2 transition-[width,height,left] ease-linear duration-200 md:flex-nowrap md:py-0",
+        // Width and positioning that accounts for sidebar
+        "left-0 right-0",
+        "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",
+        "md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:left-[var(--sidebar-width-icon)] md:group-has-[[data-collapsible=icon]]/sidebar-wrapper:w-[calc(100%-var(--sidebar-width-icon))]",
+        "md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:left-0 md:group-has-[[data-collapsible=offcanvas]]/sidebar-wrapper:w-full",
+        // Height
+        "md:h-12 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="bg-sidebar text-muted-foreground hover:text-muted-foreground" />
+
+        <Separator orientation="vertical" className="h-4" />
+        <p className="text-sm font-semibold text-foreground">
+          {product?.productName}
+        </p>
+        <Separator orientation="vertical" className="h-4" />
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 rounded-lg gap-2 px-2"
+            onClick={() => {
+              exportPDF(
+                { productId },
+                {
+                  onSuccess: () => {
+                    toast.success(
+                      "PDF export queued. Check Product Exports for status.",
+                    );
+                  },
+                  onError: (error) => {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to queue PDF export",
+                    );
+                  },
+                },
+              );
+            }}
+            disabled={isExportingPDF || isExportLocked}
+            title={
+              isExportLocked
+                ? "An export is already in progress"
+                : "Queue PDF export"
+            }
+          >
+            {isExportingPDF ? <Spinner className="size-3" /> : <PiFilePdfDuotone />}
+            {isExportingPDF ? "Queueing PDF..." : "Export PDF"}
+          </Button>
+
+          <Select
+            value={productId}
+            onValueChange={handleVersionChange}
+            disabled={!product || isLoadingVersions}
+          >
+            <SelectTrigger className="h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 whitespace-nowrap">
+              <PiGitBranchDuotone />
+              <SelectValue placeholder="View Versions" />
+            </SelectTrigger>
+            <SelectContent>
+              {versions.length > 0 ? (
+                versions.map((v: Product & { _id: string }) => (
+                  <SelectItem key={v._id} value={v._id}>
+                    <div className="flex items-center gap-2">
+                      <span>Version {v.version}</span>
+                      {/* <Badge
+                        variant={
+                          v.status === "submitted" ? "default" : "outline"
+                        }
+                        className="text-[0.65rem] pt-0.5 mt-0.5"
+                      >
+                        {v.status}
+                      </Badge> */}
+                    </div>
+                  </SelectItem>
+                ))
+              ) : product?.version ? (
+                <SelectItem value={productId}>
+                  Version {product.version}
+                  {product.isLatest && " (Latest)"}
+                </SelectItem>
+              ) : null}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={compareVersionId || ""}
+            onValueChange={handleRedlineVersionChange}
+            disabled={
+              !product || isLoadingVersions || previousVersions.length === 0
+            }
+          >
+            <SelectTrigger
+              className={cn(
+                "h-7 w-full rounded-lg gap-2 px-2 has-[>svg]:px-2 border whitespace-nowrap",
+                isRedlineView
+                  ? "bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/20"
+                  : "bg-secondary text-secondary-foreground border-border hover:bg-secondary/80",
+              )}
+            >
+              <PiTextStrikethroughDuotone />
+              {isRedlineView && selectedCompareVersion ? (
+                <span>Comparing v{selectedCompareVersion.version}</span>
+              ) : (
+                <SelectValue placeholder="Compare Versions" />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              {isRedlineView && (
+                <SelectItem value="clear">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <PiXCircleDuotone className="size-4" />
+                    <span>Clear comparison</span>
+                  </div>
+                </SelectItem>
+              )}
+              {previousVersions.length > 0 ? (
+                previousVersions.map((v: Product & { _id: string }) => (
+                  <SelectItem key={v._id} value={v._id}>
+                    <div className="flex items-center gap-2">
+                      <span>Compare with v{v.version}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({v.status})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  No previous versions
+                </div>
+              )}
+            </SelectContent>
+          </Select>
+
+          {/* Show submitted badge when read-only */}
+          {/* {isReadOnly && (
+            <Badge
+              variant="default"
+              className="bg-green-600 hover:bg-green-600"
+            >
+              <PiLockKeyDuotone className="size-3 mr-1" />
+              Submitted
+            </Badge>
+          )} */}
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+        <ButtonGroup>
+          <ProductUpdateProgress
+            completionPercentage={completionPercentage}
+            completedTabsCount={completedTabsCount}
+            totalTabs={TOTAL_TABS}
+            productStatus={productCoreData?.status}
+          />
+          {isTabCompletionEnabled ? (
+            <ToggleTabCompletionDialog
+              tabName={currentTab}
+              isCompleted={isCurrentTabCompleted}
+              onConfirm={handleToggleTab}
+              disabled={!product || isSyncingStatus || isEditLocked}
+            >
+              <Button
+                variant="secondary"
+                size="default"
+                className={cn(toggleButtonClasses, "px-1")}
+                disabled={!product || isSyncingStatus || isEditLocked}
+                title={
+                  isExportLocked
+                    ? "Editing is disabled while export is in progress"
+                    : isReadOnly
+                      ? "Cannot edit submitted product"
+                      : undefined
+                }
+              >
+                <span className={toggleButtonIconClasses}>
+                  {toggleButtonIcon}
+                </span>
+                <span className="flex flex-col items-start leading-tight">
+                  <span className="text-xs font-semibold">
+                    {toggleButtonTitle}
+                  </span>
+                  <span className="text-[0.65rem] font-medium text-muted-foreground">
+                    {toggleButtonSubtitle}
+                  </span>
+                </span>
+              </Button>
+            </ToggleTabCompletionDialog>
+          ) : null}
+        </ButtonGroup>
+        <div className="flex items-center gap-4">
+          <div className="flex gap-2">
+            <ConfirmSubmitProductDialog
+              productName={product?.productName}
+              onConfirm={handleSubmit}
+              disabled={!isProductComplete || isEditLocked}
+            >
+              <Button
+                size="sm"
+                disabled={!isProductComplete || isEditLocked}
+                className={cn(
+                  (!isProductComplete || isEditLocked) &&
+                    "opacity-50 cursor-not-allowed",
+                )}
+                title={
+                  isExportLocked
+                    ? "Cannot submit while export is in progress"
+                    : isReadOnly
+                    ? "Product is already submitted"
+                    : !isProductComplete
+                      ? "Complete all tabs to enable submission"
+                      : "Submit product"
+                }
+              >
+                <PiPaperPlaneRightDuotone />
+                {isReadOnly ? "Submitted" : "Submit"}
+              </Button>
+            </ConfirmSubmitProductDialog>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
