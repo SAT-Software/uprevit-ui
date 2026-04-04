@@ -42,14 +42,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Documentation Files
-FOLDER_STRUCTURE.md
 
-#Cursor
-/.cursor/
-.kilocode/
+
+
 .vscode/
-usage-tracking-plan.md
 /staging-e2e
-session-*
 monorepo*

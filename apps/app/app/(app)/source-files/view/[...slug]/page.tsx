@@ -98,9 +98,9 @@ function getFileKind(fileNameOrUrl: string, fileName?: string): FileKind {
 }
 
 export default function ProductSourceFilesPage() {
-  const params = useParams<{ slug: string }>();
-  const slug = params?.slug as string;
-  const deleteSourceFile = useDeleteSourceFiles(slug);
+  const params = useParams<{ slug?: string[] }>();
+  const folderId = params?.slug?.[0] ?? "";
+  const deleteSourceFile = useDeleteSourceFiles(folderId);
   const router = useRouter();
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
   const [pendingFolderId, setPendingFolderId] = useState<string | null>(null);
@@ -130,9 +130,9 @@ export default function ProductSourceFilesPage() {
   };
 
   const { data, isLoading, isError, refetch } = useGetSourceFilesFolderById(
-    slug ?? ""
+    folderId
   );
-  const { data: currentFolderData } = useGetCurrentSourceFilesFolder(slug);
+  const { data: currentFolderData } = useGetCurrentSourceFilesFolder(folderId);
   const { data: productsData } = useGetAllProducts();
   const products = (productsData?.result?.products ?? []) as ProductLinkItem[];
   const auth = useAuth();
@@ -145,7 +145,7 @@ export default function ProductSourceFilesPage() {
   } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
 
   const bookmarkedFolders = bookmarkedData?.result.filter(
-    (folder: BookmarkedSourceFilesFolder) => folder.parentId === slug[0]
+    (folder: BookmarkedSourceFilesFolder) => folder.parentId === folderId
   );
 
   const { mutate: toggleBookmark } = useToggleBookmarkSourceFilesFolder();
@@ -251,24 +251,24 @@ export default function ProductSourceFilesPage() {
             >
               <DialogEditSourceFilesFolder
                 currentFolder={currentFolder}
-                folderId={slug}
+                folderId={folderId}
               />
               <DialogDeleteSourceFilesFolder
                 id={currentFolder?._id}
                 folderName={currentFolder?.name}
-                folderId={slug}
+                folderId={folderId}
               />
             </div>
           </div>
           <div className="flex items-center gap-2">
             <DialogAddProductFolder
               parentId={currentFolder?._id}
-              folderId={slug}
+              folderId={folderId}
             />
             <DialogUploadSourceFiles
               folder={folder}
               currentFolder={currentFolder}
-              folderId={slug}
+              folderId={folderId}
             />
           </div>
         </div>

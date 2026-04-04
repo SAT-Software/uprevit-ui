@@ -9,10 +9,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import * as React from "react";
 import { AuthProvider } from "react-oidc-context";
 
+const appUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_REDIRECT_URI!;
+
 const cognitoAuthConfig = {
   authority: process.env.NEXT_PUBLIC_COGNITO_AUTHORITY!,
   client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
-  redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL!}/auth/callback`,
+  redirect_uri: `${appUrl}/auth/callback`,
   response_type: "code",
   scope: "email openid phone",
 };

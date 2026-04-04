@@ -8,7 +8,11 @@ export function useSignOut() {
 
   return useCallback(async () => {
     const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
-    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI!;
+    const logoutUri =
+      process.env.NEXT_PUBLIC_LOGOUT_URI ??
+      process.env.NEXT_PUBLIC_APP_URL ??
+      process.env.NEXT_PUBLIC_REDIRECT_URI ??
+      window.location.origin;
     const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
 
     await auth.removeUser();
