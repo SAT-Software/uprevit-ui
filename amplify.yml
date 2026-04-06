@@ -1,0 +1,51 @@
+version: 1
+applications:
+  - appRoot: apps/app
+    frontend:
+      buildPath: /
+      phases:
+        preBuild:
+          commands:
+            - curl -fsSL https://bun.sh/install | bash
+            - export BUN_INSTALL="$HOME/.bun"
+            - export PATH="$BUN_INSTALL/bin:$PATH"
+            - bun install --frozen-lockfile
+        build:
+          commands:
+            - export BUN_INSTALL="$HOME/.bun"
+            - export PATH="$BUN_INSTALL/bin:$PATH"
+            - bun run --cwd apps/app build
+      artifacts:
+        baseDirectory: apps/app/.next
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - node_modules/**/*
+          - .turbo/**/*
+          - apps/app/.next/cache/**/*
+
+  - appRoot: apps/marketing
+    frontend:
+      buildPath: /
+      phases:
+        preBuild:
+          commands:
+            - curl -fsSL https://bun.sh/install | bash
+            - export BUN_INSTALL="$HOME/.bun"
+            - export PATH="$BUN_INSTALL/bin:$PATH"
+            - bun install --frozen-lockfile
+        build:
+          commands:
+            - export BUN_INSTALL="$HOME/.bun"
+            - export PATH="$BUN_INSTALL/bin:$PATH"
+            - bun run --cwd apps/marketing build
+      artifacts:
+        baseDirectory: apps/marketing/.next
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - node_modules/**/*
+          - .turbo/**/*
+          - apps/marketing/.next/cache/**/*

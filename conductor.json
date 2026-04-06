@@ -1,6 +1,0 @@
-{
-  "scripts": {
-    "setup": "cp \"$CONDUCTOR_ROOT_PATH/.env\" . && bun install",
-    "run": "bun run dev"
-  }
-}
