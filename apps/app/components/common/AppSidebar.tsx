@@ -171,6 +171,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const workspace = workspaceData?.workspace;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const productId =
+    pathSegments[0] === "products" && pathSegments[1] !== "exports"
+      ? pathSegments[1]
+      : undefined;
+  const showProductSubNavigation = Boolean(productId);
 
   return (
     <Sidebar {...props}>
@@ -240,13 +246,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         {item.title}
                       </Link>
                     </SidebarMenuButton>
-                    {item.title === "Products" &&
-                      pathname.startsWith("/products/") &&
-                      pathname.split("/")[2] && (
+                    {item.title === "Products" && showProductSubNavigation && (
                         <Collapsible
                           key={item.title}
                           asChild
-                          defaultOpen={pathname.startsWith("/products/")}
+                          defaultOpen={showProductSubNavigation}
                           className="group/collapsible"
                         >
                           <CollapsibleContent>
@@ -262,9 +266,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     asChild
                                   >
                                     <Link
-                                      href={`/products/${
-                                        pathname.split("/")[2]
-                                      }${subItem.url}${
+                                      href={`/products/${productId}${subItem.url}${
                                         compareVersionId ? `?compareVersion=${compareVersionId}` : ""
                                       }`}
                                     >

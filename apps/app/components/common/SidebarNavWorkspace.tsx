@@ -18,7 +18,6 @@ import {
 } from "@uprevit/ui/components/ui/sidebar";
 import Link from "next/link";
 import {
-  PiCreditCardDuotone,
   PiDotsThreeOutlineVerticalDuotone,
   PiGearDuotone,
   PiSquaresFourDuotone,
@@ -94,12 +93,6 @@ export function SidebarNavWorkspace({
                 <Link href={`/settings?tab=workspace`}>
                   <PiGearDuotone />
                   Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/settings?tab=billing`}>
-                  <PiCreditCardDuotone />
-                  Billing
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

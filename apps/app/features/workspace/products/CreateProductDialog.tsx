@@ -200,11 +200,11 @@ export default function CreateProductDialog() {
               )}
             </div>
 
-            <div className="rounded-md bg-emerald-50 p-3 text-xs">
-              <h4 className="mb-2 font-medium text-emerald-700">
+            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-950 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-100">
+              <h4 className="mb-2 font-medium text-emerald-800 dark:text-emerald-200">
                 General Guidelines for PPN
               </h4>
-              <ul className="list-inside list-disc space-y-1 text-emerald-600">
+              <ul className="list-inside list-disc space-y-1 text-emerald-700 dark:text-emerald-300">
                 <li>Must be alphanumeric & 10 characters long</li>
                 <li>Each product part number should be unique</li>
                 <li>Do not use special characters</li>

@@ -63,7 +63,7 @@ export default function DialogArchiveEntity({
 
   async function handleConfirm() {
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     if (disabled) return;
@@ -82,7 +82,7 @@ export default function DialogArchiveEntity({
             if (!isAdmin) {
               e.preventDefault();
               e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
+              toast.warning("Insufficient privileges, contact Admin");
               return;
             }
           }}

@@ -19,7 +19,6 @@ import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import Link from "next/link";
 import {
-  PiCreditCardDuotone,
   PiSignOutDuotone,
   PiSquaresFourDuotone,
   PiUserCircleGearDuotone,
@@ -90,12 +89,6 @@ export function UserNav() {
             <Link href={`/settings?tab=workspace`}>
               <PiSquaresFourDuotone />
               Workspace
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={`/settings?tab=billing`}>
-              <PiCreditCardDuotone />
-              Billing
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

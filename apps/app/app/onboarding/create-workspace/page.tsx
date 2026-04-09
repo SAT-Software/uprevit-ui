@@ -114,7 +114,7 @@ export default function OnboardingCreateWorkspacePage() {
 
       const isAdmin = isAdminProfile(auth.user?.profile);
       if (!isAdmin) {
-        toast.error("Insufficient privileges, contact Admin");
+        toast.warning("Insufficient privileges, contact Admin");
         return;
       }
 
