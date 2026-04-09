@@ -2,16 +2,13 @@
 
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DialogUpdateWorkspace } from "./DialogUpdateWorkspace";
 import {
-  PiBuildingsDuotone,
   PiIdentificationCardDuotone,
   PiTagDuotone,
   PiCrownDuotone,
   PiUsersDuotone,
   PiTextAlignLeftDuotone,
-  PiPlanetDuotone,
   PiBriefcaseDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
@@ -106,12 +103,7 @@ function WorkspaceTab() {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold">
-              {workspaceData?.workspaceName}
-            </h2>
-            <Badge variant="default">
-              {workspaceData?.planName || "Enterprise"}
-            </Badge>
+            <h2 className="text-xl font-semibold">{workspaceData?.workspaceName}</h2>
           </div>
           <p className="text-muted-foreground">
             Manage your workspace settings and organization details.
@@ -176,9 +168,7 @@ function WorkspaceTab() {
               <div className="text-sm font-medium text-muted-foreground">
                 Plan
               </div>
-              <div className="text-sm font-medium">
-                {workspaceData?.plan || "Pro"}
-              </div>
+              <div className="text-sm font-medium">NA</div>
             </div>
           </div>
 

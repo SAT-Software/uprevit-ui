@@ -155,7 +155,7 @@ export default function UpdateDepartmentDialog({
             if (!isAdmin) {
               e.preventDefault();
               e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
+              toast.warning("Insufficient privileges, contact Admin");
               return;
             }
           }}

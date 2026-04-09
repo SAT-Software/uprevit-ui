@@ -29,7 +29,7 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
 
   const handleRestoreClick = (row: ProductArchiveRow) => {
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     setSelectedItemToRestore(row);
