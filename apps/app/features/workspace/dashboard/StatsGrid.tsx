@@ -55,7 +55,7 @@ function StatCardSkeleton({
   return (
     <div className="relative flex w-full items-center justify-between p-4 group before:absolute before:inset-y-8 before:right-0 before:w-px before:bg-linear-to-b before:from-input/30 before:via-input before:to-input/30 last:before:hidden lg:p-5">
       <div className="relative flex items-center gap-4">
-        <div className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/10 text-primary sm:flex">
+        <div className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-border bg-accent/80 text-accent-foreground sm:flex">
           <Icon className="animate-pulse" />
         </div>
         <div>
