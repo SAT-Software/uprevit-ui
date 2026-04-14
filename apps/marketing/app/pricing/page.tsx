@@ -32,24 +32,14 @@ import {
 
 const pricingFAQs = [
   {
-    question: "Is pricing per user or per workspace?",
-    answer:
-      "Startup pricing is billed per active user per month. Enterprise plans are customized based on deployment scope, compliance needs, and integrations.",
-  },
-  {
     question: "Do you offer annual billing?",
     answer:
-      "Yes. Annual billing is available for both Startup and Enterprise plans and includes a discounted rate.",
+      "Yes. Annual billing is available for both Growth and Enterprise plans and includes a discounted rate.",
   },
   {
     question: "What happens when we add or remove users?",
     answer:
       "Your monthly bill scales with active users. Add or remove users any time to match project demand and budget.",
-  },
-  {
-    question: "Do you support validation and audit readiness?",
-    answer:
-      "Yes. Uprevit is optimized for regulated teams with traceability, version control, and audit-ready artifacts.",
   },
 ];
 
@@ -110,33 +100,35 @@ export default function PricingPage() {
                   <Card className="relative w-full overflow-hidden rounded-2xl lg:max-w-90 border-border/70 bg-background shadow-[0_28px_55px_-45px_rgba(15,15,15,0.45)]">
                     <CardHeader className="pb-6 md:pb-8">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl">Startup</CardTitle>
+                        <CardTitle className="text-2xl">Growth</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-end gap-3">
-                        <span className="text-4xl md:text-5xl font-semibold">
-                          $20
+                        <span className="text-3xl md:text-4xl font-semibold">
+                          Pay as you grow
                         </span>
-                        <span className="text-muted-foreground pb-1">
+                        {/* <span className="text-muted-foreground pb-1">
                           per user / month
-                        </span>
+                        </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
                         Includes everything needed to standardize label data and
                         ship faster.
                       </p>
                       <Button className="mt-6 h-12 w-full rounded-xl text-base">
-                        Start with Startup
+                        Start with Growth
                         <PiArrowRightDuotone className="ml-2 h-4 w-4" />
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
-                          "Unlimited projects, products, and label components",
-                          "Regulatory templates and symbol library access",
-                          "Version control with audit-ready change history",
-                          "CSV/PDF exports for downstream systems",
-                          "Email support with 1 business day response",
+                          "Workspace platform included",
+                          "Audit-ready change history",
+                          "Regulatory templates and symbol library",
+                          "Product and report exports",
+                          "Transparent storage and export add-ons",
+                          "Annual billing with monthly option",
+                          "SSO add on available",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
@@ -177,9 +169,6 @@ export default function PricingPage() {
                         <span className="text-3xl md:text-4xl font-semibold">
                           Custom
                         </span>
-                        <span className="text-muted-foreground pb-1">
-                          tailored pricing
-                        </span>
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
                         Engage our team for compliance validation, security
@@ -197,11 +186,12 @@ export default function PricingPage() {
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
-                          "Dedicated success and compliance onboarding",
-                          "Custom workflows, approvals, and RBAC",
-                          "Priority support and SLA options",
-                          "Security reviews, SSO, and audit support",
-                          "Integrations tailored to your tech stack",
+                          "Volume pricing and negotiated limits",
+                          "SSO and advanced security requirements",
+                          "Custom workflows and integrations",
+                          "Larger rollout and product libraries",
+                          "Procurement and onboarding support",
+                          "Validation/documentation support as scoped",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
@@ -231,7 +221,7 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <div className="relative">
+            {/* <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0">
@@ -373,7 +363,7 @@ export default function PricingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
