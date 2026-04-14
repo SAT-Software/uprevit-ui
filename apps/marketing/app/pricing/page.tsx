@@ -11,6 +11,7 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
@@ -20,6 +21,7 @@ import MarketingHeader from "@/features/marketing/marketing-header";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
+  PiArrowDownDuotone,
   PiArrowRightDuotone,
   PiCheckCircleDuotone,
   PiClockCountdownDuotone,
@@ -110,13 +112,13 @@ export default function PricingPage() {
                   <Card className="relative w-full overflow-hidden rounded-2xl lg:max-w-90 border-border/70 bg-background shadow-[0_28px_55px_-45px_rgba(15,15,15,0.45)]">
                     <CardHeader className="pb-6 md:pb-8">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl">Startup</CardTitle>
+                        <CardTitle className="text-2xl">Growth</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-end gap-3">
-                        <span className="text-4xl md:text-5xl font-semibold">
-                          $20
+                      <div className="flex flex-col items-start gap-3">
+                        <span className="text-4xl md:text-4xl font-semibold">
+                          Pay as you grow
                         </span>
                         <span className="text-muted-foreground pb-1">
                           per user / month
@@ -127,16 +129,18 @@ export default function PricingPage() {
                         ship faster.
                       </p>
                       <Button className="mt-6 h-12 w-full rounded-xl text-base">
-                        Start with Startup
-                        <PiArrowRightDuotone className="ml-2 h-4 w-4" />
+                        View Pricing
+                        <PiArrowDownDuotone className="ml-2 h-4 w-4" />
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
-                          "Unlimited projects, products, and label components",
-                          "Regulatory templates and symbol library access",
-                          "Version control with audit-ready change history",
-                          "CSV/PDF exports for downstream systems",
-                          "Email support with 1 business day response",
+                          "Workspace platform included",
+                          "Audit-ready change history",
+                          "Regulatory templates and symbol library",
+                          "Product and report exports",
+                          "Transparent storage and export add-ons",
+                          "Annual billing with monthly option",
+                          "SSO add-on available",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
@@ -173,7 +177,7 @@ export default function PricingPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-end gap-3 h-12">
+                      <div className="flex flex-col items-stat gap-3">
                         <span className="text-3xl md:text-4xl font-semibold">
                           Custom
                         </span>
@@ -197,11 +201,12 @@ export default function PricingPage() {
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
-                          "Dedicated success and compliance onboarding",
-                          "Custom workflows, approvals, and RBAC",
-                          "Priority support and SLA options",
-                          "Security reviews, SSO, and audit support",
-                          "Integrations tailored to your tech stack",
+                          "Volume pricing and negotiated limits",
+                          "SSO and advanced security requirements",
+                          "Custom workflows and integrations",
+                          "Larger rollout and product libraries",
+                          "Procurement and onboarding support",
+                          "Validation/documentation support as scoped",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
@@ -227,6 +232,84 @@ export default function PricingPage() {
                       />
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
+              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
+              <div className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0">
+                <div className="flex flex-col items-center text-center mb-10">
+                  <Badge
+                    variant={badgeVariant}
+                    className="mb-6 z-60 dark:px-2 dark:py-0.5"
+                  >
+                    <PiCoinsDuotone className="mr-1 text-foreground/50" />
+                    <span className="font-medium">Pricing</span>
+                  </Badge>
+                  <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
+                    Calculate your cost
+                  </h2>
+                  <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
+                    Use our pricing calculator to estimate costs based on your
+                    team size, file storage needs, and security requirements.
+                    Get a personalized quote for enterprise plans.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-8">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Platform Fee</CardTitle>
+                      <CardDescription>
+                        one paid workspace/account
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>$149/month</CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Seat</CardTitle>
+                      <CardDescription>
+                        one licensed user in the workspace
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>$29/user/month</CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Storage</CardTitle>
+                      <CardDescription>
+                        total uploaded file storage for the workspace
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      10 GB
+                      <p>$19/month per 10 GB</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>SSO add-on</CardTitle>
+                      <CardDescription>
+                        one workspace with SAML/OIDC SSO enabled
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>$149/month</CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Export</CardTitle>
+                      <CardDescription>
+                        One completed PDF/XLSX product export or report export
+                        job
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      50/month
+                      <p>$29/month per 100 exports/month</p>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </div>
