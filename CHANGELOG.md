@@ -16,3 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separate product app and marketing app structure in the monorepo.
 - Bun/Turbo monorepo structure.
 - Added Amplify monorepo deployment configuration.
+
+## [0.1.1] - 2026-04-14
+
+### HOTFIX
+
+- update pricing strategy and add placeholder for now
+- remove the feature section on pricing page
