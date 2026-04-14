@@ -11,13 +11,18 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
+import { PricingCalculatorCards } from "@/features/pricing/PricingCalculatorCards";
+import {
+  ScrollProvider,
+  useScrollSection,
+  useScrollTo,
+} from "@/lib/scroll-context";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
@@ -34,29 +39,41 @@ import {
 
 const pricingFAQs = [
   {
-    question: "Is pricing per user or per workspace?",
+    question: "How is Growth priced?",
     answer:
-      "Startup pricing is billed per active user per month. Enterprise plans are customized based on deployment scope, compliance needs, and integrations.",
+      "Growth pricing combines a platform fee, seat count, and optional usage add-ons for storage, exports, and SSO. Enterprise plans are custom and designed for larger rollouts or advanced requirements.",
+  },
+  {
+    question: "What counts as a seat?",
+    answer:
+      "A seat is one licensed user in a workspace. Growth pricing scales with the number of users your team needs access for.",
+  },
+  {
+    question: "What counts as an export?",
+    answer:
+      "An export is one completed PDF or XLSX product export or report export job. Growth includes a monthly export allowance, with additional usage priced per export.",
+  },
+  {
+    question: "How is storage calculated?",
+    answer:
+      "Storage is based on the total uploaded file storage used by the workspace. Growth includes a base storage allowance, and any additional usage is priced per GB.",
+  },
+  {
+    question: "When should we talk to you?",
+    answer:
+      "Talk to us when you expect a larger rollout, need advanced security or SSO planning, want custom workflows or integrations, or need a tailored enterprise agreement.",
   },
   {
     question: "Do you offer annual billing?",
     answer:
-      "Yes. Annual billing is available for both Startup and Enterprise plans and includes a discounted rate.",
-  },
-  {
-    question: "What happens when we add or remove users?",
-    answer:
-      "Your monthly bill scales with active users. Add or remove users any time to match project demand and budget.",
-  },
-  {
-    question: "Do you support validation and audit readiness?",
-    answer:
-      "Yes. Uprevit is optimized for regulated teams with traceability, version control, and audit-ready artifacts.",
+      "Yes. Annual billing is the default buying path for most organizations and offers a lower effective monthly cost. Monthly billing is also available for teams that prefer more flexibility.",
   },
 ];
 
-export default function PricingPage() {
+function PricingPageContent() {
   const { resolvedTheme } = useTheme();
+  const scrollTo = useScrollTo();
+  const pricingCalculatorRef = useScrollSection("pricing-calculator");
 
   const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
 
@@ -120,15 +137,18 @@ export default function PricingPage() {
                         <span className="text-4xl md:text-4xl font-semibold">
                           Pay as you grow
                         </span>
-                        <span className="text-muted-foreground pb-1">
+                        {/* <span className="text-muted-foreground pb-1">
                           per user / month
-                        </span>
+                        </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        Includes everything needed to standardize label data and
-                        ship faster.
+                        Simple pricing for smaller labeling teams: platform +
+                        seats + transparent usage.
                       </p>
-                      <Button className="mt-6 h-12 w-full rounded-xl text-base">
+                      <Button
+                        className="mt-6 h-12 w-full rounded-xl text-base"
+                        onClick={() => scrollTo("pricing-calculator")}
+                      >
                         View Pricing
                         <PiArrowDownDuotone className="ml-2 h-4 w-4" />
                       </Button>
@@ -179,15 +199,15 @@ export default function PricingPage() {
                     <CardContent>
                       <div className="flex flex-col items-stat gap-3">
                         <span className="text-3xl md:text-4xl font-semibold">
-                          Custom
+                          Custom Pricing
                         </span>
-                        <span className="text-muted-foreground pb-1">
+                        {/* <span className="text-muted-foreground pb-1">
                           tailored pricing
-                        </span>
+                        </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        Engage our team for compliance validation, security
-                        reviews, and integration scope.
+                        Volume pricing tailored to seats, storage, export
+                        volume, security needs, and integration scope.
                       </p>
                       <Button
                         asChild
@@ -195,7 +215,7 @@ export default function PricingPage() {
                         className="mt-6 h-12 w-full rounded-xl text-base"
                       >
                         <Link href="mailto:contact@uprevit.com">
-                          Talk to Sales
+                          Talk to Us
                           <PiArrowRightDuotone className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
@@ -239,7 +259,10 @@ export default function PricingPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0">
+              <div
+                ref={pricingCalculatorRef}
+                className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0"
+              >
                 <div className="flex flex-col items-center text-center mb-10">
                   <Badge
                     variant={badgeVariant}
@@ -257,64 +280,12 @@ export default function PricingPage() {
                     Get a personalized quote for enterprise plans.
                   </p>
                 </div>
-                <div className="flex flex-col gap-8">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Platform Fee</CardTitle>
-                      <CardDescription>
-                        one paid workspace/account
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>$149/month</CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Seat</CardTitle>
-                      <CardDescription>
-                        one licensed user in the workspace
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>$29/user/month</CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Storage</CardTitle>
-                      <CardDescription>
-                        total uploaded file storage for the workspace
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      10 GB
-                      <p>$19/month per 10 GB</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>SSO add-on</CardTitle>
-                      <CardDescription>
-                        one workspace with SAML/OIDC SSO enabled
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>$149/month</CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Export</CardTitle>
-                      <CardDescription>
-                        One completed PDF/XLSX product export or report export
-                        job
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      50/month
-                      <p>$29/month per 100 exports/month</p>
-                    </CardContent>
-                  </Card>
-                </div>
+                <PricingCalculatorCards />
               </div>
             </div>
 
-            <div className="relative">
+            {/* TODO - Later on check this section. See if we need to keep it or remove it, but fix the cluttered UI if we are keeping it */}
+            {/* <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0">
@@ -456,7 +427,7 @@ export default function PricingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
@@ -531,5 +502,13 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <ScrollProvider>
+      <PricingPageContent />
+    </ScrollProvider>
   );
 }
