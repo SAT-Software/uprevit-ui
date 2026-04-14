@@ -32,24 +32,14 @@ import {
 
 const pricingFAQs = [
   {
-    question: "Is pricing per user or per workspace?",
-    answer:
-      "Startup pricing is billed per active user per month. Enterprise plans are customized based on deployment scope, compliance needs, and integrations.",
-  },
-  {
     question: "Do you offer annual billing?",
     answer:
-      "Yes. Annual billing is available for both Startup and Enterprise plans and includes a discounted rate.",
+      "Yes. Annual billing is available for both Growth and Enterprise plans and includes a discounted rate.",
   },
   {
     question: "What happens when we add or remove users?",
     answer:
       "Your monthly bill scales with active users. Add or remove users any time to match project demand and budget.",
-  },
-  {
-    question: "Do you support validation and audit readiness?",
-    answer:
-      "Yes. Uprevit is optimized for regulated teams with traceability, version control, and audit-ready artifacts.",
   },
 ];
 
