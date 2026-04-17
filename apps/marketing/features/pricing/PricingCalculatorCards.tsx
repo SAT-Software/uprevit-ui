@@ -28,6 +28,7 @@ import { Label } from "@uprevit/ui/components/ui/label";
 
 type BillingCycle = "annual" | "monthly";
 
+const BASE_SEAT_COUNT = 1;
 const INCLUDED_STORAGE_GB = 10;
 const INCLUDED_EXPORTS_PER_MONTH = 50;
 const MAX_SEATS = 100;
@@ -237,7 +238,7 @@ function ScaleLink({ copy }: { copy: string }) {
 
 export function PricingCalculatorCards() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("annual");
-  const [seatCount, setSeatCount] = useState(8);
+  const [seatCount, setSeatCount] = useState(BASE_SEAT_COUNT);
   const [storageGb, setStorageGb] = useState(INCLUDED_STORAGE_GB);
   const [exportsPerMonth, setExportsPerMonth] = useState(
     INCLUDED_EXPORTS_PER_MONTH,
@@ -305,7 +306,7 @@ export function PricingCalculatorCards() {
           onCheckedChange={(checked) =>
             setBillingCycle(checked ? "annual" : "monthly")
           }
-          aria-label="Enable SSO add-on"
+          aria-label="billing cycle toggle"
           className="scale-125 data-[state=checked]:bg-foreground"
         />
         <Label htmlFor="pricing-plan">Yearly</Label>
