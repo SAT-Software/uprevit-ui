@@ -300,7 +300,7 @@ export function PricingCalculatorCards() {
   const billingToggle = (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
       <div className="flex items-center space-x-2">
-        <Label htmlFor="pricing-plan">Monthly</Label>
+        <Label>Monthly</Label>
         <Switch
           checked={billingCycle === "annual"}
           onCheckedChange={(checked) =>
@@ -309,7 +309,7 @@ export function PricingCalculatorCards() {
           aria-label="billing cycle toggle"
           className="scale-125 data-[state=checked]:bg-foreground"
         />
-        <Label htmlFor="pricing-plan">Yearly</Label>
+        <Label>Yearly</Label>
       </div>
     </div>
   );
@@ -475,7 +475,7 @@ export function PricingCalculatorCards() {
             <div className="border-t border-border/70 pt-4">
               <RailRow
                 label="Annual contract rate"
-                value={`${formatCurrency(300)} / seat / year`}
+                value={`${formatCurrency(pricing.annual.seatMonthlyEquivalent * 12)} / seat / year`}
               />
             </div>
           </div>
@@ -498,7 +498,7 @@ export function PricingCalculatorCards() {
                 <div>
                   <CountDisplay
                     value={storageGb}
-                    suffix={storageGb === 1 ? "GB" : "GB"}
+                    suffix="GB"
                   />
                 </div>
               </div>
@@ -760,7 +760,7 @@ export function PricingCalculatorCards() {
             />
             <RailRow
               label="Annual billing"
-              value={`${formatCurrency(1500)} / year`}
+              value={`${formatCurrency(pricing.annual.ssoMonthlyEquivalent * 12)} / year`}
             />
             {/* <RailRow
               label="Monthly equivalent"
@@ -770,7 +770,7 @@ export function PricingCalculatorCards() {
             /> */}
             <RailRow
               label="Monthly billing"
-              value={`${formatCurrency(149)} / month`}
+              value={`${formatCurrency(pricing.monthly.ssoMonthlyEquivalent)} / month`}
             />
             <div className="border-t border-border/70 pt-4">
               <ScaleLink copy="Need SSO rollout help? Talk to sales" />

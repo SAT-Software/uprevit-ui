@@ -1,5 +1,14 @@
 "use client";
 
+import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
+import FooterSection from "@/features/marketing/landing-page/FooterSection";
+import MarketingHeader from "@/features/marketing/marketing-header";
+import { PricingCalculatorCards } from "@/features/pricing/PricingCalculatorCards";
+import {
+  ScrollProvider,
+  useScrollSection,
+  useScrollTo,
+} from "@/lib/scroll-context";
 import {
   Accordion,
   AccordionContent,
@@ -14,27 +23,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
-import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
-import FooterSection from "@/features/marketing/landing-page/FooterSection";
-import MarketingHeader from "@/features/marketing/marketing-header";
-import { PricingCalculatorCards } from "@/features/pricing/PricingCalculatorCards";
-import {
-  ScrollProvider,
-  useScrollSection,
-  useScrollTo,
-} from "@/lib/scroll-context";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   PiArrowDownDuotone,
   PiArrowRightDuotone,
   PiCheckCircleDuotone,
-  PiClockCountdownDuotone,
   PiCoinsDuotone,
-  PiFilesDuotone,
   PiQuestionDuotone,
-  PiShieldCheckDuotone,
-  PiStackDuotone,
 } from "react-icons/pi";
 
 const pricingFAQs = [
@@ -130,7 +126,6 @@ function PricingPageContent() {
                     <CardHeader className="pb-6 md:pb-8">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl">Growth</CardTitle>
-                        <CardTitle className="text-2xl">Growth</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -139,9 +134,7 @@ function PricingPageContent() {
                           Pay as you grow
                         </span>
                         {/* <span className="text-muted-foreground pb-1">
-                        {/* <span className="text-muted-foreground pb-1">
                           per user / month
-                        </span> */}
                         </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
@@ -200,7 +193,7 @@ function PricingPageContent() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-col items-stat gap-3">
+                      <div className="flex flex-col items-start gap-3">
                         <span className="text-3xl md:text-4xl font-semibold">
                           Custom Pricing
                         </span>
@@ -224,12 +217,6 @@ function PricingPageContent() {
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
-                          "Volume pricing and negotiated limits",
-                          "SSO and advanced security requirements",
-                          "Custom workflows and integrations",
-                          "Larger rollout and product libraries",
-                          "Procurement and onboarding support",
-                          "Validation/documentation support as scoped",
                           "Volume pricing and negotiated limits",
                           "SSO and advanced security requirements",
                           "Custom workflows and integrations",
@@ -436,7 +423,6 @@ function PricingPageContent() {
                   </div>
                 </div>
               </div>
-            </div> */}
             </div> */}
 
             <div className="relative">
