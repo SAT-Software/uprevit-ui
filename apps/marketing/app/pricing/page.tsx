@@ -130,6 +130,7 @@ function PricingPageContent() {
                     <CardHeader className="pb-6 md:pb-8">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl">Growth</CardTitle>
+                        <CardTitle className="text-2xl">Growth</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -138,7 +139,9 @@ function PricingPageContent() {
                           Pay as you grow
                         </span>
                         {/* <span className="text-muted-foreground pb-1">
+                        {/* <span className="text-muted-foreground pb-1">
                           per user / month
+                        </span> */}
                         </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
@@ -221,6 +224,12 @@ function PricingPageContent() {
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
+                          "Volume pricing and negotiated limits",
+                          "SSO and advanced security requirements",
+                          "Custom workflows and integrations",
+                          "Larger rollout and product libraries",
+                          "Procurement and onboarding support",
+                          "Validation/documentation support as scoped",
                           "Volume pricing and negotiated limits",
                           "SSO and advanced security requirements",
                           "Custom workflows and integrations",
@@ -427,6 +436,7 @@ function PricingPageContent() {
                   </div>
                 </div>
               </div>
+            </div> */}
             </div> */}
 
             <div className="relative">
