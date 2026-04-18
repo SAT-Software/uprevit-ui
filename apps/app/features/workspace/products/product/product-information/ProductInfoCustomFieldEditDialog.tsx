@@ -43,6 +43,7 @@ interface ProductData {
   id?: string;
   custom_fields?: Array<{
     _id?: string;
+    parent_id?: string | null;
     label: string;
     value: string;
   }>;
@@ -60,7 +61,12 @@ interface FormValues {
 interface CustomFieldEditDialogProps {
   product: ProductData;
   productMetadata: ProductMetadata;
-  customFieldsData: Array<{ _id: string; label: string; value: string }>;
+  customFieldsData: Array<{
+    _id: string;
+    parent_id?: string | null;
+    label: string;
+    value: string;
+  }>;
 }
 
 export default function ProductInformationCustomFieldEditDialog({
@@ -102,7 +108,12 @@ export default function ProductInformationCustomFieldEditDialog({
     getValues: getValuesManage,
     formState: { errors: errorsManage },
   } = useForm<{
-    existingFields: Array<{ _id: string; label: string; value: string }>;
+    existingFields: Array<{
+      _id: string;
+      parent_id?: string | null;
+      label: string;
+      value: string;
+    }>;
   }>({
     defaultValues: {
       existingFields: [],
@@ -120,6 +131,7 @@ export default function ProductInformationCustomFieldEditDialog({
       resetManage({
         existingFields: customFieldsData.map((f) => ({
           _id: f._id || "",
+          parent_id: f.parent_id ?? null,
           label: f.label,
           value: f.value,
         })),
@@ -191,7 +203,7 @@ export default function ProductInformationCustomFieldEditDialog({
       tab: "product-information",
       data:
         allCustomFields?.map((field) => ({
-          field_id: field._id!,
+          id: field._id!,
           label: field.label,
           value: field.value,
         })) || [],

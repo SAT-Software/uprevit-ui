@@ -25,8 +25,11 @@ export interface Product {
     manufacturing_location?: string;
     custom_fields?: Array<{
       _id?: string;
-      field_name: string;
-      field_value: string;
+      parent_id?: string | null;
+      label?: string;
+      value?: string;
+      field_name?: string;
+      field_value?: string;
     }>;
     tab_completed?: boolean;
   };
@@ -182,8 +185,11 @@ export interface ProductDataWrapper {
 /** Custom field structure */
 export interface CustomField {
   _id?: string;
-  field_name: string;
-  field_value: string;
+  parent_id?: string | null;
+  label?: string;
+  value?: string;
+  field_name?: string;
+  field_value?: string;
 }
 
 /** Base structure for tab data in the all-tabs response */
