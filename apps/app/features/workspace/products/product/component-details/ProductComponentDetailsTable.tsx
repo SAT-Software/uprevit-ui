@@ -95,6 +95,11 @@ type TableMeta = {
   ) => "added" | "removed" | "modified" | null;
 };
 
+const getPersistentComponentId = (item: ComponentItem): string =>
+  item._redlineId ||
+  item._id ||
+  `${item.component_number}-${item.component_type}`;
+
 const RedlineCell = ({
   value,
   diff,
@@ -102,13 +107,17 @@ const RedlineCell = ({
 }: {
   value: unknown;
   diff: DiffItem | null;
-  formatFn?: (v: unknown) => React.ReactNode;
+  formatFn?: (v: unknown, state?: "old" | "new" | "current") => React.ReactNode;
 }) => {
   const format =
     formatFn ||
-    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
+    ((v: unknown, state = "current") => (
+      <span className={state === "old" ? "line-through" : undefined}>
+        {typeof v === "string" ? v : v != null ? String(v) : "-"}
+      </span>
+    ));
 
-  if (!diff) return <>{format(value)}</>;
+  if (!diff) return <>{format(value, "current")}</>;
 
   const isAdded = diff.status === "added";
   const isRemoved = diff.status === "removed";
@@ -118,16 +127,107 @@ const RedlineCell = ({
     <div className="flex flex-col gap-0.5">
       {/* Old value - show for modified and removed */}
       {(isModified || isRemoved) && diff.old_value !== null && (
-        <div className="line-through text-sm text-red-600/70">
-          {format(diff.old_value)}
+        <div className="text-sm text-red-600/70">
+          {format(diff.old_value, "old")}
         </div>
       )}
       {/* New value - show for modified and added */}
       {(isModified || isAdded) && !isRemoved && (
-        <div className="text-sm text-blue-700">{format(diff.new_value)}</div>
+        <div className="text-sm text-blue-700">
+          {format(diff.new_value, "new")}
+        </div>
       )}
     </div>
   );
+};
+
+const getUniqueStrings = (values: string[]) => [...new Set(values)];
+
+const getArrayValueChanges = (diffs: DiffItem[], fieldPath: string) => {
+  const added: string[] = [];
+  const removed: string[] = [];
+
+  diffs.forEach((diff) => {
+    if (!diff.path.startsWith(fieldPath)) return;
+
+    if (diff.status === "added" && diff.new_value != null) {
+      added.push(String(diff.new_value));
+    }
+
+    if (diff.status === "removed" && diff.old_value != null) {
+      removed.push(String(diff.old_value));
+    }
+
+    if (diff.status === "modified") {
+      if (diff.old_value != null) {
+        removed.push(String(diff.old_value));
+      }
+      if (diff.new_value != null) {
+        added.push(String(diff.new_value));
+      }
+    }
+  });
+
+  return {
+    added: getUniqueStrings(added),
+    removed: getUniqueStrings(removed),
+  };
+};
+
+const getRedlineImagePresentation = (row: ComponentItem, meta?: TableMeta) => {
+  const image = typeof row.image === "string" ? row.image.trim() : "";
+  const rowStatus = meta?.getRowStatus?.(row);
+  const diff = meta?.isRedlineView
+    ? meta.getFieldDiff?.(row, "image", row.image)
+    : null;
+
+  if (!image) {
+    return {
+      src: "",
+      badge: null as "NEW" | "DEL" | "MOD" | null,
+      frameClassName: undefined as string | undefined,
+      imageClassName: undefined as string | undefined,
+      diff,
+    };
+  }
+
+  if (rowStatus === "added") {
+    return {
+      src: image,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+      diff,
+    };
+  }
+
+  if (rowStatus === "removed") {
+    return {
+      src: image,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+      diff,
+    };
+  }
+
+  if (diff?.status === "modified") {
+    return {
+      src: image,
+      badge: "MOD" as const,
+      frameClassName: "border-amber-300",
+      imageClassName: undefined,
+      diff,
+    };
+  }
+
+  return {
+    src: image,
+    badge: null as "NEW" | "DEL" | "MOD" | null,
+    frameClassName: undefined,
+    imageClassName: undefined,
+    diff,
+  };
 };
 
 // Helper component for sortable headers
@@ -209,54 +309,38 @@ const columns: ColumnDef<ComponentItem>[] = [
   },
   {
     accessorKey: "image",
-    header: ({ column }) => (
-      <SortableHeader title="Image" icon={PiImageDuotone} />
-    ),
+    header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
-      const diff = meta?.isRedlineView
-        ? meta.getFieldDiff?.(row.original, "image", row.original.image)
-        : null;
-      const newImageUrl =
-        diff?.status === "added" && typeof diff.new_value === "string"
-          ? diff.new_value
-          : "";
-      const removedImageUrl =
-        diff?.status === "removed" && typeof diff.old_value === "string"
-          ? diff.old_value
-          : "";
+      const imagePresentation = getRedlineImagePresentation(row.original, meta);
 
-      // For image, show both old and new if changed
-      if (diff && diff.status === "added" && newImageUrl) {
+      if (imagePresentation.badge && imagePresentation.src) {
         return (
           <div className="flex flex-col gap-1">
-            <span className="text-[9px] text-blue-600 font-medium">NEW</span>
+            <span
+              className={`text-[9px] font-medium ${
+                imagePresentation.badge === "NEW"
+                  ? "text-blue-600"
+                  : imagePresentation.badge === "DEL"
+                    ? "text-red-600"
+                    : "text-amber-700"
+              }`}
+            >
+              {imagePresentation.badge}
+            </span>
             <ProductImageFrame
-              src={newImageUrl}
+              src={imagePresentation.src}
               alt={row.original.component_number}
-              frameClassName="border-blue-300"
+              frameClassName={imagePresentation.frameClassName}
+              imageClassName={imagePresentation.imageClassName}
             />
           </div>
         );
       }
 
-      if (diff && diff.status === "removed" && removedImageUrl) {
-        return (
-          <div className="flex flex-col gap-1">
-            <span className="text-[9px] text-red-600 font-medium">REMOVED</span>
-            <ProductImageFrame
-              src={removedImageUrl}
-              alt={row.original.component_number}
-              frameClassName="border-red-300"
-              imageClassName="opacity-70"
-            />
-          </div>
-        );
-      }
-
-      return row.original.image !== "" ? (
+      return imagePresentation.src ? (
         <ProductImageFrame
-          src={row.original.image}
+          src={imagePresentation.src}
           alt={row.original.component_number}
         />
       ) : (
@@ -287,16 +371,9 @@ const columns: ColumnDef<ComponentItem>[] = [
         } else if (rowStatus === "removed") {
           removedTypes = currentTypes;
         } else if (rowDiffs.length > 0) {
-          const rowLabelTypeDiffs = rowDiffs.filter((d) =>
-            d.path.startsWith("label_type"),
-          );
-
-          addedTypes = rowLabelTypeDiffs
-            .filter((d) => d.status === "added" && d.new_value)
-            .map((d) => d.new_value as string);
-          removedTypes = rowLabelTypeDiffs
-            .filter((d) => d.status === "removed" && d.old_value)
-            .map((d) => d.old_value as string);
+          const changes = getArrayValueChanges(rowDiffs, "label_type");
+          addedTypes = changes.added;
+          removedTypes = changes.removed;
         }
       }
 
@@ -366,8 +443,16 @@ const columns: ColumnDef<ComponentItem>[] = [
             <RedlineCell
               value={row.getValue("component_number")}
               diff={diff}
-              formatFn={(v) => (
-                <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+              formatFn={(v, state = "current") => (
+                <span
+                  className={`inline-flex items-center rounded px-2 py-1 font-mono text-xs ${
+                    state === "old"
+                      ? "bg-red-50 text-red-700 line-through decoration-1"
+                      : state === "new"
+                        ? "bg-blue-50 text-blue-700"
+                        : "bg-muted"
+                  }`}
+                >
                   {typeof v === "string" ? v : String(v ?? "")}
                 </span>
               )}
@@ -554,6 +639,7 @@ export default function ProductComponentDetailsTable({
   const table = useReactTable({
     data,
     columns,
+    getRowId: (originalRow) => getPersistentComponentId(originalRow),
     getRowCanExpand: (row) => Boolean(row.original.component_description),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -622,9 +708,10 @@ export default function ProductComponentDetailsTable({
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
+                const componentId = getPersistentComponentId(row.original);
 
                 return (
-                  <Fragment key={row.id}>
+                  <Fragment key={componentId}>
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
                       className={`hover:bg-muted/50 ${
@@ -664,38 +751,42 @@ export default function ProductComponentDetailsTable({
 
                     {row.getIsExpanded() &&
                       (() => {
-                        // Check if image was added in redline view
-                        const imageDiff = isRedlineView
-                          ? getFieldDiff(
-                              row.original,
-                              "image",
-                              row.original.image,
-                            )
-                          : null;
-                        const addedImageUrl =
-                          imageDiff?.status === "added" &&
-                          typeof imageDiff.new_value === "string"
-                            ? imageDiff.new_value
-                            : null;
-
-                        // Use current image or added image
-                        const displayImage =
-                          row.original.image || addedImageUrl;
+                        const imagePresentation = getRedlineImagePresentation(
+                          row.original,
+                          table.options.meta as TableMeta | undefined,
+                        );
 
                         return (
                           <TableRow>
                             <TableCell colSpan={row.getVisibleCells().length}>
                               <div className="flex flex-col items-center py-2">
-                                {displayImage ? (
+                                {imagePresentation.src ? (
                                   <ProductImageFrame
-                                    src={displayImage}
+                                    src={imagePresentation.src}
                                     alt={row.original.component_number}
                                     variant="preview"
                                     frameClassName={
-                                      addedImageUrl && !row.original.image
-                                        ? "border-2 border-blue-400"
-                                        : undefined
+                                      imagePresentation.frameClassName
                                     }
+                                    imageClassName={
+                                      imagePresentation.imageClassName
+                                    }
+                                    // badge={
+                                    //   imagePresentation.badge ? (
+                                    //     <span
+                                    //       className={`absolute -top-1 -left-1 z-65 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider shadow-sm ${
+                                    //         imagePresentation.badge === "NEW"
+                                    //           ? "border border-blue-200 bg-blue-100 text-blue-700"
+                                    //           : imagePresentation.badge ===
+                                    //               "DEL"
+                                    //             ? "border border-red-200 bg-red-100 text-red-700"
+                                    //             : "border border-amber-200 bg-amber-100 text-amber-700"
+                                    //       }`}
+                                    //     >
+                                    //       {imagePresentation.badge}
+                                    //     </span>
+                                    //   ) : undefined
+                                    // }
                                     priority
                                   />
                                 ) : (
@@ -827,6 +918,9 @@ function RowActions({
 }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const componentId = getPersistentComponentId(row.original);
+  const actionsDisabled =
+    isSubmitted || row.original._redlineStatus === "removed";
 
   // Get productId from the current URL using usePathname
   const pathname = usePathname();
@@ -845,7 +939,7 @@ function RowActions({
             variant="ghost"
             className="shadow-none"
             aria-label="More actions"
-            disabled={isSubmitted}
+            disabled={actionsDisabled}
           >
             <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
           </Button>
@@ -853,6 +947,7 @@ function RowActions({
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem
+              disabled={actionsDisabled}
               onSelect={() => {
                 setTimeout(() => setShowEditDialog(true), 100);
               }}
@@ -863,6 +958,7 @@ function RowActions({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            disabled={actionsDisabled}
             onSelect={() => {
               setTimeout(() => setShowDeleteDialog(true), 100);
             }}
@@ -875,12 +971,14 @@ function RowActions({
       </DropdownMenu>
 
       <EditComponentDialog
+        key={`edit-${componentId}`}
         productId={getProductId()}
         component={row.original}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
       <DeleteComponentDialog
+        key={`delete-${componentId}`}
         productId={getProductId()}
         component={row.original}
         open={showDeleteDialog}

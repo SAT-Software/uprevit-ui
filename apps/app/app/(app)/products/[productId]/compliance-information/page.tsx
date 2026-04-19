@@ -59,7 +59,7 @@ type ComplianceTabsData = {
 const createSyntheticDiff = (
   path: string,
   status: "added" | "removed",
-  value: unknown
+  value: unknown,
 ): DiffItem => ({
   path,
   status,
@@ -74,7 +74,10 @@ export default function Page() {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
 
-  const { data, isLoading, error } = useGetProductTabData(productId, "all-tabs");
+  const { data, isLoading, error } = useGetProductTabData(
+    productId,
+    "all-tabs",
+  );
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
 
@@ -91,7 +94,8 @@ export default function Page() {
 
     const format =
       formatFn ||
-      ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : ""));
+      ((v: unknown) =>
+        typeof v === "string" ? v : v != null ? String(v) : "");
 
     const isRemoved = diff.status === "removed";
     const isAdded = diff.status === "added";
@@ -107,10 +111,8 @@ export default function Page() {
     return (
       <span className="inline-flex max-w-full flex-wrap items-center gap-2 whitespace-normal break-words">
         {(diff.old_value !== null || isRemoved) && hasOldValue && (
-          <span className="relative group/old max-w-full">
-            <span className="max-w-full whitespace-pre-wrap rounded border border-red-200/50 bg-red-100/50 px-1.5 py-0.5 text-sm text-red-600/70 line-through break-words dark:border-red-800/20 dark:bg-red-900/10">
-              {oldValue}
-            </span>
+          <span className="max-w-full whitespace-pre-wrap break-words text-sm text-red-600/70 line-through">
+            {oldValue}
           </span>
         )}
 
@@ -120,11 +122,11 @@ export default function Page() {
           !isAdded &&
           hasOldValue &&
           hasNewValue && (
-          <PiArrowRightBold className="shrink-0 text-xs text-muted-foreground/50" />
-        )}
+            <PiArrowRightBold className="shrink-0 text-xs text-muted-foreground/50" />
+          )}
 
         {(diff.new_value !== null || isAdded) && !isRemoved && hasNewValue && (
-          <span className="max-w-full whitespace-pre-wrap rounded border border-blue-200 bg-blue-100 px-1.5 py-0.5 text-sm font-semibold text-blue-700 break-words shadow-sm dark:border-blue-800/30 dark:bg-blue-900/30">
+          <span className="max-w-full whitespace-pre-wrap break-words text-sm font-semibold text-blue-700">
             {newValue}
           </span>
         )}
@@ -137,7 +139,10 @@ export default function Page() {
       <div className="flex h-full flex-col gap-2 p-2">
         <div className="flex h-full w-full flex-col overflow-y-auto rounded-xl border border-border bg-background">
           {[0, 1].map((section) => (
-            <div key={section} className={cn(section === 0 && "border-b border-border")}>
+            <div
+              key={section}
+              className={cn(section === 0 && "border-b border-border")}
+            >
               <div className="flex flex-col items-start justify-between gap-4 border-b border-border p-6 md:flex-row">
                 <div className="flex items-center gap-2">
                   <div className="h-5 w-48 animate-pulse rounded bg-muted" />
@@ -174,15 +179,23 @@ export default function Page() {
     return (
       <div className="flex h-full flex-col gap-2 p-2">
         <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-          <Link href="/dashboard" className="flex items-center transition-colors hover:text-foreground">
+          <Link
+            href="/dashboard"
+            className="flex items-center transition-colors hover:text-foreground"
+          >
             <PiHouseDuotone className="h-4 w-4" />
           </Link>
           <PiCaretRightDuotone className="h-3 w-3 text-muted-foreground/50" />
-          <Link href="/products" className="transition-colors hover:text-foreground">
+          <Link
+            href="/products"
+            className="transition-colors hover:text-foreground"
+          >
             Products
           </Link>
           <PiCaretRightDuotone className="h-3 w-3 text-muted-foreground/50" />
-          <span className="font-medium text-foreground">Compliance Information</span>
+          <span className="font-medium text-foreground">
+            Compliance Information
+          </span>
         </div>
 
         <div className="flex h-full w-full flex-col overflow-y-auto rounded-xl border border-border bg-background">
@@ -195,7 +208,9 @@ export default function Page() {
                 <h3 className="text-lg font-semibold text-destructive">
                   Error Loading Compliance Details
                 </h3>
-                <p className="max-w-md text-sm text-muted-foreground">{error.message}</p>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  {error.message}
+                </p>
               </div>
             </div>
           </div>
@@ -204,13 +219,15 @@ export default function Page() {
     );
   }
 
-  const allTabsData = (data as { result?: { data?: ComplianceTabsData } })?.result?.data;
-  const currentStandards =
-    (allTabsData?.compliance_information?.data ?? []) as unknown as ComplianceItem[];
-  const currentLanguages =
-    (allTabsData?.languages_information?.data ?? []) as unknown as LanguageItem[];
+  const allTabsData = (data as { result?: { data?: ComplianceTabsData } })
+    ?.result?.data;
+  const currentStandards = (allTabsData?.compliance_information?.data ??
+    []) as unknown as ComplianceItem[];
+  const currentLanguages = (allTabsData?.languages_information?.data ??
+    []) as unknown as LanguageItem[];
   const hasDiffVersions = Boolean(
-    diffRedlineData?.result?.base_version && diffRedlineData?.result?.next_version
+    diffRedlineData?.result?.base_version &&
+    diffRedlineData?.result?.next_version,
   );
 
   const baseStandards = hasDiffVersions
@@ -233,14 +250,16 @@ export default function Page() {
     isRedlineView && hasDiffVersions
       ? buildRedlineArray(baseStandards, nextStandards, {
           getId: (item) => item._id,
-          getFallbackKey: (item) => `${item.standard}-${item.standard_description}`,
+          getFallbackKey: (item) =>
+            `${item.standard}-${item.standard_description}`,
         })
       : [];
   const languageRedlineItems =
     isRedlineView && hasDiffVersions
       ? buildRedlineArray(baseLanguages, nextLanguages, {
           getId: (item) => item.code,
-          getFallbackKey: (item) => `${item.code}-${item.name}-${item.country || ""}`,
+          getFallbackKey: (item) =>
+            `${item.code}-${item.name}-${item.country || ""}`,
         })
       : [];
   const complianceChangeCount =
@@ -286,9 +305,22 @@ export default function Page() {
       })
       .filter(Boolean) as LanguageItemWithDiff[];
   })();
+  const desktopLanguageFillerCount = (3 - (languages.length % 3)) % 3;
+  const desktopLanguageEntries = [
+    ...languages.map((item, itemIndex) => ({
+      type: "item" as const,
+      item,
+      itemIndex,
+    })),
+    ...Array.from({ length: desktopLanguageFillerCount }, (_, fillerIndex) => ({
+      type: "placeholder" as const,
+      fillerIndex,
+    })),
+  ];
 
   const isSubmitted =
-    allTabsData?.product_information?.product_data?.data?.status === "submitted";
+    allTabsData?.product_information?.product_data?.data?.status ===
+    "submitted";
 
   return (
     <div className="flex h-full flex-col gap-2 p-2">
@@ -299,7 +331,9 @@ export default function Page() {
               ? "Loading changes..."
               : `Redline View: ${complianceChangeCount} changes in Compliance Information`}
           </span>
-          <span className="text-xs text-muted-foreground">(comparing with previous version)</span>
+          <span className="text-xs text-muted-foreground">
+            (comparing with previous version)
+          </span>
         </div>
       )}
 
@@ -317,7 +351,10 @@ export default function Page() {
                 content="Add and manage regulatory compliance standards, certifications, and safety documents for your product."
               />
             </div>
-            <AddStandardDialog productId={productId} isSubmitted={isSubmitted} />
+            <AddStandardDialog
+              productId={productId}
+              isSubmitted={isSubmitted}
+            />
           </div>
 
           <div className="px-2 py-2">
@@ -327,18 +364,25 @@ export default function Page() {
                   <PiCertificateDuotone className="h-10 w-10 text-muted-foreground" />
                 </div>
                 <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-semibold text-foreground">No Standards Added</h3>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    No Standards Added
+                  </h3>
                   <p className="max-w-md text-sm text-muted-foreground">
-                    Add compliance standards and certifications to track regulatory requirements for this product.
+                    Add compliance standards and certifications to track
+                    regulatory requirements for this product.
                   </p>
                 </div>
-                <AddStandardDialog productId={productId} isSubmitted={isSubmitted} />
+                <AddStandardDialog
+                  productId={productId}
+                  isSubmitted={isSubmitted}
+                />
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
                 {standards.map((item) => {
                   const itemStatus = item._redlineStatus;
-                  const hasAnyDiff = Boolean(itemStatus) && itemStatus !== "unchanged";
+                  const hasAnyDiff =
+                    Boolean(itemStatus) && itemStatus !== "unchanged";
                   const isAdded = itemStatus === "added";
                   const isRemoved = itemStatus === "removed";
                   const isModified = itemStatus === "modified";
@@ -347,8 +391,14 @@ export default function Page() {
                     ? itemStatus === "added"
                       ? createSyntheticDiff("standard", "added", item.standard)
                       : itemStatus === "removed"
-                        ? createSyntheticDiff("standard", "removed", item.standard)
-                        : item._redlineDiffs?.find((diff) => diff.path === "standard") ?? null
+                        ? createSyntheticDiff(
+                            "standard",
+                            "removed",
+                            item.standard,
+                          )
+                        : (item._redlineDiffs?.find(
+                            (diff) => diff.path === "standard",
+                          ) ?? null)
                     : null;
 
                   const descriptionDiff: DiffItem | null = isRedlineView
@@ -356,38 +406,65 @@ export default function Page() {
                       ? createSyntheticDiff(
                           "standard_description",
                           "added",
-                          item.standard_description
+                          item.standard_description,
                         )
                       : itemStatus === "removed"
                         ? createSyntheticDiff(
                             "standard_description",
                             "removed",
-                            item.standard_description
+                            item.standard_description,
                           )
-                        : item._redlineDiffs?.find(
-                            (diff) => diff.path === "standard_description"
-                          ) ?? null
+                        : (item._redlineDiffs?.find(
+                            (diff) => diff.path === "standard_description",
+                          ) ?? null)
                     : null;
 
                   return (
                     <div
                       key={item._redlineId ?? item._id}
                       className={cn(
-                        "group flex flex-col gap-3 rounded-xl border bg-card p-4 transition-all duration-200 hover:bg-accent/5",
-                        isRedlineView && isRemoved && "border-red-500/50 bg-red-100/5 opacity-60",
-                        isRedlineView && isAdded && "border-blue-500/50 bg-blue-100/5",
-                        isRedlineView && isModified && "border-amber-500/50 bg-amber-100/10",
-                        (!isRedlineView || !hasAnyDiff) && "border-border"
+                        "group relative flex flex-col gap-3 rounded-xl border bg-card p-4 transition-all duration-200 hover:bg-accent/5",
+                        isRedlineView &&
+                          isRemoved &&
+                          "border-red-500/50 bg-red-100/5 opacity-60",
+                        isRedlineView &&
+                          isAdded &&
+                          "border-blue-500/50 bg-blue-100/5",
+                        isRedlineView &&
+                          isModified &&
+                          "border-amber-500/50 bg-amber-100/10",
+                        (!isRedlineView || !hasAnyDiff) && "border-border",
                       )}
                     >
+                      {isRedlineView && isAdded && (
+                        <span className="absolute -top-2 -right-2 z-10 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-700 shadow-sm">
+                          NEW
+                        </span>
+                      )}
+                      {isRedlineView && isRemoved && (
+                        <span className="absolute -top-2 -right-2 z-10 rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-red-700 shadow-sm">
+                          DEL
+                        </span>
+                      )}
+                      {isRedlineView && isModified && (
+                        <span className="absolute -top-2 -right-2 z-10 rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 shadow-sm">
+                          MOD
+                        </span>
+                      )}
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="flex min-w-0 flex-1 items-start gap-3">
                           <div
                             className={cn(
-                              "rounded-lg bg-green-500/10 p-2 text-green-600 transition-colors group-hover:bg-green-500/20",
-                              isRedlineView && isRemoved && "bg-red-200/40 text-destructive",
-                              isRedlineView && isAdded && "bg-blue-200/40 text-blue-500",
-                              isRedlineView && isModified && "bg-amber-200/40 text-amber-500"
+                              "rounded-lg bg-green-500/10 p-2 text-green-600",
+                              isRedlineView &&
+                                isRemoved &&
+                                "bg-red-200/40 text-destructive",
+                              isRedlineView &&
+                                isAdded &&
+                                "bg-blue-200/40 text-blue-500",
+                              isRedlineView &&
+                                isModified &&
+                                "bg-amber-200/40 text-amber-500",
                             )}
                           >
                             <PiShieldCheckDuotone className="h-4 w-4" />
@@ -397,26 +474,16 @@ export default function Page() {
                               <span
                                 className={cn(
                                   "min-w-0 break-words text-base font-semibold text-foreground",
-                                  isRedlineView && isRemoved && "text-red-500/70 line-through"
+                                  isRedlineView &&
+                                    isRemoved &&
+                                    "text-red-500/70 line-through",
                                 )}
                               >
-                                <RedlineValue value={item.standard} diff={standardDiff} />
+                                <RedlineValue
+                                  value={item.standard}
+                                  diff={standardDiff}
+                                />
                               </span>
-                              {isRedlineView && isAdded && (
-                                <span className="rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-700 shadow-sm">
-                                  NEW
-                                </span>
-                              )}
-                              {isRedlineView && isRemoved && (
-                                <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-red-700 shadow-sm">
-                                  REMOVED
-                                </span>
-                              )}
-                              {isRedlineView && isModified && (
-                                <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 shadow-sm">
-                                  MODIFIED
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -439,11 +506,16 @@ export default function Page() {
                       <p
                         className={cn(
                           "line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground",
-                          isRedlineView && isRemoved && "text-red-500/70 line-through"
+                          isRedlineView &&
+                            isRemoved &&
+                            "text-red-500/70 line-through",
                         )}
                       >
                         <RedlineValue
-                          value={item.standard_description || "No description provided."}
+                          value={
+                            item.standard_description ||
+                            "No description provided."
+                          }
                           diff={descriptionDiff}
                         />
                       </p>
@@ -482,9 +554,12 @@ export default function Page() {
                   <PiGlobeDuotone className="h-10 w-10 text-muted-foreground" />
                 </div>
                 <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-semibold text-foreground">No Languages Selected</h3>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    No Languages Selected
+                  </h3>
                   <p className="max-w-md text-sm text-muted-foreground">
-                    Add required market languages individually or use language groups to build your labeling set faster.
+                    Add required market languages individually or use language
+                    groups to build your labeling set faster.
                   </p>
                 </div>
                 <ManageLanguagesDialog
@@ -495,26 +570,40 @@ export default function Page() {
               </div>
             ) : (
               <div className="grid overflow-hidden rounded-lg border border-border bg-background lg:grid-cols-3">
-                {languages.map((item, index) => {
+                {desktopLanguageEntries.map((entry, index) => {
+                  const isInLastDesktopRow =
+                    index >= desktopLanguageEntries.length - 3;
+                  const hasDesktopItemToTheRight = index % 3 !== 2;
+
+                  if (entry.type === "placeholder") {
+                    return (
+                      <div
+                        key={`language-placeholder-${entry.fillerIndex}`}
+                        aria-hidden="true"
+                        className={cn(
+                          "hidden lg:block",
+                          !isInLastDesktopRow && "lg:border-b lg:border-border",
+                          hasDesktopItemToTheRight &&
+                            "lg:border-r lg:border-border",
+                        )}
+                      />
+                    );
+                  }
+
+                  const { item, itemIndex } = entry;
                   const itemStatus = item._redlineStatus;
-                  const hasAnyDiff = Boolean(itemStatus) && itemStatus !== "unchanged";
+                  const hasAnyDiff =
+                    Boolean(itemStatus) && itemStatus !== "unchanged";
                   const isAdded = itemStatus === "added";
                   const isRemoved = itemStatus === "removed";
                   const isModified = itemStatus === "modified";
-                  const isLastItem = index === languages.length - 1;
-                  const lastDesktopRowStart =
-                    languages.length <= 3
-                      ? 0
-                      : languages.length - ((languages.length % 3) || 3);
-                  const isInLastDesktopRow = index >= lastDesktopRowStart;
-                  const hasDesktopItemToTheRight =
-                    index + 1 < languages.length && index % 3 !== 2;
+                  const isLastItem = itemIndex === languages.length - 1;
                   const statusLabel = isAdded
-                    ? "Added"
+                    ? "NEW"
                     : isRemoved
-                      ? "Removed"
+                      ? "DEL"
                       : isModified
-                        ? "Modified"
+                        ? "MOD"
                         : null;
                   const countryValue = item.country?.trim() || "";
 
@@ -523,7 +612,9 @@ export default function Page() {
                       ? createSyntheticDiff("code", "added", item.code)
                       : itemStatus === "removed"
                         ? createSyntheticDiff("code", "removed", item.code)
-                        : item._redlineDiffs?.find((diff) => diff.path === "code") ?? null
+                        : (item._redlineDiffs?.find(
+                            (diff) => diff.path === "code",
+                          ) ?? null)
                     : null;
 
                   const nameDiff: DiffItem | null = isRedlineView
@@ -531,7 +622,9 @@ export default function Page() {
                       ? createSyntheticDiff("name", "added", item.name)
                       : itemStatus === "removed"
                         ? createSyntheticDiff("name", "removed", item.name)
-                        : item._redlineDiffs?.find((diff) => diff.path === "name") ?? null
+                        : (item._redlineDiffs?.find(
+                            (diff) => diff.path === "name",
+                          ) ?? null)
                     : null;
 
                   const countryDiff: DiffItem | null = isRedlineView
@@ -541,28 +634,36 @@ export default function Page() {
                         : null
                       : itemStatus === "removed"
                         ? countryValue
-                          ? createSyntheticDiff("country", "removed", countryValue)
+                          ? createSyntheticDiff(
+                              "country",
+                              "removed",
+                              countryValue,
+                            )
                           : null
-                        : item._redlineDiffs?.find((diff) => diff.path === "country") ?? null
+                        : (item._redlineDiffs?.find(
+                            (diff) => diff.path === "country",
+                          ) ?? null)
                     : null;
 
                   return (
                     <div
                       key={item._redlineId ?? item.code}
                       className={cn(
-                        "flex flex-col gap-2 px-3 py-3 transition-colors sm:flex-row sm:items-start sm:justify-between",
+                        "flex relative flex-col gap-2 px-3 py-3 transition-colors sm:flex-row sm:items-start sm:justify-between",
+                        statusLabel && "pr-12",
                         !isLastItem && "border-b border-border",
                         isInLastDesktopRow && "lg:border-b-0",
                         !isInLastDesktopRow && "lg:border-b lg:border-border",
-                        hasDesktopItemToTheRight && "lg:border-r lg:border-border",
+                        hasDesktopItemToTheRight &&
+                          "lg:border-r lg:border-border",
                         isRedlineView && isRemoved && "bg-red-100/5 opacity-60",
                         isRedlineView && isAdded && "bg-blue-100/5",
                         isRedlineView && isModified && "bg-amber-100/10",
-                        (!isRedlineView || !hasAnyDiff) && "hover:bg-accent/30"
+                        (!isRedlineView || !hasAnyDiff) && "hover:bg-accent/30",
                       )}
                     >
                       <div className="flex min-w-0 items-start gap-3">
-                        <CountryFlag country={item.country} className="mt-0.5" />
+                        <CountryFlag country={item.country} className="mt-1" />
                         <div className="min-w-0 flex w-full items-start gap-3">
                           <div className="min-w-[2.75rem] shrink-0 pt-0.5 text-xs font-medium tracking-wide text-muted-foreground">
                             <RedlineValue value={item.code} diff={codeDiff} />
@@ -571,7 +672,9 @@ export default function Page() {
                             <p
                               className={cn(
                                 "text-sm font-medium text-foreground",
-                                isRedlineView && isRemoved && "text-red-500/70 line-through"
+                                isRedlineView &&
+                                  isRemoved &&
+                                  "text-red-500/70 line-through",
                               )}
                             >
                               <RedlineValue value={item.name} diff={nameDiff} />
@@ -580,10 +683,15 @@ export default function Page() {
                               <p
                                 className={cn(
                                   "mt-0.5 text-xs text-muted-foreground",
-                                  isRedlineView && isRemoved && "text-red-500/70 line-through"
+                                  isRedlineView &&
+                                    isRemoved &&
+                                    "text-red-500/70 line-through",
                                 )}
                               >
-                                <RedlineValue value={countryValue} diff={countryDiff} />
+                                <RedlineValue
+                                  value={countryValue}
+                                  diff={countryDiff}
+                                />
                               </p>
                             )}
                           </div>
@@ -591,16 +699,19 @@ export default function Page() {
                       </div>
 
                       {statusLabel && (
-                        <div
+                        <span
                           className={cn(
-                            "shrink-0 pl-8 text-[11px] font-medium sm:pl-0",
-                            isAdded && "text-blue-700 dark:text-blue-300",
-                            isRemoved && "text-red-700 dark:text-red-300",
-                            isModified && "text-amber-700 dark:text-amber-300"
+                            "absolute right-1 top-1 z-10 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider shadow-sm",
+                            isAdded &&
+                              "border-blue-200 bg-blue-100 text-blue-700",
+                            isRemoved &&
+                              "border-red-200 bg-red-100 text-red-700",
+                            isModified &&
+                              "border-amber-200 bg-amber-100 text-amber-700",
                           )}
                         >
                           {statusLabel}
-                        </div>
+                        </span>
                       )}
                     </div>
                   );

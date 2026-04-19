@@ -88,6 +88,9 @@ type TableMeta = {
   getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
 };
 
+const getPersistentItemId = (item: Item): string =>
+  item._redlineId || item.id || item.componentName;
+
 // Helper component for displaying redline values
 const RedlineCell = ({
   value,
@@ -461,6 +464,7 @@ export default function SymbolsGraphicsPageBarcodesTable({
   const table = useReactTable({
     data: dataProp || [],
     columns,
+    getRowId: (originalRow) => getPersistentItemId(originalRow),
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -530,9 +534,10 @@ export default function SymbolsGraphicsPageBarcodesTable({
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
+                const itemId = getPersistentItemId(row.original);
 
                 return (
-                  <Fragment key={row.id}>
+                  <Fragment key={itemId}>
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
                       className={`hover:bg-muted/50 ${
@@ -673,6 +678,8 @@ function RowActions({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
+  const itemId = getPersistentItemId(item);
+  const actionsDisabled = isSubmitted || item._redlineStatus === "removed";
   const pathname = usePathname();
   const getProductId = (): string => {
     if (!pathname) return "";
@@ -698,7 +705,7 @@ function RowActions({
             size="icon"
             variant="ghost"
             className="shadow-none"
-            disabled={isSubmitted}
+            disabled={actionsDisabled}
           >
             <PiDotsThreeCircleDuotone size={18} />
           </Button>
@@ -706,6 +713,7 @@ function RowActions({
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem
+              disabled={actionsDisabled}
               onSelect={() => setTimeout(() => setShowEditDialog(true), 100)}
             >
               <PiPencilSimpleDuotone className="h-4 w-4" />
@@ -714,6 +722,7 @@ function RowActions({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            disabled={actionsDisabled}
             onSelect={() => setTimeout(() => setShowDeleteDialog(true), 100)}
             className="text-destructive focus:text-destructive"
           >
@@ -723,12 +732,14 @@ function RowActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <EditBarcodesDialog
+        key={`edit-${itemId}`}
         productId={getProductId()}
         barcode={barcodeForItem}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
       <DeleteSymbolsSchematicsDialog
+        key={`delete-${itemId}`}
         productId={getProductId()}
         graphics={barcodeForItem}
         open={showDeleteDialog}

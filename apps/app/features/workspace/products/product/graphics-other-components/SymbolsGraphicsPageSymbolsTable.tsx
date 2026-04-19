@@ -85,6 +85,9 @@ type TableMeta = {
   getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
 };
 
+const getPersistentItemId = (item: Item): string =>
+  item._redlineId || item.id || item.componentName;
+
 // Helper component for displaying redline values (vertical stacking)
 const RedlineCell = ({
   value,
@@ -474,6 +477,7 @@ export default function SymbolsGraphicsPageSymbolsTable({
   const table = useReactTable({
     data: data || [],
     columns,
+    getRowId: (originalRow) => getPersistentItemId(originalRow),
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -540,9 +544,10 @@ export default function SymbolsGraphicsPageSymbolsTable({
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
+                const itemId = getPersistentItemId(row.original);
 
                 return (
-                  <Fragment key={row.id}>
+                  <Fragment key={itemId}>
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
                       className={`hover:bg-muted/50 ${
@@ -698,6 +703,8 @@ function RowActions({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
+  const itemId = getPersistentItemId(item);
+  const actionsDisabled = isSubmitted || item._redlineStatus === "removed";
 
   // Get productId from the current URL using usePathname
   const pathname = usePathname();
@@ -716,7 +723,7 @@ function RowActions({
             variant="ghost"
             className="shadow-none"
             aria-label="More actions"
-            disabled={isSubmitted}
+            disabled={actionsDisabled}
           >
             <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
           </Button>
@@ -724,6 +731,7 @@ function RowActions({
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem
+              disabled={actionsDisabled}
               onSelect={() => {
                 setTimeout(() => setShowEditDialog(true), 100);
               }}
@@ -734,6 +742,7 @@ function RowActions({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            disabled={actionsDisabled}
             onSelect={() => {
               setTimeout(() => setShowDeleteDialog(true), 100);
             }}
@@ -746,12 +755,14 @@ function RowActions({
       </DropdownMenu>
 
       <EditSymbolsDialog
+        key={`edit-${itemId}`}
         productId={getProductId()}
         symbol={{ ...item, key: item.key }}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
       <DeleteSymbolsSchematicsDialog
+        key={`delete-${itemId}`}
         productId={getProductId()}
         graphics={item}
         open={showDeleteDialog}
