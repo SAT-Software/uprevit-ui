@@ -319,10 +319,18 @@ const columns: ColumnDef<Item>[] = [
             d.path.startsWith("label_presence"),
           );
           addedLabels = labelDiffs
-            .filter((d) => d.status === "added" && d.new_value)
+            .filter(
+              (d) =>
+                (d.status === "added" || d.status === "modified") &&
+                d.new_value,
+            )
             .map((d) => d.new_value as string);
           removedLabels = labelDiffs
-            .filter((d) => d.status === "removed" && d.old_value)
+            .filter(
+              (d) =>
+                (d.status === "removed" || d.status === "modified") &&
+                d.old_value,
+            )
             .map((d) => d.old_value as string);
         }
       }
