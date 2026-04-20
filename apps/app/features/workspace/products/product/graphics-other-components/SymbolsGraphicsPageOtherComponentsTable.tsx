@@ -86,6 +86,56 @@ type TableMeta = {
   getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
 };
 
+const getPersistentItemId = (item: Item): string =>
+  item._redlineId || item.id || item.componentName;
+
+const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
+  const image =
+    typeof row.componentImage === "string" ? row.componentImage.trim() : "";
+  const rowStatus = meta?.getRowStatus?.(row);
+  const diff = meta?.isRedlineView
+    ? (meta.getFieldDiff?.(row, "componentImage", row.componentImage) ??
+      row._redlineDiffs?.find((d) => d.path === "image") ??
+      null)
+    : null;
+  const oldImage =
+    typeof diff?.old_value === "string" ? diff.old_value.trim() : "";
+  const newImage =
+    typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
+
+  if (rowStatus === "added") {
+    return {
+      src: image || newImage,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (rowStatus === "removed") {
+    return {
+      src: image || oldImage,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "modified") {
+    const modifiedImage = image || newImage || oldImage;
+    const imageWasRemoved = !image && !newImage && Boolean(oldImage);
+    return {
+      src: modifiedImage,
+      frameClassName: "border-amber-300",
+      imageClassName: imageWasRemoved ? "opacity-70" : undefined,
+    };
+  }
+
+  return {
+    src: image,
+    frameClassName: undefined as string | undefined,
+    imageClassName: undefined as string | undefined,
+  };
+};
+
 // Helper component for displaying redline values
 const RedlineCell = ({
   value,
@@ -100,8 +150,7 @@ const RedlineCell = ({
 }) => {
   const format =
     formatFn ||
-    ((v: unknown) =>
-      typeof v === "string" ? v : v != null ? String(v) : "-");
+    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
   if (!diff) return <>{format(value)}</>;
 
   const isAdded = diff.status === "added";
@@ -204,51 +253,13 @@ const columns: ColumnDef<Item>[] = [
     header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
-      const image = row.original.componentImage;
-      const hasImage = typeof image === "string" && image.trim() !== "";
-      const diff = meta?.isRedlineView
-        ? meta.getFieldDiff?.(row.original, "image", image)
-        : null;
-      const newImageUrl =
-        diff?.status === "added" && typeof diff.new_value === "string"
-          ? diff.new_value
-          : "";
-      const removedImageUrl =
-        diff?.status === "removed" && typeof diff.old_value === "string"
-          ? diff.old_value
-          : "";
-
-      if (diff && diff.status === "added" && newImageUrl) {
-        return (
-          <div className="flex flex-col gap-1">
-            <span className="text-[9px] text-blue-600 font-medium">NEW</span>
-            <ProductImageFrame
-              src={newImageUrl}
-              alt={row.original.componentName}
-              frameClassName="border-blue-300"
-            />
-          </div>
-        );
-      }
-
-      if (diff && diff.status === "removed" && removedImageUrl) {
-        return (
-          <div className="flex flex-col gap-1">
-            <span className="text-[9px] text-red-600 font-medium">REMOVED</span>
-            <ProductImageFrame
-              src={removedImageUrl}
-              alt={row.original.componentName}
-              frameClassName="border-red-300"
-              imageClassName="opacity-70"
-            />
-          </div>
-        );
-      }
-
-      return hasImage ? (
+      const imagePresentation = getRedlineImagePresentation(row.original, meta);
+      return imagePresentation.src ? (
         <ProductImageFrame
-          src={image}
+          src={imagePresentation.src}
           alt={row.original.componentName}
+          frameClassName={imagePresentation.frameClassName}
+          imageClassName={imagePresentation.imageClassName}
         />
       ) : (
         <ProductImageFrame alt={row.original.componentName} />
@@ -469,6 +480,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
   const table = useReactTable({
     data: dataProp || [],
     columns,
+    getRowId: (originalRow) => getPersistentItemId(originalRow),
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -537,9 +549,10 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
+                const itemId = getPersistentItemId(row.original);
 
                 return (
-                  <Fragment key={row.id}>
+                  <Fragment key={itemId}>
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
                       className={`hover:bg-muted/50 ${
@@ -578,68 +591,37 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                     {row.getIsExpanded() && (
                       <TableRow>
                         <TableCell colSpan={row.getVisibleCells().length}>
-                          <div className="flex flex-col items-center py-4">
-                            {(() => {
-                              const meta = table.options.meta as
-                                | TableMeta
-                                | undefined;
-                              const image = row.original.componentImage;
-                              const imageDiff = meta?.isRedlineView
-                                ? meta.getFieldDiff?.(
-                                    row.original,
-                                    "image",
-                                    image,
-                                  )
-                                : null;
-                              const displayImage =
-                                imageDiff?.status === "added" &&
-                                typeof imageDiff.new_value === "string"
-                                  ? imageDiff.new_value
-                                  : imageDiff?.status === "removed" &&
-                                      typeof imageDiff.old_value === "string"
-                                    ? imageDiff.old_value
-                                    : image;
-                              const hasImage =
-                                typeof displayImage === "string" &&
-                                displayImage.trim() !== "";
-                              const borderClass =
-                                imageDiff?.status === "added"
-                                  ? "border-2 border-blue-400"
-                                  : imageDiff?.status === "removed"
-                                    ? "border-2 border-red-300"
-                                    : "";
-                              return hasImage ? (
-                                <ProductImageFrame
-                                  src={displayImage}
-                                  alt={row.original.componentName}
-                                  variant="preview"
-                                  frameClassName={borderClass}
-                                  badge={
-                                    imageDiff?.status === "added" ? (
-                                      <span className="absolute top-2 left-2 z-10 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-700 shadow-sm">
-                                        NEW
-                                      </span>
-                                    ) : imageDiff?.status === "removed" ? (
-                                      <span className="absolute top-2 left-2 z-10 rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-red-700 shadow-sm">
-                                        REMOVED
-                                      </span>
-                                    ) : undefined
-                                  }
-                                  imageClassName={
-                                    imageDiff?.status === "removed"
-                                      ? "opacity-70"
-                                      : undefined
-                                  }
-                                  priority
-                                />
-                              ) : (
-                                <ProductImageFrame
-                                  alt={row.original.componentName}
-                                  variant="preview"
-                                />
+                          {(() => {
+                            const imagePresentation =
+                              getRedlineImagePresentation(
+                                row.original,
+                                table.options.meta as TableMeta | undefined,
                               );
-                            })()}
-                          </div>
+
+                            return (
+                              <div className="flex flex-col items-center py-4">
+                                {imagePresentation.src ? (
+                                  <ProductImageFrame
+                                    src={imagePresentation.src}
+                                    alt={row.original.componentName}
+                                    variant="preview"
+                                    frameClassName={
+                                      imagePresentation.frameClassName
+                                    }
+                                    imageClassName={
+                                      imagePresentation.imageClassName
+                                    }
+                                    priority
+                                  />
+                                ) : (
+                                  <ProductImageFrame
+                                    alt={row.original.componentName}
+                                    variant="preview"
+                                  />
+                                )}
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                       </TableRow>
                     )}
@@ -721,6 +703,8 @@ function RowActions({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
+  const itemId = getPersistentItemId(item);
+  const actionsDisabled = isSubmitted || item._redlineStatus === "removed";
   const pathname = usePathname();
   const getProductId = (): string => {
     if (!pathname) return "";
@@ -745,7 +729,7 @@ function RowActions({
             size="icon"
             variant="ghost"
             className="shadow-none"
-            disabled={isSubmitted}
+            disabled={actionsDisabled}
           >
             <PiDotsThreeCircleDuotone size={18} />
           </Button>
@@ -753,6 +737,7 @@ function RowActions({
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem
+              disabled={actionsDisabled}
               onSelect={() => setTimeout(() => setShowEditDialog(true), 100)}
             >
               <PiPencilSimpleDuotone className="h-4 w-4" />
@@ -761,6 +746,7 @@ function RowActions({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            disabled={actionsDisabled}
             onSelect={() => setTimeout(() => setShowDeleteDialog(true), 100)}
             className="text-destructive focus:text-destructive"
           >
@@ -770,12 +756,14 @@ function RowActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <EditOtherComponentsDialog
+        key={`edit-${itemId}`}
         productId={getProductId()}
         otherComponent={OtherComponentItem}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
       <DeleteSymbolsSchematicsDialog
+        key={`delete-${itemId}`}
         productId={getProductId()}
         graphics={OtherComponentItem}
         open={showDeleteDialog}

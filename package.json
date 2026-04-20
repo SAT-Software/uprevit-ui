@@ -25,5 +25,8 @@
   },
   "devDependencies": {
     "turbo": "^2.8.21"
+  },
+  "dependencies": {
+    "lottie-react": "^2.4.1"
   }
 }

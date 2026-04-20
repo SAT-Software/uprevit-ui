@@ -98,6 +98,8 @@ type RedlineValueProps = {
   diff?: DiffItem | null;
   formatFn?: (v: unknown) => string;
   isRedlineView: boolean;
+  oldValueClassName?: string;
+  newValueClassName?: string;
 };
 
 function RedlineValue({
@@ -105,6 +107,8 @@ function RedlineValue({
   diff,
   formatFn,
   isRedlineView,
+  oldValueClassName,
+  newValueClassName,
 }: RedlineValueProps) {
   if (!isRedlineView || !diff) return <>{value}</>;
   const format =
@@ -127,10 +131,13 @@ function RedlineValue({
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       {(diff.old_value !== null || isRemoved) && (
-        <span className="relative group/old">
-          <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
-            {format(diff.old_value) || ""}
-          </span>
+        <span
+          className={cn(
+            "line-through text-sm text-red-600/70",
+            oldValueClassName,
+          )}
+        >
+          {format(diff.old_value) || ""}
         </span>
       )}
 
@@ -142,7 +149,12 @@ function RedlineValue({
         )}
 
       {(diff.new_value !== null || isAdded) && !isRemoved && (
-        <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
+        <span
+          className={cn(
+            "text-sm font-semibold text-blue-700",
+            newValueClassName,
+          )}
+        >
           {format(diff.new_value) || ""}
         </span>
       )}
@@ -338,8 +350,9 @@ export default function Page() {
   const customFieldsForDialog = (customFieldsData ?? []).map(
     (field, index) => ({
       _id: field._id ?? `custom-${index}`,
-      label: field.label ?? "",
-      value: field.value ?? "",
+      parent_id: field.parent_id ?? null,
+      label: field.label ?? field.field_name ?? "",
+      value: field.value ?? field.field_value ?? "",
     }),
   );
 
@@ -497,6 +510,8 @@ export default function Page() {
                 }
                 diff={getProductInfoDiff("productDescription")}
                 isRedlineView={isRedlineView}
+                oldValueClassName="font-medium"
+                newValueClassName="font-medium"
               />
             </p>
             <div className="flex flex-col items-start gap-2 text-xs text-muted-foreground w-full mt-auto">
@@ -518,6 +533,8 @@ export default function Page() {
                           : "N/A"
                       }
                       isRedlineView={isRedlineView}
+                      oldValueClassName="text-xs"
+                      newValueClassName="text-xs"
                     />
                   </span>
                 </span>
@@ -541,6 +558,8 @@ export default function Page() {
                           : "N/A"
                       }
                       isRedlineView={isRedlineView}
+                      oldValueClassName="text-xs"
+                      newValueClassName="text-xs"
                     />
                   </span>
                 </span>
@@ -720,7 +739,7 @@ export default function Page() {
                 <div
                   key={idx}
                   className={cn(
-                    "flex flex-col gap-3 p-4 border rounded-xl bg-card hover:bg-accent/5 transition-all duration-200 group",
+                    "relative flex flex-col gap-3 p-4 border rounded-xl bg-card hover:bg-accent/5 transition-all duration-200 group",
                     isRedlineView &&
                       isRemoved &&
                       "border-red-500/50 bg-red-100/5 opacity-60",
@@ -733,6 +752,21 @@ export default function Page() {
                     !isRedlineView || !fieldStatus ? "border-border" : "",
                   )}
                 >
+                  {isRedlineView && isAdded && (
+                    <span className="absolute -top-1 -right-1 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                      NEW
+                    </span>
+                  )}
+                  {isRedlineView && isRemoved && (
+                    <span className="absolute -top-1 -right-1 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                      DEL
+                    </span>
+                  )}
+                  {isRedlineView && isModified && (
+                    <span className="absolute -top-1 -right-1 text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                      MOD
+                    </span>
+                  )}
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
@@ -769,21 +803,6 @@ export default function Page() {
                         field.label
                       )}
                     </span>
-                    {isRedlineView && isAdded && (
-                      <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
-                        NEW
-                      </span>
-                    )}
-                    {isRedlineView && isRemoved && (
-                      <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
-                        REMOVED
-                      </span>
-                    )}
-                    {isRedlineView && isModified && (
-                      <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
-                        MODIFIED
-                      </span>
-                    )}
                   </div>
                   <div
                     className={cn(

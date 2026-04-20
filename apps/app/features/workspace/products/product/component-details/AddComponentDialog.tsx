@@ -207,6 +207,9 @@ export default function AddComponentDialog({
                 <Controller
                   name="componentType"
                   control={control}
+                  rules={{
+                    required: "Component type is required",
+                  }}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
@@ -220,6 +223,11 @@ export default function AddComponentDialog({
                     </Select>
                   )}
                 />
+                {errors.componentType && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentType.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
