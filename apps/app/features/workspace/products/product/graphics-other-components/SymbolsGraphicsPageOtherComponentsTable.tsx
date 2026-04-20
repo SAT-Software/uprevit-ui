@@ -89,6 +89,53 @@ type TableMeta = {
 const getPersistentItemId = (item: Item): string =>
   item._redlineId || item.id || item.componentName;
 
+const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
+  const image =
+    typeof row.componentImage === "string" ? row.componentImage.trim() : "";
+  const rowStatus = meta?.getRowStatus?.(row);
+  const diff = meta?.isRedlineView
+    ? (meta.getFieldDiff?.(row, "componentImage", row.componentImage) ??
+      row._redlineDiffs?.find((d) => d.path === "image") ??
+      null)
+    : null;
+  const oldImage =
+    typeof diff?.old_value === "string" ? diff.old_value.trim() : "";
+  const newImage =
+    typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
+
+  if (rowStatus === "added") {
+    return {
+      src: image || newImage,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (rowStatus === "removed") {
+    return {
+      src: image || oldImage,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "modified") {
+    const modifiedImage = image || newImage || oldImage;
+    const imageWasRemoved = !image && !newImage && Boolean(oldImage);
+    return {
+      src: modifiedImage,
+      frameClassName: "border-amber-300",
+      imageClassName: imageWasRemoved ? "opacity-70" : undefined,
+    };
+  }
+
+  return {
+    src: image,
+    frameClassName: undefined as string | undefined,
+    imageClassName: undefined as string | undefined,
+  };
+};
+
 // Helper component for displaying redline values
 const RedlineCell = ({
   value,
@@ -103,8 +150,7 @@ const RedlineCell = ({
 }) => {
   const format =
     formatFn ||
-    ((v: unknown) =>
-      typeof v === "string" ? v : v != null ? String(v) : "-");
+    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
   if (!diff) return <>{format(value)}</>;
 
   const isAdded = diff.status === "added";
@@ -205,13 +251,15 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentImage",
     header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
-    cell: ({ row }) => {
-      const image = row.original.componentImage;
-      const hasImage = typeof image === "string" && image.trim() !== "";
-      return hasImage ? (
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta | undefined;
+      const imagePresentation = getRedlineImagePresentation(row.original, meta);
+      return imagePresentation.src ? (
         <ProductImageFrame
-          src={image}
+          src={imagePresentation.src}
           alt={row.original.componentName}
+          frameClassName={imagePresentation.frameClassName}
+          imageClassName={imagePresentation.imageClassName}
         />
       ) : (
         <ProductImageFrame alt={row.original.componentName} />
@@ -543,21 +591,37 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                     {row.getIsExpanded() && (
                       <TableRow>
                         <TableCell colSpan={row.getVisibleCells().length}>
-                          <div className="flex flex-col items-center py-4">
-                            {row.original.componentImage ? (
-                              <ProductImageFrame
-                                src={row.original.componentImage}
-                                alt={row.original.componentName}
-                                variant="preview"
-                                priority
-                              />
-                            ) : (
-                              <ProductImageFrame
-                                alt={row.original.componentName}
-                                variant="preview"
-                              />
-                            )}
-                          </div>
+                          {(() => {
+                            const imagePresentation =
+                              getRedlineImagePresentation(
+                                row.original,
+                                table.options.meta as TableMeta | undefined,
+                              );
+
+                            return (
+                              <div className="flex flex-col items-center py-4">
+                                {imagePresentation.src ? (
+                                  <ProductImageFrame
+                                    src={imagePresentation.src}
+                                    alt={row.original.componentName}
+                                    variant="preview"
+                                    frameClassName={
+                                      imagePresentation.frameClassName
+                                    }
+                                    imageClassName={
+                                      imagePresentation.imageClassName
+                                    }
+                                    priority
+                                  />
+                                ) : (
+                                  <ProductImageFrame
+                                    alt={row.original.componentName}
+                                    variant="preview"
+                                  />
+                                )}
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                       </TableRow>
                     )}

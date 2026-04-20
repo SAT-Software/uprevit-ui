@@ -179,9 +179,7 @@ export default function EditComponentDialog({
           }
         },
         onError: () => {
-          onOpenChange(false);
-          reset();
-          setImageState("unchanged");
+          setUploadingImage(false);
         },
       });
     } catch (error) {

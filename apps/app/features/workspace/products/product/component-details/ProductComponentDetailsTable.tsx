@@ -180,20 +180,15 @@ const getRedlineImagePresentation = (row: ComponentItem, meta?: TableMeta) => {
   const diff = meta?.isRedlineView
     ? meta.getFieldDiff?.(row, "image", row.image)
     : null;
-
-  if (!image) {
-    return {
-      src: "",
-      badge: null as "NEW" | "DEL" | "MOD" | null,
-      frameClassName: undefined as string | undefined,
-      imageClassName: undefined as string | undefined,
-      diff,
-    };
-  }
+  const oldImage =
+    typeof diff?.old_value === "string" ? diff.old_value.trim() : "";
+  const newImage =
+    typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
 
   if (rowStatus === "added") {
+    const addedImage = image || newImage;
     return {
-      src: image,
+      src: addedImage,
       badge: "NEW" as const,
       frameClassName: "border-blue-300",
       imageClassName: undefined,
@@ -202,8 +197,9 @@ const getRedlineImagePresentation = (row: ComponentItem, meta?: TableMeta) => {
   }
 
   if (rowStatus === "removed") {
+    const removedImage = image || oldImage;
     return {
-      src: image,
+      src: removedImage,
       badge: "DEL" as const,
       frameClassName: "border-red-300",
       imageClassName: "opacity-70",
@@ -212,11 +208,23 @@ const getRedlineImagePresentation = (row: ComponentItem, meta?: TableMeta) => {
   }
 
   if (diff?.status === "modified") {
+    const modifiedImage = image || newImage || oldImage;
+    const imageWasRemoved = !image && !newImage && Boolean(oldImage);
     return {
-      src: image,
+      src: modifiedImage,
       badge: "MOD" as const,
       frameClassName: "border-amber-300",
-      imageClassName: undefined,
+      imageClassName: imageWasRemoved ? "opacity-70" : undefined,
+      diff,
+    };
+  }
+
+  if (!image) {
+    return {
+      src: "",
+      badge: null as "NEW" | "DEL" | "MOD" | null,
+      frameClassName: undefined as string | undefined,
+      imageClassName: undefined as string | undefined,
       diff,
     };
   }
