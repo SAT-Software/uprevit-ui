@@ -88,6 +88,74 @@ type TableMeta = {
 const getPersistentItemId = (item: Item): string =>
   item._redlineId || item.id || item.componentName;
 
+const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
+  const image =
+    typeof row.componentImage === "string" ? row.componentImage.trim() : "";
+  const rowStatus = meta?.getRowStatus?.(row);
+  const diff = meta?.isRedlineView
+    ? (meta.getFieldDiff?.(row, "componentImage", row.componentImage) ??
+      row._redlineDiffs?.find((d) => d.path === "image") ??
+      null)
+    : null;
+  const oldImage =
+    typeof diff?.old_value === "string" ? diff.old_value.trim() : "";
+  const newImage =
+    typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
+
+  if (rowStatus === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (rowStatus === "removed") {
+    return {
+      src: image || oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (diff?.status === "removed") {
+    return {
+      src: oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "modified") {
+    const modifiedImage = image || newImage || oldImage;
+    const imageWasRemoved = !image && !newImage && Boolean(oldImage);
+    return {
+      src: modifiedImage,
+      badge: "MOD" as const,
+      frameClassName: "border-amber-300",
+      imageClassName: imageWasRemoved ? "opacity-70" : undefined,
+    };
+  }
+
+  return {
+    src: image,
+    frameClassName: undefined as string | undefined,
+    imageClassName: undefined as string | undefined,
+  };
+};
+
 // Helper component for displaying redline values (vertical stacking)
 const RedlineCell = ({
   value,
@@ -102,8 +170,7 @@ const RedlineCell = ({
 }) => {
   const format =
     formatFn ||
-    ((v: unknown) =>
-      typeof v === "string" ? v : v != null ? String(v) : "-");
+    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
 
   if (!diff) return <>{format(value)}</>;
 
@@ -117,9 +184,7 @@ const RedlineCell = ({
       {(isModified || isRemoved) && diff.old_value !== null && (
         <div
           className={`line-through text-sm ${
-            showBadgeStyle
-              ? "text-red-700 px-1.5 py-0.5"
-              : "text-red-600/70 px-1.5 py-0.5"
+            showBadgeStyle ? "text-red-700" : "text-red-600/70"
           }`}
         >
           {format(diff.old_value, true, false)}
@@ -129,9 +194,7 @@ const RedlineCell = ({
       {(isModified || isAdded) && !isRemoved && (
         <div
           className={`text-sm ${
-            showBadgeStyle
-              ? "text-blue-700 px-1.5 py-0.5"
-              : "text-blue-700 px-1.5 py-0.5"
+            showBadgeStyle ? "text-blue-700" : "text-blue-700"
           }`}
         >
           {format(diff.new_value, false, true)}
@@ -221,13 +284,40 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentImage",
     header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
-    cell: ({ row }) => {
-      const image = row.original.componentImage;
-      const hasImage = typeof image === "string" && image.trim() !== "";
-      return hasImage ? (
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta | undefined;
+      const imagePresentation = getRedlineImagePresentation(row.original, meta);
+
+      if (imagePresentation.badge && imagePresentation.src) {
+        return (
+          <div className="flex flex-col gap-1">
+            <span
+              className={`text-[9px] font-medium ${
+                imagePresentation.badge === "NEW"
+                  ? "text-blue-600"
+                  : imagePresentation.badge === "DEL"
+                    ? "text-red-600"
+                    : "text-amber-700"
+              }`}
+            >
+              {imagePresentation.badge}
+            </span>
+            <ProductImageFrame
+              src={imagePresentation.src}
+              alt={row.original.componentName}
+              frameClassName={imagePresentation.frameClassName}
+              imageClassName={imagePresentation.imageClassName}
+            />
+          </div>
+        );
+      }
+
+      return imagePresentation.src ? (
         <ProductImageFrame
-          src={image}
+          src={imagePresentation.src}
           alt={row.original.componentName}
+          frameClassName={imagePresentation.frameClassName}
+          imageClassName={imagePresentation.imageClassName}
         />
       ) : (
         <ProductImageFrame alt={row.original.componentName} />
@@ -598,14 +688,20 @@ export default function SymbolsGraphicsPageSymbolsTable({
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <div className="flex flex-col items-center py-4">
                             {(() => {
-                              const image = row.original.componentImage;
-                              const hasImage =
-                                typeof image === "string" && image.trim() !== "";
-                              return hasImage ? (
+                              const meta = table.options.meta;
+                              const imagePresentation =
+                                getRedlineImagePresentation(row.original, meta);
+                              return imagePresentation.src ? (
                                 <ProductImageFrame
-                                  src={image}
+                                  src={imagePresentation.src}
                                   alt={row.original.componentName}
                                   variant="preview"
+                                  frameClassName={
+                                    imagePresentation.frameClassName
+                                  }
+                                  imageClassName={
+                                    imagePresentation.imageClassName
+                                  }
                                   priority
                                 />
                               ) : (

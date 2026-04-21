@@ -106,6 +106,7 @@ const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
   if (rowStatus === "added") {
     return {
       src: image || newImage,
+      badge: "NEW" as const,
       frameClassName: "border-blue-300",
       imageClassName: undefined,
     };
@@ -114,6 +115,25 @@ const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
   if (rowStatus === "removed") {
     return {
       src: image || oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (diff?.status === "removed") {
+    return {
+      src: oldImage,
+      badge: "DEL" as const,
       frameClassName: "border-red-300",
       imageClassName: "opacity-70",
     };
@@ -124,6 +144,7 @@ const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
     const imageWasRemoved = !image && !newImage && Boolean(oldImage);
     return {
       src: modifiedImage,
+      badge: "MOD" as const,
       frameClassName: "border-amber-300",
       imageClassName: imageWasRemoved ? "opacity-70" : undefined,
     };
@@ -254,6 +275,31 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const imagePresentation = getRedlineImagePresentation(row.original, meta);
+
+      if (imagePresentation.badge && imagePresentation.src) {
+        return (
+          <div className="flex flex-col gap-1">
+            <span
+              className={`text-[9px] font-medium ${
+                imagePresentation.badge === "NEW"
+                  ? "text-blue-600"
+                  : imagePresentation.badge === "DEL"
+                    ? "text-red-600"
+                    : "text-amber-700"
+              }`}
+            >
+              {imagePresentation.badge}
+            </span>
+            <ProductImageFrame
+              src={imagePresentation.src}
+              alt={row.original.componentName}
+              frameClassName={imagePresentation.frameClassName}
+              imageClassName={imagePresentation.imageClassName}
+            />
+          </div>
+        );
+      }
+
       return imagePresentation.src ? (
         <ProductImageFrame
           src={imagePresentation.src}
