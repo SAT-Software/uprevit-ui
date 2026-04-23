@@ -76,6 +76,7 @@ type Item = {
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
+  _redlineBaseImage?: string;
 };
 
 type TableMeta = {
@@ -98,7 +99,8 @@ const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
       null)
     : null;
   const oldImage =
-    typeof diff?.old_value === "string" ? diff.old_value.trim() : "";
+    row._redlineBaseImage ||
+    (typeof diff?.old_value === "string" ? diff.old_value.trim() : "");
   const newImage =
     typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
 
