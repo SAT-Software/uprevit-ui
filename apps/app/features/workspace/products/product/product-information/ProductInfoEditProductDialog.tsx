@@ -122,6 +122,7 @@ export default function EditProductDialog({
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const [openTargetDate, setOpenTargetDate] = useState(false);
+  const isSubmitted = productMetadata?.status === "submitted";
 
   // Get current product information data - handle both possible data structures
   const initialValues = {
@@ -175,6 +176,10 @@ export default function EditProductDialog({
   const countryOfOriginInput = watch("countryOfOriginInput");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (isSubmitted) {
+      return;
+    }
+
     if (!product?.id) {
       console.error("Product ID is missing");
       return;
@@ -219,10 +224,7 @@ export default function EditProductDialog({
         <Button
           size="sm"
           variant="secondary"
-          disabled={
-            productMetadata?.status === "submitted" &&
-            productMetadata?.is_latest === false
-          }
+          disabled={isSubmitted}
           className="flex items-center gap-2"
         >
           <PiPencilCircleDuotone className="w-4 h-4" />

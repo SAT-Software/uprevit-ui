@@ -26,6 +26,7 @@ export interface ProductSpecificationDataTableProps {
   onDataChange?: (data: ProductDataTableSchema) => void;
   onSaveSuccess?: (clearHistory: () => void) => void;
   isRedlineView?: boolean;
+  isReadOnly?: boolean;
   redlineMode?: "inline" | "highlight";
   redlineBaseData?: {
     headerData: Record<number, string>;

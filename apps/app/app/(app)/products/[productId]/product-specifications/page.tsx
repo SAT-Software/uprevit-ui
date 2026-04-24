@@ -11,12 +11,13 @@ import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData
 import { type ProductDataTableSchema } from "@/types/product-data-table";
 import { parseProductSpecDataFromDatabase } from "@/utils/product/product-spec";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   PiCloudCheckDuotone,
   PiFloppyDiskDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
+import { toast } from "sonner";
 
 const AUTO_SAVE_STORAGE_KEY_PREFIX = "product-specifications-auto-save";
 
@@ -33,9 +34,9 @@ export default function Page() {
   const [autoSave, setAutoSave] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(autoSaveStorageKey);
-      return stored !== "false";
+      return stored === "true";
     }
-    return true;
+    return false;
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -43,6 +44,9 @@ export default function Page() {
   const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
   const isFirstRender = useRef(true);
   const onSaveSuccessRef = useRef<() => void>(() => {});
+  const saveDataToDBRef = useRef<(data: ProductDataTableSchema) => void>(() => {
+    // no-op
+  });
 
   const {
     data: productTabData,
@@ -57,15 +61,16 @@ export default function Page() {
     compareVersionId,
   );
 
-  const workbookData =
-    productTabData?.result?.data?.data
-      ?.workbook_data as ProductDataTableSchema | undefined;
-  const baseVersionWorkbook =
-    diffData?.result?.base_version?.product_data?.data
-      ?.workbook_data as ProductDataTableSchema | undefined;
-  const nextVersionWorkbook =
-    diffData?.result?.next_version?.product_data?.data
-      ?.workbook_data as ProductDataTableSchema | undefined;
+  const workbookData = productTabData?.result?.data?.data?.workbook_data as
+    | ProductDataTableSchema
+    | undefined;
+  const isSubmitted =
+    productTabData?.result?.data?.product_data?.data?.status === "submitted";
+  const hasEditableUnsavedChanges = hasUnsavedChanges && !isSubmitted;
+  const baseVersionWorkbook = diffData?.result?.base_version?.product_data?.data
+    ?.workbook_data as ProductDataTableSchema | undefined;
+  const nextVersionWorkbook = diffData?.result?.next_version?.product_data?.data
+    ?.workbook_data as ProductDataTableSchema | undefined;
   const resolvedWorkbookData =
     isRedlineView && nextVersionWorkbook ? nextVersionWorkbook : workbookData;
 
@@ -87,24 +92,35 @@ export default function Page() {
     }
   }
 
-  function saveDataToDB(data: ProductDataTableSchema) {
-    const payload = {
-      id: productId,
-      tab: "product-specifications",
-      action: "add_product_data",
-      data: { workbook_data: data },
-    };
+  const saveDataToDB = useCallback(
+    (data: ProductDataTableSchema) => {
+      if (isSubmitted) return;
 
-    updateTabData(payload, {
-      onSuccess: () => {
-        setHasUnsavedChanges(false);
-        setLastSavedAt(new Date());
-        onSaveSuccessRef.current();
-      },
-    });
-  }
+      const payload = {
+        id: productId,
+        tab: "product-specifications",
+        action: "add_product_data",
+        data: { workbook_data: data },
+      };
+
+      updateTabData(payload, {
+        onSuccess: () => {
+          setHasUnsavedChanges(false);
+          setLastSavedAt(new Date());
+          onSaveSuccessRef.current();
+        },
+        onError: (error) => {
+          console.error("Failed to save product specifications:", error);
+          toast.error("Failed to save product specifications");
+        },
+      });
+    },
+    [isSubmitted, productId, updateTabData],
+  );
 
   function handleAutoSave(data: ProductDataTableSchema) {
+    if (isSubmitted) return;
+
     if (isFirstRender.current) {
       isFirstRender.current = false;
       pendingDataRef.current = data;
@@ -112,6 +128,7 @@ export default function Page() {
     }
 
     setHasUnsavedChanges(true);
+    setLastSavedAt(new Date());
     pendingDataRef.current = data;
 
     if (autoSave) {
@@ -127,6 +144,8 @@ export default function Page() {
   }
 
   function handleManualSave() {
+    if (isSubmitted) return;
+
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
@@ -137,17 +156,28 @@ export default function Page() {
   }
 
   useEffect(() => {
+    saveDataToDBRef.current = saveDataToDB;
+  }, [saveDataToDB]);
+
+  useEffect(() => {
     return () => {
+      if (!isSubmitted) return;
+
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+
+        if (pendingDataRef.current) {
+          saveDataToDBRef.current(pendingDataRef.current);
+        }
       }
     };
-  }, []);
+  }, [isSubmitted]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const hasPendingAutoSave = !!debounceTimerRef.current;
-      if (hasUnsavedChanges && (!autoSave || hasPendingAutoSave)) {
+      if (hasEditableUnsavedChanges && (!autoSave || hasPendingAutoSave)) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -155,7 +185,7 @@ export default function Page() {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges, autoSave]);
+  }, [hasEditableUnsavedChanges, autoSave]);
 
   if (isLoading) {
     return (
@@ -272,13 +302,13 @@ export default function Page() {
                 <Spinner className="w-4 h-4" />
                 <span className="text-xs">Saving...</span>
               </div>
+            ) : hasEditableUnsavedChanges ? (
+              <span className="text-xs text-amber-600">Unsaved changes</span>
             ) : lastSavedAt ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
                 <span className="text-xs">Saved</span>
               </div>
-            ) : hasUnsavedChanges ? (
-              <span className="text-xs text-amber-600">Unsaved changes</span>
             ) : null}
 
             <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/50">
@@ -287,15 +317,15 @@ export default function Page() {
                 checked={autoSave}
                 onCheckedChange={handleAutoSaveToggle}
                 className="scale-75"
-                disabled={isRedlineView}
+                disabled={isSubmitted}
               />
             </div>
 
             <Button
               size="sm"
-              variant={hasUnsavedChanges ? "default" : "outline"}
+              variant={hasEditableUnsavedChanges ? "default" : "outline"}
               onClick={handleManualSave}
-              disabled={isSaving || !hasUnsavedChanges || isRedlineView}
+              disabled={isSaving || !hasEditableUnsavedChanges || isSubmitted}
               className="gap-1.5"
             >
               {isSaving ? (
@@ -310,11 +340,12 @@ export default function Page() {
 
         <ProductSpecificationDataTable
           initialData={initialData}
-          onDataChange={isRedlineView ? undefined : handleAutoSave}
+          onDataChange={isSubmitted ? undefined : handleAutoSave}
           onSaveSuccess={(clearHistory) => {
             onSaveSuccessRef.current = clearHistory;
           }}
           isRedlineView={isRedlineView}
+          isReadOnly={isSubmitted}
           redlineMode={redlineMode}
           redlineBaseData={redlineBaseData}
         />
