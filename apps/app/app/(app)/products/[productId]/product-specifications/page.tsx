@@ -128,7 +128,7 @@ export default function Page() {
     }
 
     setHasUnsavedChanges(true);
-    setLastSavedAt(new Date());
+    setLastSavedAt(null);
     pendingDataRef.current = data;
 
     if (autoSave) {
@@ -161,8 +161,6 @@ export default function Page() {
 
   useEffect(() => {
     return () => {
-      if (!isSubmitted) return;
-
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
@@ -172,6 +170,17 @@ export default function Page() {
         }
       }
     };
+  }, []);
+
+  useEffect(() => {
+    if (!isSubmitted) return;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    pendingDataRef.current = null;
   }, [isSubmitted]);
 
   useEffect(() => {
