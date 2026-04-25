@@ -427,16 +427,22 @@ export default function LabelTagsTabs({
     const diff = imageDiff ?? keyDiff;
 
     if (!diff) return undefined;
+    const resolvedOld =
+      item._redlineBaseImage ??
+      (typeof diff.old_value === "string" ? diff.old_value : null);
+    const resolvedNew =
+      item._redlineNextImage ??
+      item.image ??
+      (typeof diff.new_value === "string" ? diff.new_value : null);
+
+    if (diff === keyDiff && resolvedOld && resolvedNew && resolvedOld === resolvedNew) {
+      return undefined;
+    }
 
     return {
       ...diff,
-      old_value:
-        item._redlineBaseImage ??
-        (typeof diff.old_value === "string" ? diff.old_value : null),
-      new_value:
-        item._redlineNextImage ??
-        item.image ??
-        (typeof diff.new_value === "string" ? diff.new_value : null),
+      old_value: resolvedOld,
+      new_value: resolvedNew,
     } as DiffItem;
   };
 
