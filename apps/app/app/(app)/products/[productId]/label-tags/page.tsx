@@ -23,9 +23,12 @@ interface LabelTagItem {
   tagged_image?: string;
   tagged_image_key?: string;
   legend_items?: LegendItem[];
+  parent_id?: string | null;
   _redlineStatus?: RedlineStatus;
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
+  _redlineBaseImage?: string;
+  _redlineNextImage?: string;
 }
 
 type LabelTagsResponse = GetSingleTabResponse<LabelTagItem[]>;
@@ -151,7 +154,6 @@ export default function Page() {
             const parentId = (item as { parent_id?: string | null }).parent_id;
             return parentId ? String(parentId) : undefined;
           },
-          getFallbackKey: (item) => `${item.name}-${item.type}`,
         })
       : [];
   const labelTagsChangeCount = countChangedRedlineItems(labelTagRedlineItems);
@@ -168,6 +170,8 @@ export default function Page() {
           _redlineStatus: item.status,
           _redlineDiffs: item.diffs,
           _redlineId: item.id,
+          _redlineBaseImage: item.base?.image,
+          _redlineNextImage: item.next?.image,
         };
       })
       .filter(Boolean) as LabelTagItem[];
