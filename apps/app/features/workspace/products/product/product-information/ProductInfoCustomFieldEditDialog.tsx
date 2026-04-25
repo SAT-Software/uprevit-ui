@@ -80,6 +80,7 @@ export default function ProductInformationCustomFieldEditDialog({
   const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null);
   const [deleteFieldOpen, setDeleteFieldOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
+  const isSubmitted = productMetadata?.status === "submitted";
 
   // Initialize form with react-hook-form and field array for new fields
   const {
@@ -140,6 +141,10 @@ export default function ProductInformationCustomFieldEditDialog({
   }, [customFieldsData, resetManage]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (isSubmitted) {
+      return;
+    }
+
     if (!product?.id) {
       toast.error("Product ID is missing");
       return;
@@ -187,6 +192,10 @@ export default function ProductInformationCustomFieldEditDialog({
     label: string,
     value: string
   ) => {
+    if (isSubmitted) {
+      return;
+    }
+
     if (!product?.id) {
       toast.error("Product ID is missing");
       return;
@@ -224,6 +233,10 @@ export default function ProductInformationCustomFieldEditDialog({
   };
 
   const handleDeleteCustomField = async (fieldId: string) => {
+    if (isSubmitted) {
+      return;
+    }
+
     if (!product?.id) {
       toast.error("Product ID is missing");
       return;
@@ -267,10 +280,7 @@ export default function ProductInformationCustomFieldEditDialog({
           size="sm"
           variant="secondary"
           className="flex items-center gap-2"
-          disabled={
-            productMetadata?.status === "submitted" &&
-            productMetadata?.is_latest === false
-          }
+          disabled={isSubmitted}
         >
           <PiPencilLineDuotone className="w-4 h-4" />
           Manage Custom Fields
@@ -450,7 +460,7 @@ export default function ProductInformationCustomFieldEditDialog({
                               data.value
                             );
                           }}
-                          disabled={isPending}
+                          disabled={isPending || isSubmitted}
                         >
                           <PiCheckCircleDuotone className="h-4 w-4 mr-1" />
                           Update
@@ -463,7 +473,7 @@ export default function ProductInformationCustomFieldEditDialog({
                             setDeleteFieldId(field._id);
                             setDeleteFieldOpen(true);
                           }}
-                          disabled={isPending}
+                          disabled={isPending || isSubmitted}
                         >
                           <PiTrashDuotone className="h-4 w-4 mr-1" />
                           Delete
@@ -498,7 +508,7 @@ export default function ProductInformationCustomFieldEditDialog({
             <Button
               type="submit"
               form={`edit-custom-fields-form-${id}`}
-              disabled={isPending}
+              disabled={isPending || isSubmitted}
               aria-busy={isPending}
               size="sm"
             >
@@ -531,7 +541,7 @@ export default function ProductInformationCustomFieldEditDialog({
                     setDeleteFieldId(null);
                   }
                 }}
-                disabled={isPending}
+                disabled={isPending || isSubmitted}
                 className="bg-destructive text-white hover:bg-destructive/90"
               >
                 {isPending ? "Deleting..." : "Delete Field"}
