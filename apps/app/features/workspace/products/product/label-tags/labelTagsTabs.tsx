@@ -1,7 +1,12 @@
 "use client";
 
 import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
 import { cn } from "@uprevit/ui/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
@@ -36,6 +41,8 @@ interface LabelTagItem {
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
+  _redlineBaseImage?: string;
+  _redlineNextImage?: string;
 }
 
 interface LabelTagsTabsProps {
@@ -194,7 +201,13 @@ export default function LabelTagsTabs({
   const typeStatusMap = useMemo(() => {
     const accumulator = new Map<
       string,
-      { hasAdded: boolean; hasRemoved: boolean; hasCurrent: boolean }
+      {
+        hasAdded: boolean;
+        hasRemoved: boolean;
+        hasCurrent: boolean;
+        hasModified: boolean;
+        typeDiff?: DiffItem;
+      }
     >();
 
     labelTagsData.forEach((item) => {
@@ -204,6 +217,7 @@ export default function LabelTagsTabs({
         hasAdded: false,
         hasRemoved: false,
         hasCurrent: false,
+        hasModified: false,
       };
       if (item._redlineStatus === "added") {
         entry.hasAdded = true;
@@ -212,20 +226,26 @@ export default function LabelTagsTabs({
       } else {
         entry.hasCurrent = true;
       }
+      if (item._redlineStatus === "modified") {
+        entry.hasModified = true;
+        entry.typeDiff = item._redlineDiffs?.find((d) => d.path === "type");
+      }
       accumulator.set(type, entry);
     });
 
-    const result: Record<string, "added" | "removed" | "modified" | null> =
-      {};
+    const result: Record<
+      string,
+      { status: "added" | "removed" | "modified" | null; typeDiff?: DiffItem }
+    > = {};
     accumulator.forEach((entry, type) => {
       if (entry.hasAdded && !entry.hasCurrent && !entry.hasRemoved) {
-        result[type] = "added";
+        result[type] = { status: "added" };
       } else if (entry.hasRemoved && !entry.hasCurrent && !entry.hasAdded) {
-        result[type] = "removed";
-      } else if (entry.hasAdded || entry.hasRemoved) {
-        result[type] = "modified";
+        result[type] = { status: "removed" };
+      } else if (entry.hasAdded || entry.hasRemoved || entry.hasModified) {
+        result[type] = { status: "modified", typeDiff: entry.typeDiff };
       } else {
-        result[type] = null;
+        result[type] = { status: null };
       }
     });
 
@@ -377,7 +397,7 @@ export default function LabelTagsTabs({
 
   const getFieldDiff = (
     item: LabelTagItem,
-    field: "name" | "description" | "image" | "type"
+    field: "name" | "description" | "image" | "type",
   ) => {
     if (!isRedlineView) return undefined;
     const status = item._redlineStatus;
@@ -401,16 +421,37 @@ export default function LabelTagsTabs({
     return item._redlineDiffs?.find((d) => d.path === field);
   };
 
+  const getImageDiff = (item: LabelTagItem) => {
+    const imageDiff = getFieldDiff(item, "image");
+    const keyDiff = item._redlineDiffs?.find((d) => d.path === "key");
+    const diff = imageDiff ?? keyDiff;
+
+    if (!diff) return undefined;
+
+    return {
+      ...diff,
+      old_value:
+        item._redlineBaseImage ??
+        (typeof diff.old_value === "string" ? diff.old_value : null),
+      new_value:
+        item._redlineNextImage ??
+        item.image ??
+        (typeof diff.new_value === "string" ? diff.new_value : null),
+    } as DiffItem;
+  };
+
   const RedlineValue = ({
     value,
     diff,
     formatFn,
     isImage = false,
+    emptyLabel,
   }: {
     value: string;
     diff: DiffItem | undefined;
     formatFn?: (v: unknown) => string;
     isImage?: boolean;
+    emptyLabel?: string;
   }) => {
     if (!isRedlineView || !diff) return <>{value}</>;
 
@@ -485,10 +526,10 @@ export default function LabelTagsTabs({
       <span className="inline-flex flex-wrap items-center gap-2">
         {(diff.old_value != null || isRemoved) && (
           <span className="inline-flex items-center gap-1">
-            <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full shadow-sm">
+            {/* <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full shadow-sm">
               OLD
-            </span>
-            <span className="line-through text-sm text-red-600/70 bg-red-100/50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-800/20">
+            </span> */}
+            <span className="line-through text-sm text-red-600/70 ">
               {format(diff.old_value) || ""}
             </span>
           </span>
@@ -503,11 +544,18 @@ export default function LabelTagsTabs({
 
         {(diff.new_value != null || isAdded) && !isRemoved && (
           <span className="inline-flex items-center gap-1">
-            <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full shadow-sm">
+            {/* <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full shadow-sm">
               NEW
-            </span>
-            <span className="text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800/30 shadow-sm">
-              {format(diff.new_value) || ""}
+            </span> */}
+            <span className="text-sm text-blue-700 ">
+              {format(diff.new_value) ||
+                (emptyLabel ? (
+                  <span className="text-muted-foreground/35 italic">
+                    {emptyLabel}
+                  </span>
+                ) : (
+                  ""
+                ))}
             </span>
           </span>
         )}
@@ -577,7 +625,8 @@ export default function LabelTagsTabs({
           <ScrollArea className="flex-1 pb-2">
             <TabsList>
               {filteredLabelTypesForTabs?.map((type, i) => {
-                const typeStatus = typeStatusMap[type];
+                const typeStatus = typeStatusMap[type]?.status;
+                const typeDiff = typeStatusMap[type]?.typeDiff;
                 const isTypeAdded = isRedlineView && typeStatus === "added";
                 const isTypeRemoved = isRedlineView && typeStatus === "removed";
                 const isTypeModified =
@@ -596,7 +645,11 @@ export default function LabelTagsTabs({
                         "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800",
                     )}
                   >
-                    <span>{type}</span>
+                    {isTypeModified && typeDiff ? (
+                      <RedlineValue value={type} diff={typeDiff} />
+                    ) : (
+                      <span>{type}</span>
+                    )}
                     {isTypeAdded && (
                       <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
                         NEW
@@ -604,7 +657,7 @@ export default function LabelTagsTabs({
                     )}
                     {isTypeRemoved && (
                       <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
-                        REMOVED
+                        DEL
                       </span>
                     )}
                     {isTypeModified && (
@@ -632,7 +685,7 @@ export default function LabelTagsTabs({
 
                 const nameDiff = getFieldDiff(item, "name");
                 const descriptionDiff = getFieldDiff(item, "description");
-                const imageDiff = getFieldDiff(item, "image");
+                const imageDiff = getImageDiff(item);
 
                 return (
                   <TabsContent key={`${i}-${type}`} value={type}>
@@ -654,6 +707,23 @@ export default function LabelTagsTabs({
                       <div className="pb-2">
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              {isRedlineView && isAdded && (
+                                <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                                  NEW
+                                </span>
+                              )}
+                              {isRedlineView && isRemoved && (
+                                <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                                  DEL
+                                </span>
+                              )}
+                              {isRedlineView && isModified && (
+                                <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                                  MOD
+                                </span>
+                              )}
+                            </div>
                             <div
                               className={cn(
                                 "text-sm font-semibold flex items-center gap-2",
@@ -673,9 +743,11 @@ export default function LabelTagsTabs({
                               ) : (
                                 item.name || "Untitled Label"
                               )}
-                              <span className="text-sm font-normal text-muted-foreground">
-                                -
-                              </span>
+                              {item.description && (
+                                <span className="text-sm font-normal text-muted-foreground">
+                                  -
+                                </span>
+                              )}
                               <span
                                 className={cn(
                                   "text-sm font-normal text-muted-foreground",
@@ -688,47 +760,26 @@ export default function LabelTagsTabs({
                                   <RedlineValue
                                     value={item.description || ""}
                                     diff={descriptionDiff}
+                                    emptyLabel="Blank"
                                   />
                                 ) : (
                                   item.description
                                 )}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {/* <Badge variant="secondary" className="text-xs">
-                              {item.type || "Unknown Type"}
-                            </Badge> */}
-                              {isRedlineView && isAdded && (
-                                <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
-                                  NEW
-                                </span>
-                              )}
-                              {isRedlineView && isRemoved && (
-                                <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
-                                  REMOVED
-                                </span>
-                              )}
-                              {isRedlineView && isModified && (
-                                <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
-                                  MODIFIED
-                                </span>
-                              )}
-                            </div>
                           </div>
-                          {!isRedlineView && (
-                            <div className="flex items-center gap-2">
-                              <DialogEditLabelTag
-                                productId={productId}
-                                labelTag={item}
-                                isSubmitted={isSubmitted}
-                              />
-                              <DialogDeleteLabelTag
-                                productId={productId}
-                                labelTag={item}
-                                isSubmitted={isSubmitted}
-                              />
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <DialogEditLabelTag
+                              productId={productId}
+                              labelTag={item}
+                              isSubmitted={isSubmitted}
+                            />
+                            <DialogDeleteLabelTag
+                              productId={productId}
+                              labelTag={item}
+                              isSubmitted={isSubmitted}
+                            />
+                          </div>
                         </div>
                       </div>
 
