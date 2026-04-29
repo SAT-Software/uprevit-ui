@@ -40,6 +40,8 @@ type Item = {
   key?: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
+  standard_symbol_id?: string;
+  standard_ref_number?: string;
 };
 
 type FormData = {
@@ -97,11 +99,20 @@ export default function EditSymbolsDialog({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<FormData>({
     defaultValues: formDefaults,
   });
 
   const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
+  const watchedComponentName = watch("componentName");
+  const isStandardLinked = Boolean(
+    symbol.standard_symbol_id || symbol.standard_ref_number,
+  );
+  const standardCoreFieldsChanged =
+    isStandardLinked &&
+    ((watchedComponentName ?? "").trim() !== symbol.componentName.trim() ||
+      imageState !== "unchanged");
 
   useEffect(() => {
     if (!open) return;
@@ -241,6 +252,13 @@ export default function EditSymbolsDialog({
                   </p>
                 )}
               </div>
+              {standardCoreFieldsChanged && (
+                <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                  Changing the symbol text or image will convert this
+                  standard-library symbol into a custom product symbol and
+                  remove its standard reference.
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Symbol text present</Label>
                 <Controller

@@ -261,6 +261,8 @@ export interface AllTabsData {
     text_present?: boolean;
     label_presence: string[];
     entity: "Symbols" | "Schematics" | "Barcodes" | "Other Components";
+    standard_symbol_id?: string;
+    standard_ref_number?: string;
   }>;
   product_data: WorkbookTabData;
   operational_parameters: WorkbookTabData;

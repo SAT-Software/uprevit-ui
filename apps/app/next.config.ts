@@ -23,6 +23,34 @@ const nextConfig: NextConfig = {
         hostname:
           "uprevit-upload-prod-940900040930-us-east-1-an.s3.us-east-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "uprevit-standard-symbols-dev-and-test.s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "uprevit-standard-symbols-dev.s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "uprevit-standard-symbols-stage.s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "s3.amazonaws.com",
+      },
     ],
   },
 
