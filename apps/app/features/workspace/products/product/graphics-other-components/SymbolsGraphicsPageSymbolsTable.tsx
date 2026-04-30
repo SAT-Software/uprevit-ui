@@ -73,6 +73,8 @@ type Item = {
   key?: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
+  standard_symbol_id?: string;
+  standard_ref_number?: string;
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;

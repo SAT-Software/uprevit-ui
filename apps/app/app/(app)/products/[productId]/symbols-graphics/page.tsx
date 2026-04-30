@@ -21,6 +21,8 @@ interface SymbolGraphicItem {
   label_presence: string[];
   entity: string;
   count?: number;
+  standard_symbol_id?: string;
+  standard_ref_number?: string;
   _redlineStatus?: RedlineStatus;
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
@@ -223,6 +225,8 @@ export default function Page() {
     key: item.key,
     symbolsTextPresent: item.label_presence,
     textPresent: item.text_present,
+    standard_symbol_id: item.standard_symbol_id,
+    standard_ref_number: item.standard_ref_number,
     _redlineStatus: item._redlineStatus,
     _redlineDiffs: item._redlineDiffs,
     _redlineId: item._redlineId,
