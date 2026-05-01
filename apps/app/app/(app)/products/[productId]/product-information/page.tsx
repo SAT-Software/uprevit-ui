@@ -42,7 +42,9 @@ import {
   PiFlaskDuotone,
   PiFolderSimpleDuotone,
   PiGlobeDuotone,
+  PiIdentificationCardDuotone,
   PiMapPinDuotone,
+  PiShieldCheckDuotone,
   PiTagDuotone,
 } from "react-icons/pi";
 
@@ -57,6 +59,8 @@ type ProductEditData = {
   oem_contract_manufacturer?: string;
   commercial_clinical?: string;
   manufacturing_location?: string;
+  class_of_device?: string;
+  basic_udi_di?: string;
 };
 
 type ProductCustomField = {
@@ -188,6 +192,8 @@ const PRODUCT_INFO_DIFF_PATHS = {
   ],
   commercialClinical: ["product_information.data.commercial_clinical"],
   manufacturingLocation: ["product_information.data.manufacturing_location"],
+  classOfDevice: ["product_information.data.class_of_device"],
+  basicUdiDi: ["product_information.data.basic_udi_di"],
 } as const;
 
 type ProductInfoDiffKey = keyof typeof PRODUCT_INFO_DIFF_PATHS;
@@ -202,6 +208,8 @@ const PRODUCT_INFO_COUNTED_DIFF_KEYS: ProductInfoDiffKey[] = [
   "oemContractManufacturer",
   "commercialClinical",
   "manufacturingLocation",
+  "classOfDevice",
+  "basicUdiDi",
 ];
 
 const normalizeCustomField = (
@@ -403,6 +411,18 @@ export default function Page() {
         value: productData.manufacturing_location || "N/A",
         icon: PiMapPinDuotone,
         diffKey: "manufacturingLocation",
+      },
+      {
+        label: "Class of Device",
+        value: productData.class_of_device || "N/A",
+        icon: PiShieldCheckDuotone,
+        diffKey: "classOfDevice",
+      },
+      {
+        label: "Basic UDI-DI",
+        value: productData.basic_udi_di || "N/A",
+        icon: PiIdentificationCardDuotone,
+        diffKey: "basicUdiDi",
       },
     ];
 

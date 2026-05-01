@@ -23,6 +23,8 @@ export interface Product {
     oem_contract_manufacturer?: string;
     commercial_clinical?: string;
     manufacturing_location?: string;
+    class_of_device?: string;
+    basic_udi_di?: string;
     custom_fields?: Array<{
       _id?: string;
       parent_id?: string | null;
@@ -205,6 +207,8 @@ export interface ProductInformationData {
   oem_contract_manufacturer?: string;
   commercial_clinical?: string;
   manufacturing_location?: string;
+  class_of_device?: string;
+  basic_udi_di?: string;
 }
 
 /** Product information tab in all-tabs response */
