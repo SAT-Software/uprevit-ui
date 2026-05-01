@@ -24,17 +24,19 @@ import {
   useOnboardAdminCreateWorkspace,
 } from "@/hooks/onboarding/useOnboardAdminCreateWorkspace";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import { Workspace } from "@/types/workspace";
 import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
 import { PiBuildingsDuotone } from "react-icons/pi";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 
-type WorkspaceFormValues = Pick<
-  Workspace,
-  "workspaceName" | "companyName" | "companyId" | "description" | "logo"
->;
+type WorkspaceFormValues = {
+  adminName: string;
+  workspaceName: string;
+  companyName: string;
+  description: string;
+  logo: string;
+};
 
 export default function OnboardingCreateWorkspacePage() {
   const id = useId();
@@ -55,9 +57,12 @@ export default function OnboardingCreateWorkspacePage() {
   } = useForm<WorkspaceFormValues>({
     mode: "onChange",
     defaultValues: {
+      adminName:
+        typeof auth.user?.profile.name === "string"
+          ? auth.user.profile.name
+          : "",
       workspaceName: "",
       companyName: "",
-      companyId: "",
       description: "",
       logo: "",
     },
@@ -118,11 +123,16 @@ export default function OnboardingCreateWorkspacePage() {
         return;
       }
 
-      const { name, email, sub } = auth.user.profile;
+      const { email, sub } = auth.user.profile;
+      const fallbackName =
+        typeof email === "string" && email.includes("@")
+          ? email.split("@")[0]
+          : "Admin";
+      const { adminName, ...workspaceValues } = values;
 
       const payload: OnboardAdminWorkspacePayload = {
-        ...values,
-        name: name || "Test",
+        ...workspaceValues,
+        name: adminName.trim() || fallbackName,
         email,
         cognitoSub: sub,
       };
@@ -265,6 +275,29 @@ export default function OnboardingCreateWorkspacePage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
+                  <Label htmlFor={`${id}-adminName`}>Your full name</Label>
+                  <InputGroup className={inputGroupClass}>
+                    <InputGroupInput
+                      id={`${id}-adminName`}
+                      placeholder="e.g. Amit Patel"
+                      aria-invalid={Boolean(errors.adminName)}
+                      {...register("adminName", {
+                        required: "Full name is required",
+                        maxLength: {
+                          value: 80,
+                          message: "Full name must be at most 80 characters",
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                  {errors.adminName && (
+                    <p className="text-xs text-destructive">
+                      {errors.adminName.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor={`${id}-companyName`}>Company name</Label>
                   <InputGroup className={inputGroupClass}>
                     <InputGroupAddon align="inline-start">CO</InputGroupAddon>
@@ -285,30 +318,6 @@ export default function OnboardingCreateWorkspacePage() {
                   {errors.companyName && (
                     <p className="text-xs text-destructive">
                       {errors.companyName.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-companyId`}>Company ID</Label>
-                  <InputGroup className={inputGroupClass}>
-                    <InputGroupAddon align="inline-start">ID</InputGroupAddon>
-                    <InputGroupInput
-                      id={`${id}-companyId`}
-                      placeholder="e.g. MED-REG-10293"
-                      aria-invalid={Boolean(errors.companyId)}
-                      {...register("companyId", {
-                        required: "Company ID is required",
-                        maxLength: {
-                          value: 80,
-                          message: "Company ID must be at most 80 characters",
-                        },
-                      })}
-                    />
-                  </InputGroup>
-                  {errors.companyId && (
-                    <p className="text-xs text-destructive">
-                      {errors.companyId.message}
                     </p>
                   )}
                 </div>
