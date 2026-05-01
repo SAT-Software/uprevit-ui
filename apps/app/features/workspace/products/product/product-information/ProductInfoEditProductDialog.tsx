@@ -31,6 +31,10 @@ import {
 } from "@uprevit/ui/components/ui/popover";
 import { Calendar } from "@uprevit/ui/components/ui/calendar";
 import { ProductMetadata } from "@/types/product";
+import {
+  DEVICE_CLASS_GROUPS,
+  findDeviceClassOption,
+} from "@/data/device-classes";
 import { GEO_MARKETS } from "@/data/geo-markets";
 import {
   Command,
@@ -57,12 +61,16 @@ interface ProductData {
   oem_contract_manufacturer?: string;
   commercial_clinical?: string;
   manufacturing_location?: string;
+  class_of_device?: string;
+  basic_udi_di?: string;
   product_information?: {
     market_geography?: string;
     country_of_origin?: string;
     oem_contract_manufacturer?: string;
     commercial_clinical?: string;
     manufacturing_location?: string;
+    class_of_device?: string;
+    basic_udi_di?: string;
   };
 }
 
@@ -77,24 +85,9 @@ interface FormValues {
   oemContractManufacturer: string;
   commercialClinical: string;
   manufacturingLocation: string;
-}
-
-function formatDate(date: Date | undefined) {
-  if (!date) {
-    return "";
-  }
-  return date.toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function isValidDate(date: Date | undefined) {
-  if (!date) {
-    return false;
-  }
-  return !isNaN(date.getTime());
+  classOfDeviceSelect: string;
+  classOfDeviceInput: string;
+  basicUdiDi: string;
 }
 
 function formatDateToLocal(date: Date): string {
@@ -120,6 +113,7 @@ export default function EditProductDialog({
   const [open, setOpen] = useState(false);
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
+  const [classComboboxOpen, setClassComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const [openTargetDate, setOpenTargetDate] = useState(false);
   const isSubmitted = productMetadata?.status === "submitted";
@@ -154,6 +148,16 @@ export default function EditProductDialog({
     oemContractManufacturer: product?.oem_contract_manufacturer || "",
     commercialClinical: product?.commercial_clinical || "",
     manufacturingLocation: product?.manufacturing_location || "",
+    classOfDeviceSelect:
+      product?.class_of_device && findDeviceClassOption(product.class_of_device)
+        ? product.class_of_device
+        : "",
+    classOfDeviceInput:
+      product?.class_of_device &&
+      !findDeviceClassOption(product.class_of_device)
+        ? product.class_of_device
+        : "",
+    basicUdiDi: product?.basic_udi_di || "",
   };
 
   const {
@@ -174,6 +178,9 @@ export default function EditProductDialog({
   const marketGeographyInput = watch("marketGeographyInput");
   const countryOfOriginSelect = watch("countryOfOriginSelect");
   const countryOfOriginInput = watch("countryOfOriginInput");
+  const classOfDeviceSelect = watch("classOfDeviceSelect");
+  const classOfDeviceInput = watch("classOfDeviceInput");
+  const selectedDeviceClass = findDeviceClassOption(classOfDeviceSelect);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (isSubmitted) {
@@ -202,6 +209,8 @@ export default function EditProductDialog({
         oem_contract_manufacturer: data.oemContractManufacturer,
         commercial_clinical: data.commercialClinical,
         manufacturing_location: data.manufacturingLocation,
+        class_of_device: data.classOfDeviceSelect || data.classOfDeviceInput,
+        basic_udi_di: data.basicUdiDi,
       },
     };
 
@@ -310,7 +319,7 @@ export default function EditProductDialog({
                       >
                         {targetDateValue
                           ? parseDateStringAsLocal(
-                              targetDateValue
+                              targetDateValue,
                             ).toLocaleDateString("en-US", {
                               day: "2-digit",
                               month: "long",
@@ -338,7 +347,7 @@ export default function EditProductDialog({
                           if (selectedDate) {
                             setValue(
                               "targetDate",
-                              formatDateToLocal(selectedDate)
+                              formatDateToLocal(selectedDate),
                             );
                           }
                           setOpenTargetDate(false);
@@ -374,7 +383,7 @@ export default function EditProductDialog({
                         {marketGeographySelect
                           ? GEO_MARKETS.find(
                               (market) =>
-                                market.regionAcronym === marketGeographySelect
+                                market.regionAcronym === marketGeographySelect,
                             )?.regionAcronym
                           : "Select market..."}
                         <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -398,7 +407,7 @@ export default function EditProductDialog({
                                   const originalValue = GEO_MARKETS.find(
                                     (m) =>
                                       m.regionAcronym.toLowerCase() ===
-                                      currentValue.toLowerCase()
+                                      currentValue.toLowerCase(),
                                   )?.regionAcronym;
 
                                   if (originalValue) {
@@ -407,7 +416,7 @@ export default function EditProductDialog({
                                       originalValue === marketGeographySelect
                                         ? ""
                                         : originalValue,
-                                      { shouldValidate: true }
+                                      { shouldValidate: true },
                                     );
                                     setComboboxOpen(false);
                                   }
@@ -419,7 +428,7 @@ export default function EditProductDialog({
                                     marketGeographySelect ===
                                       market.regionAcronym
                                       ? "opacity-100"
-                                      : "opacity-0"
+                                      : "opacity-0",
                                   )}
                                 />
                                 {market.regionAcronym} - {market.fullName}
@@ -491,7 +500,7 @@ export default function EditProductDialog({
                           <span className="flex items-center gap-2">
                             {(() => {
                               const country = COUNTRIES.find(
-                                (c) => c.name === countryOfOriginSelect
+                                (c) => c.name === countryOfOriginSelect,
                               );
                               if (country) {
                                 const FlagComponent =
@@ -530,7 +539,7 @@ export default function EditProductDialog({
                                     const originalValue = COUNTRIES.find(
                                       (c) =>
                                         c.name.toLowerCase() ===
-                                        currentValue.toLowerCase()
+                                        currentValue.toLowerCase(),
                                     )?.name;
 
                                     if (originalValue) {
@@ -539,7 +548,7 @@ export default function EditProductDialog({
                                         originalValue === countryOfOriginSelect
                                           ? ""
                                           : originalValue,
-                                        { shouldValidate: true }
+                                        { shouldValidate: true },
                                       );
                                       setCountryComboboxOpen(false);
                                     }
@@ -550,7 +559,7 @@ export default function EditProductDialog({
                                       "mr-2 h-4 w-4",
                                       countryOfOriginSelect === country.name
                                         ? "opacity-100"
-                                        : "opacity-0"
+                                        : "opacity-0",
                                     )}
                                   />
                                   {FlagComponent && (
@@ -669,6 +678,139 @@ export default function EditProductDialog({
                   {errors.manufacturingLocation && (
                     <p role="alert" className="text-xs text-destructive">
                       {errors.manufacturingLocation.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor={`${id}-class-device`} className="text-sm">
+                    Class of Device
+                  </Label>
+                  <Popover
+                    open={classComboboxOpen}
+                    onOpenChange={setClassComboboxOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-expanded={classComboboxOpen}
+                        className="w-full justify-between text-foreground/80 font-normal h-9"
+                        disabled={!!classOfDeviceInput}
+                      >
+                        {selectedDeviceClass ? (
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="truncate">
+                              {selectedDeviceClass.className}
+                            </span>
+                            <span className="shrink-0 text-xs text-muted-foreground">
+                              {selectedDeviceClass.regulation}
+                            </span>
+                          </span>
+                        ) : (
+                          "Select device class..."
+                        )}
+                        <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search class or regulation..." />
+                        <CommandList className="max-h-72 overflow-y-auto">
+                          <CommandEmpty>No device class found.</CommandEmpty>
+                          {DEVICE_CLASS_GROUPS.map((group) => (
+                            <CommandGroup
+                              key={group.regulation}
+                              heading={group.regulation}
+                            >
+                              {group.options.map((deviceClass) => (
+                                <CommandItem
+                                  key={deviceClass.value}
+                                  value={`${deviceClass.value} ${deviceClass.description || ""}`}
+                                  onSelect={() => {
+                                    setValue(
+                                      "classOfDeviceSelect",
+                                      deviceClass.value === classOfDeviceSelect
+                                        ? ""
+                                        : deviceClass.value,
+                                      { shouldValidate: true },
+                                    );
+                                    setClassComboboxOpen(false);
+                                  }}
+                                >
+                                  <PiCheck
+                                    className={cn(
+                                      "mr-2 h-4 w-4 shrink-0",
+                                      classOfDeviceSelect === deviceClass.value
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                  />
+                                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                                    <span className="truncate">
+                                      {deviceClass.className}
+                                    </span>
+                                    <span className="shrink-0 text-xs text-muted-foreground">
+                                      {deviceClass.regulation}
+                                    </span>
+                                  </span>
+                                  {deviceClass.description && (
+                                    <span className="ml-auto truncate text-xs text-muted-foreground/70">
+                                      {deviceClass.description}
+                                    </span>
+                                  )}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          ))}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  <div className="flex items-center gap-2 py-1">
+                    <div className="h-0 w-full border-t border-dashed" />
+                    <p className="text-[10px] font-light text-muted-foreground uppercase">
+                      OR
+                    </p>
+                    <div className="h-0 w-full border-t border-dashed" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor={`${id}-class-device-custom`}
+                      className="text-sm"
+                    >
+                      Enter Custom Class
+                    </Label>
+                    <Input
+                      id={`${id}-class-device-custom`}
+                      placeholder="Enter custom device class"
+                      type="text"
+                      disabled={!!classOfDeviceSelect}
+                      {...register("classOfDeviceInput")}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor={`${id}-basic-udi-di`} className="text-sm">
+                    Basic UDI-DI
+                  </Label>
+                  <Input
+                    id={`${id}-basic-udi-di`}
+                    placeholder="Enter Basic UDI-DI"
+                    type="text"
+                    aria-invalid={errors.basicUdiDi ? "true" : "false"}
+                    {...register("basicUdiDi")}
+                  />
+                  {errors.basicUdiDi && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {errors.basicUdiDi.message}
                     </p>
                   )}
                 </div>
