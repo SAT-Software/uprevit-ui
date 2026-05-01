@@ -11,9 +11,12 @@ import {
   PiTextAlignLeftDuotone,
   PiBriefcaseDuotone,
   PiWarningCircleDuotone,
+  PiCopyDuotone,
 } from "react-icons/pi";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { toast } from "sonner";
 
 function WorkspaceTab() {
   const {
@@ -24,6 +27,23 @@ function WorkspaceTab() {
   const { data: workspaceUserData } = useGetAllUsersByWorkspace();
 
   const workspaceData = data?.workspace;
+  const workspaceId = workspaceData?._id ?? "";
+  const displayWorkspaceId =
+    workspaceId.length > 12
+      ? `${workspaceId.slice(0, 6)}...${workspaceId.slice(-4)}`
+      : workspaceId;
+
+  const copyWorkspaceId = async () => {
+    if (!workspaceId) return;
+
+    try {
+      await navigator.clipboard.writeText(workspaceId);
+      toast.success("Workspace ID copied");
+    } catch (error) {
+      console.error("Failed to copy workspace ID:", error);
+      toast.error("Failed to copy workspace ID");
+    }
+  };
 
   if (workspaceLoading) {
     return (
@@ -152,10 +172,24 @@ function WorkspaceTab() {
             </div>
             <div className="space-y-1">
               <div className="text-sm font-medium text-muted-foreground">
-                Company ID
+                Workspace ID
               </div>
-              <div className="text-sm font-medium">
-                {workspaceData?.companyId || "123456"}
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium font-mono">
+                  {displayWorkspaceId || "-"}
+                </div>
+                {workspaceId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={copyWorkspaceId}
+                    aria-label="Copy workspace ID"
+                  >
+                    <PiCopyDuotone className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>

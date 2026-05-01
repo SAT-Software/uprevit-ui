@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 export type OnboardAdminWorkspacePayload = {
   workspaceName: string;
   companyName: string;
-  companyId: string;
   description?: string;
   logo?: string;
   name?: string;
