@@ -90,6 +90,8 @@ export default function AddComponentDialog({
         uploadRes = await uploadImage({
           file: data.image.file,
           contentType: data.image.file.type,
+          uploadScope: "product-assets",
+          productId,
         });
 
         console.log("S3 upload response:", uploadRes);

@@ -135,6 +135,8 @@ export default function LabelTagsTabs({
         const s3UploadResult = await uploadFileToS3({
           file,
           contentType: file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
         const uploadedKey = s3UploadResult.key;
 

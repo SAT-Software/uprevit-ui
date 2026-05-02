@@ -129,6 +129,8 @@ export default function EditComponentDialog({
         const uploadRes = await uploadImage({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
         uploadedImageKey = uploadRes.key;
       }
