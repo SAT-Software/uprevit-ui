@@ -112,7 +112,7 @@ function BrandMark({ className }: { className?: string }) {
     >
       <div className="relative size-8">
         <Image
-          src="/uprevit-logo-black"
+          src="/uprevit-logo-black.svg"
           alt="Uprevit logo"
           fill
           className="object-contain dark:hidden"

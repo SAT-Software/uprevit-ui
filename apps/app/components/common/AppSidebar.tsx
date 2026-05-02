@@ -187,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         >
           <div className="relative flex aspect-square mb-1 size-8 rounded-xl items-center justify-center">
             <Image
-              src="/uprevit-logo-black.svg"
+              src="/uprevit-logo-black.svg.svg"
               alt="Uprevit logo"
               fill
               className="object-contain dark:hidden p-0.5"
