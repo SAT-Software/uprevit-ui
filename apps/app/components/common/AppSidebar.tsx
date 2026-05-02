@@ -180,23 +180,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="border-b border-sidebar-border h-12">
+      <SidebarHeader className="border-b border-sidebar-border h-12 py-1">
         <Link
           href="/"
-          className="flex items-center gap-4 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          className="flex items-center gap-1 p-0.5 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <div className="relative flex aspect-square mb-1 size-6 items-center justify-center">
+          <div className="relative flex aspect-square mb-1 size-8 rounded-xl items-center justify-center">
             <Image
-              src="/log-no-bg-black.svg"
+              src="/uprevit-logo-black.svg"
               alt="Uprevit logo"
               fill
-              className="object-contain dark:hidden"
+              className="object-contain dark:hidden p-0.5"
             />
             <Image
-              src="/log-no-bg-white.svg"
+              src="/uprevit-logo-white.svg"
               alt="Uprevit logo"
               fill
-              className="hidden object-contain dark:block"
+              className="hidden object-contain dark:block p-0.5"
             />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
@@ -208,7 +208,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <TooltipTrigger asChild>
                   <span
                     aria-label="Alpha release"
-                    className="rounded-full border border-sidebar-border bg-sidebar-accent px-2 py-0.5 text-xs font-semibold text-sidebar-foreground/70"
+                    className="rounded-full border border-sidebar-border bg-sidebar-accent px-1.5 py-0.5 text-xs font-semibold text-sidebar-foreground/70"
                   >
                     α
                   </span>
@@ -238,7 +238,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         "h-7 border border-transparent",
                         pathname.startsWith(item.url)
                           ? "bg-sidebar-accent border-sidebar-border rounded text-sidebar-primary"
-                          : ""
+                          : "",
                       )}
                     >
                       <Link href={item.url} className="flex items-center gap-2">
@@ -247,39 +247,41 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       </Link>
                     </SidebarMenuButton>
                     {item.title === "Products" && showProductSubNavigation && (
-                        <Collapsible
-                          key={item.title}
-                          asChild
-                          defaultOpen={showProductSubNavigation}
-                          className="group/collapsible"
-                        >
-                          <CollapsibleContent>
-                            <SidebarMenuSub className="gap-1 py-1">
-                              {productSubItems?.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.title}>
-                                  <SidebarMenuSubButton
-                                    className={cn(
-                                      pathname.includes(subItem.url)
-                                        ? "bg-sidebar-border/50 rounded text-sidebar-foreground"
+                      <Collapsible
+                        key={item.title}
+                        asChild
+                        defaultOpen={showProductSubNavigation}
+                        className="group/collapsible"
+                      >
+                        <CollapsibleContent>
+                          <SidebarMenuSub className="gap-1 py-1">
+                            {productSubItems?.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton
+                                  className={cn(
+                                    pathname.includes(subItem.url)
+                                      ? "bg-sidebar-border/50 rounded text-sidebar-foreground"
+                                      : "",
+                                  )}
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/products/${productId}${subItem.url}${
+                                      compareVersionId
+                                        ? `?compareVersion=${compareVersionId}`
                                         : ""
-                                    )}
-                                    asChild
+                                    }`}
                                   >
-                                    <Link
-                                      href={`/products/${productId}${subItem.url}${
-                                        compareVersionId ? `?compareVersion=${compareVersionId}` : ""
-                                      }`}
-                                    >
-                                      {subItem.icon && <subItem.icon />}
-                                      <span>{subItem.title}</span>
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              ))}
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      )}
+                                    {subItem.icon && <subItem.icon />}
+                                    <span>{subItem.title}</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
