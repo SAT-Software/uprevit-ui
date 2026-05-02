@@ -305,8 +305,8 @@ function ResultsTable({
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-16 text-center">
+        <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
           <PiMagnifyingGlassDuotone
             size={32}
             className="text-muted-foreground"
@@ -314,7 +314,7 @@ function ResultsTable({
         </div>
         <p className="text-sm font-medium text-foreground">No products found</p>
         <p className="text-xs text-muted-foreground mt-1">
-          Try adjusting your filters or add new conditions
+          No products match this query. Try adjusting your filters.
         </p>
       </div>
     );
@@ -561,7 +561,8 @@ export default function Page() {
   };
 
   const isQueryValid = validateConditions();
-  const hasResults = results && results.products.length > 0;
+  const hasExecutedResults = Boolean(results);
+  const hasResultProducts = Boolean(results?.products.length);
   const reportExportJobs = exportJobsData?.result.jobs ?? [];
   const activeReportExportCount =
     typeof exportJobsData?.result.activeJobsCount === "number"
@@ -637,7 +638,7 @@ export default function Page() {
                       <TabsTrigger
                         value="results"
                         className="gap-1.5"
-                        disabled={!hasResults}
+                        disabled={!hasExecutedResults}
                       >
                         <PiTableDuotone size={14} />
                         Results
@@ -781,7 +782,7 @@ export default function Page() {
                 </TabsContent>
 
                 <TabsContent value="results" className="mt-0">
-                  {hasResults && (
+                  {results && (
                     <>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -792,13 +793,16 @@ export default function Page() {
                             {results.pagination.total} products found
                           </Badge>
                         </div>
-                        <ExportButtons
-                          onExportPDF={() => handleOpenExportDialog("pdf")}
-                          onExportExcel={() => handleOpenExportDialog("excel")}
-                          isExportingPDF={exportPDF.isPending}
-                          isExportingExcel={exportExcel.isPending}
-                          disabled={!hasResults}
-                        />
+                        {hasResultProducts && (
+                          <ExportButtons
+                            onExportPDF={() => handleOpenExportDialog("pdf")}
+                            onExportExcel={() =>
+                              handleOpenExportDialog("excel")
+                            }
+                            isExportingPDF={exportPDF.isPending}
+                            isExportingExcel={exportExcel.isPending}
+                          />
+                        )}
                       </div>
                       <ResultsTable
                         products={results.products}

@@ -124,7 +124,7 @@ export default function MarketingHeader() {
               >
                 <div className="relative dark:hidden flex aspect-square mb-1 size-7 items-center justify-center">
                   <Image
-                    src="/log-no-bg-black.svg"
+                    src="/uprevit-logo-black"
                     alt="Uprevit logo"
                     fill
                     className=""
@@ -132,7 +132,7 @@ export default function MarketingHeader() {
                 </div>
                 <div className="relative hidden dark:flex aspect-square mb-1 size-7 items-center justify-center">
                   <Image
-                    src="/log-no-bg-white.svg"
+                    src="/uprevit-logo-white.svg"
                     alt="Uprevit logo"
                     fill
                     className=""

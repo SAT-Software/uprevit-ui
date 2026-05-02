@@ -27,7 +27,7 @@ export default function FooterSection() {
             >
               <div className="relative flex aspect-square mb-1 size-8 items-center justify-center">
                 <Image
-                  src="/log-no-bg-white.svg"
+                  src="/uprevit-logo-white.svg"
                   alt="Uprevit logo"
                   fill
                   className=""
