@@ -509,6 +509,7 @@ export default function Page() {
   const handleLoadQuery = (query: SavedQuery) => {
     loadConditions(query.conditions, query.conditionLogic);
     setResults(null);
+    setActiveTab("builder");
     toast.success(`Loaded "${query.name}"`);
   };
 
@@ -782,7 +783,7 @@ export default function Page() {
                 </TabsContent>
 
                 <TabsContent value="results" className="mt-0">
-                  {results && (
+                  {results ? (
                     <>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -811,6 +812,21 @@ export default function Page() {
                         onPageChange={(page) => handleExecuteQuery(page)}
                       />
                     </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-16 text-center">
+                      <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
+                        <PiTableDuotone
+                          size={32}
+                          className="text-muted-foreground"
+                        />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        No query results yet
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Run a query to view matching products.
+                      </p>
+                    </div>
                   )}
                 </TabsContent>
 
