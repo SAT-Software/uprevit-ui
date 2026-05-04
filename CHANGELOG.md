@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-04
+
+### Added
+
+- Added Product Information fields for device class and Basic UDI-DI, including supporting report configuration.
+- Added standard symbol library selection with restricted external symbol image hosts.
+- Added improved workspace onboarding with admin name capture and workspace ID copy support.
+- Added a pricing calculator experience with shared sliding number UI support.
+- Added product-aware upload structuring for workspace assets.
+- Added refreshed black and white Uprevit brand assets across the product and marketing apps.
+
+### Updated
+
+- Updated product redline workflows across Product Information, Compliance Information, Product Specifications, Symbols & Graphics, and Label Tags.
+- Updated label tag image diff handling to support base and next image comparison for modified states.
+- Updated symbols, schematics, barcodes, and other component tables and dialogs for more consistent add, edit, and redline behavior.
+- Updated reports UI with improved layout handling and blank-result empty states.
+- Updated dashboard, sidebar, settings, archive, department, project, and product UI details for cleaner workspace interactions.
+- Updated marketing pricing copy, demo presentation, favicon assets, and header/footer branding.
+- Updated monorepo package versions and lockfile metadata to `0.2.0`.
+- Updated app configuration to use the unified S3 hostname setup.
+
+### Fixed
+
+- Fixed redline image previews so base images are preserved and image diff badges render correctly.
+- Fixed redundant label tag redlines when only key-only image data changed.
+- Fixed modified label presence diffs in Symbols & Graphics tables.
+- Fixed product specification submit behavior so save state resets correctly.
+- Fixed fixed-row-height and truncation behavior in redline-heavy product tables.
+- Fixed Product Information redline layout and dialog positioning issues.
+- Fixed language and status badge layout issues in product redline views.
+- Fixed logo file extension usage in the sidebar, onboarding shell, and marketing header.
+- Fixed blank report result handling so users see an empty state instead of a broken or unclear page.
+- Fixed minor UI consistency issues in skeleton states, toast behavior, dialogs, sliders, and alert dialogs.
+
+### Removed
+
+- Removed legacy single `logo.svg` assets after replacing them with dedicated black and white brand assets.
+- Removed obsolete favicon asset usage from the marketing app in favor of the refreshed favicon set.
+
 ## [0.1.0] - 2026-04-03
 
 ### Added
