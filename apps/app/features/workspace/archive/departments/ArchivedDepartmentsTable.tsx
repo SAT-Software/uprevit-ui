@@ -134,7 +134,7 @@ export function ArchivedDepartmentsTable({
 
   const handleRestore = (item: DepartmentArchiveRow) => {
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     onRestore(item);

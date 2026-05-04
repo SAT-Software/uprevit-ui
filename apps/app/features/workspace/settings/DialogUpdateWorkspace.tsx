@@ -69,7 +69,7 @@ export function DialogUpdateWorkspace({
 
   const onSubmit: SubmitHandler<Workspace> = async (formData) => {
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     try {
@@ -134,7 +134,7 @@ export function DialogUpdateWorkspace({
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen && !isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     setOpen(nextOpen);
@@ -290,7 +290,7 @@ export function DialogUpdateWorkspace({
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="mr-2 h-4 w-4" />
+              <PiXCircleDuotone className="h-4 w-4" />
               Cancel
             </Button>
           </DialogClose>
@@ -304,7 +304,7 @@ export function DialogUpdateWorkspace({
             {isPending ? (
               <Spinner />
             ) : (
-              <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+              <PiCheckCircleDuotone className="h-4 w-4" />
             )}
             {isPending ? "Saving..." : "Save Changes"}
           </Button>

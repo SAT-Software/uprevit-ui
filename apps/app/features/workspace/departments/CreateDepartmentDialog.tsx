@@ -142,7 +142,7 @@ export default function CreateDepartmentDialog() {
             if (!isAdmin) {
               e.preventDefault();
               e.stopPropagation();
-              toast.error("Insufficient privileges, contact Admin");
+              toast.warning("Insufficient privileges, contact Admin");
               return;
             }
           }}

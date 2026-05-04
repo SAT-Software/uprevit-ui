@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -59,6 +60,8 @@ type FormData = {
   componentType: string;
 };
 
+type ImageChangeState = "unchanged" | "removed" | "replaced";
+
 export default function EditComponentDialog({
   productId,
   component,
@@ -71,12 +74,31 @@ export default function EditComponentDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
+  const queryClient = useQueryClient();
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
   const buildTags = (labels: string[]) =>
     labels.map((text, index) => ({
       id: `tag-${index}-${text}`,
       text,
     }));
+  const formDefaults = useMemo(
+    () => ({
+      componentNumber: component.component_number || "",
+      componentDescription: component.component_description || "",
+      image: null,
+      labelType: buildTags(component.label_type || []),
+      dimensions: component.dimensions || "",
+      componentType: component.component_type || "",
+    }),
+    [
+      component.component_description,
+      component.component_number,
+      component.component_type,
+      component.dimensions,
+      component.label_type,
+    ],
+  );
   const {
     register,
     handleSubmit,
@@ -85,45 +107,43 @@ export default function EditComponentDialog({
     reset,
     setValue,
   } = useForm<FormData>({
-    defaultValues: {
-      componentNumber: component.component_number || "",
-      componentDescription: component.component_description || "",
-      image: null,
-      labelType: buildTags(component.label_type || []),
-      dimensions: component.dimensions || "",
-      componentType: component.component_type || "",
-    },
+    defaultValues: formDefaults,
   });
   const { mutate: updateComponent, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadImage, isPending: isUploadingImage } =
     useUploadFilesToS3();
 
   useEffect(() => {
-    if (open) {
-      reset({
-        componentNumber: component.component_number || "",
-        componentDescription: component.component_description || "",
-        image: null,
-        labelType: buildTags(component.label_type || []),
-        dimensions: component.dimensions || "",
-        componentType: component.component_type || "",
-      });
-    }
-  }, [open, component, reset]);
+    if (!open) return;
+    reset(formDefaults);
+    setImageState("unchanged");
+  }, [formDefaults, open, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
       setUploadingImage(true);
-      let uploadRes;
+      let uploadedImageKey: string | undefined;
 
       // Only upload if there's a new image file
       if (data.image && data.image.file instanceof File) {
-        uploadRes = await uploadImage({
+        const uploadRes = await uploadImage({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
+        uploadedImageKey = uploadRes.key;
       }
       setUploadingImage(false);
+
+      const nextImage =
+        imageState === "unchanged" ? component.image : "";
+      const nextKey =
+        imageState === "replaced"
+          ? (uploadedImageKey ?? "")
+          : imageState === "removed"
+            ? ""
+            : (component.key ?? "");
 
       const updatedComponentData = {
         id: productId,
@@ -132,8 +152,8 @@ export default function EditComponentDialog({
         data: {
           id: component._id,
           component_number: data.componentNumber,
-          image: uploadRes?.key ? "" : component.image,
-          ...(uploadRes?.key && { key: uploadRes.key }),
+          image: nextImage,
+          key: nextKey,
           component_description: data.componentDescription,
           label_type: (data.labelType || []).map((tag: Tag) => tag.text),
           dimensions: data.dimensions,
@@ -142,17 +162,31 @@ export default function EditComponentDialog({
       };
 
       updateComponent(updatedComponentData, {
-        onSuccess: () => {
-          onOpenChange(false);
-          reset();
+        onSuccess: async () => {
+          try {
+            await Promise.all([
+              queryClient.refetchQueries({
+                queryKey: ["product-tab-data", productId, "label-components"],
+                type: "active",
+              }),
+              queryClient.refetchQueries({
+                queryKey: ["product-diff-redline", productId],
+                type: "active",
+              }),
+            ]);
+          } finally {
+            onOpenChange(false);
+            reset();
+            setImageState("unchanged");
+          }
         },
         onError: () => {
-          onOpenChange(false);
-          reset();
+          setUploadingImage(false);
         },
       });
     } catch (error) {
       console.error("Failed to update component:", error);
+      setUploadingImage(false);
     }
   };
 
@@ -190,6 +224,8 @@ export default function EditComponentDialog({
                   <ComponentImage
                     currentImage={component.image}
                     value={field.value}
+                    imageState={imageState}
+                    onImageStateChange={setImageState}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -222,6 +258,9 @@ export default function EditComponentDialog({
                 <Controller
                   name="componentType"
                   control={control}
+                  rules={{
+                    required: "Component type is required",
+                  }}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
@@ -236,6 +275,11 @@ export default function EditComponentDialog({
                     </Select>
                   )}
                 />
+                {errors.componentType && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentType.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -287,7 +331,10 @@ export default function EditComponentDialog({
               type="button"
               variant="secondary"
               size="sm"
-              onClick={() => reset()}
+              onClick={() => {
+                reset();
+                setImageState("unchanged");
+              }}
             >
               <PiXCircleDuotone />
               Cancel
@@ -321,12 +368,16 @@ export default function EditComponentDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
+  imageState: ImageChangeState;
+  onImageStateChange: (state: ImageChangeState) => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
+  imageState,
+  onImageStateChange,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -334,6 +385,7 @@ function ComponentImage({
       accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
       onFilesChange: (newFiles) => {
         if (newFiles.length > 0) {
+          onImageStateChange("replaced");
           onChange(newFiles[0]);
         } else {
           onChange(null);
@@ -342,7 +394,10 @@ function ComponentImage({
     });
 
   // Show current image if no new file is selected
-  const displayImage = value?.preview || files[0]?.preview || currentImage;
+  const displayImage =
+    value?.preview ||
+    files[0]?.preview ||
+    (imageState !== "removed" ? currentImage : "");
 
   return (
     <div className="h-40 w-full">
@@ -379,6 +434,9 @@ function ComponentImage({
                 const fileId = value?.id || files[0]?.id;
                 if (fileId) {
                   removeFile(fileId);
+                  onImageStateChange(currentImage ? "unchanged" : "removed");
+                } else if (currentImage) {
+                  onImageStateChange("removed");
                 }
                 onChange(null);
               }}

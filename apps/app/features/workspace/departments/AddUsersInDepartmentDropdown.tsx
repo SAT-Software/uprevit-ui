@@ -38,7 +38,7 @@ export default function AddUsersInDepartmentDropdown({
 
   const handleUserClick = (user: User) => {
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     const isSelected = selectedUsers.some((u) => u._id === user._id);

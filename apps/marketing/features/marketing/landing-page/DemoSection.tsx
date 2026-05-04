@@ -6,6 +6,8 @@ import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/Decorati
 import { useScrollSection } from "@/lib/scroll-context";
 import { useTheme } from "next-themes";
 import { PiImageDuotone } from "react-icons/pi";
+import Lottie from "lottie-react";
+import uprevitMarketingVideo from "@/public/Uprevit-Marketing-Video.json";
 
 export default function DemoSection() {
   const { resolvedTheme } = useTheme();
@@ -55,23 +57,33 @@ export default function DemoSection() {
           />
 
           <div className="p-1 bg-accent border-border border rounded-[12px]">
-            <Card className="aspect-video mx-auto border-border overflow-hidden">
+            <Card className="aspect-auto mx-auto border-border overflow-hidden">
               <CardContent className="p-0 overflow-hidden dark:hidden">
-                <video
+                {/* <video
                   src="/Uprevit-ComingSoon-Intro-Light.mp4"
                   className="overflow-hidden rounded-xl"
                   autoPlay
                   loop
                   muted
+                /> */}
+                <Lottie
+                  animationData={uprevitMarketingVideo}
+                  loop={true}
+                  className="aspect-auto"
                 />
               </CardContent>
               <CardContent className="p-0 overflow-hidden dark:block hidden">
-                <video
+                {/* <video
                   src="/Uprevit-ComingSoon-Intro-Dark.mp4"
                   className="overflow-hidden rounded-xl"
                   autoPlay
                   loop
                   muted
+                /> */}
+                <Lottie
+                  animationData={uprevitMarketingVideo}
+                  loop={true}
+                  className="aspect-auto"
                 />
               </CardContent>
             </Card>

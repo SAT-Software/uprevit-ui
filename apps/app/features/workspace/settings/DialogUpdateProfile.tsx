@@ -285,7 +285,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="mr-2 h-4 w-4" />
+              <PiXCircleDuotone className="h-4 w-4" />
               Cancel
             </Button>
           </DialogClose>
@@ -299,7 +299,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
             {isPending ? (
               <Spinner />
             ) : (
-              <PiCheckCircleDuotone className="mr-2 h-4 w-4" />
+              <PiCheckCircleDuotone className="h-4 w-4" />
             )}
             {isPending ? "Saving..." : "Save Changes"}
           </Button>

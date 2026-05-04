@@ -32,6 +32,9 @@ const fallbackVariants = {
   preview: "size-full p-10 text-muted-foreground/60",
 };
 
+const isRenderableImageSrc = (src: string) =>
+  src.startsWith("/") || src.startsWith("http://") || src.startsWith("https://");
+
 export function ProductImageFrame({
   src,
   alt,
@@ -44,7 +47,7 @@ export function ProductImageFrame({
   sizes,
 }: ProductImageFrameProps) {
   const imageSrc = typeof src === "string" ? src.trim() : "";
-  const hasImage = imageSrc.length > 0;
+  const hasImage = imageSrc.length > 0 && isRenderableImageSrc(imageSrc);
 
   return (
     <div className={cn(frameVariants[variant], frameClassName)}>

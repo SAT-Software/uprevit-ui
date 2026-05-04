@@ -44,7 +44,7 @@ export default function DialogArchiveProduct({
   async function handleArchiveProduct(e: React.MouseEvent) {
     e.preventDefault();
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     if (!product?._id) return;
@@ -150,7 +150,7 @@ export default function DialogArchiveProduct({
               if (!isAdmin) {
                 e.preventDefault();
                 e.stopPropagation();
-                toast.error("Insufficient privileges, contact Admin");
+                toast.warning("Insufficient privileges, contact Admin");
                 return;
               }
             }}

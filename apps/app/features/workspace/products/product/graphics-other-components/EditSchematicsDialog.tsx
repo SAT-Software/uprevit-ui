@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -48,6 +49,8 @@ type FormData = {
   image: FileWithPreview | null;
 };
 
+type ImageChangeState = "unchanged" | "removed" | "replaced";
+
 export default function EditSchematicsDialog({
   productId,
   schematic,
@@ -60,12 +63,31 @@ export default function EditSchematicsDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
+  const queryClient = useQueryClient();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [labelPresence, setLabelPresence] = useState<Tag[]>(
     schematic.labelPresence.map((label, index) => ({
       id: `tag-${index}-${label}`,
       text: label,
     }))
+  );
+  const buildTags = (labels: string[]) =>
+    labels.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }));
+  const formDefaults = useMemo(
+    () => ({
+      componentName: schematic.componentName,
+      componentDescription: schematic.description,
+      labelPresence: buildTags(schematic.labelPresence),
+      image: null,
+    }),
+    [
+      schematic.componentName,
+      schematic.description,
+      schematic.labelPresence,
+    ],
   );
 
   const {
@@ -76,41 +98,16 @@ export default function EditSchematicsDialog({
     reset,
     setValue,
   } = useForm<FormData>({
-    defaultValues: {
-      componentName: schematic.componentName,
-      componentDescription: schematic.description,
-      labelPresence: schematic.labelPresence.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      })),
-      image: null,
-    },
+    defaultValues: formDefaults,
   });
-  const [isImageRemoved, setIsImageRemoved] = useState(false);
+  const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
 
-  const buildTags = (labels: string[]) =>
-    labels.map((label, index) => ({
-      id: `tag-${index}-${label}`,
-      text: label,
-    }));
-
-  const syncFormWithSchematic = () => {
-    reset({
-      componentName: schematic.componentName,
-      componentDescription: schematic.description,
-      labelPresence: buildTags(schematic.labelPresence),
-      image: null,
-    });
-    setLabelPresence(buildTags(schematic.labelPresence));
-    setIsImageRemoved(false);
-  };
-
-  const handleDialogChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      syncFormWithSchematic();
-    }
-    onOpenChange(nextOpen);
-  };
+  useEffect(() => {
+    if (!open) return;
+    reset(formDefaults);
+    setLabelPresence(formDefaults.labelPresence);
+    setImageState("unchanged");
+  }, [formDefaults, open, reset]);
 
   const { mutate: updateSchematicsData, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -124,19 +121,22 @@ export default function EditSchematicsDialog({
         const s3UploadResult = await uploadFileToS3({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
 
         uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
 
-      let finalImage: string = schematic.componentImage;
-      if (isImageRemoved) {
-        finalImage = "";
-      }
-      if (uploadedImageKey) {
-        finalImage = "";
-      }
+      const finalImage =
+        imageState === "unchanged" ? schematic.componentImage : "";
+      const finalKey =
+        imageState === "replaced"
+          ? (uploadedImageKey ?? "")
+          : imageState === "removed"
+            ? ""
+            : (schematic.key ?? "");
 
       const updatedSchematicsData = {
         id: productId,
@@ -146,8 +146,7 @@ export default function EditSchematicsDialog({
           id: schematic.id,
           text: data.componentName,
           image: finalImage,
-          ...(uploadedImageKey !== undefined && { key: uploadedImageKey }),
-          ...(isImageRemoved && uploadedImageKey === undefined && { key: "" }),
+          key: finalKey,
           entity: "Schematics",
           description: data.componentDescription,
           label_presence: labelPresence.map((tag: Tag) => tag.text),
@@ -155,11 +154,24 @@ export default function EditSchematicsDialog({
       };
 
       updateSchematicsData(updatedSchematicsData, {
-        onSuccess: () => {
-          onOpenChange(false);
-          reset();
-          setLabelPresence([]);
-          setIsImageRemoved(false);
+        onSuccess: async () => {
+          try {
+            await Promise.all([
+              queryClient.refetchQueries({
+                queryKey: ["product-tab-data", productId, "symbols-graphics"],
+                type: "active",
+              }),
+              queryClient.refetchQueries({
+                queryKey: ["product-diff-redline", productId],
+                type: "active",
+              }),
+            ]);
+          } finally {
+            onOpenChange(false);
+            reset();
+            setLabelPresence([]);
+            setImageState("unchanged");
+          }
         },
         onError: () => {
           setUploadingImage(false);
@@ -172,7 +184,7 @@ export default function EditSchematicsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
@@ -204,8 +216,8 @@ export default function EditSchematicsDialog({
                   <ComponentImage
                     currentImage={schematic.componentImage}
                     value={field.value}
-                    isRemoved={isImageRemoved}
-                    onRemove={() => setIsImageRemoved(true)}
+                    imageState={imageState}
+                    onImageStateChange={setImageState}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -274,7 +286,7 @@ export default function EditSchematicsDialog({
               size="sm"
               onClick={() => {
                 reset();
-                setIsImageRemoved(false);
+                setImageState("unchanged");
               }}
             >
               <PiXCircleDuotone />
@@ -306,16 +318,16 @@ export default function EditSchematicsDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
-  isRemoved: boolean;
-  onRemove: () => void;
+  imageState: ImageChangeState;
+  onImageStateChange: (state: ImageChangeState) => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
-  isRemoved,
-  onRemove,
+  imageState,
+  onImageStateChange,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -323,6 +335,7 @@ function ComponentImage({
       accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
       onFilesChange: (newFiles) => {
         if (newFiles.length > 0) {
+          onImageStateChange("replaced");
           onChange(newFiles[0]);
         } else {
           onChange(null);
@@ -331,7 +344,9 @@ function ComponentImage({
     });
 
   const displayImage =
-    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
+    value?.preview ||
+    files[0]?.preview ||
+    (imageState !== "removed" ? currentImage : "");
 
   return (
     <div className="h-40 w-full">
@@ -368,11 +383,11 @@ function ComponentImage({
                 const fileId = value?.id || files[0]?.id;
                 if (fileId) {
                   removeFile(fileId);
-                  onChange(null);
+                  onImageStateChange(currentImage ? "unchanged" : "removed");
                 } else {
-                  onRemove();
-                  onChange(null);
+                  onImageStateChange("removed");
                 }
+                onChange(null);
               }}
               aria-label="Remove image"
             >
