@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -39,6 +40,8 @@ type Item = {
   key?: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
+  standard_symbol_id?: string;
+  standard_ref_number?: string;
 };
 
 type FormData = {
@@ -47,6 +50,8 @@ type FormData = {
   labelPresence: Tag[];
   image: FileWithPreview | null;
 };
+
+type ImageChangeState = "unchanged" | "removed" | "replaced";
 
 export default function EditSymbolsDialog({
   productId,
@@ -60,12 +65,31 @@ export default function EditSymbolsDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
+  const queryClient = useQueryClient();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [labelPresence, setLabelPresence] = useState<Tag[]>(
     symbol.symbolsTextPresent.map((label, index) => ({
       id: `tag-${index}-${label}`,
       text: label,
     }))
+  );
+  const buildTags = (labels: string[]) =>
+    labels.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }));
+  const formDefaults = useMemo(
+    () => ({
+      componentName: symbol.componentName,
+      textPresent: symbol.textPresent ? "yes" : "no",
+      labelPresence: buildTags(symbol.symbolsTextPresent),
+      image: null,
+    }),
+    [
+      symbol.componentName,
+      symbol.symbolsTextPresent,
+      symbol.textPresent,
+    ],
   );
 
   const {
@@ -75,43 +99,27 @@ export default function EditSymbolsDialog({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<FormData>({
-    defaultValues: {
-      componentName: symbol.componentName,
-      textPresent: symbol.textPresent ? "yes" : "no",
-      labelPresence: symbol.symbolsTextPresent.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      })),
-      image: null,
-    },
+    defaultValues: formDefaults,
   });
 
-  const [isImageRemoved, setIsImageRemoved] = useState(false);
+  const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
+  const watchedComponentName = watch("componentName");
+  const isStandardLinked = Boolean(
+    symbol.standard_symbol_id || symbol.standard_ref_number,
+  );
+  const standardCoreFieldsChanged =
+    isStandardLinked &&
+    ((watchedComponentName ?? "").trim() !== symbol.componentName.trim() ||
+      imageState !== "unchanged");
 
-  const buildTags = (labels: string[]) =>
-    labels.map((label, index) => ({
-      id: `tag-${index}-${label}`,
-      text: label,
-    }));
-
-  const syncFormWithSymbol = () => {
-    reset({
-      componentName: symbol.componentName,
-      textPresent: symbol.textPresent ? "yes" : "no",
-      labelPresence: buildTags(symbol.symbolsTextPresent),
-      image: null,
-    });
-    setLabelPresence(buildTags(symbol.symbolsTextPresent));
-    setIsImageRemoved(false);
-  };
-
-  const handleDialogChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      syncFormWithSymbol();
-    }
-    onOpenChange(nextOpen);
-  };
+  useEffect(() => {
+    if (!open) return;
+    reset(formDefaults);
+    setLabelPresence(formDefaults.labelPresence);
+    setImageState("unchanged");
+  }, [formDefaults, open, reset]);
 
   const { mutate: updateSymbolsData, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -125,19 +133,21 @@ export default function EditSymbolsDialog({
         const s3UploadResult = await uploadFileToS3({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
 
         uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
 
-      let finalImage: string = symbol.componentImage;
-      if (isImageRemoved) {
-        finalImage = "";
-      }
-      if (uploadedImageKey) {
-        finalImage = "";
-      }
+      const finalImage = imageState === "unchanged" ? symbol.componentImage : "";
+      const finalKey =
+        imageState === "replaced"
+          ? (uploadedImageKey ?? "")
+          : imageState === "removed"
+            ? ""
+            : (symbol.key ?? "");
 
       const updatedSymbolsData = {
         id: productId,
@@ -147,8 +157,7 @@ export default function EditSymbolsDialog({
           id: symbol.id,
           text: data.componentName,
           image: finalImage,
-          ...(uploadedImageKey !== undefined && { key: uploadedImageKey }),
-          ...(isImageRemoved && uploadedImageKey === undefined && { key: "" }),
+          key: finalKey,
           entity: "Symbols",
           text_present: data.textPresent === "yes",
           label_presence: labelPresence.map((tag: Tag) => tag.text),
@@ -156,11 +165,24 @@ export default function EditSymbolsDialog({
       };
 
       updateSymbolsData(updatedSymbolsData, {
-        onSuccess: () => {
-          onOpenChange(false);
-          reset();
-          setLabelPresence([]);
-          setIsImageRemoved(false);
+        onSuccess: async () => {
+          try {
+            await Promise.all([
+              queryClient.refetchQueries({
+                queryKey: ["product-tab-data", productId, "symbols-graphics"],
+                type: "active",
+              }),
+              queryClient.refetchQueries({
+                queryKey: ["product-diff-redline", productId],
+                type: "active",
+              }),
+            ]);
+          } finally {
+            onOpenChange(false);
+            reset();
+            setLabelPresence([]);
+            setImageState("unchanged");
+          }
         },
         onError: () => {
           setUploadingImage(false);
@@ -173,7 +195,7 @@ export default function EditSymbolsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
@@ -205,8 +227,8 @@ export default function EditSymbolsDialog({
                   <ComponentImage
                     currentImage={symbol.componentImage}
                     value={field.value}
-                    isRemoved={isImageRemoved}
-                    onRemove={() => setIsImageRemoved(true)}
+                    imageState={imageState}
+                    onImageStateChange={setImageState}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -232,6 +254,13 @@ export default function EditSymbolsDialog({
                   </p>
                 )}
               </div>
+              {standardCoreFieldsChanged && (
+                <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                  Changing the symbol text or image will convert this
+                  standard-library symbol into a custom product symbol and
+                  remove its standard reference.
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Symbol text present</Label>
                 <Controller
@@ -294,7 +323,7 @@ export default function EditSymbolsDialog({
               size="sm"
               onClick={() => {
                 reset();
-                setIsImageRemoved(false);
+                setImageState("unchanged");
               }}
             >
               <PiXCircleDuotone />
@@ -326,16 +355,16 @@ export default function EditSymbolsDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
-  isRemoved: boolean;
-  onRemove: () => void;
+  imageState: ImageChangeState;
+  onImageStateChange: (state: ImageChangeState) => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
-  isRemoved,
-  onRemove,
+  imageState,
+  onImageStateChange,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -343,6 +372,7 @@ function ComponentImage({
       accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
       onFilesChange: (newFiles) => {
         if (newFiles.length > 0) {
+          onImageStateChange("replaced");
           onChange(newFiles[0]);
         } else {
           onChange(null);
@@ -351,7 +381,9 @@ function ComponentImage({
     });
 
   const displayImage =
-    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
+    value?.preview ||
+    files[0]?.preview ||
+    (imageState !== "removed" ? currentImage : "");
 
   return (
     <div className="h-40 w-full">
@@ -388,11 +420,11 @@ function ComponentImage({
                 const fileId = value?.id || files[0]?.id;
                 if (fileId) {
                   removeFile(fileId);
-                  onChange(null);
+                  onImageStateChange(currentImage ? "unchanged" : "removed");
                 } else {
-                  onRemove();
-                  onChange(null);
+                  onImageStateChange("removed");
                 }
+                onChange(null);
               }}
               aria-label="Remove image"
             >

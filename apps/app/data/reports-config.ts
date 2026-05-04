@@ -96,6 +96,16 @@ export const QUERYABLE_TABS: TabConfig[] = [
         label: "OEM/Contract Manufacturer",
         type: "text",
       },
+      {
+        key: "class_of_device",
+        label: "Class of Device",
+        type: "text",
+      },
+      {
+        key: "basic_udi_di",
+        label: "Basic UDI-DI",
+        type: "text",
+      },
     ],
   },
   {

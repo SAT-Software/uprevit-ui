@@ -23,10 +23,15 @@ export interface Product {
     oem_contract_manufacturer?: string;
     commercial_clinical?: string;
     manufacturing_location?: string;
+    class_of_device?: string;
+    basic_udi_di?: string;
     custom_fields?: Array<{
       _id?: string;
-      field_name: string;
-      field_value: string;
+      parent_id?: string | null;
+      label?: string;
+      value?: string;
+      field_name?: string;
+      field_value?: string;
     }>;
     tab_completed?: boolean;
   };
@@ -182,8 +187,11 @@ export interface ProductDataWrapper {
 /** Custom field structure */
 export interface CustomField {
   _id?: string;
-  field_name: string;
-  field_value: string;
+  parent_id?: string | null;
+  label?: string;
+  value?: string;
+  field_name?: string;
+  field_value?: string;
 }
 
 /** Base structure for tab data in the all-tabs response */
@@ -199,6 +207,8 @@ export interface ProductInformationData {
   oem_contract_manufacturer?: string;
   commercial_clinical?: string;
   manufacturing_location?: string;
+  class_of_device?: string;
+  basic_udi_di?: string;
 }
 
 /** Product information tab in all-tabs response */
@@ -255,6 +265,8 @@ export interface AllTabsData {
     text_present?: boolean;
     label_presence: string[];
     entity: "Symbols" | "Schematics" | "Barcodes" | "Other Components";
+    standard_symbol_id?: string;
+    standard_ref_number?: string;
   }>;
   product_data: WorkbookTabData;
   operational_parameters: WorkbookTabData;

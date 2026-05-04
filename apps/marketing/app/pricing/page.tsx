@@ -1,5 +1,14 @@
 "use client";
 
+import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
+import FooterSection from "@/features/marketing/landing-page/FooterSection";
+import MarketingHeader from "@/features/marketing/marketing-header";
+import { PricingCalculatorCards } from "@/features/pricing/PricingCalculatorCards";
+import {
+  ScrollProvider,
+  useScrollSection,
+  useScrollTo,
+} from "@/lib/scroll-context";
 import {
   Accordion,
   AccordionContent,
@@ -14,37 +23,53 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
-import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
-import FooterSection from "@/features/marketing/landing-page/FooterSection";
-import MarketingHeader from "@/features/marketing/marketing-header";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
+  PiArrowDownDuotone,
   PiArrowRightDuotone,
   PiCheckCircleDuotone,
-  PiClockCountdownDuotone,
   PiCoinsDuotone,
-  PiFilesDuotone,
   PiQuestionDuotone,
-  PiShieldCheckDuotone,
-  PiStackDuotone,
 } from "react-icons/pi";
 
 const pricingFAQs = [
   {
-    question: "Do you offer annual billing?",
+    question: "How is Growth priced?",
     answer:
-      "Yes. Annual billing is available for both Growth and Enterprise plans and includes a discounted rate.",
+      "Growth pricing combines a platform fee, seat count, and optional usage add-ons for storage, exports, and SSO. Enterprise plans are custom and designed for larger rollouts or advanced requirements.",
   },
   {
-    question: "What happens when we add or remove users?",
+    question: "What counts as a seat?",
     answer:
-      "Your monthly bill scales with active users. Add or remove users any time to match project demand and budget.",
+      "A seat is one licensed user in a workspace. Growth pricing scales with the number of users your team needs access for.",
+  },
+  {
+    question: "What counts as an export?",
+    answer:
+      "An export is one completed PDF or XLSX product export or report export job. Growth includes a monthly export allowance, with additional usage priced per export.",
+  },
+  {
+    question: "How is storage calculated?",
+    answer:
+      "Storage is based on the total uploaded file storage used by the workspace. Growth includes a base storage allowance, and any additional usage is priced per GB.",
+  },
+  {
+    question: "When should we talk to you?",
+    answer:
+      "Talk to us when you expect a larger rollout, need advanced security or SSO planning, want custom workflows or integrations, or need a tailored enterprise agreement.",
+  },
+  {
+    question: "Do you offer annual billing?",
+    answer:
+      "Yes. Annual billing is the default buying path for most organizations and offers a lower effective monthly cost. Monthly billing is also available for teams that prefer more flexibility.",
   },
 ];
 
-export default function PricingPage() {
+function PricingPageContent() {
   const { resolvedTheme } = useTheme();
+  const scrollTo = useScrollTo();
+  const pricingCalculatorRef = useScrollSection("pricing-calculator");
 
   const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
 
@@ -104,8 +129,8 @@ export default function PricingPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-end gap-3">
-                        <span className="text-3xl md:text-4xl font-semibold">
+                      <div className="flex flex-col items-start gap-3">
+                        <span className="text-4xl md:text-4xl font-semibold">
                           Pay as you grow
                         </span>
                         {/* <span className="text-muted-foreground pb-1">
@@ -113,12 +138,15 @@ export default function PricingPage() {
                         </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        Includes everything needed to standardize label data and
-                        ship faster.
+                        Simple pricing for smaller labeling teams: platform +
+                        seats + transparent usage.
                       </p>
-                      <Button className="mt-6 h-12 w-full rounded-xl text-base">
-                        Start with Growth
-                        <PiArrowRightDuotone className="ml-2 h-4 w-4" />
+                      <Button
+                        className="mt-6 h-12 w-full rounded-xl text-base"
+                        onClick={() => scrollTo("pricing-calculator")}
+                      >
+                        View Pricing
+                        <PiArrowDownDuotone className="ml-2 h-4 w-4" />
                       </Button>
                       <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
                         {[
@@ -128,7 +156,7 @@ export default function PricingPage() {
                           "Product and report exports",
                           "Transparent storage and export add-ons",
                           "Annual billing with monthly option",
-                          "SSO add on available",
+                          "SSO add-on available",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
@@ -165,14 +193,17 @@ export default function PricingPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-end gap-3 h-12">
+                      <div className="flex flex-col items-start gap-3">
                         <span className="text-3xl md:text-4xl font-semibold">
-                          Custom
+                          Custom Pricing
                         </span>
+                        {/* <span className="text-muted-foreground pb-1">
+                          tailored pricing
+                        </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        Engage our team for compliance validation, security
-                        reviews, and integration scope.
+                        Volume pricing tailored to seats, storage, export
+                        volume, security needs, and integration scope.
                       </p>
                       <Button
                         asChild
@@ -180,7 +211,7 @@ export default function PricingPage() {
                         className="mt-6 h-12 w-full rounded-xl text-base"
                       >
                         <Link href="mailto:contact@uprevit.com">
-                          Talk to Sales
+                          Talk to Us
                           <PiArrowRightDuotone className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
@@ -221,6 +252,35 @@ export default function PricingPage() {
               </div>
             </div>
 
+            <div className="relative">
+              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
+              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
+              <div
+                ref={pricingCalculatorRef}
+                className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0"
+              >
+                <div className="flex flex-col items-center text-center mb-10">
+                  <Badge
+                    variant={badgeVariant}
+                    className="mb-6 z-60 dark:px-2 dark:py-0.5"
+                  >
+                    <PiCoinsDuotone className="mr-1 text-foreground/50" />
+                    <span className="font-medium">Pricing</span>
+                  </Badge>
+                  <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
+                    Calculate your cost
+                  </h2>
+                  <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
+                    Use our pricing calculator to estimate costs based on your
+                    team size, file storage needs, and security requirements.
+                    Get a personalized quote for enterprise plans.
+                  </p>
+                </div>
+                <PricingCalculatorCards />
+              </div>
+            </div>
+
+            {/* TODO - Later on check this section. See if we need to keep it or remove it, but fix the cluttered UI if we are keeping it */}
             {/* <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
@@ -438,5 +498,13 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <ScrollProvider>
+      <PricingPageContent />
+    </ScrollProvider>
   );
 }

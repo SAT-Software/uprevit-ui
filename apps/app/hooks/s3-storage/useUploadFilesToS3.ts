@@ -5,8 +5,11 @@ import { toast } from "sonner";
 interface S3SignedUrlRequest {
   file: File;
   contentType?: string;
-  uploadScope?: "product-assets" | "source-files";
+  uploadScope?: S3UploadScope;
+  productId?: string;
 }
+
+type S3UploadScope = "workspace-assets" | "product-assets" | "source-files";
 
 const PRODUCT_ASSET_CONTENT_TYPES = new Set([
   "image/png",
@@ -64,7 +67,7 @@ const resolveContentType = (file: File, providedType?: string): string => {
 
 const isAllowedContentType = (
   contentType: string,
-  uploadScope: "product-assets" | "source-files",
+  uploadScope: S3UploadScope,
 ) => {
   if (PRODUCT_ASSET_CONTENT_TYPES.has(contentType)) return true;
   if (uploadScope === "source-files") {
@@ -80,7 +83,8 @@ export function useUploadFilesToS3() {
     mutationFn: async ({
       file,
       contentType,
-      uploadScope = "product-assets",
+      uploadScope = "workspace-assets",
+      productId,
     }: S3SignedUrlRequest) => {
       const accessToken = auth.user?.access_token;
       if (!accessToken) {
@@ -93,13 +97,16 @@ export function useUploadFilesToS3() {
         throw new Error(`Unsupported file type: ${file.name}`);
       }
 
+      const presignRequestBody = {
+        fileName: file.name,
+        contentType: resolvedContentType,
+        uploadScope,
+        ...(productId ? { productId } : {}),
+      };
+
       const res = await fetch(`/api/s3-storage/presign-upload`, {
         method: "POST",
-        body: JSON.stringify({
-          fileName: file.name,
-          contentType: resolvedContentType,
-          uploadScope,
-        }),
+        body: JSON.stringify(presignRequestBody),
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",

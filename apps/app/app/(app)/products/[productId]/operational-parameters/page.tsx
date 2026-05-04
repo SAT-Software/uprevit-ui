@@ -34,9 +34,9 @@ export default function Page() {
   const [autoSave, setAutoSave] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(autoSaveStorageKey);
-      return stored !== "false";
+      return stored === "true";
     }
-    return true;
+    return false;
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -332,7 +332,7 @@ export default function Page() {
                 checked={autoSave}
                 onCheckedChange={handleAutoSaveToggle}
                 className="scale-75"
-                disabled={isRedlineView || isSubmitted}
+                disabled={isSubmitted}
               />
             </div>
 
@@ -343,7 +343,6 @@ export default function Page() {
               disabled={
                 isSaving ||
                 !hasEditableUnsavedChanges ||
-                isRedlineView ||
                 isSubmitted
               }
               className="gap-1.5"
@@ -360,13 +359,12 @@ export default function Page() {
 
         <ProductSpecificationDataTable
           initialData={initialData}
-          onDataChange={
-            isRedlineView || isSubmitted ? undefined : handleAutoSave
-          }
+          onDataChange={isSubmitted ? undefined : handleAutoSave}
           onSaveSuccess={(clearHistory) => {
             onSaveSuccessRef.current = clearHistory;
           }}
           isRedlineView={isRedlineView}
+          isReadOnly={isSubmitted}
           redlineMode={redlineMode}
           redlineBaseData={redlineBaseData}
         />

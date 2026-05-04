@@ -90,6 +90,8 @@ export default function AddComponentDialog({
         uploadRes = await uploadImage({
           file: data.image.file,
           contentType: data.image.file.type,
+          uploadScope: "product-assets",
+          productId,
         });
 
         console.log("S3 upload response:", uploadRes);
@@ -207,6 +209,9 @@ export default function AddComponentDialog({
                 <Controller
                   name="componentType"
                   control={control}
+                  rules={{
+                    required: "Component type is required",
+                  }}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
@@ -220,6 +225,11 @@ export default function AddComponentDialog({
                     </Select>
                   )}
                 />
+                {errors.componentType && (
+                  <p className="text-xs text-red-500">
+                    {errors.componentType.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>

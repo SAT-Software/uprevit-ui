@@ -78,6 +78,8 @@ export default function DialogAddLabelTag({
         const s3UploadResult = await uploadFileToS3({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
 
         uploadedImageKey = s3UploadResult.key;

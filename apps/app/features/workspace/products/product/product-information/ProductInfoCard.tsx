@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@uprevit/ui/components/ui/card";
+import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { useMemo } from "react";
 
 interface ProductInformationCardProps {
@@ -8,6 +8,8 @@ interface ProductInformationCardProps {
   countryOfOrigin?: string;
   oemContractManufacturer?: string;
   commercialClinical?: string;
+  classOfDevice?: string;
+  basicUdiDi?: string;
   customFields?: { label: string; value: string }[];
 }
 
@@ -16,6 +18,8 @@ export default function ProductInformationCard({
   countryOfOrigin,
   oemContractManufacturer,
   commercialClinical,
+  classOfDevice,
+  basicUdiDi,
   customFields = [],
 }: ProductInformationCardProps) {
   const fields = useMemo(() => {
@@ -27,6 +31,8 @@ export default function ProductInformationCard({
         value: oemContractManufacturer || "N/A",
       },
       { label: "Commercial / Clinical", value: commercialClinical || "N/A" },
+      { label: "Class of Device", value: classOfDevice || "N/A" },
+      { label: "Basic UDI-DI", value: basicUdiDi || "N/A" },
     ];
 
     // Add custom fields if they exist
@@ -40,6 +46,8 @@ export default function ProductInformationCard({
     countryOfOrigin,
     oemContractManufacturer,
     commercialClinical,
+    classOfDevice,
+    basicUdiDi,
     customFields,
   ]);
 

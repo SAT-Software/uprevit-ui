@@ -130,7 +130,7 @@ export function ArchivedProjectsTable({
 
   const handleRestore = (item: ProjectArchiveRow) => {
     if (!isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+      toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     onRestore(item);

@@ -21,9 +21,12 @@ interface SymbolGraphicItem {
   label_presence: string[];
   entity: string;
   count?: number;
+  standard_symbol_id?: string;
+  standard_ref_number?: string;
   _redlineStatus?: RedlineStatus;
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
+  _redlineBaseImage?: string;
 }
 
 export default function Page() {
@@ -137,7 +140,6 @@ export default function Page() {
               const parentId = (item as { parent_id?: string | null }).parent_id;
               return parentId ? String(parentId) : undefined;
             },
-            getFallbackKey: (item) => `${item.text}-${item.entity}`,
           }
         )
       : [];
@@ -157,6 +159,7 @@ export default function Page() {
           _redlineStatus: item.status,
           _redlineDiffs: item.diffs,
           _redlineId: item.id,
+          _redlineBaseImage: item.base?.image,
         };
       })
       .filter(Boolean) as SymbolGraphicItem[];
@@ -182,6 +185,7 @@ export default function Page() {
     _redlineStatus: item._redlineStatus,
     _redlineDiffs: item._redlineDiffs,
     _redlineId: item._redlineId,
+    _redlineBaseImage: item._redlineBaseImage,
   }));
 
   const barcodesData = (entityGroups["barcodes"] || []).map((item) => ({
@@ -195,6 +199,7 @@ export default function Page() {
     _redlineStatus: item._redlineStatus,
     _redlineDiffs: item._redlineDiffs,
     _redlineId: item._redlineId,
+    _redlineBaseImage: item._redlineBaseImage,
   }));
 
   const otherComponentsData = (entityGroups["other components"] || []).map(
@@ -208,6 +213,7 @@ export default function Page() {
       _redlineStatus: item._redlineStatus,
       _redlineDiffs: item._redlineDiffs,
       _redlineId: item._redlineId,
+      _redlineBaseImage: item._redlineBaseImage,
     })
   );
 
@@ -219,9 +225,12 @@ export default function Page() {
     key: item.key,
     symbolsTextPresent: item.label_presence,
     textPresent: item.text_present,
+    standard_symbol_id: item.standard_symbol_id,
+    standard_ref_number: item.standard_ref_number,
     _redlineStatus: item._redlineStatus,
     _redlineDiffs: item._redlineDiffs,
     _redlineId: item._redlineId,
+    _redlineBaseImage: item._redlineBaseImage,
   }));
 
   return (

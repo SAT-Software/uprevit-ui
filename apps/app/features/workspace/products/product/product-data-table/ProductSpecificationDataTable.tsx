@@ -164,7 +164,7 @@ const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
 const COL_WIDTH = 150;
 const ROW_HEIGHT = 34;
-const ROW_NUMBER_WIDTH = 50;
+const ROW_NUMBER_WIDTH = 60;
 const MIN_COL_WIDTH = 50;
 const MAX_COL_WIDTH = 500;
 
@@ -206,16 +206,48 @@ const DEFAULT_TEXT_COLORS = [
 // Row data type for the table
 type RowData = { rowIndex: number };
 
+type RedlineDiff<T extends string> = {
+  status: "added" | "removed" | "modified";
+  oldValue: T;
+  newValue: T;
+};
+
 // Table meta interface for type-safe access to custom table metadata
 interface TableMeta {
   headerData: Record<number, string>;
   setHeaderData: React.Dispatch<React.SetStateAction<Record<number, string>>>;
   cellData: Record<string, string>;
+  isRedlineView?: boolean;
+  redlineMode?: "inline" | "highlight";
+  headerDiffs: Record<number, RedlineDiff<string>>;
   columnFilters: Record<number, ColumnFilter>;
   setColumnFilters: React.Dispatch<
     React.SetStateAction<Record<number, ColumnFilter>>
   >;
   isReadOnly?: boolean;
+}
+
+function DiffValueDisplay<T extends string>({
+  diff,
+  formatValue,
+}: {
+  diff: RedlineDiff<T>;
+  formatValue: (value: T) => string;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      {diff.status !== "added" && (
+        <span className="truncate text-red-600/80 line-through">
+          {formatValue(diff.oldValue)}
+        </span>
+      )}
+      {diff.status !== "removed" && (
+        <span className="truncate text-blue-700 font-semibold">
+          {formatValue(diff.newValue)}
+        </span>
+      )}
+    </div>
+  );
 }
 
 const EditableHeaderContent = ({
@@ -227,24 +259,67 @@ const EditableHeaderContent = ({
 }) => {
   const colIndex = parseInt(column.id.split("-")[1]);
   const meta = table.options.meta as TableMeta;
+  const [isFocused, setIsFocused] = useState(false);
 
   const dataType = useMemo(
     () => detectColumnDataType(meta.cellData, colIndex, ROW_COUNT),
     [meta.cellData, colIndex],
   );
+  const diff = meta.isRedlineView ? meta.headerDiffs[colIndex] : undefined;
+  const showInlineDiff =
+    meta.isRedlineView &&
+    meta.redlineMode === "inline" &&
+    diff &&
+    !(isFocused && !meta.isReadOnly);
+  const showHighlightDiff =
+    meta.isRedlineView && meta.redlineMode === "highlight" && diff;
 
-  return (
-    <>
+  const headerInput = (
+    <div className="relative flex-1 min-w-0 h-full">
       <input
-        className="flex-1 min-w-0 bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground"
+        className={`h-full w-full bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground ${
+          showHighlightDiff ? "ring-1 ring-amber-400/60 ring-inset" : ""
+        } ${showInlineDiff ? "caret-transparent" : ""}`}
+        style={{
+          boxShadow: showHighlightDiff
+            ? "inset 0 0 0 9999px rgba(251, 191, 36, 0.12)"
+            : undefined,
+          color: showInlineDiff ? "transparent" : undefined,
+          caretColor: showInlineDiff ? "transparent" : undefined,
+        }}
         value={meta.headerData[colIndex] ?? ""}
         readOnly={meta.isReadOnly}
         onChange={(e) => {
           if (meta.isReadOnly) return;
           meta.setHeaderData((d) => ({ ...d, [colIndex]: e.target.value }));
         }}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         placeholder={`Column ${colIndex + 1}`}
       />
+      {showInlineDiff && diff && (
+        <div className="absolute inset-0 pointer-events-none px-1 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
+          <DiffValueDisplay diff={diff} formatValue={(value) => value || "—"} />
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {showHighlightDiff && diff ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{headerInput}</TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            <DiffValueDisplay
+              diff={diff}
+              formatValue={(value) => value || "—"}
+            />
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        headerInput
+      )}
       <Button
         variant="ghost"
         size="icon-sm"
@@ -281,10 +356,12 @@ const DraggableHeader = ({
   header,
   virtualCol,
   showChangeIndicator = false,
+  isReadOnly = false,
 }: {
   header: Header<RowData, unknown>;
   virtualCol: { start: number; size: number };
   showChangeIndicator?: boolean;
+  isReadOnly?: boolean;
 }) => {
   const {
     attributes,
@@ -295,6 +372,7 @@ const DraggableHeader = ({
     transition,
   } = useSortable({
     id: header.column.id,
+    disabled: isReadOnly,
   });
 
   const style: React.CSSProperties = {
@@ -320,7 +398,10 @@ const DraggableHeader = ({
       <Button
         variant="ghost"
         size="icon-sm"
-        className="shrink-0 cursor-grab active:cursor-grabbing hover:bg-accent-foreground/10 rounded size-6 ml-0.5"
+        disabled={isReadOnly}
+        className={`shrink-0 hover:bg-accent-foreground/10 rounded size-6 ml-0.5 ${
+          isReadOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+        }`}
         {...attributes}
         {...listeners}
       >
@@ -331,7 +412,7 @@ const DraggableHeader = ({
         {flexRender(header.column.columnDef.header, header.getContext())}
       </div>
 
-      {header.column.getCanResize() && (
+      {!isReadOnly && header.column.getCanResize() && (
         <div
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
@@ -364,6 +445,14 @@ const DATA_TYPE_OPTIONS = [
   { value: "variable", label: "Variable Data" },
   { value: "na", label: "NA" },
 ] as const;
+
+const DATA_TYPE_LABELS = DATA_TYPE_OPTIONS.reduce(
+  (labels, option) => ({
+    ...labels,
+    [option.value]: option.label,
+  }),
+  {} as Record<DataType, string>,
+);
 
 const DataTypeSelect = ({
   colIndex,
@@ -399,6 +488,7 @@ export function ProductSpecificationDataTable({
   onDataChange,
   onSaveSuccess,
   isRedlineView = false,
+  isReadOnly = false,
   redlineMode = "inline",
   redlineBaseData,
 }: ProductSpecificationDataTableProps) {
@@ -491,30 +581,9 @@ export function ProductSpecificationDataTable({
   const redlineDiffs = useMemo(() => {
     if (!isRedlineView || !redlineBaseData) {
       return {
-        cellDiffs: {} as Record<
-          string,
-          {
-            status: "added" | "removed" | "modified";
-            oldValue: string;
-            newValue: string;
-          }
-        >,
-        headerDiffs: {} as Record<
-          number,
-          {
-            status: "added" | "removed" | "modified";
-            oldValue: string;
-            newValue: string;
-          }
-        >,
-        columnTypeDiffs: {} as Record<
-          number,
-          {
-            status: "added" | "removed" | "modified";
-            oldValue: DataType;
-            newValue: DataType;
-          }
-        >,
+        cellDiffs: {},
+        headerDiffs: {},
+        columnTypeDiffs: {},
         changedRows: new Set<number>(),
         changedCols: new Set<number>(),
       };
@@ -618,6 +687,10 @@ export function ProductSpecificationDataTable({
   const formatDiffValue = (value: string) => {
     if (!value) return "—";
     return value;
+  };
+
+  const formatColumnTypeDiffValue = (value: DataType) => {
+    return DATA_TYPE_LABELS[value] ?? value;
   };
 
   useEffect(() => {
@@ -742,6 +815,8 @@ export function ProductSpecificationDataTable({
 
   const handleFindReplace = useCallback(
     (updatedCells: Record<string, string>) => {
+      if (isReadOnly) return;
+
       const changes: Array<{
         key: string;
         prev: string | undefined;
@@ -761,12 +836,14 @@ export function ProductSpecificationDataTable({
 
       setCellData(updatedCells);
     },
-    [cellData, record],
+    [cellData, isReadOnly, record],
   );
 
   // Wrapped setHeaderData that records history
   const setHeaderDataWithRecord = useCallback(
     (updater: React.SetStateAction<Record<number, string>>) => {
+      if (isReadOnly) return;
+
       setHeaderData((prev) => {
         const next = typeof updater === "function" ? updater(prev) : updater;
         // Find which column changed
@@ -785,7 +862,7 @@ export function ProductSpecificationDataTable({
         return next;
       });
     },
-    [record, isRedlineView],
+    [isReadOnly, record],
   );
 
   // Ref for table container to manage cell focus
@@ -799,6 +876,7 @@ export function ProductSpecificationDataTable({
 
       if (isCtrlCombo) {
         if (e.key === "z") {
+          if (isReadOnly) return;
           e.preventDefault();
           if (e.shiftKey) {
             redo();
@@ -807,10 +885,12 @@ export function ProductSpecificationDataTable({
           }
           return;
         } else if (e.key === "y") {
+          if (isReadOnly) return;
           e.preventDefault();
           redo();
           return;
         } else if (e.key === "r") {
+          if (isReadOnly) return;
           e.preventDefault();
           setShowFindReplace(true);
           return;
@@ -820,7 +900,7 @@ export function ProductSpecificationDataTable({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo]);
+  }, [undo, redo, isReadOnly]);
 
   // Handle onSaveSuccess callback - register clearHistory with parent
   useEffect(() => {
@@ -831,6 +911,8 @@ export function ProductSpecificationDataTable({
 
   const applyBgColor = useCallback(
     (color: string) => {
+      if (isReadOnly) return;
+
       const changes: Array<{
         key: string;
         prev: CellFormat | undefined;
@@ -869,11 +951,13 @@ export function ProductSpecificationDataTable({
         record({ type: "cellFormat", changes });
       }
     },
-    [selectedCells, activeCell, cellFormats, record],
+    [selectedCells, activeCell, cellFormats, isReadOnly, record],
   );
 
   const applyTextColor = useCallback(
     (color: string) => {
+      if (isReadOnly) return;
+
       const changes: Array<{
         key: string;
         prev: CellFormat | undefined;
@@ -912,7 +996,7 @@ export function ProductSpecificationDataTable({
         record({ type: "cellFormat", changes });
       }
     },
-    [selectedCells, activeCell, cellFormats, record],
+    [selectedCells, activeCell, cellFormats, isReadOnly, record],
   );
 
   const rows: { rowIndex: number }[] = useMemo(() => {
@@ -998,9 +1082,12 @@ export function ProductSpecificationDataTable({
       headerData,
       setHeaderData: setHeaderDataWithRecord,
       cellData,
+      isRedlineView,
+      redlineMode,
+      headerDiffs: redlineDiffs.headerDiffs,
       columnFilters,
       setColumnFilters,
-      isReadOnly: isRedlineView,
+      isReadOnly,
     },
     state: {
       columnSizing,
@@ -1009,6 +1096,8 @@ export function ProductSpecificationDataTable({
       globalFilter: globalFilterValue,
     },
     onColumnSizingChange: (updater) => {
+      if (isReadOnly) return;
+
       const prev = columnSizing;
       const next = typeof updater === "function" ? updater(prev) : updater;
       // Coalesce: if same type within 500ms, replace last entry
@@ -1033,13 +1122,11 @@ export function ProductSpecificationDataTable({
     },
   });
 
-  const columnSizes = useMemo(() => {
-    return table.getVisibleLeafColumns().map((col) => col.getSize());
-  }, [table.getState().columnSizing]);
+  const columnSizes = table.getVisibleLeafColumns().map((col) => col.getSize());
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent, rowIndex: number, colIndex: number) => {
-      if (isRedlineView) return;
+      if (isReadOnly) return;
       e.preventDefault();
       const text = e.clipboardData.getData("text/plain");
       const pastedRows = text.split("\n").map((r) => r.split("\t"));
@@ -1067,11 +1154,11 @@ export function ProductSpecificationDataTable({
         record({ type: "cell", changes });
       }
     },
-    [record],
+    [isReadOnly, record],
   );
 
   function handleDragEnd(event: DragEndEvent) {
-    if (isRedlineView) return;
+    if (isReadOnly) return;
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
       const prev = columnOrder;
@@ -1086,6 +1173,8 @@ export function ProductSpecificationDataTable({
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    if (isReadOnly) return;
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -1103,6 +1192,8 @@ export function ProductSpecificationDataTable({
   }
 
   async function processImport(file: File) {
+    if (isReadOnly) return;
+
     try {
       const buffer = await file.arrayBuffer();
       const { headers, columnTypes, cells } = parseWorkbookToTableData(buffer);
@@ -1118,6 +1209,8 @@ export function ProductSpecificationDataTable({
   }
 
   function handleImportConfirm() {
+    if (isReadOnly) return;
+
     setShowImportConfirm(false);
     if (pendingFileRef.current) {
       processImport(pendingFileRef.current);
@@ -1200,7 +1293,7 @@ export function ProductSpecificationDataTable({
 
   useEffect(() => {
     colVirtualizer.measure();
-  }, [columnSizes, colVirtualizer]);
+  }, [columnSizing, columnOrder, colVirtualizer]);
 
   const headerGroup = table.getHeaderGroups()[0];
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
@@ -1330,6 +1423,7 @@ export function ProductSpecificationDataTable({
               <button
                 key={`bg-${color}`}
                 onClick={() => applyBgColor(color)}
+                disabled={isReadOnly}
                 className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all"
                 style={
                   color === NO_FILL_COLOR
@@ -1353,6 +1447,7 @@ export function ProductSpecificationDataTable({
               <button
                 key={`text-${color}`}
                 onClick={() => applyTextColor(color)}
+                disabled={isReadOnly}
                 className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all flex items-center justify-center"
                 title={color === "#000000" ? "Default" : color}
               >
@@ -1380,7 +1475,7 @@ export function ProductSpecificationDataTable({
               variant="ghost"
               size="icon-sm"
               onClick={undo}
-              disabled={history.past.length === 0}
+              disabled={isReadOnly || history.past.length === 0}
               className="hover:bg-accent-foreground/10"
             >
               <PiArrowCounterClockwiseBold className="size-4" />
@@ -1395,7 +1490,7 @@ export function ProductSpecificationDataTable({
               variant="ghost"
               size="icon-sm"
               onClick={redo}
-              disabled={history.future.length === 0}
+              disabled={isReadOnly || history.future.length === 0}
               className="hover:bg-accent-foreground/10"
             >
               <PiArrowClockwiseBold className="size-4" />
@@ -1422,6 +1517,7 @@ export function ProductSpecificationDataTable({
           variant="secondary"
           size="sm"
           onClick={() => setShowFindReplace(true)}
+          disabled={isReadOnly}
         >
           <PiMagnifyingGlassDuotone className="size-3" />
           Find & Replace
@@ -1438,6 +1534,7 @@ export function ProductSpecificationDataTable({
           variant="secondary"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
+          disabled={isReadOnly}
           // className="gap-1.5"
         >
           <PiUploadSimpleDuotone className="size-3" />
@@ -1516,6 +1613,7 @@ export function ProductSpecificationDataTable({
                             size: virtualCol.size,
                           }}
                           showChangeIndicator={showChangeIndicator}
+                          isReadOnly={isReadOnly}
                         />
                       );
                     })}
@@ -1541,16 +1639,30 @@ export function ProductSpecificationDataTable({
                   {colVirtualizer.getVirtualItems().map((virtualCol) => {
                     const column = visibleColumns[virtualCol.index];
                     const originalColIndex = parseInt(column.id.split("-")[1]);
+                    const diff = isRedlineView
+                      ? redlineDiffs.columnTypeDiffs[originalColIndex]
+                      : undefined;
+                    const showInlineDiff =
+                      isRedlineView && redlineMode === "inline" && diff;
+                    const showHighlightDiff =
+                      isRedlineView && redlineMode === "highlight" && diff;
 
-                    return (
+                    const select = (
                       <div
                         key={`type-${column.id}`}
-                        className="border-r border-b border-border flex items-center bg-muted"
+                        className={`border-r border-b border-border flex items-center bg-muted ${
+                          showHighlightDiff
+                            ? "ring-1 ring-amber-400/60 ring-inset"
+                            : ""
+                        }`}
                         style={{
                           position: "absolute",
                           left: virtualCol.start,
                           width: virtualCol.size,
                           height: ROW_HEIGHT,
+                          boxShadow: showHighlightDiff
+                            ? "inset 0 0 0 9999px rgba(251, 191, 36, 0.12)"
+                            : undefined,
                         }}
                       >
                         <DataTypeSelect
@@ -1560,9 +1672,9 @@ export function ProductSpecificationDataTable({
                               ? columnTypeData[originalColIndex]
                               : undefined
                           }
-                          isReadOnly={isRedlineView}
+                          isReadOnly={isReadOnly}
                           onChange={(col, val) => {
-                            if (isRedlineView) return;
+                            if (isReadOnly) return;
                             const prev = columnTypeData[col];
                             setColumnTypeData((d) => ({ ...d, [col]: val }));
                             if (prev !== val) {
@@ -1575,7 +1687,29 @@ export function ProductSpecificationDataTable({
                             }
                           }}
                         />
+                        {showInlineDiff && diff && (
+                          <div className="absolute inset-0 pointer-events-none bg-muted px-2 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
+                            <DiffValueDisplay
+                              diff={diff}
+                              formatValue={formatColumnTypeDiffValue}
+                            />
+                          </div>
+                        )}
                       </div>
+                    );
+
+                    return showHighlightDiff && diff ? (
+                      <Tooltip key={`type-${column.id}`}>
+                        <TooltipTrigger asChild>{select}</TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">
+                          <DiffValueDisplay
+                            diff={diff}
+                            formatValue={formatColumnTypeDiffValue}
+                          />
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      select
                     );
                   })}
                 </div>
@@ -1631,15 +1765,21 @@ export function ProductSpecificationDataTable({
                       const diff = isRedlineView
                         ? redlineDiffs.cellDiffs[cellKey]
                         : undefined;
+                      const isActiveDiffCell =
+                        activeCell?.row === rowIndex &&
+                        activeCell?.col === originalColIndex;
                       const showInlineDiff =
-                        isRedlineView && redlineMode === "inline" && diff;
+                        isRedlineView &&
+                        redlineMode === "inline" &&
+                        diff &&
+                        !(isActiveDiffCell && !isReadOnly);
                       const showHighlightDiff =
                         isRedlineView && redlineMode === "highlight" && diff;
 
                       const input = (
                         <input
                           data-cell-key={cellKey}
-                          readOnly={isRedlineView}
+                          readOnly={isReadOnly}
                           className={`h-full w-full border border-border/60 outline-none px-2 text-sm ${
                             isSelected
                               ? "ring-1 ring-primary ring-inset border-foreground/60"
@@ -1668,7 +1808,7 @@ export function ProductSpecificationDataTable({
                             ""
                           }
                           onChange={(e) => {
-                            if (isRedlineView) return;
+                            if (isReadOnly) return;
                             cellDraftRef.current[cellKey] = e.target.value;
                             setCellData((d) => ({
                               ...d,
@@ -1694,7 +1834,7 @@ export function ProductSpecificationDataTable({
                             });
                           }}
                           onBlur={() => {
-                            if (isRedlineView) return;
+                            if (isReadOnly) return;
                             const prev = cellInitialValueRef.current[cellKey];
                             const next =
                               cellDraftRef.current[cellKey] ??
@@ -1734,7 +1874,7 @@ export function ProductSpecificationDataTable({
                               return;
                             }
 
-                            if (isRedlineView) return;
+                            if (isReadOnly) return;
 
                             if (e.key === "Enter") {
                               const prev = cellInitialValueRef.current[cellKey];
@@ -1773,20 +1913,10 @@ export function ProductSpecificationDataTable({
                             <Tooltip>
                               <TooltipTrigger asChild>{input}</TooltipTrigger>
                               <TooltipContent side="top" className="text-xs">
-                                <div className="flex flex-col gap-1">
-                                  {diff?.status !== "added" && (
-                                    <span className="text-red-600/80 line-through">
-                                      Old:{" "}
-                                      {formatDiffValue(diff?.oldValue ?? "")}
-                                    </span>
-                                  )}
-                                  {diff?.status !== "removed" && (
-                                    <span className="text-blue-700 font-semibold">
-                                      New:{" "}
-                                      {formatDiffValue(diff?.newValue ?? "")}
-                                    </span>
-                                  )}
-                                </div>
+                                <DiffValueDisplay
+                                  diff={diff}
+                                  formatValue={formatDiffValue}
+                                />
                               </TooltipContent>
                             </Tooltip>
                           ) : (
@@ -1795,16 +1925,10 @@ export function ProductSpecificationDataTable({
 
                           {showInlineDiff && diff && (
                             <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
-                              {diff.status !== "added" && (
-                                <span className="text-red-600/80 line-through">
-                                  {formatDiffValue(diff.oldValue)}
-                                </span>
-                              )}
-                              {diff.status !== "removed" && (
-                                <span className="text-blue-700 font-semibold text-[11px]">
-                                  {formatDiffValue(diff.newValue)}
-                                </span>
-                              )}
+                              <DiffValueDisplay
+                                diff={diff}
+                                formatValue={formatDiffValue}
+                              />
                             </div>
                           )}
                         </div>

@@ -122,7 +122,7 @@ Example local values are provided in `apps/app/.env.example`.
 
 Typical environment mapping:
 
-- local: `NEXT_PUBLIC_APP_URL=http://localhost:8080` and `API_PROXY_TARGET=http://localhost:3000`
+- local: `NEXT_PUBLIC_APP_URL=http://localhost:8080` and `API_PROXY_TARGET=https://<API-GATEWAY-ID>.execute-api.<AWS-REGION>.amazonaws.com/Prod`
 - preview/staging: preview frontend URL and staging backend URL
 - production: `NEXT_PUBLIC_APP_URL=https://app.uprevit.com` and production backend URL
 
@@ -143,7 +143,7 @@ The product app proxies `/api/*` requests to the backend using `API_PROXY_TARGET
 For local development, the default expectation is:
 
 - frontend: `http://localhost:8080`
-- backend: `http://localhost:3000`
+- backend: `https://<API-GATEWAY-ID>.execute-api.<AWS-REGION>.amazonaws.com/Prod`
 
 If your backend runs elsewhere, update `apps/app/.env.local` accordingly.
 

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
 import SecurityTab from "@/features/workspace/settings/SecurityTab";
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
 import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
@@ -27,7 +32,7 @@ function SettingsPage() {
   const tab = useSearchParams().get("tab");
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const adminTabs = ["admins", "workspace"];
+  const adminTabs = ["admins", "workspace", "billing", "security"];
   const initialTab =
     tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -81,14 +86,14 @@ function SettingsPage() {
               <PiUserGearDuotone className="mr-2 h-4 w-4" />
               Admins
             </TabsTrigger>
-            <TabsTrigger value="security">
+            {/* <TabsTrigger value="security">
               <PiShieldCheckDuotone className="mr-2 h-4 w-4" />
               Security
             </TabsTrigger>
             <TabsTrigger value="billing">
               <PiCreditCardDuotone className="mr-2 h-4 w-4" />
               Billing
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="profile" className="mt-6">
@@ -107,13 +112,13 @@ function SettingsPage() {
             <AdminsTab />
           </TabsContent>
 
-          <TabsContent value="security" className="mt-6">
+          {/* <TabsContent value="security" className="mt-6">
             <SecurityTab />
           </TabsContent>
 
           <TabsContent value="billing" className="mt-6">
             <BillingTab />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

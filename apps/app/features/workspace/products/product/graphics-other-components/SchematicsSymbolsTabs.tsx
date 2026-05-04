@@ -12,7 +12,6 @@ import AddOtherCompsDialog from "@/features/workspace/products/product/graphics-
 import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import {
   PiShapesDuotone,
-  PiCpuDuotone,
   PiBarcodeDuotone,
   PiCubeDuotone,
   PiCubeTransparentDuotone,
@@ -27,6 +26,8 @@ interface SymbolData {
   key?: string;
   symbolsTextPresent: string[];
   textPresent: boolean;
+  standard_symbol_id?: string;
+  standard_ref_number?: string;
 }
 
 interface SchematicData {
@@ -115,7 +116,11 @@ export default function SchematicsSymbolsTabs({
           />
         </div>
         {activeTab === "tab-1" ? (
-          <AddSymbolsDialog productId={productId} isSubmitted={isSubmitted} />
+          <AddSymbolsDialog
+            productId={productId}
+            isSubmitted={isSubmitted}
+            existingSymbols={symbolsData}
+          />
         ) : activeTab === "tab-2" ? (
           <AddSchematicsDialog
             productId={productId}

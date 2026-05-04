@@ -2,7 +2,7 @@ export interface Workspace {
   _id?: string;
   workspaceName: string;
   companyName: string;
-  companyId: string;
+  companyId?: string;
   description: string;
   logo?: string;
   logoKey?: string;

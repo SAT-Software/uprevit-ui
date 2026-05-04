@@ -2,21 +2,21 @@
 
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DialogUpdateWorkspace } from "./DialogUpdateWorkspace";
 import {
-  PiBuildingsDuotone,
   PiIdentificationCardDuotone,
   PiTagDuotone,
   PiCrownDuotone,
   PiUsersDuotone,
   PiTextAlignLeftDuotone,
-  PiPlanetDuotone,
   PiBriefcaseDuotone,
   PiWarningCircleDuotone,
+  PiCopyDuotone,
 } from "react-icons/pi";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { toast } from "sonner";
 
 function WorkspaceTab() {
   const {
@@ -27,6 +27,23 @@ function WorkspaceTab() {
   const { data: workspaceUserData } = useGetAllUsersByWorkspace();
 
   const workspaceData = data?.workspace;
+  const workspaceId = workspaceData?._id ?? "";
+  const displayWorkspaceId =
+    workspaceId.length > 12
+      ? `${workspaceId.slice(0, 6)}...${workspaceId.slice(-4)}`
+      : workspaceId;
+
+  const copyWorkspaceId = async () => {
+    if (!workspaceId) return;
+
+    try {
+      await navigator.clipboard.writeText(workspaceId);
+      toast.success("Workspace ID copied");
+    } catch (error) {
+      console.error("Failed to copy workspace ID:", error);
+      toast.error("Failed to copy workspace ID");
+    }
+  };
 
   if (workspaceLoading) {
     return (
@@ -106,12 +123,7 @@ function WorkspaceTab() {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold">
-              {workspaceData?.workspaceName}
-            </h2>
-            <Badge variant="default">
-              {workspaceData?.planName || "Enterprise"}
-            </Badge>
+            <h2 className="text-xl font-semibold">{workspaceData?.workspaceName}</h2>
           </div>
           <p className="text-muted-foreground">
             Manage your workspace settings and organization details.
@@ -160,10 +172,24 @@ function WorkspaceTab() {
             </div>
             <div className="space-y-1">
               <div className="text-sm font-medium text-muted-foreground">
-                Company ID
+                Workspace ID
               </div>
-              <div className="text-sm font-medium">
-                {workspaceData?.companyId || "123456"}
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium font-mono">
+                  {displayWorkspaceId || "-"}
+                </div>
+                {workspaceId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={copyWorkspaceId}
+                    aria-label="Copy workspace ID"
+                  >
+                    <PiCopyDuotone className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -176,9 +202,7 @@ function WorkspaceTab() {
               <div className="text-sm font-medium text-muted-foreground">
                 Plan
               </div>
-              <div className="text-sm font-medium">
-                {workspaceData?.plan || "Pro"}
-              </div>
+              <div className="text-sm font-medium">NA</div>
             </div>
           </div>
 

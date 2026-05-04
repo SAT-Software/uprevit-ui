@@ -68,6 +68,8 @@ type FormData = {
   count: number;
 };
 
+type ImageChangeState = "unchanged" | "removed" | "replaced";
+
 export default function EditBarcodesDialog({
   productId,
   barcode,
@@ -118,7 +120,7 @@ export default function EditBarcodesDialog({
   const barcodeTypeSelect = watch("barcodeTypeSelect");
   const barcodeTypeInput = watch("barcodeTypeInput");
 
-  const [isImageRemoved, setIsImageRemoved] = useState(false);
+  const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
 
   useEffect(() => {
     const isStandard = BARCODE_STANDARDS.some(
@@ -142,7 +144,7 @@ export default function EditBarcodesDialog({
         text: label,
       }))
     );
-    setIsImageRemoved(false);
+    setImageState("unchanged");
   }, [barcode, reset]);
 
   const { mutate: updateBarcodesData, isPending } = useUpdateProductTabData();
@@ -165,19 +167,22 @@ export default function EditBarcodesDialog({
         const s3UploadResult = await uploadFileToS3({
           file: data.image.file,
           contentType: data.image.file.type || "application/octet-stream",
+          uploadScope: "product-assets",
+          productId,
         });
 
         uploadedImageKey = s3UploadResult.key;
       }
       setUploadingImage(false);
 
-      let finalImage: string | null = barcode.componentImage;
-      if (isImageRemoved) {
-        finalImage = "";
-      }
-      if (uploadedImageKey) {
-        finalImage = "";
-      }
+      const finalImage =
+        imageState === "unchanged" ? barcode.componentImage : "";
+      const finalKey =
+        imageState === "replaced"
+          ? (uploadedImageKey ?? "")
+          : imageState === "removed"
+            ? ""
+            : (barcode.key ?? "");
 
       const updatedBarcodesData = {
         id: productId,
@@ -187,8 +192,7 @@ export default function EditBarcodesDialog({
           id: barcode.id,
           text: componentName,
           image: finalImage,
-          ...(uploadedImageKey !== undefined && { key: uploadedImageKey }),
-          ...(isImageRemoved && uploadedImageKey === undefined && { key: "" }),
+          key: finalKey,
           entity: "Barcodes",
           description: data.componentDescription,
           label_presence: labelPresence.map((tag: Tag) => tag.text),
@@ -197,12 +201,12 @@ export default function EditBarcodesDialog({
       };
 
       updateBarcodesData(updatedBarcodesData, {
-        onSuccess: () => {
-          onOpenChange(false);
-          reset();
-          setLabelPresence([]);
-          setIsImageRemoved(false);
-        },
+          onSuccess: () => {
+            onOpenChange(false);
+            reset();
+            setLabelPresence([]);
+            setImageState("unchanged");
+          },
         onError: () => {
           setUploadingImage(false);
         },
@@ -246,8 +250,8 @@ export default function EditBarcodesDialog({
                   <ComponentImage
                     currentImage={barcode.componentImage}
                     value={field.value}
-                    isRemoved={isImageRemoved}
-                    onRemove={() => setIsImageRemoved(true)}
+                    imageState={imageState}
+                    onImageStateChange={setImageState}
                     onChange={(file) => {
                       field.onChange(file);
                       setValue("image", file);
@@ -412,7 +416,7 @@ export default function EditBarcodesDialog({
               size="sm"
               onClick={() => {
                 reset();
-                setIsImageRemoved(false);
+                setImageState("unchanged");
               }}
             >
               <PiXCircleDuotone />
@@ -448,16 +452,16 @@ export default function EditBarcodesDialog({
 interface ComponentImageProps {
   currentImage: string;
   value: FileWithPreview | null;
-  isRemoved: boolean;
-  onRemove: () => void;
+  imageState: ImageChangeState;
+  onImageStateChange: (state: ImageChangeState) => void;
   onChange: (file: FileWithPreview | null) => void;
 }
 
 function ComponentImage({
   currentImage,
   value,
-  isRemoved,
-  onRemove,
+  imageState,
+  onImageStateChange,
   onChange,
 }: ComponentImageProps) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
@@ -465,6 +469,7 @@ function ComponentImage({
       accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
       onFilesChange: (newFiles) => {
         if (newFiles.length > 0) {
+          onImageStateChange("replaced");
           onChange(newFiles[0]);
         } else {
           onChange(null);
@@ -473,7 +478,9 @@ function ComponentImage({
     });
 
   const displayImage =
-    value?.preview || files[0]?.preview || (!isRemoved && currentImage);
+    value?.preview ||
+    files[0]?.preview ||
+    (imageState !== "removed" ? currentImage : "");
 
   return (
     <div className="h-40 w-full">
@@ -510,11 +517,11 @@ function ComponentImage({
                 const fileId = value?.id || files[0]?.id;
                 if (fileId) {
                   removeFile(fileId);
-                  onChange(null);
+                  onImageStateChange(currentImage ? "unchanged" : "removed");
                 } else {
-                  onRemove();
-                  onChange(null);
+                  onImageStateChange("removed");
                 }
+                onChange(null);
               }}
               aria-label="Remove image"
             >

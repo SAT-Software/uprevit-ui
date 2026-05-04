@@ -79,6 +79,7 @@ type Item = {
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
+  _redlineBaseImage?: string;
 };
 
 type TableMeta = {
@@ -86,6 +87,78 @@ type TableMeta = {
   isRedlineView?: boolean;
   getFieldDiff?: (row: Item, field: string, value?: unknown) => DiffItem | null;
   getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
+};
+
+const getPersistentItemId = (item: Item): string =>
+  item._redlineId || item.id || item.componentName;
+
+const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
+  const image =
+    typeof row.componentImage === "string" ? row.componentImage.trim() : "";
+  const rowStatus = meta?.getRowStatus?.(row);
+  const diff = meta?.isRedlineView
+    ? (meta.getFieldDiff?.(row, "componentImage", row.componentImage) ??
+      row._redlineDiffs?.find((d) => d.path === "image") ??
+      null)
+    : null;
+  const oldImage =
+    row._redlineBaseImage ||
+    (typeof diff?.old_value === "string" ? diff.old_value.trim() : "");
+  const newImage =
+    typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
+
+  if (rowStatus === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (rowStatus === "removed") {
+    return {
+      src: image || oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (diff?.status === "removed") {
+    return {
+      src: oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "modified") {
+    const modifiedImage = image || newImage || oldImage;
+    const imageWasRemoved = !image && !newImage && Boolean(oldImage);
+    return {
+      src: modifiedImage,
+      badge: "MOD" as const,
+      frameClassName: "border-amber-300",
+      imageClassName: imageWasRemoved ? "opacity-70" : undefined,
+    };
+  }
+
+  return {
+    src: image,
+    frameClassName: undefined as string | undefined,
+    imageClassName: undefined as string | undefined,
+  };
 };
 
 // Helper component for displaying redline values
@@ -203,13 +276,40 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentImage",
     header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
-    cell: ({ row }) => {
-      const image = row.original.componentImage;
-      const hasImage = typeof image === "string" && image.trim() !== "";
-      return hasImage ? (
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta | undefined;
+      const imagePresentation = getRedlineImagePresentation(row.original, meta);
+
+      if (imagePresentation.badge && imagePresentation.src) {
+        return (
+          <div className="flex flex-col gap-1">
+            <span
+              className={`text-[9px] font-medium ${
+                imagePresentation.badge === "NEW"
+                  ? "text-blue-600"
+                  : imagePresentation.badge === "DEL"
+                    ? "text-red-600"
+                    : "text-amber-700"
+              }`}
+            >
+              {imagePresentation.badge}
+            </span>
+            <ProductImageFrame
+              src={imagePresentation.src}
+              alt={row.original.componentName}
+              frameClassName={imagePresentation.frameClassName}
+              imageClassName={imagePresentation.imageClassName}
+            />
+          </div>
+        );
+      }
+
+      return imagePresentation.src ? (
         <ProductImageFrame
-          src={image}
+          src={imagePresentation.src}
           alt={row.original.componentName}
+          frameClassName={imagePresentation.frameClassName}
+          imageClassName={imagePresentation.imageClassName}
         />
       ) : (
         <ProductImageFrame alt={row.original.componentName} />
@@ -316,10 +416,18 @@ const columns: ColumnDef<Item>[] = [
             d.path.startsWith("label_presence"),
           );
           addedLabels = labelDiffs
-            .filter((d) => d.status === "added" && d.new_value)
+            .filter(
+              (d) =>
+                (d.status === "added" || d.status === "modified") &&
+                d.new_value,
+            )
             .map((d) => d.new_value as string);
           removedLabels = labelDiffs
-            .filter((d) => d.status === "removed" && d.old_value)
+            .filter(
+              (d) =>
+                (d.status === "removed" || d.status === "modified") &&
+                d.old_value,
+            )
             .map((d) => d.old_value as string);
         }
       }
@@ -461,6 +569,7 @@ export default function SymbolsGraphicsPageBarcodesTable({
   const table = useReactTable({
     data: dataProp || [],
     columns,
+    getRowId: (originalRow) => getPersistentItemId(originalRow),
     getRowCanExpand: (row) => Boolean(row.original.componentName),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -530,9 +639,10 @@ export default function SymbolsGraphicsPageBarcodesTable({
                 const isAdded = isRedlineView && rowStatus === "added";
                 const isRemoved = isRedlineView && rowStatus === "removed";
                 const isModified = isRedlineView && rowStatus === "modified";
+                const itemId = getPersistentItemId(row.original);
 
                 return (
-                  <Fragment key={row.id}>
+                  <Fragment key={itemId}>
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
                       className={`hover:bg-muted/50 ${
@@ -573,15 +683,20 @@ export default function SymbolsGraphicsPageBarcodesTable({
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <div className="flex flex-col items-center py-4">
                             {(() => {
-                              const image = row.original.componentImage;
-                              const hasImage =
-                                typeof image === "string" &&
-                                image.trim() !== "";
-                              return hasImage ? (
+                              const meta = table.options.meta;
+                              const imagePresentation =
+                                getRedlineImagePresentation(row.original, meta);
+                              return imagePresentation.src ? (
                                 <ProductImageFrame
-                                  src={image}
+                                  src={imagePresentation.src}
                                   alt={row.original.componentName}
                                   variant="preview"
+                                  frameClassName={
+                                    imagePresentation.frameClassName
+                                  }
+                                  imageClassName={
+                                    imagePresentation.imageClassName
+                                  }
                                   priority
                                 />
                               ) : (
@@ -673,6 +788,8 @@ function RowActions({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
+  const itemId = getPersistentItemId(item);
+  const actionsDisabled = isSubmitted || item._redlineStatus === "removed";
   const pathname = usePathname();
   const getProductId = (): string => {
     if (!pathname) return "";
@@ -698,7 +815,7 @@ function RowActions({
             size="icon"
             variant="ghost"
             className="shadow-none"
-            disabled={isSubmitted}
+            disabled={actionsDisabled}
           >
             <PiDotsThreeCircleDuotone size={18} />
           </Button>
@@ -706,6 +823,7 @@ function RowActions({
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem
+              disabled={actionsDisabled}
               onSelect={() => setTimeout(() => setShowEditDialog(true), 100)}
             >
               <PiPencilSimpleDuotone className="h-4 w-4" />
@@ -714,6 +832,7 @@ function RowActions({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            disabled={actionsDisabled}
             onSelect={() => setTimeout(() => setShowDeleteDialog(true), 100)}
             className="text-destructive focus:text-destructive"
           >
@@ -723,12 +842,14 @@ function RowActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <EditBarcodesDialog
+        key={`edit-${itemId}`}
         productId={getProductId()}
         barcode={barcodeForItem}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
       <DeleteSymbolsSchematicsDialog
+        key={`delete-${itemId}`}
         productId={getProductId()}
         graphics={barcodeForItem}
         open={showDeleteDialog}
