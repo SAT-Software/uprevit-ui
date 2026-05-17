@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useArchiveProject() {
   const queryClient = useQueryClient();
@@ -24,8 +25,9 @@ export function useArchiveProject() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to archive project");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to archive project"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -36,8 +38,9 @@ export function useArchiveProject() {
       router.push("/archive");
     },
     onError: (error) => {
-      console.error(error.message || "Failed to archive project");
-      toast.error("Failed to archive project");
+      const message = getErrorMessage(error, "Failed to archive project");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

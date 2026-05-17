@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useDeleteBookmarkFolder() {
   const queryClient = useQueryClient();
@@ -24,8 +25,9 @@ export function useDeleteBookmarkFolder() {
         }
       );
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to delete bookmark folder");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to delete bookmark folder"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -39,8 +41,9 @@ export function useDeleteBookmarkFolder() {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to delete bookmark folder");
-      toast.error(error.message || "Failed to delete bookmark folder");
+      const message = getErrorMessage(error, "Failed to delete bookmark folder");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

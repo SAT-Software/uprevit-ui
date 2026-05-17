@@ -148,13 +148,16 @@ export default function Page() {
         onError: (error) => {
           setIsSaving(false);
           console.error("Failed to update product information:", error);
-          toast.error("Failed to save the product specifications");
         },
       });
     } catch (error) {
       setIsSaving(false);
       console.error("Save error:", error);
-      toast.error("Failed to save the product specifications");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to save the product specifications",
+      );
     }
   };
 

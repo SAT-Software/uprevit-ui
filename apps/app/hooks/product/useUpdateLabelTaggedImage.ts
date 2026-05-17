@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface UpdateLabelTaggedImageParams {
   productId: string;
@@ -43,8 +44,9 @@ export function useUpdateLabelTaggedImage() {
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to update tagged image");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to update tagged image"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -54,8 +56,9 @@ export function useUpdateLabelTaggedImage() {
       queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to save tagged image");
-      toast.error("Failed to save tagged image");
+      const message = getErrorMessage(error, "Failed to save tagged image");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

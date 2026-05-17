@@ -93,7 +93,6 @@ export default function OnboardingCreateWorkspacePage() {
     } catch (error) {
       console.error("Failed to upload workspace logo:", error);
       setLogoPreview("");
-      toast.error("Failed to upload workspace logo");
     } finally {
       setUploadingLogo(false);
     }

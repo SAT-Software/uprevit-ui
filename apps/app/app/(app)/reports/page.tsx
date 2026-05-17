@@ -492,8 +492,12 @@ export default function Page() {
 
       setResults(response.result);
       setActiveTab("results");
-    } catch {
-      toast.error("Failed to execute the query. Please try again.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to execute the query. Please try again.",
+      );
     }
   };
 

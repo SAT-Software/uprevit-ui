@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useDeleteSourceFiles(slug: string) {
   const queryClient = useQueryClient();
@@ -21,8 +22,9 @@ export function useDeleteSourceFiles(slug: string) {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to delete source files");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to delete source files"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -35,8 +37,9 @@ export function useDeleteSourceFiles(slug: string) {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to delete source files");
-      toast.error(error.message || "Failed to delete source files");
+      const message = getErrorMessage(error, "Failed to delete source files");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

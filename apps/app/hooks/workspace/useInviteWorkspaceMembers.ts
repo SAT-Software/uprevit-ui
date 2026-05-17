@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useInviteWorkspaceMembers() {
   const queryClient = useQueryClient();
@@ -24,8 +25,9 @@ export function useInviteWorkspaceMembers() {
       });
 
       if (!response.ok) {
-        const text = await response.text().catch(() => "");
-        throw new Error(text || "Failed to send invitations");
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to send invitations")
+        );
       }
 
       const data = await response.json();
@@ -41,8 +43,9 @@ export function useInviteWorkspaceMembers() {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to send invitations");
-      toast.error("Failed to send invitations");
+      const message = getErrorMessage(error, "Failed to send invitations");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

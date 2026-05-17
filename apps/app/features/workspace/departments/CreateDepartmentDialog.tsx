@@ -125,7 +125,6 @@ export default function CreateDepartmentDialog() {
       );
     } catch (error) {
       console.error("Error uploading department image:", error);
-      toast.error("Failed to upload department image");
     } finally {
       setUploadingImage(false);
     }

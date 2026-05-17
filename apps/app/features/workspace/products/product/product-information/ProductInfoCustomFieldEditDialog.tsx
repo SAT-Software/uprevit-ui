@@ -180,7 +180,6 @@ export default function ProductInformationCustomFieldEditDialog({
         append({ label: "", value: "" });
       },
       onError: () => {
-        toast.error("Failed to create custom field");
         reset();
         setOpen(false);
       },
@@ -225,7 +224,6 @@ export default function ProductInformationCustomFieldEditDialog({
         setOpen(false);
       },
       onError: () => {
-        toast.error("Failed to update custom field");
         reset();
         setOpen(false);
       },
@@ -261,7 +259,6 @@ export default function ProductInformationCustomFieldEditDialog({
         setDeleteFieldOpen(true);
       },
       onError: () => {
-        toast.error("Failed to delete custom field");
         reset();
         setOpen(false);
         setDeleteFieldOpen(true);

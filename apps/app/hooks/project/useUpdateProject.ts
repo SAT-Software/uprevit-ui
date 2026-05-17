@@ -2,6 +2,7 @@ import { Project } from "@/types/project";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useUpdateProject() {
   const queryClient = useQueryClient();
@@ -23,8 +24,9 @@ export function useUpdateProject() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to update project");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to update project"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -36,8 +38,9 @@ export function useUpdateProject() {
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to update project");
-      toast.error("Failed to update project");
+      const message = getErrorMessage(error, "Failed to update project");
+      console.error(message);
+      toast.error(message);
     },
   });
 }
