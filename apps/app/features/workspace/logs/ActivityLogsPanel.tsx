@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { PiCircleNotchDuotone } from "react-icons/pi";
+import Link from "next/link";
+import { PiArrowLeft, PiCircleNotchDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import { Input } from "@uprevit/ui/components/ui/input";
 import {
@@ -85,6 +86,15 @@ export function ActivityLogsPanel({
       >
         {showHeader ? (
           <div>
+            {scopeType === "product" && scopeId ? (
+              <Link
+                href={`/products/${scopeId}/product-information`}
+                className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                <PiArrowLeft className="h-3.5 w-3.5" />
+                Go Back
+              </Link>
+            ) : null}
             <h2 className="text-base font-semibold">{title}</h2>
             <p className="text-xs text-muted-foreground">{description}</p>
           </div>

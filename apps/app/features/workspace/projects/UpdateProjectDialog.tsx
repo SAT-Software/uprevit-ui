@@ -151,7 +151,6 @@ export default function UpdateProjectDialog({
       );
     } catch (error) {
       console.error("Error uploading project image:", error);
-      toast.error("Failed to upload project image");
     } finally {
       setUploadingImage(false);
     }

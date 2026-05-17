@@ -22,7 +22,6 @@ import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
 import UnsavedAnnotationDialog from "./UnsavedAnnotationDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import { toast } from "sonner";
 import { LegendPanel } from "./LegendPanel";
 import { LegendItem } from "./legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
@@ -172,7 +171,6 @@ export default function LabelTagsTabs({
         setSaveDialogOpen(false);
       } catch (error) {
         console.error("Failed to upload tagged image:", error);
-        toast.error("Failed to upload tagged image");
 
         // Reset unsaved dialog flow state on error too
         if (isUnsavedFlowRef.current) {

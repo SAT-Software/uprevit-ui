@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useRestoreProject() {
   const queryClient = useQueryClient();
@@ -22,8 +23,9 @@ export function useRestoreProject() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to restore project");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to restore project"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -33,8 +35,9 @@ export function useRestoreProject() {
       queryClient.invalidateQueries({ queryKey: ["archived-projects"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to restore project");
-      toast.error("Failed to restore project");
+      const message = getErrorMessage(error, "Failed to restore project");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

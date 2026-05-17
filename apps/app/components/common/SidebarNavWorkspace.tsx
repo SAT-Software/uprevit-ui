@@ -7,7 +7,12 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
 import {
@@ -17,10 +22,14 @@ import {
   useSidebar,
 } from "@uprevit/ui/components/ui/sidebar";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import {
+  PiDesktopDuotone,
   PiDotsThreeOutlineVerticalDuotone,
   PiGearDuotone,
+  PiMoonDuotone,
   PiSquaresFourDuotone,
+  PiSunDuotone,
 } from "react-icons/pi";
 import type { Workspace } from "@/types/workspace";
 
@@ -30,6 +39,7 @@ export function SidebarNavWorkspace({
   workspace: Workspace | null | undefined;
 }) {
   const { isMobile } = useSidebar();
+  const { setTheme, theme } = useTheme();
 
   return (
     <SidebarMenu>
@@ -89,6 +99,29 @@ export function SidebarNavWorkspace({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="gap-2 [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0">
+                  <PiSunDuotone className="dark:hidden" />
+                  <PiMoonDuotone className="hidden dark:block" />
+                  Theme
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                    <DropdownMenuRadioItem value="light">
+                      <PiSunDuotone />
+                      Light
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dark">
+                      <PiMoonDuotone />
+                      Dark
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="system">
+                      <PiDesktopDuotone />
+                      System
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuItem asChild>
                 <Link href={`/settings?tab=workspace`}>
                   <PiGearDuotone />

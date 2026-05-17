@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface EditBookmarkFolderRequest {
   folderId: string;
@@ -32,8 +33,9 @@ export function useEditBookmarkFolder() {
         }
       );
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to edit bookmark folder");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to edit bookmark folder"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -47,8 +49,9 @@ export function useEditBookmarkFolder() {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to edit bookmark folder");
-      toast.error(error.message || "Failed to edit bookmark folder");
+      const message = getErrorMessage(error, "Failed to edit bookmark folder");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

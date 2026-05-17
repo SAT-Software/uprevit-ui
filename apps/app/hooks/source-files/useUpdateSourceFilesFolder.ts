@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface UpdateSourceFilesFolderRequest {
   id: string;
@@ -39,8 +40,9 @@ export function useUpdateSourceFilesFolder(folderId: string) {
         }
       );
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to update source files folder");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to update source files folder"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -55,8 +57,9 @@ export function useUpdateSourceFilesFolder(folderId: string) {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to update source files folder");
-      toast.error(error.message || "Failed to update source files folder");
+      const message = getErrorMessage(error, "Failed to update source files folder");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

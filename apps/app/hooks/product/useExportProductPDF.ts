@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { EnqueueProductExportResponse } from "@/types/export-job";
+import { getResponseErrorMessage } from "@/lib/api-error";
 
 async function exportProductPDF({
   auth,
@@ -19,8 +20,9 @@ async function exportProductPDF({
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to queue product PDF export");
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to queue product PDF export")
+    );
   }
 
   return response.json();

@@ -123,7 +123,6 @@ export default function OnboardUserPage() {
     } catch (error) {
       console.error("Failed to upload avatar:", error);
       setAvatarPreview("");
-      toast.error("Failed to upload profile picture");
     } finally {
       setUploadingAvatar(false);
     }
