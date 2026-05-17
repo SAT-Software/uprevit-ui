@@ -91,6 +91,10 @@ type ProductInformationTabPayload = {
   custom_fields?: ProductCustomField[];
   product_data?: { data?: ProductMetadataView };
   auditLogs?: AuditLog[];
+  createdBy?: string;
+  createdAt?: string;
+  modifiedBy?: string;
+  modifiedAt?: string;
 };
 
 type ProductInformationTabResponse = {
@@ -365,12 +369,24 @@ export default function Page() {
   );
 
   const auditLogs = (productAuditLog as AuditLog[]) || [];
-  const creationLog = auditLogs.find((log) => log.action === "create");
-  const latestUpdateLog = auditLogs
+  const legacyCreationLog = auditLogs.find((log) => log.action === "create");
+  const legacyUpdateLog = auditLogs
     .filter((log) => log.action === "update")
     .sort(
       (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0];
+  const creationLog = productTabData?.createdBy
+    ? {
+        actionAt: productTabData.createdAt,
+        actionBy: productTabData.createdBy,
+      }
+    : legacyCreationLog;
+  const latestUpdateLog = productTabData?.modifiedBy
+    ? {
+        actionAt: productTabData.modifiedAt,
+        actionBy: productTabData.modifiedBy,
+      }
+    : legacyUpdateLog;
   const productInfoChangeCount =
     PRODUCT_INFO_COUNTED_DIFF_KEYS.filter((key) =>
       productInfoDiffLookup.has(key),

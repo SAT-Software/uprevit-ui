@@ -53,6 +53,8 @@ const sampleColumns: Column[] = [
   { name: "product_name", label: "Product Name", type: "text" },
   { name: "project_name", label: "Project", type: "text" },
   { name: "department_name", label: "Department", type: "text" },
+  { name: "created_by", label: "Created By", type: "text" },
+  { name: "modified_by", label: "Modified By", type: "text" },
   { name: "status", label: "Status", type: "text" },
   { name: "version", label: "Version", type: "number" },
   { name: "complete_count", label: "Progress", type: "number" },
@@ -106,7 +108,11 @@ const getOperatorsForType = (type: ColumnType): FilterOperator[] => {
 // Helper to generate a unique ID
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-export default function FilterBuilder({ table }: { table: Table<Item> }) {
+export default function FilterBuilder({
+  table,
+}: {
+  table: Table<Item>;
+}) {
   const [filters, setFilters] = useState<FilterCondition[]>([]);
 
   const dropdownShadowStyle: CSSProperties = {

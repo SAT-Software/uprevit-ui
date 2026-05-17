@@ -218,7 +218,11 @@ export default function CreateProductDialog() {
                 id={`${id}-description`}
                 placeholder="Enter product description"
                 className="min-h-[100px] resize-none"
+                aria-invalid={errors.description ? "true" : "false"}
                 {...register("description", {
+                  validate: (value) =>
+                    value.trim().length > 0 ||
+                    "Product description is required",
                   maxLength: {
                     value: 220,
                     message: "Description must be at most 220 characters",

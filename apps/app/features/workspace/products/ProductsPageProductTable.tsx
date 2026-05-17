@@ -39,6 +39,7 @@ import {
   PiInfoDuotone,
   PiKanbanDuotone,
   PiPackageDuotone,
+  PiXCircleDuotone,
 } from "react-icons/pi";
 
 import { Badge } from "@uprevit/ui/components/ui/badge";
@@ -106,6 +107,10 @@ export type Item = {
   operational_parameters?: { tab_completed?: boolean };
   label_tags?: { tab_completed?: boolean };
   auditLogs?: Array<AuditLog>;
+  createdBy?: string;
+  createdAt?: string;
+  modifiedBy?: string;
+  modifiedAt?: string;
   department: Array<{
     _id: string;
     department_name: string;
@@ -121,6 +126,11 @@ interface AdvancedFilter {
   operator: string;
   value: string | number | boolean;
 }
+
+const getAuditActionBy = (
+  auditLogs: Array<AuditLog> | undefined,
+  action: string,
+) => auditLogs?.find((log) => log.action === action)?.actionBy ?? "";
 
 // Advanced operator-based filter function
 const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
@@ -442,6 +452,18 @@ const columns: ColumnDef<Item>[] = [
     size: 180,
   },
   {
+    id: "created_by",
+    accessorFn: (row) =>
+      row.createdBy ?? getAuditActionBy(row.auditLogs, "create"),
+    enableHiding: false,
+  },
+  {
+    id: "modified_by",
+    accessorFn: (row) =>
+      row.modifiedBy ?? getAuditActionBy(row.auditLogs, "update"),
+    enableHiding: false,
+  },
+  {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => <RowActions row={row} />,
@@ -454,7 +476,11 @@ export default function ProductsPageProductTable() {
   const router = useRouter();
   const { data } = useGetAllProducts();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    created_by: false,
+    modified_by: false,
+  });
+  const [filterResetSignal, setFilterResetSignal] = useState(0);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -500,6 +526,12 @@ export default function ProductsPageProductTable() {
           "value" in productNameFilterValue
         ? String((productNameFilterValue as AdvancedFilter).value ?? "")
         : "";
+  const hasActiveFilters = table.getState().columnFilters.length > 0;
+
+  const handleClearFilters = () => {
+    table.setColumnFilters([]);
+    setFilterResetSignal((signal) => signal + 1);
+  };
 
   return (
     <div className="space-y-2 w-full">
@@ -515,7 +547,14 @@ export default function ProductsPageProductTable() {
             }
             className="w-60 h-7 text-xs"
           />
-          <FilterBuilder table={table} />
+          <FilterBuilder key={filterResetSignal} table={table} />
+
+          {hasActiveFilters && (
+            <Button variant="outline" size="sm" onClick={handleClearFilters}>
+              <PiXCircleDuotone />
+              Clear filters
+            </Button>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
