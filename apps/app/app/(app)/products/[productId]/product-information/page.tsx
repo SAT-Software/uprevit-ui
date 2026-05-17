@@ -375,13 +375,13 @@ export default function Page() {
     .sort(
       (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0];
-  const creationLog = productTabData?.createdBy
+  const creationLog = productTabData?.createdBy && productTabData?.createdAt
     ? {
         actionAt: productTabData.createdAt,
         actionBy: productTabData.createdBy,
       }
     : legacyCreationLog;
-  const latestUpdateLog = productTabData?.modifiedBy
+  const latestUpdateLog = productTabData?.modifiedBy && productTabData?.modifiedAt
     ? {
         actionAt: productTabData.modifiedAt,
         actionBy: productTabData.modifiedBy,

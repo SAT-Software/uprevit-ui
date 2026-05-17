@@ -130,7 +130,12 @@ interface AdvancedFilter {
 const getAuditActionBy = (
   auditLogs: Array<AuditLog> | undefined,
   action: string,
-) => auditLogs?.find((log) => log.action === action)?.actionBy ?? "";
+) =>
+  auditLogs
+    ?.filter((log) => log.action === action)
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
+    )[0]?.actionBy ?? "";
 
 // Advanced operator-based filter function
 const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
