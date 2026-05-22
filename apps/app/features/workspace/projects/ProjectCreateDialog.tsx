@@ -15,14 +15,20 @@ import {
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@uprevit/ui/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@uprevit/ui/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@uprevit/ui/components/ui/popover";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
-import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsInfinite";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { useCreateProject } from "@/hooks/project/useCreateProject";
@@ -31,9 +37,10 @@ import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspac
 import { Department } from "@/types/department";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
-import { useId, useState } from "react";
+import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm } from "react-hook-form";
 import {
+  PiCaretDownDuotone,
   PiKanbanDuotone,
   PiPlusCircleDuotone,
   PiXCircleDuotone,
@@ -41,7 +48,7 @@ import {
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
-import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
+import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
 
 interface User {
   _id: string;
@@ -69,11 +76,36 @@ export default function ProjectCreateDialog({
   const [open, setOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [projectImage, setProjectImage] = useState<File | FileMetadata | null>(
-    null
+    null,
   );
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
+  const [departmentSearch, setDepartmentSearch] = useState("");
+  const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] = useState("");
+  const [selectedDepartmentLabel, setSelectedDepartmentLabel] = useState<
+    string | null
+  >(null);
 
-  const { data: departmentsData } = useGetAllDepartments();
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedDepartmentSearch(departmentSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [departmentSearch]);
+
+  const {
+    data: departmentsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isPending: isDepartmentsPending,
+    isError: isDepartmentsError,
+  } = useGetDepartmentsInfinite({
+    enabled: open,
+    search: debouncedDepartmentSearch,
+  });
   const { data: usersData } = useGetAllUsersByWorkspace();
   const { mutate: createProject, isPending } = useCreateProject();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -82,8 +114,24 @@ export default function ProjectCreateDialog({
   const workspaceId = auth?.user?.profile?.workspaceId;
   const isAdmin = isAdminProfile(auth.user?.profile);
 
-  const departments = departmentsData?.result?.departments || [];
+  const departments = useMemo(
+    () =>
+      departmentsData?.pages.flatMap(
+        (page) => page.result?.departments ?? [],
+      ) ?? [],
+    [departmentsData],
+  );
   const users = usersData?.data;
+
+  const handleDepartmentListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  };
 
   const {
     register,
@@ -102,6 +150,11 @@ export default function ProjectCreateDialog({
     },
     mode: "onSubmit",
   });
+
+  const selectedDepartmentId = watch("department");
+  const selectedDepartment = departments.find(
+    (dept: Department) => dept._id === selectedDepartmentId,
+  );
 
   const handleAddUser = (user: User) => {
     if (!selectedUsers.some((u) => u._id === user._id)) {
@@ -140,13 +193,16 @@ export default function ProjectCreateDialog({
           onSuccess: () => {
             reset();
             setSelectedUsers([]);
+            setDepartmentSearch("");
+            setDebouncedDepartmentSearch("");
+            setSelectedDepartmentLabel(null);
             setOpen(false);
           },
           onError: (error) => {
             setSelectedUsers([]);
             console.error("Error creating project:", error);
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Error uploading project image:", error);
@@ -240,41 +296,97 @@ export default function ProjectCreateDialog({
               </div>
             </div>
           </div>
-          <div className="flex gap-4 w-full px-4 pb-4">
-            <div className="space-y-2 w-1/2">
-              <Label htmlFor={`${id}-department`}>Department</Label>
-              <Select
-                value={watch("department")}
-                onValueChange={(value) => setValue("department", value)}
-              >
-                <SelectTrigger id={`${id}-department`}>
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((dept: Department) => (
-                    <SelectItem key={dept._id} value={dept._id || ""}>
-                      {dept.department_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.department && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.department.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-4 w-1/2">
-              <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
 
-              <Input
-                id={`${id}-manager-name`}
-                placeholder="Enter manager's name"
-                type="text"
-                aria-invalid={errors.project_manager ? "true" : "false"}
-                {...register("project_manager")}
-              />
-            </div>
+          <div className="space-y-2 w-full px-4 pb-4">
+            <Label htmlFor={`${id}-department`}>Department</Label>
+            <Popover
+              open={departmentPopoverOpen}
+              onOpenChange={setDepartmentPopoverOpen}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  id={`${id}-department`}
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={departmentPopoverOpen}
+                  className="w-full justify-between font-normal h-9"
+                >
+                  <span className="truncate">
+                    {selectedDepartmentLabel ||
+                      selectedDepartment?.department_name ||
+                      "Select department"}
+                  </span>
+                  <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-(--radix-popover-trigger-width) p-0"
+                align="start"
+                onWheel={(event) => event.stopPropagation()}
+              >
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Search departments..."
+                    className="h-9"
+                    value={departmentSearch}
+                    onValueChange={setDepartmentSearch}
+                  />
+                  <CommandList onScroll={handleDepartmentListScroll}>
+                    <CommandEmpty>
+                      {isDepartmentsPending
+                        ? "Loading departments..."
+                        : isDepartmentsError
+                          ? "Failed to load departments."
+                          : "No department found."}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {departments.map((dept: Department) => (
+                        <CommandItem
+                          key={dept._id}
+                          value={dept.department_name}
+                          onSelect={() => {
+                            setValue("department", dept._id || "", {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+                            setSelectedDepartmentLabel(dept.department_name);
+                            setDepartmentPopoverOpen(false);
+                          }}
+                        >
+                          <span className="truncate">
+                            {dept.department_name}
+                          </span>
+                        </CommandItem>
+                      ))}
+                      {isFetchingNextPage && (
+                        <div className="flex items-center justify-center py-2">
+                          <Spinner className="size-4" />
+                        </div>
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {errors.department && (
+              <p role="alert" className="text-xs text-destructive">
+                {errors.department.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-4 w-full px-4 pb-4">
+            <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
+
+            <Input
+              id={`${id}-manager-name`}
+              placeholder="Enter manager's name"
+              type="text"
+              className="w-full"
+              aria-invalid={errors.project_manager ? "true" : "false"}
+              {...register("project_manager")}
+            />
           </div>
 
           <div className="px-4 pb-4">
@@ -315,7 +427,7 @@ export default function ProjectCreateDialog({
               </div>
 
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
-                <AddUsersInProjectDropdown
+                <AddUsersDropdown
                   users={users?.map((user: User) => ({
                     _id: user._id,
                     name: user.name,
@@ -384,8 +496,8 @@ export default function ProjectCreateDialog({
             {uploadingImage
               ? "Uploading..."
               : isPending
-              ? "Creating..."
-              : "Create Project"}
+                ? "Creating..."
+                : "Create Project"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -399,9 +511,9 @@ function ProfileBg({
   setProjectImage: (file: File | FileMetadata) => void;
 }) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-	useFileUpload({
-		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-	});
+    useFileUpload({
+      accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+    });
 
   const ImageFile = files[0]?.file;
 

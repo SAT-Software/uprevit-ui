@@ -29,7 +29,7 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import Image from "next/image";
-import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
+import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
@@ -272,7 +272,7 @@ export default function UpdateDepartmentDialog({
             <div className="space-y-2">
               <Label>Members</Label>
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
-                <AddUsersInDepartmentDropdown
+                <AddUsersDropdown
                   users={users?.map((user: User) => ({
                     _id: user._id,
                     name: user.name,

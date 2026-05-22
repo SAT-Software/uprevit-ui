@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, useEffect } from "react";
+import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -16,18 +16,28 @@ import {
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
-import { PiPlusCircleDuotone, PiXCircleDuotone } from "react-icons/pi";
+import {
+  PiCaretDownDuotone,
+  PiPlusCircleDuotone,
+  PiXCircleDuotone,
+} from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@uprevit/ui/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@uprevit/ui/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@uprevit/ui/components/ui/popover";
 
-import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
-import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsInfinite";
+import { useGetProjectsInfinite } from "@/hooks/project/useGetProjectsInfinite";
 import { Department } from "@/types/department";
 import { Project } from "@/types/project";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
@@ -46,21 +56,20 @@ interface FormValues {
 export default function CreateProductDialog() {
   const id = useId();
   const [open, setOpen] = useState(false);
+  const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
+  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
+  const [departmentSearch, setDepartmentSearch] = useState("");
+  const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] = useState("");
+  const [projectSearch, setProjectSearch] = useState("");
+  const [debouncedProjectSearch, setDebouncedProjectSearch] = useState("");
+  const [selectedDepartmentLabel, setSelectedDepartmentLabel] = useState<
+    string | null
+  >(null);
+  const [selectedProjectLabel, setSelectedProjectLabel] = useState<string | null>(
+    null,
+  );
   const auth = useAuth();
   const user = auth?.user?.profile;
-
-  const { data: departmentsData = [] } = useGetAllDepartments();
-  const { data: projectsData = [] } = useGetAllProjects();
-
-  const updateDepartmentsProjects = useMemo(() => {
-    return {
-      departments: departmentsData?.result?.departments ?? [],
-      projects: projectsData?.result?.projects ?? [],
-    };
-  }, [departmentsData, projectsData]);
-
-  const departments = updateDepartmentsProjects.departments;
-  const projects = updateDepartmentsProjects.projects;
 
   const {
     register,
@@ -87,19 +96,88 @@ export default function CreateProductDialog() {
   const selectedProject = watch("project");
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedDepartmentSearch(departmentSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [departmentSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedProjectSearch(projectSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [projectSearch]);
+
+  useEffect(() => {
     register("department", { required: "Department is required" });
     register("project", { required: "Project is required" });
   }, [register]);
 
+  const {
+    data: departmentsData,
+    fetchNextPage: fetchNextDepartmentPage,
+    hasNextPage: hasNextDepartmentPage,
+    isFetching: isDepartmentsFetching,
+    isFetchingNextPage: isFetchingNextDepartmentPage,
+    isPending: isDepartmentsPending,
+    isError: isDepartmentsError,
+  } = useGetDepartmentsInfinite({
+    enabled: open,
+    search: debouncedDepartmentSearch,
+  });
+
+  const {
+    data: projectsData,
+    fetchNextPage: fetchNextProjectPage,
+    hasNextPage: hasNextProjectPage,
+    isFetching: isProjectsFetching,
+    isFetchingNextPage: isFetchingNextProjectPage,
+    isPending: isProjectsPending,
+    isError: isProjectsError,
+  } = useGetProjectsInfinite({
+    enabled: open && !!selectedDepartment,
+    departmentId: selectedDepartment,
+    search: debouncedProjectSearch,
+  });
+
+  const departments = useMemo(
+    () =>
+      departmentsData?.pages.flatMap(
+        (page) => page.result?.departments ?? [],
+      ) ?? [],
+    [departmentsData],
+  );
+
+  const projects = useMemo(
+    () =>
+      projectsData?.pages.flatMap((page) => page.result?.projects ?? []) ?? [],
+    [projectsData],
+  );
+
   const { mutate: createProduct, isPending } = useCreateProduct();
 
-  const filteredProjects = useMemo(() => {
-    return selectedDepartment
-      ? projects.filter(
-          (project: Project) => project.department_id === selectedDepartment
-        )
-      : projects;
-  }, [selectedDepartment, projects]);
+  const handleDepartmentListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextDepartmentPage && !isDepartmentsFetching) {
+      fetchNextDepartmentPage();
+    }
+  };
+
+  const handleProjectListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextProjectPage && !isProjectsFetching) {
+      fetchNextProjectPage();
+    }
+  };
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     try {
@@ -117,6 +195,12 @@ export default function CreateProductDialog() {
       createProduct(productData, {
         onSuccess: () => {
           reset();
+          setDepartmentSearch("");
+          setDebouncedDepartmentSearch("");
+          setProjectSearch("");
+          setDebouncedProjectSearch("");
+          setSelectedDepartmentLabel(null);
+          setSelectedProjectLabel(null);
           setOpen(false);
         },
         onError: (error) => {
@@ -253,23 +337,85 @@ export default function CreateProductDialog() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor={`${id}-department`}>Department</Label>
-                <Select
-                  value={selectedDepartment}
-                  onValueChange={(value) => {
-                    setValue("department", value, { shouldValidate: true });
-                  }}
+                <Popover
+                  open={departmentPopoverOpen}
+                  onOpenChange={setDepartmentPopoverOpen}
                 >
-                  <SelectTrigger id={`${id}-department`}>
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((dept: Department) => (
-                      <SelectItem key={dept._id} value={dept._id || ""}>
-                        {dept.department_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id={`${id}-department`}
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={departmentPopoverOpen}
+                      className="w-full justify-between font-normal h-9"
+                    >
+                      <span className="truncate">
+                        {selectedDepartmentLabel ||
+                          departments.find(
+                            (d) => d._id === selectedDepartment,
+                          )?.department_name ||
+                          "Select department"}
+                      </span>
+                      <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-(--radix-popover-trigger-width) p-0"
+                    align="start"
+                    onWheel={(event) => event.stopPropagation()}
+                  >
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="Search departments..."
+                        className="h-9"
+                        value={departmentSearch}
+                        onValueChange={setDepartmentSearch}
+                      />
+                      <CommandList onScroll={handleDepartmentListScroll}>
+                        <CommandEmpty>
+                          {isDepartmentsPending
+                            ? "Loading departments..."
+                            : isDepartmentsError
+                              ? "Failed to load departments."
+                              : "No department found."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {departments.map((dept: Department) => (
+                            <CommandItem
+                              key={dept._id}
+                              value={dept.department_name}
+                              onSelect={() => {
+                                setValue("department", dept._id || "", {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                });
+                                setValue("project", "", {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                });
+                                setSelectedDepartmentLabel(dept.department_name);
+                                setSelectedProjectLabel(null);
+                                setProjectSearch("");
+                                setDebouncedProjectSearch("");
+                                setDepartmentPopoverOpen(false);
+                              }}
+                            >
+                              <span className="truncate">
+                                {dept.department_name}
+                              </span>
+                            </CommandItem>
+                          ))}
+                          {isFetchingNextDepartmentPage && (
+                            <div className="flex items-center justify-center py-2">
+                              <Spinner className="size-4" />
+                            </div>
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {errors.department && (
                   <p role="alert" className="text-xs text-destructive">
                     {errors.department.message}
@@ -279,24 +425,78 @@ export default function CreateProductDialog() {
 
               <div className="space-y-2">
                 <Label htmlFor={`${id}-project`}>Project</Label>
-                <Select
-                  value={selectedProject}
-                  onValueChange={(value) => {
-                    setValue("project", value, { shouldValidate: true });
-                  }}
-                  disabled={!selectedDepartment}
+                <Popover
+                  open={projectPopoverOpen}
+                  onOpenChange={setProjectPopoverOpen}
                 >
-                  <SelectTrigger id={`${id}-project`}>
-                    <SelectValue placeholder="Select project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredProjects?.map((project: Project) => (
-                      <SelectItem key={project._id} value={project._id || ""}>
-                        {project.project_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id={`${id}-project`}
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={projectPopoverOpen}
+                      disabled={!selectedDepartment}
+                      className="w-full justify-between font-normal h-9"
+                    >
+                      <span className="truncate">
+                        {selectedProjectLabel ||
+                          projects.find((p) => p._id === selectedProject)
+                            ?.project_name ||
+                          "Select project"}
+                      </span>
+                      <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-(--radix-popover-trigger-width) p-0"
+                    align="start"
+                    onWheel={(event) => event.stopPropagation()}
+                  >
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="Search projects..."
+                        className="h-9"
+                        value={projectSearch}
+                        onValueChange={setProjectSearch}
+                      />
+                      <CommandList onScroll={handleProjectListScroll}>
+                        <CommandEmpty>
+                          {isProjectsPending
+                            ? "Loading projects..."
+                            : isProjectsError
+                              ? "Failed to load projects."
+                              : "No project found."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {projects.map((proj: Project) => (
+                            <CommandItem
+                              key={proj._id}
+                              value={proj.project_name}
+                              onSelect={() => {
+                                setValue("project", proj._id || "", {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                });
+                                setSelectedProjectLabel(proj.project_name);
+                                setProjectPopoverOpen(false);
+                              }}
+                            >
+                              <span className="truncate">
+                                {proj.project_name}
+                              </span>
+                            </CommandItem>
+                          ))}
+                          {isFetchingNextProjectPage && (
+                            <div className="flex items-center justify-center py-2">
+                              <Spinner className="size-4" />
+                            </div>
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {errors.project && (
                   <p role="alert" className="text-xs text-destructive">
                     {errors.project.message}

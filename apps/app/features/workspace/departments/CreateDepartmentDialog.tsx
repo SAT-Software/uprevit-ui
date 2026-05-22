@@ -32,7 +32,7 @@ import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
-import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
+import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
 
 interface User {
   _id: string;
@@ -252,7 +252,7 @@ export default function CreateDepartmentDialog() {
             <div className="space-y-2">
               <Label>Members</Label>
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
-                <AddUsersInDepartmentDropdown
+                <AddUsersDropdown
                   users={users?.map((user: User) => ({
                     _id: user._id,
                     name: user.name,
