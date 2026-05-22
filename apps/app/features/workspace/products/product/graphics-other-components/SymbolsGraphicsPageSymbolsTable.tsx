@@ -601,8 +601,6 @@ export default function SymbolsGraphicsPageSymbolsTable({
       <div className="shrink-0">
         <TableControls
           table={table}
-          searchColumnId="componentName"
-          searchPlaceholder="Filter symbols..."
           filterColumns={[
             { name: "componentName", label: "Symbol Text", type: "text" },
             { name: "textPresent", label: "Text Present", type: "boolean" },

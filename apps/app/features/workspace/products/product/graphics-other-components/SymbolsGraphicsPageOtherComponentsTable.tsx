@@ -558,8 +558,6 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
       <div className="shrink-0">
         <TableControls
           table={table}
-          searchColumnId="componentName"
-          searchPlaceholder="Filter other components..."
           filterColumns={[
             { name: "componentName", label: "Component Name", type: "text" },
             {

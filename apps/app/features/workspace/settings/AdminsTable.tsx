@@ -286,8 +286,6 @@ export function AdminsTable() {
     <div className="space-y-3">
       <TableControls
         table={table}
-        searchColumnId="name"
-        searchPlaceholder="Filter admins..."
         filterColumns={[
           { name: "_id", label: "ID", type: "text" },
           { name: "name", label: "User", type: "text" },

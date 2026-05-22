@@ -576,8 +576,6 @@ export default function SymbolsGraphicsPageSchematicsTable({
       <div className="shrink-0">
         <TableControls
           table={table}
-          searchColumnId="componentName"
-          searchPlaceholder="Filter schematics..."
           filterColumns={[
             { name: "componentName", label: "Schematic Name", type: "text" },
             {

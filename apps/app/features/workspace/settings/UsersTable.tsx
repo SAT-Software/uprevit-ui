@@ -283,8 +283,6 @@ export function UsersTable() {
     <div className="space-y-3">
       <TableControls
         table={table}
-        searchColumnId="name"
-        searchPlaceholder="Filter members..."
         filterColumns={[
           { name: "_id", label: "ID", type: "text" },
           { name: "name", label: "User", type: "text" },
