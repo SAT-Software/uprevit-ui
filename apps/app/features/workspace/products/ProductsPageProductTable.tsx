@@ -1,31 +1,19 @@
 "use client";
 
-import { Input } from "@uprevit/ui/components/ui/input";
 import {
   type Column,
   ColumnDef,
-  ColumnFiltersState,
-  FilterFn,
   flexRender,
   getCoreRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  PaginationState,
   SortingState,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
 import type { IconType } from "react-icons";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PiBuildingsDuotone,
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
   PiCaretDownDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
@@ -39,7 +27,6 @@ import {
   PiInfoDuotone,
   PiKanbanDuotone,
   PiPackageDuotone,
-  PiXCircleDuotone,
 } from "react-icons/pi";
 
 import { Badge } from "@uprevit/ui/components/ui/badge";
@@ -54,11 +41,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@uprevit/ui/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -81,8 +63,13 @@ import DialogBookmarkProduct from "./DialogBookmarkProduct";
 import DialogCreateVersion from "./DialogCreateVersion";
 import DialogExportProductPDF from "./DialogExportProductPDF";
 import DialogShareProduct from "./DialogShareProduct";
-import FilterBuilder from "./tableFilter";
 import UpdateProductDialog from "./UpdateProductDialog";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import {
+  ListFilterColumn,
+  useWorkspaceListQuery,
+} from "@/lib/workspace-list-query";
 
 export type Item = {
   _id: string;
@@ -108,9 +95,9 @@ export type Item = {
   label_tags?: { tab_completed?: boolean };
   auditLogs?: Array<AuditLog>;
   createdBy?: string;
-  createdAt?: string;
+  createdOn?: string;
   modifiedBy?: string;
-  modifiedAt?: string;
+  modifiedOn?: string;
   department: Array<{
     _id: string;
     department_name: string;
@@ -122,11 +109,6 @@ export type Item = {
   complete_count: number;
 };
 
-interface AdvancedFilter {
-  operator: string;
-  value: string | number | boolean;
-}
-
 const getAuditActionBy = (
   auditLogs: Array<AuditLog> | undefined,
   action: string,
@@ -137,59 +119,23 @@ const getAuditActionBy = (
       (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0]?.actionBy ?? "";
 
-// Advanced operator-based filter function
-const advancedFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
-  const rowValue = row.getValue(columnId);
+const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "product_name", label: "Product Name", type: "text" },
+  { name: "product_plan_number", label: "Product Plan Number", type: "text" },
+  { name: "project_name", label: "Project", type: "text" },
+  { name: "department_name", label: "Department", type: "text" },
+  { name: "status", label: "Status", type: "text" },
+  { name: "version", label: "Version", type: "number" },
+  { name: "complete_count", label: "Progress", type: "number" },
+  { name: "createdBy", label: "Created By", type: "text" },
+  { name: "createdOn", label: "Created On", type: "date" },
+  { name: "modifiedBy", label: "Modified By", type: "text" },
+  { name: "modifiedOn", label: "Modified On", type: "date" },
+];
 
-  if (filterValue == null) return true;
+const PRODUCT_SORT_FIELDS = PRODUCT_FILTER_COLUMNS.map((column) => column.name);
 
-  // Support simple string filters (e.g., from a basic text input)
-  if (typeof filterValue === "string") {
-    const needle = filterValue.toLowerCase();
-    if (!needle) return true;
-    return String(rowValue ?? "")
-      .toLowerCase()
-      .includes(needle);
-  }
-
-  const { operator, value } = filterValue as AdvancedFilter;
-  switch (operator) {
-    case "eq":
-      return rowValue == value;
-    case "neq":
-      return rowValue != value;
-    case "contains":
-      return String(rowValue)
-        .toLowerCase()
-        .includes(String(value).toLowerCase());
-    case "not_contains":
-      return !String(rowValue)
-        .toLowerCase()
-        .includes(String(value).toLowerCase());
-    case "starts_with":
-      return String(rowValue)
-        .toLowerCase()
-        .startsWith(String(value).toLowerCase());
-    case "ends_with":
-      return String(rowValue)
-        .toLowerCase()
-        .endsWith(String(value).toLowerCase());
-    case "gt":
-      return Number(rowValue) > Number(value);
-    case "gte":
-      return Number(rowValue) >= Number(value);
-    case "lt":
-      return Number(rowValue) < Number(value);
-    case "lte":
-      return Number(rowValue) <= Number(value);
-    case "is_null":
-      return rowValue == null || rowValue === "";
-    case "is_not_null":
-      return rowValue != null && rowValue !== "";
-    default:
-      return true;
-  }
-};
+const PRODUCT_TABLE_COLUMN_COUNT = 8;
 
 // Helper component for sortable headers
 const SortableHeader = ({
@@ -457,15 +403,25 @@ const columns: ColumnDef<Item>[] = [
     size: 180,
   },
   {
-    id: "created_by",
+    id: "createdBy",
     accessorFn: (row) =>
       row.createdBy ?? getAuditActionBy(row.auditLogs, "create"),
     enableHiding: false,
   },
   {
-    id: "modified_by",
+    id: "createdOn",
+    accessorFn: (row) => row.createdOn ?? "",
+    enableHiding: false,
+  },
+  {
+    id: "modifiedBy",
     accessorFn: (row) =>
       row.modifiedBy ?? getAuditActionBy(row.auditLogs, "update"),
+    enableHiding: false,
+  },
+  {
+    id: "modifiedOn",
+    accessorFn: (row) => row.modifiedOn ?? "",
     enableHiding: false,
   },
   {
@@ -479,87 +435,69 @@ const columns: ColumnDef<Item>[] = [
 
 export default function ProductsPageProductTable() {
   const router = useRouter();
-  const { data } = useGetAllProducts();
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    created_by: false,
-    modified_by: false,
+  const listState = useWorkspaceListQuery({
+    defaultSort: "product_name",
+    allowedSortFields: PRODUCT_SORT_FIELDS,
+    filterColumns: PRODUCT_FILTER_COLUMNS,
   });
-  const [filterResetSignal, setFilterResetSignal] = useState(0);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
+  const { data, isLoading } = useGetAllProducts(listState.query);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    createdBy: false,
+    createdOn: false,
+    modifiedBy: false,
+    modifiedOn: false,
   });
 
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: "_id",
-      desc: false,
-    },
-  ]);
+  const paginationInfo = data?.result?.pagination;
+  const sorting = useMemo<SortingState>(
+    () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
+    [listState.query.order, listState.query.sort],
+  );
+
+  useEffect(() => {
+    if (
+      paginationInfo?.totalPages === 0 ||
+      !paginationInfo?.totalPages ||
+      listState.query.page <= paginationInfo.totalPages
+    ) {
+      return;
+    }
+
+    listState.setPage(1);
+  }, [listState.query.page, listState.setPage, paginationInfo?.totalPages]);
 
   const table = useReactTable({
     data: data?.result.products ?? [],
     columns,
-    defaultColumn: { filterFn: advancedFilterFn },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
+    manualSorting: true,
+    manualPagination: true,
+    pageCount: paginationInfo?.totalPages ?? 1,
+    onSortingChange: (updater) => {
+      const nextSorting =
+        typeof updater === "function" ? updater(sorting) : updater;
+      const next = nextSorting[0];
+      if (!next) return;
+      listState.setSort(next.id, next.desc ? "desc" : "asc");
+    },
     enableSortingRemoval: false,
-    getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
-      pagination,
-      columnFilters,
       columnVisibility,
     },
   });
-
-  const productNameFilterValue = table
-    .getColumn("product_name")
-    ?.getFilterValue();
-  const productNameQuery =
-    typeof productNameFilterValue === "string"
-      ? productNameFilterValue
-      : typeof productNameFilterValue === "object" &&
-          productNameFilterValue !== null &&
-          "value" in productNameFilterValue
-        ? String((productNameFilterValue as AdvancedFilter).value ?? "")
-        : "";
-  const hasActiveFilters = table.getState().columnFilters.length > 0;
-
-  const handleClearFilters = () => {
-    table.setColumnFilters([]);
-    setFilterResetSignal((signal) => signal + 1);
-  };
 
   return (
     <div className="space-y-2 w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center justify-start w-full gap-3">
-          <Input
-            placeholder="Filter products..."
-            value={productNameQuery}
-            onChange={(event) =>
-              table
-                .getColumn("product_name")
-                ?.setFilterValue(event.target.value)
-            }
-            className="w-60 h-7 text-xs"
+          <WorkspaceListControls
+            filters={listState.query.filters}
+            filterColumns={PRODUCT_FILTER_COLUMNS}
+            onApplyFilters={listState.setFilters}
+            onClearFilters={listState.clearFilters}
           />
-          <FilterBuilder key={filterResetSignal} table={table} />
-
-          {hasActiveFilters && (
-            <Button variant="outline" size="sm" onClick={handleClearFilters}>
-              <PiXCircleDuotone />
-              Clear filters
-            </Button>
-          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -622,7 +560,17 @@ export default function ProductsPageProductTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table?.getRowModel().rows?.length ? (
+            {isLoading ? (
+              [...Array(6)].map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {[...Array(PRODUCT_TABLE_COLUMN_COUNT)].map((__, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table?.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -658,97 +606,13 @@ export default function ProductsPageProductTable() {
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between gap-8">
-        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
-          <p
-            className="text-muted-foreground text-sm whitespace-nowrap"
-            aria-live="polite"
-          >
-            <span className="text-foreground">
-              {table.getState().pagination.pageIndex *
-                table.getState().pagination.pageSize +
-                1}
-              -
-              {Math.min(
-                Math.max(
-                  table.getState().pagination.pageIndex *
-                    table.getState().pagination.pageSize +
-                    table.getState().pagination.pageSize,
-                  0,
-                ),
-                table.getRowCount(),
-              )}
-            </span>{" "}
-            of{" "}
-            <span className="text-foreground">
-              {table.getRowCount().toString()}
-            </span>
-          </p>
-        </div>
-
-        {/* Pagination buttons */}
-        <div>
-          <Pagination>
-            <PaginationContent>
-              {/* First page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.firstPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to first page"
-                >
-                  <PiCaretCircleDoubleLeftDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              {/* Previous page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to previous page"
-                >
-                  <PiCaretCircleLeftDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              {/* Next page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to next page"
-                >
-                  <PiCaretCircleRightDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              {/* Last page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.lastPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to last page"
-                >
-                  <PiCaretCircleDoubleRightDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </div>
+      {paginationInfo ? (
+        <WorkspaceListPagination
+          pagination={paginationInfo}
+          onPageChange={listState.setPage}
+        />
+      ) : null}
     </div>
-    // </div>
   );
 }
 

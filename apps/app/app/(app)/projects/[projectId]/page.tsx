@@ -4,7 +4,11 @@ import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntit
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
 import Image from "next/image";
 import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import type { SortingState } from "@tanstack/react-table";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Tooltip,
@@ -21,12 +25,15 @@ import {
 import ProjectPageProductsTable from "@/features/workspace/projects/ProjectPageProductsTable";
 import ShareProjectDialog from "@/features/workspace/projects/ShareProjectDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { Item } from "@/features/workspace/projects/ProjectPageProductsTable";
 import { AuditLog } from "@/types/audit-log";
 import UpdateProjectDialog from "@/features/workspace/projects/UpdateProjectDialog";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
+import {
+  ListFilterColumn,
+  useWorkspaceListQuery,
+} from "@/lib/workspace-list-query";
 
 interface ProjectUser {
   _id: string;
@@ -34,6 +41,34 @@ interface ProjectUser {
   email: string;
   profileAvatar?: string;
 }
+
+const PROJECT_PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "product_plan_number", label: "PPN", type: "text" },
+  { name: "product_name", label: "Product Name", type: "text" },
+  { name: "department_name", label: "Department Name", type: "text" },
+  { name: "status", label: "Status", type: "text" },
+  { name: "version", label: "Version", type: "number" },
+  { name: "complete_count", label: "Progress", type: "number" },
+  { name: "createdBy", label: "Created By", type: "text" },
+  { name: "createdOn", label: "Created On", type: "date" },
+  { name: "modifiedBy", label: "Modified By", type: "text" },
+  { name: "modifiedOn", label: "Modified On", type: "date" },
+];
+
+const PROJECT_PRODUCT_SORT_FIELDS = [
+  "product_name",
+  "product_plan_number",
+  "department_name",
+  "version",
+  "status",
+  "complete_count",
+  "createdBy",
+  "createdOn",
+  "modifiedBy",
+  "modifiedOn",
+  "actionAt",
+  "_id",
+];
 
 export default function ProjectDetailPage() {
   const params = useParams<{ projectId: string }>();
@@ -44,17 +79,39 @@ export default function ProjectDetailPage() {
   const isAdmin = isAdminProfile(auth.user?.profile);
   const activeTab = searchParams.get("tab") === "logs" && isAdmin ? "logs" : "overview";
   const isLogsView = activeTab === "logs";
+  const listState = useWorkspaceListQuery({
+    defaultSort: "product_name",
+    allowedSortFields: PROJECT_PRODUCT_SORT_FIELDS,
+    filterColumns: PROJECT_PRODUCT_FILTER_COLUMNS,
+  });
 
   const { data, isLoading, isError } = useGetProjectById(projectId);
-  const { data: productsData } = useGetAllProducts();
+  const { data: productsData } = useGetAllProducts({
+    ...listState.query,
+    projectId,
+  });
 
   if (!projectId) return notFound();
 
   const project = data?.project;
-  const products =
-    productsData?.result?.products?.filter(
-      (p: Item) => p.project_id === projectId,
-    ) || [];
+  const products = productsData?.result?.products || [];
+  const productsPagination = productsData?.result?.pagination;
+  const productSorting = useMemo<SortingState>(
+    () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
+    [listState.query.order, listState.query.sort],
+  );
+
+  useEffect(() => {
+    if (
+      productsPagination?.totalPages === 0 ||
+      !productsPagination?.totalPages ||
+      listState.query.page <= productsPagination.totalPages
+    ) {
+      return;
+    }
+
+    listState.setPage(1);
+  }, [listState.query.page, listState.setPage, productsPagination?.totalPages]);
 
   if (isLoading) {
     return (
@@ -342,18 +399,52 @@ export default function ProjectDetailPage() {
 
           <div className="w-full">
             {products.length > 0 ? (
-              <ProjectPageProductsTable data={products} />
+              <div className="flex flex-col gap-2">
+                <WorkspaceListControls
+                  filters={listState.query.filters}
+                  filterColumns={PROJECT_PRODUCT_FILTER_COLUMNS}
+                  onApplyFilters={listState.setFilters}
+                  onClearFilters={listState.clearFilters}
+                />
+                <ProjectPageProductsTable
+                  data={products}
+                  sorting={productSorting}
+                  onSortingChange={(updater) => {
+                    const nextSorting =
+                      typeof updater === "function"
+                        ? updater(productSorting)
+                        : updater;
+                    const next = nextSorting[0];
+                    if (!next) return;
+                    listState.setSort(next.id, next.desc ? "desc" : "asc");
+                  }}
+                />
+                {productsPagination ? (
+                  <WorkspaceListPagination
+                    pagination={productsPagination}
+                    onPageChange={listState.setPage}
+                  />
+                ) : null}
+              </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
-                  <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
+              <div className="flex flex-col gap-2">
+                <WorkspaceListControls
+                  filters={listState.query.filters}
+                  filterColumns={PROJECT_PRODUCT_FILTER_COLUMNS}
+                  onApplyFilters={listState.setFilters}
+                  onClearFilters={listState.clearFilters}
+                />
+                <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
+                  <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
+                    <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    No products found
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This project doesn&apos;t have any products yet.
+                  </p>
                 </div>
-                <p className="text-sm font-medium text-foreground">
-                  No products found
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This project doesn&apos;t have any products yet.
-                </p>
               </div>
             )}
           </div>

@@ -1,19 +1,33 @@
 "use client";
 
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import {
+  ListFilterColumn,
+  useWorkspaceListQuery,
+} from "@/lib/workspace-list-query";
 import Image from "next/image";
 import Link from "next/link";
 import {
   PiArrowCircleUpRightDuotone,
   PiCalendarDuotone,
   PiBuildingsDuotone,
+  PiCaretUpDownDuotone,
 } from "react-icons/pi";
 
 interface DepartmentUser {
@@ -35,6 +49,21 @@ export interface DepartmentsProps {
   membersCount?: number;
   auditLogs?: { actionAt: string; action: string }[];
 }
+
+const DEPARTMENT_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "department_name", label: "Department Name", type: "text" },
+  { name: "department_description", label: "Description", type: "text" },
+  { name: "manager", label: "Manager", type: "text" },
+  { name: "lastChangedBy", label: "Last Changed By", type: "text" },
+  { name: "lastChangedOn", label: "Last Changed On", type: "date" },
+];
+
+const DEPARTMENT_SORT_OPTIONS = [
+  { value: "department_name", label: "Department Name" },
+  { value: "department_description", label: "Description" },
+  { value: "manager", label: "Manager" },
+  { value: "actionAt", label: "Last Changed" },
+];
 
 function DepartmentLoadingCard() {
   return (
@@ -182,14 +211,20 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
 }
 
 function DepartmentsCard() {
+  const listState = useWorkspaceListQuery({
+    defaultSort: "department_name",
+    allowedSortFields: DEPARTMENT_SORT_OPTIONS.map((option) => option.value),
+    filterColumns: DEPARTMENT_FILTER_COLUMNS,
+  });
   const {
     data: departmentsData,
     isLoading,
     isError,
     refetch,
-  } = useGetAllDepartments();
+  } = useGetAllDepartments(listState.query);
 
   const departments = departmentsData?.result?.departments ?? [];
+  const pagination = departmentsData?.result?.pagination;
 
   if (isLoading) {
     return (
@@ -206,7 +241,48 @@ function DepartmentsCard() {
   }
 
   return (
-    <div className="flex flex-col items-start w-full gap-2 h-full">
+    <div className="flex flex-col items-start w-full gap-2">
+      <div className="flex flex-wrap items-center gap-2 w-full">
+        <WorkspaceListControls
+          filters={listState.query.filters}
+          filterColumns={DEPARTMENT_FILTER_COLUMNS}
+          onApplyFilters={listState.setFilters}
+          onClearFilters={listState.clearFilters}
+        />
+        <div className="flex items-center gap-2">
+          <Select
+            value={listState.query.sort}
+            onValueChange={(sort) =>
+              listState.setSort(sort, listState.query.order)
+            }
+          >
+            <SelectTrigger className="h-8 w-[230px] text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DEPARTMENT_SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  Sort by: {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-2 text-xs text-muted-foreground"
+            onClick={() =>
+              listState.setSort(
+                listState.query.sort,
+                listState.query.order === "asc" ? "desc" : "asc",
+              )
+            }
+          >
+            <PiCaretUpDownDuotone />
+            {listState.query.order === "asc" ? "A-Z" : "Z-A"}
+          </Button>
+        </div>
+      </div>
       {departments.length === 0 ? (
         <DepartmentEmptyState />
       ) : (
@@ -214,6 +290,10 @@ function DepartmentsCard() {
           <DepartmentCard key={department._id} department={department} />
         ))
       )}
+      <WorkspaceListPagination
+        pagination={pagination}
+        onPageChange={listState.setPage}
+      />
     </div>
   );
 }

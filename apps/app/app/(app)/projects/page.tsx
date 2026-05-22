@@ -5,8 +5,8 @@ import ProjectCreateDialog from "@/features/workspace/projects/ProjectCreateDial
 
 function ProjectsPage() {
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
+    <div className="flex flex-col gap-2 p-2 min-h-full">
+      <div className="flex flex-1 flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-auto">
         <div className="flex flex-wrap gap-2 items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <h1 className="text-base font-semibold">All Projects</h1>
