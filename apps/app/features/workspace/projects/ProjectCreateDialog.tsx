@@ -33,7 +33,7 @@ import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { useCreateProject } from "@/hooks/project/useCreateProject";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import { Department } from "@/types/department";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
@@ -82,6 +82,8 @@ export default function ProjectCreateDialog({
   const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState("");
   const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [debouncedUserSearch, setDebouncedUserSearch] = useState("");
   const [selectedDepartmentLabel, setSelectedDepartmentLabel] = useState<
     string | null
   >(null);
@@ -93,6 +95,14 @@ export default function ProjectCreateDialog({
 
     return () => window.clearTimeout(timer);
   }, [departmentSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedUserSearch(userSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [userSearch]);
 
   const {
     data: departmentsData,
@@ -106,7 +116,18 @@ export default function ProjectCreateDialog({
     enabled: open,
     search: debouncedDepartmentSearch,
   });
-  const { data: usersData } = useGetAllUsersByWorkspace();
+  const {
+    data: usersData,
+    fetchNextPage: fetchNextUsersPage,
+    hasNextPage: hasNextUsersPage,
+    isFetching: isUsersFetching,
+    isFetchingNextPage: isUsersFetchingNextPage,
+    isPending: isUsersPending,
+    isError: isUsersError,
+  } = useGetUsersInfinite({
+    enabled: open,
+    search: debouncedUserSearch,
+  });
   const { mutate: createProject, isPending } = useCreateProject();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const auth = useAuth();
@@ -121,7 +142,21 @@ export default function ProjectCreateDialog({
       ) ?? [],
     [departmentsData],
   );
-  const users = usersData?.data;
+  const users = useMemo(
+    () =>
+      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    [usersData],
+  );
+
+  const handleUserListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextUsersPage && !isUsersFetching) {
+      fetchNextUsersPage();
+    }
+  };
 
   const handleDepartmentListScroll = (event: UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
@@ -195,6 +230,8 @@ export default function ProjectCreateDialog({
             setSelectedUsers([]);
             setDepartmentSearch("");
             setDebouncedDepartmentSearch("");
+            setUserSearch("");
+            setDebouncedUserSearch("");
             setSelectedDepartmentLabel(null);
             setOpen(false);
           },
@@ -428,14 +465,20 @@ export default function ProjectCreateDialog({
 
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
                 <AddUsersDropdown
-                  users={users?.map((user: User) => ({
-                    _id: user._id,
+                  users={users.map((user: User) => ({
+                    _id: user._id as string,
                     name: user.name,
                     profileAvatar: user.profileAvatar,
                   }))}
                   onAddUser={handleAddUser}
                   onRemoveUser={handleRemoveUser}
                   selectedUsers={selectedUsers}
+                  userSearch={userSearch}
+                  onUserSearchChange={setUserSearch}
+                  onListScroll={handleUserListScroll}
+                  isPending={isUsersPending}
+                  isError={isUsersError}
+                  isFetchingNextPage={isUsersFetchingNextPage}
                 />
                 <div className="flex items-center justify-end flex-1">
                   {selectedUsers.length > 0 && (

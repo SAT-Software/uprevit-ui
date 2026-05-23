@@ -39,7 +39,10 @@ export function useInviteWorkspaceMembers() {
         queryKey: ["workspace", workspaceId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["workspace-users", workspaceId],
+        queryKey: ["users", workspaceId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["users-infinite", workspaceId],
       });
     },
     onError: (error) => {

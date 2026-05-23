@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type UIEvent } from "react";
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { PiUserCirclePlusDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
 
@@ -32,6 +33,12 @@ interface AddUsersDropdownProps {
   onRemoveUser?: (user: User) => void;
   selectedUsers?: User[];
   users?: User[];
+  userSearch: string;
+  onUserSearchChange: (value: string) => void;
+  onListScroll?: (event: UIEvent<HTMLDivElement>) => void;
+  isPending?: boolean;
+  isError?: boolean;
+  isFetchingNextPage?: boolean;
 }
 
 export default function AddUsersDropdown({
@@ -39,6 +46,12 @@ export default function AddUsersDropdown({
   onRemoveUser,
   selectedUsers = [],
   users = [],
+  userSearch,
+  onUserSearchChange,
+  onListScroll,
+  isPending = false,
+  isError = false,
+  isFetchingNextPage = false,
 }: AddUsersDropdownProps) {
   const [open, setOpen] = useState(false);
   const auth = useAuth();
@@ -74,10 +87,21 @@ export default function AddUsersDropdown({
         align="start"
         onWheel={(event) => event.stopPropagation()}
       >
-        <Command>
-          <CommandInput placeholder="Search users..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No user found.</CommandEmpty>
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search users..."
+            className="h-9"
+            value={userSearch}
+            onValueChange={onUserSearchChange}
+          />
+          <CommandList onScroll={onListScroll}>
+            <CommandEmpty>
+              {isPending
+                ? "Loading users..."
+                : isError
+                  ? "Failed to load users."
+                  : "No user found."}
+            </CommandEmpty>
             <CommandGroup>
               {users.map((user) => {
                 const isSelected = selectedUsers.some(
@@ -112,6 +136,11 @@ export default function AddUsersDropdown({
                   </CommandItem>
                 );
               })}
+              {isFetchingNextPage && (
+                <div className="flex items-center justify-center py-2">
+                  <Spinner className="size-4" />
+                </div>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>

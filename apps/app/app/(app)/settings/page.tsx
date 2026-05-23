@@ -22,14 +22,19 @@ import {
   PiShieldCheckDuotone,
   PiCreditCardDuotone,
 } from "react-icons/pi";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 
+const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
+
 function SettingsPage() {
   const tab = useSearchParams().get("tab");
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
   const adminTabs = ["admins", "workspace", "billing", "security"];
@@ -42,6 +47,15 @@ function SettingsPage() {
       toast.error("Insufficient privileges, contact Admin");
       return;
     }
+
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of LIST_QUERY_PARAMS) {
+      params.delete(key);
+    }
+    params.set("tab", value);
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+
     setActiveTab(value);
   };
 
@@ -97,19 +111,19 @@ function SettingsPage() {
           </TabsList>
 
           <TabsContent value="profile" className="mt-6">
-            <ProfileTab />
+            {activeTab === "profile" && <ProfileTab />}
           </TabsContent>
 
           <TabsContent value="workspace" className="mt-6">
-            <WorkspaceTab />
+            {activeTab === "workspace" && <WorkspaceTab />}
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
-            <UsersTab />
+            {activeTab === "users" && <UsersTab />}
           </TabsContent>
 
           <TabsContent value="admins" className="mt-6">
-            <AdminsTab />
+            {activeTab === "admins" && <AdminsTab />}
           </TabsContent>
 
           {/* <TabsContent value="security" className="mt-6">

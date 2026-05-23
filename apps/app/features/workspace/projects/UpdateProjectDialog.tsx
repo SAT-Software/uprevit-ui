@@ -46,7 +46,7 @@ import Image from "next/image";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import type { Project } from "@/types/project";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsInfinite";
@@ -70,14 +70,14 @@ interface DialogUpdateProjectProps {
 export default function UpdateProjectDialog({
   project,
 }: DialogUpdateProjectProps) {
-  const { data: usersData } = useGetAllUsersByWorkspace();
-  const users = usersData?.data;
   const id = useId();
 
   const [open, setOpen] = useState(false);
   const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState("");
   const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [debouncedUserSearch, setDebouncedUserSearch] = useState("");
   const [selectedDepartmentLabel, setSelectedDepartmentLabel] = useState<
     string | null
   >(null);
@@ -95,6 +95,43 @@ export default function UpdateProjectDialog({
 
     return () => window.clearTimeout(timer);
   }, [departmentSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedUserSearch(userSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [userSearch]);
+
+  const {
+    data: usersData,
+    fetchNextPage: fetchNextUsersPage,
+    hasNextPage: hasNextUsersPage,
+    isFetching: isUsersFetching,
+    isFetchingNextPage: isUsersFetchingNextPage,
+    isPending: isUsersPending,
+    isError: isUsersError,
+  } = useGetUsersInfinite({
+    enabled: open,
+    search: debouncedUserSearch,
+  });
+
+  const users = useMemo(
+    () =>
+      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    [usersData],
+  );
+
+  const handleUserListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextUsersPage && !isUsersFetching) {
+      fetchNextUsersPage();
+    }
+  };
 
   const { mutate: updateProject, isPending } = useUpdateProject();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -218,6 +255,8 @@ export default function UpdateProjectDialog({
             reset();
             setNewProjectImage(null);
             setRemoveProjectImage(false);
+            setUserSearch("");
+            setDebouncedUserSearch("");
             setOpen(false);
           },
         }
@@ -452,14 +491,20 @@ export default function UpdateProjectDialog({
 
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
                 <AddUsersDropdown
-                  users={users?.map((user: User) => ({
-                    _id: user._id,
+                  users={users.map((user: User) => ({
+                    _id: user._id as string,
                     name: user.name,
                     profileAvatar: user.profileAvatar,
                   }))}
                   onAddUser={handleAddUser}
                   onRemoveUser={handleRemoveUser}
                   selectedUsers={selectedUsers}
+                  userSearch={userSearch}
+                  onUserSearchChange={setUserSearch}
+                  onListScroll={handleUserListScroll}
+                  isPending={isUsersPending}
+                  isError={isUsersError}
+                  isFetchingNextPage={isUsersFetchingNextPage}
                 />
                 <div className="flex items-center justify-end flex-1">
                   {selectedUsers.length > 0 && (

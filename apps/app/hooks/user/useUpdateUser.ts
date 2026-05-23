@@ -54,7 +54,14 @@ export function useUpdateUser() {
     },
     onSuccess: (data) => {
       toast.success("User updated successfully");
+      const workspaceId = auth.user?.profile?.workspaceId;
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      if (workspaceId) {
+        queryClient.invalidateQueries({ queryKey: ["users", workspaceId] });
+        queryClient.invalidateQueries({
+          queryKey: ["users-infinite", workspaceId],
+        });
+      }
       if (data?.user?.id) {
         queryClient.setQueryData(["user", userId], data);
       }
