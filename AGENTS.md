@@ -129,7 +129,3 @@ Located at `../uprevit-backend`:
 - **`@/lib/utils`**: Contains `cn()` for Tailwind class merging
 - **`@/utils/isAdmin`**: Contains `isAdminProfile()` for admin role checks
 - **`@/components/ui`**: shadcn/ui component library
-
- # TODO
- - Make the user selection in department and user same as department selection in project create dialgue and others. Also add the custom made combobox same as there. Will have to update the backend too, becasue right now the backend get all users does fetch the in single go, no limits, filters or sorting of anything
- - The user fetch is not paginated, filtered and sorted in settings page. Need to update frontend and backend both

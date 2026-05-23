@@ -62,6 +62,12 @@ const selectContentStyle: CSSProperties = {
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
+const DEFAULT_FILTER_COLUMN: ListFilterColumn = {
+  name: "",
+  label: "",
+  type: "text",
+};
+
 const getOperatorsForType = (type: ListFilterColumn["type"]) => {
   if (type === "number" || type === "date") {
     return [
@@ -235,7 +241,7 @@ export function WorkspaceListControls({
   };
 
   const getColumnByName = (name: string) =>
-    filterColumns.find((column) => column.name === name) ?? filterColumns[0];
+    filterColumns.find((column) => column.name === name) ?? DEFAULT_FILTER_COLUMN;
 
   const hasActiveFilters = filters.length > 0;
 

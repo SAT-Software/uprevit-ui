@@ -91,10 +91,6 @@ export default function ProjectDetailPage() {
     projectId,
   });
 
-  if (!projectId) return notFound();
-
-  const project = data?.project;
-  const products = productsData?.result?.products || [];
   const productsPagination = productsData?.result?.pagination;
   const productSorting = useMemo<SortingState>(
     () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
@@ -112,6 +108,11 @@ export default function ProjectDetailPage() {
 
     listState.setPage(1);
   }, [listState.query.page, listState.setPage, productsPagination?.totalPages]);
+
+  if (!projectId) return notFound();
+
+  const project = data?.project;
+  const products = productsData?.result?.products || [];
 
   if (isLoading) {
     return (
