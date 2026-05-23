@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-23
+
+### Added
+
+- Added URL-driven workspace list query parameters with shared list controls for departments, projects, and archives.
+- Added server-backed pagination and filtering for workspace lists and archive views.
+- Added infinite-scroll department and project pickers with a shared add-users dropdown pattern.
+- Added server-backed workspace users list query wiring with an infinite user picker.
+
+### Updated
+
+- Updated product management flows and general UX polish across the application.
+- Updated error handling and user-facing error messaging across the UI.
+- Updated product audit metadata handling based on review feedback.
+- Updated calendar dependencies to `react-day-picker` v10 with aligned `date-fns` versions.
+- Updated monorepo package versions to `0.3.0`.
+
+### Fixed
+
+- Fixed archive page tab management and URL query parameter handling.
+- Fixed premature project validation and duplicate search parameter handling.
+- Fixed workspace table empty states when server-side filters return no rows.
+
 ## [0.2.0] - 2026-05-04
 
 ### Added
