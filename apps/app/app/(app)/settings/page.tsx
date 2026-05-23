@@ -31,8 +31,8 @@ import { toast } from "sonner";
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
 
 function SettingsPage() {
-  const tab = useSearchParams().get("tab");
   const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();

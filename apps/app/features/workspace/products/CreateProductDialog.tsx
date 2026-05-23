@@ -78,6 +78,7 @@ export default function CreateProductDialog() {
     watch,
     reset,
     setValue,
+    clearErrors,
   } = useForm<FormValues>({
     defaultValues: {
       ppn: "",
@@ -390,10 +391,8 @@ export default function CreateProductDialog() {
                                   shouldDirty: true,
                                   shouldValidate: true,
                                 });
-                                setValue("project", "", {
-                                  shouldDirty: true,
-                                  shouldValidate: true,
-                                });
+                                setValue("project", "", { shouldDirty: true });
+                                clearErrors("project");
                                 setSelectedDepartmentLabel(dept.department_name);
                                 setSelectedProjectLabel(null);
                                 setProjectSearch("");
