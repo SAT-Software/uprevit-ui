@@ -83,6 +83,8 @@ export default function DepartmentDetailPage() {
   const department = data?.department;
   const projects = projectsData?.result?.projects || [];
   const projectsPagination = projectsData?.result?.pagination;
+  const hasProjectsToList =
+    (projectsPagination?.totalCount ?? 0) > 0 || listState.query.filters.length > 0;
   const projectSorting = useMemo<SortingState>(
     () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
     [listState.query.order, listState.query.sort],
@@ -385,7 +387,7 @@ export default function DepartmentDetailPage() {
           </div>
 
           <div className="w-full">
-            {projects.length > 0 ? (
+            {hasProjectsToList ? (
               <div className="flex flex-col gap-2">
                 <WorkspaceListControls
                   filters={listState.query.filters}

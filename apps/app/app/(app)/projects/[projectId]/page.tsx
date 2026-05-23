@@ -92,6 +92,8 @@ export default function ProjectDetailPage() {
   });
 
   const productsPagination = productsData?.result?.pagination;
+  const hasProductsToList =
+    (productsPagination?.totalCount ?? 0) > 0 || listState.query.filters.length > 0;
   const productSorting = useMemo<SortingState>(
     () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
     [listState.query.order, listState.query.sort],
@@ -399,7 +401,7 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="w-full">
-            {products.length > 0 ? (
+            {hasProductsToList ? (
               <div className="flex flex-col gap-2">
                 <WorkspaceListControls
                   filters={listState.query.filters}
