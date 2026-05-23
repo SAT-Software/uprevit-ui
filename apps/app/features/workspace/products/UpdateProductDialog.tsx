@@ -16,14 +16,13 @@ import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { Item } from "./ProductsPageProductTable";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { Product } from "@/types/product";
 import { PiXCircleDuotone, PiCheckCircleDuotone } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 export default function UpdateProductDialog({
-  product: productData,
+  product,
   open,
   onOpenChange,
 }: {
@@ -32,9 +31,6 @@ export default function UpdateProductDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
-  const { data: productsData } = useGetAllProducts();
-  const products = productsData?.result?.products ?? [];
-  const product = products.find((p: Product) => p._id === productData._id);
   const { mutate: updateProduct, isPending } = useUpdateProduct();
 
   type FormValues = {
@@ -42,12 +38,12 @@ export default function UpdateProductDialog({
     product_description: string;
   };
 
-  const initialValues: FormValues = useMemo(
+  const initialValues = useMemo(
     () => ({
-      product_name: product?.product_name || "",
-      product_description: product?.product_description || "",
+      product_name: product.product_name || "",
+      product_description: product.product_description || "",
     }),
-    [product]
+    [product],
   );
 
   const {
@@ -109,9 +105,9 @@ export default function UpdateProductDialog({
           <div className="p-4 space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`${id}-ppn`}>Product Plan Number (PPN)</Label>
-              <Input
-                id={`${id}-ppn`}
-                value={product.product_plan_number}
+                <Input
+                  id={`${id}-ppn`}
+                  defaultValue={product.product_plan_number || ""}
                 type="text"
                 disabled
                 className="bg-muted"
@@ -154,7 +150,10 @@ export default function UpdateProductDialog({
                 <Label htmlFor={`${id}-department`}>Department</Label>
                 <Input
                   id={`${id}-department`}
-                  value={product.department_id}
+                  defaultValue={
+                    product.department?.[0]?.department_name ??
+                    product.department_id
+                  }
                   type="text"
                   disabled
                   className="bg-muted"
@@ -165,7 +164,9 @@ export default function UpdateProductDialog({
                 <Label htmlFor={`${id}-project`}>Project</Label>
                 <Input
                   id={`${id}-project`}
-                  value={product.project_id}
+                  defaultValue={
+                    product.project?.[0]?.project_name ?? product.project_id
+                  }
                   type="text"
                   disabled
                   className="bg-muted"
@@ -178,7 +179,7 @@ export default function UpdateProductDialog({
                 <Label htmlFor={`${id}-version`}>Version</Label>
                 <Input
                   id={`${id}-version`}
-                  value={product.version}
+                  defaultValue={String(product.version ?? "")}
                   type="text"
                   disabled
                   className="bg-muted"
@@ -189,7 +190,7 @@ export default function UpdateProductDialog({
                 <Label htmlFor={`${id}-status`}>Status</Label>
                 <Input
                   id={`${id}-status`}
-                  value={product.status.toLowerCase()}
+                  defaultValue={product.status?.toLowerCase() ?? ""}
                   type="text"
                   disabled
                   className="bg-muted"

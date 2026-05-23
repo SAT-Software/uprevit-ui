@@ -323,14 +323,18 @@ const columns: ColumnDef<Item>[] = [
 ];
 
 export default function DashboardProductsTable() {
-  const { data, isLoading, error } = useGetAllProducts();
+  const { data, isLoading, error } = useGetAllProducts({
+    limit: 5,
+    sort: "actionAt",
+    order: "desc",
+  });
   const [sorting, setSorting] = useState<SortingState>([]);
   const router = useRouter();
 
   const recentProductsData = useMemo<Item[]>(
     () =>
       Array.isArray(data?.result?.products)
-        ? (data.result.products.slice(0, 5) as Item[])
+        ? (data.result.products as Item[])
         : [],
     [data]
   );

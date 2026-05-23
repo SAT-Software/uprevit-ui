@@ -3,11 +3,9 @@
 import {
   Column,
   ColumnDef,
-  ColumnFiltersState,
+  OnChangeFn,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -23,8 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import TableControls from "@/components/table/TableControls";
-import { advancedFilterFn } from "@/lib/table-filters";
 import { useRouter } from "next/navigation";
 import { AuditLog, Product } from "@/types/product";
 import { useState } from "react";
@@ -200,44 +196,34 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
+export default function ProjectPageProductsTable({
+  data,
+  sorting,
+  onSortingChange,
+}: {
+  data: Item[];
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
+}) {
   const router = useRouter();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn<Item>() },
-    onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
+    onSortingChange,
+    enableSortingRemoval: false,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
     },
   });
 
   return (
     <div className="w-full space-y-2 mt-2">
-      <TableControls
-        table={table}
-        searchColumnId="product_name"
-        searchPlaceholder="Filter products..."
-        filterColumns={[
-          { name: "product_plan_number", label: "PPN", type: "text" },
-          { name: "product_name", label: "Product Name", type: "text" },
-          { name: "department_name", label: "Department Name", type: "text" },
-          { name: "status", label: "Status", type: "text" },
-          { name: "version", label: "Version", type: "number" },
-          { name: "complete_count", label: "Progress", type: "number" },
-        ]}
-      />
       <div className="w-full border border-border rounded-lg overflow-hidden">
         <Table>
           <TableHeader className="bg-muted">

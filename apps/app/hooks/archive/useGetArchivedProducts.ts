@@ -1,15 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  buildListSearchParams,
+  ListQueryParams,
+} from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
 async function getArchivedProducts({
   signal,
   auth,
+  query,
 }: {
   signal: AbortSignal;
   auth: AuthContextProps;
+  query?: ListQueryParams;
 }) {
+  const params = buildListSearchParams(
+    auth.user?.profile?.workspaceId as string | undefined,
+    query,
+  );
+  params.set("status", "archived");
+
   const response = await fetch(
-    `/api/products?workspaceId=${auth?.user?.profile?.workspaceId}&status=archived`,
+    `/api/products?${params.toString()}`,
     {
       headers: {
         Authorization: `Bearer ${auth?.user?.access_token}`,
@@ -24,16 +36,15 @@ async function getArchivedProducts({
   }
   const data = await response.json();
 
-  console.log("archived products", data);
   return data;
 }
 
-export function useGetArchivedProducts() {
+export function useGetArchivedProducts(query?: ListQueryParams) {
   const auth = useAuth();
 
   return useQuery({
-    queryKey: ["archived-products"],
-    queryFn: ({ signal }) => getArchivedProducts({ signal, auth }),
+    queryKey: ["archived-products", auth.user?.profile?.workspaceId, query],
+    queryFn: ({ signal }) => getArchivedProducts({ signal, auth, query }),
     enabled: auth.isAuthenticated,
   });
 }

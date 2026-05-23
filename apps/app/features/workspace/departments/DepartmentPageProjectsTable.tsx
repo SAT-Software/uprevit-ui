@@ -3,11 +3,9 @@
 import {
   Column,
   ColumnDef,
-  ColumnFiltersState,
+  OnChangeFn,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -21,8 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import TableControls from "@/components/table/TableControls";
-import { advancedFilterFn } from "@/lib/table-filters";
 import { Project } from "@/types/project";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -195,43 +191,32 @@ const columns: ColumnDef<Project>[] = [
 
 export default function DepartmentPageProjectsTable({
   data,
+  sorting,
+  onSortingChange,
 }: {
   data: Project[];
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
 }) {
   const router = useRouter();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable<Project>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn<Project>() },
-    onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
+    onSortingChange,
+    enableSortingRemoval: false,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
     },
   });
 
   return (
     <div className="w-full space-y-2 mt-2">
-      <TableControls
-        table={table}
-        searchColumnId="project_name"
-        searchPlaceholder="Filter projects..."
-        filterColumns={[
-          { name: "project_number", label: "Project Number", type: "text" },
-          { name: "project_name", label: "Project Name", type: "text" },
-          { name: "project_description", label: "Description", type: "text" },
-        ]}
-      />
       <div className="w-full border border-border rounded-lg overflow-hidden">
         <Table>
           <TableHeader className="bg-muted">

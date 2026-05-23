@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
-import { useId, useState, useEffect } from "react";
+import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
@@ -29,8 +29,8 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import Image from "next/image";
-import AddUsersInDepartmentDropdown from "./AddUsersInDepartmentDropdown";
-import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
+import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";
@@ -58,11 +58,11 @@ export default function UpdateDepartmentDialog({
 }: {
   department?: DepartmentWithUsers;
 }) {
-  const { data: usersData } = useGetAllUsersByWorkspace();
-  const users = usersData?.data;
   const id = useId();
 
   const [open, setOpen] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [debouncedUserSearch, setDebouncedUserSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>(
     department?.users ?? [],
   );
@@ -71,6 +71,43 @@ export default function UpdateDepartmentDialog({
   );
   const [removeDepartmentImage, setRemoveDepartmentImage] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedUserSearch(userSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [userSearch]);
+
+  const {
+    data: usersData,
+    fetchNextPage: fetchNextUsersPage,
+    hasNextPage: hasNextUsersPage,
+    isFetching: isUsersFetching,
+    isFetchingNextPage: isUsersFetchingNextPage,
+    isPending: isUsersPending,
+    isError: isUsersError,
+  } = useGetUsersInfinite({
+    enabled: open,
+    search: debouncedUserSearch,
+  });
+
+  const users = useMemo(
+    () =>
+      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    [usersData],
+  );
+
+  const handleUserListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextUsersPage && !isUsersFetching) {
+      fetchNextUsersPage();
+    }
+  };
 
   const { mutate: updateDepartment, isPending } = useUpdateDepartment();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -132,6 +169,8 @@ export default function UpdateDepartmentDialog({
             reset();
             setNewDepartmentImage(null);
             setRemoveDepartmentImage(false);
+            setUserSearch("");
+            setDebouncedUserSearch("");
             setOpen(false);
           },
         },
@@ -272,15 +311,21 @@ export default function UpdateDepartmentDialog({
             <div className="space-y-2">
               <Label>Members</Label>
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
-                <AddUsersInDepartmentDropdown
-                  users={users?.map((user: User) => ({
-                    _id: user._id,
+                <AddUsersDropdown
+                  users={users.map((user: User) => ({
+                    _id: user._id as string,
                     name: user.name,
                     profileAvatar: user.profileAvatar,
                   }))}
                   onAddUser={handleAddUser}
                   onRemoveUser={handleRemoveUser}
                   selectedUsers={selectedUsers}
+                  userSearch={userSearch}
+                  onUserSearchChange={setUserSearch}
+                  onListScroll={handleUserListScroll}
+                  isPending={isUsersPending}
+                  isError={isUsersError}
+                  isFetchingNextPage={isUsersFetchingNextPage}
                 />
                 <div className="flex items-center justify-end flex-1">
                   {selectedUsers.length > 0 && (

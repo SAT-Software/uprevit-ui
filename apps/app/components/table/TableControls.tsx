@@ -90,36 +90,14 @@ const getOperatorsForType = (type: ColumnType) => {
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-const getSearchValue = (filterValue: unknown) => {
-  if (typeof filterValue === "string") {
-    return filterValue;
-  }
-
-  if (
-    filterValue &&
-    typeof filterValue === "object" &&
-    "value" in filterValue
-  ) {
-    return String((filterValue as { value?: unknown }).value ?? "");
-  }
-
-  return "";
-};
-
 type TableControlsProps<TData> = {
   table: Table<TData>;
-  searchColumnId: string;
-  searchPlaceholder: string;
   filterColumns: TableFilterColumn[];
-  inputClassName?: string;
 };
 
 export default function TableControls<TData>({
   table,
-  searchColumnId,
-  searchPlaceholder,
   filterColumns,
-  inputClassName = "w-60 h-7 text-xs",
 }: TableControlsProps<TData>) {
   const [filters, setFilters] = useState<FilterCondition[]>([]);
 
@@ -193,22 +171,11 @@ export default function TableControls<TData>({
     );
   };
 
-  const searchColumn = table.getColumn(searchColumnId);
-  const searchQuery = getSearchValue(searchColumn?.getFilterValue());
   const hasActiveFilters = table.getState().columnFilters.length > 0;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center justify-start w-full gap-3">
-        <Input
-          placeholder={searchPlaceholder}
-          value={searchQuery}
-          onChange={(event) =>
-            searchColumn?.setFilterValue(event.target.value)
-          }
-          className={inputClassName}
-        />
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="sm">

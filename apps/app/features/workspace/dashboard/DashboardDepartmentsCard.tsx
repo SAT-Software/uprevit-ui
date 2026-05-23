@@ -187,7 +187,7 @@ function DashboardDepartmentsCard() {
     isLoading,
     isError,
     refetch,
-  } = useGetAllDepartments();
+  } = useGetAllDepartments({ limit: 5, sort: "actionAt", order: "desc" });
 
   const departments = departmentsData?.result?.departments ?? [];
 
