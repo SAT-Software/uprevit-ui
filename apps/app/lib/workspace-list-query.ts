@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 export const WORKSPACE_LIST_LIMIT = 10;
 
@@ -200,41 +200,36 @@ export function useWorkspaceListQuery({
     [replaceParams, searchParamsString],
   );
 
-  const setPage = useCallback(
-    (page: number) =>
-      updateParams((params) => {
-        params.set("page", String(page));
-      }),
-    [updateParams],
-  );
+  const updateParamsRef = useRef(updateParams);
+  updateParamsRef.current = updateParams;
 
-  const setSort = useCallback(
-    (sort: string, order: ListOrder) =>
-      updateParams((params) => {
-        params.set("page", "1");
-        params.set("sort", sort);
-        params.set("order", order);
-      }),
-    [updateParams],
-  );
+  const setPage = useCallback((page: number) => {
+    updateParamsRef.current((params) => {
+      params.set("page", String(page));
+    });
+  }, []);
 
-  const setFilters = useCallback(
-    (filters: ListFilter[]) =>
-      updateParams((params) => {
-        params.set("page", "1");
-        setFiltersParam(params, filters);
-      }),
-    [updateParams],
-  );
+  const setSort = useCallback((sort: string, order: ListOrder) => {
+    updateParamsRef.current((params) => {
+      params.set("page", "1");
+      params.set("sort", sort);
+      params.set("order", order);
+    });
+  }, []);
 
-  const clearFilters = useCallback(
-    () =>
-      updateParams((params) => {
-        params.set("page", "1");
-        params.delete("filters");
-      }),
-    [updateParams],
-  );
+  const setFilters = useCallback((filters: ListFilter[]) => {
+    updateParamsRef.current((params) => {
+      params.set("page", "1");
+      setFiltersParam(params, filters);
+    });
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    updateParamsRef.current((params) => {
+      params.set("page", "1");
+      params.delete("filters");
+    });
+  }, []);
 
   return useMemo(
     () => ({
