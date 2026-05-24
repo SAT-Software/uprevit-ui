@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed archive page tab management and URL query parameter handling.
 - Fixed premature project validation and duplicate search parameter handling.
 - Fixed workspace table empty states when server-side filters return no rows.
+- Fixed workspace list sort allowlists and removed unused legacy table filter code.
+- Fixed archive department, project, and product sorting, pagination reset when `totalPages` is zero, and archive tab completion sync with error toasts.
+- Fixed list loading skeletons and table column widths on department and project detail pages.
+- Fixed redundant workspace list URL setter effect runs.
+- Fixed Amplify build issues from conflicting user map annotations and aligned product updates to send `product_name` with `product_description`.
 
 ## [0.2.0] - 2026-05-04
 
