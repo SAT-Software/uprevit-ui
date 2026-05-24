@@ -455,15 +455,14 @@ export default function ProductsPageProductTable() {
   );
 
   useEffect(() => {
-    if (
-      paginationInfo?.totalPages === 0 ||
-      !paginationInfo?.totalPages ||
-      listState.query.page <= paginationInfo.totalPages
-    ) {
+    if (!paginationInfo) return;
+    if (paginationInfo.totalPages === 0) {
+      if (listState.query.page !== 1) listState.setPage(1);
       return;
     }
-
-    listState.setPage(1);
+    if (listState.query.page > paginationInfo.totalPages) {
+      listState.setPage(1);
+    }
   }, [listState.query.page, listState.setPage, paginationInfo?.totalPages]);
 
   const table = useReactTable({

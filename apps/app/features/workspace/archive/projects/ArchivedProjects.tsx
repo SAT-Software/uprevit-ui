@@ -76,15 +76,14 @@ export function ArchivedProjects({ onRowClick }: ArchivedProjectsProps) {
   );
 
   useEffect(() => {
-    if (
-      pagination?.totalPages === 0 ||
-      !pagination?.totalPages ||
-      listState.query.page <= pagination.totalPages
-    ) {
+    if (!pagination) return;
+    if (pagination.totalPages === 0) {
+      if (listState.query.page !== 1) listState.setPage(1);
       return;
     }
-
-    listState.setPage(1);
+    if (listState.query.page > pagination.totalPages) {
+      listState.setPage(1);
+    }
   }, [listState.query.page, listState.setPage, pagination?.totalPages]);
 
   return (

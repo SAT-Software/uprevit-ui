@@ -107,15 +107,14 @@ export default function ProjectDetailPage() {
   );
 
   useEffect(() => {
-    if (
-      productsPagination?.totalPages === 0 ||
-      !productsPagination?.totalPages ||
-      listState.query.page <= productsPagination.totalPages
-    ) {
+    if (!productsPagination) return;
+    if (productsPagination.totalPages === 0) {
+      if (listState.query.page !== 1) listState.setPage(1);
       return;
     }
-
-    listState.setPage(1);
+    if (listState.query.page > productsPagination.totalPages) {
+      listState.setPage(1);
+    }
   }, [listState.query.page, listState.setPage, productsPagination?.totalPages]);
 
   if (!projectId) return notFound();

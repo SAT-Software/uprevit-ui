@@ -102,15 +102,14 @@ export default function DepartmentDetailPage() {
   );
 
   useEffect(() => {
-    if (
-      projectsPagination?.totalPages === 0 ||
-      !projectsPagination?.totalPages ||
-      listState.query.page <= projectsPagination.totalPages
-    ) {
+    if (!projectsPagination) return;
+    if (projectsPagination.totalPages === 0) {
+      if (listState.query.page !== 1) listState.setPage(1);
       return;
     }
-
-    listState.setPage(1);
+    if (listState.query.page > projectsPagination.totalPages) {
+      listState.setPage(1);
+    }
   }, [listState.query.page, listState.setPage, projectsPagination?.totalPages]);
 
   if (isLoading) {
