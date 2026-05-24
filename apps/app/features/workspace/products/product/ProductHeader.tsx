@@ -282,30 +282,34 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
       (updatedTabsCompleted.length / TOTAL_TABS) * 100,
     );
 
-    try {
-      await updateProductTabData({
+    const results = await Promise.allSettled([
+      updateProductTabData({
         id: productId,
         action: currentTabConfig.action,
         tab: currentTabConfig.tab,
         data: {
           tab_completed: !isCurrentTabCompleted,
         },
-      });
-
-      await updateProduct({
+      }),
+      updateProduct({
         _id: productId,
         action: "update-product",
         data: {
           _id: productId,
           complete_count: newCompletionPercentage,
         },
-      });
-    } catch {
+      }),
+    ]);
+
+    const hasFailure = results.some((result) => result.status === "rejected");
+
+    if (hasFailure) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
         queryClient.invalidateQueries({ queryKey: ["all-products"] }),
         queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
       ]);
+      toast.error("Failed to update tab completion. Please try again.");
     }
   };
 

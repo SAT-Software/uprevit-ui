@@ -465,7 +465,7 @@ export default function ProjectCreateDialog({
 
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
                 <AddUsersDropdown
-                  users={users.map((user: User) => ({
+                  users={users.map((user) => ({
                     _id: user._id as string,
                     name: user.name,
                     profileAvatar: user.profileAvatar,
