@@ -17,7 +17,6 @@ import {
   PiFloppyDiskDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
-import { toast } from "sonner";
 
 const AUTO_SAVE_STORAGE_KEY_PREFIX = "product-specifications-auto-save";
 
@@ -111,7 +110,6 @@ export default function Page() {
         },
         onError: (error) => {
           console.error("Failed to save product specifications:", error);
-          toast.error("Failed to save product specifications");
         },
       });
     },

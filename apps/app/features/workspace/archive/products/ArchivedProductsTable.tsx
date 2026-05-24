@@ -3,13 +3,9 @@
 import {
   Column,
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  PaginationState,
+  OnChangeFn,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -17,12 +13,7 @@ import {
 import { useMemo, useState } from "react";
 import {
   PiArrowCounterClockwiseDuotone,
-  PiBuildingsDuotone,
   PiCalendarDuotone,
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
   PiCaretDownDuotone,
   PiCaretUpDownDuotone,
   PiCaretUpDuotone,
@@ -37,19 +28,6 @@ import type { IconType } from "react-icons";
 
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Label } from "@uprevit/ui/components/ui/label";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@uprevit/ui/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@uprevit/ui/components/ui/select";
 import {
   Table,
   TableBody,
@@ -59,8 +37,6 @@ import {
   TableRow,
 } from "@uprevit/ui/components/ui/table";
 import { cn } from "@uprevit/ui/lib/utils";
-import TableControls from "@/components/table/TableControls";
-import { advancedFilterFn } from "@/lib/table-filters";
 
 export type ProductArchiveRow = {
   _id: string;
@@ -86,6 +62,8 @@ interface ArchivedProductsTableProps {
   onRowClick?: (item: ProductArchiveRow) => void;
   onRestore: (item: ProductArchiveRow) => void;
   loadingRowId?: string | null;
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
 }
 
 // Helper component for sortable headers
@@ -125,14 +103,9 @@ export function ArchivedProductsTable({
   onRowClick,
   onRestore,
   loadingRowId,
+  sorting,
+  onSortingChange,
 }: ArchivedProductsTableProps) {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const columns: ColumnDef<ProductArchiveRow>[] = useMemo(() => {
@@ -264,37 +237,18 @@ export function ArchivedProductsTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
+    manualSorting: true,
+    onSortingChange,
     enableSortingRemoval: false,
-    getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination,
-    getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn<ProductArchiveRow>() },
-    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
-      pagination,
-      columnFilters,
       columnVisibility,
     },
   });
 
   return (
-    <div className="space-y-2 mt-2 w-full">
-      <TableControls
-        table={table}
-        searchColumnId="product_name"
-        searchPlaceholder="Filter archived products..."
-        filterColumns={[
-          { name: "product_plan_number", label: "PPN", type: "text" },
-          { name: "product_name", label: "Product Name", type: "text" },
-          { name: "actionBy", label: "Archived By", type: "text" },
-          { name: "actionAt", label: "Archived On", type: "text" },
-          { name: "version", label: "Version", type: "number" },
-        ]}
-      />
+    <div className="w-full">
       {/* Table */}
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">
@@ -357,101 +311,6 @@ export function ArchivedProductsTable({
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between gap-8">
-        {/* Results per page (Deleted) */}
-
-        {/* Page number information */}
-        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
-          <p
-            className="text-muted-foreground text-sm whitespace-nowrap"
-            aria-live="polite"
-          >
-            <span className="text-foreground">
-              {table.getState().pagination.pageIndex *
-                table.getState().pagination.pageSize +
-                1}
-              -
-              {Math.min(
-                Math.max(
-                  table.getState().pagination.pageIndex *
-                    table.getState().pagination.pageSize +
-                    table.getState().pagination.pageSize,
-                  0,
-                ),
-                table.getRowCount(),
-              )}
-            </span>{" "}
-            of{" "}
-            <span className="text-foreground">
-              {table.getRowCount().toString()}
-            </span>
-          </p>
-        </div>
-
-        {/* Pagination buttons */}
-        <div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.firstPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to first page"
-                >
-                  <PiCaretCircleDoubleLeftDuotone
-                    size={16}
-                    aria-hidden="true"
-                  />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to previous page"
-                >
-                  <PiCaretCircleLeftDuotone size={16} aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to next page"
-                >
-                  <PiCaretCircleRightDuotone size={16} aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.lastPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to last page"
-                >
-                  <PiCaretCircleDoubleRightDuotone
-                    size={16}
-                    aria-hidden="true"
-                  />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
       </div>
     </div>
   );

@@ -17,6 +17,10 @@ export interface Product {
   parent_id?: string | null;
 
   auditLogs?: Array<AuditLog>;
+  createdBy?: string;
+  createdAt?: string;
+  modifiedBy?: string;
+  modifiedAt?: string;
   product_information?: {
     market_geography?: string;
     country_of_origin?: string;
@@ -118,6 +122,10 @@ export interface Product {
 export interface ProductApiResponse {
   _id?: string;
   auditLogs?: Array<AuditLog>;
+  createdBy?: string;
+  createdAt?: string;
+  modifiedBy?: string;
+  modifiedAt?: string;
   product_name?: string;
   project_id?: string;
   department_id?: string;

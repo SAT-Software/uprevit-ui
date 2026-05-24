@@ -24,7 +24,10 @@ function WorkspaceTab() {
     isLoading: workspaceLoading,
     error: workspaceError,
   } = useGetWorkspace();
-  const { data: workspaceUserData } = useGetAllUsersByWorkspace();
+  const { data: workspaceUserData } = useGetAllUsersByWorkspace({
+    page: 1,
+    limit: 1,
+  });
 
   const workspaceData = data?.workspace;
   const workspaceId = workspaceData?._id ?? "";
@@ -215,7 +218,7 @@ function WorkspaceTab() {
                 User Count
               </div>
               <div className="text-sm font-medium">
-                {workspaceUserData?.data?.length || 1}
+                {workspaceUserData?.result?.pagination?.totalCount ?? 0}
               </div>
             </div>
           </div>

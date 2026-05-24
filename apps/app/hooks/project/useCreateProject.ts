@@ -2,6 +2,7 @@ import { Project } from "@/types/project";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
@@ -23,8 +24,9 @@ export function useCreateProject() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to create project");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to create project"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -33,8 +35,9 @@ export function useCreateProject() {
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to create project");
-      toast.error("Failed to create project");
+      const message = getErrorMessage(error, "Failed to create project");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

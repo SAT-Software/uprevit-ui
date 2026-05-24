@@ -3,16 +3,15 @@
 import {
   Column,
   ColumnDef,
-  ColumnFiltersState,
+  OnChangeFn,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
   SortingState,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
 
+import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import {
   Table,
   TableBody,
@@ -21,8 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import TableControls from "@/components/table/TableControls";
-import { advancedFilterFn } from "@/lib/table-filters";
 import { Project } from "@/types/project";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -53,9 +50,9 @@ const SortableHeader = ({
       className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
     >
       <div className="flex items-center justify-between w-full gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{title}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="whitespace-nowrap">{title}</span>
         </div>
         {column.getIsSorted() === "desc" ? (
           <PiCaretDownDuotone className="ml-1 h-3 w-3" />
@@ -72,7 +69,7 @@ const SortableHeader = ({
 const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "project_number",
-    size: 180,
+    size: 140,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -85,11 +82,11 @@ const columns: ColumnDef<Project>[] = [
         {row.getValue("project_number")}
       </div>
     ),
-    minSize: 180,
+    minSize: 140,
   },
   {
     accessorKey: "project_name",
-    size: 240,
+    size: 200,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -105,7 +102,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "project_description",
-    size: 340,
+    size: 280,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -123,6 +120,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "users",
+    size: 88,
     header: ({ column }) => (
       <SortableHeader column={column} title="Users" icon={PiUsersDuotone} />
     ),
@@ -133,6 +131,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "createdOn",
+    size: 175,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -163,6 +162,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "modifiedOn",
+    size: 175,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -193,47 +193,45 @@ const columns: ColumnDef<Project>[] = [
   },
 ];
 
+const DEPARTMENT_PROJECT_TABLE_COLUMN_COUNT = 6;
+
 export default function DepartmentPageProjectsTable({
   data,
+  sorting,
+  onSortingChange,
+  isLoading = false,
 }: {
   data: Project[];
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
+  isLoading?: boolean;
 }) {
   const router = useRouter();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable<Project>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn<Project>() },
-    onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
+    onSortingChange,
+    enableSortingRemoval: false,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
     },
   });
 
   return (
     <div className="w-full space-y-2 mt-2">
-      <TableControls
-        table={table}
-        searchColumnId="project_name"
-        searchPlaceholder="Filter projects..."
-        filterColumns={[
-          { name: "project_number", label: "Project Number", type: "text" },
-          { name: "project_name", label: "Project Name", type: "text" },
-          { name: "project_description", label: "Description", type: "text" },
-        ]}
-      />
       <div className="w-full border border-border rounded-lg overflow-hidden">
-        <Table>
+        <Table className="table-fixed w-full">
+          <colgroup>
+            {table.getHeaderGroups()[0]?.headers.map((header) => (
+              <col key={header.id} style={{ width: `${header.getSize()}px` }} />
+            ))}
+          </colgroup>
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -241,8 +239,7 @@ export default function DepartmentPageProjectsTable({
                   return (
                     <TableHead
                       key={header.id}
-                      className="border-r border-border"
-                      style={{ width: header.getSize() }}
+                      className="h-11 border-r border-border last:border-r-0"
                     >
                       {header.isPlaceholder
                         ? null
@@ -257,7 +254,11 @@ export default function DepartmentPageProjectsTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableBodySkeleton
+                columnCount={DEPARTMENT_PROJECT_TABLE_COLUMN_COUNT}
+              />
+            ) : !isLoading && table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

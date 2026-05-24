@@ -21,7 +21,6 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
-import { toast } from "sonner";
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -63,9 +62,8 @@ export default function DialogUploadSourceFiles({
 
       setIsDialogOpen(false);
       setSelectedFiles([]);
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to upload files");
+    } catch (error) {
+      console.error(error);
     } finally {
       setIsUploading(false);
     }

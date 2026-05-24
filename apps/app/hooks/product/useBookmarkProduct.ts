@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface ProductBookmark {
   user_id: string;
@@ -31,8 +32,9 @@ export function useBookmarkProduct() {
         }
       );
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to create bookmark product");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to create bookmark product"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -41,8 +43,9 @@ export function useBookmarkProduct() {
       queryClient.invalidateQueries({ queryKey: ["all-bookmark-folders"] });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to create bookmark product");
-      toast.error(error.message || "Failed to create bookmark product");
+      const message = getErrorMessage(error, "Failed to create bookmark product");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 type UploadSourceFilesRequest = {
   workspace_id: string;
@@ -33,8 +34,9 @@ export function useUploadSourceFiles(currentFolderId: string) {
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to upload source files");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to upload source files"),
+        );
       }
 
       return res.json().catch(() => null);
@@ -47,8 +49,9 @@ export function useUploadSourceFiles(currentFolderId: string) {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to upload source files");
-      toast.error(error.message || "Failed to upload source files");
+      const message = getErrorMessage(error, "Failed to upload source files");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

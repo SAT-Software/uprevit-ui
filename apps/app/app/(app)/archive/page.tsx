@@ -18,16 +18,32 @@ import {
   PiFolderDuotone,
   PiCubeDuotone,
 } from "react-icons/pi";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
 
+const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
+
 function ArchivePage() {
   const [activeTab, setActiveTab] = useState("department");
   const [showLogs, setShowLogs] = useState(false);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
   const workspaceId = auth.user?.profile?.workspaceId as string | undefined;
+
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of LIST_QUERY_PARAMS) {
+      params.delete(key);
+    }
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+    setActiveTab(value);
+  };
 
   const getTabLabel = () => {
     if (showLogs) return "logs";
@@ -49,7 +65,7 @@ function ArchivePage() {
       <Tabs
         defaultValue="department"
         value={activeTab}
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className="flex flex-col gap-0 border border-border bg-background rounded-xl w-full h-full overflow-hidden"
       >
         {/* Header Section */}
@@ -117,13 +133,19 @@ function ArchivePage() {
           ) : (
             <>
               <TabsContent value="department" className="h-full mt-0 pb-4">
-                <ArchivedDepartments onRowClick={(_row: unknown) => undefined} />
+                {activeTab === "department" && (
+                  <ArchivedDepartments onRowClick={(_row: unknown) => undefined} />
+                )}
               </TabsContent>
               <TabsContent value="project" className="h-full mt-0 pb-4">
-                <ArchivedProjects onRowClick={(_row: unknown) => undefined} />
+                {activeTab === "project" && (
+                  <ArchivedProjects onRowClick={(_row: unknown) => undefined} />
+                )}
               </TabsContent>
               <TabsContent value="product" className="h-full mt-0 pb-4">
-                <ArchivedProducts onRowClick={(_row: unknown) => undefined} />
+                {activeTab === "product" && (
+                  <ArchivedProducts onRowClick={(_row: unknown) => undefined} />
+                )}
               </TabsContent>
             </>
           )}

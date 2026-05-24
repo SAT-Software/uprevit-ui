@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useArchiveDepartment() {
   const queryClient = useQueryClient();
@@ -24,8 +25,9 @@ export function useArchiveDepartment() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to archive department");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to archive department"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -36,8 +38,9 @@ export function useArchiveDepartment() {
       router.push("/archive");
     },
     onError: (error) => {
-      console.error(error.message || "Failed to archive department");
-      toast.error("Failed to archive department");
+      const message = getErrorMessage(error, "Failed to archive department");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

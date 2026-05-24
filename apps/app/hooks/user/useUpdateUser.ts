@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 async function updateUser(
   userData: Partial<User>,
@@ -24,8 +25,9 @@ async function updateUser(
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to update user");
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to update user")
+    );
   }
 
   const data = await response.json();
@@ -52,14 +54,22 @@ export function useUpdateUser() {
     },
     onSuccess: (data) => {
       toast.success("User updated successfully");
+      const workspaceId = auth.user?.profile?.workspaceId;
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      if (workspaceId) {
+        queryClient.invalidateQueries({ queryKey: ["users", workspaceId] });
+        queryClient.invalidateQueries({
+          queryKey: ["users-infinite", workspaceId],
+        });
+      }
       if (data?.user?.id) {
         queryClient.setQueryData(["user", userId], data);
       }
     },
     onError: (error) => {
-      console.error(error.message || "Failed to update user profile");
-      toast.error("Failed to update user profile");
+      const message = getErrorMessage(error, "Failed to update user profile");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

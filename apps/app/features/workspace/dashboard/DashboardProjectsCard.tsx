@@ -182,7 +182,7 @@ function DashboardProjectsCard() {
     isLoading,
     isError,
     refetch,
-  } = useGetAllProjects();
+  } = useGetAllProjects({ limit: 5, sort: "actionAt", order: "desc" });
 
   const projects = projectsData?.result?.projects ?? [];
 

@@ -1,19 +1,34 @@
 "use client";
 
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import {
+  ListFilterColumn,
+  useWorkspaceListQuery,
+} from "@/lib/workspace-list-query";
 import Image from "next/image";
 import Link from "next/link";
 import {
   PiArrowCircleUpRightDuotone,
   PiCalendarDuotone,
   PiBuildingsDuotone,
+  PiCaretUpDownDuotone,
   PiKanbanDuotone,
 } from "react-icons/pi";
 
@@ -36,6 +51,21 @@ export interface ProjectProps {
   membersCount?: number;
   auditLogs?: { actionAt: string; action: string }[];
 }
+
+const PROJECT_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "project_name", label: "Project Name", type: "text" },
+  { name: "project_description", label: "Description", type: "text" },
+  { name: "project_manager", label: "Project Manager", type: "text" },
+  { name: "lastChangedBy", label: "Last Changed By", type: "text" },
+  { name: "lastChangedOn", label: "Last Changed On", type: "date" },
+];
+
+const PROJECT_SORT_OPTIONS = [
+  { value: "project_name", label: "Project Name" },
+  { value: "project_description", label: "Description" },
+  { value: "project_manager", label: "Project Manager" },
+  { value: "actionAt", label: "Last Changed" },
+];
 
 function ProjectLoadingCard() {
   return (
@@ -176,38 +206,89 @@ function ProjectCard({ project }: { project: ProjectProps }) {
 }
 
 function ProjectsCard() {
+  const listState = useWorkspaceListQuery({
+    defaultSort: "project_name",
+    allowedSortFields: PROJECT_SORT_OPTIONS.map((option) => option.value),
+    filterColumns: PROJECT_FILTER_COLUMNS,
+  });
   const {
     data: projectsData,
     isLoading,
     isError,
     refetch,
-  } = useGetAllProjects();
+  } = useGetAllProjects(listState.query);
 
   const projects = projectsData?.result?.projects ?? [];
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-start w-full gap-2">
-        {[...Array(3)].map((_, index) => (
-          <ProjectLoadingCard key={index} />
-        ))}
-      </div>
-    );
-  }
+  const pagination = projectsData?.result?.pagination;
 
   if (isError) {
     return <ProjectErrorState onRetry={() => refetch()} />;
   }
 
   return (
-    <div className="flex flex-col items-start w-full gap-2 h-full">
-      {projects.length === 0 ? (
+    <div className="flex flex-col items-start w-full gap-2">
+      {isLoading ? (
+        <WorkspaceListToolbarSkeleton />
+      ) : (
+        <div className="flex flex-wrap items-center gap-2 w-full">
+        <WorkspaceListControls
+          filters={listState.query.filters}
+          filterColumns={PROJECT_FILTER_COLUMNS}
+          onApplyFilters={listState.setFilters}
+          onClearFilters={listState.clearFilters}
+        />
+        <div className="flex items-center gap-2">
+          <Select
+            value={listState.query.sort}
+            onValueChange={(sort) =>
+              listState.setSort(sort, listState.query.order)
+            }
+          >
+            <SelectTrigger className="h-8 w-[230px] text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PROJECT_SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  Sort by: {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-2 text-xs text-muted-foreground"
+            onClick={() =>
+              listState.setSort(
+                listState.query.sort,
+                listState.query.order === "asc" ? "desc" : "asc",
+              )
+            }
+          >
+            <PiCaretUpDownDuotone />
+            {listState.query.order === "asc" ? "A-Z" : "Z-A"}
+          </Button>
+        </div>
+      </div>
+      )}
+      {isLoading ? (
+        [...Array(3)].map((_, index) => (
+          <ProjectLoadingCard key={index} />
+        ))
+      ) : projects.length === 0 ? (
         <ProjectEmptyState />
       ) : (
         projects.map((project: ProjectProps) => (
           <ProjectCard key={project._id} project={project} />
         ))
       )}
+      {!isLoading ? (
+        <WorkspaceListPagination
+          pagination={pagination}
+          onPageChange={listState.setPage}
+        />
+      ) : null}
     </div>
   );
 }
