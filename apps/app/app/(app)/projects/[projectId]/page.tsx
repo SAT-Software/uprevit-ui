@@ -86,14 +86,21 @@ export default function ProjectDetailPage() {
   });
 
   const { data, isLoading, isError } = useGetProjectById(projectId);
-  const { data: productsData } = useGetAllProducts({
+  const {
+    data: productsData,
+    isFetching: isProductsFetching,
+    isPending: isProductsPending,
+  } = useGetAllProducts({
     ...listState.query,
     projectId,
   });
 
   const productsPagination = productsData?.result?.pagination;
+  const isProductsListBusy = isProductsPending || isProductsFetching;
   const hasProductsToList =
-    (productsPagination?.totalCount ?? 0) > 0 || listState.query.filters.length > 0;
+    isProductsListBusy ||
+    (productsPagination?.totalCount ?? 0) > 0 ||
+    listState.query.filters.length > 0;
   const productSorting = useMemo<SortingState>(
     () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
     [listState.query.order, listState.query.sort],
@@ -412,6 +419,7 @@ export default function ProjectDetailPage() {
                 <ProjectPageProductsTable
                   data={products}
                   sorting={productSorting}
+                  isLoading={isProductsListBusy}
                   onSortingChange={(updater) => {
                     const nextSorting =
                       typeof updater === "function"

@@ -3,6 +3,7 @@
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Select,
@@ -220,23 +221,16 @@ function ProjectsCard() {
   const projects = projectsData?.result?.projects ?? [];
   const pagination = projectsData?.result?.pagination;
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-start w-full gap-2">
-        {[...Array(3)].map((_, index) => (
-          <ProjectLoadingCard key={index} />
-        ))}
-      </div>
-    );
-  }
-
   if (isError) {
     return <ProjectErrorState onRetry={() => refetch()} />;
   }
 
   return (
     <div className="flex flex-col items-start w-full gap-2">
-      <div className="flex flex-wrap items-center gap-2 w-full">
+      {isLoading ? (
+        <WorkspaceListToolbarSkeleton />
+      ) : (
+        <div className="flex flex-wrap items-center gap-2 w-full">
         <WorkspaceListControls
           filters={listState.query.filters}
           filterColumns={PROJECT_FILTER_COLUMNS}
@@ -277,17 +271,24 @@ function ProjectsCard() {
           </Button>
         </div>
       </div>
-      {projects.length === 0 ? (
+      )}
+      {isLoading ? (
+        [...Array(3)].map((_, index) => (
+          <ProjectLoadingCard key={index} />
+        ))
+      ) : projects.length === 0 ? (
         <ProjectEmptyState />
       ) : (
         projects.map((project: ProjectProps) => (
           <ProjectCard key={project._id} project={project} />
         ))
       )}
-      <WorkspaceListPagination
-        pagination={pagination}
-        onPageChange={listState.setPage}
-      />
+      {!isLoading ? (
+        <WorkspaceListPagination
+          pagination={pagination}
+          onPageChange={listState.setPage}
+        />
+      ) : null}
     </div>
   );
 }

@@ -79,7 +79,11 @@ export default function DepartmentDetailPage() {
   });
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId);
-  const { data: projectsData } = useGetAllProjects({
+  const {
+    data: projectsData,
+    isFetching: isProjectsFetching,
+    isPending: isProjectsPending,
+  } = useGetAllProjects({
     ...listState.query,
     departmentId,
   });
@@ -87,8 +91,11 @@ export default function DepartmentDetailPage() {
   const department = data?.department;
   const projects = projectsData?.result?.projects || [];
   const projectsPagination = projectsData?.result?.pagination;
+  const isProjectsListBusy = isProjectsPending || isProjectsFetching;
   const hasProjectsToList =
-    (projectsPagination?.totalCount ?? 0) > 0 || listState.query.filters.length > 0;
+    isProjectsListBusy ||
+    (projectsPagination?.totalCount ?? 0) > 0 ||
+    listState.query.filters.length > 0;
   const projectSorting = useMemo<SortingState>(
     () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
     [listState.query.order, listState.query.sort],
@@ -402,6 +409,7 @@ export default function DepartmentDetailPage() {
                 <DepartmentPageProjectsTable
                   data={projects}
                   sorting={projectSorting}
+                  isLoading={isProjectsListBusy}
                   onSortingChange={(updater) => {
                     const nextSorting =
                       typeof updater === "function"

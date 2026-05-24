@@ -3,6 +3,7 @@
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Select,
@@ -226,23 +227,16 @@ function DepartmentsCard() {
   const departments = departmentsData?.result?.departments ?? [];
   const pagination = departmentsData?.result?.pagination;
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-start w-full gap-2">
-        {[...Array(3)].map((_, index) => (
-          <DepartmentLoadingCard key={index} />
-        ))}
-      </div>
-    );
-  }
-
   if (isError) {
     return <DepartmentErrorState onRetry={() => refetch()} />;
   }
 
   return (
     <div className="flex flex-col items-start w-full gap-2">
-      <div className="flex flex-wrap items-center gap-2 w-full">
+      {isLoading ? (
+        <WorkspaceListToolbarSkeleton />
+      ) : (
+        <div className="flex flex-wrap items-center gap-2 w-full">
         <WorkspaceListControls
           filters={listState.query.filters}
           filterColumns={DEPARTMENT_FILTER_COLUMNS}
@@ -283,17 +277,24 @@ function DepartmentsCard() {
           </Button>
         </div>
       </div>
-      {departments.length === 0 ? (
+      )}
+      {isLoading ? (
+        [...Array(3)].map((_, index) => (
+          <DepartmentLoadingCard key={index} />
+        ))
+      ) : departments.length === 0 ? (
         <DepartmentEmptyState />
       ) : (
         departments.map((department: DepartmentsProps) => (
           <DepartmentCard key={department._id} department={department} />
         ))
       )}
-      <WorkspaceListPagination
-        pagination={pagination}
-        onPageChange={listState.setPage}
-      />
+      {!isLoading ? (
+        <WorkspaceListPagination
+          pagination={pagination}
+          onPageChange={listState.setPage}
+        />
+      ) : null}
     </div>
   );
 }
