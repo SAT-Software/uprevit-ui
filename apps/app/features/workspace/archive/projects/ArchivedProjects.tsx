@@ -31,9 +31,12 @@ const ARCHIVED_PROJECT_FILTER_COLUMNS: ListFilterColumn[] = [
 ];
 
 const ARCHIVED_PROJECT_SORT_FIELDS = [
+  "project_number",
   "project_name",
   "project_description",
   "project_manager",
+  "users",
+  "actionBy",
   "actionAt",
   "_id",
 ];

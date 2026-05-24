@@ -51,9 +51,13 @@ const DEPARTMENT_PROJECT_FILTER_COLUMNS: ListFilterColumn[] = [
 ];
 
 const DEPARTMENT_PROJECT_SORT_FIELDS = [
+  "project_number",
   "project_name",
   "project_description",
   "project_manager",
+  "users",
+  "createdOn",
+  "modifiedOn",
   "actionAt",
   "_id",
 ];
