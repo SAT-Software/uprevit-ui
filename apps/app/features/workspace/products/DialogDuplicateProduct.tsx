@@ -66,7 +66,7 @@ export default function DialogDuplicateProduct({
     defaultValues: {
       ppn: "",
       productName: product.product_name,
-      description: product.description,
+      description: product.product_description,
       department: product.department_id,
       project: product.project_id,
       version: 1,
