@@ -17,7 +17,6 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { Item } from "./ProductsPageProductTable";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
-import { Product } from "@/types/product";
 import { PiXCircleDuotone, PiCheckCircleDuotone } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
@@ -58,26 +57,27 @@ export default function UpdateProductDialog({
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const updatedProduct: Product = {
-      ...product,
-      action: "update-product",
-      data: {
+    updateProduct(
+      {
         _id: product._id,
-        name: data.product_name,
-        product_description: data.product_description,
+        action: "update-product",
+        data: {
+          _id: product._id,
+          product_name: data.product_name,
+          product_description: data.product_description,
+        },
       },
-    };
-
-    updateProduct(updatedProduct, {
-      onSuccess: () => {
-        onOpenChange(false);
-        reset();
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          reset();
+        },
+        onError: () => {
+          onOpenChange(false);
+          reset();
+        },
       },
-      onError: () => {
-        onOpenChange(false);
-        reset();
-      },
-    });
+    );
   };
 
   return (
@@ -105,9 +105,9 @@ export default function UpdateProductDialog({
           <div className="p-4 space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`${id}-ppn`}>Product Plan Number (PPN)</Label>
-                <Input
-                  id={`${id}-ppn`}
-                  defaultValue={product.product_plan_number || ""}
+              <Input
+                id={`${id}-ppn`}
+                defaultValue={product.product_plan_number || ""}
                 type="text"
                 disabled
                 className="bg-muted"

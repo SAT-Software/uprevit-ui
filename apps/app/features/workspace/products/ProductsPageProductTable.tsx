@@ -74,7 +74,7 @@ import {
 export type Item = {
   _id: string;
   productId?: string;
-  description: string;
+  product_description: string;
   action: string;
   action_at: string;
   action_by: string;
@@ -450,7 +450,9 @@ export default function ProductsPageProductTable() {
 
   const paginationInfo = data?.result?.pagination;
   const sorting = useMemo<SortingState>(
-    () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
+    () => [
+      { id: listState.query.sort, desc: listState.query.order === "desc" },
+    ],
     [listState.query.order, listState.query.sort],
   );
 
@@ -562,11 +564,13 @@ export default function ProductsPageProductTable() {
             {isLoading ? (
               [...Array(6)].map((_, rowIndex) => (
                 <TableRow key={rowIndex}>
-                  {[...Array(PRODUCT_TABLE_COLUMN_COUNT)].map((__, cellIndex) => (
-                    <TableCell key={cellIndex}>
-                      <div className="h-4 w-full rounded bg-muted animate-pulse" />
-                    </TableCell>
-                  ))}
+                  {[...Array(PRODUCT_TABLE_COLUMN_COUNT)].map(
+                    (__, cellIndex) => (
+                      <TableCell key={cellIndex}>
+                        <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                      </TableCell>
+                    ),
+                  )}
                 </TableRow>
               ))
             ) : table?.getRowModel().rows?.length ? (
