@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface RemoveProductBookmark {
   user_id: string;
@@ -33,9 +34,11 @@ export function useRemoveProductBookmark() {
         }
       );
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
         throw new Error(
-          text || "Failed to remove product from bookmark folder"
+          await getResponseErrorMessage(
+            res,
+            "Failed to remove product from bookmark folder",
+          ),
         );
       }
       return res.json().catch(() => null);
@@ -47,12 +50,12 @@ export function useRemoveProductBookmark() {
       });
     },
     onError: (error) => {
-      console.error(
-        error.message || "Failed to remove product from bookmark folder"
+      const message = getErrorMessage(
+        error,
+        "Failed to remove product from bookmark folder",
       );
-      toast.error(
-        error.message || "Failed to remove product from bookmark folder"
-      );
+      console.error(message);
+      toast.error(message);
     },
   });
 }

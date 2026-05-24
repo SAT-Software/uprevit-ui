@@ -669,8 +669,6 @@ export default function ProductComponentDetailsTable({
       <div className="shrink-0">
         <TableControls
           table={table}
-          searchColumnId="component_number"
-          searchPlaceholder="Filter components..."
           filterColumns={[
             { name: "component_number", label: "Component #", type: "text" },
             {

@@ -12,3 +12,20 @@ export interface User {
   workspaceId: string | null;
   status: "invited" | "active" | "inactive";
 }
+
+export type WorkspaceListPagination = {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};
+
+export type UsersListResponse = {
+  message: string;
+  result: {
+    users: User[];
+    pagination: WorkspaceListPagination;
+  };
+};

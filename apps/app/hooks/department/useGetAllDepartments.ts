@@ -1,19 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  buildListSearchParams,
+  ListQueryParams,
+} from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllDepartments({
+export async function getAllDepartments({
   signal,
   auth,
+  query,
 }: {
   signal: AbortSignal;
   auth: AuthContextProps;
+  query?: ListQueryParams;
 }) {
+  const params = buildListSearchParams(
+    auth.user?.profile?.workspaceId as string | undefined,
+    query,
+  );
+
   const response = await fetch(
-    `/api/departments?workspaceId=${auth?.user?.profile?.workspaceId}`,
+    `/api/departments?${params.toString()}`,
     {
       headers: {
-        Authorization: `Bearer ${auth?.user?.access_token}`, // Add your authorization header here
-        "Content-Type": "application/json", // Example of another header
+        Authorization: `Bearer ${auth?.user?.access_token}`,
+        "Content-Type": "application/json",
       },
       signal,
     }
@@ -26,12 +37,12 @@ async function getAllDepartments({
   return data;
 }
 
-export function useGetAllDepartments() {
+export function useGetAllDepartments(query?: ListQueryParams) {
   const auth = useAuth();
 
   return useQuery({
-    queryKey: ["all-departments"],
-    queryFn: ({ signal }) => getAllDepartments({ signal, auth }),
+    queryKey: ["all-departments", auth.user?.profile?.workspaceId, query],
+    queryFn: ({ signal }) => getAllDepartments({ signal, auth, query }),
     enabled: auth.isAuthenticated,
   });
 }

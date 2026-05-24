@@ -3,11 +3,9 @@
 import {
   Column,
   ColumnDef,
-  ColumnFiltersState,
+  OnChangeFn,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -15,6 +13,7 @@ import {
 
 import { cn } from "@uprevit/ui/lib/utils";
 import { Badge } from "@uprevit/ui/components/ui/badge";
+import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import {
   Table,
   TableBody,
@@ -23,8 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import TableControls from "@/components/table/TableControls";
-import { advancedFilterFn } from "@/lib/table-filters";
 import { useRouter } from "next/navigation";
 import { AuditLog, Product } from "@/types/product";
 import { useState } from "react";
@@ -83,9 +80,9 @@ const SortableHeader = ({
       className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
     >
       <div className="flex items-center justify-between w-full gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{title}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="whitespace-nowrap">{title}</span>
         </div>
         {column.getIsSorted() === "desc" ? (
           <PiCaretDownDuotone className="ml-1 h-3 w-3" />
@@ -102,6 +99,7 @@ const SortableHeader = ({
 const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "product_plan_number",
+    size: 110,
     header: ({ column }) => (
       <SortableHeader column={column} title="PPN" icon={PiHashDuotone} />
     ),
@@ -112,6 +110,7 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     accessorKey: "product_name",
+    size: 190,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -128,6 +127,7 @@ const columns: ColumnDef<Item>[] = [
   {
     id: "department_name",
     accessorFn: (row) => row.department?.[0]?.department_name ?? "N/A",
+    size: 150,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -146,6 +146,7 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     accessorKey: "status",
+    size: 110,
     header: ({ column }) => (
       <SortableHeader column={column} title="Status" icon={PiInfoDuotone} />
     ),
@@ -164,6 +165,7 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     accessorKey: "version",
+    size: 95,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -179,6 +181,7 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     accessorKey: "complete_count",
+    size: 160,
     header: ({ column }) => (
       <SortableHeader
         column={column}
@@ -200,46 +203,45 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
+const PROJECT_PRODUCT_TABLE_COLUMN_COUNT = 6;
+
+export default function ProjectPageProductsTable({
+  data,
+  sorting,
+  onSortingChange,
+  isLoading = false,
+}: {
+  data: Item[];
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
+  isLoading?: boolean;
+}) {
   const router = useRouter();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    defaultColumn: { filterFn: advancedFilterFn<Item>() },
-    onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
+    onSortingChange,
+    enableSortingRemoval: false,
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
     },
   });
 
   return (
     <div className="w-full space-y-2 mt-2">
-      <TableControls
-        table={table}
-        searchColumnId="product_name"
-        searchPlaceholder="Filter products..."
-        filterColumns={[
-          { name: "product_plan_number", label: "PPN", type: "text" },
-          { name: "product_name", label: "Product Name", type: "text" },
-          { name: "department_name", label: "Department Name", type: "text" },
-          { name: "status", label: "Status", type: "text" },
-          { name: "version", label: "Version", type: "number" },
-          { name: "complete_count", label: "Progress", type: "number" },
-        ]}
-      />
       <div className="w-full border border-border rounded-lg overflow-hidden">
-        <Table>
+        <Table className="table-fixed w-full">
+          <colgroup>
+            {table.getHeaderGroups()[0]?.headers.map((header) => (
+              <col key={header.id} style={{ width: `${header.getSize()}px` }} />
+            ))}
+          </colgroup>
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -247,7 +249,7 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
                   return (
                     <TableHead
                       key={header.id}
-                      className="border-r border-border"
+                      className="h-11 border-r border-border last:border-r-0"
                     >
                       {header.isPlaceholder
                         ? null
@@ -262,7 +264,11 @@ export default function ProjectPageProductsTable({ data }: { data: Item[] }) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableBodySkeleton
+                columnCount={PROJECT_PRODUCT_TABLE_COLUMN_COUNT}
+              />
+            ) : !isLoading && table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

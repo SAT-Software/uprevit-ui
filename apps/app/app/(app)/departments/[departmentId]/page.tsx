@@ -4,7 +4,11 @@ import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntit
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import Image from "next/image";
 import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import type { SortingState } from "@tanstack/react-table";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Tooltip,
@@ -21,12 +25,15 @@ import {
 import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
 import ShareDepartmentDialog from "@/features/workspace/departments/ShareDepartmentDialog";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
-import { Project } from "@/types/project";
 import { AuditLog } from "@/types/audit-log";
 import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
+import {
+  ListFilterColumn,
+  useWorkspaceListQuery,
+} from "@/lib/workspace-list-query";
 
 interface DepartmentUser {
   _id: string;
@@ -34,6 +41,26 @@ interface DepartmentUser {
   email: string;
   profileAvatar?: string;
 }
+
+const DEPARTMENT_PROJECT_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "project_name", label: "Project Name", type: "text" },
+  { name: "project_description", label: "Description", type: "text" },
+  { name: "project_manager", label: "Project Manager", type: "text" },
+  { name: "lastChangedBy", label: "Last Changed By", type: "text" },
+  { name: "lastChangedOn", label: "Last Changed On", type: "date" },
+];
+
+const DEPARTMENT_PROJECT_SORT_FIELDS = [
+  "project_number",
+  "project_name",
+  "project_description",
+  "project_manager",
+  "users",
+  "createdOn",
+  "modifiedOn",
+  "actionAt",
+  "_id",
+];
 
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
@@ -44,15 +71,46 @@ export default function DepartmentDetailPage() {
   const isAdmin = isAdminProfile(auth.user?.profile);
   const activeTab = searchParams.get("tab") === "logs" && isAdmin ? "logs" : "overview";
   const isLogsView = activeTab === "logs";
+  const listState = useWorkspaceListQuery({
+    defaultSort: "actionAt",
+    defaultOrder: "desc",
+    allowedSortFields: DEPARTMENT_PROJECT_SORT_FIELDS,
+    filterColumns: DEPARTMENT_PROJECT_FILTER_COLUMNS,
+  });
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId);
-  const { data: projectsData } = useGetAllProjects();
+  const {
+    data: projectsData,
+    isFetching: isProjectsFetching,
+    isPending: isProjectsPending,
+  } = useGetAllProjects({
+    ...listState.query,
+    departmentId,
+  });
 
   const department = data?.department;
-  const projects =
-    projectsData?.result?.projects?.filter(
-      (p: Project) => p.department_id === departmentId,
-    ) || [];
+  const projects = projectsData?.result?.projects || [];
+  const projectsPagination = projectsData?.result?.pagination;
+  const isProjectsListBusy = isProjectsPending || isProjectsFetching;
+  const hasProjectsToList =
+    isProjectsListBusy ||
+    (projectsPagination?.totalCount ?? 0) > 0 ||
+    listState.query.filters.length > 0;
+  const projectSorting = useMemo<SortingState>(
+    () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
+    [listState.query.order, listState.query.sort],
+  );
+
+  useEffect(() => {
+    if (!projectsPagination) return;
+    if (projectsPagination.totalPages === 0) {
+      if (listState.query.page !== 1) listState.setPage(1);
+      return;
+    }
+    if (listState.query.page > projectsPagination.totalPages) {
+      listState.setPage(1);
+    }
+  }, [listState.query.page, listState.setPage, projectsPagination?.totalPages]);
 
   if (isLoading) {
     return (
@@ -339,19 +397,54 @@ export default function DepartmentDetailPage() {
           </div>
 
           <div className="w-full">
-            {projects.length > 0 ? (
-              <DepartmentPageProjectsTable data={projects} />
+            {hasProjectsToList ? (
+              <div className="flex flex-col gap-2">
+                <WorkspaceListControls
+                  filters={listState.query.filters}
+                  filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
+                  onApplyFilters={listState.setFilters}
+                  onClearFilters={listState.clearFilters}
+                />
+                <DepartmentPageProjectsTable
+                  data={projects}
+                  sorting={projectSorting}
+                  isLoading={isProjectsListBusy}
+                  onSortingChange={(updater) => {
+                    const nextSorting =
+                      typeof updater === "function"
+                        ? updater(projectSorting)
+                        : updater;
+                    const next = nextSorting[0];
+                    if (!next) return;
+                    listState.setSort(next.id, next.desc ? "desc" : "asc");
+                  }}
+                />
+                {projectsPagination ? (
+                  <WorkspaceListPagination
+                    pagination={projectsPagination}
+                    onPageChange={listState.setPage}
+                  />
+                ) : null}
+              </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
-                  <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
+              <div className="flex flex-col gap-2">
+                <WorkspaceListControls
+                  filters={listState.query.filters}
+                  filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
+                  onApplyFilters={listState.setFilters}
+                  onClearFilters={listState.clearFilters}
+                />
+                <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
+                  <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
+                    <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    No projects found
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This department doesn&apos;t have any projects yet.
+                  </p>
                 </div>
-                <p className="text-sm font-medium text-foreground">
-                  No projects found
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This department doesn&apos;t have any projects yet.
-                </p>
               </div>
             )}
           </div>

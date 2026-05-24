@@ -17,7 +17,6 @@ import {
   PiFloppyDiskDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
-import { toast } from "sonner";
 
 const AUTO_SAVE_STORAGE_KEY_PREFIX = "operational-parameters-auto-save";
 
@@ -114,7 +113,6 @@ export default function Page() {
         },
         onError: (error) => {
           console.error("Failed to save operational parameters:", error);
-          toast.error("Failed to save operational parameters");
         },
       });
     },

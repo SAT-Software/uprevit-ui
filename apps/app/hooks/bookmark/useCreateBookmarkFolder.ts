@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface CreateBookmarkFolderRequest {
   folder_name: string;
@@ -25,8 +26,9 @@ export function useCreateBookmarkFolder() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to create bookmark folder");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to create bookmark folder"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -37,8 +39,9 @@ export function useCreateBookmarkFolder() {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to create bookmark folder");
-      toast.error(error.message || "Failed to create bookmark folder");
+      const message = getErrorMessage(error, "Failed to create bookmark folder");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

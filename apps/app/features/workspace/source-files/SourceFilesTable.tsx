@@ -235,8 +235,6 @@ export default function SourceFilesTable({
       {/* Filters */}
       <TableControls
         table={table}
-        searchColumnId="productName"
-        searchPlaceholder="Filter products..."
         filterColumns={[
           { name: "productId", label: "Product ID", type: "text" },
           { name: "productName", label: "Product Name", type: "text" },

@@ -591,8 +591,6 @@ export default function SymbolsGraphicsPageBarcodesTable({
       <div className="shrink-0">
         <TableControls
           table={table}
-          searchColumnId="componentName"
-          searchPlaceholder="Filter barcodes..."
           filterColumns={[
             { name: "componentName", label: "Barcode Name", type: "text" },
             {

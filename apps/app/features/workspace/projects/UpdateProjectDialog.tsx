@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
@@ -23,26 +23,33 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import {
   PiBuildingsDuotone,
+  PiCaretDownDuotone,
   PiPencilCircleDuotone,
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@uprevit/ui/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@uprevit/ui/components/ui/popover";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import Image from "next/image";
-import AddUsersInProjectDropdown from "./AddUsersInProjectDropdown";
+import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
+import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import type { Project } from "@/types/project";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@uprevit/ui/components/ui/select";
-import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsInfinite";
 import { Department } from "@/types/department";
 
 interface User {
@@ -63,19 +70,68 @@ interface DialogUpdateProjectProps {
 export default function UpdateProjectDialog({
   project,
 }: DialogUpdateProjectProps) {
-  const { data: departmentsData } = useGetAllDepartments();
-  const departments = departmentsData?.result?.departments || [];
-  const { data: usersData } = useGetAllUsersByWorkspace();
-  const users = usersData?.data;
   const id = useId();
 
   const [open, setOpen] = useState(false);
+  const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
+  const [departmentSearch, setDepartmentSearch] = useState("");
+  const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [debouncedUserSearch, setDebouncedUserSearch] = useState("");
+  const [selectedDepartmentLabel, setSelectedDepartmentLabel] = useState<
+    string | null
+  >(null);
   const [selectedUsers, setSelectedUsers] = useState<User[]>(
     project?.users ?? []
   );
   const [newProjectImage, setNewProjectImage] = useState<File | null>(null);
   const [removeProjectImage, setRemoveProjectImage] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedDepartmentSearch(departmentSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [departmentSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedUserSearch(userSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [userSearch]);
+
+  const {
+    data: usersData,
+    fetchNextPage: fetchNextUsersPage,
+    hasNextPage: hasNextUsersPage,
+    isFetching: isUsersFetching,
+    isFetchingNextPage: isUsersFetchingNextPage,
+    isPending: isUsersPending,
+    isError: isUsersError,
+  } = useGetUsersInfinite({
+    enabled: open,
+    search: debouncedUserSearch,
+  });
+
+  const users = useMemo(
+    () =>
+      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    [usersData],
+  );
+
+  const handleUserListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextUsersPage && !isUsersFetching) {
+      fetchNextUsersPage();
+    }
+  };
 
   const { mutate: updateProject, isPending } = useUpdateProject();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -97,12 +153,66 @@ export default function UpdateProjectDialog({
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<FormValues>({
+    defaultValues: {
+      department: project?.department_id || "",
+    },
     mode: "onSubmit",
   });
 
+  const {
+    data: departmentsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isPending: isDepartmentsPending,
+    isError: isDepartmentsError,
+  } = useGetDepartmentsInfinite({
+    enabled: open,
+    search: debouncedDepartmentSearch,
+  });
+
+  const departments = useMemo(
+    () =>
+      departmentsData?.pages.flatMap(
+        (page) => page.result?.departments ?? [],
+      ) ?? [],
+    [departmentsData],
+  );
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const descriptionText = watch("project_description") || "";
+  const selectedDepartmentId = watch("department");
+  const selectedDepartment = departments.find(
+    (dept: Department) => dept._id === selectedDepartmentId,
+  );
+
+  useEffect(() => {
+    register("department", { required: "Department is required" });
+  }, [register]);
+
+  useEffect(() => {
+    if (!selectedDepartmentLabel && project?.department_id) {
+      const match = departments.find(
+        (dept) => dept._id === project.department_id,
+      );
+      if (match?.department_name) {
+        setSelectedDepartmentLabel(match.department_name);
+      }
+    }
+  }, [departments, project.department_id, selectedDepartmentLabel]);
+
+  const handleDepartmentListScroll = (event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  };
 
   const handleAddUser = (user: User) => {
     if (!selectedUsers.some((u) => u._id === user._id)) {
@@ -145,13 +255,14 @@ export default function UpdateProjectDialog({
             reset();
             setNewProjectImage(null);
             setRemoveProjectImage(false);
+            setUserSearch("");
+            setDebouncedUserSearch("");
             setOpen(false);
           },
         }
       );
     } catch (error) {
       console.error("Error uploading project image:", error);
-      toast.error("Failed to upload project image");
     } finally {
       setUploadingImage(false);
     }
@@ -251,26 +362,76 @@ export default function UpdateProjectDialog({
           <div className="flex gap-4 w-full px-4 pb-4">
             <div className="space-y-2 w-1/2">
               <Label htmlFor={`${id}-department`}>Department</Label>
-              <Select
-                defaultValue={project?.department_id}
-                onValueChange={(value) => {
-                  const event = { target: { name: "department", value } };
-                  register("department", {
-                    required: "Department is required",
-                  }).onChange(event);
-                }}
+              <Popover
+                open={departmentPopoverOpen}
+                onOpenChange={setDepartmentPopoverOpen}
               >
-                <SelectTrigger id={`${id}-department`}>
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((dept: Department) => (
-                    <SelectItem key={dept._id} value={dept._id || ""}>
-                      {dept.department_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <PopoverTrigger asChild>
+                  <Button
+                    id={`${id}-department`}
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={departmentPopoverOpen}
+                    className="w-full justify-between font-normal h-9"
+                  >
+                    <span className="truncate">
+                      {selectedDepartmentLabel ||
+                        selectedDepartment?.department_name ||
+                        "Select department"}
+                    </span>
+                    <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-(--radix-popover-trigger-width) p-0"
+                  align="start"
+                  onWheel={(event) => event.stopPropagation()}
+                >
+                  <Command shouldFilter={false}>
+                    <CommandInput
+                      placeholder="Search departments..."
+                      className="h-9"
+                      value={departmentSearch}
+                      onValueChange={setDepartmentSearch}
+                    />
+                    <CommandList onScroll={handleDepartmentListScroll}>
+                      <CommandEmpty>
+                        {isDepartmentsPending
+                          ? "Loading departments..."
+                          : isDepartmentsError
+                            ? "Failed to load departments."
+                            : "No department found."}
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {departments.map((dept: Department) => (
+                          <CommandItem
+                            key={dept._id}
+                            value={dept.department_name}
+                            onSelect={() => {
+                              setValue("department", dept._id || "", {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              });
+                              setSelectedDepartmentLabel(dept.department_name);
+                              setDepartmentPopoverOpen(false);
+                            }}
+                          >
+                            <span className="truncate">
+                              {dept.department_name}
+                            </span>
+                          </CommandItem>
+                        ))}
+                        {isFetchingNextPage && (
+                          <div className="flex items-center justify-center py-2">
+                            <Spinner className="size-4" />
+                          </div>
+                        )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {errors.department && (
                 <p role="alert" className="text-xs text-destructive">
                   {errors.department.message}
@@ -329,15 +490,21 @@ export default function UpdateProjectDialog({
               </div>
 
               <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
-                <AddUsersInProjectDropdown
-                  users={users?.map((user: User) => ({
-                    _id: user._id,
+                <AddUsersDropdown
+                  users={users.map((user) => ({
+                    _id: user._id as string,
                     name: user.name,
                     profileAvatar: user.profileAvatar,
                   }))}
                   onAddUser={handleAddUser}
                   onRemoveUser={handleRemoveUser}
                   selectedUsers={selectedUsers}
+                  userSearch={userSearch}
+                  onUserSearchChange={setUserSearch}
+                  onListScroll={handleUserListScroll}
+                  isPending={isUsersPending}
+                  isError={isUsersError}
+                  isFetchingNextPage={isUsersFetchingNextPage}
                 />
                 <div className="flex items-center justify-end flex-1">
                   {selectedUsers.length > 0 && (

@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 interface S3SignedUrlRequest {
   file: File;
@@ -114,8 +115,9 @@ export function useUploadFilesToS3() {
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to get signed URL");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to get signed URL"),
+        );
       }
 
       const presignResponse = (await res.json()) as {
@@ -161,7 +163,9 @@ export function useUploadFilesToS3() {
       });
 
       if (!putRes.ok) {
-        throw new Error("Failed to upload file to S3");
+        throw new Error(
+          "File upload failed. Please check your connection and try again.",
+        );
       }
 
       return {
@@ -171,12 +175,13 @@ export function useUploadFilesToS3() {
         size: file.size,
       };
     },
-    onSuccess: () => {
-      toast.success("File uploaded successfully");
-    },
     onError: (error) => {
-      console.error(error.message || "Failed to upload file to S3");
-      toast.error("Failed to upload file to S3");
+      const message = getErrorMessage(
+        error,
+        "File upload failed. Please try again.",
+      );
+      console.error(message);
+      toast.error(message);
     },
   });
 }

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useDeleteSourceFilesFolder(folderId?: string) {
   const queryClient = useQueryClient();
@@ -23,8 +24,9 @@ export function useDeleteSourceFilesFolder(folderId?: string) {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to delete source files folder");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to delete source files folder"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -47,8 +49,9 @@ export function useDeleteSourceFilesFolder(folderId?: string) {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to delete source files folder");
-      toast.error(error.message || "Failed to delete source files folder");
+      const message = getErrorMessage(error, "Failed to delete source files folder");
+      console.error(message);
+      toast.error(message);
     },
   });
 }

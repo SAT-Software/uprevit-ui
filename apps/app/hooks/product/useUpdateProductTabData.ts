@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 import type {
   LegendItem,
   OptimisticContext,
@@ -72,8 +73,9 @@ export function useUpdateProductTabData() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to update product tab data");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to update product tab data"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -115,13 +117,14 @@ export function useUpdateProductTabData() {
       queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
     },
     onError: (error, _params, context) => {
-      console.error(error.message || "Failed to make changes");
+      const message = getErrorMessage(error, "Failed to make changes");
+      console.error(message);
       if (context?.didOptimisticUpdate && context.previousData) {
         queryClient.setQueryData(context.queryKey, context.previousData);
-        toast.error("Failed to update legend. Changes were reverted.");
+        toast.error(`${message} Changes were reverted.`);
         return;
       }
-      toast.error("Failed to make changes");
+      toast.error(message);
     },
   });
 }

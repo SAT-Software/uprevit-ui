@@ -2,6 +2,7 @@ import { Department } from "@/types/department";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 
 export function useUpdateDepartment() {
   const queryClient = useQueryClient();
@@ -23,8 +24,9 @@ export function useUpdateDepartment() {
         },
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || "Failed to update department");
+        throw new Error(
+          await getResponseErrorMessage(res, "Failed to update department"),
+        );
       }
       return res.json().catch(() => null);
     },
@@ -38,8 +40,9 @@ export function useUpdateDepartment() {
       });
     },
     onError: (error) => {
-      console.error(error.message || "Failed to update department");
-      toast.error("Failed to update department");
+      const message = getErrorMessage(error, "Failed to update department");
+      console.error(message);
+      toast.error(message);
     },
   });
 }
