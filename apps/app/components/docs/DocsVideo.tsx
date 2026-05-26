@@ -14,9 +14,10 @@ import {
   VideoPlayerVolumeRange,
 } from "@uprevit/ui/components/kibo-ui/video-player";
 import { cn } from "@uprevit/ui/lib/utils";
+import type { DocumentationVideoKey } from "@/types/documentation-video";
 
 type DocsVideoProps = {
-  videoKey: string;
+  videoKey: DocumentationVideoKey;
   title?: string;
   caption?: string;
   className?: string;

@@ -22,6 +22,7 @@ import {
   PiTagChevronDuotone,
 } from "react-icons/pi";
 
+import { DocsSearchDialog } from "@/components/docs/DocsSearchDialog";
 import { SectionSpacer } from "../../components/layout.client";
 import { RootProvider } from "fumadocs-ui/provider/next";
 
@@ -32,7 +33,7 @@ export default function DocsRootLayout({
 }) {
   return (
     <AccessEligibilityGuard>
-      <RootProvider>
+      <RootProvider search={{ SearchDialog: DocsSearchDialog }}>
         <DocsLayout
           tree={{
             name: "Uprevit Docs",

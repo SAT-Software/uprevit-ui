@@ -2,7 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAuth, type AuthContextProps } from "react-oidc-context";
-import type { DocumentationVideoSignedUrlResponse } from "@/types/documentation-video";
+import type {
+  DocumentationVideoKey,
+  DocumentationVideoSignedUrlResponse,
+} from "@/types/documentation-video";
 
 const REFRESH_BUFFER_MS = 2 * 60 * 1000;
 
@@ -17,7 +20,7 @@ async function fetchDocumentationVideoUrl({
   signal,
   auth,
 }: {
-  videoKey: string;
+  videoKey: DocumentationVideoKey;
   signal: AbortSignal;
   auth: AuthContextProps;
 }) {
@@ -44,7 +47,7 @@ async function fetchDocumentationVideoUrl({
   return (await response.json()) as DocumentationVideoSignedUrlResponse;
 }
 
-export function useDocumentationVideoUrl(videoKey: string) {
+export function useDocumentationVideoUrl(videoKey: DocumentationVideoKey) {
   const auth = useAuth();
 
   return useQuery({
