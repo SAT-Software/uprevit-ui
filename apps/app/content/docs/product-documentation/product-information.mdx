@@ -1,0 +1,75 @@
+---
+title: Product Information
+description: Core product metadata, custom fields, dates, and linked source files.
+---
+
+**Product Information** is the first tab in the product documentation workflow (`/products/{productId}/product-information`). It holds identifying metadata, scheduling dates, regulatory geography, device classification, custom fields, and links to related **source file** folders.
+
+## Opening the tab
+
+From the product list, click a product row—or use the sidebar **Product Information** link when viewing any product.
+
+## Fields on the page
+
+### Standard fields (edit dialog)
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Product name** | Yes | Also shown in the product header. |
+| **Description** | No | Longer narrative than the list description. |
+| **Target date** | No | Planned completion date. |
+| **Market / Geography** | Yes* | Choose from preset markets or enter a custom value. |
+| **Country of origin** | Yes* | Preset country or custom entry. |
+| **OEM / Contract manufacturer** | Yes | |
+| **Commercial / Clinical** | Yes | Commercial or Clinical use. |
+| **Manufacturing location** | No | |
+| **Class of device** | No | Preset device class groups or custom. |
+| **Basic UDI-DI** | No | Unique Device Identification (when applicable). |
+
+\*Required means you must provide either a preset selection or custom text.
+
+### Read-only on this tab
+
+- **Status** — Draft, Submitted, or Archived.
+- **Actual completion date** — Set automatically when you **Submit** the product version.
+- **Created / Modified** — Audit metadata.
+- **Linked source files** — Links to folders in **Source Files** tied to this product.
+
+### Custom fields
+
+Add organization-specific label/value pairs:
+
+| Field | Required |
+|-------|----------|
+| **Label** | Yes (when editing a custom field) |
+| **Value** | Yes |
+
+Use **Add custom field**, **Edit**, or **Delete** from the custom fields section.
+
+## Editing
+
+1. Click **Edit Product** for standard fields.
+2. Use the custom field actions for additional rows.
+3. Save—changes persist immediately to this product version.
+
+When status is **Submitted**, edit actions are disabled until you create a [new version](/docs/review-outputs/redlines-versions).
+
+## Tab completion
+
+Toggle **Mark tab complete** in the product header when Product Information is finished. This counts toward the seven-tab progress bar required for submit.
+
+## Activity logs
+
+Use **View logs** (or navigate to `/products/{productId}/logs`) for a detailed change history on this product.
+
+## Version comparison (redline)
+
+To see what changed in Product Information between versions, use **Compare Versions** in the product header. Field-level highlights and custom-field badges (NEW / DEL / MOD) appear on this tab.
+
+For the full comparison workflow, see **[Redlines and Versions](/docs/review-outputs/redlines-versions)**—that page is the canonical guide; this tab does not duplicate those steps.
+
+## Related topics
+
+- [Products](/docs/getting-started/products) — create and list products.
+- [Source Files](/docs/source-files-bookmarks/source-files) — folders linked from this tab.
+- [Redlines and Versions](/docs/review-outputs/redlines-versions) — submit and compare.

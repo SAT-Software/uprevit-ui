@@ -1,0 +1,107 @@
+---
+title: Products
+description: Create products, track status and versions, and open the seven documentation tabs.
+---
+
+A **product** in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and outputs (PDF, Excel, reports). Products always belong to a **department** and **project** in your workspace hierarchy.
+
+## Product list
+
+Open **Products** (`/products`) to see all products you can access. The table includes:
+
+| Column | Meaning |
+|--------|---------|
+| **Product name** | Display name. |
+| **PPN** | Product Plan Number (unique identifier). |
+| **Project / Department** | Structural placement. |
+| **Status** | `Draft`, `Submitted`, or `Archived`. |
+| **Version** | Numeric version (e.g. v1, v2). |
+| **Progress** | Tab completion percentage (0–7 tabs). |
+
+Click a row to open **Product Information** for that product. Use the row menu for shortcuts without navigating away.
+
+## Creating a product
+
+Any signed-in workspace member can create a product.
+
+1. Click **Create New Product**.
+2. Complete the form:
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Product name** | Yes | |
+| **PPN (Product Plan Number)** | Yes | Minimum **10** characters; must start with a letter or digit; use alphanumeric characters for the full identifier. |
+| **Description** | Yes | Non-empty; max **220** characters. |
+| **Department** | Yes | Searchable selector. |
+| **Project** | Yes | Enabled after department is chosen; lists projects in that department only. |
+| **Version** | Fixed | New products start at version **1** (displayed as 1.0). |
+| **Status** | Fixed | New products start as **Draft**. |
+
+3. Submit. Uprevit opens the product documentation workflow starting at **Product Information**.
+
+## Editing basic product fields
+
+From the products table menu, **Edit** updates **product name** and **description** only. PPN, department, project, version, and status are not changed from this dialog.
+
+For full metadata (markets, UDI-DI, custom fields, etc.), use the **Product Information** tab.
+
+## Product documentation tabs
+
+After opening a product, the sidebar shows seven tabs:
+
+1. [Product Information](/docs/product-documentation/product-information)
+2. [Compliance Information](/docs/product-documentation/compliance-information)
+3. [Label Components](/docs/product-documentation/label-components)
+4. [Symbols & Graphics](/docs/product-documentation/symbols-graphics)
+5. [Product Specifications](/docs/product-documentation/product-specifications)
+6. [Operational Parameters](/docs/product-documentation/operational-parameters)
+7. [Label Tags](/docs/product-documentation/label-tags)
+
+Mark each tab **complete** from the product header when finished. Progress reaches **100%** when all seven tabs are complete—required before **Submit**.
+
+## Status and versions
+
+| Status | Meaning |
+|--------|---------|
+| **Draft** | Editable; default for new products and new versions. |
+| **Submitted** | Locked snapshot; editing disabled on all tabs. |
+| **Archived** | Removed from active work; listed under Archive. |
+
+**Submit** (product header) is available at 100% tab completion and locks the current version. To continue work, create a **New version** from the products table when status is **Submitted**—see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+
+## Row actions
+
+| Action | Who can use | Notes |
+|--------|-------------|-------|
+| Edit name/description | All users | |
+| New version | All users | Only when status is **Submitted**. |
+| Share | All users | Copies product URL. |
+| Bookmark | All users | Adds to bookmark folders; see [Bookmarks](/docs/source-files-bookmarks/bookmarks). |
+| Export PDF | All users | Queues async job; see [Exports](/docs/review-outputs/exports). |
+| Archive | **Admin only** | Moves product to archived status. |
+
+<Callout type="warn" title="Admin only">
+**Archive** on the products table sets status to **archived** and is restricted to admins.
+</Callout>
+
+## Archiving and restoring products
+
+Admins archive products from the table menu. Restore archived products from **Archive → Products** (`/archive`). Restored products return to **Draft** status.
+
+## Product header tools
+
+On any product tab, the header provides:
+
+- **Version** switcher — jump between versions of the same product lineage.
+- **Compare versions** — redline view; documented in [Redlines and Versions](/docs/review-outputs/redlines-versions).
+- **Tab completion** toggle — mark current tab complete or incomplete.
+- **Submit** — lock version when all tabs are complete.
+- **Export PDF** — queue a PDF export job.
+
+While a PDF export is in progress, editing and submit may be temporarily locked.
+
+## Related topics
+
+- Product tabs — **Product Documentation** section in this guide.
+- [Source Files](/docs/source-files-bookmarks/source-files) — link folders from Product Information.
+- [Redlines and Versions](/docs/review-outputs/redlines-versions) — submit and compare workflow.

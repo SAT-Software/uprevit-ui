@@ -1,0 +1,79 @@
+---
+title: Workspace
+description: Your organization container—departments, projects, products, and workspace settings.
+---
+
+A **workspace** is the top-level container for everything in Uprevit. One workspace represents your company or organization. All departments, projects, products, users, and source files belong to a single workspace.
+
+## What lives in a workspace
+
+| Concept | Purpose |
+|---------|---------|
+| **Departments** | Organizational groupings (e.g. Regulatory, Packaging). |
+| **Projects** | Work streams within a department. |
+| **Products** | Labeling documentation records tied to a department and project. |
+| **Users** | Members invited to collaborate in the workspace. |
+| **Source files** | Shared folder tree for reference documents. |
+
+The **Dashboard** (`/dashboard`) summarizes activity: department and project cards, plus a table of recent products.
+
+## Workspace information
+
+Open **Settings** (`/settings`) and select the **Workspace** tab to view:
+
+| Field | Description |
+|-------|-------------|
+| **Workspace name** | Display name for your organization in Uprevit. |
+| **Company name** | Legal or commercial company name. |
+| **Description** | Short summary of the workspace. |
+| **Workspace ID** | System identifier (copyable from the tab). |
+| **Logo** | Optional branding image (PNG, JPG, JPEG, GIF, or WebP). |
+| **User count** | Number of members in the workspace. |
+
+Billing and plan fields may appear as placeholders depending on your deployment; plan management is not covered in this guide.
+
+## Updating workspace details
+
+<Callout type="warn" title="Admin only">
+Only **Admin** users can edit workspace details. Non-admins can view the Workspace tab but receive an insufficient-privileges message if they try to open the edit dialog.
+</Callout>
+
+1. Go to **Settings → Workspace**.
+2. Click **Edit Workspace**.
+3. Update **Workspace name**, **Company name**, or **Description** (all required).
+4. Optionally upload or replace the **logo** (uploaded to secure storage).
+5. Save changes.
+
+Workspace creation happens during **admin onboarding** (first-time setup) with the same core fields plus admin contact details.
+
+## Members and admins
+
+From **Settings** you can also:
+
+- **Profile** — Any user can update their own profile.
+- **Users** — View workspace members.
+- **Admins** — View users with admin privileges.
+
+<Callout type="warn" title="Admin only">
+**Invite members** (name and email rows) is restricted to admins. Invited users receive access to the workspace according to your identity provider configuration.
+</Callout>
+
+Admins are determined by membership in the `admin` group on your sign-in token. If you need admin access, contact an existing workspace administrator.
+
+## Navigation
+
+The **Workspace** section of the sidebar includes:
+
+- **Dashboard** — Overview and recent products.
+- **Departments** — List and detail pages.
+- **Projects** — List and detail pages.
+- **Products** — Product list and entry into documentation tabs.
+
+## Typical setup flow (admins)
+
+1. Create or complete the workspace during onboarding.
+2. Invite team members from Settings.
+3. Create **departments**, then **projects** under each department.
+4. Team members create **products** under the appropriate project.
+
+See [Departments](/docs/getting-started/departments), [Projects](/docs/getting-started/projects), and [Products](/docs/getting-started/products) for the next steps.

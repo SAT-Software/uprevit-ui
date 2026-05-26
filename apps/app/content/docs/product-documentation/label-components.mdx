@@ -1,0 +1,44 @@
+---
+title: Label Components
+description: Physical label components with images, dimensions, and types.
+---
+
+**Label Components** (`/products/{productId}/label-components`) catalogs each physical labeling element—labels, tags, stickers, packaging panels, and similar items—with optional images and structured attributes.
+
+## Component fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Component number** | Yes | Unique identifier within the product. |
+| **Component type** | Yes | Preprinted, Blank, or N/A. |
+| **Description** | No | |
+| **Dimensions** | No | Free text (e.g. size notation). |
+| **Label type** | No | Multiple tags (e.g. primary, secondary). |
+| **Image** | No | Uploaded to product asset storage; stored as a file key. |
+
+## Adding and editing
+
+1. Click **Add Label Component**.
+2. Fill required fields and optionally upload an image.
+3. Submit—the table lists all components with expandable rows.
+4. Use row actions to **Edit** or **Delete**.
+
+Sort columns by image, number, description, label types, dimensions, or type.
+
+Draft products allow full CRUD. **Submitted** products disable add, edit, and delete.
+
+## Tab completion
+
+Mark **Label Components** complete from the product header when all components for this version are documented.
+
+## Version comparison (redline)
+
+Compare mode highlights changed cells in the table and shows OLD/NEW image pairs. Removed components stay visible with deletion styling; actions on removed rows are disabled.
+
+Full steps for compare mode: **[Redlines and Versions](/docs/review-outputs/redlines-versions)**.
+
+## Related topics
+
+- [Symbols & Graphics](/docs/product-documentation/symbols-graphics) — symbols and schematics separate from physical components.
+- [Label Tags](/docs/product-documentation/label-tags) — annotated label artwork.
+- [Exports](/docs/review-outputs/exports) — PDF includes label component data.

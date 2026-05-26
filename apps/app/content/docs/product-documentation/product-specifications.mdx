@@ -1,0 +1,68 @@
+---
+title: Product Specifications
+description: Spreadsheet-style specification data with save, filters, and export.
+---
+
+**Product Specifications** (`/products/{productId}/product-specifications`) is a workbook-style grid for structured specification data: column headers, column types (constant, variable, N/A), and cell values.
+
+## Workbook structure
+
+| Part | Description |
+|------|-------------|
+| **Headers** | Column names you define. |
+| **Column types** | Per column: `constant`, `variable`, or `na`. |
+| **Cells** | Values at row/column intersections. |
+| **Column order / widths / formats** | Layout and display preferences. |
+
+There is no per-cell required validation—the grid is free-form for your specification template.
+
+## Editing
+
+- Click cells to edit values inline.
+- Add or remove **rows** and **columns** from toolbar actions.
+- Use **Find & Replace** (Ctrl+R) for bulk text updates.
+- **Undo / Redo** for recent grid changes.
+
+### Saving
+
+- **Save** — writes the workbook to the server (`add_product_data` on the product-specifications tab).
+- **Auto-save** — optional per-product preference stored in the browser; when enabled, changes save automatically.
+
+A **beforeunload** warning appears if you leave with unsaved manual changes.
+
+### Submitted products
+
+When status is **Submitted**, the grid is **read-only**: no edits, save, or auto-save.
+
+## Toolbar extras
+
+- **Filters** — narrow visible rows.
+- **Page info** — keyboard shortcuts and grid help.
+- **Export** — download the current grid immediately as an Excel workbook (local export, not the async jobs queue).
+
+For workspace-wide PDF/Excel jobs, see [Exports](/docs/review-outputs/exports).
+
+## Tab completion
+
+Mark **Product Specifications** complete in the header when the workbook is finalized for this version.
+
+## Version comparison (redline)
+
+In compare mode the grid shows the **current** version’s data with differences against the selected older version:
+
+- **Highlight** mode — changed cells emphasized.
+- **Inline** mode — strikethrough old values with new values beside them.
+
+Header and column-type changes are diffed as well.
+
+This tab participates in redline display but does not define the workflow—see **[Redlines and Versions](/docs/review-outputs/redlines-versions)** for Compare Versions, clearing comparison, and switching tabs while comparing.
+
+## Legacy spec archive route
+
+A separate read-only route (`/products/{productId}/product-spec-archive`) exists for historical Univer-based viewers and side-by-side spreadsheet comparison. Day-to-day editing uses this **Product Specifications** tab.
+
+## Related topics
+
+- [Operational Parameters](/docs/product-documentation/operational-parameters) — same grid behavior, separate workbook.
+- [Redlines and Versions](/docs/review-outputs/redlines-versions)
+- [Exports](/docs/review-outputs/exports)
