@@ -1,0 +1,135 @@
+---
+title: Introduction
+description: Learn how to organize your workspace, document medical device labeling products, and produce reviewed outputs.
+---
+
+import {
+  PiArchiveDuotone,
+  PiBookmarkSimpleDuotone,
+  PiBuildingsDuotone,
+  PiExportDuotone,
+  PiFolderOpenDuotone,
+  PiGitBranchDuotone,
+  PiHouseDuotone,
+  PiKanbanDuotone,
+  PiLayoutDuotone,
+  PiPackageDuotone,
+  PiPresentationChartDuotone,
+} from "react-icons/pi";
+
+Uprevit helps teams document medical device labeling in one place—from workspace setup through reviewed outputs.
+
+<DocsVideo videoKey="getting-started.welcome-dashboard" title="Welcome dashboard overview" />
+
+## How it fits together
+
+```text
+Workspace → Departments → Projects → Products → 7 documentation tabs
+```
+
+Each **product** is where labeling work lives: seven tabs for structured data, plus source files, bookmarks, version review, and exports.
+
+## Documentation topics
+
+Each card below opens a guide for that part of Uprevit. Jump to whatever you need—you do not have to read them in sequence. The order follows the same flow as above: set up **workspace → departments → projects → products**, then product tabs, files, review, and outputs when they become relevant to your work.
+
+<Cards>
+  <Card
+    title="Workspace"
+    href="/docs/getting-started/workspace"
+    description="Your organization container, settings, and who can manage them."
+    icon={<PiHouseDuotone />}
+  />
+  <Card
+    title="Departments"
+    href="/docs/getting-started/departments"
+    description="Group teams and projects; admins create and maintain departments."
+    icon={<PiBuildingsDuotone />}
+  />
+  <Card
+    title="Projects"
+    href="/docs/getting-started/projects"
+    description="Work streams under a department; where products are filed."
+    icon={<PiKanbanDuotone />}
+  />
+  <Card
+    title="Products"
+    href="/docs/getting-started/products"
+    description="Create products, track status and versions, open documentation tabs."
+    icon={<PiPackageDuotone />}
+  />
+  <Card
+    title="Product documentation"
+    href="/docs/product-documentation/product-information"
+    description="Complete all seven tabs and mark each one complete before submit."
+    icon={<PiLayoutDuotone />}
+  />
+  <Card
+    title="Redlines and versions"
+    href="/docs/review-outputs/redlines-versions"
+    description="Submit a version, compare changes, and start a new draft when needed."
+    icon={<PiGitBranchDuotone />}
+  />
+  <Card
+    title="Source files"
+    href="/docs/source-files-bookmarks/source-files"
+    description="Store and browse reference folders linked to products."
+    icon={<PiFolderOpenDuotone />}
+  />
+  <Card
+    title="Bookmarks"
+    href="/docs/source-files-bookmarks/bookmarks"
+    description="Personal folders of products for quick access."
+    icon={<PiBookmarkSimpleDuotone />}
+  />
+  <Card
+    title="Reports"
+    href="/docs/review-outputs/reports"
+    description="Query products across tabs and export result sets."
+    icon={<PiPresentationChartDuotone />}
+  />
+  <Card
+    title="Exports"
+    href="/docs/review-outputs/exports"
+    description="Download PDFs, Excel jobs, and specification workbooks."
+    icon={<PiExportDuotone />}
+  />
+  <Card
+    title="Archives"
+    href="/docs/review-outputs/archives"
+    description="Archive and restore departments, projects, and products."
+    icon={<PiArchiveDuotone />}
+  />
+</Cards>
+
+## Roles
+
+Everyone in a workspace signs in with one of two roles. Your organization assigns which role you have.
+
+<Cards>
+  <Card
+    title="Member"
+    description="The default role for people doing labeling work day to day."
+  >
+
+    - Browse departments, projects, and products
+    - Create products and complete all seven documentation tabs
+    - Submit versions, compare redlines, and export outputs
+    - Use source files, bookmarks, and reports
+
+  </Card>
+  <Card
+    title="Admin"
+    description="Additional control over workspace structure and lifecycle."
+  >
+
+    - Everything a member can do
+    - Edit workspace details and invite people
+    - Create, update, archive, and restore departments and projects
+    - Archive products and view archive activity logs
+    - Assign members to departments and projects
+
+  </Card>
+</Cards>
+
+If an action is restricted, please contact your organization's workspace admin.

@@ -1,0 +1,95 @@
+---
+title: Redlines and Versions
+description: Submit product versions, compare changes across versions, and create new drafts.
+---
+
+This page is the **canonical guide** for product versioning and redline (comparison) review in Uprevit. Other documentation pages link here instead of repeating the full workflow.
+
+Uprevit does not use a separate “approver” role in the UI. The lifecycle is: **Draft → Submit (lock) → New version (new draft)**.
+
+<DocsVideo videoKey="product.product-plan-review-overview" title="Product plan review and versions overview" />
+
+## Concepts
+
+| Term | Meaning |
+|------|---------|
+| **Version** | Numeric revision on a product (`v1`, `v2`, …). New versions share lineage via `parent_id`. |
+| **Draft** | Editable; new products and new versions start here. |
+| **Submitted** | Locked snapshot—all seven tabs read-only for that version ID. |
+| **Redline / compare** | Read-only diff of an older version against the version you are viewing. |
+| **Tab completion** | Each of the seven tabs can be marked complete; **100%** (7/7) is required to submit. |
+
+## Tab completion and submit
+
+1. Open each product tab and enter data.
+2. In the product header, toggle **Mark tab complete** when a tab is finished.
+3. When progress shows **100%**, **Submit** becomes available.
+4. Confirm in the submit dialog.
+
+Submit:
+
+- Sets status to **Submitted**
+- Records **actual completion date** (today)
+- Disables editing on all tabs for that product ID
+
+## Creating a new version
+
+After submit, continue work by branching a new draft:
+
+1. On `/products`, open the row menu for a **Submitted** product.
+2. Choose **New version** (also available from version dialogs on the product).
+3. Uprevit copies data into a new product record: **Draft** status, incremented version, tabs marked incomplete.
+4. You are navigated to the new version’s **Product Information** tab.
+
+Only **Submitted** versions can spawn a new version.
+
+## Switching versions
+
+Use **View Versions** in the product header to jump between IDs in the same lineage. The current tab path is preserved (e.g. stay on Label Components when switching from v1 to v2).
+
+## Compare versions (redline)
+
+Redline is for **reviewing what changed** between an older submitted (or draft) version and the version open in the URL.
+
+### Start comparison
+
+1. Open any product tab for the **newer** version you want as the “current” side.
+2. In the header, open **Compare Versions**.
+3. Select an older version (only versions with a lower version number appear).
+4. The URL gains `?compareVersion={olderProductId}`.
+
+### While comparing
+
+- A banner summarizes change counts on tabs that support counts (e.g. Product Information, Compliance, Label Components).
+- **Product Specifications** and **Operational Parameters** offer **Highlight** vs **Inline** diff modes on the grid.
+- **Label Tags** and **Symbols & Graphics** show image and field-level OLD/NEW styling.
+- Sidebar links to other product tabs **keep** `compareVersion` so you can review the full product diff without re-selecting.
+
+### End comparison
+
+Click **Clear comparison** in the header (or remove the query parameter). The page returns to normal edit or read-only mode based on status.
+
+### Technical note
+
+The client loads `all-tabs` data for both version IDs and computes a structural diff (`added`, `removed`, `modified`, `unchanged`). Redline is read-only—it does not write merged data.
+
+## Edit locks beyond submit
+
+| Condition | Effect |
+|-----------|--------|
+| **Submitted** | No tab edits. |
+| **PDF export in progress** | Header may lock submit, tab completion, and further exports until the job finishes. |
+
+## Where redline appears
+
+All seven documentation tabs participate. Product tab docs describe tab-specific fields and link here for compare workflow.
+
+## Product logs
+
+Per-product change history lives at `/products/{productId}/logs`. Use it alongside redline when you need audit timestamps and actors, not field-level diffs.
+
+## Related topics
+
+- [Products](/docs/getting-started/products) — status and row actions.
+- [Exports](/docs/review-outputs/exports) — export submitted snapshots.
+- [Archives](/docs/review-outputs/archives) — archived products vs version lineage.

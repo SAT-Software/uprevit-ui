@@ -1,0 +1,65 @@
+---
+title: Exports
+description: Product PDF exports, report exports, and specification workbook downloads.
+---
+
+Uprevit supports **asynchronous export jobs** (PDF and Excel) and **immediate spreadsheet download** from specification grids.
+
+## Product PDF exports
+
+### Queue a job
+
+From a product:
+
+- **Product header → Export PDF**, or
+- **Products table row menu → Export to PDF**
+
+The job is created via the product exports API. While **queued** or **processing**, the product header may lock submit, tab completion, and additional PDF requests.
+
+### Track and download
+
+| Route | Purpose |
+|-------|---------|
+| `/products/exports` | All product export jobs for your workspace access. |
+| Product header link | **View Export Jobs** when a job is active. |
+
+When status is **Completed**, download the file from the exports table. **Failed** jobs show an error state—retry from the product if needed.
+
+### Product Excel (async)
+
+The application supports Excel export jobs through the same jobs infrastructure. Entry points in the UI may be limited compared to PDF; check the products table and export dialogs in your deployment.
+
+## Report exports
+
+From **Reports** results:
+
+1. Run a query.
+2. Choose **Export PDF** or **Export Excel** on the result set.
+3. Confirm in the dialog.
+
+Jobs appear under **Report Exports** on `/reports` with the same status lifecycle (queued → processing → completed / failed). Downloads use the reports export API.
+
+## Immediate specification export
+
+On **Product Specifications** and **Operational Parameters** grids, the toolbar **Export** button downloads the **current workbook** as Excel immediately—this does not use the background job queue.
+
+Use async product PDF export when you need a packaged document across tabs.
+
+## Export formats and targets
+
+| Format | Typical target |
+|--------|----------------|
+| **PDF** | Full product documentation snapshot |
+| **Excel** | Product specifications, operational parameters, or report result sets |
+
+Job records include `format`, `status`, and `target` (product, product_specifications, operational_parameters, report).
+
+## Permissions
+
+Exports are available to authenticated members. No admin-only restriction applies.
+
+## Related topics
+
+- [Redlines and Versions](/docs/review-outputs/redlines-versions) — submit before exporting final snapshots.
+- [Reports](/docs/review-outputs/reports) — query then export.
+- [Product Specifications](/docs/product-documentation/product-specifications) — inline Excel export.

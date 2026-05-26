@@ -1,0 +1,83 @@
+---
+title: Archives
+description: Archive and restore departments, projects, and products.
+---
+
+The **Archive** page (`/archive`) is where you browse entities removed from active lists and restore them when appropriate. Archiving is different from **product version submit**—archive removes organizational units or marks products as archived status.
+
+## Archive tabs
+
+| Tab | What it lists |
+|-----|----------------|
+| **Departments** | Departments with `isArchived` set. |
+| **Projects** | Archived projects. |
+| **Products** | Products with status **Archived**. |
+
+Any signed-in user can open `/archive` and browse tables. **Restore** and archive **creation** are admin-restricted (below).
+
+## Archiving departments
+
+<Callout type="warn" title="Admin only">
+Archiving a department requires **Admin** privileges.
+</Callout>
+
+1. Open `/departments/{departmentId}`.
+2. Choose **Archive**.
+3. Type the **exact department name** to confirm.
+4. The department disappears from active lists and appears under **Archive → Departments**.
+
+## Archiving projects
+
+<Callout type="warn" title="Admin only">
+Archiving a project requires **Admin** privileges.
+</Callout>
+
+Same flow on `/projects/{projectId}` with exact **project name** confirmation.
+
+## Archiving products
+
+<Callout type="warn" title="Admin only">
+Archiving a product requires **Admin** privileges.
+</Callout>
+
+1. On `/products`, open the row menu.
+2. Choose **Archive** and confirm.
+3. Status becomes **archived**; the product moves to **Archive → Products**.
+
+Non-admins may see the menu entry but receive an insufficient-privileges message when confirming.
+
+## Restoring entities
+
+<Callout type="warn" title="Admin only">
+Restoring departments, projects, or products requires **Admin** privileges.
+</Callout>
+
+1. Go to `/archive` and select the correct tab.
+2. Click **Restore** on the row.
+3. Confirm in the dialog.
+
+| Entity | After restore |
+|--------|----------------|
+| **Department** | Active; `isArchived` cleared. |
+| **Project** | Active; `isArchived` cleared. |
+| **Product** | Status returns to **Draft** (editable again). |
+
+## Archive activity logs
+
+<Callout type="warn" title="Admin only">
+The **Logs** toggle on `/archive` is visible only to admins. It opens the activity panel with `scopeType: archive`.
+</Callout>
+
+Use archive logs to review who archived or restored entities and when.
+
+## Product spec archive route (not workspace archive)
+
+`/products/{productId}/product-spec-archive` is a **read-only historical specification viewer** (legacy Univer layout), sometimes used with `?compareVersion=` for side-by-side spreadsheets. It is **not** the same as archiving a product on `/archive`.
+
+For version comparison workflow, see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+
+## Related topics
+
+- [Departments](/docs/getting-started/departments) — create before archive.
+- [Projects](/docs/getting-started/projects)
+- [Products](/docs/getting-started/products) — archive vs submit.

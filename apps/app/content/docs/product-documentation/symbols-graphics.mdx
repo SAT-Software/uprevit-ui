@@ -1,0 +1,80 @@
+---
+title: Symbols & Graphics
+description: Symbols, schematics, barcodes, and other graphical assets.
+---
+
+**Symbols & Graphics** (`/products/{productId}/symbols-graphics`) organizes graphical assets into four internal categories. Each item can include text, descriptions, label-presence tags, and optional images.
+
+<DocsVideo videoKey="product.symbols-graphics" title="Symbols and Graphics tab walkthrough" />
+
+## Sub-tabs
+
+| Sub-tab | Entity type | Typical content |
+|---------|-------------|-----------------|
+| **Symbols** | Symbols | Standard library symbols or custom symbol text |
+| **Schematics** | Schematics | Diagrams and schematic artwork |
+| **Barcodes** | Barcodes | Barcode data and counts |
+| **Other Components** | Other Components | Additional graphical elements |
+
+Switch sub-tabs at the top of the page; each has its own table and **Add** action.
+
+## Fields by type
+
+### Symbols
+
+| Field | Required |
+|-------|----------|
+| **Symbol text** | Yes |
+| **Text present** | Yes (yes/no) |
+| **Label presence** | No (tags) |
+| **Image** | No |
+| **Standard symbol** | No | When picked from the standard library |
+
+### Schematics
+
+| Field | Required |
+|-------|----------|
+| **Name** | Yes |
+| **Description** | No |
+| **Label presence** | No |
+| **Image** | No |
+
+### Barcodes
+
+| Field | Required |
+|-------|----------|
+| **Barcode data** | Yes |
+| **Count** | Yes |
+| **Description** | No |
+| **Label presence** | No |
+| **Image** | No |
+
+### Other components
+
+| Field | Required |
+|-------|----------|
+| **Component name** | Yes |
+| **Description** | No |
+| **Label presence** | No |
+| **Image** | No |
+
+Images upload to **product-assets** storage.
+
+## Editing
+
+Use the sub-tab **Add** button and row **Edit** / **Delete** actions. All changes are blocked when the product is **Submitted**.
+
+## Tab completion
+
+Mark **Symbols & Graphics** complete in the header after all required assets are entered.
+
+## Version comparison (redline)
+
+Redline groups changes across all entities, then filters into each sub-tab. Tables use highlighted cells; images show side-by-side OLD/NEW previews.
+
+See **[Redlines and Versions](/docs/review-outputs/redlines-versions)** for enabling compare mode and clearing it.
+
+## Related topics
+
+- [Label Components](/docs/product-documentation/label-components) — physical components vs graphical symbols.
+- [Label Tags](/docs/product-documentation/label-tags) — annotated label images.

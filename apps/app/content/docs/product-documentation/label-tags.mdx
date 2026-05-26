@@ -1,0 +1,55 @@
+---
+title: Label Tags
+description: Label images by type with annotations, legends, and tagged exports.
+---
+
+**Label Tags** (`/products/{productId}/label-tags`) manages label artwork grouped by **type** (e.g. primary label, IFU panel). You can upload images, annotate them with callouts and shapes, define a legend, and save a flattened **tagged image** for documentation outputs.
+
+<DocsVideo videoKey="product.label-tags" title="Label Tags tab walkthrough" />
+
+## Structure
+
+- **Type tabs** — One tab per distinct label type on this product.
+- **Label entries** — Each has name, optional description, optional type override, base image, annotation state, legend items, and optional tagged PNG output.
+
+## Fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Name** | Yes | |
+| **Type** | No | Drives top-level grouping tabs. |
+| **Description** | No | |
+| **Image** | No | Base label artwork (S3). |
+| **Legend items** | Optional | Color, shape, and text per legend entry; text required per item when defined. |
+| **Tagged image** | Via save flow | Rendered PNG after annotation, uploaded on confirm. |
+
+## Adding and editing labels
+
+1. Click **Add Label** and fill metadata; upload an image if needed.
+2. Select a **type** tab to work on that group’s artwork.
+3. Open the **annotation editor** on the image (marker.js tools: callouts, arrows, shapes, text).
+4. Define **Legend** entries that explain annotations.
+5. **Save tagged image** — confirm dialog renders the annotated PNG, uploads it, and stores annotation state.
+
+### Unsaved annotation guard
+
+If annotations changed but are not saved, switching type tabs or leaving the page prompts you to save or discard.
+
+## Submitted products
+
+Add, edit, annotate, and delete are disabled when status is **Submitted**.
+
+## Tab completion
+
+Mark **Label Tags** complete in the header when all required label types are documented and tagged images are saved as needed.
+
+## Version comparison (redline)
+
+Compare mode groups changes by type and shows field diffs (name, description, type) plus OLD/NEW image blocks.
+
+Workflow details: **[Redlines and Versions](/docs/review-outputs/redlines-versions)**.
+
+## Related topics
+
+- [Label Components](/docs/product-documentation/label-components) — structured component list vs annotated artwork.
+- [Exports](/docs/review-outputs/exports) — PDF export includes label tag content.

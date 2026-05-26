@@ -1,0 +1,56 @@
+---
+title: Bookmarks
+description: Personal folders of bookmarked products for quick access.
+---
+
+**Bookmarked Products** (`/bookmarked-products`) is separate from **source file folder bookmarks**. Here you organize **products** into personal folders for fast return to in-progress labeling work.
+
+## Pages
+
+| Route | Purpose |
+|-------|---------|
+| `/bookmarked-products` | Your bookmark folders. |
+| `/bookmarked-products/{folderId}` | Products saved inside one folder. |
+
+## Folder actions
+
+| Action | How |
+|--------|-----|
+| **Create folder** | **Create Folder** on the main bookmarked products page. |
+| **Rename folder** | Edit action on a folder card. |
+| **Delete folder** | Delete action with confirmation. |
+
+## Adding products
+
+**From the products table**
+
+1. Open the row menu on `/products`.
+2. Choose **Add to Bookmarks**.
+3. Pick an existing folder or create one in the dialog.
+
+**From inside a folder**
+
+1. Open `/bookmarked-products/{folderId}`.
+2. Use **Add products** to search and select products.
+
+## Removing products
+
+Inside a folder, remove a product with **Remove from folder** (confirm dialog). This only removes the bookmark reference—the product itself is unchanged.
+
+## Permissions
+
+Any signed-in user manages their own bookmark folders and product membership. Admins have no special bookmark UI beyond normal access.
+
+## Source file bookmarks vs product bookmarks
+
+| Feature | Location | What is saved |
+|---------|----------|----------------|
+| **Source file folder bookmark** | `/source-files` | A folder in the source file tree |
+| **Product bookmark** | `/bookmarked-products` | A product reference in a user folder |
+
+See [Source Files](/docs/source-files-bookmarks/source-files) for the document library.
+
+## Related topics
+
+- [Products](/docs/getting-started/products) — row menu bookmark action.
+- [Source Files](/docs/source-files-bookmarks/source-files)
