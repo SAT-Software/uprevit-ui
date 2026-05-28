@@ -51,6 +51,7 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
+import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
 
 const data = {
   navMain: [
@@ -277,6 +278,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     )}
                   </SidebarMenuItem>
                 ))}
+                {item.title === "Help" && (
+                  <SidebarMenuItem>
+                    <SidebarFeedbackButton />
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
