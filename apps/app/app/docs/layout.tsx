@@ -23,8 +23,10 @@ import {
 } from "react-icons/pi";
 
 import { DocsSearchDialog } from "@/components/docs/DocsSearchDialog";
+import { DocsSidebarThemeSwitch } from "@/components/docs/DocsSidebarThemeSwitch";
 import { SectionSpacer } from "../../components/layout.client";
 import { RootProvider } from "fumadocs-ui/provider/next";
+import { SentryUserSync } from "@/components/common/SentryUserSync";
 
 export default function DocsRootLayout({
   children,
@@ -33,8 +35,15 @@ export default function DocsRootLayout({
 }) {
   return (
     <AccessEligibilityGuard>
+      <SentryUserSync />
       <RootProvider search={{ SearchDialog: DocsSearchDialog }}>
         <DocsLayout
+          containerProps={{
+            className: "w-full [--fd-layout-width:100%]",
+          }}
+          slots={{
+            themeSwitch: DocsSidebarThemeSwitch,
+          }}
           tree={{
             name: "Uprevit Docs",
             type: "root",

@@ -19,6 +19,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 
   return (
     <DocsPage
+      className="mx-0 w-full max-w-none"
       tableOfContent={{
         style: "clerk",
       }}
@@ -27,7 +28,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody>
+      <DocsBody className="max-w-none">
         <MDX
           components={getMDXComponents({
             a: createRelativeLink(source, page),
