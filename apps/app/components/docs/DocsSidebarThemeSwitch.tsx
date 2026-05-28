@@ -1,23 +1,14 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { ThemeSwitch } from "fumadocs-ui/layouts/shared/slots/theme-switch";
 import { cn } from "@uprevit/ui/lib/utils";
 import type { ComponentProps } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useSentryFeedbackAttach } from "@/hooks/sentry/useSentryFeedbackAttach";
 import { PiChatTeardropDotsDuotone } from "react-icons/pi";
 import { Button } from "@uprevit/ui/components/ui/button";
 
 function SentryFeedbackButton() {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [feedback] = useState(() => Sentry.getFeedback());
-
-  useEffect(() => {
-    if (!feedback || !buttonRef.current) return;
-    return feedback.attachTo(buttonRef.current, {
-      formTitle: "Submit Feedback",
-    });
-  }, [feedback]);
+  const buttonRef = useSentryFeedbackAttach<HTMLButtonElement>();
 
   return (
     <Button ref={buttonRef} aria-label="Send feedback" variant="ghost">

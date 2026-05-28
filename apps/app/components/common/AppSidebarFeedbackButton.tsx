@@ -1,21 +1,12 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { SidebarMenuButton } from "@uprevit/ui/components/ui/sidebar";
 import { cn } from "@uprevit/ui/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useSentryFeedbackAttach } from "@/hooks/sentry/useSentryFeedbackAttach";
 import { PiChatTeardropDotsDuotone } from "react-icons/pi";
 
 export function SidebarFeedbackButton() {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [feedback] = useState(() => Sentry.getFeedback());
-
-  useEffect(() => {
-    if (!feedback || !buttonRef.current) return;
-    return feedback.attachTo(buttonRef.current, {
-      formTitle: "Submit Feedback",
-    });
-  }, [feedback]);
+  const buttonRef = useSentryFeedbackAttach<HTMLButtonElement>();
 
   return (
     <SidebarMenuButton
