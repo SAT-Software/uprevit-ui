@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-05-28
+
+### Added
+
+- Added in-app documentation with Fumadocs, including embedded walkthrough videos in docs pages.
+- Added Sentry error monitoring with user context sync across the application.
+- Added sidebar user feedback entry via Sentry User Feedback.
+
+### Updated
+
+- Updated docs layout with a wider content area, sidebar feedback entry, and theme switch.
+- Updated documentation videos to use a native video element in `DocsVideo` (replacing the media-chrome player).
+- Updated monorepo package versions to `0.4.0`.
+
+### Fixed
+
+- Fixed docs search authentication and documentation video type handling from review feedback.
+- Fixed Sentry integration issues from PR review feedback.
+- Fixed Amplify production build issues related to documentation video rendering.
+
 ## [0.3.1] - 2026-05-24
 
 ### Fixed
