@@ -1,0 +1,90 @@
+---
+title: Departments
+description: Create and manage departments, assign members, and link projects.
+---
+
+**Departments** group work inside your workspace—for example by function, site, or product line. Every **project** belongs to exactly one department, and products inherit that structure through their project assignment.
+
+<DocsVideo videoKey="department.departments-tab" title="Departments tab walkthrough" />
+
+## Viewing departments
+
+- **List:** `/departments` — cards with name, description, manager, and member count.
+- **Detail:** `/departments/{departmentId}` — full profile, member list, audit metadata, and a table of projects in this department.
+
+Anyone signed in can browse departments and open detail pages. **Share** copies a direct link to the department page.
+
+## Creating a department
+
+<Callout type="warn" title="Admin only">
+Creating a department requires **Admin** privileges.
+</Callout>
+
+1. Open **Departments** and click **Create Department**.
+2. Fill in the form:
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Department name** | Yes | Display name. |
+| **Description** | Yes | Max **220** characters. |
+| **Manager** | No | Free-text manager name. |
+| **Image** | No | Optional department image (uploaded to storage). |
+| **Members** | No | Search and add workspace users from the user picker. |
+
+3. Submit. The new department appears on the list and is available when creating projects and products.
+
+## Updating a department
+
+<Callout type="warn" title="Admin only">
+Updating a department or changing its member list requires **Admin** privileges.
+</Callout>
+
+On the department detail page:
+
+1. Click **Update**.
+2. Change name, description, manager, image, or members (same rules as create).
+3. Save.
+
+The detail page shows **Created** and **Updated** audit badges when available.
+
+## Assigning members
+
+Admins add or remove users through **Add users** on create/update dialogs. All members can view the member list on the detail page via the members control, but only admins can change assignments.
+
+## Projects in a department
+
+The department detail page lists all projects scoped to that department. Use filters and sorting on the table, then open a project to manage products there.
+
+## Archiving a department
+
+<Callout type="warn" title="Admin only">
+Archiving a department requires **Admin** privileges.
+</Callout>
+
+1. On the department detail page, choose **Archive**.
+2. Type the **exact department name** to confirm.
+3. The department moves to **Archive → Departments** (`/archive`).
+
+Archived departments are hidden from normal lists but remain recoverable.
+
+## Restoring a department
+
+<Callout type="warn" title="Admin only">
+Restoring an archived department requires **Admin** privileges.
+</Callout>
+
+1. Go to **Archive** (`/archive`) → **Departments** tab.
+2. Find the department and click **Restore**.
+3. Confirm in the dialog.
+
+The department returns to active use with its projects and associations intact.
+
+## Activity logs
+
+On the department detail page, admins can open the **Logs** tab (`?tab=logs`) for audit history. Non-admins see the overview without the logs tab.
+
+## Related topics
+
+- [Projects](/docs/getting-started/projects) — created under a department.
+- [Products](/docs/getting-started/products) — linked via department when created.
+- [Archives](/docs/review-outputs/archives) — restore and browse archived departments.

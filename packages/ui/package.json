@@ -1,6 +1,6 @@
 {
   "name": "@uprevit/ui",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "build": "tsc --noEmit",
@@ -10,6 +10,7 @@
     "./components/ui/*": "./src/components/ui/*.tsx",
     "./components/common/ThemeToggle": "./src/components/common/ThemeToggle.tsx",
     "./components/common/SlidingNumber": "./src/components/common/SlidingNumber.tsx",
+    "./components/kibo-ui/video-player": "./src/components/kibo-ui/video-player/index.tsx",
     "./hooks/general/use-mobile": "./src/hooks/general/use-mobile.ts",
     "./lib/utils": "./src/lib/utils.ts",
     "./lib/theme-provider": "./src/lib/theme-provider.tsx"
@@ -48,6 +49,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.2.1",
     "lucide-react": "^0.555.0",
+    "media-chrome": "^4.19.0",
     "motion": "^12.34.0",
     "radix-ui": "^1.4.3",
     "react-day-picker": "^10.0.1",

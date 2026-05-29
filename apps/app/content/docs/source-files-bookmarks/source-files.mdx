@@ -1,0 +1,59 @@
+---
+title: Source Files
+description: Workspace folder tree for reference documents linked to products.
+---
+
+**Source Files** (`/source-files`) is a workspace-wide file library organized as folders and files. Use it to store reference PDFs, artwork, standards extracts, and other materials—not the structured product tabs themselves.
+
+Folders can nest under parents and may optionally link to a **product** so teammates can open related assets from [Product Information](/docs/product-documentation/product-information).
+
+<DocsVideo videoKey="working-with-files.source-files-archive-bookmarks" title="Source Files, Archive, and Bookmarks tabs" />
+
+## Browsing
+
+| Route | Purpose |
+|-------|---------|
+| `/source-files` | Root folders plus **Bookmarked Folders** section. |
+| `/source-files/view/{folderId}` | Contents of one folder: subfolders, files, uploads. |
+
+Switch **card**, **list**, or **big grid** view on folder pages for different density.
+
+## Folder actions
+
+| Action | Description |
+|--------|-------------|
+| **Create folder** | Add a folder at root or inside another folder; optionally associate with a product. |
+| **Edit folder** | Rename or update folder metadata. |
+| **Delete folder** | Remove folder (confirm dialog). |
+| **Upload files** | Add one or more files into the current folder. |
+
+## File actions
+
+On each file:
+
+- **Preview** — images open in a preview dialog.
+- **Download** — save a copy locally.
+- **Delete** — remove the file with confirmation.
+
+## Bookmarking folders
+
+Toggle the bookmark icon on a folder card to add it to your personal **Bookmarked Folders** list. Bookmarked folders appear on `/source-files` filtered by context (root vs inside a parent folder).
+
+Bookmarks are per user and do not change folder permissions for others.
+
+## Activity logs
+
+On `/source-files`, toggle **Logs** to open the activity panel (`scopeType: source-files`). Any signed-in user can view these logs in the current application—unlike archive logs, this is not admin-restricted.
+
+## Linking from products
+
+On **Product Information**, **Linked source files** shows folders tied to the product. Links open the folder in Source Files.
+
+## Permissions
+
+Source file and folder CRUD is available to authenticated workspace members. There is no separate admin gate on these actions in the UI.
+
+## Related topics
+
+- [Bookmarks](/docs/source-files-bookmarks/bookmarks) — product bookmark folders (separate feature).
+- [Product Information](/docs/product-documentation/product-information) — product-side links into folders.

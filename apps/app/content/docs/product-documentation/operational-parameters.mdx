@@ -1,0 +1,38 @@
+---
+title: Operational Parameters
+description: Spreadsheet workbook for operational and environmental parameters.
+---
+
+**Operational Parameters** (`/products/{productId}/operational-parameters`) uses the same spreadsheet interface as [Product Specifications](/docs/product-documentation/product-specifications), but stores a **separate workbook** for operational, environmental, or process parameters distinct from the main specification table.
+
+## Workbook structure
+
+Identical model to Product Specifications:
+
+- User-defined **headers**
+- **Column types** (`constant`, `variable`, `na`)
+- **Cell** grid with optional formats, order, and widths
+
+## Editing and saving
+
+- Inline cell editing, add/remove rows and columns, find & replace, undo/redo.
+- **Save** persists to the `operational-parameters` tab (`add_operational_parameters`).
+- **Auto-save** uses a separate browser preference key per product (`operational-parameters-auto-save-{productId}`).
+
+Submitted products lock the grid to read-only.
+
+## Tab completion
+
+Mark **Operational Parameters** complete from the product header when finished.
+
+## Version comparison (redline)
+
+Compare mode diffs `operational_parameters` workbook data with the same **Highlight** and **Inline** display modes as Product Specifications.
+
+For how to start and end a comparison session, see **[Redlines and Versions](/docs/review-outputs/redlines-versions)**.
+
+## Related topics
+
+- [Product Specifications](/docs/product-documentation/product-specifications)
+- [Reports](/docs/review-outputs/reports) — query operational parameter fields when configured in report categories
+- [Exports](/docs/review-outputs/exports)

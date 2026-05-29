@@ -1,0 +1,89 @@
+---
+title: Projects
+description: Create projects under departments, assign members, and manage products.
+---
+
+**Projects** sit between departments and products. Each project belongs to one **department** and holds the products your team documents for a specific initiative, SKU family, or submission.
+
+<DocsVideo videoKey="projects.projects-tab" title="Projects tab walkthrough" />
+
+## Viewing projects
+
+- **List:** `/projects` — searchable cards across the workspace.
+- **Detail:** `/projects/{projectId}` — project profile, members, and a filterable **products** table for that project only.
+
+All signed-in users can view and share project links. Row actions on the products table link into product documentation.
+
+## Creating a project
+
+<Callout type="warn" title="Admin only">
+Creating a project requires **Admin** privileges.
+</Callout>
+
+1. Open **Projects** and click **Create Project** (or use the control on the list page).
+2. Fill in the form:
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Project name** | Yes | Display name. |
+| **Project number** | Yes | Internal or regulatory reference number. |
+| **Description** | Yes | Max **220** characters. |
+| **Department** | Yes | Searchable list; projects are always scoped to one department. |
+| **Project manager** | No | Free-text name. |
+| **Image** | No | Optional project image. |
+| **Members** | No | Workspace users assigned to the project. |
+
+3. Submit. The project appears under its department and in the global projects list.
+
+## Updating a project
+
+<Callout type="warn" title="Admin only">
+Updating a project or changing members requires **Admin** privileges.
+</Callout>
+
+On the project detail page:
+
+1. Click **Update**.
+2. Edit fields (department can be changed via searchable selector on update).
+3. Save.
+
+## Assigning members
+
+Same pattern as departments: admins manage members on create/update; everyone can view the member list on the detail page.
+
+## Products on a project
+
+The project detail page shows all products where `project_id` matches this project. Use list controls to filter and sort, then open a product row to enter the seven documentation tabs.
+
+When **creating a product**, you must pick a department first; the **project** dropdown then lists only projects in that department.
+
+## Archiving a project
+
+<Callout type="warn" title="Admin only">
+Archiving a project requires **Admin** privileges.
+</Callout>
+
+1. On the project detail page, choose **Archive**.
+2. Type the **exact project name** to confirm.
+3. The project moves to **Archive → Projects**.
+
+Products already tied to the project remain in the database; archive behavior for products is separate (see [Archives](/docs/review-outputs/archives)).
+
+## Restoring a project
+
+<Callout type="warn" title="Admin only">
+Restoring an archived project requires **Admin** privileges.
+</Callout>
+
+1. Go to **Archive** → **Projects** tab.
+2. Click **Restore** on the row and confirm.
+
+## Activity logs
+
+Admins can view the **Logs** tab on the project detail page for audit entries.
+
+## Related topics
+
+- [Departments](/docs/getting-started/departments) — parent grouping.
+- [Products](/docs/getting-started/products) — created within a project.
+- [Archives](/docs/review-outputs/archives) — archived project recovery.

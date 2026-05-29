@@ -1,0 +1,12 @@
+{
+  "title": "Product Documentation",
+  "pages": [
+    "product-information",
+    "compliance-information",
+    "label-components",
+    "symbols-graphics",
+    "product-specifications",
+    "operational-parameters",
+    "label-tags"
+  ]
+}

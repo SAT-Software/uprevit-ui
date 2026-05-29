@@ -1,0 +1,56 @@
+---
+title: Compliance Information
+description: Regulatory standards and packaging or labeling languages.
+---
+
+The **Compliance Information** tab (`/products/{productId}/compliance-information`) documents regulatory standards and the languages used on packaging or labeling for this product version.
+
+<DocsVideo videoKey="product.compliance-tab" title="Compliance Information tab walkthrough" />
+
+## Sections
+
+### Compliance standards
+
+Each standard is a card with:
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Standard / Regulation** | Yes | Pick from the preset library (`COMPLIANCE_STANDARDS`) or enter a custom standard name. |
+| **Standard description** | Auto or manual | Filled automatically for presets; enter manually for custom standards. |
+
+**Actions:** Add, edit, or delete standards while the product is in **Draft**.
+
+### Languages
+
+Manage the set of languages for labeling:
+
+| Field | Notes |
+|-------|-------|
+| **Language code, name, country** | Selected in bulk via **Manage Languages**; supports presets and individual picks. |
+
+One dialog updates the full language list for the product.
+
+## Editing workflow
+
+1. Open **Compliance Information** from the product sidebar.
+2. Under **Compliance Standards**, click **Add Standard** or use row actions on existing cards.
+3. Under **Languages**, open **Manage Languages**, select languages, and save.
+4. Mark the tab complete in the header when finished.
+
+Submitted products cannot add, edit, or delete standards or languages until a new draft version exists.
+
+## Tab completion
+
+Use the header toggle to mark **Compliance Information** complete (`update_compliance_tab_completion`).
+
+## Version comparison (redline)
+
+In compare mode, standards and languages show per-item **NEW**, **DEL**, and **MOD** badges with inline old/new values.
+
+See **[Redlines and Versions](/docs/review-outputs/redlines-versions)** for how to enable and read redline views across tabs.
+
+## Related topics
+
+- [Product Information](/docs/product-documentation/product-information) — core metadata.
+- [Label Components](/docs/product-documentation/label-components) — physical label parts.
+- [Reports](/docs/review-outputs/reports) — query compliance fields across products.

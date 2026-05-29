@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @source "../../../packages/ui/src";
 
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+@source "../../../node_modules/fumadocs-ui/dist/**/*.js";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -236,4 +240,13 @@
 
 .create-product-dialog-scrollbar::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--foreground) / 0.4);
+}
+
+#sentry-feedback {
+  --accent-background: var(--primary);
+  --accent-foreground: var(--primary-foreground);
+  --outline: 1px auto var(--primary);
+  /* Default inset is auto 0 0 auto (bottom-right); this pins the form to bottom-left */
+  --inset: auto auto 0 0;
+  --page-margin: 16px;
 }

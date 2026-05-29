@@ -15,8 +15,8 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@uprevit/ui/components/ui/sidebar";
-import Image from "next/image";
 import Link from "next/link";
+import { UprevitLogo } from "@/components/common/UprevitLogo";
 import {
   PiArchiveDuotone,
   PiBookmarkSimpleDuotone,
@@ -51,6 +51,7 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
+import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
 
 const data = {
   navMain: [
@@ -115,12 +116,18 @@ const data = {
       ],
     },
     {
-      title: "Settings",
+      title: "Help",
+
       items: [
         {
           title: "Settings",
           url: "/settings",
           icon: PiGearDuotone,
+        },
+        {
+          title: "Documentation",
+          url: "/docs",
+          icon: PiBookOpenDuotone,
         },
       ],
     },
@@ -185,20 +192,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           href="/"
           className="flex items-center gap-1 p-0.5 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <div className="relative flex aspect-square mb-1 size-8 rounded-xl items-center justify-center">
-            <Image
-              src="/uprevit-logo-black.svg"
-              alt="Uprevit logo"
-              fill
-              className="object-contain dark:hidden p-0.5"
-            />
-            <Image
-              src="/uprevit-logo-white.svg"
-              alt="Uprevit logo"
-              fill
-              className="hidden object-contain dark:block p-0.5"
-            />
-          </div>
+          <UprevitLogo className="mb-1 rounded-xl" />
           <div className="grid flex-1 text-left text-sm leading-tight">
             <div className="flex items-center gap-2">
               <span className="truncate text-lg text-foreground font-black ">
@@ -284,6 +278,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     )}
                   </SidebarMenuItem>
                 ))}
+                {item.title === "Help" && (
+                  <SidebarMenuItem>
+                    <SidebarFeedbackButton />
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

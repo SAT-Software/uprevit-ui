@@ -1,0 +1,62 @@
+---
+title: Reports
+description: Query products across tabs and export report results.
+---
+
+**Reports** (`/reports`) lets you search products workspace-wide using conditions on root product fields and on data from each documentation tab.
+
+<DocsVideo videoKey="reports-analytics.overview" title="Reports and Analytics overview" />
+
+## Query builder
+
+Build up to **10 conditions** combined with **AND** or **OR**:
+
+| Piece | Description |
+|-------|-------------|
+| **Category** | Maps to a product area: Product (root), Product Information, Compliance, Label Components, Symbols & Graphics, and other tab-backed fields defined in the report configuration. |
+| **Field** | Attribute within that category. |
+| **Operator** | Equals, does not equal, contains, does not contain, exists, does not exist, contains any, contains all. |
+| **Value** | Text, select, or multi-select depending on field type. |
+
+Click **Run query** to execute. Results paginate in the **Results** tab.
+
+### Example categories
+
+- **Product** — status, product name, PPN, version.
+- **Product Information** — market, country of origin, commercial/clinical, UDI-DI, and related metadata.
+- **Compliance** — standards and languages (where exposed in config).
+- **Label Components / Symbols** — array-backed fields with existence and containment operators.
+
+Exact fields mirror `QUERYABLE_TABS` in the application configuration and may expand as tabs gain query support.
+
+## Saved queries
+
+**Save** and **Load** store named queries in your browser (`localStorage` key `uprevit_reports_saved_queries`). Saved queries are local to your machine, not shared workspace-wide.
+
+## Results
+
+The results table lists matching products with key columns for identification. Open a product from results by navigating to its documentation URL.
+
+From results you can queue **Export PDF** or **Export Excel** for the current result set (async jobs—see [Exports](/docs/review-outputs/exports)).
+
+## Report export jobs
+
+The **Report Exports** section on the same page lists background jobs:
+
+| Status | Meaning |
+|--------|---------|
+| **Queued** | Waiting to process. |
+| **Processing** | Generating file. |
+| **Completed** | Ready to download. |
+| **Failed** | Error; retry or contact support. |
+
+A layout-level notifier toast can alert you when jobs complete while you work elsewhere.
+
+## Permissions
+
+Reports are available to all authenticated workspace members. No admin-only gate applies to building or running queries.
+
+## Related topics
+
+- [Exports](/docs/review-outputs/exports) — download completed report files.
+- Product documentation tabs — define the fields you filter on.

@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useAuth } from "react-oidc-context";
+import * as Sentry from "@sentry/nextjs";
 
 export function useSignOut() {
   const auth = useAuth();
@@ -16,6 +17,7 @@ export function useSignOut() {
     const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
 
     await auth.removeUser();
+    Sentry.setUser(null);
 
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
       logoutUri,
