@@ -25,6 +25,7 @@ export interface ProductSpecificationDataTableProps {
   };
   onDataChange?: (data: ProductDataTableSchema) => void;
   onSaveSuccess?: (clearHistory: () => void) => void;
+  resetKey?: number;
   isRedlineView?: boolean;
   isReadOnly?: boolean;
   redlineMode?: "inline" | "highlight";

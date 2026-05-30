@@ -37,6 +37,7 @@ import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductUpdateProgress } from "./ProductUpdateProgress";
 import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
 import { toast } from "sonner";
+import { useProductWorkbookUnsavedGuardOptional } from "@/lib/product-workbook-unsaved-guard";
 
 export type Item = {
   productId: string;
@@ -84,6 +85,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
+  const workbookGuard = useProductWorkbookUnsavedGuardOptional();
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -211,7 +213,12 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
 
   const handleVersionChange = (versionId: string) => {
     if (versionId !== productId) {
-      router.push(`/products/${versionId}/${currentTab}`);
+      const href = `/products/${versionId}/${currentTab}`;
+      if (workbookGuard) {
+        workbookGuard.tryNavigate(href);
+        return;
+      }
+      router.push(href);
     }
   };
 
@@ -332,7 +339,12 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     } else {
       params.set("compareVersion", value);
     }
-    router.push(`${pathname}?${params.toString()}`);
+    const href = `${pathname}?${params.toString()}`;
+    if (workbookGuard) {
+      workbookGuard.tryNavigate(href);
+      return;
+    }
+    router.push(href);
   };
 
   // Get selected version info for display

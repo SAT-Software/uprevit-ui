@@ -487,6 +487,7 @@ export function ProductSpecificationDataTable({
   initialData,
   onDataChange,
   onSaveSuccess,
+  resetKey = 0,
   isRedlineView = false,
   isReadOnly = false,
   redlineMode = "inline",
@@ -812,6 +813,23 @@ export function ProductSpecificationDataTable({
   const clearHistory = useCallback(() => {
     setHistory((prev) => ({ ...prev, past: [], future: [] }));
   }, []);
+
+  useEffect(() => {
+    if (resetKey === 0 || !initialData) return;
+
+    setCellData(initialData.cellData ?? {});
+    setHeaderData(initialData.headerData ?? {});
+    setColumnTypeData(initialData.columnTypeData ?? {});
+    setColumnSizing(initialData.columnSizing ?? {});
+    setColumnOrder(
+      initialData.columnOrder ??
+        Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
+    );
+    setCellFormats(initialData.cellFormats ?? {});
+    setSearchQuery("");
+    clearHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when parent discards unsaved edits
+  }, [resetKey]);
 
   const handleFindReplace = useCallback(
     (updatedCells: Record<string, string>) => {
