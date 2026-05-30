@@ -39,6 +39,7 @@ export function GuardedLink({ href, onClick, ...props }: GuardedLinkProps) {
           return;
         }
         if (!guardContext || !hrefString) return;
+        if (!guardContext.isNavigationBlocked()) return;
 
         event.preventDefault();
         guardContext.tryNavigate(hrefString);

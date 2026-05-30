@@ -249,7 +249,9 @@ export function ProductWorkbookTabPage({
         <ProductSpecificationDataTable
           resetKey={editor.tableResetKey}
           initialData={initialData}
-          onDataChange={isSubmitted ? undefined : editor.handleDataChange}
+          onDataChange={
+            isSubmitted || isRedlineView ? undefined : editor.handleDataChange
+          }
           onSaveSuccess={editor.registerClearHistoryOnSave}
           isRedlineView={isRedlineView}
           isReadOnly={isSubmitted}
