@@ -184,22 +184,65 @@ const Editor = ({
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
 
-  const handleKeyboardShortcuts = useCallback((event: KeyboardEvent) => {
-    if (!editor.current || !editorContainer.current) return;
+  const getMarkerTextEditor = useCallback((): HTMLTextAreaElement | null => {
+    const markerArea = editor.current;
+    if (!markerArea?.shadowRoot) return null;
 
-    // Only handle shortcuts when the editor container or its children are focused
-    const isEditorFocused =
-      editorContainer.current.contains(document.activeElement) ||
-      editorContainer.current.contains(event.target as Node);
+    return markerArea.shadowRoot.querySelector("textarea");
+  }, []);
 
-    if (!isEditorFocused) return;
+  const applyTextEditorKey = useCallback(
+    (textEditor: HTMLTextAreaElement, event: KeyboardEvent) => {
+      textEditor.focus();
 
-    // Delete/Backspace - delete selected markers
-    if (event.key === "Delete" || event.key === "Backspace") {
+      const start = textEditor.selectionStart ?? 0;
+      const end = textEditor.selectionEnd ?? 0;
+
+      if (event.key === "Backspace") {
+        if (start !== end) {
+          textEditor.setRangeText("", start, end, "end");
+        } else if (start > 0) {
+          textEditor.setRangeText("", start - 1, start, "end");
+        }
+      } else if (start !== end) {
+        textEditor.setRangeText("", start, end, "end");
+      } else if (end < textEditor.value.length) {
+        textEditor.setRangeText("", end, end + 1, "end");
+      }
+
+      textEditor.dispatchEvent(
+        new KeyboardEvent("keyup", { key: event.key, bubbles: true }),
+      );
+    },
+    [],
+  );
+
+  const handleKeyboardShortcuts = useCallback(
+    (event: KeyboardEvent) => {
+      if (!editor.current || !editorContainer.current) return;
+
+      const isEditorFocused =
+        editorContainer.current.contains(document.activeElement) ||
+        editorContainer.current.contains(event.target as Node);
+
+      if (!isEditorFocused) return;
+
+      if (event.key !== "Delete" && event.key !== "Backspace") return;
+
+      const textEditor = getMarkerTextEditor();
+      if (textEditor) {
+        // markerjs3 renders the textarea in shadow DOM; focus stays on <mjs-marker-area>
+        event.preventDefault();
+        event.stopPropagation();
+        applyTextEditorKey(textEditor, event);
+        return;
+      }
+
       event.preventDefault();
       editor.current.deleteSelectedMarkers();
-    }
-  }, []);
+    },
+    [applyTextEditorKey, getMarkerTextEditor],
+  );
 
   const handleToolbarAction = (action: ToolbarAction) => {
     if (editor.current) {
@@ -419,9 +462,9 @@ const Editor = ({
   }, [annotation]);
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyboardShortcuts);
+    document.addEventListener("keydown", handleKeyboardShortcuts, true);
     return () => {
-      document.removeEventListener("keydown", handleKeyboardShortcuts);
+      document.removeEventListener("keydown", handleKeyboardShortcuts, true);
     };
   }, [handleKeyboardShortcuts]);
 
