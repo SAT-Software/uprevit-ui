@@ -17,13 +17,14 @@ import {
   PiLayoutDuotone,
   PiMicrosoftExcelLogoDuotone,
   PiPackageDuotone,
+  PiSquaresFourDuotone,
   PiPictureInPictureDuotone,
   PiPresentationChartDuotone,
   PiTagChevronDuotone,
 } from "react-icons/pi";
 
 import { DocsSearchDialog } from "@/components/docs/DocsSearchDialog";
-import { DocsSidebarThemeSwitch } from "@/components/docs/DocsSidebarThemeSwitch";
+import { DocsSidebarFooter } from "@/components/docs/DocsSidebarFooter";
 import { SectionSpacer } from "../../components/layout.client";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { SentryUserSync } from "@/components/common/SentryUserSync";
@@ -41,9 +42,7 @@ export default function DocsRootLayout({
           containerProps={{
             className: "w-full [--fd-layout-width:100%]",
           }}
-          slots={{
-            themeSwitch: DocsSidebarThemeSwitch,
-          }}
+          themeSwitch={{ enabled: false }}
           tree={{
             name: "Uprevit Docs",
             type: "root",
@@ -94,6 +93,12 @@ export default function DocsRootLayout({
                 icon: <PiPackageDuotone />,
                 defaultOpen: true,
                 children: [
+                  {
+                    name: "Product Overview",
+                    type: "page",
+                    url: "/docs/product-documentation/product-overview",
+                    icon: <PiSquaresFourDuotone />,
+                  },
                   {
                     name: "Product Information",
                     type: "page",
@@ -195,6 +200,7 @@ export default function DocsRootLayout({
             ],
           }}
           sidebar={{
+            footer: <DocsSidebarFooter />,
             components: {
               Separator: SectionSpacer,
             },
