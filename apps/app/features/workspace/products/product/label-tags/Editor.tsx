@@ -217,6 +217,13 @@ const Editor = ({
     [],
   );
 
+  const previousImageSrc = useRef<string | null>(null);
+  const reportStateChangesRef = useRef(false);
+
+  const enableStateChangeReporting = useCallback(() => {
+    reportStateChangesRef.current = true;
+  }, []);
+
   const handleKeyboardShortcuts = useCallback(
     (event: KeyboardEvent) => {
       if (!editor.current || !editorContainer.current) return;
@@ -239,9 +246,10 @@ const Editor = ({
       }
 
       event.preventDefault();
+      enableStateChangeReporting();
       editor.current.deleteSelectedMarkers();
     },
-    [applyTextEditorKey, getMarkerTextEditor],
+    [applyTextEditorKey, enableStateChangeReporting, getMarkerTextEditor],
   );
 
   const handleToolbarAction = (action: ToolbarAction) => {
@@ -256,10 +264,12 @@ const Editor = ({
           break;
         }
         case "delete": {
+          enableStateChangeReporting();
           editor.current.deleteSelectedMarkers();
           break;
         }
         case "clear-all": {
+          enableStateChangeReporting();
           const currentState = editor.current.getState();
           editor.current.restoreState({
             width: currentState.width,
@@ -269,10 +279,12 @@ const Editor = ({
           break;
         }
         case "undo": {
+          enableStateChangeReporting();
           editor.current.undo();
           break;
         }
         case "redo": {
+          enableStateChangeReporting();
           editor.current.redo();
           break;
         }
@@ -315,6 +327,7 @@ const Editor = ({
   const handleNewMarker = (markerType: MarkerTypeItem | null) => {
     setCurrentMarkerType(markerType);
     if (editor.current && markerType) {
+      enableStateChangeReporting();
       setEditorState((prevState) => ({
         ...prevState,
         mode: "create",
@@ -339,8 +352,6 @@ const Editor = ({
     }
   }, []);
 
-  const previousImageSrc = useRef<string | null>(null);
-
   useEffect(() => {
     onStateChangeRef.current = onStateChange;
   }, [onStateChange]);
@@ -363,6 +374,7 @@ const Editor = ({
     }
 
     previousImageSrc.current = targetImageSrc;
+    reportStateChangesRef.current = false;
 
     if (editor.current) return;
 
@@ -403,7 +415,7 @@ const Editor = ({
 
       newEditor.addEventListener("areastatechange", () => {
         updateCalculatedEditorState();
-        if (onStateChangeRef.current) {
+        if (reportStateChangesRef.current && onStateChangeRef.current) {
           onStateChangeRef.current(newEditor.getState());
         }
       });
@@ -419,6 +431,7 @@ const Editor = ({
       });
 
       newEditor.addEventListener("markercreate", () => {
+        enableStateChangeReporting();
         setEditorState((prevState) => ({
           ...prevState,
           mode: "select",
@@ -428,6 +441,11 @@ const Editor = ({
       containerRef.replaceChildren();
       containerRef.appendChild(newEditor);
       editor.current = newEditor;
+
+      const handleEditorPointerDown = () => {
+        enableStateChangeReporting();
+      };
+      newEditor.addEventListener("pointerdown", handleEditorPointerDown);
 
       if (
         annotationRef.current &&
@@ -449,7 +467,7 @@ const Editor = ({
       isCancelled = true;
       targetImg.onload = null;
     };
-  }, [targetImageSrc, updateCalculatedEditorState]);
+  }, [enableStateChangeReporting, targetImageSrc, updateCalculatedEditorState]);
 
   useEffect(() => {
     if (
