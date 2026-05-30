@@ -1,6 +1,7 @@
 {
   "title": "Product Documentation",
   "pages": [
+    "product-overview",
     "product-information",
     "compliance-information",
     "label-components",
