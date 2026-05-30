@@ -30,6 +30,7 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { SourceFilesDuplicateProductLinkAlert } from "@/features/workspace/source-files/SourceFilesDuplicateProductLinkAlert";
 
 interface FormValues {
   folderName: string;
@@ -69,6 +70,9 @@ export default function DialogEditSourceFilesFolder({
   });
 
   const folderName = watch("folderName");
+  const selectedProduct = products.find(
+    (product) => product._id === selectedProductId,
+  );
 
   useEffect(() => {
     if (open) {
@@ -190,6 +194,13 @@ export default function DialogEditSourceFilesFolder({
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedProductId && (
+                  <SourceFilesDuplicateProductLinkAlert
+                    productId={selectedProductId}
+                    productName={selectedProduct?.product_name}
+                    excludeFolderId={currentFolder._id}
+                  />
+                )}
               </div>
             )}
           </div>

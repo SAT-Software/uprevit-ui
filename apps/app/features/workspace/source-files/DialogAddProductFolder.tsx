@@ -29,6 +29,7 @@ import {
   PiFolderPlusDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { SourceFilesDuplicateProductLinkAlert } from "@/features/workspace/source-files/SourceFilesDuplicateProductLinkAlert";
 
 interface FormValues {
   folderName: string;
@@ -74,6 +75,9 @@ export default function DialogAddProductFolder({
 
   const folderName = watch("folderName");
   const isRootFolder = !parentId;
+  const selectedProduct = products.find(
+    (product) => product._id === selectedProductId,
+  );
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     const sourceFilesFolderData = {
@@ -192,6 +196,12 @@ export default function DialogAddProductFolder({
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedProductId && (
+                  <SourceFilesDuplicateProductLinkAlert
+                    productId={selectedProductId}
+                    productName={selectedProduct?.product_name}
+                  />
+                )}
               </div>
             )}
           </div>
