@@ -324,6 +324,7 @@ const Editor = ({
     if (editor.current) return;
 
     const targetImg = document.createElement("img");
+    targetImg.crossOrigin = "anonymous";
     targetImg.src = targetImageSrc;
 
     const editorAreaWidth = containerRef.clientWidth;
