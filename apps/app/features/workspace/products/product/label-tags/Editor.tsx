@@ -184,22 +184,73 @@ const Editor = ({
   const [currentMarkerEditor, setCurrentMarkerEditor] =
     useState<MarkerBaseEditor | null>(null);
 
-  const handleKeyboardShortcuts = useCallback((event: KeyboardEvent) => {
-    if (!editor.current || !editorContainer.current) return;
+  const getMarkerTextEditor = useCallback((): HTMLTextAreaElement | null => {
+    const markerArea = editor.current;
+    if (!markerArea?.shadowRoot) return null;
 
-    // Only handle shortcuts when the editor container or its children are focused
-    const isEditorFocused =
-      editorContainer.current.contains(document.activeElement) ||
-      editorContainer.current.contains(event.target as Node);
-
-    if (!isEditorFocused) return;
-
-    // Delete/Backspace - delete selected markers
-    if (event.key === "Delete" || event.key === "Backspace") {
-      event.preventDefault();
-      editor.current.deleteSelectedMarkers();
-    }
+    return markerArea.shadowRoot.querySelector("textarea");
   }, []);
+
+  const applyTextEditorKey = useCallback(
+    (textEditor: HTMLTextAreaElement, event: KeyboardEvent) => {
+      textEditor.focus();
+
+      const start = textEditor.selectionStart ?? 0;
+      const end = textEditor.selectionEnd ?? 0;
+
+      if (event.key === "Backspace") {
+        if (start !== end) {
+          textEditor.setRangeText("", start, end, "end");
+        } else if (start > 0) {
+          textEditor.setRangeText("", start - 1, start, "end");
+        }
+      } else if (start !== end) {
+        textEditor.setRangeText("", start, end, "end");
+      } else if (end < textEditor.value.length) {
+        textEditor.setRangeText("", end, end + 1, "end");
+      }
+
+      textEditor.dispatchEvent(
+        new KeyboardEvent("keyup", { key: event.key, bubbles: true }),
+      );
+    },
+    [],
+  );
+
+  const previousImageSrc = useRef<string | null>(null);
+  const reportStateChangesRef = useRef(false);
+
+  const enableStateChangeReporting = useCallback(() => {
+    reportStateChangesRef.current = true;
+  }, []);
+
+  const handleKeyboardShortcuts = useCallback(
+    (event: KeyboardEvent) => {
+      if (!editor.current || !editorContainer.current) return;
+
+      const isEditorFocused =
+        editorContainer.current.contains(document.activeElement) ||
+        editorContainer.current.contains(event.target as Node);
+
+      if (!isEditorFocused) return;
+
+      if (event.key !== "Delete" && event.key !== "Backspace") return;
+
+      const textEditor = getMarkerTextEditor();
+      if (textEditor) {
+        // markerjs3 renders the textarea in shadow DOM; focus stays on <mjs-marker-area>
+        event.preventDefault();
+        event.stopPropagation();
+        applyTextEditorKey(textEditor, event);
+        return;
+      }
+
+      event.preventDefault();
+      enableStateChangeReporting();
+      editor.current.deleteSelectedMarkers();
+    },
+    [applyTextEditorKey, enableStateChangeReporting, getMarkerTextEditor],
+  );
 
   const handleToolbarAction = (action: ToolbarAction) => {
     if (editor.current) {
@@ -213,10 +264,12 @@ const Editor = ({
           break;
         }
         case "delete": {
+          enableStateChangeReporting();
           editor.current.deleteSelectedMarkers();
           break;
         }
         case "clear-all": {
+          enableStateChangeReporting();
           const currentState = editor.current.getState();
           editor.current.restoreState({
             width: currentState.width,
@@ -226,10 +279,12 @@ const Editor = ({
           break;
         }
         case "undo": {
+          enableStateChangeReporting();
           editor.current.undo();
           break;
         }
         case "redo": {
+          enableStateChangeReporting();
           editor.current.redo();
           break;
         }
@@ -272,6 +327,7 @@ const Editor = ({
   const handleNewMarker = (markerType: MarkerTypeItem | null) => {
     setCurrentMarkerType(markerType);
     if (editor.current && markerType) {
+      enableStateChangeReporting();
       setEditorState((prevState) => ({
         ...prevState,
         mode: "create",
@@ -296,8 +352,6 @@ const Editor = ({
     }
   }, []);
 
-  const previousImageSrc = useRef<string | null>(null);
-
   useEffect(() => {
     onStateChangeRef.current = onStateChange;
   }, [onStateChange]);
@@ -320,10 +374,12 @@ const Editor = ({
     }
 
     previousImageSrc.current = targetImageSrc;
+    reportStateChangesRef.current = false;
 
     if (editor.current) return;
 
     const targetImg = document.createElement("img");
+    targetImg.crossOrigin = "anonymous";
     targetImg.src = targetImageSrc;
 
     const editorAreaWidth = containerRef.clientWidth;
@@ -359,7 +415,7 @@ const Editor = ({
 
       newEditor.addEventListener("areastatechange", () => {
         updateCalculatedEditorState();
-        if (onStateChangeRef.current) {
+        if (reportStateChangesRef.current && onStateChangeRef.current) {
           onStateChangeRef.current(newEditor.getState());
         }
       });
@@ -375,6 +431,7 @@ const Editor = ({
       });
 
       newEditor.addEventListener("markercreate", () => {
+        enableStateChangeReporting();
         setEditorState((prevState) => ({
           ...prevState,
           mode: "select",
@@ -384,6 +441,11 @@ const Editor = ({
       containerRef.replaceChildren();
       containerRef.appendChild(newEditor);
       editor.current = newEditor;
+
+      const handleEditorPointerDown = () => {
+        enableStateChangeReporting();
+      };
+      newEditor.addEventListener("pointerdown", handleEditorPointerDown);
 
       if (
         annotationRef.current &&
@@ -405,7 +467,7 @@ const Editor = ({
       isCancelled = true;
       targetImg.onload = null;
     };
-  }, [targetImageSrc, updateCalculatedEditorState]);
+  }, [enableStateChangeReporting, targetImageSrc, updateCalculatedEditorState]);
 
   useEffect(() => {
     if (
@@ -418,9 +480,9 @@ const Editor = ({
   }, [annotation]);
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyboardShortcuts);
+    document.addEventListener("keydown", handleKeyboardShortcuts, true);
     return () => {
-      document.removeEventListener("keydown", handleKeyboardShortcuts);
+      document.removeEventListener("keydown", handleKeyboardShortcuts, true);
     };
   }, [handleKeyboardShortcuts]);
 

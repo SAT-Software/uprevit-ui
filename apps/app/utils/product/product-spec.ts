@@ -62,6 +62,23 @@ export function sparseProductSpecDataForDatabase(
   };
 }
 
+/** Stable JSON for dirty-checking against grid serialization. */
+export function normalizeWorkbookForComparison(
+  schema: ProductDataTableSchema | undefined,
+): string {
+  const parsed = parseProductSpecDataFromDatabase(schema);
+  return JSON.stringify(
+    sparseProductSpecDataForDatabase(
+      parsed.headerData,
+      parsed.columnTypeData,
+      parsed.cellData,
+      parsed.cellFormats,
+      parsed.columnOrder,
+      parsed.columnSizing,
+    ),
+  );
+}
+
 export function parseProductSpecDataFromDatabase(
   schema: ProductDataTableSchema | undefined
 ): {

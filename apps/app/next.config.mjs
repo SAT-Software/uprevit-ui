@@ -16,6 +16,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "utfs.io",
+      },
+      {
+        protocol: "https",
         hostname:
           "uprevit-upload-stage-940900040930-us-east-1-an.s3.us-east-1.amazonaws.com",
       },

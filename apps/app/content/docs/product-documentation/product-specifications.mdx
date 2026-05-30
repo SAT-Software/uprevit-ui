@@ -27,14 +27,13 @@ There is no per-cell required validation—the grid is free-form for your specif
 
 ### Saving
 
-- **Save** — writes the workbook to the server (`add_product_data` on the product-specifications tab).
-- **Auto-save** — optional per-product preference stored in the browser; when enabled, changes save automatically.
-
-A **beforeunload** warning appears if you leave with unsaved manual changes.
+- **Save** — writes the workbook to the server (`add_product_data` on the product-specifications tab). Click **Save** after editing; the toolbar shows **Unsaved changes** until the server confirms.
+- Changes are **not** saved automatically. If you navigate to another tab or page without saving, Uprevit shows an **Unsaved Changes** dialog so you can save, discard, or stay on the page.
+- Closing or refreshing the browser tab with unsaved edits triggers the browser’s leave warning.
 
 ### Submitted products
 
-When status is **Submitted**, the grid is **read-only**: no edits, save, or auto-save.
+When status is **Submitted**, the grid is **read-only**: no edits or save.
 
 ## Toolbar extras
 

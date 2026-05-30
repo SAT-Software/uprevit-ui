@@ -17,7 +17,7 @@ import {
 import { SidebarMenuButton } from "@uprevit/ui/components/ui/sidebar";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useGetUser } from "@/hooks/user/useGetUser";
-import Link from "next/link";
+import { GuardedLink } from "@/components/common/GuardedLink";
 import {
   PiSignOutDuotone,
   PiSquaresFourDuotone,
@@ -80,16 +80,16 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href={`/settings?tab=profile`}>
+            <GuardedLink href={`/settings?tab=profile`}>
               <PiUserDuotone />
               Profile
-            </Link>
+            </GuardedLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href={`/settings?tab=workspace`}>
+            <GuardedLink href={`/settings?tab=workspace`}>
               <PiSquaresFourDuotone />
               Workspace
-            </Link>
+            </GuardedLink>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut}>

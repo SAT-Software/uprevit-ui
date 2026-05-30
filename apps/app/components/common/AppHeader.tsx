@@ -10,7 +10,7 @@ import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Product } from "@/types/product";
-import Link from "next/link";
+import { GuardedLink } from "@/components/common/GuardedLink";
 import { useParams, usePathname } from "next/navigation";
 import {
   PiArchiveDuotone,
@@ -215,7 +215,7 @@ export function AppHeader() {
                     <BreadcrumbList>
                       {/* <BreadcrumbSeparator /> */}
                       <BreadcrumbItem>
-                        <Link href={`/${section}`}>{sectionData?.title}</Link>
+                        <GuardedLink href={`/${section}`}>{sectionData?.title}</GuardedLink>
                       </BreadcrumbItem>
                     </BreadcrumbList>
                   </Breadcrumb>
