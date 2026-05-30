@@ -8,6 +8,8 @@ import {
   merge,
 } from "@univerjs/presets";
 import { IWorkbookData } from "@univerjs/core";
+import { cn } from "@uprevit/ui/lib/utils";
+import { redlineBadgeAdded, redlineBadgeRemoved } from "@/utils/redlineStyles";
 import { UniverSheetsCorePreset } from "@univerjs/presets/preset-sheets-core";
 import UniverPresetSheetsCoreEnUS from "@univerjs/presets/preset-sheets-core/locales/en-US";
 
@@ -74,9 +76,9 @@ export default function UniverReadOnlyViewer({
   const getBorderColor = () => {
     switch (variant) {
       case "old":
-        return "border-red-300/50";
+        return "border-red-300/50 dark:border-red-700/50";
       case "new":
-        return "border-blue-300/50";
+        return "border-blue-300/50 dark:border-blue-700/50";
       default:
         return "border-border";
     }
@@ -85,9 +87,9 @@ export default function UniverReadOnlyViewer({
   const getLabelColor = () => {
     switch (variant) {
       case "old":
-        return "text-red-700 bg-red-100 border-red-200";
+        return cn(redlineBadgeRemoved, "border");
       case "new":
-        return "text-blue-700 bg-blue-100 border-blue-200";
+        return cn(redlineBadgeAdded, "border");
       default:
         return "text-muted-foreground bg-muted border-border";
     }

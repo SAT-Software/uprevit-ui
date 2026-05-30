@@ -29,6 +29,18 @@ import {
 import type { DiffItem } from "@/utils/deepDiff";
 import { hasChangedRedlineStatus } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
+import {
+  cnRedlineBadge,
+  redlineBannerText,
+  redlineCardAdded,
+  redlineCardModified,
+  redlineCardRemoved,
+  redlineFieldHighlightAdded,
+  redlineFieldHighlightModified,
+  redlineFieldHighlightRemoved,
+  redlineNewValue,
+  redlineOldValue,
+} from "@/utils/redlineStyles";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -139,12 +151,7 @@ function RedlineValue({
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       {(diff.old_value !== null || isRemoved) && (
-        <span
-          className={cn(
-            "line-through text-sm text-red-600/70",
-            oldValueClassName,
-          )}
-        >
+        <span className={cn(redlineOldValue, oldValueClassName)}>
           {format(diff.old_value) || ""}
         </span>
       )}
@@ -157,12 +164,7 @@ function RedlineValue({
         )}
 
       {(diff.new_value !== null || isAdded) && !isRemoved && (
-        <span
-          className={cn(
-            "text-sm font-semibold text-blue-700",
-            newValueClassName,
-          )}
-        >
+        <span className={cn(redlineNewValue, newValueClassName)}>
           {format(diff.new_value) || ""}
         </span>
       )}
@@ -502,7 +504,7 @@ export default function Page() {
       {/* Redline Mode Banner */}
       {isRedlineView && (
         <div className=" px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
-          <span className="text-amber-600 font-medium">
+          <span className={cn("font-medium", redlineBannerText)}>
             {diffRedlineLoading
               ? "Loading changes..."
               : `Redline View: ${productInfoChangeCount} changes in Product Information`}
@@ -776,30 +778,39 @@ export default function Page() {
                   key={idx}
                   className={cn(
                     "relative flex flex-col gap-3 p-4 border rounded-xl bg-card hover:bg-accent/5 transition-all duration-200 group",
-                    isRedlineView &&
-                      isRemoved &&
-                      "border-red-500/50 bg-red-100/5 opacity-60",
-                    isRedlineView &&
-                      isAdded &&
-                      "border-blue-500/50 bg-blue-100/5",
-                    isRedlineView &&
-                      isModified &&
-                      "border-amber-500/50 bg-amber-100/10",
+                    isRedlineView && isRemoved && redlineCardRemoved,
+                    isRedlineView && isAdded && redlineCardAdded,
+                    isRedlineView && isModified && redlineCardModified,
                     !isRedlineView || !fieldStatus ? "border-border" : "",
                   )}
                 >
                   {isRedlineView && isAdded && (
-                    <span className="absolute -top-1 -right-1 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                    <span
+                      className={cn(
+                        "absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[10px]",
+                        cnRedlineBadge("added"),
+                      )}
+                    >
                       NEW
                     </span>
                   )}
                   {isRedlineView && isRemoved && (
-                    <span className="absolute -top-1 -right-1 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                    <span
+                      className={cn(
+                        "absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[10px]",
+                        cnRedlineBadge("removed"),
+                      )}
+                    >
                       DEL
                     </span>
                   )}
                   {isRedlineView && isModified && (
-                    <span className="absolute -top-1 -right-1 text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                    <span
+                      className={cn(
+                        "absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[10px]",
+                        cnRedlineBadge("modified"),
+                      )}
+                    >
                       MOD
                     </span>
                   )}
@@ -809,13 +820,11 @@ export default function Page() {
                         "p-2 rounded-lg bg-accent text-foreground group-hover:bg-accent/60 transition-colors",
                         isRedlineView &&
                           isRemoved &&
-                          "bg-red-200/40 text-destructive",
-                        isRedlineView &&
-                          isAdded &&
-                          "bg-blue-200/40 text-blue-500",
+                          redlineFieldHighlightRemoved,
+                        isRedlineView && isAdded && redlineFieldHighlightAdded,
                         isRedlineView &&
                           isModified &&
-                          "bg-amber-200/40 text-amber-500",
+                          redlineFieldHighlightModified,
                         !isRedlineView || !fieldStatus ? "border-border" : "",
                       )}
                     >
@@ -826,7 +835,7 @@ export default function Page() {
                         "text-sm font-medium text-muted-foreground truncate",
                         isRedlineView &&
                           isRemoved &&
-                          "line-through text-red-500/70",
+                          "line-through text-red-500/70 dark:text-red-400/80",
                       )}
                     >
                       {labelDiff ? (
@@ -845,7 +854,7 @@ export default function Page() {
                       "font-semibold text-lg text-foreground pl-1",
                       isRedlineView &&
                         isRemoved &&
-                        "line-through text-red-500/70",
+                        "line-through text-red-500/70 dark:text-red-400/80",
                     )}
                     title={field.value}
                   >

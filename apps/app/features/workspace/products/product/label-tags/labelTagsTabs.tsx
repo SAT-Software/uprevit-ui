@@ -33,6 +33,14 @@ import { LegendPanel } from "./LegendPanel";
 import { LegendItem } from "./legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
 import { annotationsMatchForComparison } from "@/utils/product/label-tag-annotation";
+import {
+  cnRedlineBadge,
+  redlineCardAdded,
+  redlineCardModified,
+  redlineCardRemoved,
+  redlineNewValue,
+  redlineOldValue,
+} from "@/utils/redlineStyles";
 
 interface LabelTagItem {
   _id: string;
@@ -627,11 +635,16 @@ export default function LabelTagsTabs({
         <div className="flex flex-col gap-2">
           {(oldValue || isRemoved) && (
             <div className="relative">
-              <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+              <span
+                className={cn(
+                  "absolute top-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
+                  cnRedlineBadge("removed"),
+                )}
+              >
                 OLD
               </span>
               {oldValue ? (
-                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-red-300 bg-red-50/30 opacity-60">
+                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20">
                   <Image
                     src={oldValue}
                     alt="Previous image"
@@ -641,7 +654,7 @@ export default function LabelTagsTabs({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-red-50/30 rounded-lg border-2 border-red-300 border-dashed opacity-60">
+                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-red-50/30 rounded-lg border-2 border-red-300 border-dashed opacity-60 dark:border-red-700/50 dark:bg-red-950/20">
                   <PiImageDuotone className="w-8 h-8 mb-2 opacity-50" />
                   <p className="text-xs">No image</p>
                 </div>
@@ -655,11 +668,16 @@ export default function LabelTagsTabs({
           )}
           {(newValue || isAdded) && !isRemoved && (
             <div className="relative">
-              <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+              <span
+                className={cn(
+                  "absolute top-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
+                  cnRedlineBadge("added"),
+                )}
+              >
                 NEW
               </span>
               {newValue ? (
-                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-blue-300 bg-blue-50/30">
+                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20">
                   <Image
                     src={newValue}
                     alt="New image"
@@ -669,7 +687,7 @@ export default function LabelTagsTabs({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-blue-50/30 rounded-lg border-2 border-blue-300 border-dashed">
+                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-blue-50/30 rounded-lg border-2 border-blue-300 border-dashed dark:border-blue-700/50 dark:bg-blue-950/20">
                   <PiImageDuotone className="w-8 h-8 mb-2 opacity-50" />
                   <p className="text-xs">No image</p>
                 </div>
@@ -687,7 +705,7 @@ export default function LabelTagsTabs({
             {/* <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full shadow-sm">
               OLD
             </span> */}
-            <span className="line-through text-sm text-red-600/70 ">
+            <span className={redlineOldValue}>
               {format(diff.old_value) || ""}
             </span>
           </span>
@@ -705,7 +723,7 @@ export default function LabelTagsTabs({
             {/* <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full shadow-sm">
               NEW
             </span> */}
-            <span className="text-sm text-blue-700 ">
+            <span className={redlineNewValue}>
               {format(diff.new_value) ||
                 (emptyLabel ? (
                   <span className="text-muted-foreground/35 italic">
@@ -812,11 +830,11 @@ export default function LabelTagsTabs({
                     className={cn(
                       "gap-2",
                       isTypeAdded &&
-                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800",
+                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800 dark:text-blue-400 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:text-blue-300",
                       isTypeRemoved &&
-                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800",
+                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800 dark:text-red-400 dark:data-[state=active]:bg-red-950/30 dark:data-[state=active]:text-red-300",
                       isTypeModified &&
-                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800",
+                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800 dark:text-amber-400 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:text-amber-300",
                     )}
                   >
                     {isTypeModified && typeDiff ? (
@@ -825,17 +843,32 @@ export default function LabelTagsTabs({
                       <span>{type}</span>
                     )}
                     {isTypeAdded && (
-                      <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[9px]",
+                          cnRedlineBadge("added"),
+                        )}
+                      >
                         NEW
                       </span>
                     )}
                     {isTypeRemoved && (
-                      <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[9px]",
+                          cnRedlineBadge("removed"),
+                        )}
+                      >
                         DEL
                       </span>
                     )}
                     {isTypeModified && (
-                      <span className="text-[9px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[9px]",
+                          cnRedlineBadge("modified"),
+                        )}
+                      >
                         MOD
                       </span>
                     )}
@@ -868,13 +901,13 @@ export default function LabelTagsTabs({
                         "w-full shadow-none transition-all duration-200 mb-4 last:mb-0",
                         isRedlineView &&
                           isRemoved &&
-                          "border-red-500/50 bg-red-100/5 opacity-60",
+                          redlineCardRemoved,
                         isRedlineView &&
                           isAdded &&
-                          "border-blue-500/50 bg-blue-100/5",
+                          redlineCardAdded,
                         isRedlineView &&
                           isModified &&
-                          "border-amber-500/50 bg-amber-100/10",
+                          redlineCardModified,
                         !isRedlineView || !itemStatus ? "border-border" : "",
                       )}
                     >
@@ -883,17 +916,32 @@ export default function LabelTagsTabs({
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {isRedlineView && isAdded && (
-                                <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-2 py-0.5 text-[10px]",
+                                    cnRedlineBadge("added"),
+                                  )}
+                                >
                                   NEW
                                 </span>
                               )}
                               {isRedlineView && isRemoved && (
-                                <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-2 py-0.5 text-[10px]",
+                                    cnRedlineBadge("removed"),
+                                  )}
+                                >
                                   DEL
                                 </span>
                               )}
                               {isRedlineView && isModified && (
-                                <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-2 py-0.5 text-[10px]",
+                                    cnRedlineBadge("modified"),
+                                  )}
+                                >
                                   MOD
                                 </span>
                               )}
@@ -903,7 +951,7 @@ export default function LabelTagsTabs({
                                 "text-sm font-semibold flex items-center gap-2",
                                 isRedlineView &&
                                   isRemoved &&
-                                  "line-through text-red-500/70",
+                                  "line-through text-red-500/70 dark:text-red-400/80",
                               )}
                             >
                               <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground bg-muted/60 border border-border/60 px-2 py-0.5 rounded-full">
@@ -927,7 +975,7 @@ export default function LabelTagsTabs({
                                   "text-sm font-normal text-muted-foreground",
                                   isRedlineView &&
                                     isRemoved &&
-                                    "line-through text-red-500/70",
+                                    "line-through text-red-500/70 dark:text-red-400/80",
                                 )}
                               >
                                 {isRedlineView && descriptionDiff ? (
@@ -998,9 +1046,9 @@ export default function LabelTagsTabs({
                                 className={cn(
                                   "flex flex-col items-center justify-center p-12 text-muted-foreground rounded-lg border border-dashed w-full max-w-md",
                                   isRedlineView && isRemoved
-                                    ? "border-red-300 bg-red-50/30 opacity-60"
+                                    ? "border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20"
                                     : isRedlineView && isAdded
-                                      ? "border-blue-300 bg-blue-50/30"
+                                      ? "border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
                                       : "bg-muted/50 border-border",
                                 )}
                               >
