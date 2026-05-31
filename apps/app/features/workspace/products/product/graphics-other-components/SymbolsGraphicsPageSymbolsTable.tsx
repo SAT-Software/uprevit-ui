@@ -173,12 +173,10 @@ const RedlineCell = ({
   value,
   diff,
   formatFn,
-  showBadgeStyle = false,
 }: {
   value: unknown;
   diff: DiffItem | null;
   formatFn?: (v: unknown, isOld?: boolean, isNew?: boolean) => React.ReactNode;
-  showBadgeStyle?: boolean;
 }) => {
   const format =
     formatFn ||
@@ -195,10 +193,7 @@ const RedlineCell = ({
       {/* Old value - show for modified and removed */}
       {(isModified || isRemoved) && diff.old_value !== null && (
         <div
-          className={cn(
-            redlineOldValueCompact,
-            showBadgeStyle && "px-1.5 py-0.5",
-          )}
+          className={cn(redlineOldValueCompact, "px-1.5 py-0.5")}
         >
           {format(diff.old_value, true, false)}
         </div>
@@ -206,10 +201,7 @@ const RedlineCell = ({
       {/* New value - show for modified and added */}
       {(isModified || isAdded) && !isRemoved && (
         <div
-          className={cn(
-            redlineNewValueCompact,
-            showBadgeStyle && "px-1.5 py-0.5",
-          )}
+          className={cn(redlineNewValueCompact, "px-1.5 py-0.5")}
         >
           {format(diff.new_value, false, true)}
         </div>
@@ -399,7 +391,6 @@ const columns: ColumnDef<Item>[] = [
           <RedlineCell
             value={row.getValue("textPresent")}
             diff={diff}
-            showBadgeStyle={true}
             formatFn={(v, isOld, isNew) => (
               <Badge
                 variant={
