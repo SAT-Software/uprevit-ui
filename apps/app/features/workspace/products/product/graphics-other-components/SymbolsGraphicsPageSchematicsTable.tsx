@@ -65,6 +65,14 @@ import {
 import EditSchematicsDialog from "./EditSchematicsDialog";
 import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 import type { DiffItem } from "@/utils/deepDiff";
+import { cn } from "@uprevit/ui/lib/utils";
+import {
+  cnRedlineBadge,
+  redlineChipAdded,
+  redlineChipRemoved,
+  redlineNewValueCompact,
+  redlineOldValueCompact,
+} from "@/utils/redlineStyles";
 
 type Item = {
   id: string;
@@ -163,12 +171,10 @@ const RedlineCell = ({
   value,
   diff,
   formatFn,
-  showBadgeStyle = false,
 }: {
   value: unknown;
   diff: DiffItem | null;
   formatFn?: (v: unknown, isOld?: boolean, isNew?: boolean) => React.ReactNode;
-  showBadgeStyle?: boolean;
 }) => {
   const format =
     formatFn ||
@@ -183,22 +189,14 @@ const RedlineCell = ({
     <div className="flex flex-col gap-1">
       {(isModified || isRemoved) && diff.old_value !== null && (
         <div
-          className={`line-through text-sm ${
-            showBadgeStyle
-              ? "text-red-700 px-1.5 py-0.5"
-              : "text-red-600/70 px-1.5 py-0.5"
-          }`}
+          className={cn(redlineOldValueCompact, "px-1.5 py-0.5")}
         >
           {format(diff.old_value, true, false)}
         </div>
       )}
       {(isModified || isAdded) && !isRemoved && (
         <div
-          className={`text-sm ${
-            showBadgeStyle
-              ? "text-blue-700 px-1.5 py-0.5"
-              : "text-blue-700 px-1.5 py-0.5"
-          }`}
+          className={cn(redlineNewValueCompact, "px-1.5 py-0.5")}
         >
           {format(diff.new_value, false, true)}
         </div>
@@ -462,13 +460,11 @@ const columns: ColumnDef<Item>[] = [
                 <Badge
                   key={index}
                   variant="outline"
-                  className={`text-xs ${
-                    isNewlyAdded
-                      ? "border-blue-400 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500"
-                      : isRemoved
-                        ? "border-red-400 text-red-700 bg-red-50 line-through dark:bg-red-900/20 dark:text-red-400 dark:border-red-500"
-                        : ""
-                  }`}
+                  className={cn(
+                    "text-xs",
+                    isNewlyAdded && redlineChipAdded,
+                    isRemoved && redlineChipRemoved,
+                  )}
                 >
                   {label}
                 </Badge>
@@ -629,11 +625,12 @@ export default function SymbolsGraphicsPageSchematicsTable({
                   <Fragment key={itemId}>
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
-                      className={`hover:bg-muted/50 ${
-                        isAdded ? "bg-blue-50/30" : ""
-                      } ${isRemoved ? "bg-red-50/30" : ""} ${
-                        isModified ? "bg-amber-50/30" : ""
-                      }`}
+                      className={cn(
+                        "hover:bg-muted/50",
+                        isAdded && "bg-blue-50/30 dark:bg-blue-950/20",
+                        isRemoved && "bg-red-50/30 dark:bg-red-950/20",
+                        isModified && "bg-amber-50/30 dark:bg-amber-950/20",
+                      )}
                     >
                       {row.getVisibleCells().map((cell, cellIdx) => (
                         <TableCell
@@ -643,13 +640,12 @@ export default function SymbolsGraphicsPageSchematicsTable({
                           <div className="flex items-center gap-2">
                             {cellIdx === 0 && isRedlineView && rowStatus && (
                               <span
-                                className={`text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-full border shadow-sm whitespace-nowrap ${
-                                  isAdded
-                                    ? "text-blue-700 bg-blue-100 border-blue-200"
-                                    : isRemoved
-                                      ? "text-red-700 bg-red-100 border-red-200"
-                                      : "text-amber-700 bg-amber-100 border-amber-200"
-                                }`}
+                                className={cn(
+                                  "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px]",
+                                  isAdded && cnRedlineBadge("added"),
+                                  isRemoved && cnRedlineBadge("removed"),
+                                  isModified && cnRedlineBadge("modified"),
+                                )}
                               >
                                 {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
                               </span>

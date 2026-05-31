@@ -169,7 +169,7 @@ export function ProductWorkbookTabPage({
     <div className="flex flex-1 flex-col gap-2 p-2 min-h-0 overflow-hidden">
       {isRedlineView && (
         <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
-          <span className="text-amber-600 font-medium">
+          <span className="text-amber-600 dark:text-amber-400 font-medium">
             {isLoadingDiff ? "Loading changes..." : redlineBannerLabel}
           </span>
         </div>
@@ -217,7 +217,9 @@ export function ProductWorkbookTabPage({
                 <span className="text-xs">Saving</span>
               </div>
             ) : editor.hasEditableUnsavedChanges ? (
-              <span className="text-xs text-amber-600">Unsaved changes</span>
+              <span className="text-xs text-amber-600 dark:text-amber-400">
+                Unsaved changes
+              </span>
             ) : editor.lastSavedAt ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
