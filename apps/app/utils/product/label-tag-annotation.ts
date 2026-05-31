@@ -2,8 +2,8 @@ import type { AnnotationState } from "@markerjs/markerjs3";
 
 function normalizeMarkers(
   markers: AnnotationState["markers"] | undefined,
-): AnnotationState["markers"] | undefined {
-  if (!markers) return markers;
+): AnnotationState["markers"] {
+  if (!markers) return [];
 
   return markers.map((marker) => {
     const typeName = marker.typeName;

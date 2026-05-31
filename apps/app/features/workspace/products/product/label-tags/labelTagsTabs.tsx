@@ -332,7 +332,8 @@ export default function LabelTagsTabs({
   const persistAnnotation = useCallback(
     (itemId: string, annotation: AnnotationState): Promise<void> => {
       const item = labelTagsData.find((labelTag) => labelTag._id === itemId);
-      if (!item?.image) {
+      const itemImage = item?.image;
+      if (!itemImage) {
         return Promise.reject(new Error("No image available for this label tag"));
       }
 
@@ -345,7 +346,6 @@ export default function LabelTagsTabs({
 
         setIsSaving(true);
         setAnnotations((prev) => ({ ...prev, [itemId]: annotation }));
-        const itemImage = item.image;
         setPendingSave({
           itemId,
           itemImage,
@@ -361,7 +361,7 @@ export default function LabelTagsTabs({
   );
 
   const saveDirtyItemIds = useCallback(
-    async (itemIds: string[]) => {
+    async (itemIds?: string[]) => {
       const dirtyIds = getDirtyItemIds(itemIds);
       for (const itemId of dirtyIds) {
         const annotation = currentEditorState[itemId];
