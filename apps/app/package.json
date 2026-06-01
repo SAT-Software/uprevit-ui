@@ -62,6 +62,7 @@
     "motion": "^12.34.0",
     "next": "16.0.10",
     "next-themes": "^0.4.6",
+    "next-video": "^2.8.0",
     "oidc-client-ts": "^3.3.0",
     "path2d-polyfill": "^3.2.1",
     "radix-ui": "^1.4.3",
