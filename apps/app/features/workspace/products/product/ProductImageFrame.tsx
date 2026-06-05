@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { PiImageDuotone } from "react-icons/pi";
 
 import { cn } from "@uprevit/ui/lib/utils";
+import { getNextImageSrc } from "@/utils/isNextImageSrc";
 
 type ProductImageFrameProps = {
   src?: string | null;
@@ -17,7 +18,8 @@ type ProductImageFrameProps = {
 };
 
 const frameVariants = {
-  thumbnail: "relative size-12 shrink-0 overflow-hidden rounded-md border bg-muted",
+  thumbnail:
+    "relative size-12 shrink-0 overflow-hidden rounded-md border bg-muted",
   preview:
     "relative mx-auto h-[280px] w-full max-w-[280px] overflow-hidden rounded-md border bg-muted",
 };
@@ -32,9 +34,6 @@ const fallbackVariants = {
   preview: "size-full p-10 text-muted-foreground/60",
 };
 
-const isRenderableImageSrc = (src: string) =>
-  src.startsWith("/") || src.startsWith("http://") || src.startsWith("https://");
-
 export function ProductImageFrame({
   src,
   alt,
@@ -46,19 +45,24 @@ export function ProductImageFrame({
   priority = false,
   sizes,
 }: ProductImageFrameProps) {
-  const imageSrc = typeof src === "string" ? src.trim() : "";
-  const hasImage = imageSrc.length > 0 && isRenderableImageSrc(imageSrc);
+  const imageSrc = getNextImageSrc(src);
+  const hasImage = Boolean(imageSrc);
 
   return (
     <div className={cn(frameVariants[variant], frameClassName)}>
       {badge}
       {hasImage ? (
         <Image
-          src={imageSrc}
+          src={imageSrc ?? ""}
           alt={alt}
           fill
           className={cn(imageVariants[variant], imageClassName)}
-          sizes={sizes ?? (variant === "thumbnail" ? "48px" : "(max-width: 768px) 100vw, 280px")}
+          sizes={
+            sizes ??
+            (variant === "thumbnail"
+              ? "48px"
+              : "(max-width: 768px) 100vw, 280px")
+          }
           priority={priority}
         />
       ) : (
