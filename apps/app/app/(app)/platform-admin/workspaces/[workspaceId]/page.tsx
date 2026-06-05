@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PiBuildingsDuotone } from "react-icons/pi";
 import { PlatformAdminGuard } from "@/components/common/PlatformAdminGuard";
 import { PlatformAdminNav } from "@/features/platform-admin/PlatformAdminNav";
 import { WorkspaceAdminInviteDialog } from "@/features/platform-admin/WorkspaceAdminInviteDialog";
 import { useGetPlatformWorkspaceDetail } from "@/hooks/platform-admin/useGetPlatformWorkspaceDetail";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
   Table,
@@ -16,10 +18,31 @@ import {
   TableRow,
 } from "@uprevit/ui/components/ui/table";
 
+function WorkspaceDetailErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
+      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
+        <PiBuildingsDuotone className="w-8 h-8 text-destructive" />
+      </div>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-destructive">
+          We couldn&apos;t load the platform workspace detail
+        </p>
+        <p className="text-xs text-muted-foreground">Please try again later</p>
+      </div>
+      <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
+        Try Again
+      </Button>
+    </div>
+  );
+}
+
 export default function PlatformAdminWorkspaceDetailPage() {
   const params = useParams<{ workspaceId: string }>();
   const workspaceId = params.workspaceId;
-  const { data, isLoading } = useGetPlatformWorkspaceDetail(workspaceId);
+  const { data, isLoading, isError, refetch } =
+    useGetPlatformWorkspaceDetail(workspaceId);
+  const hasLoadError = !isLoading && (isError || !data);
 
   return (
     <PlatformAdminGuard>
@@ -29,13 +52,20 @@ export default function PlatformAdminWorkspaceDetailPage() {
             <div>
               {isLoading ? (
                 <Skeleton className="h-8 w-48" />
+              ) : hasLoadError ? (
+                <>
+                  <h1 className="text-base font-semibold">Workspace</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Platform workspace detail
+                  </p>
+                </>
               ) : (
                 <>
                   <h1 className="text-base font-semibold">
-                    {data?.workspace.workspaceName}
+                    {data.workspace.workspaceName}
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    {data?.workspace.companyName}
+                    {data.workspace.companyName}
                   </p>
                 </>
               )}
@@ -43,7 +73,7 @@ export default function PlatformAdminWorkspaceDetailPage() {
                 <PlatformAdminNav />
               </div>
             </div>
-            {workspaceId ? (
+            {!hasLoadError && workspaceId ? (
               <WorkspaceAdminInviteDialog workspaceId={workspaceId} />
             ) : null}
           </div>
@@ -51,6 +81,8 @@ export default function PlatformAdminWorkspaceDetailPage() {
 
         {isLoading ? (
           <Skeleton className="h-40 w-full rounded-xl" />
+        ) : hasLoadError ? (
+          <WorkspaceDetailErrorState onRetry={() => refetch()} />
         ) : (
           <>
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">

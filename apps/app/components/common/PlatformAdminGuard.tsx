@@ -43,7 +43,7 @@ export function PlatformAdminGuard({ children }: { children: React.ReactNode }) 
   if (
     auth.isLoading ||
     !hasCognitoGroup ||
-    sessionQuery.isLoading ||
+    sessionQuery.isPending ||
     sessionQuery.isError
   ) {
     return <PlatformAdminLoadingShell />;
