@@ -18,18 +18,23 @@ import { SidebarMenuButton } from "@uprevit/ui/components/ui/sidebar";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { GuardedLink } from "@/components/common/GuardedLink";
+import { useAuth } from "react-oidc-context";
+import { isPlatformOperatorProfile } from "@/utils/isPlatformOperator";
 import {
   PiSignOutDuotone,
   PiSquaresFourDuotone,
+  PiShieldCheckDuotone,
   PiUserCircleGearDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 export function UserNav() {
+  const auth = useAuth();
   const { data: userData, isLoading } = useGetUser();
   const signOut = useSignOut();
   const user = userData?.user;
+  const isPlatformOperator = isPlatformOperatorProfile(auth.user?.profile);
 
   if (isLoading)
     return <Skeleton className="h-7 w-7 rounded-full bg-border/80" />;
@@ -91,6 +96,14 @@ export function UserNav() {
               Workspace
             </GuardedLink>
           </DropdownMenuItem>
+          {isPlatformOperator ? (
+            <DropdownMenuItem asChild>
+              <GuardedLink href="/platform-admin">
+                <PiShieldCheckDuotone />
+                Platform admin
+              </GuardedLink>
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut}>
             <PiSignOutDuotone />
