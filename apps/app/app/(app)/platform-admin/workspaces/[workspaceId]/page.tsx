@@ -59,7 +59,7 @@ export default function PlatformAdminWorkspaceDetailPage() {
                     Platform workspace detail
                   </p>
                 </>
-              ) : (
+              ) : data ? (
                 <>
                   <h1 className="text-base font-semibold">
                     {data.workspace.workspaceName}
@@ -68,7 +68,7 @@ export default function PlatformAdminWorkspaceDetailPage() {
                     {data.workspace.companyName}
                   </p>
                 </>
-              )}
+              ) : null}
               <div className="mt-3">
                 <PlatformAdminNav />
               </div>
