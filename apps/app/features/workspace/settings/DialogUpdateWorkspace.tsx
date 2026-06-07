@@ -44,6 +44,7 @@ export function DialogUpdateWorkspace({
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
+  const [logoSizeBytes, setLogoSizeBytes] = useState<number | undefined>();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
   const existingLogoValue =
@@ -74,7 +75,7 @@ export function DialogUpdateWorkspace({
     }
     try {
       updateWorkspaceMutation(
-        { ...formData, _id: workspaceData._id },
+        { ...formData, _id: workspaceData._id, logoSizeBytes } as Workspace,
         {
           onSuccess: () => {
             setOpen(false);
@@ -109,6 +110,7 @@ export function DialogUpdateWorkspace({
         shouldTouch: true,
         shouldValidate: true,
       });
+      setLogoSizeBytes(uploadResult.size);
     } catch (error) {
       console.error("Failed to upload logo:", error);
       // Reset preview on error
@@ -125,6 +127,7 @@ export function DialogUpdateWorkspace({
       shouldValidate: true,
     });
     setLogoPreview("");
+    setLogoSizeBytes(undefined);
   };
 
   const logoValue = watch("logo");

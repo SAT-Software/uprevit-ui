@@ -9,6 +9,7 @@ import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 export type OnboardUserPayload = {
   user_id: string;
   profileAvatar?: string;
+  profileAvatarSizeBytes?: number;
   name: string;
   designation: string;
   location?: string;

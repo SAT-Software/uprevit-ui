@@ -141,6 +141,7 @@ export default function UpdateDepartmentDialog({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       let imageUrlToSend: string;
+      let imageSizeBytes: number | undefined;
       if (removeDepartmentImage) {
         imageUrlToSend = "";
       } else if (newDepartmentImage) {
@@ -149,6 +150,7 @@ export default function UpdateDepartmentDialog({
           file: newDepartmentImage,
         });
         imageUrlToSend = uploadedImage.key;
+        imageSizeBytes = uploadedImage.size;
       } else {
         imageUrlToSend = existingImageValue;
       }
@@ -161,6 +163,7 @@ export default function UpdateDepartmentDialog({
           manager: data.manager,
           users: selectedUsers.map((user) => user._id),
           image: imageUrlToSend,
+          imageSizeBytes,
           admin_id: department!.admin_id,
           workspace_id: department!.workspace_id,
         },

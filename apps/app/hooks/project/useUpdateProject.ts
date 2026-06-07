@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 export function useUpdateProject() {
   const queryClient = useQueryClient();
@@ -36,6 +37,7 @@ export function useUpdateProject() {
         queryKey: ["project", variables._id],
       });
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to update project");

@@ -128,6 +128,7 @@ export default function EditSymbolsDialog({
     try {
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       if (data.image && data.image.file instanceof File) {
         const s3UploadResult = await uploadFileToS3({
@@ -138,6 +139,7 @@ export default function EditSymbolsDialog({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
 
@@ -158,6 +160,7 @@ export default function EditSymbolsDialog({
           text: data.componentName,
           image: finalImage,
           key: finalKey,
+          ...(uploadedImageSizeBytes ? { sizeBytes: uploadedImageSizeBytes } : {}),
           entity: "Symbols",
           text_present: data.textPresent === "yes",
           label_presence: labelPresence.map((tag: Tag) => tag.text),

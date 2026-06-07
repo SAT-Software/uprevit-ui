@@ -116,6 +116,7 @@ export default function EditOtherComponentsDialog({
     try {
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       if (data.image && data.image.file instanceof File) {
         const s3UploadResult = await uploadFileToS3({
@@ -126,6 +127,7 @@ export default function EditOtherComponentsDialog({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
 
@@ -147,6 +149,7 @@ export default function EditOtherComponentsDialog({
           text: data.componentName,
           image: finalImage,
           key: finalKey,
+          ...(uploadedImageSizeBytes ? { sizeBytes: uploadedImageSizeBytes } : {}),
           entity: "Other Components",
           description: data.componentDescription,
           label_presence: labelPresence.map((tag: Tag) => tag.text),

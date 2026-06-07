@@ -162,6 +162,7 @@ export default function EditBarcodesDialog({
     try {
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       if (data.image && data.image.file instanceof File) {
         const s3UploadResult = await uploadFileToS3({
@@ -172,6 +173,7 @@ export default function EditBarcodesDialog({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
 
@@ -193,6 +195,7 @@ export default function EditBarcodesDialog({
           text: componentName,
           image: finalImage,
           key: finalKey,
+          ...(uploadedImageSizeBytes ? { sizeBytes: uploadedImageSizeBytes } : {}),
           entity: "Barcodes",
           description: data.componentDescription,
           label_presence: labelPresence.map((tag: Tag) => tag.text),

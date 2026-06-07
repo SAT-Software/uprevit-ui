@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 type UploadSourceFilesRequest = {
   workspace_id: string;
@@ -9,6 +10,7 @@ type UploadSourceFilesRequest = {
   type: string;
   url?: string;
   key?: string;
+  sizeBytes?: number;
   folderId: string;
   parentId: string;
 };
@@ -47,6 +49,7 @@ export function useUploadSourceFiles(currentFolderId: string) {
       queryClient.invalidateQueries({
         queryKey: ["source-files-folder", currentFolderId],
       });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to upload source files");

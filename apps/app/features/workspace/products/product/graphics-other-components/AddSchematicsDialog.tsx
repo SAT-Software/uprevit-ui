@@ -70,6 +70,7 @@ export default function AddSchematicsDialog({
     try {
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       if (data.image && data.image.file instanceof File) {
         const s3UploadResult = await uploadFileToS3({
@@ -80,6 +81,7 @@ export default function AddSchematicsDialog({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
       const newSchematicsData = {
@@ -91,6 +93,7 @@ export default function AddSchematicsDialog({
             text: data.componentName,
             image: null,
             key: uploadedImageKey,
+            sizeBytes: uploadedImageSizeBytes,
             entity: "Schematics",
             label_presence: (Array.isArray(labelPresence)
               ? labelPresence

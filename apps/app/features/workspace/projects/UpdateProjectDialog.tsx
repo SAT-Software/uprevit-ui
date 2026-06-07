@@ -227,12 +227,14 @@ export default function UpdateProjectDialog({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       let imageUrlToSend: string;
+      let imageSizeBytes: number | undefined;
       if (removeProjectImage) {
         imageUrlToSend = "";
       } else if (newProjectImage) {
         setUploadingImage(true);
         const uploadedImage = await uploadFileToS3({ file: newProjectImage });
         imageUrlToSend = uploadedImage.key;
+        imageSizeBytes = uploadedImage.size;
       } else {
         imageUrlToSend = existingImageValue;
       }
@@ -246,6 +248,7 @@ export default function UpdateProjectDialog({
           project_number: data.project_number,
           users: selectedUsers.map((user) => user._id),
           image: imageUrlToSend,
+          imageSizeBytes,
           admin_id: project!.admin_id,
           workspace_id: project!.workspace_id,
           department_id: data.department || project!.department_id,

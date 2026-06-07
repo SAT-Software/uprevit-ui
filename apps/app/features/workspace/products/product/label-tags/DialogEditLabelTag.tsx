@@ -82,6 +82,7 @@ export default function DialogEditLabelTag({
     try {
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       // Only upload if there's a new image file
       if (
@@ -97,6 +98,7 @@ export default function DialogEditLabelTag({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
 
@@ -119,6 +121,7 @@ export default function DialogEditLabelTag({
             ? data.image
             : "",
           ...(uploadedImageKey !== undefined && { key: uploadedImageKey }),
+          ...(uploadedImageSizeBytes ? { sizeBytes: uploadedImageSizeBytes } : {}),
           ...(hasRemovedExistingImage && uploadedImageKey === undefined && { key: "" }),
         },
       };

@@ -204,11 +204,13 @@ export default function ProjectCreateDialog({
   async function onSubmit(data: FormValues) {
     try {
       let imageKey = "";
+      let imageSizeBytes: number | undefined;
 
       if (projectImage instanceof File) {
         setUploadingImage(true);
         const uploadedImage = await uploadFileToS3({ file: projectImage });
         imageKey = uploadedImage.key;
+        imageSizeBytes = uploadedImage.size;
         setUploadingImage(false);
       }
 
@@ -221,6 +223,7 @@ export default function ProjectCreateDialog({
           department_id: data.department,
           users: selectedUsers.map((user) => user._id),
           image: imageKey,
+          imageSizeBytes,
           admin_id: userId as string,
           workspace_id: workspaceId as string,
         },

@@ -38,6 +38,9 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [profileAvatarSizeBytes, setProfileAvatarSizeBytes] = useState<
+    number | undefined
+  >();
   const existingProfileAvatarValue =
     typeof userProfile?.profileAvatarKey === "string"
       ? userProfile.profileAvatarKey
@@ -63,7 +66,9 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
 
   const onSubmit: SubmitHandler<User> = async (formData) => {
     try {
-      updateUserMutation(formData, {
+      updateUserMutation(
+        { ...formData, profileAvatarSizeBytes } as Partial<User>,
+        {
         onSuccess: () => {
           setOpen(false);
         },
@@ -71,7 +76,8 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
           setOpen(false);
           console.error("Failed to update user profile:", error);
         },
-      });
+        },
+      );
     } catch (error) {
       console.error("Failed to update user profile:", error);
     }
@@ -96,6 +102,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
         shouldTouch: true,
         shouldValidate: true,
       });
+      setProfileAvatarSizeBytes(uploadResult.size);
     } catch (error) {
       console.error("Failed to upload avatar:", error);
       // Reset preview on error
@@ -112,6 +119,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
       shouldValidate: true,
     });
     setAvatarPreview("");
+    setProfileAvatarSizeBytes(undefined);
   };
 
   const profileAvatarValue = watch("profileAvatar");

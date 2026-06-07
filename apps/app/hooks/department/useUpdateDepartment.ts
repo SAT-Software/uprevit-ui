@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 export function useUpdateDepartment() {
   const queryClient = useQueryClient();
@@ -38,6 +39,7 @@ export function useUpdateDepartment() {
       queryClient.invalidateQueries({
         queryKey: ["all-departments"],
       });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to update department");
