@@ -7,6 +7,7 @@ export interface Project {
   project_description: string;
   image?: string;
   imageKey?: string;
+  imageSizeBytes?: number;
   project_manager: string;
   department_id: string;
   admin_id: string;

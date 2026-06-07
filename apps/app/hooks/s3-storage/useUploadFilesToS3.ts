@@ -102,6 +102,7 @@ export function useUploadFilesToS3() {
         fileName: file.name,
         contentType: resolvedContentType,
         uploadScope,
+        sizeBytes: file.size,
         ...(productId ? { productId } : {}),
       };
 

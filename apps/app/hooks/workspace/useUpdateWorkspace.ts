@@ -3,6 +3,7 @@ import { Workspace } from "@/types/workspace";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 async function updateWorkspace(
   workspaceData: Workspace,
@@ -58,6 +59,7 @@ export function useUpdateWorkspace() {
     onSuccess: () => {
       toast.success("Workspace updated successfully");
       queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId] });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to update workspace");

@@ -1,3 +1,10 @@
+import type {
+  BillingAccountStatus,
+  BillingCadence,
+  UsageLimits,
+  WorkspaceFreezes,
+} from "@/types/billing";
+
 export type PlatformAdminRole = "owner" | "operator" | "viewer";
 
 export type PlatformOperatorSession = {
@@ -15,19 +22,30 @@ export type PlatformSummary = {
   invitedUsers: number;
   workspaceAdmins: number;
   billing: {
-    accountsLinked: null;
-    pastDueWorkspaces: null;
-    meteringEnabledWorkspaces: null;
+    accountsLinked: number;
+    pastDueWorkspaces: number;
+    limitsEnabledWorkspaces: number;
+    meteringEnabledWorkspaces: number;
   };
 };
 
-export type WorkspaceBillingPreview = {
-  status: "not_set";
-  meteringEnabled: null;
-  billingCadence: null;
-  currency: null;
-  pastDue: null;
-};
+export type WorkspaceBillingPreview =
+  | {
+      status: "not_set";
+      meteringEnabled: null;
+      limitsEnabled: null;
+      billingCadence: null;
+      currency: null;
+      pastDue: null;
+    }
+  | {
+      status: BillingAccountStatus;
+      meteringEnabled: boolean;
+      limitsEnabled: boolean;
+      billingCadence: BillingCadence;
+      currency: string;
+      pastDue: boolean;
+    };
 
 export type PlatformWorkspaceListItem = {
   id: string;
@@ -83,6 +101,7 @@ export type PlatformWorkspaceDetail = {
   };
   admins: PlatformWorkspaceAdmin[];
   billing: WorkspaceBillingPreview;
+  freezes?: WorkspaceFreezes;
   recentAuditLogs: PlatformAuditLogItem[];
 };
 
@@ -94,4 +113,16 @@ export type PaginatedResponse<T> = {
     total: number;
     totalPages: number;
   };
+};
+
+export type UpdatePlatformBillingAccountInput = {
+  status?: BillingAccountStatus;
+  billingCadence?: BillingCadence;
+  currency?: string;
+  netTermDays?: number;
+  meteringEnabled?: boolean;
+  limitsEnabled?: boolean;
+  pastDue?: boolean;
+  ssoEnabled?: boolean;
+  usageLimits?: Partial<UsageLimits>;
 };

@@ -3,6 +3,7 @@ import { User } from "@/types/user";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 async function updateUser(
   userData: Partial<User>,
@@ -65,6 +66,7 @@ export function useUpdateUser() {
       if (data?.user?.id) {
         queryClient.setQueryData(["user", userId], data);
       }
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to update user profile");

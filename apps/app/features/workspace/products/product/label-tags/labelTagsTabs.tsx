@@ -189,6 +189,7 @@ export default function LabelTagsTabs({
           labelTagId: save.itemId,
           taggedImage: "",
           taggedImageKey: uploadedKey,
+          taggedImageSizeBytes: s3UploadResult.size,
           annotationState: save.annotation,
         });
 

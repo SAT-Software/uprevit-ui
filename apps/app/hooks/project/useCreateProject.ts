@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
@@ -33,6 +34,7 @@ export function useCreateProject() {
     onSuccess: () => {
       toast.success("Project created successfully");
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to create project");

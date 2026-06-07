@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 import type {
   LegendItem,
   OptimisticContext,
@@ -115,6 +116,7 @@ export function useUpdateProductTabData() {
       toast.success("Changes were saved successfully");
       queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
       queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error, _params, context) => {
       const message = getErrorMessage(error, "Failed to make changes");

@@ -77,8 +77,7 @@ export function WorkspaceAdminInviteDialog({
             </DialogClose>
           </DialogTitle>
           <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Adds an admin to this workspace. They complete onboarding before
-            accessing the workspace.
+            Adds an admin to this workspace. The person will finish a short onboarding before they can access it.
           </div>
         </DialogHeader>
         <DialogDescription className="sr-only">

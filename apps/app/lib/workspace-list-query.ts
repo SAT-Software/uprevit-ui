@@ -35,6 +35,7 @@ export type ListQueryParams = {
   filters?: ListFilter[];
   projectId?: string;
   departmentId?: string;
+  includeInactive?: boolean;
 };
 
 export type ListFilterColumn = {
@@ -126,6 +127,7 @@ export function buildListSearchParams(
   if (query.projectId) params.set("projectId", query.projectId);
   if (query.departmentId) params.set("departmentId", query.departmentId);
   if (query.filters?.length) params.set("filters", JSON.stringify(query.filters));
+  if (query.includeInactive) params.set("includeInactive", "true");
 
   return params;
 }

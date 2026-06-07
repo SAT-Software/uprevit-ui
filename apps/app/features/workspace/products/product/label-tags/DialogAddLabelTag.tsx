@@ -72,6 +72,7 @@ export default function DialogAddLabelTag({
       console.log("Form data:", data);
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       // Only upload if there's an image file
       if (data.image && data.image.file instanceof File) {
@@ -83,6 +84,7 @@ export default function DialogAddLabelTag({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
 
@@ -97,6 +99,7 @@ export default function DialogAddLabelTag({
             type: data.type,
             image: "",
             key: uploadedImageKey,
+            sizeBytes: uploadedImageSizeBytes,
           },
         ],
       };

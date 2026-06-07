@@ -11,6 +11,7 @@ export type OnboardAdminWorkspacePayload = {
   companyName: string;
   description?: string;
   logo?: string;
+  logoSizeBytes?: number;
   name?: string;
   email?: string;
   cognitoSub: string;
