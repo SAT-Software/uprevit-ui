@@ -117,7 +117,7 @@ const columns: ColumnDef<PlatformWorkspaceListItem>[] = [
   },
   {
     id: "billing",
-    accessorFn: () => "Not set",
+    accessorFn: (row) => row.billing.status,
     enableSorting: false,
     header: () => (
       <div className="flex h-8 items-center gap-2 px-0">
@@ -125,9 +125,18 @@ const columns: ColumnDef<PlatformWorkspaceListItem>[] = [
         <span>Billing</span>
       </div>
     ),
-    cell: () => (
-      <span className="text-sm text-muted-foreground">Not set</span>
-    ),
+    cell: ({ row }) => {
+      const billing = row.original.billing;
+      if (billing.status === "not_set") {
+        return <span className="text-sm text-muted-foreground">Not set</span>;
+      }
+      return (
+        <span className="text-sm capitalize">
+          {billing.status}
+          {billing.limitsEnabled ? " · limits" : ""}
+        </span>
+      );
+    },
     size: 120,
   },
 ];
