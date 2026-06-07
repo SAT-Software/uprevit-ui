@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Tabs,
   TabsContent,
@@ -41,6 +41,15 @@ function SettingsPage() {
   const adminTabs = ["admins", "workspace", "usage", "security"];
   const activeTab =
     tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
+  const [syncedActiveTab, setSyncedActiveTab] = useState(activeTab);
+
+  if (activeTab !== syncedActiveTab) {
+    setSyncedActiveTab(activeTab);
+    setPendingTab(null);
+  }
+
+  const tabValue = pendingTab ?? activeTab;
 
   useEffect(() => {
     if (tabParam !== "billing") return;
@@ -59,6 +68,7 @@ function SettingsPage() {
     for (const key of LIST_QUERY_PARAMS) {
       params.delete(key);
     }
+    setPendingTab(value);
     params.set("tab", value);
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname);
@@ -84,7 +94,7 @@ function SettingsPage() {
       {/* Settings Tabs */}
       <div className="border border-input bg-background rounded-xl p-4">
         <Tabs
-          value={activeTab}
+          value={tabValue}
           onValueChange={handleTabChange}
           className="w-full"
         >

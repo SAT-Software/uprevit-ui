@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 async function removeUser(
   userId: string,
@@ -57,6 +58,7 @@ export function useRemoveUser() {
           queryKey: ["users-infinite", workspaceId],
         });
       }
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to remove user");

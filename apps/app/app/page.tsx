@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 
 import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccessFrozenScreen";
+import { WorkspaceAccessRemovedScreen } from "@/components/common/WorkspaceAccessRemovedScreen";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { getProfileValue } from "@/utils/authProfile";
@@ -40,6 +41,10 @@ export default function AppEntryPage() {
     const status = userProfileData?.user?.status || tokenStatus;
     const workspaceId = userProfileData?.user?.workspaceId || tokenWorkspaceId;
 
+    if (status === "inactive") {
+      return;
+    }
+
     const targetPath =
       status === "invited"
         ? "/onboarding/onboard-user"
@@ -64,6 +69,12 @@ export default function AppEntryPage() {
 
   if (isAccessFrozen) {
     return <WorkspaceAccessFrozenScreen />;
+  }
+
+  const status = userProfileData?.user?.status || tokenStatus;
+
+  if (auth.isAuthenticated && status === "inactive") {
+    return <WorkspaceAccessRemovedScreen />;
   }
 
   const isCheckingAuthenticatedUser =

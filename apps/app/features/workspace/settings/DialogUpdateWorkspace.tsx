@@ -45,6 +45,7 @@ export function DialogUpdateWorkspace({
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [logoSizeBytes, setLogoSizeBytes] = useState<number | undefined>();
+  const [logoUploadedThisSession, setLogoUploadedThisSession] = useState(false);
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
   const existingLogoValue =
@@ -68,24 +69,32 @@ export function DialogUpdateWorkspace({
     },
   });
 
+  const resetUploadSessionState = () => {
+    setLogoSizeBytes(undefined);
+    setLogoUploadedThisSession(false);
+    setLogoPreview("");
+  };
+
   const onSubmit: SubmitHandler<Workspace> = async (formData) => {
     if (!isAdmin) {
       toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     try {
-      updateWorkspaceMutation(
-        { ...formData, _id: workspaceData._id, logoSizeBytes } as Workspace,
-        {
-          onSuccess: () => {
-            setOpen(false);
-          },
-          onError: (error) => {
-            setOpen(false);
-            console.error("Failed to update workspace:", error);
-          },
+      const payload = logoUploadedThisSession
+        ? { ...formData, _id: workspaceData._id, logoSizeBytes }
+        : { ...formData, _id: workspaceData._id };
+
+      updateWorkspaceMutation(payload as Workspace, {
+        onSuccess: () => {
+          resetUploadSessionState();
+          setOpen(false);
         },
-      );
+        onError: (error) => {
+          setOpen(false);
+          console.error("Failed to update workspace:", error);
+        },
+      });
     } catch (error) {
       console.error("Failed to update workspace:", error);
     }
@@ -111,6 +120,7 @@ export function DialogUpdateWorkspace({
         shouldValidate: true,
       });
       setLogoSizeBytes(uploadResult.size);
+      setLogoUploadedThisSession(true);
     } catch (error) {
       console.error("Failed to upload logo:", error);
       // Reset preview on error
@@ -128,6 +138,7 @@ export function DialogUpdateWorkspace({
     });
     setLogoPreview("");
     setLogoSizeBytes(undefined);
+    setLogoUploadedThisSession(false);
   };
 
   const logoValue = watch("logo");
@@ -141,6 +152,9 @@ export function DialogUpdateWorkspace({
       return;
     }
     setOpen(nextOpen);
+    if (nextOpen) {
+      resetUploadSessionState();
+    }
   };
 
   return (

@@ -41,6 +41,8 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   const [profileAvatarSizeBytes, setProfileAvatarSizeBytes] = useState<
     number | undefined
   >();
+  const [avatarUploadedThisSession, setAvatarUploadedThisSession] =
+    useState(false);
   const existingProfileAvatarValue =
     typeof userProfile?.profileAvatarKey === "string"
       ? userProfile.profileAvatarKey
@@ -64,20 +66,28 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
     },
   });
 
+  const resetUploadSessionState = () => {
+    setProfileAvatarSizeBytes(undefined);
+    setAvatarUploadedThisSession(false);
+    setAvatarPreview("");
+  };
+
   const onSubmit: SubmitHandler<User> = async (formData) => {
     try {
-      updateUserMutation(
-        { ...formData, profileAvatarSizeBytes } as Partial<User>,
-        {
+      const payload = avatarUploadedThisSession
+        ? { ...formData, profileAvatarSizeBytes }
+        : formData;
+
+      updateUserMutation(payload as Partial<User>, {
         onSuccess: () => {
+          resetUploadSessionState();
           setOpen(false);
         },
         onError: (error) => {
           setOpen(false);
           console.error("Failed to update user profile:", error);
         },
-        },
-      );
+      });
     } catch (error) {
       console.error("Failed to update user profile:", error);
     }
@@ -103,6 +113,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
         shouldValidate: true,
       });
       setProfileAvatarSizeBytes(uploadResult.size);
+      setAvatarUploadedThisSession(true);
     } catch (error) {
       console.error("Failed to upload avatar:", error);
       // Reset preview on error
@@ -120,6 +131,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
     });
     setAvatarPreview("");
     setProfileAvatarSizeBytes(undefined);
+    setAvatarUploadedThisSession(false);
   };
 
   const profileAvatarValue = watch("profileAvatar");
@@ -129,8 +141,15 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
       ? resolveAssetUrl(profileAvatarValue, userProfile?.profileAvatar)
       : "");
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      resetUploadSessionState();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <PiPencilSimpleDuotone className="w-4 h-4" />

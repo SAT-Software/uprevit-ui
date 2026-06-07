@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccessFrozenScreen";
+import { WorkspaceAccessRemovedScreen } from "@/components/common/WorkspaceAccessRemovedScreen";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { getProfileValue } from "@/utils/authProfile";
 import { isWorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
@@ -41,6 +42,10 @@ export default function AuthCallbackPage() {
     const workspaceId = userProfileData?.user?.workspaceId || tokenWorkspaceId;
     const status = userProfileData?.user?.status || tokenStatus;
 
+    if (status === "inactive") {
+      return;
+    }
+
     const targetPath =
       status === "invited"
         ? "/onboarding/onboard-user"
@@ -64,6 +69,14 @@ export default function AuthCallbackPage() {
 
   if (isAccessFrozen) {
     return <WorkspaceAccessFrozenScreen />;
+  }
+
+  const profile = auth.user?.profile as Record<string, unknown> | undefined;
+  const tokenStatus = getProfileValue(profile, "status");
+  const status = userProfileData?.user?.status || tokenStatus;
+
+  if (status === "inactive") {
+    return <WorkspaceAccessRemovedScreen />;
   }
 
   return (
