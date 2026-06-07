@@ -39,9 +39,7 @@ export function PlatformOperatorSetupDialog() {
             </DialogClose>
           </DialogTitle>
           <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Phase 1 uses manual setup (no in-app invite yet). Follow these steps
-            for a co-founder or teammate who should access the platform admin
-            portal.
+            Phase 1 requires a one-time manual setup. Use the steps below to grant a teammate or co-founder access to the platform admin area.
           </div>
         </DialogHeader>
         <DialogDescription className="sr-only">

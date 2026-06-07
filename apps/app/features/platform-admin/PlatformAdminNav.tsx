@@ -1,40 +1,48 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@uprevit/ui/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
 
-const links = [
-  { href: "/platform-admin", label: "Dashboard", exact: true },
-  { href: "/platform-admin/workspaces", label: "Workspaces" },
-  { href: "/platform-admin/audit-logs", label: "Audit logs" },
+const tabs = [
+  { value: "overview", href: "/platform-admin", label: "Overview", exact: true },
+  { value: "workspaces", href: "/platform-admin/workspaces", label: "Workspaces" },
+  { value: "audit-logs", href: "/platform-admin/audit-logs", label: "Audit logs" },
 ];
 
 export function PlatformAdminNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const onWorkspaceSubpage =
+    pathname.startsWith("/platform-admin/workspaces/") &&
+    pathname.split("/").length > 4;
+
+  const activeTab = onWorkspaceSubpage
+    ? ""
+    : (tabs.find((tab) =>
+        tab.exact
+          ? pathname === tab.href
+          : pathname === tab.href || pathname.startsWith(tab.href + "/"),
+      )?.value ?? "overview");
+
+  const handleTabChange = (value: string) => {
+    const tab = tabs.find((t) => t.value === value);
+    if (tab) router.push(tab.href);
+  };
 
   return (
-    <nav className="flex flex-wrap gap-2">
-      {links.map((link) => {
-        const isActive = link.exact
-          ? pathname === link.href
-          : pathname.startsWith(link.href);
-
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-              isActive
-                ? "border-primary bg-primary/10 text-foreground"
-                : "border-border text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <TabsList>
+        {tabs.map((tab) => (
+          <TabsTrigger key={tab.value} value={tab.value}>
+            {tab.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }

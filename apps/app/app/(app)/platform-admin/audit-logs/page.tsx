@@ -1,6 +1,7 @@
 "use client";
 
 import { PlatformAdminGuard } from "@/components/common/PlatformAdminGuard";
+import { PlatformAdminHeader } from "@/features/platform-admin/PlatformAdminHeader";
 import { PlatformAdminNav } from "@/features/platform-admin/PlatformAdminNav";
 import { PlatformAuditLogsTable } from "@/features/platform-admin/PlatformAuditLogsTable";
 import { usePlatformAdminWorkspaceIdFilter } from "@/lib/platform-admin-list-query";
@@ -10,18 +11,15 @@ export default function PlatformAdminAuditLogsPage() {
 
   return (
     <PlatformAdminGuard>
-      <div className="flex flex-col gap-2 p-2">
-        <div className="rounded-xl border border-border bg-background p-4">
-          <h1 className="text-base font-semibold">Platform audit logs</h1>
-          <p className="text-sm text-muted-foreground">
-            Mutations, workspace detail views, and failed allowlist checks.
-          </p>
-          <div className="mt-4">
-            <PlatformAdminNav />
-          </div>
-        </div>
+      <div className="flex flex-col gap-4 p-2">
+        <PlatformAdminHeader
+          title="Audit logs"
+          subtitle="Track admin actions, access checks, and changes across the platform"
+        >
+          <PlatformAdminNav />
+        </PlatformAdminHeader>
 
-        <div className="rounded-xl border border-border bg-background p-4">
+        <div className="rounded-xl border border-border bg-background p-5">
           <PlatformAuditLogsTable
             workspaceId={workspaceId}
             onClearWorkspaceFilter={clearWorkspaceFilter}

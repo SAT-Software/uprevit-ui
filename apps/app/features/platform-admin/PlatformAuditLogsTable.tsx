@@ -155,9 +155,12 @@ const columns: ColumnDef<PlatformAuditLogItem>[] = [
 export function PlatformAuditLogsTable({
   workspaceId,
   onClearWorkspaceFilter,
+  hideWorkspaceFilter,
 }: {
   workspaceId?: string;
   onClearWorkspaceFilter?: () => void;
+  /** Hide workspace filter banner when embedded on workspace detail */
+  hideWorkspaceFilter?: boolean;
 }) {
   const listState = usePlatformAdminListQuery({
     defaultSort: "occurredAt",
@@ -215,7 +218,7 @@ export function PlatformAuditLogsTable({
 
   return (
     <div className="space-y-2 w-full">
-      {workspaceId ? (
+      {workspaceId && !hideWorkspaceFilter ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
             Showing audit events for workspace{" "}
@@ -231,14 +234,14 @@ export function PlatformAuditLogsTable({
             </Button>
           )}
         </div>
-      ) : (
+      ) : !workspaceId ? (
         <Input
           placeholder="Search audit logs…"
           value={listState.searchDraft}
           onChange={(event) => listState.setSearchDraft(event.target.value)}
           className="max-w-sm"
         />
-      )}
+      ) : null}
 
       <div className="bg-background overflow-hidden rounded-xl border">
         <Table className="table-fixed">

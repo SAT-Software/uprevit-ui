@@ -73,8 +73,7 @@ export function ProvisionInviteDialog() {
             </DialogClose>
           </DialogTitle>
           <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Creates a new admin with no workspace. They will create their
-            organization on first login.
+            Sends an invite for a new organization admin. They will set up their own workspace the first time they log in.
           </div>
         </DialogHeader>
         <DialogDescription className="sr-only">
