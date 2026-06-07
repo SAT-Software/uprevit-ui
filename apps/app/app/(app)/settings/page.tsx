@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   Tabs,
   TabsContent,
@@ -10,7 +10,7 @@ import {
 import SecurityTab from "@/features/workspace/settings/SecurityTab";
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
 import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
-import BillingTab from "@/features/workspace/settings/BillingTab";
+import UsageTab from "@/features/workspace/settings/UsageTab";
 import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
@@ -20,7 +20,7 @@ import {
   PiUsersDuotone,
   PiUserGearDuotone,
   PiShieldCheckDuotone,
-  PiCreditCardDuotone,
+  PiChartBarDuotone,
 } from "react-icons/pi";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
@@ -32,15 +32,22 @@ const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
 
 function SettingsPage() {
   const searchParams = useSearchParams();
-  const tab = searchParams.get("tab");
+  const tabParam = searchParams.get("tab");
+  const tab = tabParam === "billing" ? "usage" : tabParam;
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const adminTabs = ["admins", "workspace", "billing", "security"];
-  const initialTab =
+  const adminTabs = ["admins", "workspace", "usage", "security"];
+  const activeTab =
     tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
-  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    if (tabParam !== "billing") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", "usage");
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [tabParam, searchParams, pathname, router]);
 
   const handleTabChange = (value: string) => {
     if (adminTabs.includes(value) && !isAdmin) {
@@ -55,8 +62,6 @@ function SettingsPage() {
     params.set("tab", value);
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname);
-
-    setActiveTab(value);
   };
 
   return (
@@ -100,13 +105,15 @@ function SettingsPage() {
               <PiUserGearDuotone className="mr-2 h-4 w-4" />
               Admins
             </TabsTrigger>
+            {isAdmin ? (
+              <TabsTrigger value="usage">
+                <PiChartBarDuotone className="mr-2 h-4 w-4" />
+                Usage
+              </TabsTrigger>
+            ) : null}
             {/* <TabsTrigger value="security">
               <PiShieldCheckDuotone className="mr-2 h-4 w-4" />
               Security
-            </TabsTrigger>
-            <TabsTrigger value="billing">
-              <PiCreditCardDuotone className="mr-2 h-4 w-4" />
-              Billing
             </TabsTrigger> */}
           </TabsList>
 
@@ -126,12 +133,12 @@ function SettingsPage() {
             {activeTab === "admins" && <AdminsTab />}
           </TabsContent>
 
-          {/* <TabsContent value="security" className="mt-6">
-            <SecurityTab />
+          <TabsContent value="usage" className="mt-6">
+            {activeTab === "usage" && <UsageTab />}
           </TabsContent>
 
-          <TabsContent value="billing" className="mt-6">
-            <BillingTab />
+          {/* <TabsContent value="security" className="mt-6">
+            <SecurityTab />
           </TabsContent> */}
         </Tabs>
       </div>
