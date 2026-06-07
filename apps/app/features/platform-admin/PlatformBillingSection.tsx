@@ -164,7 +164,21 @@ export function PlatformBillingSection({
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="rounded-xl border border-dashed border-destructive/20 bg-destructive/5 p-5 text-center">
+        <p className="text-sm font-medium text-destructive">
+          Unable to load billing account
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Billing is configured for this workspace, but no account details were returned.
+        </p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
 
   const { account, summary, snapshot, freezes } = data;
 
