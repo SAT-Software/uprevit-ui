@@ -3,25 +3,26 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
+import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccessFrozenScreen";
 import { useGetUser } from "@/hooks/user/useGetUser";
-
-const getProfileValue = (
-  profile: Record<string, unknown> | undefined,
-  key: string,
-): string | undefined => {
-  const value = profile?.[key];
-  return typeof value === "string" && value.length > 0 ? value : undefined;
-};
+import { getProfileValue } from "@/utils/authProfile";
+import { isWorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const auth = useAuth();
   const hasRedirectedRef = useRef(false);
 
-  const { data: userProfileData, isLoading: isUserLoading } = useGetUser();
+  const {
+    data: userProfileData,
+    isFetching: isUserFetching,
+    isError: isUserError,
+    error: userError,
+  } = useGetUser();
+  const isAccessFrozen = isWorkspaceAccessFrozenError(userError);
 
   useEffect(() => {
-    if (hasRedirectedRef.current) return;
+    if (hasRedirectedRef.current || isAccessFrozen) return;
     if (auth.isLoading) return;
 
     if (!auth.isAuthenticated) {
@@ -32,7 +33,7 @@ export default function AuthCallbackPage() {
 
     const profile = auth.user?.profile as Record<string, unknown> | undefined;
     const userIdFromToken = getProfileValue(profile, "userId");
-    if (userIdFromToken && isUserLoading) return;
+    if (userIdFromToken && isUserFetching && !isUserError) return;
 
     const tokenWorkspaceId = getProfileValue(profile, "workspaceId");
     const tokenStatus = getProfileValue(profile, "status");
@@ -53,11 +54,17 @@ export default function AuthCallbackPage() {
     auth.isAuthenticated,
     auth.isLoading,
     auth.user?.profile,
-    isUserLoading,
+    isAccessFrozen,
+    isUserError,
+    isUserFetching,
     router,
     userProfileData?.user?.status,
     userProfileData?.user?.workspaceId,
   ]);
+
+  if (isAccessFrozen) {
+    return <WorkspaceAccessFrozenScreen />;
+  }
 
   return (
     <div className="flex h-screen w-full items-center justify-center">
