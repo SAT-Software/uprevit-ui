@@ -15,6 +15,7 @@ import {
 } from "@uprevit/ui/components/ui/dialog";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
+import { useRemoveUser } from "@/hooks/user/useRemoveUser";
 
 export interface DialogRemoveUserProps {
   userId: string;
@@ -30,14 +31,19 @@ export default function DialogRemoveUser({
   const inputId = useId();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
+  const { mutate: removeUser, isPending } = useRemoveUser();
 
-  const disabled = value !== userName;
+  const disabled = value !== userName || isPending;
 
   function handleConfirm() {
     if (disabled) return;
-    console.log(`Removing user: ${userId}`);
-    setOpen(false);
-    setValue("");
+
+    removeUser(userId, {
+      onSuccess: () => {
+        setOpen(false);
+        setValue("");
+      },
+    });
   }
 
   return (
@@ -52,14 +58,17 @@ export default function DialogRemoveUser({
             <PiUserMinusDuotone className="opacity-80" size={16} />
           </div>
           <DialogHeader>
-            <DialogTitle className="sm:text-center">Remove User</DialogTitle>
+            <DialogTitle className="sm:text-center">
+              Remove from workspace
+            </DialogTitle>
           </DialogHeader>
         </div>
 
         <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
           <p className="text-xs text-muted-foreground">
-            You are about to remove <strong>{userName}</strong> from the
-            workspace. This action cannot be undone.
+            You are about to remove <strong>{userName}</strong> from this
+            workspace. They will lose access immediately, but their historical
+            activity in the workspace will be preserved.
           </p>
           <div className="space-y-4">
             <Label htmlFor={inputId} className="mb-1">
@@ -85,7 +94,7 @@ export default function DialogRemoveUser({
               disabled={disabled}
               onClick={handleConfirm}
             >
-              Remove
+              {isPending ? "Removing..." : "Remove"}
             </Button>
           </DialogFooter>
         </form>

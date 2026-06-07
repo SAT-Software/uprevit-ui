@@ -6,6 +6,7 @@ export interface Workspace {
   description: string;
   logo?: string;
   logoKey?: string;
+  logoSizeBytes?: number;
   plan?: string;
   planName?: string;
   planId?: string;
@@ -14,4 +15,5 @@ export interface Workspace {
   cost?: number;
   adminIds?: string[];
   userIds?: string[];
+  memberListIncludeInactive?: boolean;
 }

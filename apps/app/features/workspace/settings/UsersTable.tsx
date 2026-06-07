@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, type ElementType } from "react";
+import { useMemo } from "react";
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -17,19 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
-import {
-  PiTrashDuotone,
-  PiUserDuotone,
-  PiUsersDuotone,
-  PiIdentificationCardDuotone,
-  PiBriefcaseDuotone,
-  PiMapPinDuotone,
-  PiInfoDuotone,
-  PiUserCircleGearDuotone,
-} from "react-icons/pi";
-import { Badge } from "@uprevit/ui/components/ui/badge";
-import { cn } from "@uprevit/ui/lib/utils";
+import { PiUsersDuotone, PiCaretUpDownDuotone } from "react-icons/pi";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
@@ -39,8 +26,6 @@ import {
 } from "@/lib/user-list-config";
 import { useWorkspaceListQuery } from "@/lib/workspace-list-query";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { User } from "@/types/user";
-import DialogRemoveUser from "./DialogRemoveUser";
 import { InviteMembersDialog } from "./InviteMembersDialog";
 import {
   Select,
@@ -49,149 +34,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
-import { PiCaretUpDownDuotone } from "react-icons/pi";
-
-const StaticHeader = ({
-  title,
-  icon: Icon,
-}: {
-  title: string;
-  icon: ElementType;
-}) => (
-  <div className="flex items-center gap-2">
-    <Icon className="h-4 w-4 text-muted-foreground" />
-    <span>{title}</span>
-  </div>
-);
-
-export const columns: ColumnDef<User>[] = [
-  {
-    accessorKey: "_id",
-    header: () => (
-      <StaticHeader title="ID" icon={PiIdentificationCardDuotone} />
-    ),
-    cell: ({ row }) => (
-      <div className="font-mono text-xs">
-        {String(row.getValue("_id") ?? "").slice(0, 8)}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "name",
-    header: () => <StaticHeader title="User" icon={PiUserDuotone} />,
-    cell: ({ row }) => {
-      const { name, email, profileAvatar } = row.original;
-      return (
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={profileAvatar} alt={name} />
-            <AvatarFallback>{name?.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium">{name}</p>
-            <p className="text-sm text-muted-foreground">{email}</p>
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "userType",
-    header: () => (
-      <StaticHeader title="User Type" icon={PiUserCircleGearDuotone} />
-    ),
-    cell: ({ row }) => {
-      const userType = row.getValue("userType") as string;
-      if (userType === "admin") {
-        return (
-          <Badge variant="secondary">
-            <PiUserCircleGearDuotone className="w-4 h-4" />
-            Admin
-          </Badge>
-        );
-      }
-      return (
-        <Badge variant="outline" className="gap-1 text-muted-foreground">
-          <PiUserDuotone className="w-4 h-4" />
-          Member
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "designation",
-    header: () => (
-      <StaticHeader title="Designation" icon={PiBriefcaseDuotone} />
-    ),
-    cell: ({ row }) => {
-      const designation = row.getValue("designation") as string;
-      if (designation) return <p>{designation}</p>;
-
-      return <p className="text-muted-foreground">N/A</p>;
-    },
-  },
-  {
-    accessorKey: "location",
-    header: () => <StaticHeader title="Location" icon={PiMapPinDuotone} />,
-    cell: ({ row }) => {
-      const location = row.getValue("location") as string;
-      if (location) return <p>{location}</p>;
-
-      return <p className="text-muted-foreground">N/A</p>;
-    },
-  },
-  {
-    accessorKey: "status",
-    header: () => <StaticHeader title="Status" icon={PiInfoDuotone} />,
-    cell: ({ row }) => {
-      const status = row.getValue("status") as "active" | "invited";
-      const statusClasses = {
-        active:
-          "bg-green-50/90 dark:bg-green-900/60 text-green-600 dark:text-green-400 border border-green-500 dark:border-green-700",
-        invited:
-          "bg-yellow-50/90 dark:bg-yellow-900/60 text-yellow-600 dark:text-yellow-400 border border-yellow-500 dark:border-yellow-700",
-      };
-      const displayText = status === "active" ? "Active" : "Invited";
-      return <Badge className={cn(statusClasses[status])}>{displayText}</Badge>;
-    },
-  },
-  {
-    id: "remove",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const { _id, name } = row.original;
-      if (!_id) {
-        return (
-          <div className="text-right">
-            <Button variant="ghost" size="icon" disabled>
-              <PiTrashDuotone className="h-4 w-4" />
-              <span className="sr-only">Cannot remove user without ID</span>
-            </Button>
-          </div>
-        );
-      }
-
-      return (
-        <div className="text-right">
-          <DialogRemoveUser
-            userId={_id}
-            userName={name}
-            trigger={
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              >
-                <PiTrashDuotone className="h-4 w-4" />
-                <span className="sr-only">Remove user</span>
-              </Button>
-            }
-          />
-        </div>
-      );
-    },
-  },
-];
+import { Switch } from "@uprevit/ui/components/ui/switch";
+import { Label } from "@uprevit/ui/components/ui/label";
+import { getUserTableColumns } from "./userTableColumns";
+import { useMemberListIncludeInactive } from "./useMemberListIncludeInactive";
 
 export function UsersTable() {
   const listState = useWorkspaceListQuery({
@@ -200,12 +46,25 @@ export function UsersTable() {
     filterColumns: USER_FILTER_COLUMNS,
   });
 
+  const { isAdmin, includeInactive, toggleIncludeInactive } =
+    useMemberListIncludeInactive();
+
+  const listQuery = useMemo(
+    () => ({
+      ...listState.query,
+      includeInactive,
+    }),
+    [includeInactive, listState.query],
+  );
+
+  const columns = useMemo(() => getUserTableColumns(isAdmin), [isAdmin]);
+
   const {
     data: responseData,
     isLoading,
     isError,
     refetch,
-  } = useGetAllUsersByWorkspace(listState.query);
+  } = useGetAllUsersByWorkspace(listQuery);
 
   const data = useMemo(
     () => responseData?.result?.users ?? [],
@@ -309,6 +168,18 @@ export function UsersTable() {
               {listState.query.order === "asc" ? "A-Z" : "Z-A"}
             </Button>
           </div>
+          {isAdmin ? (
+            <div className="ml-auto flex items-center gap-2">
+              <Switch
+                id="show-removed-members"
+                checked={includeInactive}
+                onCheckedChange={toggleIncludeInactive}
+              />
+              <Label htmlFor="show-removed-members" className="text-sm">
+                Show removed members
+              </Label>
+            </div>
+          ) : null}
         </div>
 
         <div className="border rounded-xl bg-background overflow-hidden">
