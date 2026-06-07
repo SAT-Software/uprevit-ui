@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useCreatePlatformBillingAccount } from "@/hooks/platform-admin/useCreatePlatformBillingAccount";
 import { useGetPlatformBillingAccount } from "@/hooks/platform-admin/useGetPlatformBillingAccount";
 import { usePlatformBillingActions } from "@/hooks/platform-admin/usePlatformBillingActions";
@@ -15,6 +15,7 @@ import { PlatformBillingFieldLabel } from "@/features/platform-admin/PlatformBil
 import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platformBillingFieldTooltips";
 import { formatUploadVolumeHint } from "@/utils/formatUploadVolume";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
+import { getErrorMessage } from "@/lib/api-error";
 
 function ReadOnlyField({
   label,
@@ -65,7 +66,13 @@ function ReadOnlyToggleCard({
   );
 }
 
-function PlatformBillingNotSetState({ workspaceId }: { workspaceId: string }) {
+function PlatformBillingNotSetState({
+  workspaceId,
+  onAccountCreated,
+}: {
+  workspaceId: string;
+  onAccountCreated: () => void;
+}) {
   const createAccount = useCreatePlatformBillingAccount(workspaceId);
 
   return (
@@ -81,7 +88,9 @@ function PlatformBillingNotSetState({ workspaceId }: { workspaceId: string }) {
         <Button
           size="sm"
           className="shrink-0"
-          onClick={() => createAccount.mutate()}
+          onClick={() =>
+            createAccount.mutate(undefined, { onSuccess: onAccountCreated })
+          }
           disabled={createAccount.isPending}
         >
           {createAccount.isPending ? "Creating account…" : "Create billing account"}
@@ -110,24 +119,47 @@ export function PlatformBillingSection({
   workspaceId: string;
   billingStatus?: string;
 }) {
-  const hasAccount = billingStatus !== "not_set";
-  const { data, isLoading } = useGetPlatformBillingAccount(workspaceId, {
-    enabled: hasAccount,
-  });
+  const [accountCreatedLocally, setAccountCreatedLocally] = useState(false);
+  const hasAccount = billingStatus !== "not_set" || accountCreatedLocally;
+  const { data, isLoading, isError, error, refetch, isFetching } =
+    useGetPlatformBillingAccount(workspaceId, {
+      enabled: hasAccount,
+    });
   const updateAccount = useUpdatePlatformBillingAccount(workspaceId);
   const { updateFreezes, recomputeSnapshot, createAdjustment, runReconciliation } =
     usePlatformBillingActions(workspaceId);
 
   if (!hasAccount) {
-    return <PlatformBillingNotSetState workspaceId={workspaceId} />;
+    return (
+      <PlatformBillingNotSetState
+        workspaceId={workspaceId}
+        onAccountCreated={() => setAccountCreatedLocally(true)}
+      />
+    );
   }
 
-  if (isLoading) {
+  if (isLoading || (isFetching && !data)) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-56 w-full rounded-xl" />
         <Skeleton className="h-40 w-full rounded-xl" />
         <Skeleton className="h-40 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-dashed border-destructive/20 bg-destructive/5 p-5 text-center">
+        <p className="text-sm font-medium text-destructive">
+          Unable to load billing account
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {getErrorMessage(error, "Please try again in a moment.")}
+        </p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+          Try again
+        </Button>
       </div>
     );
   }
