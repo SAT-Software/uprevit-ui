@@ -30,7 +30,7 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import type { UpdatePlatformBillingAccountInput } from "@/types/platform-admin";
-import type { BillingAccount, WorkspaceBillingSummary } from "@/types/billing";
+import type { BillingAccount, EnforcementMode, WorkspaceBillingSummary } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
 type BillingAccountForm = {
   status: BillingAccount["status"];
@@ -38,10 +38,10 @@ type BillingAccountForm = {
   currency: string;
   netTermDays: string;
   limitsEnabled: boolean;
+  enforcementMode: EnforcementMode;
   pastDue: boolean;
   ssoAllowed: boolean;
   ssoEnabled: boolean;
-  seats: string;
   exports: string;
   uploadGb: string;
 };
@@ -53,10 +53,10 @@ function accountToForm(account: BillingAccount): BillingAccountForm {
     currency: account.currency,
     netTermDays: String(account.netTermDays),
     limitsEnabled: account.limitsEnabled,
+    enforcementMode: account.limits.enforcementMode,
     pastDue: account.pastDue,
     ssoAllowed: account.usageLimits.ssoAllowed,
     ssoEnabled: account.sso.enabled,
-    seats: String(account.usageLimits.seats),
     exports: String(account.usageLimits.exports),
     uploadGb: String(account.usageLimits.uploadGb),
   };
@@ -67,16 +67,12 @@ function buildUpdatePayload(
   account: BillingAccount,
 ): UpdatePlatformBillingAccountInput | null {
   const netTermDays = Number(form.netTermDays);
-  const seats = Number(form.seats);
   const exports = Number(form.exports);
   const uploadGb = Number(form.uploadGb);
 
   if (
     !Number.isFinite(netTermDays) ||
     netTermDays < 0 ||
-    !Number.isFinite(seats) ||
-    seats < 0 ||
-    !Number.isInteger(seats) ||
     !Number.isFinite(exports) ||
     exports < 0 ||
     !Number.isInteger(exports) ||
@@ -96,11 +92,13 @@ function buildUpdatePayload(
 
   if (netTermDays !== account.netTermDays) payload.netTermDays = netTermDays;
   if (form.limitsEnabled !== account.limitsEnabled) payload.limitsEnabled = form.limitsEnabled;
+  if (form.enforcementMode !== account.limits.enforcementMode) {
+    payload.enforcementMode = form.enforcementMode;
+  }
   if (form.pastDue !== account.pastDue) payload.pastDue = form.pastDue;
   if (form.ssoEnabled !== account.sso.enabled) payload.ssoEnabled = form.ssoEnabled;
 
   const usageLimits: NonNullable<UpdatePlatformBillingAccountInput["usageLimits"]> = {};
-  if (seats !== account.usageLimits.seats) usageLimits.seats = seats;
   if (exports !== account.usageLimits.exports) usageLimits.exports = exports;
   if (uploadGb !== account.usageLimits.uploadGb) usageLimits.uploadGb = uploadGb;
   if (form.ssoAllowed !== account.usageLimits.ssoAllowed) usageLimits.ssoAllowed = form.ssoAllowed;
@@ -127,6 +125,9 @@ function describeChanges(
   if (form.limitsEnabled !== account.limitsEnabled) {
     changes.push(`Limit enforcement: ${account.limitsEnabled ? "on" : "off"} → ${form.limitsEnabled ? "on" : "off"}`);
   }
+  if (form.enforcementMode !== account.limits.enforcementMode) {
+    changes.push(`Enforcement mode: ${account.limits.enforcementMode} → ${form.enforcementMode}`);
+  }
   if (form.pastDue !== account.pastDue) {
     changes.push(`Past due: ${account.pastDue ? "yes" : "no"} → ${form.pastDue ? "yes" : "no"}`);
   }
@@ -135,9 +136,6 @@ function describeChanges(
   }
   if (form.ssoAllowed !== account.usageLimits.ssoAllowed) {
     changes.push(`SSO allowed: ${account.usageLimits.ssoAllowed ? "yes" : "no"} → ${form.ssoAllowed ? "yes" : "no"}`);
-  }
-  if (Number(form.seats) !== account.usageLimits.seats) {
-    changes.push(`Seat limit: ${account.usageLimits.seats} → ${form.seats}`);
   }
   if (Number(form.exports) !== account.usageLimits.exports) {
     changes.push(`Export limit: ${account.usageLimits.exports} → ${form.exports}`);
@@ -188,7 +186,7 @@ export function DialogEditPlatformBillingAccount({
   const handleSaveClick = () => {
     const payload = buildUpdatePayload(form, account);
     if (!payload) {
-      setFormError("Enter valid values. Seat limit and export limit must be whole numbers.");
+      setFormError("Enter valid values. Export limit must be a whole number.");
       return;
     }
     setFormError(null);
@@ -356,18 +354,30 @@ export function DialogEditPlatformBillingAccount({
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="billing-seat-limit">Seat limit</Label>
-                  <Input
-                    id="billing-seat-limit"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={form.seats}
-                    onChange={(event) => patchForm({ seats: event.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Used: {summary.usage.activeSeats}
+                  <Label>Seat limit</Label>
+                  <p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+                    {account.usageLimits.seats.toLocaleString()} seats
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    Mirrored from Chargebee. Used: {summary.usage.activeSeats}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="billing-enforcement-mode">Enforcement mode</Label>
+                  <Select
+                    value={form.enforcementMode}
+                    onValueChange={(enforcementMode) =>
+                      patchForm({ enforcementMode: enforcementMode as EnforcementMode })
+                    }
+                  >
+                    <SelectTrigger id="billing-enforcement-mode">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="overage">Allow overage</SelectItem>
+                      <SelectItem value="block">Block when over limit</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="billing-exports">Export limit</Label>

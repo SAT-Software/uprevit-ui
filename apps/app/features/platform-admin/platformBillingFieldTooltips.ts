@@ -28,12 +28,6 @@ export const WORKSPACE_FREEZE_FIELD_TOOLTIPS = {
 } as const;
 
 export const BILLING_OPERATIONS_FIELD_TOOLTIPS = {
-  reconciliationStatus:
-    "Result of the latest reconciliation check comparing recorded usage events against underlying source records.",
-  recomputeSnapshot:
-    "Rebuilds the current billing period usage snapshot from recorded usage events. Use after data fixes or if totals look stale.",
-  runReconciliation:
-    "Runs a reconciliation check for this workspace and updates the snapshot reconciliation status.",
   adjustmentMetric:
     "Which usage metric to correct: completed exports or raw upload bytes for the current billing period.",
   adjustmentDelta:
@@ -55,9 +49,8 @@ export const BILLING_SUMMARY_FIELD_TOOLTIPS = {
   uploadGb: BILLING_ACCOUNT_FIELD_TOOLTIPS.uploadGb,
   usageFreeze: WORKSPACE_FREEZE_FIELD_TOOLTIPS.usageFreeze,
   accessFreeze: WORKSPACE_FREEZE_FIELD_TOOLTIPS.accessFreeze,
-  reconciliationStatus: BILLING_OPERATIONS_FIELD_TOOLTIPS.reconciliationStatus,
+  enforcementMode:
+    "Whether over-limit usage is blocked or allowed. Only platform operators can change this setting.",
   currentPeriod:
-    "Start and end dates for the workspace's current billing period, anchored to when the billing account was created.",
-  availableActions:
-    "Maintenance actions available to platform operators: snapshot recompute, reconciliation, and manual usage adjustments.",
+    "Start and end dates for the workspace's current usage period. Uses the linked Chargebee subscription term when available.",
 } as const;

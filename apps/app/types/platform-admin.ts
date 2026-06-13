@@ -1,6 +1,7 @@
 import type {
   BillingAccountStatus,
   BillingCadence,
+  EnforcementMode,
   UsageLimits,
   WorkspaceFreezes,
 } from "@/types/billing";
@@ -122,6 +123,7 @@ export type UpdatePlatformBillingAccountInput = {
   netTermDays?: number;
   meteringEnabled?: boolean;
   limitsEnabled?: boolean;
+  enforcementMode?: EnforcementMode;
   pastDue?: boolean;
   ssoEnabled?: boolean;
   usageLimits?: Partial<UsageLimits>;

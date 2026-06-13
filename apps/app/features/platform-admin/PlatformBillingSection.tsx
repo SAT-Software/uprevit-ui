@@ -12,6 +12,8 @@ import { DialogEditPlatformBillingAccount } from "@/features/platform-admin/Dial
 import { DialogEditPlatformWorkspaceFreezes } from "@/features/platform-admin/DialogEditPlatformWorkspaceFreezes";
 import { DialogPlatformBillingOperations } from "@/features/platform-admin/DialogPlatformBillingOperations";
 import { PlatformBillingFieldLabel } from "@/features/platform-admin/PlatformBillingFieldLabel";
+import { PlatformChargebeeSection } from "@/features/platform-admin/PlatformChargebeeSection";
+import { PlatformUsageEventsTable } from "@/features/platform-admin/PlatformUsageEventsTable";
 import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platformBillingFieldTooltips";
 import { formatUploadVolumeHint } from "@/utils/formatUploadVolume";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
@@ -126,8 +128,7 @@ export function PlatformBillingSection({
       enabled: hasAccount,
     });
   const updateAccount = useUpdatePlatformBillingAccount(workspaceId);
-  const { updateFreezes, recomputeSnapshot, createAdjustment, runReconciliation } =
-    usePlatformBillingActions(workspaceId);
+  const { updateFreezes, createAdjustment } = usePlatformBillingActions(workspaceId);
 
   if (!hasAccount) {
     return (
@@ -180,7 +181,7 @@ export function PlatformBillingSection({
     );
   }
 
-  const { account, summary, snapshot, freezes } = data;
+  const { account, summary, freezes } = data;
 
   return (
     <div className="space-y-4">
@@ -337,49 +338,18 @@ export function PlatformBillingSection({
           <div>
             <h2 className="text-sm font-semibold">Billing operations</h2>
             <p className="text-xs text-muted-foreground mt-0.5 max-w-prose">
-              Maintenance tools for snapshots, reconciliation, and manual usage corrections.
+              Manual usage corrections for the current billing period.
             </p>
           </div>
           <DialogPlatformBillingOperations
-            snapshot={snapshot}
-            isRecomputePending={recomputeSnapshot.isPending}
-            isReconciliationPending={runReconciliation.isPending}
             isAdjustmentPending={createAdjustment.isPending}
-            onRecompute={async () => {
-              await recomputeSnapshot.mutateAsync();
-            }}
-            onReconciliation={async () => {
-              await runReconciliation.mutateAsync();
-            }}
             onAdjustment={async (input) => {
               await createAdjustment.mutateAsync(input);
             }}
           />
         </div>
 
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-3">
-          <ReadOnlyField
-            label="Reconciliation"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.reconciliationStatus}
-            value={
-              snapshot ? (
-                <Badge
-                  variant={
-                    snapshot.reconciliationStatus === "ok"
-                      ? "secondary"
-                      : snapshot.reconciliationStatus === "mismatch"
-                        ? "destructive"
-                        : "outline"
-                  }
-                  className="capitalize"
-                >
-                  {snapshot.reconciliationStatus}
-                </Badge>
-              ) : (
-                <span className="text-muted-foreground">No snapshot yet</span>
-              )
-            }
-          />
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
           <ReadOnlyField
             label="Current period"
             tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currentPeriod}
@@ -389,13 +359,30 @@ export function PlatformBillingSection({
                 {formatToLocalDate(summary.period.end)}
               </>
             }
+            hint={
+              summary.period.source === "chargebee"
+                ? "Period from linked Chargebee subscription"
+                : "Chargebee not linked — using internal billing period"
+            }
           />
           <ReadOnlyField
-            label="Quick actions"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.availableActions}
-            value="Recompute, reconcile, or adjust usage"
+            label="Enforcement mode"
+            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.enforcementMode}
+            value={<span className="capitalize">{summary.enforcementMode}</span>}
           />
         </div>
+      </section>
+
+      <PlatformChargebeeSection workspaceId={workspaceId} account={account} />
+
+      <section className="space-y-3 rounded-xl border border-border bg-background p-5">
+        <div>
+          <h2 className="text-sm font-semibold">Recent usage events</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground max-w-prose">
+            Ledger entries from exports, uploads, and adjustments with Chargebee sync status.
+          </p>
+        </div>
+        <PlatformUsageEventsTable workspaceId={workspaceId} />
       </section>
     </div>
   );

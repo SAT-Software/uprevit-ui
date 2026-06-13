@@ -19,11 +19,21 @@ export type UsageLimits = {
   ssoAllowed: boolean;
 };
 
-export type DeprecatedIncludedLimits = {
-  seatMonths: number;
-  exports: number;
-  uploadGb: number;
-  sso: boolean;
+export type WorkspaceLimits = UsageLimits & {
+  enabled: boolean;
+  enforcementMode: EnforcementMode;
+};
+
+export type BillingAccountChargebee = {
+  customerId: string | null;
+  subscriptionId: string | null;
+  subscriptionStatus: string | null;
+  planId: string | null;
+  planName: string | null;
+  billingCadence: BillingCadence | null;
+  currentTermStart: string | null;
+  currentTermEnd: string | null;
+  nextBillingAt: string | null;
 };
 
 export type LimitStatusMetric = {
@@ -39,12 +49,14 @@ export type LimitStatus = {
   uploadGb: LimitStatusMetric;
 };
 
+/** Workspace billing profile returned from billing APIs. */
 export type BillingAccount = {
   id: string;
   workspaceId: string;
   status: BillingAccountStatus;
-  meteringEnabled: boolean;
+  limits: WorkspaceLimits;
   limitsEnabled: boolean;
+  meteringEnabled: boolean;
   billingCadence: BillingCadence;
   currency: string;
   netTermDays: number;
@@ -52,17 +64,13 @@ export type BillingAccount = {
   periodStart: string | null;
   periodEnd: string | null;
   usageLimits: UsageLimits;
-  included: DeprecatedIncludedLimits;
-  workspacePreferences: {
-    enforcementMode: EnforcementMode;
-  };
+  chargebee: BillingAccountChargebee | null;
   sso: {
     enabled: boolean;
     enabledAt: string | null;
     disabledAt: string | null;
   };
   pastDue: boolean;
-  lastReconciledAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -72,6 +80,7 @@ export type WorkspaceBillingSummary = {
   period: {
     start: string;
     end: string;
+    source: "chargebee" | "internal";
   };
   usage: {
     activeSeats: number;
@@ -79,15 +88,15 @@ export type WorkspaceBillingSummary = {
     uploadBytes: number;
     uploadGb: number;
   };
+  limits: WorkspaceLimits;
   usageLimits: UsageLimits;
-  included: DeprecatedIncludedLimits;
   limitStatus: LimitStatus;
   addOns: {
     ssoEnabled: boolean;
   };
   enforcementMode: EnforcementMode;
-  meteringEnabled: boolean;
   limitsEnabled: boolean;
+  meteringEnabled: boolean;
   freezes?: WorkspaceFreezes | null;
 };
 
@@ -96,22 +105,65 @@ export type WorkspaceFreezes = {
   accessFreeze: { enabled: boolean; updatedAt: string | null };
 };
 
-export type UsageSnapshot = {
-  id: string;
-  periodStart: string;
-  periodEnd: string;
-  usage: WorkspaceBillingSummary["usage"];
-  usageLimits: UsageLimits;
-  included: DeprecatedIncludedLimits;
-  limitStatus: LimitStatus;
-  reconciliationStatus: "pending" | "ok" | "mismatch";
-  approvedForBillingAt: string | null;
-  updatedAt: string;
-};
-
 export type PlatformBillingDetail = {
   account: BillingAccount;
   summary: WorkspaceBillingSummary;
-  snapshot: UsageSnapshot | null;
   freezes: WorkspaceFreezes;
+};
+
+export type UsageEventSource =
+  | "user_activation"
+  | "export_job"
+  | "upload_commit"
+  | "platform_adjustment";
+
+export type UsageEventMetric = BillingUsageMetric;
+
+export type UsageEventChargebeeSyncStatus =
+  | "pending_link"
+  | "pending"
+  | "synced"
+  | "failed"
+  | "manual_correction_required";
+
+export type UsageEventChargebeeSync = {
+  status: UsageEventChargebeeSyncStatus;
+  deduplicationId: string;
+  attempts?: number;
+  lastError?: string | null;
+};
+
+export type UsageEvent = {
+  id: string;
+  metric: UsageEventMetric;
+  source: UsageEventSource;
+  sourceId: string;
+  occurredAt: string;
+  chargebeeSync?: UsageEventChargebeeSync | null;
+};
+
+export type ChargebeeInvoice = {
+  id: string;
+  status: string;
+  date: string | null;
+  dueDate: string | null;
+  total: number;
+  amountPaid: number;
+  amountDue: number;
+  currencyCode: string | null;
+  subscriptionId: string | null;
+};
+
+export type BillingChargebeeConnection = {
+  configured: boolean;
+  linked: boolean;
+  customerId: string | null;
+  subscriptionId: string | null;
+};
+
+export type BillingChargebeeDetail = {
+  account: BillingAccount;
+  connection: BillingChargebeeConnection;
+  invoices: ChargebeeInvoice[];
+  invoiceError: string | null;
 };
