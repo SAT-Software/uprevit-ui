@@ -13,24 +13,20 @@ import {
   TableRow,
 } from "@uprevit/ui/components/ui/table";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
-
-function formatMoney(amount: number, currencyCode: string | null): string {
-  const currency = currencyCode ?? "USD";
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount / 100);
-}
-
-function invoiceStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
-  if (status === "paid") return "default";
-  if (status === "payment_due" || status === "not_paid") return "destructive";
-  return "secondary";
-}
+import {
+  formatBillingMoney,
+  invoiceStatusVariant,
+} from "@/utils/billingFormat";
+import { PiArrowSquareOutDuotone } from "react-icons/pi";
+import { useRouter } from "next/navigation";
 
 function BillingTab() {
+  const router = useRouter();
   const { data, isLoading, isError, error, refetch } = useGetBillingChargebee();
+
+  const openInvoice = (invoiceId: string) => {
+    router.push(`/settings/billing/invoices/${encodeURIComponent(invoiceId)}`);
+  };
 
   if (isLoading) {
     return (
@@ -186,11 +182,16 @@ function BillingTab() {
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Total</TableHead>
                 <TableHead className="text-right">Due</TableHead>
+                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {invoices.map((invoice) => (
-                <TableRow key={invoice.id}>
+                <TableRow
+                  key={invoice.id}
+                  className="cursor-pointer"
+                  onClick={() => openInvoice(invoice.id)}
+                >
                   <TableCell className="font-mono text-xs">{invoice.id}</TableCell>
                   <TableCell>
                     {invoice.date ? formatToLocalDate(invoice.date) : "—"}
@@ -201,10 +202,24 @@ function BillingTab() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatMoney(invoice.total, invoice.currencyCode)}
+                    {formatBillingMoney(invoice.total, invoice.currencyCode)}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatMoney(invoice.amountDue, invoice.currencyCode)}
+                    {formatBillingMoney(invoice.amountDue, invoice.currencyCode)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      aria-label={`View invoice ${invoice.id}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openInvoice(invoice.id);
+                      }}
+                    >
+                      <PiArrowSquareOutDuotone className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

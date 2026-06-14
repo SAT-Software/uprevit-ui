@@ -154,6 +154,51 @@ export type ChargebeeInvoice = {
   subscriptionId: string | null;
 };
 
+export type ChargebeeInvoiceLineItem = {
+  id: string;
+  description: string | null;
+  amount: number;
+  unitAmount: number;
+  quantity: number;
+  dateFrom: string | null;
+  dateTo: string | null;
+  entityType: string | null;
+  entityId: string | null;
+};
+
+export type ChargebeeBillingAddress = {
+  firstName: string | null;
+  lastName: string | null;
+  company: string | null;
+  line1: string | null;
+  line2: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  country: string | null;
+};
+
+export type ChargebeeInvoiceDetail = ChargebeeInvoice & {
+  customerId: string;
+  subTotal: number;
+  tax?: number;
+  creditsApplied?: number;
+  lineItems: ChargebeeInvoiceLineItem[];
+  billingAddress: ChargebeeBillingAddress | null;
+};
+
+export type BillingInvoiceDownload = {
+  downloadUrl: string;
+  mimeType: string | null;
+  validTill: string | null;
+};
+
+export type BillingInvoiceDownloadResponse = {
+  invoiceId: string;
+  downloads: BillingInvoiceDownload[];
+  pdfDownloadUrl: string | null;
+};
+
 export type BillingChargebeeConnection = {
   configured: boolean;
   linked: boolean;
