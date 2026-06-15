@@ -39,7 +39,6 @@ type BillingAccountForm = {
   netTermDays: string;
   limitsEnabled: boolean;
   enforcementMode: EnforcementMode;
-  pastDue: boolean;
   ssoAllowed: boolean;
   ssoEnabled: boolean;
   exports: string;
@@ -54,7 +53,6 @@ function accountToForm(account: BillingAccount): BillingAccountForm {
     netTermDays: String(account.netTermDays),
     limitsEnabled: account.limitsEnabled,
     enforcementMode: account.limits.enforcementMode,
-    pastDue: account.pastDue,
     ssoAllowed: account.usageLimits.ssoAllowed,
     ssoEnabled: account.sso.enabled,
     exports: String(account.usageLimits.exports),
@@ -95,7 +93,6 @@ function buildUpdatePayload(
   if (form.enforcementMode !== account.limits.enforcementMode) {
     payload.enforcementMode = form.enforcementMode;
   }
-  if (form.pastDue !== account.pastDue) payload.pastDue = form.pastDue;
   if (form.ssoEnabled !== account.sso.enabled) payload.ssoEnabled = form.ssoEnabled;
 
   const usageLimits: NonNullable<UpdatePlatformBillingAccountInput["usageLimits"]> = {};
@@ -127,9 +124,6 @@ function describeChanges(
   }
   if (form.enforcementMode !== account.limits.enforcementMode) {
     changes.push(`Enforcement mode: ${account.limits.enforcementMode} → ${form.enforcementMode}`);
-  }
-  if (form.pastDue !== account.pastDue) {
-    changes.push(`Past due: ${account.pastDue ? "yes" : "no"} → ${form.pastDue ? "yes" : "no"}`);
   }
   if (form.ssoEnabled !== account.sso.enabled) {
     changes.push(`SSO enabled: ${account.sso.enabled ? "on" : "off"} → ${form.ssoEnabled ? "on" : "off"}`);
@@ -264,7 +258,7 @@ export function DialogEditPlatformBillingAccount({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(["draft", "pilot", "active", "past_due", "cancelled"] as const).map(
+                      {(["draft", "pilot", "active", "cancelled"] as const).map(
                         (status) => (
                           <SelectItem key={status} value={status}>
                             {status}
@@ -317,21 +311,13 @@ export function DialogEditPlatformBillingAccount({
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
                   <Label htmlFor="edit-metering-enabled">Limit enforcement</Label>
                   <Switch
                     id="edit-metering-enabled"
                     checked={form.limitsEnabled}
                     onCheckedChange={(limitsEnabled) => patchForm({ limitsEnabled })}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <Label htmlFor="edit-past-due">Past due</Label>
-                  <Switch
-                    id="edit-past-due"
-                    checked={form.pastDue}
-                    onCheckedChange={(pastDue) => patchForm({ pastDue })}
                   />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">

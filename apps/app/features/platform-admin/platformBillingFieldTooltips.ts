@@ -1,6 +1,6 @@
 export const BILLING_ACCOUNT_FIELD_TOOLTIPS = {
   status:
-    "Lifecycle state of the billing account. Draft and pilot are pre-production; active is billable; past_due flags overdue payment without auto-blocking access; cancelled ends billing.",
+    "Lifecycle state of the billing account. Draft and pilot are pre-production; active is billable; cancelled ends billing. past_due is set automatically from Chargebee when invoices are overdue.",
   cadence:
     "How often the workspace is billed. Monthly and yearly cadences roll forward from the billing account creation date.",
   currency: "Currency used for account display and later provider handoff for this workspace.",
@@ -9,7 +9,7 @@ export const BILLING_ACCOUNT_FIELD_TOOLTIPS = {
   meteringEnabled:
     "When enabled, usage limits can block or allow over-limit usage per the workspace enforcement mode. Usage is always recorded, even when enforcement is off.",
   pastDue:
-    "Marks the account as overdue for payment. Does not automatically freeze workspace access or usage.",
+    "Mirrored from Chargebee when open invoices are due. Read-only in platform admin; updated by Chargebee webhooks.",
   ssoEnabled:
     "Actual SSO feature state for this workspace. SSO can only be enabled when the workspace usage limit allows it.",
   seatMonths:

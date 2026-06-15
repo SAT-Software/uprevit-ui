@@ -124,7 +124,6 @@ export type UpdatePlatformBillingAccountInput = {
   meteringEnabled?: boolean;
   limitsEnabled?: boolean;
   enforcementMode?: EnforcementMode;
-  pastDue?: boolean;
   ssoEnabled?: boolean;
   usageLimits?: Partial<UsageLimits>;
 };
