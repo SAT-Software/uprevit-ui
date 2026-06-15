@@ -533,7 +533,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     data: dataProp || [],
     columns,
     getRowId: (originalRow) => getPersistentItemId(originalRow),
-    getRowCanExpand: (row) => Boolean(row.original.componentName),
+    getRowCanExpand: (row) => Boolean(row.original.componentImage?.trim()),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
