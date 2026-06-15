@@ -180,7 +180,7 @@ export function PlatformBillingSection({
     );
   }
 
-  const { account, summary, freezes } = data;
+  const { account, summary, freezes, failedUsageEventSyncCount } = data;
 
   return (
     <div className="space-y-4">
@@ -350,7 +350,11 @@ export function PlatformBillingSection({
         </div>
       </section>
 
-      <PlatformChargebeeSection workspaceId={workspaceId} account={account} />
+      <PlatformChargebeeSection
+        workspaceId={workspaceId}
+        account={account}
+        failedUsageEventSyncCount={failedUsageEventSyncCount}
+      />
 
       <section className="space-y-3 rounded-xl border border-border bg-background p-5">
         <div>

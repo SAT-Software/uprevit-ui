@@ -109,6 +109,7 @@ export type PlatformBillingDetail = {
   account: BillingAccount;
   summary: WorkspaceBillingSummary;
   freezes: WorkspaceFreezes;
+  failedUsageEventSyncCount: number;
 };
 
 export type UsageEventSource =

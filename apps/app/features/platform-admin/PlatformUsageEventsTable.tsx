@@ -28,6 +28,12 @@ function eventTypeLabel(event: UsageEvent): string {
   return SOURCE_LABELS[event.source] ?? event.metric.replace(/_/g, " ");
 }
 
+const RETRYABLE_SYNC_STATUSES = new Set([
+  "pending",
+  "failed",
+  "pending_link",
+]);
+
 function deduplicationId(event: UsageEvent): string {
   return event.chargebeeSync?.deduplicationId ?? event.sourceId;
 }
@@ -94,7 +100,8 @@ export function PlatformUsageEventsTable({
                 {deduplicationId(event)}
               </TableCell>
               <TableCell>
-                {event.chargebeeSync?.status && event.chargebeeSync.status !== "synced" ? (
+                {event.chargebeeSync?.status &&
+                RETRYABLE_SYNC_STATUSES.has(event.chargebeeSync.status) ? (
                   <Button
                     variant="outline"
                     size="sm"

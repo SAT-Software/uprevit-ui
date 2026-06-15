@@ -131,8 +131,12 @@ function BillingTab() {
               <Badge variant="outline" className="capitalize">
                 {account.status}
               </Badge>
-              {connection.linked ? (
-                <Badge variant="secondary">Subscription active</Badge>
+              {subscription?.subscriptionStatus ? (
+                <Badge variant="secondary" className="capitalize">
+                  {subscription.subscriptionStatus.replace(/_/g, " ")}
+                </Badge>
+              ) : connection.linked ? (
+                <Badge variant="outline">Subscription linked</Badge>
               ) : (
                 <Badge variant="outline">Billing not set up</Badge>
               )}

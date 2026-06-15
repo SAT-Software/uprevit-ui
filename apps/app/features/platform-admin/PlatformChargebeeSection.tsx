@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useCreateChargebeeCustomer } from "@/hooks/platform-admin/useCreateChargebeeCustomer";
-import { useGetUsageEvents } from "@/hooks/platform-admin/useGetUsageEvents";
 import { useLinkChargebeeSubscription } from "@/hooks/platform-admin/useLinkChargebeeSubscription";
 import { useRetryUsageEventSync } from "@/hooks/platform-admin/useRetryUsageEventSync";
 import type { BillingAccount } from "@/types/billing";
@@ -11,34 +10,19 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 
-const FAILED_SYNC_STATUSES = new Set([
-  "failed",
-  "pending",
-  "pending_link",
-  "manual_correction_required",
-]);
-
 export function PlatformChargebeeSection({
   workspaceId,
   account,
+  failedUsageEventSyncCount,
 }: {
   workspaceId: string;
   account: BillingAccount;
+  failedUsageEventSyncCount: number;
 }) {
   const [subscriptionId, setSubscriptionId] = useState("");
   const createCustomer = useCreateChargebeeCustomer(workspaceId);
   const linkSubscription = useLinkChargebeeSubscription(workspaceId);
   const { retryAll } = useRetryUsageEventSync(workspaceId);
-  const { data: usageEventsData } = useGetUsageEvents(workspaceId, { limit: 50 });
-
-  const failedSyncCount = useMemo(() => {
-    const items = usageEventsData?.items ?? [];
-    return items.filter((event) =>
-      event.chargebeeSync?.status
-        ? FAILED_SYNC_STATUSES.has(event.chargebeeSync.status)
-        : false,
-    ).length;
-  }, [usageEventsData?.items]);
 
   const customerId = account.chargebee?.customerId;
   const linkedSubscriptionId = account.chargebee?.subscriptionId;
@@ -72,7 +56,7 @@ export function PlatformChargebeeSection({
             </div>
             <div>
               <dt className="text-muted-foreground">Failed / pending syncs</dt>
-              <dd>{failedSyncCount}</dd>
+              <dd>{failedUsageEventSyncCount}</dd>
             </div>
           </dl>
         </div>

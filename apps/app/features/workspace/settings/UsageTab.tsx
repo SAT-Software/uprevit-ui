@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ComponentType } from "react";
 import { useGetBillingSummary } from "@/hooks/billing/useGetBillingSummary";
 import { useUpdateBillingPreferences } from "@/hooks/billing/useUpdateBillingPreferences";
@@ -35,7 +35,8 @@ import {
 } from "react-icons/pi";
 import { formatUploadVolumeDisplay } from "@/utils/formatUploadVolume";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
-import type { EnforcementMode } from "@/types/billing";
+import type { EnforcementMode, WorkspaceBillingSummary } from "@/types/billing";
+import type { BillingPreferencesInput } from "@/hooks/billing/useUpdateBillingPreferences";
 
 function UsageMetricCard({
   label,
@@ -123,19 +124,145 @@ function UsageMetricCard({
   );
 }
 
+function UsageLimitEnforcementForm({
+  summary,
+  isSaving,
+  onSaved,
+  onSave,
+}: {
+  summary: WorkspaceBillingSummary;
+  isSaving: boolean;
+  onSaved: () => void;
+  onSave: (
+    input: BillingPreferencesInput,
+    options?: { onSuccess?: () => void },
+  ) => void;
+}) {
+  const [enforcementMode, setEnforcementMode] = useState(summary.enforcementMode);
+  const [exportsLimit, setExportsLimit] = useState(String(summary.usageLimits.exports));
+  const [uploadGbLimit, setUploadGbLimit] = useState(String(summary.usageLimits.uploadGb));
+  const [formDirty, setFormDirty] = useState(false);
+
+  const markDirty = () => {
+    if (!formDirty) {
+      setFormDirty(true);
+    }
+  };
+
+  const exportsTrimmed = exportsLimit.trim();
+  const uploadGbTrimmed = uploadGbLimit.trim();
+  const parsedExports = Number(exportsTrimmed);
+  const parsedUploadGb = Number(uploadGbTrimmed);
+  const limitsValid =
+    exportsTrimmed !== "" &&
+    uploadGbTrimmed !== "" &&
+    Number.isInteger(parsedExports) &&
+    parsedExports >= 0 &&
+    Number.isFinite(parsedUploadGb) &&
+    parsedUploadGb >= 0;
+
+  const savePreferences = () => {
+    if (!limitsValid) return;
+    onSave(
+      {
+        enforcementMode,
+        exports: parsedExports,
+        uploadGb: parsedUploadGb,
+      },
+      {
+        onSuccess: () => {
+          setFormDirty(false);
+          onSaved();
+        },
+      },
+    );
+  };
+
+  return (
+    <Card className="shadow-none">
+      <CardHeader className="space-y-1 p-6 pb-0">
+        <div className="flex items-center gap-2.5">
+          <div className="rounded-lg bg-muted p-2 shrink-0">
+            <PiSlidersHorizontalDuotone className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <CardTitle className="text-base">Limit enforcement</CardTitle>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Choose whether over-limit usage is allowed or blocked for exports and
+          uploads.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4 p-6 pt-4">
+        <div className="space-y-2">
+          <Label htmlFor="enforcement-mode">Enforcement mode</Label>
+          <Select
+            value={enforcementMode}
+            onValueChange={(value) => {
+              markDirty();
+              setEnforcementMode(value as EnforcementMode);
+            }}
+            disabled={isSaving}
+          >
+            <SelectTrigger id="enforcement-mode">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="overage">Allow overage</SelectItem>
+              <SelectItem value="block">Block when over limit</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="exports-limit">Export limit</Label>
+            <Input
+              id="exports-limit"
+              type="number"
+              min={0}
+              step={1}
+              value={exportsLimit}
+              onChange={(event) => {
+                markDirty();
+                setExportsLimit(event.target.value);
+              }}
+              disabled={isSaving}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="upload-limit">Upload limit (GB)</Label>
+            <Input
+              id="upload-limit"
+              type="number"
+              min={0}
+              step={0.1}
+              value={uploadGbLimit}
+              onChange={(event) => {
+                markDirty();
+                setUploadGbLimit(event.target.value);
+              }}
+              disabled={isSaving}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <Button
+            onClick={savePreferences}
+            disabled={!formDirty || !limitsValid || isSaving}
+          >
+            Save preferences
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function UsageTab() {
   const { data, isLoading, isError, error, refetch } = useGetBillingSummary();
   const updatePreferences = useUpdateBillingPreferences();
-  const [enforcementMode, setEnforcementMode] = useState<EnforcementMode>("overage");
-  const [exportsLimit, setExportsLimit] = useState("");
-  const [uploadGbLimit, setUploadGbLimit] = useState("");
-
-  useEffect(() => {
-    if (!data) return;
-    setEnforcementMode(data.enforcementMode);
-    setExportsLimit(String(data.usageLimits.exports));
-    setUploadGbLimit(String(data.usageLimits.uploadGb));
-  }, [data]);
+  const [formResetKey, setFormResetKey] = useState(0);
 
   if (isLoading) {
     return (
@@ -205,28 +332,6 @@ function UsageTab() {
     data.usage.uploadBytes,
     data.usage.uploadGb,
   );
-
-  const parsedExports = Number(exportsLimit);
-  const parsedUploadGb = Number(uploadGbLimit);
-  const limitsDirty =
-    enforcementMode !== data.enforcementMode ||
-    parsedExports !== data.usageLimits.exports ||
-    parsedUploadGb !== data.usageLimits.uploadGb;
-  const limitsValid =
-    Number.isInteger(parsedExports) &&
-    parsedExports >= 0 &&
-    Number.isFinite(parsedUploadGb) &&
-    parsedUploadGb >= 0;
-
-  const savePreferences = () => {
-    if (!limitsValid) return;
-    updatePreferences.mutate({
-      enforcementMode,
-      exports: parsedExports,
-      uploadGb: parsedUploadGb,
-    });
-  };
-
   return (
     <div className="space-y-6">
       {/* Usage Header */}
@@ -347,79 +452,13 @@ function UsageTab() {
         </div>
       </div>
 
-      {/* Limit enforcement */}
-      <Card className="shadow-none">
-        <CardHeader className="space-y-1 p-6 pb-0">
-          <div className="flex items-center gap-2.5">
-            <div className="rounded-lg bg-muted p-2 shrink-0">
-              <PiSlidersHorizontalDuotone className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <CardTitle className="text-base">Limit enforcement</CardTitle>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Choose whether over-limit usage is allowed or blocked for exports and
-            uploads.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4 p-6 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="enforcement-mode">Enforcement mode</Label>
-            <Select
-              value={enforcementMode}
-              onValueChange={(value) =>
-                setEnforcementMode(value as EnforcementMode)
-              }
-              disabled={updatePreferences.isPending}
-            >
-              <SelectTrigger id="enforcement-mode">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="overage">Allow overage</SelectItem>
-                <SelectItem value="block">Block when over limit</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="exports-limit">Export limit</Label>
-              <Input
-                id="exports-limit"
-                type="number"
-                min={0}
-                step={1}
-                value={exportsLimit}
-                onChange={(event) => setExportsLimit(event.target.value)}
-                disabled={updatePreferences.isPending}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="upload-limit">Upload limit (GB)</Label>
-              <Input
-                id="upload-limit"
-                type="number"
-                min={0}
-                step={0.1}
-                value={uploadGbLimit}
-                onChange={(event) => setUploadGbLimit(event.target.value)}
-                disabled={updatePreferences.isPending}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button
-              onClick={savePreferences}
-              disabled={
-                !limitsDirty || !limitsValid || updatePreferences.isPending
-              }
-            >
-              Save preferences
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <UsageLimitEnforcementForm
+        key={formResetKey}
+        summary={data}
+        isSaving={updatePreferences.isPending}
+        onSaved={() => setFormResetKey((k) => k + 1)}
+        onSave={(input, options) => updatePreferences.mutate(input, options)}
+      />
 
       {(data.freezes?.usageFreeze.enabled ||
         data.freezes?.accessFreeze.enabled) && (
