@@ -16,7 +16,6 @@ import { PlatformChargebeeSection } from "@/features/platform-admin/PlatformChar
 import { PlatformUsageEventsTable } from "@/features/platform-admin/PlatformUsageEventsTable";
 import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platformBillingFieldTooltips";
 import { formatUploadVolumeHint } from "@/utils/formatUploadVolume";
-import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import { getErrorMessage } from "@/lib/api-error";
 
 function ReadOnlyField({
@@ -332,13 +331,14 @@ export function PlatformBillingSection({
         </div>
       </section>
 
-      {/* Operations */}
+      {/* Usage corrections */}
       <section className="space-y-4 rounded-xl border border-border bg-background p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">Billing operations</h2>
+            <h2 className="text-sm font-semibold">Usage corrections</h2>
             <p className="text-xs text-muted-foreground mt-0.5 max-w-prose">
-              Manual usage corrections for the current billing period.
+              Manual usage corrections for the current billing period. Each adjustment asks for
+              confirmation.
             </p>
           </div>
           <DialogPlatformBillingOperations
@@ -346,29 +346,6 @@ export function PlatformBillingSection({
             onAdjustment={async (input) => {
               await createAdjustment.mutateAsync(input);
             }}
-          />
-        </div>
-
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-          <ReadOnlyField
-            label="Current period"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currentPeriod}
-            value={
-              <>
-                {formatToLocalDate(summary.period.start)} –{" "}
-                {formatToLocalDate(summary.period.end)}
-              </>
-            }
-            hint={
-              summary.period.source === "chargebee"
-                ? "Period from linked Chargebee subscription"
-                : "Chargebee not linked — using internal billing period"
-            }
-          />
-          <ReadOnlyField
-            label="Enforcement mode"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.enforcementMode}
-            value={<span className="capitalize">{summary.enforcementMode}</span>}
           />
         </div>
       </section>

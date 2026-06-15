@@ -97,7 +97,7 @@ export function DialogPlatformBillingOperations({
         <DialogTrigger asChild>
           <Button size="sm" variant="secondary" className="gap-2">
             <PiGearDuotone className="h-4 w-4" />
-            Usage operations
+            Usage corrections
           </Button>
         </DialogTrigger>
 
@@ -106,7 +106,7 @@ export function DialogPlatformBillingOperations({
             <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
               <div className="flex items-center gap-2">
                 <PiGearDuotone className="h-5 w-5 text-muted-foreground" />
-                <p>Usage operations</p>
+                <p>Usage corrections</p>
               </div>
               <DialogClose asChild>
                 <button type="button" className="cursor-pointer">
@@ -124,48 +124,46 @@ export function DialogPlatformBillingOperations({
 
           <div className="space-y-4 overflow-y-auto p-4">
             <div className="space-y-3 rounded-lg border border-border p-3">
-              <PlatformBillingFieldLabel
-                label="Usage adjustment"
-                tooltip={BILLING_OPERATIONS_FIELD_TOOLTIPS.usageAdjustment}
-              />
-              <div className="flex flex-wrap items-end gap-3">
-                <div className="space-y-2">
-                  <PlatformBillingFieldLabel
-                    htmlFor="adjustment-metric"
-                    label="Metric"
-                    tooltip={BILLING_OPERATIONS_FIELD_TOOLTIPS.adjustmentMetric}
-                  />
-                  <Select
-                    value={adjustmentMetric}
-                    onValueChange={(value) =>
-                      setAdjustmentMetric(value as AdjustableUsageMetric)
-                    }
-                  >
-                    <SelectTrigger id="adjustment-metric" className="w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="completed_export">Export</SelectItem>
-                      <SelectItem value="upload_bytes">Upload bytes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <PlatformBillingFieldLabel
-                    htmlFor="adjustment-delta"
-                    label="Delta"
-                    tooltip={BILLING_OPERATIONS_FIELD_TOOLTIPS.adjustmentDelta}
-                  />
-                  <Input
-                    id="adjustment-delta"
-                    type="number"
-                    className="w-28"
-                    value={adjustmentDelta}
-                    onChange={(event) => {
-                      setAdjustmentDelta(event.target.value);
-                      setAdjustmentError(null);
-                    }}
-                  />
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <PlatformBillingFieldLabel
+                      htmlFor="adjustment-metric"
+                      label="Metric"
+                      tooltip={BILLING_OPERATIONS_FIELD_TOOLTIPS.adjustmentMetric}
+                    />
+                    <Select
+                      value={adjustmentMetric}
+                      onValueChange={(value) =>
+                        setAdjustmentMetric(value as AdjustableUsageMetric)
+                      }
+                    >
+                      <SelectTrigger id="adjustment-metric" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="completed_export">Export</SelectItem>
+                        <SelectItem value="upload_bytes">Upload bytes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <PlatformBillingFieldLabel
+                      htmlFor="adjustment-delta"
+                      label="Delta"
+                      tooltip={BILLING_OPERATIONS_FIELD_TOOLTIPS.adjustmentDelta}
+                    />
+                    <Input
+                      id="adjustment-delta"
+                      type="number"
+                      className="w-full"
+                      value={adjustmentDelta}
+                      onChange={(event) => {
+                        setAdjustmentDelta(event.target.value);
+                        setAdjustmentError(null);
+                      }}
+                    />
+                  </div>
                 </div>
                 <Button
                   size="sm"
