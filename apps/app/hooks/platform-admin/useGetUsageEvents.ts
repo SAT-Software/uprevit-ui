@@ -7,7 +7,7 @@ import { isPlatformOperatorProfile } from "@/utils/isPlatformOperator";
 
 export function useGetUsageEvents(
   workspaceId: string,
-  { page = 1, limit = 15 }: { page?: number; limit?: number } = {},
+  { page = 1, limit = 10 }: { page?: number; limit?: number } = {},
   { enabled = true }: { enabled?: boolean } = {},
 ) {
   const auth = useAuth();

@@ -10,6 +10,7 @@ import {
   PiUserPlusDuotone,
   PiCreditCardDuotone,
   PiArrowLeftDuotone,
+  PiListChecksDuotone,
 } from "react-icons/pi";
 import { PlatformAdminGuard } from "@/components/common/PlatformAdminGuard";
 import { PlatformAdminNav } from "@/features/platform-admin/PlatformAdminNav";
@@ -149,6 +150,12 @@ export default function PlatformAdminWorkspaceDetailPage() {
                   <Link href={`/platform-admin/workspaces/${workspaceId}/logs`}>
                     <PiClockDuotone className="h-4 w-4" />
                     View logs
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="secondary" className="gap-2">
+                  <Link href={`/platform-admin/workspaces/${workspaceId}/usage-events`}>
+                    <PiListChecksDuotone className="h-4 w-4" />
+                    Usage events
                   </Link>
                 </Button>
                 <WorkspaceAdminInviteDialog workspaceId={workspaceId} />
