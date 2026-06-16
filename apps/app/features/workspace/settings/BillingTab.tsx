@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetBillingChargebee } from "@/hooks/billing/useGetBillingChargebee";
+import { BillingInvoicesTable } from "@/features/billing/BillingInvoicesTable";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -10,57 +11,23 @@ import {
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@uprevit/ui/components/ui/table";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
-  formatBillingMoney,
-  invoiceStatusVariant,
-} from "@/utils/billingFormat";
+  billingAccountStatusVariant,
+  formatSubscriptionStatusLabel,
+  getBillingStatusLabel,
+} from "@/utils/billingStatusDisplay";
 import {
   PiCalendarDuotone,
-  PiCoinsDuotone,
   PiCreditCardDuotone,
-  PiInfoDuotone,
   PiKeyDuotone,
-  PiMoneyDuotone,
   PiReceiptDuotone,
   PiShieldCheckDuotone,
   PiTagDuotone,
   PiUsersDuotone,
   PiWarningCircleDuotone,
 } from "react-icons/pi";
-import type { ComponentType } from "react";
 import { useRouter } from "next/navigation";
-
-function InvoiceTableHeader({
-  title,
-  icon: Icon,
-  align = "left",
-}: {
-  title: string;
-  icon: ComponentType<{ className?: string }>;
-  align?: "left" | "right";
-}) {
-  return (
-    <div
-      className={
-        align === "right"
-          ? "flex items-center justify-end gap-2"
-          : "flex items-center gap-2"
-      }
-    >
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <span>{title}</span>
-    </div>
-  );
-}
 
 function BillingTab() {
   const router = useRouter();
@@ -128,20 +95,14 @@ function BillingTab() {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-semibold">Billing</h2>
-              <Badge variant="outline" className="capitalize">
-                {account.status}
+              <Badge
+                variant={billingAccountStatusVariant(account.status, account.pastDue)}
+                className="capitalize"
+              >
+                {getBillingStatusLabel(account.status, account.pastDue)}
               </Badge>
-              {subscription?.subscriptionStatus ? (
-                <Badge variant="secondary" className="capitalize">
-                  {subscription.subscriptionStatus.replace(/_/g, " ")}
-                </Badge>
-              ) : connection.linked ? (
-                <Badge variant="outline">Subscription linked</Badge>
-              ) : (
+              {!connection.linked ? (
                 <Badge variant="outline">Billing not set up</Badge>
-              )}
-              {account.pastDue ? (
-                <Badge variant="destructive">Past due</Badge>
               ) : null}
             </div>
             <p className="text-sm text-muted-foreground">
@@ -188,7 +149,10 @@ function BillingTab() {
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Subscription status</dt>
                 <dd className="capitalize font-medium">
-                  {subscription?.subscriptionStatus ?? "—"}
+                  {formatSubscriptionStatusLabel(
+                    subscription?.subscriptionStatus,
+                    account.status,
+                  )}
                 </dd>
               </div>
             </dl>
@@ -350,70 +314,7 @@ function BillingTab() {
               <p className="text-sm text-muted-foreground">No invoices found.</p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl border bg-background">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      <InvoiceTableHeader title="Invoice" icon={PiReceiptDuotone} />
-                    </TableHead>
-                    <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      <InvoiceTableHeader title="Date" icon={PiCalendarDuotone} />
-                    </TableHead>
-                    <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      <InvoiceTableHeader title="Status" icon={PiInfoDuotone} />
-                    </TableHead>
-                    <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      <InvoiceTableHeader
-                        title="Total"
-                        icon={PiCoinsDuotone}
-                        align="right"
-                      />
-                    </TableHead>
-                    <TableHead className="h-11 text-xs uppercase font-medium text-muted-foreground">
-                      <InvoiceTableHeader
-                        title="Due"
-                        icon={PiMoneyDuotone}
-                        align="right"
-                      />
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invoices.map((invoice) => (
-                    <TableRow
-                      key={invoice.id}
-                      className="cursor-pointer hover:bg-muted/30"
-                      onClick={() => openInvoice(invoice.id)}
-                    >
-                      <TableCell className="py-3 font-mono text-xs">
-                        {invoice.id}
-                      </TableCell>
-                      <TableCell className="py-3">
-                        {invoice.date ? formatToLocalDate(invoice.date) : "—"}
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <Badge
-                          variant={invoiceStatusVariant(invoice.status)}
-                          className="capitalize"
-                        >
-                          {invoice.status.replace(/_/g, " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-3 text-right">
-                        {formatBillingMoney(invoice.total, invoice.currencyCode)}
-                      </TableCell>
-                      <TableCell className="py-3 text-right">
-                        {formatBillingMoney(
-                          invoice.amountDue,
-                          invoice.currencyCode,
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <BillingInvoicesTable invoices={invoices} onInvoiceClick={openInvoice} />
           )}
         </CardContent>
       </Card>
