@@ -2,6 +2,8 @@
 
 import { useGetBillingInvoice } from "@/hooks/billing/useGetBillingInvoice";
 import { useDownloadBillingInvoice } from "@/hooks/billing/useDownloadBillingInvoice";
+import { useGetPlatformBillingInvoice } from "@/hooks/platform-admin/useGetPlatformBillingInvoice";
+import { useDownloadPlatformBillingInvoice } from "@/hooks/platform-admin/useDownloadPlatformBillingInvoice";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -57,14 +59,26 @@ function formatBillingAddress(address: ChargebeeBillingAddress): string[] {
 type BillingInvoiceDetailProps = {
   workspaceId: string;
   invoiceId: string;
+  backHref?: string;
+  apiScope?: "workspace" | "platform-admin";
 };
 
-function BillingInvoiceDetail({ workspaceId, invoiceId }: BillingInvoiceDetailProps) {
-  const { data: invoice, isLoading, isError, error, refetch } = useGetBillingInvoice(
-    workspaceId,
-    invoiceId,
-  );
-  const downloadInvoice = useDownloadBillingInvoice(workspaceId, invoiceId);
+function BillingInvoiceDetail({
+  workspaceId,
+  invoiceId,
+  backHref = "/settings?tab=billing",
+  apiScope = "workspace",
+}: BillingInvoiceDetailProps) {
+  const isPlatformAdmin = apiScope === "platform-admin";
+  const workspaceInvoice = useGetBillingInvoice(workspaceId, invoiceId, !isPlatformAdmin);
+  const platformInvoice = useGetPlatformBillingInvoice(workspaceId, invoiceId, isPlatformAdmin);
+  const workspaceDownload = useDownloadBillingInvoice(workspaceId, invoiceId);
+  const platformDownload = useDownloadPlatformBillingInvoice(workspaceId, invoiceId);
+
+  const { data: invoice, isLoading, isError, error, refetch } =
+    apiScope === "platform-admin" ? platformInvoice : workspaceInvoice;
+  const downloadInvoice =
+    apiScope === "platform-admin" ? platformDownload : workspaceDownload;
 
   const handleDownload = () => {
     downloadInvoice.mutate(undefined, {
@@ -108,9 +122,9 @@ function BillingInvoiceDetail({ workspaceId, invoiceId }: BillingInvoiceDetailPr
     return (
       <div className="space-y-4">
         <Button variant="ghost" size="sm" className="-ml-2 w-fit" asChild>
-          <Link href="/settings?tab=billing" className="flex items-center gap-2">
+          <Link href={backHref} className="flex items-center gap-2">
             <PiArrowLeft className="h-4 w-4" />
-            Back to billing
+            Back to invoices
           </Link>
         </Button>
         <div className="flex items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
@@ -147,9 +161,9 @@ function BillingInvoiceDetail({ workspaceId, invoiceId }: BillingInvoiceDetailPr
   return (
     <div className="space-y-6">
       <Button variant="ghost" size="sm" className="-ml-2 w-fit" asChild>
-        <Link href="/settings?tab=billing" className="flex items-center gap-2">
+        <Link href={backHref} className="flex items-center gap-2">
           <PiArrowLeft className="h-4 w-4" />
-          Back to billing
+          Back to invoices
         </Link>
       </Button>
 

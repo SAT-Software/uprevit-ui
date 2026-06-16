@@ -11,6 +11,7 @@ import {
   PiCreditCardDuotone,
   PiArrowLeftDuotone,
   PiListChecksDuotone,
+  PiReceiptDuotone,
 } from "react-icons/pi";
 import { PlatformAdminGuard } from "@/components/common/PlatformAdminGuard";
 import { PlatformAdminNav } from "@/features/platform-admin/PlatformAdminNav";
@@ -19,6 +20,8 @@ import { WorkspaceAdminInviteDialog } from "@/features/platform-admin/WorkspaceA
 import { useGetPlatformWorkspaceDetail } from "@/hooks/platform-admin/useGetPlatformWorkspaceDetail";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { getBillingStatusLabel } from "@/utils/billingStatusDisplay";
+import type { WorkspaceBillingPreview } from "@/types/platform-admin";
 import {
   Table,
   TableBody,
@@ -47,25 +50,37 @@ function WorkspaceDetailErrorState({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+function BillingStatusDisplay({ billing }: { billing: WorkspaceBillingPreview }) {
+  const label = getBillingStatusLabel(billing.status, billing.pastDue);
+  const isPastDue = billing.pastDue || billing.status === "past_due";
+
+  return (
+    <div
+      className={`text-2xl font-semibold tabular-nums capitalize ${
+        isPastDue ? "text-destructive" : billing.status === "not_set" ? "text-muted-foreground" : "text-primary"
+      }`}
+    >
+      {label}
+    </div>
+  );
+}
+
 function WorkspaceStatsRow({
   members,
   active,
   invited,
-  billingStatus,
+  billing,
 }: {
   members: number;
   active: number;
   invited: number;
-  billingStatus: string;
+  billing: WorkspaceBillingPreview;
 }) {
-  const billingLabel =
-    billingStatus === "not_set" ? "Not set" : billingStatus;
-
   const items = [
-    { label: "Total members", value: members, icon: PiUsersDuotone },
-    { label: "Active now", value: active, icon: PiUserCheckDuotone },
-    { label: "Pending invites", value: invited, icon: PiUserPlusDuotone },
-    { label: "Billing status", value: billingLabel, icon: PiCreditCardDuotone },
+    { label: "Total members", value: members, icon: PiUsersDuotone, isBilling: false },
+    { label: "Active now", value: active, icon: PiUserCheckDuotone, isBilling: false },
+    { label: "Pending invites", value: invited, icon: PiUserPlusDuotone, isBilling: false },
+    { label: "Billing status", value: null, icon: PiCreditCardDuotone, isBilling: true },
   ];
 
   return (
@@ -84,9 +99,11 @@ function WorkspaceStatsRow({
               <div className="font-medium text-xs uppercase text-muted-foreground">
                 {item.label}
               </div>
-              <div className="text-2xl font-semibold tabular-nums capitalize">
-                {item.value}
-              </div>
+              {item.isBilling ? (
+                <BillingStatusDisplay billing={billing} />
+              ) : (
+                <div className="text-2xl font-semibold tabular-nums">{item.value}</div>
+              )}
             </div>
           </div>
         );
@@ -158,6 +175,12 @@ export default function PlatformAdminWorkspaceDetailPage() {
                     Usage events
                   </Link>
                 </Button>
+                <Button asChild size="sm" variant="secondary" className="gap-2">
+                  <Link href={`/platform-admin/workspaces/${workspaceId}/invoices`}>
+                    <PiReceiptDuotone className="h-4 w-4" />
+                    Invoices
+                  </Link>
+                </Button>
                 <WorkspaceAdminInviteDialog workspaceId={workspaceId} />
               </div>
             ) : null}
@@ -175,7 +198,7 @@ export default function PlatformAdminWorkspaceDetailPage() {
               members={data?.counts.members ?? 0}
               active={data?.counts.activeMembers ?? 0}
               invited={data?.counts.invitedMembers ?? 0}
-              billingStatus={data?.billing.status ?? "not_set"}
+              billing={data?.billing ?? { status: "not_set", meteringEnabled: null, limitsEnabled: null, billingCadence: null, currency: null, pastDue: null }}
             />
 
             {/* Billing & freezes & operations — the heavy section, improved internally */}

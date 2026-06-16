@@ -3,7 +3,11 @@ import { useAuth } from "react-oidc-context";
 import { getResponseErrorMessage } from "@/lib/api-error";
 import type { ChargebeeInvoiceDetail } from "@/types/billing";
 
-export function useGetBillingInvoice(workspaceId: string, invoiceId: string) {
+export function useGetBillingInvoice(
+  workspaceId: string,
+  invoiceId: string,
+  enabled = true,
+) {
   const auth = useAuth();
 
   return useQuery({
@@ -32,6 +36,6 @@ export function useGetBillingInvoice(workspaceId: string, invoiceId: string) {
       const json = await response.json();
       return json.data.invoice as ChargebeeInvoiceDetail;
     },
-    enabled: auth.isAuthenticated && Boolean(workspaceId) && Boolean(invoiceId),
+    enabled: enabled && auth.isAuthenticated && Boolean(workspaceId) && Boolean(invoiceId),
   });
 }

@@ -13,9 +13,16 @@ import { DialogEditPlatformWorkspaceFreezes } from "@/features/platform-admin/Di
 import { DialogPlatformBillingOperations } from "@/features/platform-admin/DialogPlatformBillingOperations";
 import { PlatformBillingFieldLabel } from "@/features/platform-admin/PlatformBillingFieldLabel";
 import { PlatformChargebeeSection } from "@/features/platform-admin/PlatformChargebeeSection";
+import { UsageMetricCard } from "@/features/billing/UsageMetricCard";
 import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platformBillingFieldTooltips";
-import { formatUploadVolumeHint } from "@/utils/formatUploadVolume";
+import { formatUploadVolumeDisplay } from "@/utils/formatUploadVolume";
+import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import { getErrorMessage } from "@/lib/api-error";
+import {
+  PiCloudArrowUpDuotone,
+  PiExportDuotone,
+  PiUsersDuotone,
+} from "react-icons/pi";
 
 function ReadOnlyField({
   label,
@@ -180,6 +187,10 @@ export function PlatformBillingSection({
   }
 
   const { account, summary, freezes, failedUsageEventSyncCount } = data;
+  const uploadVolume = formatUploadVolumeDisplay(
+    summary.usage.uploadBytes,
+    summary.usage.uploadGb,
+  );
 
   return (
     <div className="space-y-4">
@@ -214,7 +225,7 @@ export function PlatformBillingSection({
           />
         </div>
 
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
           <ReadOnlyField
             label="Status"
             tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.status}
@@ -229,6 +240,21 @@ export function PlatformBillingSection({
             label="Currency"
             tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currency}
             value={account.currency}
+          />
+          <ReadOnlyField
+            label="Billing period"
+            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currentPeriod}
+            value={
+              <>
+                {formatToLocalDate(summary.period.start)} –{" "}
+                {formatToLocalDate(summary.period.end)}
+              </>
+            }
+            hint={
+              summary.period.source === "chargebee"
+                ? "Chargebee subscription term"
+                : "Internal billing period"
+            }
           />
         </div>
 
@@ -245,30 +271,53 @@ export function PlatformBillingSection({
           />
         </div>
 
-        <div>
-          <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Usage limits (current period)
-          </div>
-          <div className="grid gap-x-6 gap-y-5 sm:grid-cols-3">
-            <ReadOnlyField
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <UsageMetricCard
               label="Active members"
-              tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.seatMonths}
-              value={account.usageLimits.seats.toLocaleString()}
-              hint={`Used: ${summary.usage.activeSeats.toLocaleString()}`}
+              icon={PiUsersDuotone}
+              used={summary.usage.activeSeats}
+              included={summary.usageLimits.seats}
+              unit="seats"
+              usedValue={summary.limitStatus.seats.used}
+              limitValue={summary.limitStatus.seats.limit}
+              isOverLimit={summary.limitStatus.seats.overLimit}
+              isAtLimit={
+                !summary.limitStatus.seats.overLimit &&
+                summary.usageLimits.seats > 0 &&
+                summary.limitStatus.seats.used >= summary.limitStatus.seats.limit
+              }
             />
-            <ReadOnlyField
+            <UsageMetricCard
               label="Exports"
-              tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.exports}
-              value={account.usageLimits.exports.toLocaleString()}
-              hint={`Used: ${summary.usage.exports.toLocaleString()}`}
+              icon={PiExportDuotone}
+              used={summary.usage.exports}
+              included={summary.usageLimits.exports}
+              unit="exports"
+              usedValue={summary.limitStatus.exports.used}
+              limitValue={summary.limitStatus.exports.limit}
+              isOverLimit={summary.limitStatus.exports.overLimit}
+              isAtLimit={
+                !summary.limitStatus.exports.overLimit &&
+                summary.usageLimits.exports > 0 &&
+                summary.limitStatus.exports.used >= summary.limitStatus.exports.limit
+              }
             />
-            <ReadOnlyField
-              label="Upload GB"
-              tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.uploadGb}
-              value={account.usageLimits.uploadGb.toLocaleString()}
-              hint={formatUploadVolumeHint(summary.usage.uploadBytes, summary.usage.uploadGb)}
+            <UsageMetricCard
+              label="Upload volume"
+              icon={PiCloudArrowUpDuotone}
+              used={uploadVolume.primary}
+              included={summary.usageLimits.uploadGb}
+              unit="GB"
+              usedValue={summary.limitStatus.uploadGb.used}
+              limitValue={summary.limitStatus.uploadGb.limit}
+              secondaryUsed={`${uploadVolume.secondary} used`}
+              isOverLimit={summary.limitStatus.uploadGb.overLimit}
+              isAtLimit={
+                !summary.limitStatus.uploadGb.overLimit &&
+                summary.usageLimits.uploadGb > 0 &&
+                summary.limitStatus.uploadGb.used >= summary.limitStatus.uploadGb.limit
+              }
             />
-          </div>
         </div>
       </section>
 
