@@ -13,7 +13,6 @@ import { DialogEditPlatformWorkspaceFreezes } from "@/features/platform-admin/Di
 import { DialogPlatformBillingOperations } from "@/features/platform-admin/DialogPlatformBillingOperations";
 import { PlatformBillingFieldLabel } from "@/features/platform-admin/PlatformBillingFieldLabel";
 import { PlatformChargebeeSection } from "@/features/platform-admin/PlatformChargebeeSection";
-import { PlatformUsageEventsTable } from "@/features/platform-admin/PlatformUsageEventsTable";
 import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platformBillingFieldTooltips";
 import { formatUploadVolumeHint } from "@/utils/formatUploadVolume";
 import { getErrorMessage } from "@/lib/api-error";
@@ -215,7 +214,7 @@ export function PlatformBillingSection({
           />
         </div>
 
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
           <ReadOnlyField
             label="Status"
             tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.status}
@@ -231,25 +230,13 @@ export function PlatformBillingSection({
             tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currency}
             value={account.currency}
           />
-          <ReadOnlyField
-            label="Net terms"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.netTerms}
-            value={`${account.netTermDays} days`}
-          />
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2">
           <ReadOnlyToggleCard
             label="Limit enforcement"
             tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.metering}
             enabled={account.limitsEnabled}
-          />
-          <ReadOnlyToggleCard
-            label="Past due"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.pastDue}
-            enabled={account.pastDue}
-            onLabel="Yes"
-            offLabel="No"
           />
           <ReadOnlyToggleCard
             label="SSO add-on"
@@ -355,16 +342,6 @@ export function PlatformBillingSection({
         account={account}
         failedUsageEventSyncCount={failedUsageEventSyncCount}
       />
-
-      <section className="space-y-3 rounded-xl border border-border bg-background p-5">
-        <div>
-          <h2 className="text-sm font-semibold">Recent usage events</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground max-w-prose">
-            Ledger entries from exports, uploads, and adjustments with Chargebee sync status.
-          </p>
-        </div>
-        <PlatformUsageEventsTable workspaceId={workspaceId} />
-      </section>
     </div>
   );
 }
