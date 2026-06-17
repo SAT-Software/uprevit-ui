@@ -44,10 +44,10 @@ function UsageLimitEnforcementForm({
 }: {
   summary: WorkspaceBillingSummary;
   isSaving: boolean;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
   onSave: (
     input: BillingPreferencesInput,
-    options?: { onSuccess?: () => void },
+    options?: { onSuccess?: () => void | Promise<void> },
   ) => void;
 }) {
   const [enforcementMode, setEnforcementMode] = useState(summary.enforcementMode);
@@ -82,9 +82,9 @@ function UsageLimitEnforcementForm({
         uploadGb: parsedUploadGb,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await onSaved();
           setFormDirty(false);
-          onSaved();
         },
       },
     );
@@ -175,6 +175,11 @@ function UsageTab() {
   const { data, isLoading, isError, error, refetch } = useGetBillingSummary();
   const updatePreferences = useUpdateBillingPreferences();
   const [formResetKey, setFormResetKey] = useState(0);
+
+  const handlePreferencesSaved = async () => {
+    await refetch();
+    setFormResetKey((key) => key + 1);
+  };
 
   if (isLoading) {
     return (
@@ -368,7 +373,7 @@ function UsageTab() {
         key={formResetKey}
         summary={data}
         isSaving={updatePreferences.isPending}
-        onSaved={() => setFormResetKey((k) => k + 1)}
+        onSaved={handlePreferencesSaved}
         onSave={(input, options) => updatePreferences.mutate(input, options)}
       />
 

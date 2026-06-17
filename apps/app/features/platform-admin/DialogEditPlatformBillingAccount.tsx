@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
@@ -32,6 +33,10 @@ import {
 import type { UpdatePlatformBillingAccountInput } from "@/types/platform-admin";
 import type { BillingAccount, EnforcementMode, WorkspaceBillingSummary } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
+import {
+  billingAccountStatusVariant,
+  getBillingStatusLabel,
+} from "@/utils/billingStatusDisplay";
 type BillingAccountForm = {
   status: BillingAccount["status"];
   billingCadence: BillingAccount["billingCadence"];
@@ -82,7 +87,8 @@ function buildUpdatePayload(
 
   const payload: UpdatePlatformBillingAccountInput = {};
 
-  if (form.status !== account.status) payload.status = form.status;
+  const isPastDueStatus = account.pastDue || account.status === "past_due";
+  if (!isPastDueStatus && form.status !== account.status) payload.status = form.status;
   if (form.billingCadence !== account.billingCadence) payload.billingCadence = form.billingCadence;
 
   const currency = form.currency.trim();
@@ -204,6 +210,8 @@ export function DialogEditPlatformBillingAccount({
     setFormError(null);
   };
 
+  const isPastDueStatus = account.pastDue || account.status === "past_due";
+
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -248,25 +256,39 @@ export function DialogEditPlatformBillingAccount({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="billing-status">Status</Label>
-                  <Select
-                    value={form.status}
-                    onValueChange={(status) =>
-                      patchForm({ status: status as BillingAccount["status"] })
-                    }
-                  >
-                    <SelectTrigger id="billing-status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(["draft", "pilot", "active", "cancelled"] as const).map(
-                        (status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ),
-                      )}
-                    </SelectContent>
-                  </Select>
+                  {isPastDueStatus ? (
+                    <div className="space-y-1.5">
+                      <Badge
+                        variant={billingAccountStatusVariant(account.status, account.pastDue)}
+                        className="capitalize"
+                      >
+                        {getBillingStatusLabel(account.status, account.pastDue)}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        Past due is set automatically from Chargebee when invoices are overdue.
+                      </p>
+                    </div>
+                  ) : (
+                    <Select
+                      value={form.status}
+                      onValueChange={(status) =>
+                        patchForm({ status: status as BillingAccount["status"] })
+                      }
+                    >
+                      <SelectTrigger id="billing-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(["draft", "pilot", "active", "cancelled"] as const).map(
+                          (status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
 
                 <div className="space-y-2">

@@ -122,34 +122,28 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
               </Button>
             </div>
           ) : billing.invoiceError ? (
-            <div className="mb-3 flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+            <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
               <PiWarningCircleDuotone className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
               {billing.invoiceError}
             </div>
-          ) : null}
-
-          {!billingLoading && billing && !billing.connection.customerId ? (
+          ) : !billing.connection.customerId ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
               <PiReceiptDuotone className="h-8 w-8 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
                 Invoices will appear once billing is set up for this workspace.
               </p>
             </div>
-          ) : null}
-
-          {!billingLoading && billing && billing.connection.customerId && billing.invoices.length === 0 ? (
+          ) : billing.invoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
               <PiReceiptDuotone className="h-8 w-8 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">No invoices found.</p>
             </div>
-          ) : null}
-
-          {!billingLoading && billing && billing.invoices.length > 0 ? (
+          ) : (
             <BillingInvoicesTable
               invoices={billing.invoices}
               onInvoiceClick={openInvoice}
             />
-          ) : null}
+          )}
         </div>
       </div>
     </PlatformAdminGuard>
