@@ -12,10 +12,17 @@ import { DialogEditPlatformBillingAccount } from "@/features/platform-admin/Dial
 import { DialogEditPlatformWorkspaceFreezes } from "@/features/platform-admin/DialogEditPlatformWorkspaceFreezes";
 import { DialogPlatformBillingOperations } from "@/features/platform-admin/DialogPlatformBillingOperations";
 import { PlatformBillingFieldLabel } from "@/features/platform-admin/PlatformBillingFieldLabel";
+import { PlatformChargebeeSection } from "@/features/platform-admin/PlatformChargebeeSection";
+import { UsageMetricCard } from "@/features/billing/UsageMetricCard";
 import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platformBillingFieldTooltips";
-import { formatUploadVolumeHint } from "@/utils/formatUploadVolume";
+import { formatUploadVolumeDisplay } from "@/utils/formatUploadVolume";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import { getErrorMessage } from "@/lib/api-error";
+import {
+  PiCloudArrowUpDuotone,
+  PiExportDuotone,
+  PiUsersDuotone,
+} from "react-icons/pi";
 
 function ReadOnlyField({
   label,
@@ -126,8 +133,7 @@ export function PlatformBillingSection({
       enabled: hasAccount,
     });
   const updateAccount = useUpdatePlatformBillingAccount(workspaceId);
-  const { updateFreezes, recomputeSnapshot, createAdjustment, runReconciliation } =
-    usePlatformBillingActions(workspaceId);
+  const { updateFreezes, createAdjustment } = usePlatformBillingActions(workspaceId);
 
   if (!hasAccount) {
     return (
@@ -180,7 +186,11 @@ export function PlatformBillingSection({
     );
   }
 
-  const { account, summary, snapshot, freezes } = data;
+  const { account, summary, freezes, failedUsageEventSyncCount } = data;
+  const uploadVolume = formatUploadVolumeDisplay(
+    summary.usage.uploadBytes,
+    summary.usage.uploadGb,
+  );
 
   return (
     <div className="space-y-4">
@@ -232,24 +242,27 @@ export function PlatformBillingSection({
             value={account.currency}
           />
           <ReadOnlyField
-            label="Net terms"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.netTerms}
-            value={`${account.netTermDays} days`}
+            label="Billing period"
+            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currentPeriod}
+            value={
+              <>
+                {formatToLocalDate(summary.period.start)} –{" "}
+                {formatToLocalDate(summary.period.end)}
+              </>
+            }
+            hint={
+              summary.period.source === "chargebee"
+                ? "Chargebee subscription term"
+                : "Internal billing period"
+            }
           />
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2">
           <ReadOnlyToggleCard
             label="Limit enforcement"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.metering}
+            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.limits}
             enabled={account.limitsEnabled}
-          />
-          <ReadOnlyToggleCard
-            label="Past due"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.pastDue}
-            enabled={account.pastDue}
-            onLabel="Yes"
-            offLabel="No"
           />
           <ReadOnlyToggleCard
             label="SSO add-on"
@@ -258,30 +271,53 @@ export function PlatformBillingSection({
           />
         </div>
 
-        <div>
-          <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Usage limits (current period)
-          </div>
-          <div className="grid gap-x-6 gap-y-5 sm:grid-cols-3">
-            <ReadOnlyField
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <UsageMetricCard
               label="Active members"
-              tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.seatMonths}
-              value={account.usageLimits.seats.toLocaleString()}
-              hint={`Used: ${summary.usage.activeSeats.toLocaleString()}`}
+              icon={PiUsersDuotone}
+              used={summary.usage.activeSeats}
+              included={summary.usageLimits.seats}
+              unit="seats"
+              usedValue={summary.limitStatus.seats.used}
+              limitValue={summary.limitStatus.seats.limit}
+              isOverLimit={summary.limitStatus.seats.overLimit}
+              isAtLimit={
+                !summary.limitStatus.seats.overLimit &&
+                summary.usageLimits.seats > 0 &&
+                summary.limitStatus.seats.used >= summary.limitStatus.seats.limit
+              }
             />
-            <ReadOnlyField
+            <UsageMetricCard
               label="Exports"
-              tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.exports}
-              value={account.usageLimits.exports.toLocaleString()}
-              hint={`Used: ${summary.usage.exports.toLocaleString()}`}
+              icon={PiExportDuotone}
+              used={summary.usage.exports}
+              included={summary.usageLimits.exports}
+              unit="exports"
+              usedValue={summary.limitStatus.exports.used}
+              limitValue={summary.limitStatus.exports.limit}
+              isOverLimit={summary.limitStatus.exports.overLimit}
+              isAtLimit={
+                !summary.limitStatus.exports.overLimit &&
+                summary.usageLimits.exports > 0 &&
+                summary.limitStatus.exports.used >= summary.limitStatus.exports.limit
+              }
             />
-            <ReadOnlyField
-              label="Upload GB"
-              tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.uploadGb}
-              value={account.usageLimits.uploadGb.toLocaleString()}
-              hint={formatUploadVolumeHint(summary.usage.uploadBytes, summary.usage.uploadGb)}
+            <UsageMetricCard
+              label="Upload volume"
+              icon={PiCloudArrowUpDuotone}
+              used={uploadVolume.primary}
+              included={summary.usageLimits.uploadGb}
+              unit="GB"
+              usedValue={summary.limitStatus.uploadGb.used}
+              limitValue={summary.limitStatus.uploadGb.limit}
+              secondaryUsed={`${uploadVolume.secondary} used`}
+              isOverLimit={summary.limitStatus.uploadGb.overLimit}
+              isAtLimit={
+                !summary.limitStatus.uploadGb.overLimit &&
+                summary.usageLimits.uploadGb > 0 &&
+                summary.limitStatus.uploadGb.used >= summary.limitStatus.uploadGb.limit
+              }
             />
-          </div>
         </div>
       </section>
 
@@ -331,72 +367,30 @@ export function PlatformBillingSection({
         </div>
       </section>
 
-      {/* Operations */}
+      {/* Usage corrections */}
       <section className="space-y-4 rounded-xl border border-border bg-background p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">Billing operations</h2>
+            <h2 className="text-sm font-semibold">Usage corrections</h2>
             <p className="text-xs text-muted-foreground mt-0.5 max-w-prose">
-              Maintenance tools for snapshots, reconciliation, and manual usage corrections.
+              Manual usage corrections for the current billing period. Each adjustment asks for
+              confirmation.
             </p>
           </div>
           <DialogPlatformBillingOperations
-            snapshot={snapshot}
-            isRecomputePending={recomputeSnapshot.isPending}
-            isReconciliationPending={runReconciliation.isPending}
             isAdjustmentPending={createAdjustment.isPending}
-            onRecompute={async () => {
-              await recomputeSnapshot.mutateAsync();
-            }}
-            onReconciliation={async () => {
-              await runReconciliation.mutateAsync();
-            }}
             onAdjustment={async (input) => {
               await createAdjustment.mutateAsync(input);
             }}
           />
         </div>
-
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-3">
-          <ReadOnlyField
-            label="Reconciliation"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.reconciliationStatus}
-            value={
-              snapshot ? (
-                <Badge
-                  variant={
-                    snapshot.reconciliationStatus === "ok"
-                      ? "secondary"
-                      : snapshot.reconciliationStatus === "mismatch"
-                        ? "destructive"
-                        : "outline"
-                  }
-                  className="capitalize"
-                >
-                  {snapshot.reconciliationStatus}
-                </Badge>
-              ) : (
-                <span className="text-muted-foreground">No snapshot yet</span>
-              )
-            }
-          />
-          <ReadOnlyField
-            label="Current period"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.currentPeriod}
-            value={
-              <>
-                {formatToLocalDate(summary.period.start)} –{" "}
-                {formatToLocalDate(summary.period.end)}
-              </>
-            }
-          />
-          <ReadOnlyField
-            label="Quick actions"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.availableActions}
-            value="Recompute, reconcile, or adjust usage"
-          />
-        </div>
       </section>
+
+      <PlatformChargebeeSection
+        workspaceId={workspaceId}
+        account={account}
+        failedUsageEventSyncCount={failedUsageEventSyncCount}
+      />
     </div>
   );
 }

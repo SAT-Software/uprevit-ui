@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
@@ -30,18 +31,21 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import type { UpdatePlatformBillingAccountInput } from "@/types/platform-admin";
-import type { BillingAccount, WorkspaceBillingSummary } from "@/types/billing";
+import type { BillingAccount, EnforcementMode, WorkspaceBillingSummary } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
+import {
+  billingAccountStatusVariant,
+  getBillingStatusLabel,
+} from "@/utils/billingStatusDisplay";
 type BillingAccountForm = {
   status: BillingAccount["status"];
   billingCadence: BillingAccount["billingCadence"];
   currency: string;
   netTermDays: string;
   limitsEnabled: boolean;
-  pastDue: boolean;
+  enforcementMode: EnforcementMode;
   ssoAllowed: boolean;
   ssoEnabled: boolean;
-  seats: string;
   exports: string;
   uploadGb: string;
 };
@@ -53,12 +57,11 @@ function accountToForm(account: BillingAccount): BillingAccountForm {
     currency: account.currency,
     netTermDays: String(account.netTermDays),
     limitsEnabled: account.limitsEnabled,
-    pastDue: account.pastDue,
-    ssoAllowed: account.usageLimits.ssoAllowed,
+    enforcementMode: account.limits.enforcementMode,
+    ssoAllowed: account.limits.ssoAllowed,
     ssoEnabled: account.sso.enabled,
-    seats: String(account.usageLimits.seats),
-    exports: String(account.usageLimits.exports),
-    uploadGb: String(account.usageLimits.uploadGb),
+    exports: String(account.limits.exports),
+    uploadGb: String(account.limits.uploadGb),
   };
 }
 
@@ -67,16 +70,12 @@ function buildUpdatePayload(
   account: BillingAccount,
 ): UpdatePlatformBillingAccountInput | null {
   const netTermDays = Number(form.netTermDays);
-  const seats = Number(form.seats);
   const exports = Number(form.exports);
   const uploadGb = Number(form.uploadGb);
 
   if (
     !Number.isFinite(netTermDays) ||
     netTermDays < 0 ||
-    !Number.isFinite(seats) ||
-    seats < 0 ||
-    !Number.isInteger(seats) ||
     !Number.isFinite(exports) ||
     exports < 0 ||
     !Number.isInteger(exports) ||
@@ -88,7 +87,8 @@ function buildUpdatePayload(
 
   const payload: UpdatePlatformBillingAccountInput = {};
 
-  if (form.status !== account.status) payload.status = form.status;
+  const isPastDueStatus = account.pastDue || account.status === "past_due";
+  if (!isPastDueStatus && form.status !== account.status) payload.status = form.status;
   if (form.billingCadence !== account.billingCadence) payload.billingCadence = form.billingCadence;
 
   const currency = form.currency.trim();
@@ -96,15 +96,16 @@ function buildUpdatePayload(
 
   if (netTermDays !== account.netTermDays) payload.netTermDays = netTermDays;
   if (form.limitsEnabled !== account.limitsEnabled) payload.limitsEnabled = form.limitsEnabled;
-  if (form.pastDue !== account.pastDue) payload.pastDue = form.pastDue;
+  if (form.enforcementMode !== account.limits.enforcementMode) {
+    payload.enforcementMode = form.enforcementMode;
+  }
   if (form.ssoEnabled !== account.sso.enabled) payload.ssoEnabled = form.ssoEnabled;
 
-  const usageLimits: NonNullable<UpdatePlatformBillingAccountInput["usageLimits"]> = {};
-  if (seats !== account.usageLimits.seats) usageLimits.seats = seats;
-  if (exports !== account.usageLimits.exports) usageLimits.exports = exports;
-  if (uploadGb !== account.usageLimits.uploadGb) usageLimits.uploadGb = uploadGb;
-  if (form.ssoAllowed !== account.usageLimits.ssoAllowed) usageLimits.ssoAllowed = form.ssoAllowed;
-  if (Object.keys(usageLimits).length > 0) payload.usageLimits = usageLimits;
+  const limits: NonNullable<UpdatePlatformBillingAccountInput["limits"]> = {};
+  if (exports !== account.limits.exports) limits.exports = exports;
+  if (uploadGb !== account.limits.uploadGb) limits.uploadGb = uploadGb;
+  if (form.ssoAllowed !== account.limits.ssoAllowed) limits.ssoAllowed = form.ssoAllowed;
+  if (Object.keys(limits).length > 0) payload.limits = limits;
 
   return Object.keys(payload).length > 0 ? payload : null;
 }
@@ -127,23 +128,20 @@ function describeChanges(
   if (form.limitsEnabled !== account.limitsEnabled) {
     changes.push(`Limit enforcement: ${account.limitsEnabled ? "on" : "off"} → ${form.limitsEnabled ? "on" : "off"}`);
   }
-  if (form.pastDue !== account.pastDue) {
-    changes.push(`Past due: ${account.pastDue ? "yes" : "no"} → ${form.pastDue ? "yes" : "no"}`);
+  if (form.enforcementMode !== account.limits.enforcementMode) {
+    changes.push(`Enforcement mode: ${account.limits.enforcementMode} → ${form.enforcementMode}`);
   }
   if (form.ssoEnabled !== account.sso.enabled) {
     changes.push(`SSO enabled: ${account.sso.enabled ? "on" : "off"} → ${form.ssoEnabled ? "on" : "off"}`);
   }
-  if (form.ssoAllowed !== account.usageLimits.ssoAllowed) {
-    changes.push(`SSO allowed: ${account.usageLimits.ssoAllowed ? "yes" : "no"} → ${form.ssoAllowed ? "yes" : "no"}`);
+  if (form.ssoAllowed !== account.limits.ssoAllowed) {
+    changes.push(`SSO allowed: ${account.limits.ssoAllowed ? "yes" : "no"} → ${form.ssoAllowed ? "yes" : "no"}`);
   }
-  if (Number(form.seats) !== account.usageLimits.seats) {
-    changes.push(`Seat limit: ${account.usageLimits.seats} → ${form.seats}`);
+  if (Number(form.exports) !== account.limits.exports) {
+    changes.push(`Export limit: ${account.limits.exports} → ${form.exports}`);
   }
-  if (Number(form.exports) !== account.usageLimits.exports) {
-    changes.push(`Export limit: ${account.usageLimits.exports} → ${form.exports}`);
-  }
-  if (Number(form.uploadGb) !== account.usageLimits.uploadGb) {
-    changes.push(`Upload GB limit: ${account.usageLimits.uploadGb} → ${form.uploadGb}`);
+  if (Number(form.uploadGb) !== account.limits.uploadGb) {
+    changes.push(`Upload GB limit: ${account.limits.uploadGb} → ${form.uploadGb}`);
   }
   return changes;
 }
@@ -188,7 +186,7 @@ export function DialogEditPlatformBillingAccount({
   const handleSaveClick = () => {
     const payload = buildUpdatePayload(form, account);
     if (!payload) {
-      setFormError("Enter valid values. Seat limit and export limit must be whole numbers.");
+      setFormError("Enter valid values. Export limit must be a whole number.");
       return;
     }
     setFormError(null);
@@ -211,6 +209,8 @@ export function DialogEditPlatformBillingAccount({
     setForm((current) => ({ ...current, ...patch }));
     setFormError(null);
   };
+
+  const isPastDueStatus = account.pastDue || account.status === "past_due";
 
   return (
     <>
@@ -256,25 +256,39 @@ export function DialogEditPlatformBillingAccount({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="billing-status">Status</Label>
-                  <Select
-                    value={form.status}
-                    onValueChange={(status) =>
-                      patchForm({ status: status as BillingAccount["status"] })
-                    }
-                  >
-                    <SelectTrigger id="billing-status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(["draft", "pilot", "active", "past_due", "cancelled"] as const).map(
-                        (status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ),
-                      )}
-                    </SelectContent>
-                  </Select>
+                  {isPastDueStatus ? (
+                    <div className="space-y-1.5">
+                      <Badge
+                        variant={billingAccountStatusVariant(account.status, account.pastDue)}
+                        className="capitalize"
+                      >
+                        {getBillingStatusLabel(account.status, account.pastDue)}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        Past due is set automatically from Chargebee when invoices are overdue.
+                      </p>
+                    </div>
+                  ) : (
+                    <Select
+                      value={form.status}
+                      onValueChange={(status) =>
+                        patchForm({ status: status as BillingAccount["status"] })
+                      }
+                    >
+                      <SelectTrigger id="billing-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(["draft", "pilot", "active", "cancelled"] as const).map(
+                          (status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -319,21 +333,13 @@ export function DialogEditPlatformBillingAccount({
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <Label htmlFor="edit-metering-enabled">Limit enforcement</Label>
+                  <Label htmlFor="edit-limits-enabled">Limit enforcement</Label>
                   <Switch
-                    id="edit-metering-enabled"
+                    id="edit-limits-enabled"
                     checked={form.limitsEnabled}
                     onCheckedChange={(limitsEnabled) => patchForm({ limitsEnabled })}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <Label htmlFor="edit-past-due">Past due</Label>
-                  <Switch
-                    id="edit-past-due"
-                    checked={form.pastDue}
-                    onCheckedChange={(pastDue) => patchForm({ pastDue })}
                   />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
@@ -356,18 +362,30 @@ export function DialogEditPlatformBillingAccount({
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="billing-seat-limit">Seat limit</Label>
-                  <Input
-                    id="billing-seat-limit"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={form.seats}
-                    onChange={(event) => patchForm({ seats: event.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Used: {summary.usage.activeSeats}
+                  <Label>Seat limit</Label>
+                  <p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+                    {account.usageLimits.seats.toLocaleString()} seats
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    Mirrored from Chargebee. Used: {summary.usage.activeSeats}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="billing-enforcement-mode">Enforcement mode</Label>
+                  <Select
+                    value={form.enforcementMode}
+                    onValueChange={(enforcementMode) =>
+                      patchForm({ enforcementMode: enforcementMode as EnforcementMode })
+                    }
+                  >
+                    <SelectTrigger id="billing-enforcement-mode">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="overage">Allow overage</SelectItem>
+                      <SelectItem value="block">Block when over limit</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="billing-exports">Export limit</Label>

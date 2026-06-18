@@ -31,7 +31,6 @@ export function useCreatePlatformBillingAccount(workspaceId: string) {
             ...current,
             billing: {
               status: account.status,
-              meteringEnabled: account.meteringEnabled,
               limitsEnabled: account.limitsEnabled,
               billingCadence: account.billingCadence,
               currency: account.currency,

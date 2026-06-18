@@ -1,8 +1,6 @@
 "use client";
 
 import { useGetPlatformSummary } from "@/hooks/platform-admin/useGetPlatformSummary";
-import { cn } from "@uprevit/ui/lib/utils";
-import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
   PiBuildingsDuotone,
   PiUsersDuotone,
@@ -94,9 +92,9 @@ export function PlatformSummaryCards() {
       icon: PiCreditCardDuotone,
     },
     {
-      id: "metering",
+      id: "limits",
       title: "Limits enabled",
-      value: data?.billing.limitsEnabledWorkspaces ?? data?.billing.meteringEnabledWorkspaces ?? 0,
+      value: data?.billing.limitsEnabledWorkspaces ?? 0,
       icon: PiGaugeDuotone,
       hint: data ? `${data.billing.pastDueWorkspaces ?? 0} past due` : undefined,
     },

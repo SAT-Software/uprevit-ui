@@ -1,15 +1,15 @@
 export const BILLING_ACCOUNT_FIELD_TOOLTIPS = {
   status:
-    "Lifecycle state of the billing account. Draft and pilot are pre-production; active is billable; past_due flags overdue payment without auto-blocking access; cancelled ends billing.",
+    "Lifecycle state of the billing account. Draft and pilot are pre-production; active is billable; cancelled ends billing. past_due is set automatically from Chargebee when invoices are overdue.",
   cadence:
     "How often the workspace is billed. Monthly and yearly cadences roll forward from the billing account creation date.",
   currency: "Currency used for account display and later provider handoff for this workspace.",
   netTerms:
     "Number of days after invoice issue before payment is due. Used for offline and manual payment workflows.",
-  meteringEnabled:
+  limitsEnabled:
     "When enabled, usage limits can block or allow over-limit usage per the workspace enforcement mode. Usage is always recorded, even when enforcement is off.",
   pastDue:
-    "Marks the account as overdue for payment. Does not automatically freeze workspace access or usage.",
+    "Mirrored from Chargebee when open invoices are due. Read-only in platform admin; updated by Chargebee webhooks.",
   ssoEnabled:
     "Actual SSO feature state for this workspace. SSO can only be enabled when the workspace usage limit allows it.",
   seatMonths:
@@ -28,12 +28,6 @@ export const WORKSPACE_FREEZE_FIELD_TOOLTIPS = {
 } as const;
 
 export const BILLING_OPERATIONS_FIELD_TOOLTIPS = {
-  reconciliationStatus:
-    "Result of the latest reconciliation check comparing recorded usage events against underlying source records.",
-  recomputeSnapshot:
-    "Rebuilds the current billing period usage snapshot from recorded usage events. Use after data fixes or if totals look stale.",
-  runReconciliation:
-    "Runs a reconciliation check for this workspace and updates the snapshot reconciliation status.",
   adjustmentMetric:
     "Which usage metric to correct: completed exports or raw upload bytes for the current billing period.",
   adjustmentDelta:
@@ -47,7 +41,7 @@ export const BILLING_SUMMARY_FIELD_TOOLTIPS = {
   cadence: BILLING_ACCOUNT_FIELD_TOOLTIPS.cadence,
   currency: BILLING_ACCOUNT_FIELD_TOOLTIPS.currency,
   netTerms: BILLING_ACCOUNT_FIELD_TOOLTIPS.netTerms,
-  metering: BILLING_ACCOUNT_FIELD_TOOLTIPS.meteringEnabled,
+  limits: BILLING_ACCOUNT_FIELD_TOOLTIPS.limitsEnabled,
   pastDue: BILLING_ACCOUNT_FIELD_TOOLTIPS.pastDue,
   sso: BILLING_ACCOUNT_FIELD_TOOLTIPS.ssoEnabled,
   seatMonths: BILLING_ACCOUNT_FIELD_TOOLTIPS.seatMonths,
@@ -55,9 +49,8 @@ export const BILLING_SUMMARY_FIELD_TOOLTIPS = {
   uploadGb: BILLING_ACCOUNT_FIELD_TOOLTIPS.uploadGb,
   usageFreeze: WORKSPACE_FREEZE_FIELD_TOOLTIPS.usageFreeze,
   accessFreeze: WORKSPACE_FREEZE_FIELD_TOOLTIPS.accessFreeze,
-  reconciliationStatus: BILLING_OPERATIONS_FIELD_TOOLTIPS.reconciliationStatus,
+  enforcementMode:
+    "Whether over-limit usage is blocked or allowed. Only platform operators can change this setting.",
   currentPeriod:
-    "Start and end dates for the workspace's current billing period, anchored to when the billing account was created.",
-  availableActions:
-    "Maintenance actions available to platform operators: snapshot recompute, reconciliation, and manual usage adjustments.",
+    "Start and end dates for the workspace's current usage period. Uses the linked Chargebee subscription term when available.",
 } as const;

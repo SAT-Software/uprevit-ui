@@ -4,12 +4,18 @@ import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 import type { EnforcementMode } from "@/types/billing";
 
+export type BillingPreferencesInput = {
+  enforcementMode?: EnforcementMode;
+  exports?: number;
+  uploadGb?: number;
+};
+
 export function useUpdateBillingPreferences() {
   const auth = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: { enforcementMode: EnforcementMode }) => {
+    mutationFn: async (input: BillingPreferencesInput) => {
       const token = auth.user?.access_token;
       if (!token) throw new Error("Not authenticated");
 

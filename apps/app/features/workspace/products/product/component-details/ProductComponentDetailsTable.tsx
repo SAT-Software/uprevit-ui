@@ -654,7 +654,7 @@ export default function ProductComponentDetailsTable({
     data,
     columns,
     getRowId: (originalRow) => getPersistentComponentId(originalRow),
-    getRowCanExpand: (row) => Boolean(row.original.component_description),
+    getRowCanExpand: (row) => Boolean(row.original.image?.trim()),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
