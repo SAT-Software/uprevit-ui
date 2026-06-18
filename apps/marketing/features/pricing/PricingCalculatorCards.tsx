@@ -125,6 +125,13 @@ function getMonthlyUsageValue(value: number, billingCycle: BillingCycle) {
   return billingCycle === "annual" ? value / 12 : value;
 }
 
+function getRoundedCycleUsageValue(
+  value: number,
+  billingCycle: BillingCycle,
+) {
+  return billingCycle === "monthly" ? Math.ceil(value) : Math.round(value);
+}
+
 function AmountDisplay({
   value,
   billingCycle,
@@ -370,11 +377,17 @@ export function PricingCalculatorCards() {
     setBillingCycle(nextCycle);
     setUploadGb((currentValue) => {
       const monthlyValue = getMonthlyUsageValue(currentValue, billingCycle);
-      return Math.round(getCycleUsageValue(monthlyValue, nextCycle));
+      return getRoundedCycleUsageValue(
+        getCycleUsageValue(monthlyValue, nextCycle),
+        nextCycle,
+      );
     });
     setExportsCount((currentValue) => {
       const monthlyValue = getMonthlyUsageValue(currentValue, billingCycle);
-      return Math.round(getCycleUsageValue(monthlyValue, nextCycle));
+      return getRoundedCycleUsageValue(
+        getCycleUsageValue(monthlyValue, nextCycle),
+        nextCycle,
+      );
     });
   }
 
@@ -662,7 +675,7 @@ export function PricingCalculatorCards() {
                 value={[exportsCount]}
                 min={includedExports}
                 max={getMaxExports(billingCycle)}
-                step={billingCycle === "annual" ? 12 : 1}
+                step={1}
                 onValueChange={(value) =>
                   setExportsCount(value[0] ?? includedExports)
                 }
