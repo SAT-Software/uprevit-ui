@@ -56,7 +56,6 @@ export type BillingAccount = {
   status: BillingAccountStatus;
   limits: WorkspaceLimits;
   limitsEnabled: boolean;
-  meteringEnabled: boolean;
   billingCadence: BillingCadence;
   currency: string;
   netTermDays: number;
@@ -96,7 +95,6 @@ export type WorkspaceBillingSummary = {
   };
   enforcementMode: EnforcementMode;
   limitsEnabled: boolean;
-  meteringEnabled: boolean;
   freezes?: WorkspaceFreezes | null;
 };
 

@@ -2,7 +2,7 @@ import type {
   BillingAccountStatus,
   BillingCadence,
   EnforcementMode,
-  UsageLimits,
+  WorkspaceLimits,
   WorkspaceFreezes,
 } from "@/types/billing";
 
@@ -26,14 +26,12 @@ export type PlatformSummary = {
     accountsLinked: number;
     pastDueWorkspaces: number;
     limitsEnabledWorkspaces: number;
-    meteringEnabledWorkspaces: number;
   };
 };
 
 export type WorkspaceBillingPreview =
   | {
       status: "not_set";
-      meteringEnabled: null;
       limitsEnabled: null;
       billingCadence: null;
       currency: null;
@@ -41,7 +39,6 @@ export type WorkspaceBillingPreview =
     }
   | {
       status: BillingAccountStatus;
-      meteringEnabled: boolean;
       limitsEnabled: boolean;
       billingCadence: BillingCadence;
       currency: string;
@@ -121,9 +118,8 @@ export type UpdatePlatformBillingAccountInput = {
   billingCadence?: BillingCadence;
   currency?: string;
   netTermDays?: number;
-  meteringEnabled?: boolean;
   limitsEnabled?: boolean;
   enforcementMode?: EnforcementMode;
   ssoEnabled?: boolean;
-  usageLimits?: Partial<UsageLimits>;
+  limits?: Partial<WorkspaceLimits>;
 };

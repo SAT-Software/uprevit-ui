@@ -58,10 +58,10 @@ function accountToForm(account: BillingAccount): BillingAccountForm {
     netTermDays: String(account.netTermDays),
     limitsEnabled: account.limitsEnabled,
     enforcementMode: account.limits.enforcementMode,
-    ssoAllowed: account.usageLimits.ssoAllowed,
+    ssoAllowed: account.limits.ssoAllowed,
     ssoEnabled: account.sso.enabled,
-    exports: String(account.usageLimits.exports),
-    uploadGb: String(account.usageLimits.uploadGb),
+    exports: String(account.limits.exports),
+    uploadGb: String(account.limits.uploadGb),
   };
 }
 
@@ -101,11 +101,11 @@ function buildUpdatePayload(
   }
   if (form.ssoEnabled !== account.sso.enabled) payload.ssoEnabled = form.ssoEnabled;
 
-  const usageLimits: NonNullable<UpdatePlatformBillingAccountInput["usageLimits"]> = {};
-  if (exports !== account.usageLimits.exports) usageLimits.exports = exports;
-  if (uploadGb !== account.usageLimits.uploadGb) usageLimits.uploadGb = uploadGb;
-  if (form.ssoAllowed !== account.usageLimits.ssoAllowed) usageLimits.ssoAllowed = form.ssoAllowed;
-  if (Object.keys(usageLimits).length > 0) payload.usageLimits = usageLimits;
+  const limits: NonNullable<UpdatePlatformBillingAccountInput["limits"]> = {};
+  if (exports !== account.limits.exports) limits.exports = exports;
+  if (uploadGb !== account.limits.uploadGb) limits.uploadGb = uploadGb;
+  if (form.ssoAllowed !== account.limits.ssoAllowed) limits.ssoAllowed = form.ssoAllowed;
+  if (Object.keys(limits).length > 0) payload.limits = limits;
 
   return Object.keys(payload).length > 0 ? payload : null;
 }
@@ -134,14 +134,14 @@ function describeChanges(
   if (form.ssoEnabled !== account.sso.enabled) {
     changes.push(`SSO enabled: ${account.sso.enabled ? "on" : "off"} → ${form.ssoEnabled ? "on" : "off"}`);
   }
-  if (form.ssoAllowed !== account.usageLimits.ssoAllowed) {
-    changes.push(`SSO allowed: ${account.usageLimits.ssoAllowed ? "yes" : "no"} → ${form.ssoAllowed ? "yes" : "no"}`);
+  if (form.ssoAllowed !== account.limits.ssoAllowed) {
+    changes.push(`SSO allowed: ${account.limits.ssoAllowed ? "yes" : "no"} → ${form.ssoAllowed ? "yes" : "no"}`);
   }
-  if (Number(form.exports) !== account.usageLimits.exports) {
-    changes.push(`Export limit: ${account.usageLimits.exports} → ${form.exports}`);
+  if (Number(form.exports) !== account.limits.exports) {
+    changes.push(`Export limit: ${account.limits.exports} → ${form.exports}`);
   }
-  if (Number(form.uploadGb) !== account.usageLimits.uploadGb) {
-    changes.push(`Upload GB limit: ${account.usageLimits.uploadGb} → ${form.uploadGb}`);
+  if (Number(form.uploadGb) !== account.limits.uploadGb) {
+    changes.push(`Upload GB limit: ${account.limits.uploadGb} → ${form.uploadGb}`);
   }
   return changes;
 }
@@ -335,9 +335,9 @@ export function DialogEditPlatformBillingAccount({
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <Label htmlFor="edit-metering-enabled">Limit enforcement</Label>
+                  <Label htmlFor="edit-limits-enabled">Limit enforcement</Label>
                   <Switch
-                    id="edit-metering-enabled"
+                    id="edit-limits-enabled"
                     checked={form.limitsEnabled}
                     onCheckedChange={(limitsEnabled) => patchForm({ limitsEnabled })}
                   />

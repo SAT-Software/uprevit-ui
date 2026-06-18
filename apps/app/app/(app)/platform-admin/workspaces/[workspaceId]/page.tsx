@@ -198,7 +198,7 @@ export default function PlatformAdminWorkspaceDetailPage() {
               members={data?.counts.members ?? 0}
               active={data?.counts.activeMembers ?? 0}
               invited={data?.counts.invitedMembers ?? 0}
-              billing={data?.billing ?? { status: "not_set", meteringEnabled: null, limitsEnabled: null, billingCadence: null, currency: null, pastDue: null }}
+              billing={data?.billing ?? { status: "not_set", limitsEnabled: null, billingCadence: null, currency: null, pastDue: null }}
             />
 
             {/* Billing & freezes & operations — the heavy section, improved internally */}

@@ -261,7 +261,7 @@ export function PlatformBillingSection({
         <div className="grid gap-2 sm:grid-cols-2">
           <ReadOnlyToggleCard
             label="Limit enforcement"
-            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.metering}
+            tooltip={BILLING_SUMMARY_FIELD_TOOLTIPS.limits}
             enabled={account.limitsEnabled}
           />
           <ReadOnlyToggleCard

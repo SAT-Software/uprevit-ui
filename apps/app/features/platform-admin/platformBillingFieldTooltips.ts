@@ -6,7 +6,7 @@ export const BILLING_ACCOUNT_FIELD_TOOLTIPS = {
   currency: "Currency used for account display and later provider handoff for this workspace.",
   netTerms:
     "Number of days after invoice issue before payment is due. Used for offline and manual payment workflows.",
-  meteringEnabled:
+  limitsEnabled:
     "When enabled, usage limits can block or allow over-limit usage per the workspace enforcement mode. Usage is always recorded, even when enforcement is off.",
   pastDue:
     "Mirrored from Chargebee when open invoices are due. Read-only in platform admin; updated by Chargebee webhooks.",
@@ -41,7 +41,7 @@ export const BILLING_SUMMARY_FIELD_TOOLTIPS = {
   cadence: BILLING_ACCOUNT_FIELD_TOOLTIPS.cadence,
   currency: BILLING_ACCOUNT_FIELD_TOOLTIPS.currency,
   netTerms: BILLING_ACCOUNT_FIELD_TOOLTIPS.netTerms,
-  metering: BILLING_ACCOUNT_FIELD_TOOLTIPS.meteringEnabled,
+  limits: BILLING_ACCOUNT_FIELD_TOOLTIPS.limitsEnabled,
   pastDue: BILLING_ACCOUNT_FIELD_TOOLTIPS.pastDue,
   sso: BILLING_ACCOUNT_FIELD_TOOLTIPS.ssoEnabled,
   seatMonths: BILLING_ACCOUNT_FIELD_TOOLTIPS.seatMonths,
