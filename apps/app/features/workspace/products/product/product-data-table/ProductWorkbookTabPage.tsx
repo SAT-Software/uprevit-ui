@@ -256,7 +256,7 @@ export function ProductWorkbookTabPage({
           }
           onSaveSuccess={editor.registerClearHistoryOnSave}
           isRedlineView={isRedlineView}
-          isReadOnly={isSubmitted}
+          isReadOnly={isSubmitted || isRedlineView}
           redlineMode={redlineMode}
           redlineBaseData={redlineBaseData}
         />
