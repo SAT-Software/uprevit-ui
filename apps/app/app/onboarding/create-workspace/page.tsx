@@ -44,6 +44,7 @@ export default function OnboardingCreateWorkspacePage() {
   const logoInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>("");
+  const [logoSizeBytes, setLogoSizeBytes] = useState<number | undefined>();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
   const { mutate: createWorkspace, isPending } =
     useOnboardAdminCreateWorkspace();
@@ -90,6 +91,7 @@ export default function OnboardingCreateWorkspacePage() {
         shouldTouch: true,
         shouldValidate: true,
       });
+      setLogoSizeBytes(uploadResult.size);
     } catch (error) {
       console.error("Failed to upload workspace logo:", error);
       setLogoPreview("");
@@ -109,6 +111,7 @@ export default function OnboardingCreateWorkspacePage() {
       shouldValidate: true,
     });
     setLogoPreview("");
+    setLogoSizeBytes(undefined);
   };
 
   const onSubmit = (values: WorkspaceFormValues) => {
@@ -131,6 +134,7 @@ export default function OnboardingCreateWorkspacePage() {
 
       const payload: OnboardAdminWorkspacePayload = {
         ...workspaceValues,
+        logoSizeBytes,
         name: adminName.trim() || fallbackName,
         email,
         cognitoSub: sub,

@@ -14,14 +14,14 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   PiCloudArrowUpDuotone,
-  PiInfoDuotone,
   PiTrashDuotone,
   PiWarningDuotone,
   PiXCircleDuotone,
 } from "react-icons/pi";
 
-interface UnsavedAnnotationDialogProps {
+interface UnsavedWorkbookChangesDialogProps {
   open: boolean;
+  tabLabel: string;
   onOpenChange: (open: boolean) => void;
   onSave: () => Promise<void>;
   onDiscard: () => void;
@@ -29,16 +29,16 @@ interface UnsavedAnnotationDialogProps {
   isSaving?: boolean;
 }
 
-export default function UnsavedAnnotationDialog({
+export function UnsavedWorkbookChangesDialog({
   open,
+  tabLabel,
   onOpenChange,
   onSave,
   onDiscard,
   onCancel,
   isSaving = false,
-}: UnsavedAnnotationDialogProps) {
+}: UnsavedWorkbookChangesDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const isBusy = isSaving || isSubmitting;
 
   async function handleSave(e: React.MouseEvent<HTMLButtonElement>) {
@@ -47,7 +47,7 @@ export default function UnsavedAnnotationDialog({
     try {
       await onSave();
     } catch (error) {
-      console.error("Failed to save annotation:", error);
+      console.error("Failed to save workbook:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -58,13 +58,9 @@ export default function UnsavedAnnotationDialog({
     onDiscard();
   }
 
-  function handleCancel() {
-    onCancel();
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5">
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <p>Unsaved Changes</p>
@@ -72,7 +68,8 @@ export default function UnsavedAnnotationDialog({
               <button
                 type="button"
                 className="cursor-pointer"
-                onClick={handleCancel}
+                onClick={onCancel}
+                disabled={isBusy}
               >
                 <PiXCircleDuotone size={18} />
               </button>
@@ -80,8 +77,8 @@ export default function UnsavedAnnotationDialog({
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          You have unsaved annotation changes. Choose whether to save, discard,
-          or cancel.
+          You have unsaved changes in {tabLabel}. Save, discard, or cancel
+          before leaving.
         </DialogDescription>
         <div className="p-4 space-y-4">
           <div className="flex items-start gap-3">
@@ -94,57 +91,34 @@ export default function UnsavedAnnotationDialog({
             <div className="space-y-1">
               <h4 className="font-medium text-sm">You have unsaved changes</h4>
               <p className="text-sm text-muted-foreground">
-                Your annotation changes will be lost if you leave without
-                saving. What would you like to do?
+                Your edits in <strong>{tabLabel}</strong> are not saved yet. Use
+                <strong> Save</strong> in the toolbar, or choose an option below
+                before you leave this page.
               </p>
             </div>
-          </div>
-
-          <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-            <div className="flex items-center gap-2 text-sm">
-              <PiInfoDuotone className="size-4 text-muted-foreground" />
-              <span className="text-muted-foreground font-medium">
-                If you save
-              </span>
-            </div>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-6 list-disc">
-              <li>
-                It will <strong>replace</strong> any previous tagged image
-              </li>
-              <li>
-                The original label image will remain <strong>unchanged</strong>
-              </li>
-            </ul>
           </div>
         </div>
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 flex-col sm:flex-row gap-2">
           <Button
-            type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
-            onClick={handleCancel}
+            onClick={onCancel}
             disabled={isBusy}
-            className="order-3 sm:order-1"
           >
-            Cancel
+            <PiXCircleDuotone />
+            Stay on page
           </Button>
           <div className="flex gap-2 order-1 sm:order-2">
             <Button
-              type="button"
               variant="destructive"
               size="sm"
               onClick={handleDiscard}
               disabled={isBusy}
             >
               <PiTrashDuotone />
-              Discard & Continue
+              Discard &amp; Continue
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleSave}
-              disabled={isBusy}
-            >
+            <Button size="sm" onClick={handleSave} disabled={isBusy}>
               {isBusy ? <Spinner /> : <PiCloudArrowUpDuotone />}
               {isBusy ? "Saving..." : "Save & Continue"}
             </Button>

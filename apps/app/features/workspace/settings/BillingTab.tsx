@@ -1,467 +1,321 @@
 "use client";
 
-import React from "react";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Input } from "@uprevit/ui/components/ui/input";
+import { useGetBillingChargebee } from "@/hooks/billing/useGetBillingChargebee";
+import { BillingInvoicesTable } from "@/features/billing/BillingInvoicesTable";
 import { Badge } from "@uprevit/ui/components/ui/badge";
-import { Separator } from "@uprevit/ui/components/ui/separator";
+import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@uprevit/ui/components/ui/card";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
+import {
+  billingAccountStatusVariant,
+  formatSubscriptionStatusLabel,
+  getBillingStatusLabel,
+} from "@/utils/billingStatusDisplay";
+import {
+  PiCalendarDuotone,
+  PiCreditCardDuotone,
+  PiKeyDuotone,
+  PiReceiptDuotone,
+  PiShieldCheckDuotone,
+  PiTagDuotone,
+  PiUsersDuotone,
+  PiWarningCircleDuotone,
+} from "react-icons/pi";
+import { useRouter } from "next/navigation";
 
 function BillingTab() {
+  const router = useRouter();
+  const { data, isLoading, isError, error, refetch } = useGetBillingChargebee();
+
+  const openInvoice = (invoiceId: string) => {
+    router.push(`/settings/billing/invoices/${encodeURIComponent(invoiceId)}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
+          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-36 rounded-xl" />
+          <Skeleton className="h-36 rounded-xl" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+        </div>
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+        <div className="rounded-lg bg-destructive/10 p-2.5 shrink-0">
+          <PiWarningCircleDuotone className="h-5 w-5 text-destructive" />
+        </div>
+        <div className="flex-1 space-y-0.5">
+          <div className="text-sm font-medium">Unable to load billing information</div>
+          <div className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Something went wrong while fetching billing details."}
+          </div>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
+
+  const { account, connection, invoices, invoiceError } = data;
+  const subscription = account.chargebee;
+  const hasSubscriptionDates =
+    !!subscription?.currentTermStart && !!subscription?.currentTermEnd;
+
   return (
     <div className="space-y-6">
-      {/* Current Plan Header */}
-      <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
-        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/10">
-          <svg
-            className="w-8 h-8 text-primary"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold">Enterprise Plan</h2>
-            <Badge variant="default">Active</Badge>
+      {/* Header */}
+      <div className="flex flex-col gap-4 rounded-lg border bg-accent p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-6">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+            <PiCreditCardDuotone className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground">
-            Manage your subscription and billing information.
-          </p>
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-semibold">Billing</h2>
+              <Badge
+                variant={billingAccountStatusVariant(account.status, account.pastDue)}
+                className="capitalize"
+              >
+                {getBillingStatusLabel(account.status, account.pastDue)}
+              </Badge>
+              {!connection.linked ? (
+                <Badge variant="outline">Billing not set up</Badge>
+              ) : null}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Your plan, subscription term, and invoices.
+            </p>
+          </div>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-semibold">$299</div>
-          <div className="text-sm text-muted-foreground">per month</div>
-        </div>
+
+        {account.pastDue ? (
+          <div className="flex shrink-0 items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 dark:border-amber-800 dark:bg-amber-950/40 sm:items-center md:max-w-2xl md:whitespace-nowrap">
+            <PiWarningCircleDuotone className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400 sm:mt-0" />
+            <p className="text-xs leading-snug text-amber-900 dark:text-amber-200">
+              Your account is past due. Please review your payment method or contact support.
+            </p>
+          </div>
+        ) : null}
       </div>
 
-      {/* Plan Details */}
-      <div className="space-y-4">
-        <div className="font-medium">Plan Details</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Plan Name</label>
-            <Input
-              type="text"
-              value="Enterprise Plan"
-              placeholder="Plan name"
-              className="w-full"
-              disabled
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Plan Start Date</label>
-            <Input
-              type="text"
-              value="January 15, 2024"
-              placeholder="Plan start date"
-              className="w-full"
-              disabled
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Billing Cycle</label>
-            <Input
-              type="text"
-              value="Annual ($3,588/year)"
-              placeholder="Billing cycle"
-              className="w-full"
-              disabled
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Next Billing Date</label>
-            <Input
-              type="text"
-              value="January 15, 2025"
-              placeholder="Next billing date"
-              className="w-full"
-              disabled
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Seats & Usage */}
-      <div className="space-y-4">
-        <div className="font-medium">Seats & Usage</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 border border-border rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-medium">Total Seats</div>
-              <Badge variant="outline">50 of 50 used</Badge>
-            </div>
-            <div className="text-2xl font-semibold">50</div>
-            <div className="text-sm text-muted-foreground">
-              All seats are currently allocated
-            </div>
-          </div>
-
-          <div className="p-4 border border-border rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-medium">Admin Seats</div>
-              <Badge variant="default">5 of 5 used</Badge>
-            </div>
-            <div className="text-2xl font-semibold">5</div>
-            <div className="text-sm text-muted-foreground">
-              Administrator privileges
-            </div>
-          </div>
-
-          <div className="p-4 border border-border rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-medium">User Seats</div>
-              <Badge variant="secondary">42 of 45 used</Badge>
-            </div>
-            <div className="text-2xl font-semibold">42</div>
-            <div className="text-sm text-muted-foreground">
-              Standard user access
-            </div>
-          </div>
-
-          <div className="p-4 border border-border rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-medium">Available Seats</div>
-              <Badge variant="outline">3 remaining</Badge>
-            </div>
-            <div className="text-2xl font-semibold">3</div>
-            <div className="text-sm text-muted-foreground">
-              Ready for new users
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Plan Features */}
-      <div className="space-y-4">
-        <div className="font-medium">Plan Features</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">Unlimited products and projects</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">Advanced compliance tools</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">Priority customer support</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">Custom integrations</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">Advanced reports & reporting</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">SSO and advanced security</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">API access and webhooks</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">Dedicated account manager</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Billing Information */}
-      <div className="space-y-4">
-        <div className="font-medium">Billing Information</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Company Name</label>
-            <Input
-              type="text"
-              value="MedTech Solutions Inc."
-              placeholder="Company name"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Tax ID / VAT Number</label>
-            <Input
-              type="text"
-              value="TAX-123456789"
-              placeholder="Tax ID or VAT number"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium">Billing Address</label>
-            <Input
-              type="text"
-              value="123 Medical Device Blvd, Suite 400"
-              placeholder="Street address"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">City</label>
-            <Input
-              type="text"
-              value="San Francisco"
-              placeholder="City"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">State/Province</label>
-            <Input
-              type="text"
-              value="CA"
-              placeholder="State or province"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">ZIP/Postal Code</label>
-            <Input
-              type="text"
-              value="94105"
-              placeholder="ZIP or postal code"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Country</label>
-            <Input
-              type="text"
-              value="United States"
-              placeholder="Country"
-              className="w-full"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline">Cancel</Button>
-          <Button variant="default">Update Billing Info</Button>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="space-y-4">
-        <div className="font-medium">Billing Actions</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button
-            variant="outline"
-            className="h-auto p-4 flex flex-col items-center gap-2"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <div className="text-center">
-              <div className="font-medium">View Invoices</div>
-              <div className="text-xs text-muted-foreground">
-                Access billing history
+      {/* Plan & Term */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="shadow-none">
+          <CardHeader className="space-y-1 p-6 pb-0">
+            <div className="flex items-center gap-2.5">
+              <div className="rounded-lg bg-muted p-2 shrink-0">
+                <PiTagDuotone className="h-4 w-4 text-muted-foreground" />
               </div>
+              <CardTitle className="text-base">Plan</CardTitle>
             </div>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="h-auto p-4 flex flex-col items-center gap-2"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            <div className="text-center">
-              <div className="font-medium">Customer Portal</div>
-              <div className="text-xs text-muted-foreground">
-                Manage subscription
+          </CardHeader>
+          <CardContent className="p-6 pt-4">
+            <dl className="space-y-3 text-sm">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted-foreground">Plan</dt>
+                <dd className="font-medium">
+                  {subscription?.planName ?? subscription?.planId ?? "—"}
+                </dd>
               </div>
-            </div>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="h-auto p-4 flex flex-col items-center gap-2"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <div className="text-center">
-              <div className="font-medium">Download Invoice</div>
-              <div className="text-xs text-muted-foreground">
-                Get latest invoice
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted-foreground">Cadence</dt>
+                <dd className="capitalize font-medium">
+                  {subscription?.billingCadence ?? account.billingCadence}
+                </dd>
               </div>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted-foreground">Subscription status</dt>
+                <dd className="capitalize font-medium">
+                  {formatSubscriptionStatusLabel(
+                    subscription?.subscriptionStatus,
+                    account.status,
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-none">
+          <CardHeader className="space-y-1 p-6 pb-0">
+            <div className="flex items-center gap-2.5">
+              <div className="rounded-lg bg-muted p-2 shrink-0">
+                <PiCalendarDuotone className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <CardTitle className="text-base">Current term</CardTitle>
             </div>
-          </Button>
-        </div>
+          </CardHeader>
+          <CardContent className="p-6 pt-4">
+            {hasSubscriptionDates ? (
+              <dl className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted-foreground">Term</dt>
+                  <dd className="font-medium">
+                    {formatToLocalDate(subscription!.currentTermStart!)} –{" "}
+                    {formatToLocalDate(subscription!.currentTermEnd!)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted-foreground">Next billing</dt>
+                  <dd className="font-medium">
+                    {subscription?.nextBillingAt
+                      ? formatToLocalDate(subscription.nextBillingAt)
+                      : "—"}
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Subscription term dates appear once billing is set up for this
+                workspace.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Payment Method */}
-      <div className="space-y-4">
-        <div className="font-medium">Payment Method</div>
-
-        <div className="p-4 border border-border rounded-lg bg-accent/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-6 bg-blue-600 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">VISA</span>
+      {/* Add-ons */}
+      <Card className="shadow-none">
+        <CardHeader className="space-y-1 p-6 pb-0">
+          <div className="flex items-center gap-2.5">
+            <div className="rounded-lg bg-muted p-2 shrink-0">
+              <PiShieldCheckDuotone className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-base">Add-ons</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6 pt-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-muted p-2 shrink-0">
+                <PiUsersDuotone className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div>
-                <div className="font-medium">•••• •••• •••• 4242</div>
-                <div className="text-sm text-muted-foreground">
-                  Expires 12/26
+              <div className="space-y-0.5">
+                <div className="text-xs text-muted-foreground">
+                  Included seats
+                </div>
+                <div className="text-sm font-medium">
+                  {account.usageLimits.seats.toLocaleString()}
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              Update
-            </Button>
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-muted p-2 shrink-0">
+                <PiShieldCheckDuotone className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="text-xs text-muted-foreground">SSO</div>
+                <div className="text-sm font-medium">
+                  {account.sso.enabled ? "Enabled" : "Not enabled"}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+
+      {/* Billing references */}
+      <Card className="shadow-none">
+        <CardHeader className="space-y-1 p-6 pb-0">
+          <div className="flex items-center gap-2.5">
+            <div className="rounded-lg bg-muted p-2 shrink-0">
+              <PiKeyDuotone className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-base">Billing references</CardTitle>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Identifiers from your billing provider.
+          </p>
+        </CardHeader>
+        <CardContent className="p-6 pt-4">
+          <div className="grid gap-4 sm:grid-cols-2 text-sm">
+            <div>
+              <div className="text-xs text-muted-foreground">Customer ID</div>
+              <div className="font-mono text-xs mt-1 break-all">
+                {connection.customerId ?? "—"}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">
+                Subscription ID
+              </div>
+              <div className="font-mono text-xs mt-1 break-all">
+                {connection.subscriptionId ?? "—"}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Invoices */}
+      <Card className="shadow-none">
+        <CardHeader className="flex flex-col gap-1 p-6 pb-0 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="rounded-lg bg-muted p-2 shrink-0">
+                <PiReceiptDuotone className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <CardTitle className="text-base">Invoices</CardTitle>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Refreshed when you open this tab.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="mt-2 sm:mt-0"
+          >
+            Refresh
+          </Button>
+        </CardHeader>
+        <CardContent className="p-6 pt-4">
+          {invoiceError ? (
+            <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+              <PiWarningCircleDuotone className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
+              {invoiceError}
+            </div>
+          ) : !connection.customerId ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
+              <PiReceiptDuotone className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                Invoices will appear once billing is set up for this workspace.
+              </p>
+            </div>
+          ) : invoices.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
+              <PiReceiptDuotone className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">No invoices found.</p>
+            </div>
+          ) : (
+            <BillingInvoicesTable invoices={invoices} onInvoiceClick={openInvoice} />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

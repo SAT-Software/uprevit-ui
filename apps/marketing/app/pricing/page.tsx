@@ -23,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   PiArrowDownDuotone,
@@ -35,29 +34,29 @@ import {
 
 const pricingFAQs = [
   {
-    question: "How is Growth priced?",
+    question: "How is Uprevit priced?",
     answer:
-      "Growth pricing combines a platform fee, seat count, and optional usage add-ons for storage, exports, and SSO. Enterprise plans are custom and designed for larger rollouts or advanced requirements.",
+      "Uprevit pricing combines a platform fee, seat count, and optional usage add-ons for uploads, exports, and SSO. Larger rollouts or advanced requirements can be reviewed with our team.",
   },
   {
     question: "What counts as a seat?",
     answer:
-      "A seat is one licensed user in a workspace. Growth pricing scales with the number of users your team needs access for.",
+      "A seat is one licensed user in a workspace. Pricing scales with the number of users your team needs access for.",
   },
   {
     question: "What counts as an export?",
     answer:
-      "An export is one completed PDF or XLSX product export or report export job. Growth includes a monthly export allowance, with additional usage priced per export.",
+      "An export is one completed PDF or XLSX product export or report export job. Uprevit includes a cycle-based export allowance, with additional usage priced per export.",
   },
   {
-    question: "How is storage calculated?",
+    question: "How are uploads calculated?",
     answer:
-      "Storage is based on the total uploaded file storage used by the workspace. Growth includes a base storage allowance, and any additional usage is priced per GB.",
+      "Uploads are based on committed upload volume for the workspace. Uprevit includes a base upload allowance for the selected billing cycle, and any additional usage is priced from the metered MB total.",
   },
   {
     question: "When should we talk to you?",
     answer:
-      "Talk to us when you expect a larger rollout, need advanced security or SSO planning, want custom workflows or integrations, or need a tailored enterprise agreement.",
+      "Talk to us when you expect a larger rollout, need advanced security or SSO planning, want custom workflows or integrations, or need a tailored agreement.",
   },
   {
     question: "Do you offer annual billing?",
@@ -67,11 +66,11 @@ const pricingFAQs = [
 ];
 
 function PricingPageContent() {
-  const { resolvedTheme } = useTheme();
   const scrollTo = useScrollTo();
   const pricingCalculatorRef = useScrollSection("pricing-calculator");
 
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
+  const pricingBadgeClassName =
+    "mb-6 z-60 border-border/70 bg-background/80 px-2 py-0.5 text-foreground shadow-none";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
@@ -83,8 +82,8 @@ function PricingPageContent() {
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
               <Badge
-                variant={badgeVariant}
-                className="mb-8 z-60 dark:px-2 dark:py-0.5"
+                variant="outline"
+                className={pricingBadgeClassName}
               >
                 <PiCoinsDuotone />
                 <span className="font-medium">Pricing</span>
@@ -105,8 +104,8 @@ function PricingPageContent() {
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
-                <div className="flex flex-col lg:flex-row gap-6">
-                  <div className="hidden lg:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-r border-dashed border-border relative overflow-hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)]">
+                  <div className="hidden lg:flex min-w-0 self-stretch items-stretch justify-center gap-2 border-r border-dashed border-border relative overflow-hidden">
                     <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
                       {Array.from({ length: 60 }).map((_, index) => (
                         <span
@@ -122,39 +121,51 @@ function PricingPageContent() {
                       />
                     ))}
                   </div>
-                  <Card className="relative w-full overflow-hidden rounded-2xl lg:max-w-90 border-border/70 bg-background shadow-[0_28px_55px_-45px_rgba(15,15,15,0.45)]">
-                    <CardHeader className="pb-6 md:pb-8">
+                  <Card className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl border-border/70 bg-background shadow-[0_10px_24px_-20px_rgba(15,15,15,0.45)]">
+                    <CardHeader className="pb-4 md:pb-5">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl">Growth</CardTitle>
+                        <CardTitle className="text-base font-normal">
+                          Pricing
+                        </CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-col items-start gap-3">
-                        <span className="text-4xl md:text-4xl font-semibold">
-                          Pay as you grow
+                      <div className="flex flex-col items-start gap-2">
+                        <span className="text-3xl font-semibold">
+                          Custom pricing
                         </span>
-                        {/* <span className="text-muted-foreground pb-1">
-                          per user / month
-                        </span> */}
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        Simple pricing for smaller labeling teams: platform +
-                        seats + transparent usage.
+                        One plan for regulated labeling teams: platform +
+                        seats + transparent upload and export usage, with SSO
+                        available when you need it.
                       </p>
-                      <Button
-                        className="mt-6 h-12 w-full rounded-xl text-base"
-                        onClick={() => scrollTo("pricing-calculator")}
-                      >
-                        View Pricing
-                        <PiArrowDownDuotone className="ml-2 h-4 w-4" />
-                      </Button>
-                      <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
+                      <div className="mt-5 grid gap-3">
+                        <Button
+                          asChild
+                          className="h-11 rounded-lg text-base"
+                        >
+                          <Link href="/contact">
+                            Talk to Us
+                            <PiArrowRightDuotone className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          className="h-11 rounded-lg text-base"
+                          onClick={() => scrollTo("pricing-calculator")}
+                        >
+                          View Pricing
+                          <PiArrowDownDuotone className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                      <ul className="mt-5 space-y-2.5 border-t border-border/70 pt-5 text-sm">
                         {[
                           "Workspace platform included",
                           "Audit-ready change history",
                           "Regulatory templates and symbol library",
                           "Product and report exports",
-                          "Transparent storage and export add-ons",
+                          "Transparent upload and export add-ons",
                           "Annual billing with monthly option",
                           "SSO add-on available",
                         ].map((item) => (
@@ -166,73 +177,7 @@ function PricingPageContent() {
                       </ul>
                     </CardContent>
                   </Card>
-                  <div className="hidden lg:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-x border-dashed border-border relative overflow-hidden">
-                    <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
-                      {Array.from({ length: 60 }).map((_, index) => (
-                        <span
-                          key={index}
-                          className="w-full border-t border-dashed border-border"
-                        />
-                      ))}
-                    </div>
-                    {Array.from({ length: 11 }).map((_, index) => (
-                      <span
-                        key={index}
-                        className="relative z-10 h-full w-px border-l border-dashed border-border"
-                      />
-                    ))}
-                  </div>
-                  <Card
-                    id="enterprise"
-                    className="relative w-full overflow-hidden rounded-2xl lg:max-w-90 border-border/70 bg-background/80 shadow-[0_24px_50px_-42px_rgba(15,15,15,0.35)]"
-                  >
-                    <CardHeader className="pb-6 md:pb-8">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl">Enterprise</CardTitle>
-                        {/* <Badge variant="outline">Custom</Badge> */}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-start gap-3">
-                        <span className="text-3xl md:text-4xl font-semibold">
-                          Custom Pricing
-                        </span>
-                        {/* <span className="text-muted-foreground pb-1">
-                          tailored pricing
-                        </span> */}
-                      </div>
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        Volume pricing tailored to seats, storage, export
-                        volume, security needs, and integration scope.
-                      </p>
-                      <Button
-                        asChild
-                        variant="secondary"
-                        className="mt-6 h-12 w-full rounded-xl text-base"
-                      >
-                        <Link href="mailto:contact@uprevit.com">
-                          Talk to Us
-                          <PiArrowRightDuotone className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <ul className="mt-6 space-y-3 border-t border-border/70 pt-6 text-[15px]">
-                        {[
-                          "Volume pricing and negotiated limits",
-                          "SSO and advanced security requirements",
-                          "Custom workflows and integrations",
-                          "Larger rollout and product libraries",
-                          "Procurement and onboarding support",
-                          "Validation/documentation support as scoped",
-                        ].map((item) => (
-                          <li key={item} className="flex items-start gap-2">
-                            <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                  <div className="hidden lg:flex w-12 lg:w-20 xl:w-30 self-stretch items-stretch justify-center gap-2 border-l border-dashed border-border relative overflow-hidden">
+                  <div className="hidden lg:flex min-w-0 self-stretch items-stretch justify-center gap-2 border-l border-dashed border-border relative overflow-hidden">
                     <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
                       {Array.from({ length: 60 }).map((_, index) => (
                         <span
@@ -261,19 +206,19 @@ function PricingPageContent() {
               >
                 <div className="flex flex-col items-center text-center mb-10">
                   <Badge
-                    variant={badgeVariant}
-                    className="mb-6 z-60 dark:px-2 dark:py-0.5"
+                    variant="outline"
+                    className={pricingBadgeClassName}
                   >
-                    <PiCoinsDuotone className="mr-1 text-foreground/50" />
-                    <span className="font-medium">Pricing</span>
+                    <PiCoinsDuotone className="mr-1 text-foreground/60" />
+                    <span className="font-medium">Pricing Calculator</span>
                   </Badge>
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Calculate your cost
                   </h2>
                   <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
                     Use our pricing calculator to estimate costs based on your
-                    team size, file storage needs, and security requirements.
-                    Get a personalized quote for enterprise plans.
+                    team size, upload volume, and security requirements.
+                    Contact us for larger rollouts or tailored agreements.
                   </p>
                 </div>
                 <PricingCalculatorCards />
@@ -434,10 +379,10 @@ function PricingPageContent() {
               >
                 <div className="flex flex-col items-center text-center mb-10">
                   <Badge
-                    variant={badgeVariant}
-                    className="mb-6 z-60 dark:px-2 dark:py-0.5"
+                    variant="outline"
+                    className={pricingBadgeClassName}
                   >
-                    <PiQuestionDuotone className="mr-1 text-foreground/50" />
+                    <PiQuestionDuotone className="mr-1 text-foreground/60" />
                     <span className="font-medium">FAQ</span>
                   </Badge>
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">

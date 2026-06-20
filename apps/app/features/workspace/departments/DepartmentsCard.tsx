@@ -24,6 +24,7 @@ import {
 } from "@/lib/workspace-list-query";
 import Image from "next/image";
 import Link from "next/link";
+import { getNextImageSrc } from "@/utils/isNextImageSrc";
 import {
   PiArrowCircleUpRightDuotone,
   PiCalendarDuotone,
@@ -122,6 +123,8 @@ function DepartmentErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 function DepartmentCard({ department }: { department: DepartmentsProps }) {
+  const departmentImageSrc = getNextImageSrc(department.image);
+
   return (
     <div className="group relative flex flex-col md:flex-row items-start md:items-center w-full border border-border bg-card rounded-xl p-3 gap-4 transition-all hover:shadow-sm">
       <div className="absolute right-3 top-3">
@@ -144,9 +147,9 @@ function DepartmentCard({ department }: { department: DepartmentsProps }) {
         href={`/departments/${department._id}`}
         className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted"
       >
-        {department.image ? (
+        {departmentImageSrc ? (
           <Image
-            src={department.image}
+            src={departmentImageSrc}
             fill
             alt={department.department_name}
             className="object-cover"

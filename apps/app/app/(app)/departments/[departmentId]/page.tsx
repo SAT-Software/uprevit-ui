@@ -28,6 +28,7 @@ import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { AuditLog } from "@/types/audit-log";
 import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
 import { useAuth } from "react-oidc-context";
+import { getNextImageSrc } from "@/utils/isNextImageSrc";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
 import {
@@ -178,6 +179,7 @@ export default function DepartmentDetailPage() {
 
   if (isError || !department) return notFound();
 
+  const departmentImageSrc = getNextImageSrc(department.image);
   const auditLogs = (department.auditLogs as AuditLog[]) || [];
   const creationLog = auditLogs.find((log) => log.action === "create");
   const latestUpdateLog = auditLogs
@@ -272,9 +274,9 @@ export default function DepartmentDetailPage() {
           <div className="flex flex-col md:flex-row gap-6 items-start w-full">
             {/* Image */}
             <div className="relative h-24 w-24 md:h-32 md:w-32 shrink-0 rounded-xl overflow-hidden border border-border bg-muted shadow-sm">
-              {department?.image ? (
+              {departmentImageSrc ? (
                 <Image
-                  src={department.image}
+                  src={departmentImageSrc}
                   alt={`${department.department_name} cover image`}
                   fill
                   className="object-cover"

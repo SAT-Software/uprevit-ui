@@ -4,6 +4,7 @@ export interface User {
   email: string;
   profileAvatar: string;
   profileAvatarKey?: string;
+  profileAvatarSizeBytes?: number;
   designation: string;
   phone?: string;
   userType?: "user" | "admin";

@@ -193,7 +193,7 @@ function DashboardDepartmentsCard() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
+      <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-4 justify-start rounded-xl border border-border bg-background p-4">
         <div className="flex items-center justify-between w-full">
           <p className="text-base font-semibold">Departments</p>
           <Link href="/departments">
@@ -215,7 +215,7 @@ function DashboardDepartmentsCard() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
+      <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-4 justify-start rounded-xl border border-border bg-background p-4">
         <div className="flex items-center justify-between w-full">
           <p className="text-base font-semibold">Departments</p>
           <Link href="/departments">
@@ -234,16 +234,16 @@ function DashboardDepartmentsCard() {
   const filteredDepartments = (departments || [])?.slice(0, 2);
 
   return (
-    <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center gap-2">
-          <p className="text-base font-semibold">Departments</p>
-          <div className="w-1 h-1 bg-border border border-border rounded-full" />
-          <p className="text-xs text-muted-foreground font-medium">
+    <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-4 justify-start rounded-xl border border-border bg-background p-4">
+      <div className="flex w-full min-w-0 items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+          <p className="shrink-0 text-base font-semibold">Departments</p>
+          <div className="h-1 w-1 shrink-0 rounded-full border border-border bg-border" />
+          <p className="truncate text-xs font-medium text-muted-foreground">
             Latest departments of your workspace
           </p>
         </div>
-        <Link href="/departments">
+        <Link href="/departments" className="shrink-0">
           <Button size="sm" variant="secondary">
             <PiArrowCircleUpRightDuotone />
             Show All
@@ -251,7 +251,7 @@ function DashboardDepartmentsCard() {
         </Link>
       </div>
 
-      <div className="flex flex-col items-start w-full gap-2">
+      <div className="flex w-full min-w-0 flex-col items-start gap-2">
         {filteredDepartments.length === 0 ? (
           <DepartmentEmptyState />
         ) : (

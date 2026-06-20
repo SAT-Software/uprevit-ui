@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-06-19
+
+### Added
+
+- Added platform operator control plane UI with workspace detail, logs, and billing management screens.
+- Added workspace usage tab, billing summary, and Chargebee-backed invoice detail with PDF download.
+- Added workspace access frozen and removed eligibility screens with auth and onboarding integration.
+- Added product workbook unsaved-change guard with navigation prompts and label tag status indicators.
+- Added user removal controls and inactive member list management in workspace settings.
+- Added Product Overview documentation page and consolidated seven-tab product guides.
+- Added shared billing types, hooks, and utilities for workspace and platform-admin billing flows.
+
+### Updated
+
+- Updated platform admin dashboard layout, workspace detail, usage events, and billing tooling.
+- Updated marketing pricing calculator for Chargebee usage pricing and yearly usage estimates.
+- Updated redline styling with shared dark mode support across product views and workbook cells.
+- Updated label tags editor with CORS image loading, keyboard shortcuts, and source-file link warnings.
+- Updated documentation videos to use next-video player and refreshed compare-versions clip.
+- Updated monorepo package versions to `0.5.0`.
+
+### Fixed
+
+- Fixed dashboard department and project card overflow on smaller viewports.
+- Fixed product table row expansion to occur only when a component image exists.
+- Fixed platform admin billing UI states for empty accounts, past due mirroring, and usage form staleness.
+- Fixed TypeScript and Amplify build errors across platform admin and product workbook flows.
+
 ## [0.4.0] - 2026-05-28
 
 ### Added

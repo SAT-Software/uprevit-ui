@@ -2,12 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 interface UpdateLabelTaggedImageParams {
   productId: string;
   labelTagId: string;
   taggedImage?: string;
   taggedImageKey?: string;
+  taggedImageSizeBytes?: number;
   annotationState: object;
 }
 
@@ -30,6 +32,7 @@ export function useUpdateLabelTaggedImage() {
           id: params.labelTagId,
           tagged_image: params.taggedImage,
           tagged_image_key: params.taggedImageKey,
+          sizeBytes: params.taggedImageSizeBytes,
           annotation_state: params.annotationState,
         },
       };
@@ -54,6 +57,7 @@ export function useUpdateLabelTaggedImage() {
       toast.success("Tagged image saved successfully");
       queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
       queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
+      invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to save tagged image");

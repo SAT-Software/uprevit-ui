@@ -1,0 +1,56 @@
+export const BILLING_ACCOUNT_FIELD_TOOLTIPS = {
+  status:
+    "Lifecycle state of the billing account. Draft and pilot are pre-production; active is billable; cancelled ends billing. past_due is set automatically from Chargebee when invoices are overdue.",
+  cadence:
+    "How often the workspace is billed. Monthly and yearly cadences roll forward from the billing account creation date.",
+  currency: "Currency used for account display and later provider handoff for this workspace.",
+  netTerms:
+    "Number of days after invoice issue before payment is due. Used for offline and manual payment workflows.",
+  limitsEnabled:
+    "When enabled, usage limits can block or allow over-limit usage per the workspace enforcement mode. Usage is always recorded, even when enforcement is off.",
+  pastDue:
+    "Mirrored from Chargebee when open invoices are due. Read-only in platform admin; updated by Chargebee webhooks.",
+  ssoEnabled:
+    "Actual SSO feature state for this workspace. SSO can only be enabled when the workspace usage limit allows it.",
+  seatMonths:
+    "Active member limit for this workspace. Invited and inactive members do not occupy seats.",
+  exports:
+    "Completed product or report export limit for the current billing period. Only successfully completed export jobs count.",
+  uploadGb:
+    "Upload volume limit for the current billing period, in gigabytes. Based on bytes uploaded during the period; decimals such as 0.5 GB are supported.",
+} as const;
+
+export const WORKSPACE_FREEZE_FIELD_TOOLTIPS = {
+  usageFreeze:
+    "Blocks invites, exports, and uploads while still allowing users to log in and read workspace data.",
+  accessFreeze:
+    "Blocks workspace login and all usage actions. Use for full workspace suspension.",
+} as const;
+
+export const BILLING_OPERATIONS_FIELD_TOOLTIPS = {
+  adjustmentMetric:
+    "Which usage metric to correct: completed exports or raw upload bytes for the current billing period.",
+  adjustmentDelta:
+    "Amount to add or subtract from the selected metric. Use negative values to reduce recorded usage.",
+  usageAdjustment:
+    "Manual correction to recorded usage for the current billing period. Creates an auditable adjustment event.",
+} as const;
+
+export const BILLING_SUMMARY_FIELD_TOOLTIPS = {
+  status: BILLING_ACCOUNT_FIELD_TOOLTIPS.status,
+  cadence: BILLING_ACCOUNT_FIELD_TOOLTIPS.cadence,
+  currency: BILLING_ACCOUNT_FIELD_TOOLTIPS.currency,
+  netTerms: BILLING_ACCOUNT_FIELD_TOOLTIPS.netTerms,
+  limits: BILLING_ACCOUNT_FIELD_TOOLTIPS.limitsEnabled,
+  pastDue: BILLING_ACCOUNT_FIELD_TOOLTIPS.pastDue,
+  sso: BILLING_ACCOUNT_FIELD_TOOLTIPS.ssoEnabled,
+  seatMonths: BILLING_ACCOUNT_FIELD_TOOLTIPS.seatMonths,
+  exports: BILLING_ACCOUNT_FIELD_TOOLTIPS.exports,
+  uploadGb: BILLING_ACCOUNT_FIELD_TOOLTIPS.uploadGb,
+  usageFreeze: WORKSPACE_FREEZE_FIELD_TOOLTIPS.usageFreeze,
+  accessFreeze: WORKSPACE_FREEZE_FIELD_TOOLTIPS.accessFreeze,
+  enforcementMode:
+    "Whether over-limit usage is blocked or allowed. Only platform operators can change this setting.",
+  currentPeriod:
+    "Start and end dates for the workspace's current usage period. Uses the linked Chargebee subscription term when available.",
+} as const;

@@ -123,6 +123,7 @@ export default function EditComponentDialog({
     try {
       setUploadingImage(true);
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       // Only upload if there's a new image file
       if (data.image && data.image.file instanceof File) {
@@ -133,6 +134,7 @@ export default function EditComponentDialog({
           productId,
         });
         uploadedImageKey = uploadRes.key;
+        uploadedImageSizeBytes = uploadRes.size;
       }
       setUploadingImage(false);
 
@@ -154,6 +156,7 @@ export default function EditComponentDialog({
           component_number: data.componentNumber,
           image: nextImage,
           key: nextKey,
+          ...(uploadedImageSizeBytes ? { sizeBytes: uploadedImageSizeBytes } : {}),
           component_description: data.componentDescription,
           label_type: (data.labelType || []).map((tag: Tag) => tag.text),
           dimensions: data.dimensions,

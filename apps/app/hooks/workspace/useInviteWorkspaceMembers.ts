@@ -33,8 +33,27 @@ export function useInviteWorkspaceMembers() {
       const data = await response.json();
       return data;
     },
-    onSuccess: () => {
-      toast.success("Invitations sent successfully");
+    onSuccess: (data) => {
+      const results = data?.data as Array<{ status?: string }> | undefined;
+      const reactivatedCount = results?.filter(
+        (result) => result.status === "Reactivated",
+      ).length ?? 0;
+      const invitedCount = results?.filter(
+        (result) => result.status === "Success",
+      ).length ?? 0;
+
+      if (reactivatedCount > 0 && invitedCount === 0) {
+        toast.success(
+          reactivatedCount === 1
+            ? "Member reactivated successfully"
+            : `${reactivatedCount} members reactivated successfully`,
+        );
+      } else if (reactivatedCount > 0) {
+        toast.success("Invitations sent and members reactivated");
+      } else {
+        toast.success("Invitations sent successfully");
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["workspace", workspaceId],
       });

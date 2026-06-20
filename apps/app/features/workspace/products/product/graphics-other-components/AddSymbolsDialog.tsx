@@ -242,6 +242,7 @@ export default function AddSymbolsDialog({
     setUploadingImage(true);
     try {
       let uploadedImageKey: string | undefined;
+      let uploadedImageSizeBytes: number | undefined;
 
       if (data.image && data.image.file instanceof File) {
         const s3UploadResult = await uploadFileToS3({
@@ -252,6 +253,7 @@ export default function AddSymbolsDialog({
         });
 
         uploadedImageKey = s3UploadResult.key;
+        uploadedImageSizeBytes = s3UploadResult.size;
       }
       setUploadingImage(false);
 
@@ -265,6 +267,7 @@ export default function AddSymbolsDialog({
               text: data.componentName,
               image: null,
               key: uploadedImageKey,
+            sizeBytes: uploadedImageSizeBytes,
               entity: "Symbols",
               text_present: data.textPresent === "yes",
               label_presence: customLabelPresence.map((tag) => tag.text),

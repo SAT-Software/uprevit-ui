@@ -3,6 +3,10 @@
 import { SidebarMenuButton } from "@uprevit/ui/components/ui/sidebar";
 import { cn } from "@uprevit/ui/lib/utils";
 import { useSentryFeedbackAttach } from "@/hooks/sentry/useSentryFeedbackAttach";
+import {
+  SENTRY_FEEDBACK_ARIA_LABEL,
+  SENTRY_FEEDBACK_BUTTON_LABEL,
+} from "@/lib/sentry/feedbackLabels";
 import { PiChatTeardropDotsDuotone } from "react-icons/pi";
 
 export function SidebarFeedbackButton() {
@@ -12,10 +16,11 @@ export function SidebarFeedbackButton() {
     <SidebarMenuButton
       ref={buttonRef}
       type="button"
+      aria-label={SENTRY_FEEDBACK_ARIA_LABEL}
       className={cn("h-7 w-full border border-transparent")}
     >
       <PiChatTeardropDotsDuotone />
-      Send Feedback
+      {SENTRY_FEEDBACK_BUTTON_LABEL}
     </SidebarMenuButton>
   );
 }

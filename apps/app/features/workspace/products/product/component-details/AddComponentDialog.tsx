@@ -105,6 +105,7 @@ export default function AddComponentDialog({
           {
             component_number: data.componentNumber,
             key: uploadRes?.key,
+            sizeBytes: uploadRes?.size,
             component_description: data.componentDescription,
             label_type: (Array.isArray(labelType)
               ? labelType

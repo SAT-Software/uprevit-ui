@@ -31,9 +31,15 @@ description: Label images by type with annotations, legends, and tagged exports.
 4. Define **Legend** entries that explain annotations.
 5. **Save tagged image** — confirm dialog renders the annotated PNG, uploads it, and stores annotation state.
 
-### Unsaved annotation guard
+### Unsaved changes
 
-If annotations changed but are not saved, switching type tabs or leaving the page prompts you to save or discard.
+Tagged images are saved **manually** via **Save tagged image** (confirm dialog renders the annotated PNG, uploads it, and stores annotation state).
+
+If you have unsaved annotation edits:
+
+- The page header shows **Unsaved changes** (amber), **Saving**, or **Saved**, matching Product Specifications and Operational Parameters.
+- **Switching type tabs** (e.g. primary label ↔ carton) or **leaving Label Tags** (sidebar, header, another product tab, version/redline) opens the same unsaved-changes dialog: **Save & Continue**, **Discard & Continue**, or **Stay on page**. Save each label’s tagged image from the editor toolbar before leaving, or use **Save & Continue** in the dialog. All dirty labels in the current type tab are saved or discarded together when switching tabs; all dirty label tags across types when leaving the page.
+- **Closing or refreshing the browser tab** with unsaved edits triggers the browser’s native leave confirmation (`beforeunload`).
 
 ## Submitted products
 

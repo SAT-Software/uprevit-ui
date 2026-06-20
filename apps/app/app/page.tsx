@@ -4,8 +4,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 
+import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccessFrozenScreen";
+import { WorkspaceAccessRemovedScreen } from "@/components/common/WorkspaceAccessRemovedScreen";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { getProfileValue } from "@/utils/authProfile";
+import { isWorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
 
 const rippleRingSizes = [
   "h-[24rem] w-[24rem] sm:h-[42rem] sm:w-[42rem]",
@@ -14,30 +18,32 @@ const rippleRingSizes = [
   "h-[54rem] w-[54rem] sm:h-[90rem] sm:w-[90rem]",
 ];
 
-const getProfileValue = (
-  profile: Record<string, unknown> | undefined,
-  key: string,
-): string | undefined => {
-  const value = profile?.[key];
-  return typeof value === "string" && value.length > 0 ? value : undefined;
-};
-
 export default function AppEntryPage() {
   const router = useRouter();
   const auth = useAuth();
-  const { data: userProfileData, isLoading: isUserLoading } = useGetUser();
+  const {
+    data: userProfileData,
+    isFetching: isUserFetching,
+    isError: isUserError,
+    error: userError,
+  } = useGetUser();
 
   const profile = auth.user?.profile as Record<string, unknown> | undefined;
   const userIdFromToken = getProfileValue(profile, "userId");
   const tokenWorkspaceId = getProfileValue(profile, "workspaceId");
   const tokenStatus = getProfileValue(profile, "status");
+  const isAccessFrozen = isWorkspaceAccessFrozenError(userError);
 
   useEffect(() => {
-    if (auth.isLoading || !auth.isAuthenticated) return;
-    if (userIdFromToken && isUserLoading) return;
+    if (auth.isLoading || !auth.isAuthenticated || isAccessFrozen) return;
+    if (userIdFromToken && isUserFetching && !isUserError) return;
 
     const status = userProfileData?.user?.status || tokenStatus;
     const workspaceId = userProfileData?.user?.workspaceId || tokenWorkspaceId;
+
+    if (status === "inactive") {
+      return;
+    }
 
     const targetPath =
       status === "invited"
@@ -50,7 +56,9 @@ export default function AppEntryPage() {
   }, [
     auth.isAuthenticated,
     auth.isLoading,
-    isUserLoading,
+    isAccessFrozen,
+    isUserError,
+    isUserFetching,
     router,
     tokenStatus,
     tokenWorkspaceId,
@@ -59,9 +67,23 @@ export default function AppEntryPage() {
     userProfileData?.user?.workspaceId,
   ]);
 
+  if (isAccessFrozen) {
+    return <WorkspaceAccessFrozenScreen />;
+  }
+
+  const status = userProfileData?.user?.status || tokenStatus;
+
+  if (auth.isAuthenticated && status === "inactive") {
+    return <WorkspaceAccessRemovedScreen />;
+  }
+
   const isCheckingAuthenticatedUser =
     auth.isLoading ||
-    (auth.isAuthenticated && userIdFromToken && isUserLoading);
+    (auth.isAuthenticated &&
+      userIdFromToken &&
+      isUserFetching &&
+      !isUserError &&
+      !userProfileData);
 
   if (isCheckingAuthenticatedUser) {
     return (

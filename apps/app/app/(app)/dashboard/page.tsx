@@ -10,10 +10,10 @@ import { PiArrowCircleUpRightDuotone } from "react-icons/pi";
 
 function DashboardPage() {
   return (
-    <div className="flex flex-col gap-2 p-2">
+    <div className="flex min-w-0 flex-col gap-2 p-2">
       <StatsGrid location="dashboard" />
 
-      <div className="flex flex-col xl:flex-row w-full justify-between gap-2">
+      <div className="flex w-full min-w-0 flex-col gap-2 xl:flex-row">
         <DashboardDepartmentsCard />
         <DashboardProjectsCard />
       </div>

@@ -3,6 +3,7 @@
 import { useDocumentationVideoUrl } from "@/hooks/docs/useDocumentationVideoUrl";
 import { cn } from "@uprevit/ui/lib/utils";
 import type { DocumentationVideoKey } from "@/types/documentation-video";
+import Player from "next-video/player";
 
 type DocsVideoProps = {
   videoKey: DocumentationVideoKey;
@@ -45,16 +46,22 @@ export function DocsVideo({
 
   return (
     <figure className={cn("my-6", className)}>
-      <video
-        key={data.url}
-        src={data.url}
-        controls
-        playsInline
-        preload="metadata"
-        title={title}
-        aria-label={title}
-        className="aspect-video w-full overflow-hidden rounded-2xl bg-black object-contain outline-1 outline-border outline-offset-0"
-      />
+      <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black outline-1 outline-border outline-offset-0">
+        <Player
+          key={data.url}
+          src={data.url}
+          controls
+          playsInline
+          crossOrigin={undefined}
+          title={title}
+          aria-label={title}
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+          className="h-full w-full scale-[1.08] object-cover [object-position:center_58%]"
+        />
+      </div>
       {caption ? (
         <figcaption className="mt-2 text-center text-sm text-muted-foreground">
           {caption}

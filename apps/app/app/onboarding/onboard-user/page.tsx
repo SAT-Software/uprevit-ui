@@ -20,6 +20,8 @@ import { useOnboardUser } from "@/hooks/onboarding/useOnboardUser";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import { isWorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
+import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccessFrozenScreen";
 import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 import { useAuth } from "react-oidc-context";
 import { PiUserCircleDuotone } from "react-icons/pi";
@@ -38,9 +40,13 @@ export default function OnboardUserPage() {
   const auth = useAuth();
   const { mutate: onboardUser, isPending } = useOnboardUser();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
-  const { data: userData } = useGetUser();
+  const { data: userData, error: userError } = useGetUser();
+  const isAccessFrozen = isWorkspaceAccessFrozenError(userError);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [profileAvatarSizeBytes, setProfileAvatarSizeBytes] = useState<
+    number | undefined
+  >();
 
   const userProfile = userData?.user;
 
@@ -91,12 +97,20 @@ export default function OnboardUserPage() {
       : "");
   const inputGroupClass = "bg-background/75 shadow-none";
 
+  if (isAccessFrozen) {
+    return <WorkspaceAccessFrozenScreen />;
+  }
+
   const onSubmit = (values: UserFormValues) => {
     try {
       if (!auth.user?.profile)
         throw new Error("You are not authorized to perform this action");
 
-      onboardUser({ ...values, user_id: userProfile?._id });
+      onboardUser({
+        ...values,
+        user_id: userProfile?._id,
+        profileAvatarSizeBytes,
+      });
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while updating your profile");
@@ -120,6 +134,7 @@ export default function OnboardUserPage() {
         shouldTouch: true,
         shouldValidate: true,
       });
+      setProfileAvatarSizeBytes(uploadResult.size);
     } catch (error) {
       console.error("Failed to upload avatar:", error);
       setAvatarPreview("");
@@ -135,6 +150,7 @@ export default function OnboardUserPage() {
       shouldValidate: true,
     });
     setAvatarPreview("");
+    setProfileAvatarSizeBytes(undefined);
   };
 
   return (

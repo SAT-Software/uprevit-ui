@@ -55,6 +55,7 @@ export default function DialogUploadSourceFiles({
           name: file.name,
           type: "file",
           key: s3UploadResult.key,
+          sizeBytes: s3UploadResult.size,
           folderId: folder._id,
           parentId: currentFolder._id,
         });

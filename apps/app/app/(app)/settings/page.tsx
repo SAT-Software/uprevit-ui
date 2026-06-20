@@ -10,6 +10,7 @@ import {
 import SecurityTab from "@/features/workspace/settings/SecurityTab";
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
 import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
+import UsageTab from "@/features/workspace/settings/UsageTab";
 import BillingTab from "@/features/workspace/settings/BillingTab";
 import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
@@ -20,6 +21,7 @@ import {
   PiUsersDuotone,
   PiUserGearDuotone,
   PiShieldCheckDuotone,
+  PiChartBarDuotone,
   PiCreditCardDuotone,
 } from "react-icons/pi";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -32,15 +34,24 @@ const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
 
 function SettingsPage() {
   const searchParams = useSearchParams();
-  const tab = searchParams.get("tab");
+  const tabParam = searchParams.get("tab");
+  const tab = tabParam;
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const adminTabs = ["admins", "workspace", "billing", "security"];
-  const initialTab =
+  const adminTabs = ["admins", "workspace", "usage", "billing", "security"];
+  const activeTab =
     tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
+  const [syncedActiveTab, setSyncedActiveTab] = useState(activeTab);
+
+  if (activeTab !== syncedActiveTab) {
+    setSyncedActiveTab(activeTab);
+    setPendingTab(null);
+  }
+
+  const tabValue = pendingTab ?? activeTab;
 
   const handleTabChange = (value: string) => {
     if (adminTabs.includes(value) && !isAdmin) {
@@ -52,11 +63,10 @@ function SettingsPage() {
     for (const key of LIST_QUERY_PARAMS) {
       params.delete(key);
     }
+    setPendingTab(value);
     params.set("tab", value);
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname);
-
-    setActiveTab(value);
   };
 
   return (
@@ -79,7 +89,7 @@ function SettingsPage() {
       {/* Settings Tabs */}
       <div className="border border-input bg-background rounded-xl p-4">
         <Tabs
-          value={activeTab}
+          value={tabValue}
           onValueChange={handleTabChange}
           className="w-full"
         >
@@ -100,13 +110,21 @@ function SettingsPage() {
               <PiUserGearDuotone className="mr-2 h-4 w-4" />
               Admins
             </TabsTrigger>
+            {isAdmin ? (
+              <>
+                <TabsTrigger value="usage">
+                  <PiChartBarDuotone className="mr-2 h-4 w-4" />
+                  Usage
+                </TabsTrigger>
+                <TabsTrigger value="billing">
+                  <PiCreditCardDuotone className="mr-2 h-4 w-4" />
+                  Billing
+                </TabsTrigger>
+              </>
+            ) : null}
             {/* <TabsTrigger value="security">
               <PiShieldCheckDuotone className="mr-2 h-4 w-4" />
               Security
-            </TabsTrigger>
-            <TabsTrigger value="billing">
-              <PiCreditCardDuotone className="mr-2 h-4 w-4" />
-              Billing
             </TabsTrigger> */}
           </TabsList>
 
@@ -126,12 +144,16 @@ function SettingsPage() {
             {activeTab === "admins" && <AdminsTab />}
           </TabsContent>
 
-          {/* <TabsContent value="security" className="mt-6">
-            <SecurityTab />
+          <TabsContent value="usage" className="mt-6">
+            {activeTab === "usage" && <UsageTab />}
           </TabsContent>
 
           <TabsContent value="billing" className="mt-6">
-            <BillingTab />
+            {activeTab === "billing" && <BillingTab />}
+          </TabsContent>
+
+          {/* <TabsContent value="security" className="mt-6">
+            <SecurityTab />
           </TabsContent> */}
         </Tabs>
       </div>

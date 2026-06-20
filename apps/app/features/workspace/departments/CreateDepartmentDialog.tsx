@@ -130,11 +130,13 @@ export default function CreateDepartmentDialog() {
   async function onSubmit(data: FormValues) {
     try {
       let imageKey = "";
+      let imageSizeBytes: number | undefined;
 
       if (departmentImage instanceof File) {
         setUploadingImage(true);
         const uploadedImage = await uploadFileToS3({ file: departmentImage });
         imageKey = uploadedImage.key;
+        imageSizeBytes = uploadedImage.size;
         setUploadingImage(false);
       }
 
@@ -145,6 +147,7 @@ export default function CreateDepartmentDialog() {
           manager: data.manager,
           users: selectedUsers.map((user) => user._id),
           image: imageKey,
+          imageSizeBytes,
           admin_id: userId as string,
           workspace_id: workspaceId as string,
         },

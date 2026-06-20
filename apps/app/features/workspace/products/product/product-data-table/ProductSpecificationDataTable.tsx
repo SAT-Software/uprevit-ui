@@ -30,6 +30,23 @@ import {
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
 import {
+  getRedlineHighlightInsetShadow,
+  redlineHighlightBorder,
+  redlineHighlightRing,
+  redlineOldValueCompact,
+  redlineNewValueCompact,
+} from "@/utils/redlineStyles";
+import {
+  getWorkbookFillPalette,
+  getWorkbookTextPalette,
+  getWorkbookTheme,
+  isDefaultWorkbookTextColor,
+  NO_FILL_COLOR,
+  resolveWorkbookFillColor,
+  resolveWorkbookTextColor,
+  type WorkbookTheme,
+} from "@/utils/product/workbook-cell-colors";
+import {
   closestCenter,
   DndContext,
   KeyboardSensor,
@@ -83,6 +100,7 @@ import {
   PiMagnifyingGlassDuotone,
   PiUploadSimpleDuotone,
 } from "react-icons/pi";
+import { cn } from "@uprevit/ui/lib/utils";
 import { toast } from "sonner";
 import { applyFilter, detectColumnDataType } from "./column-filter-utils";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
@@ -168,41 +186,6 @@ const ROW_NUMBER_WIDTH = 60;
 const MIN_COL_WIDTH = 50;
 const MAX_COL_WIDTH = 500;
 
-const NO_FILL_COLOR = "transparent";
-
-const LIGHT_FILL_COLORS = [
-  NO_FILL_COLOR,
-  "#f9fafb",
-  "#fffbeb",
-  "#f0fdf4",
-  "#eff6ff",
-  "#fdf2f8",
-  "#fef2f2",
-  "#eef2ff",
-];
-
-const DARK_FILL_COLORS = [
-  NO_FILL_COLOR,
-  "#27272a",
-  "#422006",
-  "#052e16",
-  "#172554",
-  "#4a044e",
-  "#450a0a",
-  "#312e81",
-];
-
-const DEFAULT_TEXT_COLORS = [
-  "#000000",
-  "#4b5563",
-  "#d97706",
-  "#16a34a",
-  "#2563eb",
-  "#db2777",
-  "#dc2626",
-  "#4f46e5",
-];
-
 // Row data type for the table
 type RowData = { rowIndex: number };
 
@@ -225,6 +208,7 @@ interface TableMeta {
     React.SetStateAction<Record<number, ColumnFilter>>
   >;
   isReadOnly?: boolean;
+  workbookTheme: WorkbookTheme;
 }
 
 function DiffValueDisplay<T extends string>({
@@ -237,12 +221,12 @@ function DiffValueDisplay<T extends string>({
   return (
     <div className="flex flex-col gap-0.5">
       {diff.status !== "added" && (
-        <span className="truncate text-red-600/80 line-through">
+        <span className={cn("truncate", redlineOldValueCompact)}>
           {formatValue(diff.oldValue)}
         </span>
       )}
       {diff.status !== "removed" && (
-        <span className="truncate text-blue-700 font-semibold">
+        <span className={cn("truncate font-semibold", redlineNewValueCompact)}>
           {formatValue(diff.newValue)}
         </span>
       )}
@@ -277,12 +261,14 @@ const EditableHeaderContent = ({
   const headerInput = (
     <div className="relative flex-1 min-w-0 h-full">
       <input
-        className={`h-full w-full bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground ${
-          showHighlightDiff ? "ring-1 ring-amber-400/60 ring-inset" : ""
-        } ${showInlineDiff ? "caret-transparent" : ""}`}
+        className={cn(
+          "h-full w-full bg-transparent outline-none text-xs font-medium placeholder:text-muted-foreground",
+          showHighlightDiff && redlineHighlightRing,
+          showInlineDiff && "caret-transparent",
+        )}
         style={{
           boxShadow: showHighlightDiff
-            ? "inset 0 0 0 9999px rgba(251, 191, 36, 0.12)"
+            ? getRedlineHighlightInsetShadow(meta.workbookTheme)
             : undefined,
           color: showInlineDiff ? "transparent" : undefined,
           caretColor: showInlineDiff ? "transparent" : undefined,
@@ -487,6 +473,7 @@ export function ProductSpecificationDataTable({
   initialData,
   onDataChange,
   onSaveSuccess,
+  resetKey = 0,
   isRedlineView = false,
   isReadOnly = false,
   redlineMode = "inline",
@@ -497,8 +484,9 @@ export function ProductSpecificationDataTable({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedData = useRef(false);
   const dndContextId = useId();
-  const fillColors =
-    resolvedTheme === "dark" ? DARK_FILL_COLORS : LIGHT_FILL_COLORS;
+  const workbookTheme = getWorkbookTheme(resolvedTheme);
+  const fillColors = getWorkbookFillPalette(workbookTheme);
+  const textColors = getWorkbookTextPalette(workbookTheme);
 
   useEffect(() => {
     if (!hasLoadedData.current && initialData) {
@@ -813,6 +801,23 @@ export function ProductSpecificationDataTable({
     setHistory((prev) => ({ ...prev, past: [], future: [] }));
   }, []);
 
+  useEffect(() => {
+    if (resetKey === 0 || !initialData) return;
+
+    setCellData(initialData.cellData ?? {});
+    setHeaderData(initialData.headerData ?? {});
+    setColumnTypeData(initialData.columnTypeData ?? {});
+    setColumnSizing(initialData.columnSizing ?? {});
+    setColumnOrder(
+      initialData.columnOrder ??
+        Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
+    );
+    setCellFormats(initialData.cellFormats ?? {});
+    setSearchQuery("");
+    clearHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when parent discards unsaved edits
+  }, [resetKey]);
+
   const handleFindReplace = useCallback(
     (updatedCells: Record<string, string>) => {
       if (isReadOnly) return;
@@ -968,7 +973,7 @@ export function ProductSpecificationDataTable({
         const prev = cellFormats[key];
         const next = {
           ...prev,
-          textColor: color === "#000000" ? undefined : color,
+          textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
         };
         changes.push({ key, prev, next });
         setCellFormats((f) => ({ ...f, [key]: next }));
@@ -977,7 +982,7 @@ export function ProductSpecificationDataTable({
           const prev = cellFormats[key];
           const next = {
             ...prev,
-            textColor: color === "#000000" ? undefined : color,
+            textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
           };
           changes.push({ key, prev, next });
         });
@@ -986,7 +991,7 @@ export function ProductSpecificationDataTable({
           selectedCells.forEach((key) => {
             updated[key] = {
               ...updated[key],
-              textColor: color === "#000000" ? undefined : color,
+              textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
             };
           });
           return updated;
@@ -1088,6 +1093,7 @@ export function ProductSpecificationDataTable({
       columnFilters,
       setColumnFilters,
       isReadOnly,
+      workbookTheme,
     },
     state: {
       columnSizing,
@@ -1443,13 +1449,13 @@ export function ProductSpecificationDataTable({
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted-foreground">Text:</span>
           <div className="flex gap-0.5">
-            {DEFAULT_TEXT_COLORS.map((color) => (
+            {textColors.map((color) => (
               <button
                 key={`text-${color}`}
                 onClick={() => applyTextColor(color)}
                 disabled={isReadOnly}
                 className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all flex items-center justify-center"
-                title={color === "#000000" ? "Default" : color}
+                title={isDefaultWorkbookTextColor(color) ? "Default" : color}
               >
                 <span className="text-xs font-bold" style={{ color }}>
                   A
@@ -1650,18 +1656,17 @@ export function ProductSpecificationDataTable({
                     const select = (
                       <div
                         key={`type-${column.id}`}
-                        className={`border-r border-b border-border flex items-center bg-muted ${
-                          showHighlightDiff
-                            ? "ring-1 ring-amber-400/60 ring-inset"
-                            : ""
-                        }`}
+                        className={cn(
+                          "border-r border-b border-border flex items-center bg-muted",
+                          showHighlightDiff && redlineHighlightRing,
+                        )}
                         style={{
                           position: "absolute",
                           left: virtualCol.start,
                           width: virtualCol.size,
                           height: ROW_HEIGHT,
                           boxShadow: showHighlightDiff
-                            ? "inset 0 0 0 9999px rgba(251, 191, 36, 0.12)"
+                            ? getRedlineHighlightInsetShadow(workbookTheme)
                             : undefined,
                         }}
                       >
@@ -1776,28 +1781,36 @@ export function ProductSpecificationDataTable({
                       const showHighlightDiff =
                         isRedlineView && redlineMode === "highlight" && diff;
 
+                      const resolvedBg = resolveWorkbookFillColor(
+                        format?.bgColor,
+                        workbookTheme,
+                      );
+                      const resolvedText = resolveWorkbookTextColor(
+                        format?.textColor,
+                        workbookTheme,
+                      );
+
                       const input = (
                         <input
                           data-cell-key={cellKey}
                           readOnly={isReadOnly}
-                          className={`h-full w-full border border-border/60 outline-none px-2 text-sm ${
+                          className={cn(
+                            "h-full w-full border border-border/60 outline-none px-2 text-sm",
                             isSelected
                               ? "ring-1 ring-primary ring-inset border-foreground/60"
-                              : "border-border"
-                          } ${
-                            showHighlightDiff
-                              ? "ring-1 ring-amber-400/60 border-amber-400/70"
-                              : ""
-                          } ${showInlineDiff ? "caret-transparent" : ""}`}
+                              : "border-border",
+                            showHighlightDiff && redlineHighlightBorder,
+                            showInlineDiff && "caret-transparent",
+                          )}
                           style={{
                             backgroundColor:
-                              format?.bgColor || "var(--background)",
+                              resolvedBg || "var(--background)",
                             boxShadow: showHighlightDiff
-                              ? "inset 0 0 0 9999px rgba(251, 191, 36, 0.12)"
+                              ? getRedlineHighlightInsetShadow(workbookTheme)
                               : undefined,
                             color: showInlineDiff
                               ? "transparent"
-                              : format?.textColor || "inherit",
+                              : resolvedText || "inherit",
                             caretColor: showInlineDiff
                               ? "transparent"
                               : undefined,

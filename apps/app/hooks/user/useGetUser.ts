@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseErrorMessage } from "@/lib/api-error";
+import { WorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
 
 async function getUserById(
   userId: string,
@@ -19,8 +21,14 @@ async function getUserById(
     signal,
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch user");
+    const message = await getResponseErrorMessage(response, "Failed to fetch user");
+    if (
+      response.status === 403 &&
+      message.toLowerCase().includes("workspace access is frozen")
+    ) {
+      throw new WorkspaceAccessFrozenError(message);
+    }
+    throw new Error(message);
   }
   const data = await response.json();
   return data;
@@ -34,5 +42,11 @@ export function useGetUser() {
     queryKey: ["user", userId],
     queryFn: ({ signal }) => getUserById(userId as string, { signal, auth }),
     enabled: auth.isAuthenticated && Boolean(userId),
+    retry: (failureCount, error) =>
+      !(
+        error instanceof WorkspaceAccessFrozenError ||
+        (error instanceof Error &&
+          error.message.toLowerCase().includes("workspace access is frozen"))
+      ) && failureCount < 3,
   });
 }

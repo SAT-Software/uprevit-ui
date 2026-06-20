@@ -11,7 +11,13 @@ import { cn } from "@uprevit/ui/lib/utils";
 import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PiArrowRightBold, PiImageDuotone, PiTagDuotone } from "react-icons/pi";
+import {
+  PiArrowRightBold,
+  PiCloudCheckDuotone,
+  PiImageDuotone,
+  PiTagDuotone,
+} from "react-icons/pi";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
 import DialogEditLabelTag from "./DialogEditLabelTag";
@@ -19,12 +25,22 @@ import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDi
 import Editor from "./Editor";
 import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
-import UnsavedAnnotationDialog from "./UnsavedAnnotationDialog";
+import { UnsavedWorkbookChangesDialog } from "@/features/workspace/products/product/product-data-table/UnsavedWorkbookChangesDialog";
 import { useUpdateLabelTaggedImage } from "@/hooks/product/useUpdateLabelTaggedImage";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { useRegisterProductWorkbookGuard } from "@/lib/product-workbook-unsaved-guard";
 import { LegendPanel } from "./LegendPanel";
 import { LegendItem } from "./legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
+import { annotationsMatchForComparison } from "@/utils/product/label-tag-annotation";
+import {
+  cnRedlineBadge,
+  redlineCardAdded,
+  redlineCardModified,
+  redlineCardRemoved,
+  redlineNewValue,
+  redlineOldValue,
+} from "@/utils/redlineStyles";
 
 interface LabelTagItem {
   _id: string;
@@ -51,6 +67,12 @@ interface LabelTagsTabsProps {
   isRedlineView?: boolean;
 }
 
+type PendingSaveCompletion = {
+  kind: "itemComplete";
+  resolve: () => void;
+  reject: (error: Error) => void;
+};
+
 export default function LabelTagsTabs({
   labelTagsData,
   productId,
@@ -73,6 +95,7 @@ export default function LabelTagsTabs({
     annotation: AnnotationState;
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   const [legendOverlayById, setLegendOverlayById] = useState<
     Record<string, boolean>
@@ -88,12 +111,13 @@ export default function LabelTagsTabs({
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<string | null>(null);
 
-  // Ref to track pending tab change from unsaved dialog (to be used after save completes)
-  const pendingTabChangeRef = useRef<string | null>(null);
-  // Ref to track if save is triggered from unsaved dialog
-  const isUnsavedFlowRef = useRef(false);
-  // Ref to prevent multiple handleRendered calls
+  const pendingSaveRef = useRef(pendingSave);
+  const pendingSaveFlowRef = useRef<PendingSaveCompletion | null>(null);
   const isRenderingRef = useRef(false);
+
+  useEffect(() => {
+    pendingSaveRef.current = pendingSave;
+  }, [pendingSave]);
 
   const { mutateAsync: updateLabelTaggedImage, isPending: isUpdating } =
     useUpdateLabelTaggedImage();
@@ -118,10 +142,27 @@ export default function LabelTagsTabs({
     });
   };
 
+  const completePendingSaveFlow = useCallback(
+    (error?: unknown) => {
+      const completion = pendingSaveFlowRef.current;
+      if (!completion) return;
+
+      pendingSaveFlowRef.current = null;
+      if (error) {
+        completion.reject(
+          error instanceof Error ? error : new Error("Failed to save annotation"),
+        );
+      } else {
+        completion.resolve();
+      }
+    },
+    [],
+  );
+
   const handleRendered = useCallback(
     async (dataUrl: string) => {
-      // Guard against multiple calls
-      if (!pendingSave || isRenderingRef.current) return;
+      const save = pendingSaveRef.current;
+      if (!save || isRenderingRef.current) return;
       isRenderingRef.current = true;
 
       try {
@@ -145,40 +186,25 @@ export default function LabelTagsTabs({
 
         await updateLabelTaggedImage({
           productId,
-          labelTagId: pendingSave.itemId,
+          labelTagId: save.itemId,
           taggedImage: "",
           taggedImageKey: uploadedKey,
-          annotationState: pendingSave.annotation,
+          taggedImageSizeBytes: s3UploadResult.size,
+          annotationState: save.annotation,
         });
 
         setSavedAnnotations((prev) => ({
           ...prev,
-          [pendingSave.itemId]: pendingSave.annotation,
+          [save.itemId]: save.annotation,
         }));
-
-        // If triggered from unsaved dialog flow, close dialog and change tab now
-        if (isUnsavedFlowRef.current) {
-          setUnsavedDialogOpen(false);
-          if (pendingTabChangeRef.current) {
-            setActiveTab(pendingTabChangeRef.current);
-            setPendingTabChange(null);
-            pendingTabChangeRef.current = null;
-          }
-          isUnsavedFlowRef.current = false;
-        }
+        setLastSavedAt(new Date());
 
         setPendingSave(null);
         setSaveDialogOpen(false);
+        completePendingSaveFlow();
       } catch (error) {
         console.error("Failed to upload tagged image:", error);
-
-        // Reset unsaved dialog flow state on error too
-        if (isUnsavedFlowRef.current) {
-          setUnsavedDialogOpen(false);
-          isUnsavedFlowRef.current = false;
-          pendingTabChangeRef.current = null;
-        }
-
+        completePendingSaveFlow(error);
         setPendingSave(null);
         setSaveDialogOpen(false);
       } finally {
@@ -187,7 +213,12 @@ export default function LabelTagsTabs({
         isRenderingRef.current = false;
       }
     },
-    [pendingSave, productId, updateLabelTaggedImage, uploadFileToS3],
+    [
+      completePendingSaveFlow,
+      productId,
+      updateLabelTaggedImage,
+      uploadFileToS3,
+    ],
   );
 
   const filteredLabelTypesForTabs: string[] = [
@@ -255,50 +286,184 @@ export default function LabelTagsTabs({
   const effectiveActiveTab =
     activeTab || filteredLabelTypesForTabs[0] || "tab-1";
 
-  const getCurrentItemId = useCallback(() => {
-    const currentTabData = labelTagsData.filter(
-      (item: LabelTagItem) => item.type === effectiveActiveTab,
-    );
-    return currentTabData[0]?._id || null;
-  }, [labelTagsData, effectiveActiveTab]);
+  const getAnnotationBaseline = useCallback(
+    (itemId: string): AnnotationState | undefined => {
+      const item = labelTagsData.find((labelTag) => labelTag._id === itemId);
+      return savedAnnotations[itemId] ?? item?.annotation_state;
+    },
+    [labelTagsData, savedAnnotations],
+  );
 
   const isDirty = useCallback(
     (itemId: string) => {
       const current = currentEditorState[itemId];
       if (!current) return false;
 
-      const baseline = savedAnnotations[itemId];
-      if (!baseline) {
-        return current.markers && current.markers.length > 0;
+      const baseline = getAnnotationBaseline(itemId);
+      if (baseline === undefined) {
+        return Boolean(current.markers && current.markers.length > 0);
       }
 
-      return JSON.stringify(current) !== JSON.stringify(baseline);
+      return !annotationsMatchForComparison(current, baseline);
     },
-    [currentEditorState, savedAnnotations],
+    [currentEditorState, getAnnotationBaseline],
   );
 
   const hasAnyDirtyItems = useCallback(() => {
     return Object.keys(currentEditorState).some((itemId) => isDirty(itemId));
   }, [currentEditorState, isDirty]);
 
+  const hasEditableDirtyItems = useMemo(
+    () => hasAnyDirtyItems(),
+    [hasAnyDirtyItems],
+  );
+
+  const showEditStatus = !isSubmitted && !isRedlineView;
+  const isPersisting = isSaving || isUpdating;
+
+  const getDirtyItemIds = useCallback(
+    (itemIds?: string[]) => {
+      const ids =
+        itemIds ?? Object.keys(currentEditorState).filter((id) => isDirty(id));
+      return ids.filter((id) => isDirty(id));
+    },
+    [currentEditorState, isDirty],
+  );
+
+  const persistAnnotation = useCallback(
+    (itemId: string, annotation: AnnotationState): Promise<void> => {
+      const item = labelTagsData.find((labelTag) => labelTag._id === itemId);
+      const itemImage = item?.image;
+      if (!itemImage) {
+        return Promise.reject(new Error("No image available for this label tag"));
+      }
+
+      return new Promise((resolve, reject) => {
+        pendingSaveFlowRef.current = {
+          kind: "itemComplete",
+          resolve,
+          reject,
+        };
+
+        setIsSaving(true);
+        setAnnotations((prev) => ({ ...prev, [itemId]: annotation }));
+        setPendingSave({
+          itemId,
+          itemImage,
+          annotation,
+        });
+        setRenderItem({
+          id: itemId,
+          image: itemImage,
+        });
+      });
+    },
+    [labelTagsData],
+  );
+
+  const saveDirtyItemIds = useCallback(
+    async (itemIds?: string[]) => {
+      const dirtyIds = getDirtyItemIds(itemIds);
+      for (const itemId of dirtyIds) {
+        const annotation = currentEditorState[itemId];
+        if (!annotation) continue;
+        await persistAnnotation(itemId, annotation);
+      }
+    },
+    [currentEditorState, getDirtyItemIds, persistAnnotation],
+  );
+
+  const revertItemEditorState = useCallback(
+    (itemId: string) => {
+      const item = labelTagsData.find((labelTag) => labelTag._id === itemId);
+      const baseline = savedAnnotations[itemId] ?? item?.annotation_state;
+
+      setCurrentEditorState((prev) => {
+        const next = { ...prev };
+        if (baseline !== undefined) {
+          next[itemId] = baseline;
+        } else {
+          delete next[itemId];
+        }
+        return next;
+      });
+    },
+    [labelTagsData, savedAnnotations],
+  );
+
+  const discardDirtyInTab = useCallback(
+    (tab: string) => {
+      const itemsInTab = labelTagsData.filter((item) => item.type === tab);
+      for (const item of itemsInTab) {
+        if (isDirty(item._id)) {
+          revertItemEditorState(item._id);
+        }
+      }
+    },
+    [isDirty, labelTagsData, revertItemEditorState],
+  );
+
+  const discardAllDirty = useCallback(() => {
+    for (const itemId of Object.keys(currentEditorState)) {
+      if (isDirty(itemId)) {
+        revertItemEditorState(itemId);
+      }
+    }
+  }, [currentEditorState, isDirty, revertItemEditorState]);
+
+  const saveAllDirtyAndContinue = useCallback(async () => {
+    await saveDirtyItemIds();
+  }, [saveDirtyItemIds]);
+
   const handleStateChange = useCallback(
     (itemId: string, annotation: AnnotationState) => {
+      const baseline = getAnnotationBaseline(itemId);
+
+      if (
+        baseline !== undefined &&
+        annotationsMatchForComparison(annotation, baseline)
+      ) {
+        setCurrentEditorState((prev) => {
+          if (!prev[itemId]) return prev;
+          const next = { ...prev };
+          delete next[itemId];
+          return next;
+        });
+        return;
+      }
+
+      if (
+        baseline === undefined &&
+        (!annotation.markers || annotation.markers.length === 0)
+      ) {
+        setCurrentEditorState((prev) => {
+          if (!prev[itemId]) return prev;
+          const next = { ...prev };
+          delete next[itemId];
+          return next;
+        });
+        return;
+      }
+
       setCurrentEditorState((prev) => ({ ...prev, [itemId]: annotation }));
     },
-    [],
+    [getAnnotationBaseline],
   );
 
   const handleTabChange = useCallback(
     (newTab: string) => {
-      const currentItemId = getCurrentItemId();
-      if (currentItemId && isDirty(currentItemId)) {
+      const itemsInTab = labelTagsData.filter(
+        (item) => item.type === effectiveActiveTab,
+      );
+      const hasDirtyInTab = itemsInTab.some((item) => isDirty(item._id));
+      if (hasDirtyInTab) {
         setPendingTabChange(newTab);
         setUnsavedDialogOpen(true);
       } else {
         setActiveTab(newTab);
       }
     },
-    [getCurrentItemId, isDirty],
+    [effectiveActiveTab, isDirty, labelTagsData],
   );
 
   const handleLegendOverlayToggle = useCallback(
@@ -308,62 +473,58 @@ export default function LabelTagsTabs({
     [],
   );
 
-  const handleUnsavedSave = async () => {
-    const currentItemId = getCurrentItemId();
-    if (!currentItemId) return;
-
-    const currentState = currentEditorState[currentItemId];
-    const currentItem = labelTagsData.find(
-      (item) => item._id === currentItemId,
+  const handleUnsavedSave = useCallback(async () => {
+    const itemsInTab = labelTagsData.filter(
+      (item) => item.type === effectiveActiveTab,
     );
-    if (!currentState || !currentItem?.image) return;
+    const dirtyIds = itemsInTab.map((item) => item._id);
 
-    // Track that this is from unsaved dialog flow
-    isUnsavedFlowRef.current = true;
-    pendingTabChangeRef.current = pendingTabChange;
+    await saveDirtyItemIds(dirtyIds);
 
-    // Directly trigger save process without opening SaveTaggedImageDialog
-    // This mimics what handleSave + handleConfirmSave do together
-    const saveData = {
-      itemId: currentItemId,
-      itemImage: currentItem.image,
-      annotation: currentState,
-    };
-
-    setAnnotations((prev) => ({ ...prev, [currentItemId]: currentState }));
-    setPendingSave(saveData);
-    // Trigger the render directly (which will then call handleRendered)
-    setRenderItem({
-      id: currentItemId,
-      image: currentItem.image,
-    });
-
-    // DON'T close dialog or change tab here - wait for save to complete in handleRendered
-  };
-
-  const handleUnsavedDiscard = () => {
-    const currentItemId = getCurrentItemId();
-    if (currentItemId) {
-      const currentItem = labelTagsData.find(
-        (item) => item._id === currentItemId,
-      );
-      setCurrentEditorState((prev) => ({
-        ...prev,
-        [currentItemId]:
-          savedAnnotations[currentItemId] ?? currentItem?.annotation_state,
-      }));
-    }
     setUnsavedDialogOpen(false);
     if (pendingTabChange) {
       setActiveTab(pendingTabChange);
       setPendingTabChange(null);
     }
-  };
+  }, [
+    effectiveActiveTab,
+    labelTagsData,
+    pendingTabChange,
+    saveDirtyItemIds,
+  ]);
 
-  const handleUnsavedCancel = () => {
+  const handleUnsavedDiscard = useCallback(() => {
+    discardDirtyInTab(effectiveActiveTab);
+    setUnsavedDialogOpen(false);
+    if (pendingTabChange) {
+      setActiveTab(pendingTabChange);
+      setPendingTabChange(null);
+    }
+  }, [discardDirtyInTab, effectiveActiveTab, pendingTabChange]);
+
+  const handleUnsavedCancel = useCallback(() => {
     setUnsavedDialogOpen(false);
     setPendingTabChange(null);
-  };
+  }, []);
+
+  const labelTagsGuardRegistration = useMemo(
+    () => ({
+      tabLabel: "Label Tags",
+      isDirty: hasEditableDirtyItems,
+      save: saveAllDirtyAndContinue,
+      discard: discardAllDirty,
+    }),
+    [
+      discardAllDirty,
+      hasEditableDirtyItems,
+      saveAllDirtyAndContinue,
+    ],
+  );
+
+  useRegisterProductWorkbookGuard(
+    labelTagsGuardRegistration,
+    !isSubmitted && !isRedlineView,
+  );
 
   // Initialize savedAnnotations from labelTagsData on mount
   useEffect(() => {
@@ -475,11 +636,16 @@ export default function LabelTagsTabs({
         <div className="flex flex-col gap-2">
           {(oldValue || isRemoved) && (
             <div className="relative">
-              <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+              <span
+                className={cn(
+                  "absolute top-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
+                  cnRedlineBadge("removed"),
+                )}
+              >
                 OLD
               </span>
               {oldValue ? (
-                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-red-300 bg-red-50/30 opacity-60">
+                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20">
                   <Image
                     src={oldValue}
                     alt="Previous image"
@@ -489,7 +655,7 @@ export default function LabelTagsTabs({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-red-50/30 rounded-lg border-2 border-red-300 border-dashed opacity-60">
+                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-red-50/30 rounded-lg border-2 border-red-300 border-dashed opacity-60 dark:border-red-700/50 dark:bg-red-950/20">
                   <PiImageDuotone className="w-8 h-8 mb-2 opacity-50" />
                   <p className="text-xs">No image</p>
                 </div>
@@ -503,11 +669,16 @@ export default function LabelTagsTabs({
           )}
           {(newValue || isAdded) && !isRemoved && (
             <div className="relative">
-              <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+              <span
+                className={cn(
+                  "absolute top-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
+                  cnRedlineBadge("added"),
+                )}
+              >
                 NEW
               </span>
               {newValue ? (
-                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-blue-300 bg-blue-50/30">
+                <div className="aspect-square relative overflow-hidden rounded-lg border-2 border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20">
                   <Image
                     src={newValue}
                     alt="New image"
@@ -517,7 +688,7 @@ export default function LabelTagsTabs({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-blue-50/30 rounded-lg border-2 border-blue-300 border-dashed">
+                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-blue-50/30 rounded-lg border-2 border-blue-300 border-dashed dark:border-blue-700/50 dark:bg-blue-950/20">
                   <PiImageDuotone className="w-8 h-8 mb-2 opacity-50" />
                   <p className="text-xs">No image</p>
                 </div>
@@ -535,7 +706,7 @@ export default function LabelTagsTabs({
             {/* <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-full shadow-sm">
               OLD
             </span> */}
-            <span className="line-through text-sm text-red-600/70 ">
+            <span className={redlineOldValue}>
               {format(diff.old_value) || ""}
             </span>
           </span>
@@ -553,7 +724,7 @@ export default function LabelTagsTabs({
             {/* <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full shadow-sm">
               NEW
             </span> */}
-            <span className="text-sm text-blue-700 ">
+            <span className={redlineNewValue}>
               {format(diff.new_value) ||
                 (emptyLabel ? (
                   <span className="text-muted-foreground/35 italic">
@@ -619,7 +790,23 @@ export default function LabelTagsTabs({
             content="Add and organize label tags with annotations to highlight specific areas on label images."
           />
         </div>
-        <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
+        <div className="flex items-center gap-3">
+          {showEditStatus &&
+            (isPersisting ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Spinner className="w-4 h-4" />
+                <span className="text-xs">Saving</span>
+              </div>
+            ) : hasEditableDirtyItems ? (
+              <span className="text-xs text-amber-600">Unsaved changes</span>
+            ) : lastSavedAt ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
+                <span className="text-xs">Saved</span>
+              </div>
+            ) : null)}
+          <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
+        </div>
       </div>
 
       <div className="p-2">
@@ -644,11 +831,11 @@ export default function LabelTagsTabs({
                     className={cn(
                       "gap-2",
                       isTypeAdded &&
-                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800",
+                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800 dark:text-blue-400 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:text-blue-300",
                       isTypeRemoved &&
-                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800",
+                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800 dark:text-red-400 dark:data-[state=active]:bg-red-950/30 dark:data-[state=active]:text-red-300",
                       isTypeModified &&
-                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800",
+                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800 dark:text-amber-400 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:text-amber-300",
                     )}
                   >
                     {isTypeModified && typeDiff ? (
@@ -657,17 +844,32 @@ export default function LabelTagsTabs({
                       <span>{type}</span>
                     )}
                     {isTypeAdded && (
-                      <span className="text-[9px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[9px]",
+                          cnRedlineBadge("added"),
+                        )}
+                      >
                         NEW
                       </span>
                     )}
                     {isTypeRemoved && (
-                      <span className="text-[9px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[9px]",
+                          cnRedlineBadge("removed"),
+                        )}
+                      >
                         DEL
                       </span>
                     )}
                     {isTypeModified && (
-                      <span className="text-[9px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[9px]",
+                          cnRedlineBadge("modified"),
+                        )}
+                      >
                         MOD
                       </span>
                     )}
@@ -700,13 +902,13 @@ export default function LabelTagsTabs({
                         "w-full shadow-none transition-all duration-200 mb-4 last:mb-0",
                         isRedlineView &&
                           isRemoved &&
-                          "border-red-500/50 bg-red-100/5 opacity-60",
+                          redlineCardRemoved,
                         isRedlineView &&
                           isAdded &&
-                          "border-blue-500/50 bg-blue-100/5",
+                          redlineCardAdded,
                         isRedlineView &&
                           isModified &&
-                          "border-amber-500/50 bg-amber-100/10",
+                          redlineCardModified,
                         !isRedlineView || !itemStatus ? "border-border" : "",
                       )}
                     >
@@ -715,17 +917,32 @@ export default function LabelTagsTabs({
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               {isRedlineView && isAdded && (
-                                <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-2 py-0.5 text-[10px]",
+                                    cnRedlineBadge("added"),
+                                  )}
+                                >
                                   NEW
                                 </span>
                               )}
                               {isRedlineView && isRemoved && (
-                                <span className="text-[10px] font-bold tracking-wider text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full shadow-sm">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-2 py-0.5 text-[10px]",
+                                    cnRedlineBadge("removed"),
+                                  )}
+                                >
                                   DEL
                                 </span>
                               )}
                               {isRedlineView && isModified && (
-                                <span className="text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full shadow-sm">
+                                <span
+                                  className={cn(
+                                    "rounded-full px-2 py-0.5 text-[10px]",
+                                    cnRedlineBadge("modified"),
+                                  )}
+                                >
                                   MOD
                                 </span>
                               )}
@@ -735,7 +952,7 @@ export default function LabelTagsTabs({
                                 "text-sm font-semibold flex items-center gap-2",
                                 isRedlineView &&
                                   isRemoved &&
-                                  "line-through text-red-500/70",
+                                  "line-through text-red-500/70 dark:text-red-400/80",
                               )}
                             >
                               <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground bg-muted/60 border border-border/60 px-2 py-0.5 rounded-full">
@@ -759,7 +976,7 @@ export default function LabelTagsTabs({
                                   "text-sm font-normal text-muted-foreground",
                                   isRedlineView &&
                                     isRemoved &&
-                                    "line-through text-red-500/70",
+                                    "line-through text-red-500/70 dark:text-red-400/80",
                                 )}
                               >
                                 {isRedlineView && descriptionDiff ? (
@@ -830,9 +1047,9 @@ export default function LabelTagsTabs({
                                 className={cn(
                                   "flex flex-col items-center justify-center p-12 text-muted-foreground rounded-lg border border-dashed w-full max-w-md",
                                   isRedlineView && isRemoved
-                                    ? "border-red-300 bg-red-50/30 opacity-60"
+                                    ? "border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20"
                                     : isRedlineView && isAdded
-                                      ? "border-blue-300 bg-blue-50/30"
+                                      ? "border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
                                       : "bg-muted/50 border-border",
                                 )}
                               >
@@ -895,13 +1112,16 @@ export default function LabelTagsTabs({
             isPending={isSaving || isUpdating}
           />
 
-          <UnsavedAnnotationDialog
+          <UnsavedWorkbookChangesDialog
             open={unsavedDialogOpen}
-            onOpenChange={setUnsavedDialogOpen}
+            tabLabel="Label Tags"
+            onOpenChange={(open) => {
+              if (!open) handleUnsavedCancel();
+            }}
             onSave={handleUnsavedSave}
             onDiscard={handleUnsavedDiscard}
             onCancel={handleUnsavedCancel}
-            isSaving={isSaving || isUpdating}
+            isSaving={isPersisting}
           />
         </Tabs>
       </div>

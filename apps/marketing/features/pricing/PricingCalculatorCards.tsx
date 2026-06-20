@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
+import { Label } from "@uprevit/ui/components/ui/label";
 import { Slider } from "@uprevit/ui/components/ui/slider";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import { cn } from "@uprevit/ui/lib/utils";
@@ -24,54 +25,111 @@ import {
   PiUsersDuotone,
 } from "react-icons/pi";
 import type { IconType } from "react-icons";
-import { Label } from "@uprevit/ui/components/ui/label";
 
 type BillingCycle = "annual" | "monthly";
 
 const BASE_SEAT_COUNT = 1;
-const INCLUDED_STORAGE_GB = 10;
-const INCLUDED_EXPORTS_PER_MONTH = 50;
+const INCLUDED_UPLOAD_GB_MONTHLY = 10;
+const INCLUDED_UPLOAD_GB_ANNUAL = 120;
+const INCLUDED_EXPORTS_MONTHLY = 50;
+const INCLUDED_EXPORTS_ANNUAL = 600;
 const MAX_SEATS = 100;
-const MAX_STORAGE_GB = 250;
-const MAX_EXPORTS_PER_MONTH = 1000;
+const MAX_UPLOAD_GB_MONTHLY = 250;
+const MAX_EXPORTS_MONTHLY = 1000;
+const MB_PER_GB = 1024;
 
 const pricing = {
   annual: {
-    platformMonthlyEquivalent: 125,
-    seatMonthlyEquivalent: 25,
-    storageMonthlyEquivalent: 1.5,
-    exportMonthlyEquivalent: 0.25,
-    ssoMonthlyEquivalent: 125,
+    platform: 1500,
+    seat: 300,
+    uploadPerMb: 0.017578125,
+    export: 3,
+    sso: 1500,
   },
   monthly: {
-    platformMonthlyEquivalent: 149,
-    seatMonthlyEquivalent: 29,
-    storageMonthlyEquivalent: 1.9,
-    exportMonthlyEquivalent: 0.29,
-    ssoMonthlyEquivalent: 149,
+    platform: 149,
+    seat: 29,
+    uploadPerMb: 0.00185546875,
+    export: 0.29,
+    sso: 149,
   },
 } as const;
 
-function formatCurrency(value: number, minimumFractionDigits?: number) {
+function formatCurrency(
+  value: number,
+  minimumFractionDigits?: number,
+  maximumFractionDigits = 2,
+) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits:
       minimumFractionDigits ?? (Number.isInteger(value) ? 0 : 2),
-    maximumFractionDigits: 2,
+    maximumFractionDigits,
   }).format(value);
 }
 
-function getCycleAmount(value: number, billingCycle: BillingCycle) {
-  return billingCycle === "annual" ? value * 12 : value;
+function formatTinyCurrency(value: number) {
+  return formatCurrency(value, 0, 8);
 }
 
 function getCycleSuffix(billingCycle: BillingCycle) {
   return billingCycle === "annual" ? "/ year" : "/ month";
 }
 
-function getMonthlyEquivalentNote(value: number) {
-  return `${formatCurrency(value)} / month`;
+function getMonthlyEquivalent(value: number, billingCycle: BillingCycle) {
+  return billingCycle === "annual" ? value / 12 : value;
+}
+
+function getMonthlyEquivalentNote(value: number, billingCycle: BillingCycle) {
+  return `${formatCurrency(getMonthlyEquivalent(value, billingCycle))} / month`;
+}
+
+function getCycleLabel(billingCycle: BillingCycle) {
+  return billingCycle === "annual" ? "year" : "month";
+}
+
+function getIncludedUploadsGb(billingCycle: BillingCycle) {
+  return billingCycle === "annual"
+    ? INCLUDED_UPLOAD_GB_ANNUAL
+    : INCLUDED_UPLOAD_GB_MONTHLY;
+}
+
+function getIncludedExports(billingCycle: BillingCycle) {
+  return billingCycle === "annual"
+    ? INCLUDED_EXPORTS_ANNUAL
+    : INCLUDED_EXPORTS_MONTHLY;
+}
+
+function getMaxUploadsGb(billingCycle: BillingCycle) {
+  return billingCycle === "annual"
+    ? MAX_UPLOAD_GB_MONTHLY * 12
+    : MAX_UPLOAD_GB_MONTHLY;
+}
+
+function getMaxExports(billingCycle: BillingCycle) {
+  return billingCycle === "annual"
+    ? MAX_EXPORTS_MONTHLY * 12
+    : MAX_EXPORTS_MONTHLY;
+}
+
+function getUploadUnitPricePerGb(billingCycle: BillingCycle) {
+  return pricing[billingCycle].uploadPerMb * MB_PER_GB;
+}
+
+function getCycleUsageValue(value: number, billingCycle: BillingCycle) {
+  return billingCycle === "annual" ? value * 12 : value;
+}
+
+function getMonthlyUsageValue(value: number, billingCycle: BillingCycle) {
+  return billingCycle === "annual" ? value / 12 : value;
+}
+
+function getRoundedCycleUsageValue(
+  value: number,
+  billingCycle: BillingCycle,
+) {
+  return billingCycle === "monthly" ? Math.ceil(value) : Math.round(value);
 }
 
 function AmountDisplay({
@@ -126,7 +184,7 @@ function IncludedSummary({
       <div
         className={cn(
           isIncluded ? "text-primary" : "text-accent-foreground",
-          "text-2xl font-semibold tracking-tight  md:text-3xl",
+          "text-2xl font-semibold tracking-tight md:text-3xl",
         )}
       >
         {isIncluded ? "Included" : "Not Included"}
@@ -239,63 +297,99 @@ function ScaleLink({ copy }: { copy: string }) {
 export function PricingCalculatorCards() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("annual");
   const [seatCount, setSeatCount] = useState(BASE_SEAT_COUNT);
-  const [storageGb, setStorageGb] = useState(INCLUDED_STORAGE_GB);
-  const [exportsPerMonth, setExportsPerMonth] = useState(
-    INCLUDED_EXPORTS_PER_MONTH,
-  );
+  const [uploadGb, setUploadGb] = useState(INCLUDED_UPLOAD_GB_ANNUAL);
+  const [exportsCount, setExportsCount] = useState(INCLUDED_EXPORTS_ANNUAL);
   const [ssoEnabled, setSsoEnabled] = useState(false);
 
   const currentPricing = pricing[billingCycle];
-  const alternativePricing =
-    pricing[billingCycle === "annual" ? "monthly" : "annual"];
+  const currentCycleLabel = getCycleLabel(billingCycle);
+  const includedUploadGb = getIncludedUploadsGb(billingCycle);
+  const includedExports = getIncludedExports(billingCycle);
+  const extraUploadGb = Math.max(0, uploadGb - includedUploadGb);
+  const extraUploadMb = extraUploadGb * MB_PER_GB;
+  const extraExports = Math.max(0, exportsCount - includedExports);
 
-  const extraStorageGb = Math.max(0, storageGb - INCLUDED_STORAGE_GB);
-  const extraExportsPerMonth = Math.max(
-    0,
-    exportsPerMonth - INCLUDED_EXPORTS_PER_MONTH,
-  );
+  const platformCycleAmount = currentPricing.platform;
+  const seatsCycleAmount = seatCount * currentPricing.seat;
+  const uploadCycleAmount = extraUploadMb * currentPricing.uploadPerMb;
+  const exportsCycleAmount = extraExports * currentPricing.export;
+  const ssoCycleAmount = ssoEnabled ? currentPricing.sso : 0;
 
-  const platformMonthlyEquivalent = currentPricing.platformMonthlyEquivalent;
-  const seatsMonthlyEquivalent =
-    seatCount * currentPricing.seatMonthlyEquivalent;
-  const storageMonthlyEquivalent =
-    extraStorageGb * currentPricing.storageMonthlyEquivalent;
-  const exportsMonthlyEquivalent =
-    extraExportsPerMonth * currentPricing.exportMonthlyEquivalent;
-  const ssoMonthlyEquivalent = ssoEnabled
-    ? currentPricing.ssoMonthlyEquivalent
-    : 0;
-
-  const totalMonthlyEquivalent = useMemo(
+  const totalCycleAmount = useMemo(
     () =>
-      platformMonthlyEquivalent +
-      seatsMonthlyEquivalent +
-      storageMonthlyEquivalent +
-      exportsMonthlyEquivalent +
-      ssoMonthlyEquivalent,
+      platformCycleAmount +
+      seatsCycleAmount +
+      uploadCycleAmount +
+      exportsCycleAmount +
+      ssoCycleAmount,
     [
-      exportsMonthlyEquivalent,
-      platformMonthlyEquivalent,
-      seatsMonthlyEquivalent,
-      ssoMonthlyEquivalent,
-      storageMonthlyEquivalent,
+      exportsCycleAmount,
+      platformCycleAmount,
+      seatsCycleAmount,
+      ssoCycleAmount,
+      uploadCycleAmount,
     ],
   );
 
-  const totalCycleAmount = getCycleAmount(totalMonthlyEquivalent, billingCycle);
-  const annualMonthlyEquivalent =
-    pricing.annual.platformMonthlyEquivalent +
-    seatCount * pricing.annual.seatMonthlyEquivalent +
-    extraStorageGb * pricing.annual.storageMonthlyEquivalent +
-    extraExportsPerMonth * pricing.annual.exportMonthlyEquivalent +
-    (ssoEnabled ? pricing.annual.ssoMonthlyEquivalent : 0);
-
+  const monthlyEquivalentUploadGb = getMonthlyUsageValue(
+    uploadGb,
+    billingCycle,
+  );
+  const monthlyEquivalentExports = getMonthlyUsageValue(
+    exportsCount,
+    billingCycle,
+  );
+  const annualUploadGb = getCycleUsageValue(monthlyEquivalentUploadGb, "annual");
+  const annualExports = getCycleUsageValue(monthlyEquivalentExports, "annual");
+  const annualExtraUploadGb = Math.max(
+    0,
+    annualUploadGb - INCLUDED_UPLOAD_GB_ANNUAL,
+  );
+  const annualExtraExports = Math.max(
+    0,
+    annualExports - INCLUDED_EXPORTS_ANNUAL,
+  );
+  const annualCycleAmount =
+    pricing.annual.platform +
+    seatCount * pricing.annual.seat +
+    annualExtraUploadGb * MB_PER_GB * pricing.annual.uploadPerMb +
+    annualExtraExports * pricing.annual.export +
+    (ssoEnabled ? pricing.annual.sso : 0);
+  const monthlyExtraUploadGb = Math.max(
+    0,
+    monthlyEquivalentUploadGb - INCLUDED_UPLOAD_GB_MONTHLY,
+  );
+  const monthlyExtraExports = Math.max(
+    0,
+    monthlyEquivalentExports - INCLUDED_EXPORTS_MONTHLY,
+  );
   const monthlyCycleAmount =
-    pricing.monthly.platformMonthlyEquivalent +
-    seatCount * pricing.monthly.seatMonthlyEquivalent +
-    extraStorageGb * pricing.monthly.storageMonthlyEquivalent +
-    extraExportsPerMonth * pricing.monthly.exportMonthlyEquivalent +
-    (ssoEnabled ? pricing.monthly.ssoMonthlyEquivalent : 0);
+    pricing.monthly.platform +
+    seatCount * pricing.monthly.seat +
+    monthlyExtraUploadGb * MB_PER_GB * pricing.monthly.uploadPerMb +
+    monthlyExtraExports * pricing.monthly.export +
+    (ssoEnabled ? pricing.monthly.sso : 0);
+
+  function handleBillingCycleChange(checked: boolean) {
+    const nextCycle: BillingCycle = checked ? "annual" : "monthly";
+    if (nextCycle === billingCycle) return;
+
+    setBillingCycle(nextCycle);
+    setUploadGb((currentValue) => {
+      const monthlyValue = getMonthlyUsageValue(currentValue, billingCycle);
+      return getRoundedCycleUsageValue(
+        getCycleUsageValue(monthlyValue, nextCycle),
+        nextCycle,
+      );
+    });
+    setExportsCount((currentValue) => {
+      const monthlyValue = getMonthlyUsageValue(currentValue, billingCycle);
+      return getRoundedCycleUsageValue(
+        getCycleUsageValue(monthlyValue, nextCycle),
+        nextCycle,
+      );
+    });
+  }
 
   const billingToggle = (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
@@ -303,9 +397,7 @@ export function PricingCalculatorCards() {
         <Label>Monthly</Label>
         <Switch
           checked={billingCycle === "annual"}
-          onCheckedChange={(checked) =>
-            setBillingCycle(checked ? "annual" : "monthly")
-          }
+          onCheckedChange={handleBillingCycleChange}
           aria-label="billing cycle toggle"
           className="scale-125 data-[state=checked]:bg-foreground"
         />
@@ -329,54 +421,37 @@ export function PricingCalculatorCards() {
           </span>
         }
         leftContent={
-          <div className="space-y-6">
-            <div className="">
-              {/* <p className="text-sm text-muted-foreground">Current subtotal</p> */}
-              <div className="space-y-2">
-                <AmountDisplay
-                  value={getCycleAmount(
-                    platformMonthlyEquivalent,
-                    billingCycle,
-                  )}
-                  billingCycle={billingCycle}
-                />
-                {billingCycle === "annual" ? (
-                  <p className="text-sm text-muted-foreground">
-                    Equivalent to{" "}
-                    {getMonthlyEquivalentNote(platformMonthlyEquivalent)} on an
-                    annual contract.
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Switch to annual billing to bring this down to{" "}
-                    {getMonthlyEquivalentNote(
-                      pricing.annual.platformMonthlyEquivalent,
-                    )}
-                    .
-                  </p>
-                )}
-              </div>
-            </div>
+          <div className="space-y-2">
+            <AmountDisplay
+              value={platformCycleAmount}
+              billingCycle={billingCycle}
+            />
+            {billingCycle === "annual" ? (
+              <p className="text-sm text-muted-foreground">
+                Equivalent to{" "}
+                {getMonthlyEquivalentNote(platformCycleAmount, billingCycle)} on
+                a yearly contract.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Switch to yearly billing to bring this down to{" "}
+                {getMonthlyEquivalentNote(pricing.annual.platform, "annual")}.
+              </p>
+            )}
           </div>
         }
         rightContent={
           <div className="space-y-4">
             <p className="text-sm font-medium text-foreground">Workspace</p>
-            <RailRow label="Platform Workspace" value="1 account" emphasized />
-            {/* <RailRow
-              label="Annual billing"
-              value={`${formatCurrency(1500)} / year`}
-            /> */}
-            {/* <RailRow
-              label="Monthly equivalent"
-              value={getMonthlyEquivalentNote(
-                pricing.annual.platformMonthlyEquivalent,
-              )}
+            <RailRow label="Platform workspace" value="1 account" emphasized />
+            <RailRow
+              label="Yearly billing"
+              value={`${formatCurrency(pricing.annual.platform)} / year`}
             />
             <RailRow
               label="Monthly billing"
-              value={`${formatCurrency(149)} / month`}
-            /> */}
+              value={`${formatCurrency(pricing.monthly.platform)} / month`}
+            />
           </div>
         }
       />
@@ -392,17 +467,10 @@ export function PricingCalculatorCards() {
         leftContent={
           <div className="space-y-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                {/* <p className="text-sm text-muted-foreground">Selected seats</p> */}
-                <div className="">
-                  <CountDisplay
-                    value={seatCount}
-                    suffix={
-                      seatCount === 1 ? "licensed user" : "licensed users"
-                    }
-                  />
-                </div>
-              </div>
+              <CountDisplay
+                value={seatCount}
+                suffix={seatCount === 1 ? "licensed user" : "licensed users"}
+              />
               <p className="text-sm text-muted-foreground">
                 Range: 1 to {MAX_SEATS} seats
               </p>
@@ -427,23 +495,16 @@ export function PricingCalculatorCards() {
             </div>
 
             <div className="border-t border-border/70 pt-6">
-              {/* <p className="text-sm text-muted-foreground">Current subtotal</p> */}
               <div className="space-y-2">
                 <AmountDisplay
-                  value={getCycleAmount(seatsMonthlyEquivalent, billingCycle)}
+                  value={seatsCycleAmount}
                   billingCycle={billingCycle}
                 />
-                {billingCycle === "annual" ? (
-                  <p className="text-sm text-muted-foreground">
-                    {formatCurrency(currentPricing.seatMonthlyEquivalent)} per
-                    seat per month, billed annually.
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {formatCurrency(currentPricing.seatMonthlyEquivalent)} per
-                    seat per month.
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  {billingCycle === "annual"
+                    ? `${formatCurrency(currentPricing.seat)} per seat per year, billed yearly.`
+                    : `${formatCurrency(currentPricing.seat)} per seat per month.`}
+                </p>
               </div>
             </div>
           </div>
@@ -451,15 +512,14 @@ export function PricingCalculatorCards() {
         rightContent={
           <div className="space-y-4">
             <p className="text-sm font-medium text-foreground">Unit pricing</p>
-            {/* <RailRow label="Current seats" value={seatCount} emphasized /> */}
             <RailRow
               label={
-                billingCycle === "annual" ? "Selected cycle" : "Annual option"
+                billingCycle === "annual" ? "Selected cycle" : "Yearly option"
               }
               value={
                 billingCycle === "annual"
-                  ? `${formatCurrency(currentPricing.seatMonthlyEquivalent)} / seat / month`
-                  : `${formatCurrency(alternativePricing.seatMonthlyEquivalent)} / seat / month`
+                  ? `${formatCurrency(currentPricing.seat)} / seat / year`
+                  : `${formatCurrency(pricing.annual.seat)} / seat / year`
               }
             />
             <RailRow
@@ -468,14 +528,14 @@ export function PricingCalculatorCards() {
               }
               value={
                 billingCycle === "monthly"
-                  ? `${formatCurrency(currentPricing.seatMonthlyEquivalent)} / seat / month`
-                  : `${formatCurrency(alternativePricing.seatMonthlyEquivalent)} / seat / month`
+                  ? `${formatCurrency(currentPricing.seat)} / seat / month`
+                  : `${formatCurrency(pricing.monthly.seat)} / seat / month`
               }
             />
             <div className="border-t border-border/70 pt-4">
               <RailRow
-                label="Annual contract rate"
-                value={`${formatCurrency(pricing.annual.seatMonthlyEquivalent * 12)} / seat / year`}
+                label="Yearly monthly equivalent"
+                value={`${formatCurrency(pricing.annual.seat / 12)} / seat / month`}
               />
             </div>
           </div>
@@ -485,67 +545,59 @@ export function PricingCalculatorCards() {
       <CalculatorCard
         icon={PiDatabaseDuotone}
         iconClassName="text-foreground"
-        title="Storage"
-        description="Uploaded file storage for the workspace. The first 10 GB stay included, then pricing scales per GB."
-        headerAction={<ScaleLink copy="Need more storage? Talk to sales" />}
+        title="Uploads"
+        description={`Committed upload volume for the workspace. The first ${includedUploadGb.toLocaleString()} GB per ${currentCycleLabel} stay included, then usage is metered in MB.`}
+        headerAction={<ScaleLink copy="Need more uploads? Talk to sales" />}
         leftContent={
           <div className="space-y-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                {/* <p className="text-sm text-muted-foreground">
-                  Selected storage
-                </p> */}
-                <div>
-                  <CountDisplay
-                    value={storageGb}
-                    suffix="GB"
-                  />
-                </div>
-              </div>
+              <CountDisplay
+                value={uploadGb}
+                suffix={`GB / ${currentCycleLabel}`}
+              />
               <p className="text-sm text-muted-foreground">
-                {INCLUDED_STORAGE_GB} GB included, then increments of 1 GB
+                {includedUploadGb.toLocaleString()} GB included per{" "}
+                {currentCycleLabel}, then increments of 1 GB
               </p>
             </div>
 
             <div className="space-y-3">
               <Slider
-                value={[storageGb]}
-                min={INCLUDED_STORAGE_GB}
-                max={MAX_STORAGE_GB}
+                value={[uploadGb]}
+                min={includedUploadGb}
+                max={getMaxUploadsGb(billingCycle)}
                 step={1}
                 onValueChange={(value) =>
-                  setStorageGb(value[0] ?? INCLUDED_STORAGE_GB)
+                  setUploadGb(value[0] ?? includedUploadGb)
                 }
-                aria-label="Storage in gigabytes"
+                aria-label={`Uploads in gigabytes per ${currentCycleLabel}`}
                 trackClassName="h-2 rounded-full bg-muted"
                 rangeClassName="bg-foreground"
                 thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-[0_8px_18px_-10px_rgba(15,15,15,0.45)] before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{INCLUDED_STORAGE_GB} GB</span>
-                <span>{MAX_STORAGE_GB} GB</span>
+                <span>{includedUploadGb.toLocaleString()} GB</span>
+                <span>{getMaxUploadsGb(billingCycle).toLocaleString()} GB</span>
               </div>
             </div>
 
             <div className="border-t border-border/70 pt-6">
               <div className="space-y-2">
-                {extraStorageGb === 0 ? (
+                {extraUploadGb === 0 ? (
                   <IncludedSummary
                     isIncluded={true}
-                    label={`${INCLUDED_STORAGE_GB} GB is already covered by the platform fee.`}
+                    label={`${includedUploadGb.toLocaleString()} GB per ${currentCycleLabel} is already covered by the platform plan.`}
                   />
                 ) : (
                   <>
                     <AmountDisplay
-                      value={getCycleAmount(
-                        storageMonthlyEquivalent,
-                        billingCycle,
-                      )}
+                      value={uploadCycleAmount}
                       billingCycle={billingCycle}
                     />
                     <p className="text-sm text-muted-foreground">
-                      {extraStorageGb} billable GB above the included{" "}
-                      {INCLUDED_STORAGE_GB} GB.
+                      {extraUploadGb.toLocaleString()} billable GB above the
+                      included {includedUploadGb.toLocaleString()} GB per{" "}
+                      {currentCycleLabel}.
                     </p>
                   </>
                 )}
@@ -559,19 +611,22 @@ export function PricingCalculatorCards() {
               Included and unit pricing
             </p>
             <RailRow
-              label="Included storage"
-              value={`${INCLUDED_STORAGE_GB} GB`}
+              label="Included uploads"
+              value={`${includedUploadGb.toLocaleString()} GB / ${currentCycleLabel}`}
               emphasized
             />
-            <RailRow label="Billable now" value={`${extraStorageGb} GB`} />
+            <RailRow
+              label="Billable now"
+              value={`${extraUploadGb.toLocaleString()} GB / ${currentCycleLabel}`}
+            />
             <RailRow
               label={
-                billingCycle === "annual" ? "Selected cycle" : "Annual option"
+                billingCycle === "annual" ? "Selected cycle" : "Yearly option"
               }
               value={
                 billingCycle === "annual"
-                  ? `${formatCurrency(currentPricing.storageMonthlyEquivalent)} / GB / month`
-                  : `${formatCurrency(alternativePricing.storageMonthlyEquivalent)} / GB / month`
+                  ? `${formatCurrency(getUploadUnitPricePerGb("annual"))} / GB / year`
+                  : `${formatCurrency(getUploadUnitPricePerGb("annual"))} / GB / year`
               }
             />
             <RailRow
@@ -580,10 +635,16 @@ export function PricingCalculatorCards() {
               }
               value={
                 billingCycle === "monthly"
-                  ? `${formatCurrency(currentPricing.storageMonthlyEquivalent)} / GB / month`
-                  : `${formatCurrency(alternativePricing.storageMonthlyEquivalent)} / GB / month`
+                  ? `${formatCurrency(getUploadUnitPricePerGb("monthly"))} / GB / month`
+                  : `${formatCurrency(getUploadUnitPricePerGb("monthly"))} / GB / month`
               }
             />
+            <div className="border-t border-border/70 pt-4">
+              <RailRow
+                label="Chargebee unit"
+                value={`${formatTinyCurrency(currentPricing.uploadPerMb)} / MB`}
+              />
+            </div>
           </div>
         }
       />
@@ -592,65 +653,65 @@ export function PricingCalculatorCards() {
         icon={PiExportDuotone}
         iconClassName="text-foreground"
         title="Exports"
-        description="Completed PDF or XLSX product exports and report exports per month. The first 50 per month stay included."
+        description={`Completed PDF or XLSX product exports and report exports. The first ${includedExports.toLocaleString()} per ${currentCycleLabel} stay included.`}
         headerAction={
           <ScaleLink copy="Need higher export volume? Talk to sales" />
         }
         leftContent={
           <div className="space-y-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div>
-                  <CountDisplay
-                    value={exportsPerMonth}
-                    suffix="exports / month"
-                  />
-                </div>
-              </div>
+              <CountDisplay
+                value={exportsCount}
+                suffix={`exports / ${currentCycleLabel}`}
+              />
               <p className="text-sm text-muted-foreground">
-                {INCLUDED_EXPORTS_PER_MONTH} exports included each month
+                {includedExports.toLocaleString()} exports included per{" "}
+                {currentCycleLabel}
               </p>
             </div>
 
             <div className="space-y-3">
               <Slider
-                value={[exportsPerMonth]}
-                min={INCLUDED_EXPORTS_PER_MONTH}
-                max={MAX_EXPORTS_PER_MONTH}
+                value={[exportsCount]}
+                min={includedExports}
+                max={getMaxExports(billingCycle)}
                 step={1}
                 onValueChange={(value) =>
-                  setExportsPerMonth(value[0] ?? INCLUDED_EXPORTS_PER_MONTH)
+                  setExportsCount(value[0] ?? includedExports)
                 }
-                aria-label="Exports per month"
+                aria-label={`Exports per ${currentCycleLabel}`}
                 trackClassName="h-2 rounded-full bg-muted"
                 rangeClassName="bg-foreground"
                 thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-[0_8px_18px_-10px_rgba(15,15,15,0.45)] before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{INCLUDED_EXPORTS_PER_MONTH} / month</span>
-                <span>{MAX_EXPORTS_PER_MONTH} / month</span>
+                <span>
+                  {includedExports.toLocaleString()} / {currentCycleLabel}
+                </span>
+                <span>
+                  {getMaxExports(billingCycle).toLocaleString()} /{" "}
+                  {currentCycleLabel}
+                </span>
               </div>
             </div>
 
             <div className="border-t border-border/70 pt-6">
-              <div className=" space-y-2">
-                {extraExportsPerMonth === 0 ? (
+              <div className="space-y-2">
+                {extraExports === 0 ? (
                   <IncludedSummary
                     isIncluded={true}
-                    label={`${INCLUDED_EXPORTS_PER_MONTH} exports per month are already covered.`}
+                    label={`${includedExports.toLocaleString()} exports per ${currentCycleLabel} are already covered.`}
                   />
                 ) : (
                   <>
                     <AmountDisplay
-                      value={getCycleAmount(
-                        exportsMonthlyEquivalent,
-                        billingCycle,
-                      )}
+                      value={exportsCycleAmount}
                       billingCycle={billingCycle}
                     />
                     <p className="text-sm text-muted-foreground">
-                      {extraExportsPerMonth} billable exports above the included{" "}
-                      {INCLUDED_EXPORTS_PER_MONTH} per month.
+                      {extraExports.toLocaleString()} billable exports above the
+                      included {includedExports.toLocaleString()} per{" "}
+                      {currentCycleLabel}.
                     </p>
                   </>
                 )}
@@ -665,21 +726,21 @@ export function PricingCalculatorCards() {
             </p>
             <RailRow
               label="Included exports"
-              value={`${INCLUDED_EXPORTS_PER_MONTH} / month`}
+              value={`${includedExports.toLocaleString()} / ${currentCycleLabel}`}
               emphasized
             />
             <RailRow
               label="Billable now"
-              value={`${extraExportsPerMonth} / month`}
+              value={`${extraExports.toLocaleString()} / ${currentCycleLabel}`}
             />
             <RailRow
               label={
-                billingCycle === "annual" ? "Selected cycle" : "Annual option"
+                billingCycle === "annual" ? "Selected cycle" : "Yearly option"
               }
               value={
                 billingCycle === "annual"
-                  ? `${formatCurrency(currentPricing.exportMonthlyEquivalent)} / export / month`
-                  : `${formatCurrency(alternativePricing.exportMonthlyEquivalent)} / export / month`
+                  ? `${formatCurrency(currentPricing.export)} / export / year`
+                  : `${formatCurrency(pricing.annual.export)} / export / year`
               }
             />
             <RailRow
@@ -688,8 +749,8 @@ export function PricingCalculatorCards() {
               }
               value={
                 billingCycle === "monthly"
-                  ? `${formatCurrency(currentPricing.exportMonthlyEquivalent)} / export / month`
-                  : `${formatCurrency(alternativePricing.exportMonthlyEquivalent)} / export / month`
+                  ? `${formatCurrency(currentPricing.export)} / export / month`
+                  : `${formatCurrency(pricing.monthly.export)} / export / month`
               }
             />
           </div>
@@ -728,10 +789,7 @@ export function PricingCalculatorCards() {
                 {ssoEnabled ? (
                   <>
                     <AmountDisplay
-                      value={getCycleAmount(
-                        currentPricing.ssoMonthlyEquivalent,
-                        billingCycle,
-                      )}
+                      value={ssoCycleAmount}
                       billingCycle={billingCycle}
                     />
                     <p className="text-sm text-muted-foreground">
@@ -759,18 +817,12 @@ export function PricingCalculatorCards() {
               emphasized
             />
             <RailRow
-              label="Annual billing"
-              value={`${formatCurrency(pricing.annual.ssoMonthlyEquivalent * 12)} / year`}
+              label="Yearly billing"
+              value={`${formatCurrency(pricing.annual.sso)} / year`}
             />
-            {/* <RailRow
-              label="Monthly equivalent"
-              value={getMonthlyEquivalentNote(
-                pricing.annual.ssoMonthlyEquivalent,
-              )}
-            /> */}
             <RailRow
               label="Monthly billing"
-              value={`${formatCurrency(pricing.monthly.ssoMonthlyEquivalent)} / month`}
+              value={`${formatCurrency(pricing.monthly.sso)} / month`}
             />
             <div className="border-t border-border/70 pt-4">
               <ScaleLink copy="Need SSO rollout help? Talk to sales" />
@@ -783,7 +835,7 @@ export function PricingCalculatorCards() {
         icon={PiCoinsDuotone}
         iconClassName="text-foreground"
         title="Total"
-        description="Estimated price for one workspace based on the current seat count, storage, export volume, and SSO selection."
+        description="Estimated price for one workspace based on the current seat count, upload volume, export volume, and SSO selection."
         className="border-primary/20"
         rightRailClassName="bg-primary/5"
         leftContent={
@@ -794,49 +846,35 @@ export function PricingCalculatorCards() {
             <div className="space-y-3">
               <RailRow
                 label="Platform fee"
-                value={formatCurrency(
-                  getCycleAmount(platformMonthlyEquivalent, billingCycle),
-                )}
+                value={formatCurrency(platformCycleAmount)}
                 emphasized
               />
               <RailRow
                 label={`${seatCount} seat${seatCount === 1 ? "" : "s"}`}
-                value={formatCurrency(
-                  getCycleAmount(seatsMonthlyEquivalent, billingCycle),
-                )}
+                value={formatCurrency(seatsCycleAmount)}
                 emphasized
               />
               <RailRow
-                label={`Storage (${storageGb} GB selected)`}
+                label={`Uploads (${uploadGb.toLocaleString()} GB / ${currentCycleLabel} selected)`}
                 value={
-                  extraStorageGb === 0
+                  extraUploadGb === 0
                     ? "Included"
-                    : formatCurrency(
-                        getCycleAmount(storageMonthlyEquivalent, billingCycle),
-                      )
+                    : formatCurrency(uploadCycleAmount)
                 }
                 emphasized
               />
               <RailRow
-                label={`Exports (${exportsPerMonth} / month selected)`}
+                label={`Exports (${exportsCount.toLocaleString()} / ${currentCycleLabel} selected)`}
                 value={
-                  extraExportsPerMonth === 0
+                  extraExports === 0
                     ? "Included"
-                    : formatCurrency(
-                        getCycleAmount(exportsMonthlyEquivalent, billingCycle),
-                      )
+                    : formatCurrency(exportsCycleAmount)
                 }
                 emphasized
               />
               <RailRow
                 label="SSO add-on"
-                value={
-                  ssoEnabled
-                    ? formatCurrency(
-                        getCycleAmount(ssoMonthlyEquivalent, billingCycle),
-                      )
-                    : "Not added"
-                }
+                value={ssoEnabled ? formatCurrency(ssoCycleAmount) : "Not added"}
                 emphasized
               />
             </div>
@@ -860,8 +898,8 @@ export function PricingCalculatorCards() {
             {billingCycle === "annual" ? (
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p>
-                  {getMonthlyEquivalentNote(totalMonthlyEquivalent)} effective
-                  monthly spend on annual billing.
+                  {getMonthlyEquivalentNote(totalCycleAmount, billingCycle)}{" "}
+                  effective monthly spend on yearly billing.
                 </p>
                 <p>
                   If you switched this exact configuration to monthly billing,
@@ -876,16 +914,15 @@ export function PricingCalculatorCards() {
                   billing.
                 </p>
                 <p>
-                  Switching this exact configuration to annual billing would
-                  bring it to{" "}
-                  {getMonthlyEquivalentNote(annualMonthlyEquivalent)} and{" "}
-                  {formatCurrency(annualMonthlyEquivalent * 12)} / year.
+                  Switching this exact configuration to yearly billing would
+                  bring it to {formatCurrency(annualCycleAmount / 12)} / month
+                  and {formatCurrency(annualCycleAmount)} / year.
                 </p>
               </div>
             )}
 
             <div className="border-t border-border/70 pt-4">
-              <ScaleLink copy="Need a larger rollout or enterprise pricing? Talk to sales" />
+              <ScaleLink copy="Need a larger rollout or tailored agreement? Talk to sales" />
             </div>
           </div>
         }

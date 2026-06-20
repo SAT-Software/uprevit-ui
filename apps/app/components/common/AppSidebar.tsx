@@ -15,7 +15,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@uprevit/ui/components/ui/sidebar";
-import Link from "next/link";
+import { GuardedLink } from "@/components/common/GuardedLink";
 import { UprevitLogo } from "@/components/common/UprevitLogo";
 import {
   PiArchiveDuotone,
@@ -188,7 +188,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-b border-sidebar-border h-12 py-1">
-        <Link
+        <GuardedLink
           href="/"
           className="flex items-center gap-1 p-0.5 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
@@ -213,7 +213,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Tooltip>
             </div>
           </div>
-        </Link>
+        </GuardedLink>
       </SidebarHeader>
       <SidebarContent className="gap-2 p-1">
         {/* We create a SidebarGroup for each parent. */}
@@ -235,10 +235,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           : "",
                       )}
                     >
-                      <Link href={item.url} className="flex items-center gap-2">
+                      <GuardedLink href={item.url} className="flex items-center gap-2">
                         {item.icon && <item.icon />}
                         {item.title}
-                      </Link>
+                      </GuardedLink>
                     </SidebarMenuButton>
                     {item.title === "Products" && showProductSubNavigation && (
                       <Collapsible
@@ -259,7 +259,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                   )}
                                   asChild
                                 >
-                                  <Link
+                                  <GuardedLink
                                     href={`/products/${productId}${subItem.url}${
                                       compareVersionId
                                         ? `?compareVersion=${compareVersionId}`
@@ -268,7 +268,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                   >
                                     {subItem.icon && <subItem.icon />}
                                     <span>{subItem.title}</span>
-                                  </Link>
+                                  </GuardedLink>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             ))}
