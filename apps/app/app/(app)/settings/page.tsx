@@ -116,16 +116,12 @@ function SettingsPage() {
                   <PiChartBarDuotone className="mr-2 h-4 w-4" />
                   Usage
                 </TabsTrigger>
-                <TabsTrigger value="billing">
+                {/* <TabsTrigger value="billing">
                   <PiCreditCardDuotone className="mr-2 h-4 w-4" />
                   Billing
-                </TabsTrigger>
+                </TabsTrigger> */}
               </>
             ) : null}
-            {/* <TabsTrigger value="security">
-              <PiShieldCheckDuotone className="mr-2 h-4 w-4" />
-              Security
-            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="profile" className="mt-6">
@@ -148,12 +144,9 @@ function SettingsPage() {
             {activeTab === "usage" && <UsageTab />}
           </TabsContent>
 
-          <TabsContent value="billing" className="mt-6">
+          {/* Billing Tab is kept hidden, it is disabled for now. Later on we will add new user group as manager which is not billed who can only handle this billing tab and can't do any other activities*/}
+          {/* <TabsContent value="billing" className="mt-6">
             {activeTab === "billing" && <BillingTab />}
-          </TabsContent>
-
-          {/* <TabsContent value="security" className="mt-6">
-            <SecurityTab />
           </TabsContent> */}
         </Tabs>
       </div>
