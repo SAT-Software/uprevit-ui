@@ -13,9 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
-import { Label } from "@uprevit/ui/components/ui/label";
+// import { Input } from "@uprevit/ui/components/ui/input";
+// import { Textarea } from "@uprevit/ui/components/ui/textarea";
+// import { Label } from "@uprevit/ui/components/ui/label";
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +23,7 @@ import {
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
 import { useTheme } from "next-themes";
-import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
+import { FaLinkedin } from "react-icons/fa6";
 import {
   PiEnvelopeSimpleDuotone,
   PiClockClockwiseDuotone,
@@ -38,7 +38,7 @@ const contactFAQs = [
   {
     question: "How quickly will we hear back?",
     answer:
-      "We respond within 1 business day. Enterprise and urgent requests are prioritized based on scope.",
+      "We respond within 72 hours. Enterprise and urgent requests are prioritized based on scope.",
   },
   {
     question: "Can you help with compliance assessments?",
@@ -97,11 +97,10 @@ export default function ContactPage() {
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
-                <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-                  <div className="flex w-full flex-col gap-6 md:max-w-sm lg:max-w-md">
-                    <Card className="border-border/70">
-                      <CardHeader className="p-4 pb-3 md:p-6 md:pb-4">
-                        <div className="flex flex-row items-start gap-2 md:items-center">
+                <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3 md:gap-4 md:items-stretch">
+                    <Card className="flex h-full flex-col border-border/70">
+                      <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
+                        <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
                             <PiEnvelopeSimpleDuotone className="h-4 w-4 md:h-5 md:w-5" />
                           </div>
@@ -116,22 +115,22 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0 md:px-6 md:pb-6">
+                      <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
                         <Link
                           href="mailto:contact@uprevit.com"
-                          className="text-sm md:text-base font-medium text-foreground hover:underline"
+                          className="text-sm font-medium text-foreground hover:underline"
                         >
                           contact@uprevit.com
                         </Link>
-                        <p className="mt-3 text-xs md:text-sm text-muted-foreground">
-                          Typical response time: within 1 business day.
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          Typical response time: within 72 hours.
                         </p>
                       </CardContent>
                     </Card>
 
-                    <Card className="border-border/70">
-                      <CardHeader className="p-4 pb-3 md:p-6 md:pb-4">
-                        <div className="flex flex-row items-start gap-2 md:items-center">
+                    <Card className="flex h-full flex-col border-border/70">
+                      <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
+                        <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
                             <PiChatTextDuotone className="h-4 w-4 md:h-5 md:w-5" />
                           </div>
@@ -146,33 +145,22 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0 md:px-6 md:pb-6">
-                        <div className="flex flex-col gap-4">
-                          <Link
-                            href="https://x.com/uprevit"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-2.5 text-sm md:text-base text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <FaXTwitter className="h-4 w-4 md:h-5 md:w-5" />
-                            <span>x.com/uprevit</span>
-                          </Link>
-                          <Link
-                            href="https://linkedin.com/company/uprevit"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-2.5 text-sm md:text-base text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <FaLinkedin className="h-4 w-4 md:h-5 md:w-5" />
-                            <span>linkedin.com/company/uprevit</span>
-                          </Link>
-                        </div>
+                      <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
+                        <Link
+                          href="https://linkedin.com/company/uprevit"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <FaLinkedin className="h-4 w-4 shrink-0" />
+                          <span>linkedin.com/company/uprevit</span>
+                        </Link>
                       </CardContent>
                     </Card>
 
-                    <Card className="border-border/70">
-                      <CardHeader className="p-4 pb-3 md:p-6 md:pb-4">
-                        <div className="flex flex-row items-start gap-2 md:items-center">
+                    <Card className="flex h-full flex-col border-border/70">
+                      <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
+                        <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
                             <PiClockClockwiseDuotone className="h-4 w-4 md:h-5 md:w-5" />
                           </div>
@@ -186,9 +174,9 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0 md:px-6 md:pb-6">
-                        <div className="flex items-start gap-2 text-xs md:text-sm text-muted-foreground">
-                          <PiMapPinDuotone className="mt-0.5 h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+                      <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
+                        <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <PiMapPinDuotone className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                           <span>
                             Serving medical device teams across North America,
                             EU, and APAC.
@@ -196,7 +184,7 @@ export default function ContactPage() {
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
+                  {/* Contact form temporarily disabled until backend integration is ready.
                   <div className="hidden md:block border-dashed border-r border-border" />
                   <Card className="w-full border-border/70 shadow-sm">
                     <CardHeader>
@@ -257,6 +245,7 @@ export default function ContactPage() {
                       </form>
                     </CardContent>
                   </Card>
+                  */}
                 </div>
               </div>
             </div>
