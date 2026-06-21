@@ -40,9 +40,12 @@ function SettingsPage() {
   const router = useRouter();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const adminTabs = ["admins", "workspace", "usage", "billing", "security"];
+  const adminTabs = ["admins", "workspace", "usage", "security"];
+  const resolvedTab = tab === "billing" ? "usage" : tab;
   const activeTab =
-    tab && (!adminTabs.includes(tab) || isAdmin) ? tab : "profile";
+    resolvedTab && (!adminTabs.includes(resolvedTab) || isAdmin)
+      ? resolvedTab
+      : "profile";
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [syncedActiveTab, setSyncedActiveTab] = useState(activeTab);
 
@@ -116,16 +119,12 @@ function SettingsPage() {
                   <PiChartBarDuotone className="mr-2 h-4 w-4" />
                   Usage
                 </TabsTrigger>
-                <TabsTrigger value="billing">
+                {/* <TabsTrigger value="billing">
                   <PiCreditCardDuotone className="mr-2 h-4 w-4" />
                   Billing
-                </TabsTrigger>
+                </TabsTrigger> */}
               </>
             ) : null}
-            {/* <TabsTrigger value="security">
-              <PiShieldCheckDuotone className="mr-2 h-4 w-4" />
-              Security
-            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="profile" className="mt-6">
@@ -148,12 +147,9 @@ function SettingsPage() {
             {activeTab === "usage" && <UsageTab />}
           </TabsContent>
 
-          <TabsContent value="billing" className="mt-6">
+          {/* Billing Tab is kept hidden, it is disabled for now. Later on we will add new user group as manager which is not billed who can only handle this billing tab and can't do any other activities*/}
+          {/* <TabsContent value="billing" className="mt-6">
             {activeTab === "billing" && <BillingTab />}
-          </TabsContent>
-
-          {/* <TabsContent value="security" className="mt-6">
-            <SecurityTab />
           </TabsContent> */}
         </Tabs>
       </div>

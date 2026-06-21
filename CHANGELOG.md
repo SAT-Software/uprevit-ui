@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-06-21
+
+### Updated
+
+- Temporarily hid the Billing tab in workspace settings while a dedicated manager user group is planned.
+- Updated AGENTS.md with notes on the future manager user group and billing access.
+- Updated monorepo package versions to `0.5.1`.
+
+### Fixed
+
+- Fixed product workbook redline compare grids to remain read-only.
+
 ## [0.5.0] - 2026-06-19
 
 ### Added
