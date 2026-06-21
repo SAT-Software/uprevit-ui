@@ -129,3 +129,5 @@ Located at `../uprevit-backend`:
 - **`@/lib/utils`**: Contains `cn()` for Tailwind class merging
 - **`@/utils/isAdmin`**: Contains `isAdminProfile()` for admin role checks
 - **`@/components/ui`**: shadcn/ui component library
+
+- Billing tab is hidden for the time being, Later on we will introduce a new user group called as manager who can who other stuff and billing, check and download invoices but can't do any other CRUD operation in the app
