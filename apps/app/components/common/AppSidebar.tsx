@@ -52,6 +52,7 @@ import {
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 
 const data = {
   navMain: [
@@ -174,7 +175,8 @@ const productSubItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { data: workspaceData, isLoading } = useGetWorkspace();
+  const { data: workspaceData, isLoading: isWorkspaceLoading } =
+    useGetWorkspace();
   const workspace = workspaceData?.workspace;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
@@ -190,22 +192,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="border-b border-sidebar-border h-12 py-1">
         <GuardedLink
           href="/"
-          className="flex items-center gap-1 p-0.5 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          className="flex items-center gap-1 p-0.5 rounded mt-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <UprevitLogo className="mb-1 rounded-xl" />
           <div className="grid flex-1 text-left text-sm leading-tight">
             <div className="flex items-center gap-2">
-              <span className="truncate text-lg text-foreground font-black ">
+              <span className="truncate text-md text-foreground font-bold ">
                 UPREVIT
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    aria-label="Alpha release"
-                    className="rounded-full border border-sidebar-border bg-sidebar-accent px-1.5 py-0.5 text-xs font-semibold text-sidebar-foreground/70"
-                  >
-                    α
-                  </span>
+                  <Badge variant="secondary">alpha</Badge>
                 </TooltipTrigger>
                 <TooltipContent>
                   Early preview. Active updates are in progress.
@@ -223,21 +220,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {item.title}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-1">
+              <SidebarMenu className="gap-0.5">
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       className={cn(
-                        "h-7 border border-transparent",
                         pathname.startsWith(item.url)
-                          ? "bg-sidebar-accent border-sidebar-border rounded text-sidebar-primary"
-                          : "",
+                          ? "bg-sidebar-accent text-accent-foreground"
+                          : "text-sidebar-accent-foreground/40",
                       )}
                     >
-                      <GuardedLink href={item.url} className="flex items-center gap-2">
-                        {item.icon && <item.icon />}
-                        {item.title}
+                      <GuardedLink
+                        href={item.url}
+                        className="flex items-center gap-2"
+                      >
+                        <span>
+                          {item.icon && <item.icon className="size-4" />}
+                        </span>
+
+                        <span
+                          className={cn(
+                            pathname.startsWith(item.url)
+                              ? " text-accent-foreground"
+                              : "text-sidebar-accent-foreground",
+                          )}
+                        >
+                          {item.title}
+                        </span>
                       </GuardedLink>
                     </SidebarMenuButton>
                     {item.title === "Products" && showProductSubNavigation && (
@@ -254,8 +264,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 <SidebarMenuSubButton
                                   className={cn(
                                     pathname.includes(subItem.url)
-                                      ? "bg-sidebar-border/50 rounded text-sidebar-foreground"
-                                      : "",
+                                      ? "bg-sidebar-accent text-sidebar-foreground"
+                                      : "text-sidebar-foreground/40",
                                   )}
                                   asChild
                                 >
@@ -266,8 +276,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         : ""
                                     }`}
                                   >
-                                    {subItem.icon && <subItem.icon />}
-                                    <span>{subItem.title}</span>
+                                    {subItem.icon && (
+                                      <subItem.icon className="size-4" />
+                                    )}
+                                    <span
+                                      className={cn(
+                                        pathname.includes(subItem.url)
+                                          ? "text-sidebar-foreground"
+                                          : "text-sidebar-foreground",
+                                      )}
+                                    >
+                                      {subItem.title}
+                                    </span>
                                   </GuardedLink>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
@@ -289,7 +309,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarGroup className="px-2 py-1">
-        {isLoading ? (
+        {isWorkspaceLoading ? (
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton

@@ -1,6 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,7 +52,7 @@ export function SidebarNavWorkspace({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="border border-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:border-sidebar-border data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage
@@ -67,7 +71,7 @@ export function SidebarNavWorkspace({
                   {workspace?.companyName}
                 </span>
               </div>
-              <PiDotsThreeOutlineVerticalDuotone className="ml-auto size-4" />
+              <PiDotsThreeOutlineVerticalDuotone className="ml-auto size-4 text-sidebar-foreground" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -106,7 +110,10 @@ export function SidebarNavWorkspace({
                   Theme
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                  <DropdownMenuRadioGroup
+                    value={theme}
+                    onValueChange={setTheme}
+                  >
                     <DropdownMenuRadioItem value="light">
                       <PiSunDuotone />
                       Light

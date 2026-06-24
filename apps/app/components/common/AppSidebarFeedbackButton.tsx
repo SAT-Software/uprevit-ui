@@ -17,10 +17,12 @@ export function SidebarFeedbackButton() {
       ref={buttonRef}
       type="button"
       aria-label={SENTRY_FEEDBACK_ARIA_LABEL}
-      className={cn("h-7 w-full border border-transparent")}
+      className={cn("h-8 w-full text-sidebar-accent-foreground/40")}
     >
       <PiChatTeardropDotsDuotone />
-      {SENTRY_FEEDBACK_BUTTON_LABEL}
+      <span className="text-sidebar-foreground">
+        {SENTRY_FEEDBACK_BUTTON_LABEL}
+      </span>
     </SidebarMenuButton>
   );
 }

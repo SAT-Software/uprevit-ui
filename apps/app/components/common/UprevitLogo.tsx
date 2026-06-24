@@ -9,7 +9,7 @@ export function UprevitLogo({ className }: UprevitLogoProps) {
   return (
     <div
       className={cn(
-        "relative flex aspect-square size-8 shrink-0 items-center justify-center",
+        "relative flex aspect-square size-6 shrink-0 items-center justify-center",
         className,
       )}
     >
