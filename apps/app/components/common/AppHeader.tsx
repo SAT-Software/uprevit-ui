@@ -5,28 +5,12 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
 } from "@uprevit/ui/components/ui/breadcrumb";
-import { Separator } from "@uprevit/ui/components/ui/separator";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Product } from "@/types/product";
 import { GuardedLink } from "@/components/common/GuardedLink";
 import { useParams, usePathname } from "next/navigation";
-import {
-  PiArchiveDuotone,
-  PiBookmarkSimpleDuotone,
-  PiBuildingsDuotone,
-  PiChartBarDuotone,
-  PiChatTeardropDotsDuotone,
-  PiFolderOpenDuotone,
-  PiExportDuotone,
-  PiGearDuotone,
-  PiHouseDuotone,
-  PiKanbanDuotone,
-  PiLifebuoyDuotone,
-  PiPackageDuotone,
-  PiPresentationChartDuotone,
-} from "react-icons/pi";
 import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
 import { UserNav } from "./UserNav";
 
@@ -34,67 +18,54 @@ const pathData = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: PiHouseDuotone,
   },
   {
     title: "Departments",
     url: "/departments",
-    icon: PiBuildingsDuotone,
   },
   {
     title: "Projects",
     url: "/projects",
-    icon: PiKanbanDuotone,
   },
   {
     title: "Products",
     url: "/products",
-    icon: PiPackageDuotone,
   },
   {
     title: "Product Exports",
     url: "/products/exports",
-    icon: PiExportDuotone,
   },
   {
     title: "Source Files",
     url: "/source-files",
-    icon: PiFolderOpenDuotone,
   },
   {
     title: "Bookmarked Products",
     url: "/bookmarked-products",
-    icon: PiBookmarkSimpleDuotone,
   },
   {
     title: "Reports",
     url: "/reports",
-    icon: PiPresentationChartDuotone,
   },
   {
     title: "Analytics",
     url: "/analytics",
-    icon: PiChartBarDuotone,
   },
   {
     title: "Archive",
     url: "/archive",
-    icon: PiArchiveDuotone,
   },
   {
     title: "Settings",
     url: "/settings",
-    icon: PiGearDuotone,
   },
   {
     title: "Feedback",
     url: "/feedback",
-    icon: PiChatTeardropDotsDuotone,
   },
   {
     title: "Help Center",
     url: "/help-center",
-    icon: PiLifebuoyDuotone,
   },
 ];
 
@@ -151,25 +122,17 @@ export function AppHeader() {
       <div className="flex w-full">
         <div className="flex w-full items-center gap-2">
           <SidebarTrigger className="" />
-          {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
-          {/* <Separator orientation="vertical" className="mr-1 h-4" /> */}
-          {/* Breadcrumbs for dynamic routes, icon+title for static */}
           {/^\/(departments|projects|products|source-files|bookmarked-products)\/.+/.test(
             pathname,
           ) ? (
             (() => {
-              // Determine section (departments, projects, products)
               const section = pathname.split("/")[1];
               const sectionData = pathData.find(
                 (item) => item.url === `/${section}`,
               );
-              const Icon = sectionData?.icon;
-              // Extract dynamic id
-              const id = pathname.split("/")[2];
+
               return (
                 <div className="flex items-center gap-1">
-                  {/* {Icon && <Icon className="text-muted-foreground" />} */}
-                  {/* <Separator orientation="vertical" className="h-4" /> */}
                   <Breadcrumb>
                     <BreadcrumbList>
                       {/* <BreadcrumbSeparator /> */}
@@ -184,16 +147,9 @@ export function AppHeader() {
               );
             })()
           ) : (
-            <>
-              {/* {pathData.map(
-                (item) =>
-                  item.url === pathname &&
-                  item.icon && <item.icon key={item.title} />,
-              )} */}
-              <p className="text-sm font-medium">
-                {pathData.find((item) => item.url === pathname)?.title || ""}
-              </p>
-            </>
+            <p className="text-sm font-medium">
+              {pathData.find((item) => item.url === pathname)?.title || ""}
+            </p>
           )}
         </div>
         <UserNav />

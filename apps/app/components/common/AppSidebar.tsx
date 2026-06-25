@@ -1,5 +1,35 @@
 import * as React from "react";
 
+import { GuardedLink } from "@/components/common/GuardedLink";
+import { UprevitLogo } from "@/components/common/UprevitLogo";
+import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
+import {
+  AiSheetsIcon,
+  Album02Icon,
+  Archive01Icon,
+  ArchiveIcon,
+  ArrowDown01Icon,
+  Blockchain03Icon,
+  Bookmark01Icon,
+  BookOpen02Icon,
+  Chart02Icon,
+  ContractsIcon,
+  FileDatabaseIcon,
+  Folder02Icon,
+  Home04Icon,
+  KanbanIcon,
+  LabelImportantIcon,
+  LayerIcon,
+  Layout01Icon,
+  NewOfficeIcon,
+  Settings01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@uprevit/ui/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -15,44 +45,16 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@uprevit/ui/components/ui/sidebar";
-import { GuardedLink } from "@/components/common/GuardedLink";
-import { UprevitLogo } from "@/components/common/UprevitLogo";
-import {
-  PiArchiveDuotone,
-  PiBookmarkSimpleDuotone,
-  PiBookOpenDuotone,
-  PiBuildingsDuotone,
-  PiPresentationChartDuotone,
-  PiDatabaseDuotone,
-  PiHouseDuotone,
-  PiFolderOpenDuotone,
-  PiGearDuotone,
-  PiImageSquareDuotone,
-  PiKanbanDuotone,
-  PiLayoutDuotone,
-  PiMicrosoftExcelLogoDuotone,
-  PiPictureInPictureDuotone,
-  PiPackageDuotone,
-  PiTagChevronDuotone,
-  PiDotsThreeOutlineVerticalDuotone,
-  PiChartBarDuotone,
-} from "react-icons/pi";
-import { usePathname, useSearchParams } from "next/navigation";
-import { cn } from "@uprevit/ui/lib/utils";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@uprevit/ui/components/ui/collapsible";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
+import { cn } from "@uprevit/ui/lib/utils";
+import { usePathname, useSearchParams } from "next/navigation";
 import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
 const data = {
   navMain: [
@@ -62,22 +64,26 @@ const data = {
         {
           title: "Dashboard",
           url: "/dashboard",
-          icon: PiHouseDuotone,
+          icon: <HugeiconsIcon icon={Home04Icon} size={16} strokeWidth={2} />,
         },
         {
           title: "Departments",
           url: "/departments",
-          icon: PiBuildingsDuotone,
+          icon: (
+            <HugeiconsIcon icon={NewOfficeIcon} size={16} strokeWidth={2} />
+          ),
         },
         {
           title: "Projects",
           url: "/projects",
-          icon: PiKanbanDuotone,
+          icon: <HugeiconsIcon icon={KanbanIcon} size={16} strokeWidth={2} />,
         },
         {
           title: "Products",
           url: "/products",
-          icon: PiPackageDuotone,
+          icon: (
+            <HugeiconsIcon icon={Blockchain03Icon} size={16} strokeWidth={2} />
+          ),
         },
       ],
     },
@@ -87,17 +93,19 @@ const data = {
         {
           title: "Source Files",
           url: "/source-files",
-          icon: PiFolderOpenDuotone,
+          icon: <HugeiconsIcon icon={Folder02Icon} size={16} strokeWidth={2} />,
         },
         {
           title: "Bookmarked Products",
           url: "/bookmarked-products",
-          icon: PiBookmarkSimpleDuotone,
+          icon: (
+            <HugeiconsIcon icon={Bookmark01Icon} size={16} strokeWidth={2} />
+          ),
         },
         {
           title: "Archive",
           url: "/archive",
-          icon: PiArchiveDuotone,
+          icon: <HugeiconsIcon icon={ArchiveIcon} size={16} strokeWidth={2} />,
         },
       ],
     },
@@ -107,12 +115,14 @@ const data = {
         {
           title: "Reports",
           url: "/reports",
-          icon: PiPresentationChartDuotone,
+          icon: (
+            <HugeiconsIcon icon={Archive01Icon} size={16} strokeWidth={2} />
+          ),
         },
         {
           title: "Analytics",
           url: "/analytics",
-          icon: PiChartBarDuotone,
+          icon: <HugeiconsIcon icon={Chart02Icon} size={16} strokeWidth={2} />,
         },
       ],
     },
@@ -123,12 +133,16 @@ const data = {
         {
           title: "Settings",
           url: "/settings",
-          icon: PiGearDuotone,
+          icon: (
+            <HugeiconsIcon icon={Settings01Icon} size={16} strokeWidth={2} />
+          ),
         },
         {
           title: "Documentation",
           url: "/docs",
-          icon: PiBookOpenDuotone,
+          icon: (
+            <HugeiconsIcon icon={BookOpen02Icon} size={16} strokeWidth={2} />
+          ),
         },
       ],
     },
@@ -139,37 +153,37 @@ const productSubItems = [
   {
     title: "Product Information",
     url: "/product-information",
-    icon: PiLayoutDuotone,
+    icon: <HugeiconsIcon icon={Layout01Icon} size={16} strokeWidth={2} />,
   },
   {
     title: "Compliance Information",
     url: "/compliance-information",
-    icon: PiBookOpenDuotone,
+    icon: <HugeiconsIcon icon={ContractsIcon} size={16} strokeWidth={2} />,
   },
   {
     title: "Label Components",
     url: "/label-components",
-    icon: PiPictureInPictureDuotone,
+    icon: <HugeiconsIcon icon={LayerIcon} size={16} strokeWidth={2} />,
   },
   {
     title: "Symbols & Graphics",
     url: "/symbols-graphics",
-    icon: PiImageSquareDuotone,
+    icon: <HugeiconsIcon icon={Album02Icon} size={16} strokeWidth={2} />,
   },
   {
     title: "Product Specifications",
     url: "/product-specifications",
-    icon: PiMicrosoftExcelLogoDuotone,
+    icon: <HugeiconsIcon icon={AiSheetsIcon} size={16} strokeWidth={2} />,
   },
   {
     title: "Operational Parameters",
     url: "/operational-parameters",
-    icon: PiDatabaseDuotone,
+    icon: <HugeiconsIcon icon={FileDatabaseIcon} size={16} strokeWidth={2} />,
   },
   {
     title: "Label Tags",
     url: "/label-tags",
-    icon: PiTagChevronDuotone,
+    icon: <HugeiconsIcon icon={LabelImportantIcon} size={16} strokeWidth={2} />,
   },
 ];
 
@@ -202,7 +216,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="secondary">alpha</Badge>
+                  <Badge variant="secondary_muted">alpha</Badge>
                 </TooltipTrigger>
                 <TooltipContent>
                   Early preview. Active updates are in progress.
@@ -235,9 +249,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         href={item.url}
                         className="flex items-center gap-2"
                       >
-                        <span>
-                          {item.icon && <item.icon className="size-4" />}
-                        </span>
+                        <span>{item.icon}</span>
 
                         <span
                           className={cn(
@@ -277,7 +289,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     }`}
                                   >
                                     {subItem.icon && (
-                                      <subItem.icon className="size-4" />
+                                      <span>{subItem.icon}</span>
                                     )}
                                     <span
                                       className={cn(
@@ -321,7 +333,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Skeleton className="h-6 w-28 bg-border" />
                   <Skeleton className="h-4 w-38 bg-border" />
                 </div>
-                <PiDotsThreeOutlineVerticalDuotone className="ml-auto size-4 text-muted-foreground" />
+                <HugeiconsIcon
+                  icon={ArrowDown01Icon}
+                  size={16}
+                  strokeWidth={2}
+                />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

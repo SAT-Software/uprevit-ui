@@ -7,7 +7,8 @@ import {
   SENTRY_FEEDBACK_ARIA_LABEL,
   SENTRY_FEEDBACK_BUTTON_LABEL,
 } from "@/lib/sentry/feedbackLabels";
-import { PiChatTeardropDotsDuotone } from "react-icons/pi";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ChatFeedback01Icon } from "@hugeicons/core-free-icons";
 
 export function SidebarFeedbackButton() {
   const buttonRef = useSentryFeedbackAttach<HTMLButtonElement>();
@@ -19,7 +20,7 @@ export function SidebarFeedbackButton() {
       aria-label={SENTRY_FEEDBACK_ARIA_LABEL}
       className={cn("h-8 w-full text-sidebar-accent-foreground/40")}
     >
-      <PiChatTeardropDotsDuotone />
+      <HugeiconsIcon icon={ChatFeedback01Icon} />
       <span className="text-sidebar-foreground">
         {SENTRY_FEEDBACK_BUTTON_LABEL}
       </span>

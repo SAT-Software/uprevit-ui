@@ -24,6 +24,11 @@ import {
 import { useIsMobile } from "@uprevit/ui/hooks/general/use-mobile";
 import { cn } from "@uprevit/ui/lib/utils";
 import { PiSidebarSimpleDuotone } from "react-icons/pi";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  LayoutAlignLeftIcon,
+  LayoutAlignRightIcon,
+} from "@hugeicons/core-free-icons";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -258,20 +263,27 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
 
   return (
     <button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      className={cn("ml-0 px-0 py-0 cursor-pointer", className)}
+      className={cn(
+        "ml-0 px-0 py-0 cursor-pointer text-foreground/40",
+        className,
+      )}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
       }}
       {...props}
     >
-      <PiSidebarSimpleDuotone />
+      {open ? (
+        <HugeiconsIcon icon={LayoutAlignLeftIcon} size={16} strokeWidth={2} />
+      ) : (
+        <HugeiconsIcon icon={LayoutAlignRightIcon} size={16} strokeWidth={2} />
+      )}
       <span className="sr-only">Toggle Sidebar</span>
     </button>
   );
