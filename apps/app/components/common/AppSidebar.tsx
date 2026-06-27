@@ -216,7 +216,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="secondary_muted">alpha</Badge>
+                  <Badge variant="secondary">alpha</Badge>
                 </TooltipTrigger>
                 <TooltipContent>
                   Early preview. Active updates are in progress.

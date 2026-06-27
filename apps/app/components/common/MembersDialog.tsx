@@ -1,6 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +16,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@uprevit/ui/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
 import { useMemo, useState } from "react";
 import { PiMagnifyingGlassDuotone, PiUserDuotone } from "react-icons/pi";
@@ -98,13 +107,18 @@ export function MembersDialog({
     const q = query.toLowerCase().trim();
     if (!q) return users;
     return users.filter((m: User) =>
-      [m.name, m.email ?? ""].some((v) => v.toLowerCase().includes(q))
+      [m.name, m.email ?? ""].some((v) => v.toLowerCase().includes(q)),
     );
   }, [users, query]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] max-w-md overflow-hidden p-0 gap-0 border-border shadow-lg sm:rounded-xl">
+      <DialogContent
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
+        className="max-h-[85vh] max-w-md overflow-hidden p-0 gap-0 border-border shadow-lg sm:rounded-xl"
+      >
         <DialogHeader className="px-4 py-3 border-b border-border flex flex-row items-center justify-between space-y-0 bg-muted/10">
           <DialogTitle className="text-base font-semibold flex items-center gap-2">
             {titlePrefix ? `${titlePrefix} ` : ""}Members
@@ -147,11 +161,11 @@ export function MembersDialog({
 export function MembersInlineTrigger({
   users,
   titlePrefix,
-  className,
+  location,
 }: {
   users: User[];
   titlePrefix?: string;
-  className?: string;
+  location: string;
 }) {
   const [open, setOpen] = useState(false);
   const topFour = users?.slice(0, 4);
@@ -159,50 +173,63 @@ export function MembersInlineTrigger({
 
   return (
     <>
-      <button
-        type="button"
-        className={"flex items-center gap-3 cursor-pointer"}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen(true);
-        }}
-      >
-        <div className="flex items-center -space-x-2">
-          {topFour?.map((m) => {
-            return (
-              <Avatar key={m._id} className="h-7 w-7 ring-2 ring-background">
-                {m?.profileAvatar ? (
-                  <AvatarImage src={m.profileAvatar} alt={m.name} />
-                ) : null}
-                <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
-                  {m?.name
-                    ?.split(" ")
-                    ?.map((p) => p[0]?.toUpperCase())
-                    ?.join("")
-                    ?.slice(0, 2)}
-                </AvatarFallback>
-              </Avatar>
-            );
-          })}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className={"flex items-center gap-3 cursor-pointer"}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setOpen(true);
+            }}
+          >
+            <div className="flex items-center -space-x-2">
+              {topFour?.map((m) => {
+                return (
+                  <Avatar
+                    key={m._id}
+                    className="h-6 w-6 ring-2 ring-background"
+                  >
+                    {m?.profileAvatar ? (
+                      <AvatarImage src={m.profileAvatar} alt={m.name} />
+                    ) : null}
+                    <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
+                      {m?.name
+                        ?.split(" ")
+                        ?.map((p) => p[0]?.toUpperCase())
+                        ?.join("")
+                        ?.slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                );
+              })}
 
-          {extra > 0 ? (
-            <Avatar className="h-7 w-7 ring-2 ring-background">
-              <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
-                +{extra}
-              </AvatarFallback>
-            </Avatar>
-          ) : null}
+              {extra > 0 ? (
+                <Avatar className="h-7 w-7 ring-2 ring-background">
+                  <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
+                    +{extra}
+                  </AvatarFallback>
+                </Avatar>
+              ) : null}
 
-          {users?.length === 0 ? (
-            <Avatar className="h-7 w-7 ring-2 ring-background">
-              <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
-                0
-              </AvatarFallback>
-            </Avatar>
-          ) : null}
-        </div>
-      </button>
+              {users?.length === 0 ? (
+                <Avatar className="h-7 w-7 ring-2 ring-background">
+                  <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
+                    0
+                  </AvatarFallback>
+                </Avatar>
+              ) : null}
+            </div>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            Users working in this {location}. Click to see complete list of
+            users.
+          </p>
+        </TooltipContent>
+      </Tooltip>
 
       <MembersDialog
         open={open}

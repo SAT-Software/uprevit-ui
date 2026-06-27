@@ -129,11 +129,7 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "project_name",
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Project Name"
-        icon={PiKanbanDuotone}
-      />
+      <SortableHeader column={column} title="Project" icon={PiKanbanDuotone} />
     ),
     cell: ({ row }) => {
       const project_name = row.original?.project[0]?.project_name;
@@ -146,7 +142,7 @@ const columns: ColumnDef<Item>[] = [
     header: ({ column }) => (
       <SortableHeader
         column={column}
-        title="Department Name"
+        title="Department"
         icon={PiBuildingsDuotone}
       />
     ),
@@ -271,7 +267,7 @@ const columns: ColumnDef<Item>[] = [
 
       const clampedPercentage = Math.max(
         0,
-        Math.min(100, Math.round(progress || 0))
+        Math.min(100, Math.round(progress || 0)),
       );
 
       // Use submitted state if product is submitted, otherwise determine based on percentage
@@ -287,7 +283,7 @@ const columns: ColumnDef<Item>[] = [
               <span
                 className={cn(
                   "flex items-center gap-1 text-muted-foreground",
-                  progressState.text
+                  progressState.text,
                 )}
               >
                 <span
@@ -303,7 +299,7 @@ const columns: ColumnDef<Item>[] = [
               <span
                 className={cn(
                   "absolute inset-y-0 left-0 rounded-full bg-linear-to-r transition-[width] duration-300 ease-out z-45",
-                  progressState.bar
+                  progressState.bar,
                 )}
                 style={{ width: `${clampedPercentage}%` }}
               />
@@ -336,7 +332,7 @@ export default function DashboardProductsTable() {
       Array.isArray(data?.result?.products)
         ? (data.result.products as Item[])
         : [],
-    [data]
+    [data],
   );
 
   const table = useReactTable({
@@ -414,7 +410,7 @@ export default function DashboardProductsTable() {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );
@@ -432,7 +428,7 @@ export default function DashboardProductsTable() {
                 onClick={() =>
                   row.original._id &&
                   router.push(
-                    `/products/${row.original._id}/product-information`
+                    `/products/${row.original._id}/product-information`,
                   )
                 }
               >

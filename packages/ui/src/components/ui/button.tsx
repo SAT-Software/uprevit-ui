@@ -34,7 +34,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "sm",
     },
-  }
+  },
 );
 
 function Button({

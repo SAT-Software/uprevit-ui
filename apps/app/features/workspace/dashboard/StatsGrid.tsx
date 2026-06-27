@@ -1,23 +1,24 @@
 "use client";
 
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetDashboardStats } from "@/hooks/dashboard/useGetDashboardStats";
-import { cn } from "@uprevit/ui/lib/utils";
-import { IconType } from "react-icons";
 import {
-  PiBuildingsDuotone,
-  PiKanbanDuotone,
-  PiPackageDuotone,
-  PiFolderOpenDuotone,
-} from "react-icons/pi";
+  ArchiveIcon,
+  Blockchain03Icon,
+  DashboardSpeed01Icon,
+  Folder02Icon,
+  KanbanIcon,
+  NewOfficeIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { cn } from "@uprevit/ui/lib/utils";
+
 interface StatsCardProps {
   id: string;
   title: string;
   value: number;
-  icon: IconType;
-}
-
-interface StatsGridProps {
-  location: string;
+  icon: React.ReactNode;
+  info: string;
 }
 
 function formatStatValue(value: number | undefined) {
@@ -28,50 +29,7 @@ function formatStatValue(value: number | undefined) {
   return value <= 9 ? `0${value}` : String(value);
 }
 
-function StatCard({ title, value, icon: Icon }: Omit<StatsCardProps, "id">) {
-  return (
-    <div className="relative flex w-full items-center justify-between p-4 group before:absolute before:inset-y-8 before:right-0 before:w-px before:bg-linear-to-b before:from-input/30 before:via-input before:to-input/30 last:before:hidden lg:p-5">
-      <div className="relative flex items-center gap-4">
-        <div className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-border bg-accent/80 text-accent-foreground sm:flex">
-          <Icon />
-        </div>
-        <div>
-          <div className="font-medium text-xs uppercase text-muted-foreground before:absolute before:inset-0">
-            {title}
-          </div>
-          <div className="mb-2 text-2xl font-semibold">
-            {formatStatValue(value)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatCardSkeleton({
-  title,
-  icon: Icon,
-}: Omit<StatsCardProps, "id" | "value">) {
-  return (
-    <div className="relative flex w-full items-center justify-between p-4 group before:absolute before:inset-y-8 before:right-0 before:w-px before:bg-linear-to-b before:from-input/30 before:via-input before:to-input/30 last:before:hidden lg:p-5">
-      <div className="relative flex items-center gap-4">
-        <div className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-border bg-accent/80 text-accent-foreground sm:flex">
-          <Icon className="animate-pulse" />
-        </div>
-        <div>
-          <div className="font-medium text-xs uppercase text-muted-foreground">
-            {title}
-          </div>
-          <div className="mb-2 text-2xl font-semibold">
-            <div className="h-8 animate-pulse rounded bg-muted" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function StatsGrid({ location }: StatsGridProps) {
+export function StatsGrid({ location }: { location: string }) {
   const {
     data: dashboardStats,
     isLoading: statsLoading,
@@ -83,25 +41,36 @@ export function StatsGrid({ location }: StatsGridProps) {
       id: "departments",
       title: "Departments",
       value: dashboardStats?.data?.total_departments ?? 0,
-      icon: PiBuildingsDuotone,
+      icon: <HugeiconsIcon icon={NewOfficeIcon} size={16} strokeWidth={2} />,
+      info: "Total department in your organization's workspace",
     },
     {
       id: "projects",
       title: "Projects",
       value: dashboardStats?.data?.total_projects ?? 0,
-      icon: PiKanbanDuotone,
+      icon: <HugeiconsIcon icon={KanbanIcon} size={16} strokeWidth={2} />,
+      info: "Total projects in your organization's workspace",
     },
     {
       id: "products",
       title: "Products",
       value: dashboardStats?.data?.total_products ?? 0,
-      icon: PiPackageDuotone,
+      icon: <HugeiconsIcon icon={Blockchain03Icon} size={16} strokeWidth={2} />,
+      info: "Total products in your organization's workspace",
     },
     {
       id: "source-files",
       title: "Source Files",
       value: dashboardStats?.data?.total_source_files ?? 0,
-      icon: PiFolderOpenDuotone,
+      icon: <HugeiconsIcon icon={Folder02Icon} size={16} strokeWidth={2} />,
+      info: "Total source files uploaded in your organization's workspace",
+    },
+    {
+      id: "archives",
+      title: "Archives",
+      value: "TBD", //To be updated
+      icon: <HugeiconsIcon icon={ArchiveIcon} size={16} strokeWidth={2} />,
+      info: "Total archived departments, projects and products in your organization's workspace",
     },
   ];
   const visibleStats = location === "archive" ? stats.slice(0, 3) : stats;
@@ -110,33 +79,98 @@ export function StatsGrid({ location }: StatsGridProps) {
     return (
       <div
         className={cn(
-          "grid grid-cols-2 border border-border rounded-xl bg-linear-to-br from-background/90 to-background",
+          "grid grid-cols-2 border-b border-border bg-linear-to-br from-background/90 to-background",
           location === "archive"
-            ? "min-[1200px]:grid-cols-3"
-            : "min-[1200px]:grid-cols-4",
+            ? "min-[1200px]:grid-cols-5"
+            : "min-[1200px]:grid-cols-5",
         )}
       >
         {visibleStats.map((stat) => (
-          <StatCardSkeleton key={stat.id} title={stat.title} icon={stat.icon} />
+          <div
+            key={stat.id}
+            className="relative flex w-full items-center justify-between p-4 group before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
+          >
+            <div className="relative flex items-center gap-4">
+              <div className="hidden size-10 mb-1 shrink-0 animate-pulse items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground/60 sm:flex">
+                {stat.icon}
+              </div>
+              <div>
+                <div className="font-medium text-xs text-muted-foreground/60">
+                  {stat.title}
+                </div>
+                <div className="mb-2 text-2xl font-semibold">
+                  <div className="h-8 animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     );
   }
 
-  if (statsError) return <div>Error loading stats: {statsError.message}</div>;
+  if (statsError)
+    return (
+      <div className={cn("h-22 border-b border-border w-full")}>
+        <div className="relative flex w-full items-center justify-center gap-4 p-4 group border border-dashed border-destructive/40 h-full bg-destructive/5">
+          <div
+            className={cn(
+              "hidden size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/40 bg-background text-destructive sm:flex",
+            )}
+          >
+            <HugeiconsIcon icon={DashboardSpeed01Icon} />
+          </div>
+          <div>
+            <p className="text-destructive text-sm">
+              Failed to load dashboard stats
+            </p>
+            <p className="text-foreground/40 text-xs">
+              Reload the page or login again
+            </p>
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <div
       className={cn(
-        "grid grid-cols-2 border border-border rounded-xl bg-linear-to-br from-background/90 to-background",
+        "grid grid-cols-2 border-b border-border",
         location === "archive"
-          ? "min-[1200px]:grid-cols-3"
-          : "min-[1200px]:grid-cols-4",
+          ? "min-[1200px]:grid-cols-5"
+          : "min-[1200px]:grid-cols-5",
       )}
     >
-      {visibleStats.map(({ id, ...stat }) => (
-        <StatCard key={id} {...stat} />
-      ))}
+      {visibleStats.map(({ id, title, value, icon, info }) => {
+        return (
+          <div
+            key={id}
+            className="relative group flex w-full items-center justify-between p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
+          >
+            <div className="relative flex items-center gap-4">
+              <div
+                className={cn(
+                  "hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground sm:flex",
+                  "text-muted-foreground/60 group-hover:text-muted-foreground transition-colors ease-in-out delay-100 duration-200",
+                )}
+              >
+                {icon}
+              </div>
+              <div>
+                <div className="flex gap-2 items-center">
+                  <p className="font-normal text-sm text-muted-foreground/60">
+                    {title}
+                  </p>
+                  <InfoTooltip content={info} />
+                </div>
+                <p className="mb-2 text-2xl font-semibold">
+                  {typeof value === "number" ? formatStatValue(value) : value}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
