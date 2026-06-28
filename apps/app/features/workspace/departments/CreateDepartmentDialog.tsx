@@ -18,6 +18,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
@@ -33,6 +38,8 @@ import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusSignSquareIcon } from "@hugeicons/core-free-icons";
 
 interface User {
   _id: string;
@@ -87,8 +94,7 @@ export default function CreateDepartmentDialog() {
   const isAdmin = isAdminProfile(auth.user?.profile);
 
   const users = useMemo(
-    () =>
-      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    () => usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
     [usersData],
   );
 
@@ -163,7 +169,7 @@ export default function CreateDepartmentDialog() {
             setSelectedUsers([]);
             console.error("Error creating department:", error);
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Error uploading department image:", error);
@@ -174,23 +180,31 @@ export default function CreateDepartmentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="default"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
-        >
-          <PiPlusCircleDuotone className="w-5 h-5" />
-          Create Department
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                if (!isAdmin) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.warning("Insufficient privileges, contact Admin");
+                  return;
+                }
+              }}
+            >
+              <HugeiconsIcon
+                icon={PlusSignSquareIcon}
+                size={16}
+                strokeWidth={2}
+              />
+              Create Department
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Create a new department</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
@@ -369,8 +383,8 @@ export default function CreateDepartmentDialog() {
             {uploadingImage
               ? "Uploading..."
               : isPending
-              ? "Creating..."
-              : "Create Department"}
+                ? "Creating..."
+                : "Create Department"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -384,9 +398,9 @@ function ProfileBg({
   setDepartmentImage: (file: File | FileMetadata) => void;
 }) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-	useFileUpload({
-		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-	});
+    useFileUpload({
+      accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+    });
 
   const ImageFile = files[0]?.file;
 

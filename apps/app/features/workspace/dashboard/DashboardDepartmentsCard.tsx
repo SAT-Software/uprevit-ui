@@ -1,26 +1,18 @@
 "use client";
 
-import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@uprevit/ui/components/ui/tooltip";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
-import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
-import Image from "next/image";
+import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Button } from "@uprevit/ui/components/ui/button";
 import Link from "next/link";
 import {
   PiArrowCircleUpRightDuotone,
   PiBuildingsDuotone,
 } from "react-icons/pi";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUpRight01Icon, Calendar03Icon } from "@hugeicons/core-free-icons";
-import { InfoTooltip } from "@/components/common/InfoTooltip";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import DepartmentCard from "../common/DepartmentCard";
 
-interface DepartmentUser {
+export interface DepartmentUser {
   _id: string;
   name: string;
   email: string;
@@ -136,83 +128,11 @@ function DashboardDepartmentsCard() {
 
       <div className="flex w-full min-w-0 flex-col items-start gap-2">
         {filteredDepartments.map((department: DepartmentsProps) => (
-          <div key={department._id} className="relative w-full">
-            <Link
-              href={`/departments/${department._id}`}
-              className="group relative flex flex-col md:flex-row items-start md:items-center w-full border border-border bg-card rounded-2xl p-3 gap-4 hover:ring-2 hover:ring-border/60 hover:border-border transition-all delay-100 duration-200 ease-in-out"
-            >
-              <div className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
-                {department.image ? (
-                  <Image
-                    src={department.image}
-                    fill
-                    alt={department.department_name}
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full">
-                    <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col flex-1 gap-1 min-w-0">
-                <div className="flex flex-col gap-0">
-                  <p className="text-sm font-semibold text-foreground truncate pr-8">
-                    {department.department_name}
-                  </p>
-                  <p className="flex items-center w-2/3 gap-1.5 text-xs text-muted-foreground line-clamp-1">
-                    <span className="truncate">
-                      {department.department_description}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant="large">
-                        <HugeiconsIcon
-                          icon={Calendar03Icon}
-                          size={14}
-                          strokeWidth={2}
-                        />
-                        <span>
-                          {department?.auditLogs?.[0]?.actionAt
-                            ? formatToLocalDate(
-                                department?.auditLogs?.[0].actionAt,
-                              )
-                            : "No activity"}
-                        </span>
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Department created date or last modified date</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-            </Link>
-
-            <div className="absolute flex items-center bottom-3 right-3">
-              {(() => {
-                const usersData = department?.users;
-                const users = usersData?.map((user) => ({
-                  _id: user._id,
-                  name: user.name,
-                  email: user.email,
-                  profileAvatar: user.profileAvatar,
-                }));
-                return (
-                  <MembersInlineTrigger
-                    users={users || []}
-                    titlePrefix={department.department_name}
-                    location="Department"
-                  />
-                );
-              })()}
-            </div>
-          </div>
+          <DepartmentCard
+            key={department._id}
+            department={department}
+            location="dashboard"
+          />
         ))}
       </div>
     </div>
