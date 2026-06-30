@@ -81,10 +81,7 @@ function PricingPageContent() {
           <div className="relative w-full mt-10 mb-20 pointer-events-auto">
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-              <Badge
-                variant="outline"
-                className={pricingBadgeClassName}
-              >
+              <Badge variant="outline" className={pricingBadgeClassName}>
                 <PiCoinsDuotone />
                 <span className="font-medium">Pricing</span>
               </Badge>
@@ -136,28 +133,25 @@ function PricingPageContent() {
                         </span>
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        One plan for regulated labeling teams: platform +
-                        seats + transparent upload and export usage, with SSO
+                        One plan for regulated labeling teams: platform + seats
+                        + transparent upload and export usage, with SSO
                         available when you need it.
                       </p>
                       <div className="mt-5 grid gap-3">
-                        <Button
-                          asChild
-                          className="h-11 rounded-lg text-base"
-                        >
+                        <Button asChild className="h-11 rounded-lg text-base">
                           <Link href="/contact">
                             Talk to Us
                             <PiArrowRightDuotone className="ml-2 h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button
+                        {/* <Button
                           variant="secondary"
                           className="h-11 rounded-lg text-base"
                           onClick={() => scrollTo("pricing-calculator")}
                         >
                           View Pricing
                           <PiArrowDownDuotone className="ml-2 h-4 w-4" />
-                        </Button>
+                        </Button> */}
                       </div>
                       <ul className="mt-5 space-y-2.5 border-t border-border/70 pt-5 text-sm">
                         {[
@@ -197,7 +191,7 @@ function PricingPageContent() {
               </div>
             </div>
 
-            <div className="relative">
+            {/* <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div
@@ -205,10 +199,7 @@ function PricingPageContent() {
                 className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0"
               >
                 <div className="flex flex-col items-center text-center mb-10">
-                  <Badge
-                    variant="outline"
-                    className={pricingBadgeClassName}
-                  >
+                  <Badge variant="outline" className={pricingBadgeClassName}>
                     <PiCoinsDuotone className="mr-1 text-foreground/60" />
                     <span className="font-medium">Pricing Calculator</span>
                   </Badge>
@@ -217,13 +208,13 @@ function PricingPageContent() {
                   </h2>
                   <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
                     Use our pricing calculator to estimate costs based on your
-                    team size, upload volume, and security requirements.
-                    Contact us for larger rollouts or tailored agreements.
+                    team size, upload volume, and security requirements. Contact
+                    us for larger rollouts or tailored agreements.
                   </p>
                 </div>
                 <PricingCalculatorCards />
               </div>
-            </div>
+            </div> */}
 
             {/* TODO - Later on check this section. See if we need to keep it or remove it, but fix the cluttered UI if we are keeping it */}
             {/* <div className="relative">
@@ -378,10 +369,7 @@ function PricingPageContent() {
                 className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0"
               >
                 <div className="flex flex-col items-center text-center mb-10">
-                  <Badge
-                    variant="outline"
-                    className={pricingBadgeClassName}
-                  >
+                  <Badge variant="outline" className={pricingBadgeClassName}>
                     <PiQuestionDuotone className="mr-1 text-foreground/60" />
                     <span className="font-medium">FAQ</span>
                   </Badge>
