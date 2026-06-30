@@ -6,7 +6,7 @@ import { isAdminProfile } from "@/utils/isAdmin";
 import { useId, useMemo, useState } from "react";
 import { PiWarningCircleDuotone } from "react-icons/pi";
 
-import { Button } from "@uprevit/ui/components/ui/button";
+import { Button, buttonVariants } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -16,6 +16,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import Link from "next/link";
@@ -23,6 +28,9 @@ import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
 import { PiArchiveDuotone } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { cn } from "@uprevit/ui/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArchiveIcon } from "@hugeicons/core-free-icons";
 
 export type ArchiveEntityType = "project" | "department";
 
@@ -75,21 +83,46 @@ export default function DialogArchiveEntity({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
-        >
-          <PiArchiveDuotone />
-          Archive
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                if (!isAdmin) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.warning("Insufficient privileges, contact Admin");
+                  return;
+                }
+              }}
+            >
+              <HugeiconsIcon
+                className="transition-colors delay-100 duration-200 ease-in-out"
+                icon={ArchiveIcon}
+                size={16}
+                strokeWidth={2}
+              />
+              Archive
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div>
+              Archive the department. This action is reversible and you can
+              restore the department from
+              <Link
+                href="/archive"
+                className={cn(
+                  buttonVariants({ variant: "link" }),
+                  "text-xs -mx-1",
+                )}
+              >
+                Archive
+              </Link>
+              page.
+            </div>
+          </TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent>
         <div className="flex flex-col items-start gap-2">

@@ -1,40 +1,42 @@
 "use client";
 
-import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
-import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
-import Image from "next/image";
-import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
-import type { SortingState } from "@tanstack/react-table";
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
-import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
-import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
+import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
+import ShareDepartmentDialog from "@/features/workspace/departments/ShareDepartmentDialog";
+import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
+import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
+import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
+import { AuditLog } from "@/types/audit-log";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { getNextImageSrc } from "@/utils/isNextImageSrc";
+import { ManagerIcon, ProfileIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@uprevit/ui/components/ui/hover-card";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import Image from "next/image";
+import {
+  notFound,
+  useParams,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import {
   PiCalendarDuotone,
-  PiKanbanDuotone,
-  PiBuildingsDuotone,
-  PiUserCircleGearDuotone,
   PiClockCounterClockwiseDuotone,
+  PiKanbanDuotone,
+  PiUserCircleGearDuotone,
 } from "react-icons/pi";
-import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
-import ShareDepartmentDialog from "@/features/workspace/departments/ShareDepartmentDialog";
-import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
-import { AuditLog } from "@/types/audit-log";
-import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
 import { useAuth } from "react-oidc-context";
-import { getNextImageSrc } from "@/utils/isNextImageSrc";
-import { isAdminProfile } from "@/utils/isAdmin";
-import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
-import {
-  ListFilterColumn,
-  useWorkspaceListQuery,
-} from "@/lib/workspace-list-query";
 
 interface DepartmentUser {
   _id: string;
@@ -43,26 +45,6 @@ interface DepartmentUser {
   profileAvatar?: string;
 }
 
-const DEPARTMENT_PROJECT_FILTER_COLUMNS: ListFilterColumn[] = [
-  { name: "project_name", label: "Project Name", type: "text" },
-  { name: "project_description", label: "Description", type: "text" },
-  { name: "project_manager", label: "Project Manager", type: "text" },
-  { name: "lastChangedBy", label: "Last Changed By", type: "text" },
-  { name: "lastChangedOn", label: "Last Changed On", type: "date" },
-];
-
-const DEPARTMENT_PROJECT_SORT_FIELDS = [
-  "project_number",
-  "project_name",
-  "project_description",
-  "project_manager",
-  "users",
-  "createdOn",
-  "modifiedOn",
-  "actionAt",
-  "_id",
-];
-
 export default function DepartmentDetailPage() {
   const params = useParams<{ departmentId: string }>();
   const departmentId = params?.departmentId;
@@ -70,48 +52,13 @@ export default function DepartmentDetailPage() {
   const searchParams = useSearchParams();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const activeTab = searchParams.get("tab") === "logs" && isAdmin ? "logs" : "overview";
+  const activeTab =
+    searchParams.get("tab") === "logs" && isAdmin ? "logs" : "overview";
   const isLogsView = activeTab === "logs";
-  const listState = useWorkspaceListQuery({
-    defaultSort: "actionAt",
-    defaultOrder: "desc",
-    allowedSortFields: DEPARTMENT_PROJECT_SORT_FIELDS,
-    filterColumns: DEPARTMENT_PROJECT_FILTER_COLUMNS,
-  });
 
   const { data, isLoading, isError } = useGetDepartmentById(departmentId);
-  const {
-    data: projectsData,
-    isFetching: isProjectsFetching,
-    isPending: isProjectsPending,
-  } = useGetAllProjects({
-    ...listState.query,
-    departmentId,
-  });
 
   const department = data?.department;
-  const projects = projectsData?.result?.projects || [];
-  const projectsPagination = projectsData?.result?.pagination;
-  const isProjectsListBusy = isProjectsPending || isProjectsFetching;
-  const hasProjectsToList =
-    isProjectsListBusy ||
-    (projectsPagination?.totalCount ?? 0) > 0 ||
-    listState.query.filters.length > 0;
-  const projectSorting = useMemo<SortingState>(
-    () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
-    [listState.query.order, listState.query.sort],
-  );
-
-  useEffect(() => {
-    if (!projectsPagination) return;
-    if (projectsPagination.totalPages === 0) {
-      if (listState.query.page !== 1) listState.setPage(1);
-      return;
-    }
-    if (listState.query.page > projectsPagination.totalPages) {
-      listState.setPage(1);
-    }
-  }, [listState.query.page, listState.setPage, projectsPagination?.totalPages]);
 
   if (isLoading) {
     return (
@@ -209,7 +156,11 @@ export default function DepartmentDetailPage() {
     }
 
     const query = nextParams.toString();
-    router.replace(query ? `/departments/${departmentId}?${query}` : `/departments/${departmentId}`);
+    router.replace(
+      query
+        ? `/departments/${departmentId}?${query}`
+        : `/departments/${departmentId}`,
+    );
   };
 
   if (isLogsView) {
@@ -267,13 +218,14 @@ export default function DepartmentDetailPage() {
   }
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col gap-2 w-full h-full">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b p-6 border-border">
-          <div className="flex flex-col md:flex-row gap-6 items-start w-full">
+        <div className="flex flex-col items-start justify-between border-b border-border">
+          {/* Header Content */}
+          <div className="flex flex-col md:flex-row gap-6 items-start w-full border-b p-2">
             {/* Image */}
-            <div className="relative h-24 w-24 md:h-32 md:w-32 shrink-0 rounded-xl overflow-hidden border border-border bg-muted shadow-sm">
+            <div className="relative h-12 w-12 md:h-16 md:w-16 shrink-0 rounded-xl overflow-hidden border border-border bg-muted">
               {departmentImageSrc ? (
                 <Image
                   src={departmentImageSrc}
@@ -283,84 +235,25 @@ export default function DepartmentDetailPage() {
                 />
               ) : (
                 <div className="flex items-center justify-center w-full h-full bg-muted/50">
-                  <PiKanbanDuotone className="w-12 h-12 text-muted-foreground/40" />
+                  <PiKanbanDuotone className="h-8 w-8 md:w-12 md:h-12  text-muted-foreground/40" />
                 </div>
               )}
             </div>
 
             {/* Info */}
-            <div className="flex flex-col gap-3 w-full min-w-0">
+            <div className="flex flex-col gap-4 w-full min-w-0">
               <div className="flex flex-col gap-1">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight">
                   {department.department_name}
                 </h1>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <PiUserCircleGearDuotone className="w-4 h-4" />
-                  <span className="text-sm">
-                    Manager:{" "}
-                    <span className="text-foreground font-medium">
-                      {department.manager || "N/A"}
-                    </span>
-                  </span>
-                </div>
+                <p className="text-base text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
+                  {department.department_description}
+                </p>
               </div>
-
-              <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
-                {department.department_description}
-              </p>
-
-              <div className="flex items-center gap-4 mt-1">
-                {(() => {
-                  const usersForDialog = (
-                    (department.users as DepartmentUser[]) || []
-                  ).map((u: DepartmentUser) => ({
-                    _id: u._id,
-                    name: u.name,
-                    email: u.email,
-                    profileAvatar: u.profileAvatar,
-                  }));
-                  return (
-                    <MembersInlineTrigger
-                      users={usersForDialog}
-                      titlePrefix={department.department_name}
-                    />
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-
-          {/* Actions & Meta */}
-          <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              {isAdmin ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLogsToggle}
-                      aria-label="Show department logs"
-                    >
-                      <PiClockCounterClockwiseDuotone className="h-4 w-4" />
-                      Logs
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Show Logs</TooltipContent>
-                </Tooltip>
-              ) : null}
-              <UpdateDepartmentDialog department={department} />
-              <ShareDepartmentDialog department={department} />
-              <DialogArchiveEntity
-                id={departmentId ?? ""}
-                entityName={department.department_name}
-                entityType="department"
-              />
             </div>
 
             {/* Audit Badges */}
-            <div className="flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground w-full">
+            <div className="w-full flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground">
               {creationLog && (
                 <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
                   <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
@@ -385,72 +278,98 @@ export default function DepartmentDetailPage() {
               )}
             </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-2 px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Projects</p>
-              <div className="w-1 h-1 bg-border border border-border rounded-full" />
-              <p className="text-xs text-muted-foreground font-medium">
-                Latest projects in this department
-              </p>
+          {/* Actions & Users */}
+          <div className="w-full flex items-start justify-between gap-4">
+            {/* Actions */}
+            <div className="flex items-center gap-2 w-full p-2">
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogsToggle}
+                    >
+                      <HugeiconsIcon
+                        className="transition-colors delay-100 duration-200 ease-in-out"
+                        icon={ProfileIcon}
+                        size={16}
+                        strokeWidth={2}
+                      />
+                      Logs
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Department Logs - When was the department created, when it
+                    was updated, who updated it, what was updated
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              <UpdateDepartmentDialog department={department} />
+              <ShareDepartmentDialog department={department} />
+              <DialogArchiveEntity
+                id={departmentId ?? ""}
+                entityName={department.department_name}
+                entityType="department"
+              />
+            </div>
+
+            {/* Manager & Users */}
+            <div className="w-full flex items-center justify-end gap-2 p-2">
+              <HoverCard>
+                <HoverCardTrigger>
+                  <Button
+                    variant="outline"
+                    className="text-muted-foreground/60 hover:text-muted-foreground"
+                  >
+                    <HugeiconsIcon
+                      icon={ManagerIcon}
+                      size={16}
+                      strokeWidth={2}
+                      className="transition-colors delay-100 duration-200 ease-in-out"
+                    />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <PiUserCircleGearDuotone className="w-4 h-4" />
+                    <span className="text-sm">
+                      Manager:{" "}
+                      <span className="text-foreground font-medium">
+                        {department.manager || "N/A"}
+                      </span>
+                    </span>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+
+              <div className="flex items-center gap-4">
+                {(() => {
+                  const usersForDialog = (
+                    (department.users as DepartmentUser[]) || []
+                  ).map((u: DepartmentUser) => ({
+                    _id: u._id,
+                    name: u.name,
+                    email: u.email,
+                    profileAvatar: u.profileAvatar,
+                  }));
+                  return (
+                    <MembersInlineTrigger
+                      users={usersForDialog}
+                      titlePrefix={department.department_name}
+                      location="department"
+                    />
+                  );
+                })()}
+              </div>
             </div>
           </div>
-
-          <div className="w-full">
-            {hasProjectsToList ? (
-              <div className="flex flex-col gap-2">
-                <WorkspaceListControls
-                  filters={listState.query.filters}
-                  filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
-                  onApplyFilters={listState.setFilters}
-                  onClearFilters={listState.clearFilters}
-                />
-                <DepartmentPageProjectsTable
-                  data={projects}
-                  sorting={projectSorting}
-                  isLoading={isProjectsListBusy}
-                  onSortingChange={(updater) => {
-                    const nextSorting =
-                      typeof updater === "function"
-                        ? updater(projectSorting)
-                        : updater;
-                    const next = nextSorting[0];
-                    if (!next) return;
-                    listState.setSort(next.id, next.desc ? "desc" : "asc");
-                  }}
-                />
-                {projectsPagination ? (
-                  <WorkspaceListPagination
-                    pagination={projectsPagination}
-                    onPageChange={listState.setPage}
-                  />
-                ) : null}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <WorkspaceListControls
-                  filters={listState.query.filters}
-                  filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
-                  onApplyFilters={listState.setFilters}
-                  onClearFilters={listState.clearFilters}
-                />
-                <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                  <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
-                    <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">
-                    No projects found
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This department doesn&apos;t have any projects yet.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
+
+        {/* Department Projects */}
+        <DepartmentPageProjectsTable departmentId={departmentId} />
       </div>
     </div>
   );

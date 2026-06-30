@@ -6,10 +6,16 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 
-export function InfoTooltip({ content }: { content: string }) {
+export function InfoTooltip({
+  content,
+  className,
+}: {
+  content: string;
+  className?: string;
+}) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger className={className} asChild>
         <HugeiconsIcon
           icon={InformationCircleIcon}
           size={12}

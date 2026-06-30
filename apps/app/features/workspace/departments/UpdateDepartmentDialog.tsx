@@ -18,6 +18,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
@@ -35,6 +40,8 @@ import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PropertyEditIcon } from "@hugeicons/core-free-icons";
 
 interface User {
   _id: string;
@@ -94,8 +101,7 @@ export default function UpdateDepartmentDialog({
   });
 
   const users = useMemo(
-    () =>
-      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    () => usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
     [usersData],
   );
 
@@ -187,23 +193,36 @@ export default function UpdateDepartmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
-        >
-          <PiPencilCircleDuotone className="w-4 h-4" />
-          Update
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={(e) => {
+                if (!isAdmin) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.warning("Insufficient privileges, contact Admin");
+                  return;
+                }
+              }}
+            >
+              <HugeiconsIcon
+                className="transition-colors delay-100 duration-200 ease-in-out"
+                icon={PropertyEditIcon}
+                size={16}
+                strokeWidth={2}
+              />
+              Update
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Update department name, manager, description, members or department
+            image.
+          </TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
@@ -419,10 +438,10 @@ function ProfileBg({
     : [];
 
   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-	useFileUpload({
-		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-		initialFiles,
-	});
+    useFileUpload({
+      accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
+      initialFiles,
+    });
 
   const fileItem = files[0];
   const ImageFile = fileItem?.file;

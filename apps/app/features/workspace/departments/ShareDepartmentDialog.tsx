@@ -24,6 +24,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Share08Icon } from "@hugeicons/core-free-icons";
 
 export default function ShareDepartmentDialog({
   department,
@@ -54,11 +56,24 @@ export default function ShareDepartmentDialog({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
-          <PiShareNetworkDuotone className="h-4 w-4" />
-          Share
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon
+                className="transition-colors delay-100 duration-200 ease-in-out"
+                icon={Share08Icon}
+                size={16}
+                strokeWidth={2}
+              />
+              Share
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Share department with any user of this workspace. Copy link and
+            send.
+          </TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">

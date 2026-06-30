@@ -275,6 +275,7 @@ export function WorkspaceListControls({
                   icon={FilterEditIcon}
                   size={12}
                   strokeWidth={2}
+                  className="transition-colors delay-100 duration-200 ease-in-out"
                 />
                 {hasActiveFilters && (
                   <span className=" rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">

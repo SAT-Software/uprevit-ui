@@ -43,7 +43,7 @@ export function WorkspaceListPagination({
   const canNext = currentPage < totalPages;
 
   return (
-    <div className="flex w-full items-center justify-between gap-3">
+    <div className="flex w-full items-center justify-between gap-3 pl-3 pr-2 py-2">
       <div className="text-muted-foreground flex text-sm whitespace-nowrap">
         <p
           className="text-muted-foreground text-sm whitespace-nowrap"

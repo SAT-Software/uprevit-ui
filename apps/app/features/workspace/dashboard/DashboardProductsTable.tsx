@@ -11,19 +11,16 @@ import {
 } from "@tanstack/react-table";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { ProductProcessDropdown } from "@/components/common/ProductProgressDropdown";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { AuditLog } from "@/types/product";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
-  ColumnsThreeCogIcon,
-  Refresh04Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@uprevit/ui/components/ui/badge";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -33,30 +30,15 @@ import {
   TableRow,
 } from "@uprevit/ui/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@uprevit/ui/components/ui/dropdown-menu";
-import { Field, FieldGroup, FieldLabel } from "@uprevit/ui/components/ui/field";
-import { cn } from "@uprevit/ui/lib/utils";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import {
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiPackageDuotone,
-} from "react-icons/pi";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { ProductProcessDropdown } from "@/components/common/ProductProgressDropdown";
+import { cn } from "@uprevit/ui/lib/utils";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { PiPackageDuotone } from "react-icons/pi";
+import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
 
 export type Item = {
   _id: string;
@@ -443,99 +425,7 @@ export default function DashboardProductsTable() {
           <InfoTooltip content="Recently created or updated products" />
         </div>
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon-xs"
-                    className="text-muted-foreground/60 hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out"
-                  >
-                    <HugeiconsIcon icon={ColumnsThreeCogIcon} size={16} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Show or hide table columns</p>
-                </TooltipContent>
-              </Tooltip>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              style={{ boxShadow: "0 12px 28px rgba(0, 0, 0, 0.18)" }}
-            >
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Fixed columns</DropdownMenuLabel>
-
-                {table
-                  .getAllColumns()
-                  .filter((column) => !column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <FieldGroup
-                        key={column.id}
-                        className="mx-auto w-56 flex-flex-col focus:bg-accent focus:text-accent-foreground text-foreground relative flex cursor-default items-center gap-1 rounded-md py-1.5 pr-2 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                      >
-                        <Field orientation="horizontal">
-                          <Checkbox checked={column.getIsVisible()} disabled />
-                          <FieldLabel
-                            htmlFor="terms-checkbox-basic"
-                            className="font-normal capitalize"
-                          >
-                            {column.id}
-                          </FieldLabel>
-                        </Field>
-                      </FieldGroup>
-                    );
-                  })}
-              </DropdownMenuGroup>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Active columns</DropdownMenuLabel>
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <FieldGroup
-                        key={column.id}
-                        className="mx-auto w-56 flex-flex-col focus:bg-accent focus:text-accent-foreground text-foreground relative flex cursor-default items-center gap-1 rounded-md py-1.5 pr-2 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                      >
-                        <Field orientation="horizontal">
-                          <Checkbox
-                            checked={column.getIsVisible()}
-                            onCheckedChange={(value) =>
-                              column.toggleVisibility(!!value)
-                            }
-                            onSelect={(event) => event.preventDefault()}
-                          />
-                          <FieldLabel
-                            htmlFor="terms-checkbox-basic"
-                            className="font-normal capitalize"
-                          >
-                            {column.id}
-                          </FieldLabel>
-                        </Field>
-                      </FieldGroup>
-                    );
-                  })}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup className="group">
-                <DropdownMenuItem onClick={() => table.resetColumnVisibility()}>
-                  <HugeiconsIcon
-                    icon={Refresh04Icon}
-                    size={14}
-                    strokeWidth={2}
-                    className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
-                  />
-                  Reset Default
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ShowOrHideTableColumnsDropdown table={table} />
         </div>
       </div>
       <Table>
