@@ -6,7 +6,7 @@ import {
   ArrowRight01Icon,
   ArrowRightDoubleIcon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Pagination,
@@ -67,7 +67,7 @@ export function WorkspaceListPagination({
               disabled={!canPrevious}
               aria-label="Go to first page"
             >
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowLeftDoubleIcon}
                 className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
                 size={16}
@@ -84,7 +84,7 @@ export function WorkspaceListPagination({
               disabled={!canPrevious}
               aria-label="Go to previous page"
             >
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowLeft01Icon}
                 className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
                 size={16}
@@ -141,7 +141,7 @@ export function WorkspaceListPagination({
               disabled={!canNext}
               aria-label="Go to next page"
             >
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowRight01Icon}
                 className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
                 size={16}
@@ -158,7 +158,7 @@ export function WorkspaceListPagination({
               disabled={!canNext}
               aria-label="Go to last page"
             >
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowRightDoubleIcon}
                 className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
                 size={16}

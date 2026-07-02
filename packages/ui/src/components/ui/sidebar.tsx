@@ -24,7 +24,7 @@ import {
 import { useIsMobile } from "@uprevit/ui/hooks/general/use-mobile";
 import { cn } from "@uprevit/ui/lib/utils";
 import { PiSidebarSimpleDuotone } from "react-icons/pi";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   LayoutAlignLeftIcon,
   LayoutAlignRightIcon,
@@ -280,9 +280,9 @@ function SidebarTrigger({
       {...props}
     >
       {open ? (
-        <HugeiconsIcon icon={LayoutAlignLeftIcon} size={16} strokeWidth={2} />
+        <Icon icon={LayoutAlignLeftIcon} size={16} strokeWidth={2} />
       ) : (
-        <HugeiconsIcon icon={LayoutAlignRightIcon} size={16} strokeWidth={2} />
+        <Icon icon={LayoutAlignRightIcon} size={16} strokeWidth={2} />
       )}
       <span className="sr-only">Toggle Sidebar</span>
     </button>
@@ -477,7 +477,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("group/menu-item relative", className)}
+      className={cn("group/menu-item relative ", className)}
       {...props}
     />
   );
@@ -527,7 +527,11 @@ function SidebarMenuButton({
       data-sidebar="menu-button"
       data-size={size}
       data-active={isActive}
-      className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      className={cn(
+        sidebarMenuButtonVariants({ variant, size }),
+        className,
+        "transition-all delay-100 duration-200 ease-in-out",
+      )}
       {...props}
     />
   );

@@ -9,7 +9,7 @@ import {
   Settings01Icon,
   Sun01Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Avatar,
   AvatarFallback,
@@ -61,7 +61,7 @@ export function SidebarNavWorkspace({
                   alt={workspace?.workspaceName}
                 />
                 <AvatarFallback>
-                  <HugeiconsIcon
+                  <Icon
                     icon={MenuSquareIcon}
                     size={16}
                     strokeWidth={2}
@@ -76,7 +76,7 @@ export function SidebarNavWorkspace({
                   {workspace?.companyName}
                 </span>
               </div>
-              <HugeiconsIcon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
+              <Icon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -93,7 +93,7 @@ export function SidebarNavWorkspace({
                     alt={workspace?.workspaceName}
                   />
                   <AvatarFallback className="">
-                    <HugeiconsIcon
+                    <Icon
                       icon={MenuSquareIcon}
                       size={16}
                       strokeWidth={2}
@@ -114,13 +114,13 @@ export function SidebarNavWorkspace({
             <DropdownMenuGroup>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-2">
-                  <HugeiconsIcon
+                  <Icon
                     icon={Sun01Icon}
                     size={16}
                     strokeWidth={2}
                     className="dark:hidden"
                   />
-                  <HugeiconsIcon
+                  <Icon
                     icon={Moon02Icon}
                     size={16}
                     strokeWidth={2}
@@ -134,7 +134,7 @@ export function SidebarNavWorkspace({
                     onValueChange={setTheme}
                   >
                     <DropdownMenuRadioItem value="light">
-                      <HugeiconsIcon
+                      <Icon
                         icon={Sun01Icon}
                         size={16}
                         strokeWidth={2}
@@ -142,7 +142,7 @@ export function SidebarNavWorkspace({
                       Light
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="dark">
-                      <HugeiconsIcon
+                      <Icon
                         icon={Moon02Icon}
                         size={16}
                         strokeWidth={2}
@@ -150,7 +150,7 @@ export function SidebarNavWorkspace({
                       Dark
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="system">
-                      <HugeiconsIcon
+                      <Icon
                         icon={ComputerIcon}
                         size={16}
                         strokeWidth={2}
@@ -162,7 +162,7 @@ export function SidebarNavWorkspace({
               </DropdownMenuSub>
               <DropdownMenuItem asChild>
                 <Link href={`/settings?tab=workspace`}>
-                  <HugeiconsIcon
+                  <Icon
                     icon={Settings01Icon}
                     size={16}
                     strokeWidth={2}

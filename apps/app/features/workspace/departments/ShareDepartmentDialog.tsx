@@ -24,7 +24,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Share08Icon } from "@hugeicons/core-free-icons";
 
 export default function ShareDepartmentDialog({
@@ -60,7 +60,7 @@ export default function ShareDepartmentDialog({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" size="sm">
-              <HugeiconsIcon
+              <Icon
                 className="transition-colors delay-100 duration-200 ease-in-out"
                 icon={Share08Icon}
                 size={16}

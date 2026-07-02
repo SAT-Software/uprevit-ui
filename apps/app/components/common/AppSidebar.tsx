@@ -24,7 +24,7 @@ import {
   NewOfficeIcon,
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Collapsible,
@@ -64,25 +64,49 @@ const data = {
         {
           title: "Dashboard",
           url: "/dashboard",
-          icon: <HugeiconsIcon icon={Home04Icon} size={16} strokeWidth={2} />,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Home04Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Departments",
           url: "/departments",
           icon: (
-            <HugeiconsIcon icon={NewOfficeIcon} size={16} strokeWidth={2} />
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={NewOfficeIcon}
+              size={16}
+              strokeWidth={2}
+            />
           ),
         },
         {
           title: "Projects",
           url: "/projects",
-          icon: <HugeiconsIcon icon={KanbanIcon} size={16} strokeWidth={2} />,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={KanbanIcon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Products",
           url: "/products",
           icon: (
-            <HugeiconsIcon icon={Blockchain03Icon} size={16} strokeWidth={2} />
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Blockchain03Icon}
+              size={16}
+              strokeWidth={2}
+            />
           ),
         },
       ],
@@ -93,19 +117,38 @@ const data = {
         {
           title: "Source Files",
           url: "/source-files",
-          icon: <HugeiconsIcon icon={Folder02Icon} size={16} strokeWidth={2} />,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Folder02Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Bookmarked Products",
           url: "/bookmarked-products",
           icon: (
-            <HugeiconsIcon icon={Bookmark01Icon} size={16} strokeWidth={2} />
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Bookmark01Icon}
+              size={16}
+              strokeWidth={2}
+            />
           ),
         },
         {
           title: "Archive",
           url: "/archive",
-          icon: <HugeiconsIcon icon={ArchiveIcon} size={16} strokeWidth={2} />,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={ArchiveIcon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
       ],
     },
@@ -116,13 +159,25 @@ const data = {
           title: "Reports",
           url: "/reports",
           icon: (
-            <HugeiconsIcon icon={Archive01Icon} size={16} strokeWidth={2} />
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Archive01Icon}
+              size={16}
+              strokeWidth={2}
+            />
           ),
         },
         {
           title: "Analytics",
           url: "/analytics",
-          icon: <HugeiconsIcon icon={Chart02Icon} size={16} strokeWidth={2} />,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Chart02Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
       ],
     },
@@ -134,14 +189,24 @@ const data = {
           title: "Settings",
           url: "/settings",
           icon: (
-            <HugeiconsIcon icon={Settings01Icon} size={16} strokeWidth={2} />
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Settings01Icon}
+              size={16}
+              strokeWidth={2}
+            />
           ),
         },
         {
           title: "Documentation",
           url: "/docs",
           icon: (
-            <HugeiconsIcon icon={BookOpen02Icon} size={16} strokeWidth={2} />
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={BookOpen02Icon}
+              size={16}
+              strokeWidth={2}
+            />
           ),
         },
       ],
@@ -153,37 +218,86 @@ const productSubItems = [
   {
     title: "Product Information",
     url: "/product-information",
-    icon: <HugeiconsIcon icon={Layout01Icon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={Layout01Icon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Compliance Information",
     url: "/compliance-information",
-    icon: <HugeiconsIcon icon={ContractsIcon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={ContractsIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Label Components",
     url: "/label-components",
-    icon: <HugeiconsIcon icon={LayerIcon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={LayerIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Symbols & Graphics",
     url: "/symbols-graphics",
-    icon: <HugeiconsIcon icon={Album02Icon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={Album02Icon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Product Specifications",
     url: "/product-specifications",
-    icon: <HugeiconsIcon icon={AiSheetsIcon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={AiSheetsIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Operational Parameters",
     url: "/operational-parameters",
-    icon: <HugeiconsIcon icon={FileDatabaseIcon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={FileDatabaseIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Label Tags",
     url: "/label-tags",
-    icon: <HugeiconsIcon icon={LabelImportantIcon} size={16} strokeWidth={2} />,
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={LabelImportantIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
 ];
 
@@ -333,7 +447,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Skeleton className="h-6 w-28 bg-border" />
                   <Skeleton className="h-4 w-38 bg-border" />
                 </div>
-                <HugeiconsIcon
+                <Icon
                   icon={ArrowDown01Icon}
                   size={16}
                   strokeWidth={2}

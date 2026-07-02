@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnsThreeCogIcon, Refresh04Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Table } from "@tanstack/react-table";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
@@ -36,7 +36,7 @@ function ShowOrHideTableColumnsDropdown<TData>({
               size="icon-xs"
               className="text-muted-foreground/60 hover:text-muted-foreground"
             >
-              <HugeiconsIcon
+              <Icon
                 icon={ColumnsThreeCogIcon}
                 size={16}
                 className="transition-colors delay-100 duration-200 ease-in-out"
@@ -113,7 +113,7 @@ function ShowOrHideTableColumnsDropdown<TData>({
         <DropdownMenuSeparator />
         <DropdownMenuGroup className="group">
           <DropdownMenuItem onClick={() => table.resetColumnVisibility()}>
-            <HugeiconsIcon
+            <Icon
               icon={Refresh04Icon}
               size={14}
               strokeWidth={2}

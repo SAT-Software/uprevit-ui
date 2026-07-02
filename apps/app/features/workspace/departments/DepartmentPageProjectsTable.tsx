@@ -14,6 +14,12 @@ import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceListPaginationSkeleton";
+import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
+import {
+  DashboardErrorState,
+  DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
+} from "@/features/workspace/dashboard/DashboardErrorState";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import {
   ListFilterColumn,
@@ -43,10 +49,11 @@ import {
   PiKanbanDuotone,
 } from "react-icons/pi";
 import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
+  KanbanIcon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 
@@ -116,11 +123,11 @@ const SortableHeader = ({
               <span className="whitespace-nowrap truncate">{title}</span>
             </div>
             {column.getIsSorted() === "desc" ? (
-              <HugeiconsIcon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
+              <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
             ) : column.getIsSorted() === "asc" ? (
-              <HugeiconsIcon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+              <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
             ) : (
-              <HugeiconsIcon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+              <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
             )}
           </div>
         </button>
@@ -256,6 +263,7 @@ export default function DepartmentPageProjectsTable({
     data: projectsData,
     isFetching: isProjectsFetching,
     isPending: isProjectsPending,
+    isError: isProjectsError,
   } = useGetAllProjects({
     ...listState.query,
     departmentId,
@@ -265,6 +273,7 @@ export default function DepartmentPageProjectsTable({
   const isProjectsListBusy = isProjectsPending || isProjectsFetching;
   const hasProjectsToList =
     isProjectsListBusy ||
+    isProjectsError ||
     (projectsPagination?.totalCount ?? 0) > 0 ||
     listState.query.filters.length > 0;
   const sorting = useMemo<SortingState>(
@@ -317,18 +326,32 @@ export default function DepartmentPageProjectsTable({
             />
           </div>
           <div className="flex items-center gap-2">
-            <ShowOrHideTableColumnsDropdown table={table} />
-            <WorkspaceListControls
-              filters={listState.query.filters}
-              filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
-              onApplyFilters={listState.setFilters}
-              onClearFilters={listState.clearFilters}
-            />
+            {isProjectsListBusy ? (
+              <WorkspaceListToolbarSkeleton />
+            ) : isProjectsError ? null : (
+              <>
+                <ShowOrHideTableColumnsDropdown table={table} />
+                <WorkspaceListControls
+                  filters={listState.query.filters}
+                  filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
+                  onApplyFilters={listState.setFilters}
+                  onClearFilters={listState.clearFilters}
+                />
+              </>
+            )}
           </div>
         </div>
 
         <div className="w-full">
-          {hasProjectsToList ? (
+          {isProjectsError ? (
+            <DashboardErrorState
+              variant="panel"
+              embedded
+              icon={KanbanIcon}
+              title="Failed to load projects"
+              className={DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT}
+            />
+          ) : hasProjectsToList ? (
             <div className="flex flex-col items-end">
               <div className="w-full">
                 <div className="w-full border-y border-border overflow-hidden">
@@ -366,12 +389,11 @@ export default function DepartmentPageProjectsTable({
                       ))}
                     </TableHeader>
                     <TableBody>
-                      {isProjectsFetching ? (
+                      {isProjectsListBusy ? (
                         <TableBodySkeleton
                           columnCount={DEPARTMENT_PROJECT_TABLE_COLUMN_COUNT}
                         />
-                      ) : !isProjectsFetching &&
-                        table.getRowModel().rows?.length ? (
+                      ) : table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                           <TableRow
                             key={row.id}
@@ -417,21 +439,19 @@ export default function DepartmentPageProjectsTable({
                   </Table>
                 </div>
               </div>
-              {projectsPagination ? (
-                <WorkspaceListPagination
-                  pagination={projectsPagination}
-                  onPageChange={listState.setPage}
-                />
-              ) : null}
+              <div className="flex h-10 w-full items-center ">
+                {isProjectsListBusy ? (
+                  <WorkspaceListPaginationSkeleton />
+                ) : (
+                  <WorkspaceListPagination
+                    pagination={projectsPagination}
+                    onPageChange={listState.setPage}
+                  />
+                )}
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <WorkspaceListControls
-                filters={listState.query.filters}
-                filterColumns={DEPARTMENT_PROJECT_FILTER_COLUMNS}
-                onApplyFilters={listState.setFilters}
-                onClearFilters={listState.clearFilters}
-              />
               <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
                 <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
                   <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />

@@ -7,7 +7,7 @@ import DashboardProjectsCard from "@/features/workspace/dashboard/DashboardProje
 import { StatsGrid } from "@/features/workspace/dashboard/StatsGrid";
 import Link from "next/link";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 
 function DashboardPage() {
@@ -34,7 +34,7 @@ function DashboardPage() {
           <Link href="/products" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowUpRight01Icon}
                 size={16}
                 strokeWidth={2}

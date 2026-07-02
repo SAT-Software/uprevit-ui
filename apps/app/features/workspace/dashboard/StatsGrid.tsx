@@ -10,7 +10,7 @@ import {
   KanbanIcon,
   NewOfficeIcon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { DashboardErrorState } from "./DashboardErrorState";
@@ -43,35 +43,35 @@ export function StatsGrid({ location }: { location: string }) {
       id: "departments",
       title: "Departments",
       value: dashboardStats?.data?.total_departments ?? 0,
-      icon: <HugeiconsIcon icon={NewOfficeIcon} size={16} strokeWidth={2} />,
+      icon: <Icon icon={NewOfficeIcon} size={16} strokeWidth={2} />,
       info: "Total department in your organization's workspace",
     },
     {
       id: "projects",
       title: "Projects",
       value: dashboardStats?.data?.total_projects ?? 0,
-      icon: <HugeiconsIcon icon={KanbanIcon} size={16} strokeWidth={2} />,
+      icon: <Icon icon={KanbanIcon} size={16} strokeWidth={2} />,
       info: "Total projects in your organization's workspace",
     },
     {
       id: "products",
       title: "Products",
       value: dashboardStats?.data?.total_products ?? 0,
-      icon: <HugeiconsIcon icon={Blockchain03Icon} size={16} strokeWidth={2} />,
+      icon: <Icon icon={Blockchain03Icon} size={16} strokeWidth={2} />,
       info: "Total products in your organization's workspace",
     },
     {
       id: "source-files",
       title: "Source Files",
       value: dashboardStats?.data?.total_source_files ?? 0,
-      icon: <HugeiconsIcon icon={Folder02Icon} size={16} strokeWidth={2} />,
+      icon: <Icon icon={Folder02Icon} size={16} strokeWidth={2} />,
       info: "Total source files uploaded in your organization's workspace",
     },
     {
       id: "archives",
       title: "Archives",
       value: "TBD", //To be updated
-      icon: <HugeiconsIcon icon={ArchiveIcon} size={16} strokeWidth={2} />,
+      icon: <Icon icon={ArchiveIcon} size={16} strokeWidth={2} />,
       info: "Total archived departments, projects and products in your organization's workspace",
     },
   ];

@@ -5,7 +5,7 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 
 import { cn } from "@uprevit/ui/lib/utils";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { CancelSquareIcon } from "@hugeicons/core-free-icons";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -75,7 +75,7 @@ function SheetContent({
       >
         {children}
         <SheetPrimitive.Close className="fixed z-60 ring-offset-background focus:ring-ring data-[state=open]:bg-secondary top-3 right-3 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground cursor-pointer">
-          <HugeiconsIcon
+          <Icon
             icon={CancelSquareIcon}
             size={16}
             strokeWidth={2}

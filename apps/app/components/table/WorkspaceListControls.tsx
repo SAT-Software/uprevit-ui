@@ -37,7 +37,7 @@ import type {
   ListFilterColumn,
   ListFilterOperator,
 } from "@/lib/workspace-list-query";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Calendar03Icon,
   CancelSquareIcon,
@@ -159,7 +159,7 @@ function DateFilterInput({
           data-empty={!selectedDate}
           className="h-8 w-[150px] justify-start text-left text-sm font-normal data-[empty=true]:text-muted-foreground"
         >
-          <HugeiconsIcon icon={Calendar03Icon} size={16} strokeWidth={2} />
+          <Icon icon={Calendar03Icon} size={16} strokeWidth={2} />
           <span className="truncate">
             {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
           </span>
@@ -271,7 +271,7 @@ export function WorkspaceListControls({
                 size="sm"
                 className="text-muted-foreground/60 hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out"
               >
-                <HugeiconsIcon
+                <Icon
                   icon={FilterEditIcon}
                   size={12}
                   strokeWidth={2}
@@ -390,7 +390,7 @@ export function WorkspaceListControls({
                       onClick={() => handleRemoveFilter(filter.id)}
                       className="p-0 text-muted-foreground/60 hover:text-foreground"
                     >
-                      <HugeiconsIcon
+                      <Icon
                         icon={CancelSquareIcon}
                         size={16}
                         strokeWidth={2}
@@ -412,7 +412,7 @@ export function WorkspaceListControls({
               className="text-sm group"
               onClick={handleAddFilter}
             >
-              <HugeiconsIcon
+              <Icon
                 icon={FilterAddIcon}
                 size={12}
                 strokeWidth={2}
@@ -426,7 +426,7 @@ export function WorkspaceListControls({
               variant="secondary"
               onClick={handleApplyFilters}
             >
-              <HugeiconsIcon
+              <Icon
                 icon={FilterResetIcon}
                 size={12}
                 strokeWidth={2}
@@ -445,7 +445,7 @@ export function WorkspaceListControls({
           className="group"
           onClick={handleClearFilters}
         >
-          <HugeiconsIcon
+          <Icon
             icon={FilterRemoveIcon}
             size={16}
             strokeWidth={2}

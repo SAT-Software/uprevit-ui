@@ -21,7 +21,7 @@ import {
   Blockchain03Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
@@ -139,14 +139,14 @@ const SortableHeader = ({
             </div>
             <div className="opacity-50 group-hover:opacity-100 transition-all delay-100 duration-200 ease-in-out">
               {column.getIsSorted() === "desc" ? (
-                <HugeiconsIcon
+                <Icon
                   icon={ArrowDown01Icon}
                   className="ml-1 h-3 w-3"
                 />
               ) : column.getIsSorted() === "asc" ? (
-                <HugeiconsIcon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+                <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
               ) : (
-                <HugeiconsIcon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+                <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
               )}
             </div>
           </div>

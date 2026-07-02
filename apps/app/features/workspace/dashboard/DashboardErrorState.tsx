@@ -1,6 +1,6 @@
 "use client";
 
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 
 export const DASHBOARD_CARDS_ERROR_MIN_HEIGHT =
@@ -11,7 +11,7 @@ export const DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT = "min-h-[17.5rem]";
 type DashboardErrorStateVariant = "bar" | "panel";
 
 interface DashboardErrorStateProps {
-  icon: React.ComponentProps<typeof HugeiconsIcon>["icon"];
+  icon: React.ComponentProps<typeof Icon>["icon"];
   title: string;
   description?: string;
   variant?: DashboardErrorStateVariant;
@@ -47,7 +47,7 @@ export function DashboardErrorState({
           !isPanel && "hidden sm:flex",
         )}
       >
-        <HugeiconsIcon icon={icon} size={16} strokeWidth={2} />
+        <Icon icon={icon} size={16} strokeWidth={2} />
       </div>
       <div className={cn(isPanel && "space-y-1")}>
         <p className="text-destructive text-sm">{title}</p>

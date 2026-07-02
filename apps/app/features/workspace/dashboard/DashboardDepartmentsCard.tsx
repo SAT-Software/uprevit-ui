@@ -3,7 +3,7 @@
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { ArrowUpRight01Icon, NewOfficeIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import Link from "next/link";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
@@ -56,7 +56,7 @@ function DashboardDepartmentsCard() {
           <Link href="/departments" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowUpRight01Icon}
                 size={16}
                 strokeWidth={2}
@@ -91,7 +91,7 @@ function DashboardDepartmentsCard() {
           <Link href="/departments" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowUpRight01Icon}
                 size={16}
                 strokeWidth={2}
@@ -145,7 +145,7 @@ function DashboardDepartmentsCard() {
         <Link href="/departments" className="shrink-0 group">
           <Button size="sm" variant="secondary">
             Show All
-            <HugeiconsIcon
+            <Icon
               icon={ArrowUpRight01Icon}
               size={16}
               strokeWidth={2}

@@ -40,7 +40,7 @@ import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import type { Department } from "@/types/department";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { PropertyEditIcon } from "@hugeicons/core-free-icons";
 
 interface User {
@@ -209,7 +209,7 @@ export default function UpdateDepartmentDialog({
                 }
               }}
             >
-              <HugeiconsIcon
+              <Icon
                 className="transition-colors delay-100 duration-200 ease-in-out"
                 icon={PropertyEditIcon}
                 size={16}

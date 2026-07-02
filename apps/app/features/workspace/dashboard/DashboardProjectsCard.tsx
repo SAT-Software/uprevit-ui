@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
@@ -71,7 +71,7 @@ function DashboardProjectsCard() {
           <Link href="/projects" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowUpRight01Icon}
                 size={16}
                 strokeWidth={2}
@@ -109,7 +109,7 @@ function DashboardProjectsCard() {
           <Link href="/projects" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
-              <HugeiconsIcon
+              <Icon
                 icon={ArrowUpRight01Icon}
                 size={16}
                 strokeWidth={2}
@@ -135,7 +135,7 @@ function DashboardProjectsCard() {
     return (
       <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30">
         <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-          <HugeiconsIcon icon={KanbanIcon} size={16} strokeWidth={2} />
+          <Icon icon={KanbanIcon} size={16} strokeWidth={2} />
         </div>
         <div className="text-center space-y-1">
           <p className="text-sm font-medium text-foreground">
@@ -166,7 +166,7 @@ function DashboardProjectsCard() {
         <Link href="/projects" className="shrink-0 group">
           <Button size="sm" variant="secondary">
             Show All
-            <HugeiconsIcon
+            <Icon
               icon={ArrowUpRight01Icon}
               size={16}
               strokeWidth={2}
@@ -194,7 +194,7 @@ function DashboardProjectsCard() {
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full">
-                    <HugeiconsIcon
+                    <Icon
                       icon={KanbanIcon}
                       size={38}
                       strokeWidth={1.5}
@@ -220,7 +220,7 @@ function DashboardProjectsCard() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge variant="large">
-                        <HugeiconsIcon
+                        <Icon
                           icon={Calendar03Icon}
                           size={14}
                           strokeWidth={2}

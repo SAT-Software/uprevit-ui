@@ -6,7 +6,7 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { cn } from "@uprevit/ui/lib/utils";
 import { PiCaretCircleDownDuotone, PiCheckCircleDuotone } from "react-icons/pi";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 function Select({
@@ -47,7 +47,7 @@ function SelectTrigger({
           size={16}
           className="text-muted-foreground/80 in-aria-invalid:text-destructive/80 shrink-0"
         /> */}
-        <HugeiconsIcon
+        <Icon
           icon={ArrowDown01Icon}
           size={16}
           strokeWidth={2}

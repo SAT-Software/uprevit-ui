@@ -10,7 +10,7 @@ import {
   MenuSquareIcon,
   User03Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Avatar,
   AvatarFallback,
@@ -80,20 +80,20 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <GuardedLink href={`/settings?tab=profile`}>
-              <HugeiconsIcon icon={User03Icon} size={16} strokeWidth={2} />
+              <Icon icon={User03Icon} size={16} strokeWidth={2} />
               Profile
             </GuardedLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <GuardedLink href={`/settings?tab=workspace`}>
-              <HugeiconsIcon icon={MenuSquareIcon} size={16} strokeWidth={2} />
+              <Icon icon={MenuSquareIcon} size={16} strokeWidth={2} />
               Workspace
             </GuardedLink>
           </DropdownMenuItem>
           {isPlatformOperator ? (
             <DropdownMenuItem asChild>
               <GuardedLink href="/platform-admin">
-                <HugeiconsIcon
+                <Icon
                   icon={AccountSetting02Icon}
                   size={16}
                   strokeWidth={2}
@@ -104,7 +104,7 @@ export function UserNav() {
           ) : null}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut}>
-            <HugeiconsIcon icon={Logout02Icon} size={16} strokeWidth={2} />
+            <Icon icon={Logout02Icon} size={16} strokeWidth={2} />
             Log out
           </DropdownMenuItem>
         </DropdownMenuGroup>

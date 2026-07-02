@@ -2,10 +2,12 @@
 
 import {
   AddSquareIcon,
+  Clock01Icon,
   Delete02Icon,
   PropertyEditIcon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
 import {
   Avatar,
   AvatarFallback,
@@ -33,10 +35,11 @@ import {
 } from "@uprevit/ui/components/ui/timeline";
 import { cn } from "@uprevit/ui/lib/utils";
 import { ChevronRightIcon } from "lucide-react";
-import { PiCircleNotchDuotone } from "react-icons/pi";
 
 import { AuditLogV2, AuditLogV2Change } from "@/types/audit-log";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
+
+import { ActivityLogsTimelineSkeleton } from "./ActivityLogsTimelineSkeleton";
 
 type ActivityLogsTimelineProps = {
   logs: AuditLogV2[];
@@ -164,7 +167,7 @@ function ActivityLogChangeItem({ change }: { change: AuditLogV2Change }) {
           </p>
 
           <div className="flex justify-center">
-            <div className="h-2 w-px bg-border" />
+            <div className="h-2 w-0.5 rounded-full bg-border" />
           </div>
           <div aria-hidden="true" />
 
@@ -191,12 +194,12 @@ function ActivityLogChangeItem({ change }: { change: AuditLogV2Change }) {
 
 function ActionIcon({ action }: { action: AuditLogV2["action"] }) {
   if (action === "create") {
-    return <HugeiconsIcon icon={AddSquareIcon} size={14} strokeWidth={2} />;
+    return <Icon icon={AddSquareIcon} size={14} strokeWidth={2} />;
   }
   if (action === "update") {
-    return <HugeiconsIcon icon={PropertyEditIcon} size={14} strokeWidth={2} />;
+    return <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />;
   }
-  return <HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={2} />;
+  return <Icon icon={Delete02Icon} size={14} strokeWidth={2} />;
 }
 
 function getActorInitials(name: string) {
@@ -215,29 +218,20 @@ export function ActivityLogsTimeline({
   isError = false,
   errorMessage,
 }: ActivityLogsTimelineProps) {
-  if (isInitialLoading) {
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-center text-muted-foreground",
-          className,
-        )}
-      >
-        <Spinner className="size-5" />
-      </div>
-    );
+  if (isInitialLoading || isRefreshing) {
+    return <ActivityLogsTimelineSkeleton className={className} />;
   }
 
   if (isError) {
     return (
-      <div
-        className={cn(
-          "flex h-28 items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 px-4 text-center text-sm text-destructive",
-          className,
-        )}
-      >
-        {errorMessage || "Failed to load logs"}
-      </div>
+      <DashboardErrorState
+        variant="panel"
+        embedded
+        icon={Clock01Icon}
+        title="Failed to load activity logs"
+        description={errorMessage || "Reload the page or login again"}
+        className={cn("min-h-48", className)}
+      />
     );
   }
 
@@ -256,12 +250,6 @@ export function ActivityLogsTimeline({
 
   return (
     <div className={cn("", className)}>
-      {isRefreshing ? (
-        <div className=" mb-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-          <PiCircleNotchDuotone className="h-3.5 w-3.5 animate-spin" />
-          Refreshing...
-        </div>
-      ) : null}
       <Timeline defaultValue={logs.length}>
         {logs.map((log) => {
           const changes = log.changes ?? [];

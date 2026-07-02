@@ -38,7 +38,7 @@ import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { PlusSignSquareIcon } from "@hugeicons/core-free-icons";
 
 interface User {
@@ -195,7 +195,7 @@ export default function CreateDepartmentDialog() {
                 }
               }}
             >
-              <HugeiconsIcon
+              <Icon
                 icon={PlusSignSquareIcon}
                 size={16}
                 strokeWidth={2}

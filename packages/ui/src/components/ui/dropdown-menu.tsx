@@ -6,7 +6,7 @@ import { CircleIcon } from "lucide-react";
 
 import { cn } from "@uprevit/ui/lib/utils";
 import { PiCheckCircleDuotone } from "react-icons/pi";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 function DropdownMenu({
@@ -220,7 +220,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <HugeiconsIcon
+      <Icon
         icon={ArrowDown01Icon}
         size={16}
         strokeWidth={2}

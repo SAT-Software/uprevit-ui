@@ -4,7 +4,7 @@ import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import { getNextImageSrc } from "@/utils/isNextImageSrc";
 import { Calendar03Icon, NewOfficeIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Tooltip,
@@ -67,7 +67,7 @@ function DepartmentCard({
             />
           ) : (
             <div className="flex items-center justify-center w-full h-full">
-              <HugeiconsIcon
+              <Icon
                 icon={NewOfficeIcon}
                 size={36}
                 strokeWidth={2}
@@ -93,7 +93,7 @@ function DepartmentCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge variant="large">
-                  <HugeiconsIcon
+                  <Icon
                     icon={Calendar03Icon}
                     size={14}
                     strokeWidth={2}

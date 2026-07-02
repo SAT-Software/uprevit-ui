@@ -1,5 +1,5 @@
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Tooltip,
   TooltipContent,
@@ -19,7 +19,7 @@ export function InfoTooltip({
   return (
     <Tooltip>
       <TooltipTrigger className={className} asChild>
-        <HugeiconsIcon
+        <Icon
           icon={InformationCircleIcon}
           size={12}
           strokeWidth={2}

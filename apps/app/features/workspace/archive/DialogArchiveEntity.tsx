@@ -29,7 +29,7 @@ import { useArchiveProject } from "@/hooks/project/useArchiveProject";
 import { PiArchiveDuotone } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { cn } from "@uprevit/ui/lib/utils";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ArchiveIcon } from "@hugeicons/core-free-icons";
 
 export type ArchiveEntityType = "project" | "department";
@@ -97,7 +97,7 @@ export default function DialogArchiveEntity({
                 }
               }}
             >
-              <HugeiconsIcon
+              <Icon
                 className="transition-colors delay-100 duration-200 ease-in-out"
                 icon={ArchiveIcon}
                 size={16}

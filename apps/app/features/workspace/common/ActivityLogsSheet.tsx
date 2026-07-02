@@ -32,7 +32,7 @@ import {
   InputGroupInput,
 } from "@uprevit/ui/components/ui/input-group";
 import { useAuth } from "react-oidc-context";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   FilterIcon,
   Refresh04Icon,
@@ -163,7 +163,7 @@ export function ActivityLogsSheet({
                 className="h-7 w-full text-sm"
               />
               <InputGroupAddon>
-                <HugeiconsIcon icon={Search02Icon} size={14} strokeWidth={2} />
+                <Icon icon={Search02Icon} size={14} strokeWidth={2} />
               </InputGroupAddon>
               <InputGroupAddon
                 className="text-muted-foreground/60 text-xs"
@@ -179,7 +179,7 @@ export function ActivityLogsSheet({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-1">
-                      <HugeiconsIcon
+                      <Icon
                         icon={FilterIcon}
                         size={14}
                         strokeWidth={2}
@@ -213,7 +213,7 @@ export function ActivityLogsSheet({
                   disabled={isFetching}
                   aria-label="Refresh logs"
                 >
-                  <HugeiconsIcon
+                  <Icon
                     icon={Refresh04Icon}
                     size={14}
                     strokeWidth={2}
