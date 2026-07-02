@@ -5,13 +5,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { cn } from "@uprevit/ui/lib/utils";
 
 export function InfoTooltip({
   content,
   className,
+  ContentClassName,
 }: {
   content: string;
   className?: string;
+  ContentClassName?: string;
 }) {
   return (
     <Tooltip>
@@ -23,7 +26,7 @@ export function InfoTooltip({
           className="text-muted-foreground/60"
         />
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent className={cn(ContentClassName)}>
         <p>{content}</p>
       </TooltipContent>
     </Tooltip>

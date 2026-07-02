@@ -37,6 +37,7 @@ import {
   PiUserCircleGearDuotone,
 } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
+import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
 
 interface DepartmentUser {
   _id: string;
@@ -147,75 +148,75 @@ export default function DepartmentDetailPage() {
     }).format(date);
   };
 
-  const handleLogsToggle = () => {
-    const nextParams = new URLSearchParams(searchParams.toString());
-    if (isLogsView) {
-      nextParams.delete("tab");
-    } else {
-      nextParams.set("tab", "logs");
-    }
+  // const handleLogsToggle = () => {
+  //   const nextParams = new URLSearchParams(searchParams.toString());
+  //   if (isLogsView) {
+  //     nextParams.delete("tab");
+  //   } else {
+  //     nextParams.set("tab", "logs");
+  //   }
 
-    const query = nextParams.toString();
-    router.replace(
-      query
-        ? `/departments/${departmentId}?${query}`
-        : `/departments/${departmentId}`,
-    );
-  };
+  //   const query = nextParams.toString();
+  //   router.replace(
+  //     query
+  //       ? `/departments/${departmentId}?${query}`
+  //       : `/departments/${departmentId}`,
+  //   );
+  // };
 
-  if (isLogsView) {
-    return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border p-4">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold">Department Logs</h1>
-              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-                {department.department_name}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {isAdmin ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleLogsToggle}
-                      aria-label="Show department overview"
-                    >
-                      <PiClockCounterClockwiseDuotone className="h-4 w-4" />
-                      Logs
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Show Overview</TooltipContent>
-                </Tooltip>
-              ) : null}
-              <UpdateDepartmentDialog department={department} />
-              <ShareDepartmentDialog department={department} />
-              <DialogArchiveEntity
-                id={departmentId ?? ""}
-                entityName={department.department_name}
-                entityType="department"
-              />
-            </div>
-          </div>
+  // if (isLogsView) {
+  //   return (
+  //     <div className="flex flex-col gap-2 p-2 h-full">
+  //       <div className="flex flex-col border border-border bg-background rounded-xl w-full h-full overflow-hidden">
+  //         <div className="flex items-center justify-between border-b border-border p-4">
+  //           <div className="flex items-center gap-2">
+  //             <h1 className="text-base font-semibold">Department Logs</h1>
+  //             <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
+  //             <p className="text-xs text-muted-foreground font-medium hidden sm:block">
+  //               {department.department_name}
+  //             </p>
+  //           </div>
+  //           <div className="flex items-center gap-2">
+  //             {isAdmin ? (
+  //               <Tooltip>
+  //                 <TooltipTrigger asChild>
+  //                   <Button
+  //                     type="button"
+  //                     variant="secondary"
+  //                     size="sm"
+  //                     onClick={handleLogsToggle}
+  //                     aria-label="Show department overview"
+  //                   >
+  //                     <PiClockCounterClockwiseDuotone className="h-4 w-4" />
+  //                     Logs
+  //                   </Button>
+  //                 </TooltipTrigger>
+  //                 <TooltipContent>Show Overview</TooltipContent>
+  //               </Tooltip>
+  //             ) : null}
+  //             <UpdateDepartmentDialog department={department} />
+  //             <ShareDepartmentDialog department={department} />
+  //             <DialogArchiveEntity
+  //               id={departmentId ?? ""}
+  //               entityName={department.department_name}
+  //               entityType="department"
+  //             />
+  //           </div>
+  //         </div>
 
-          <div className="flex-1 overflow-hidden p-4">
-            <ActivityLogsPanel
-              scopeType="department"
-              scopeId={departmentId}
-              title="Department Logs"
-              description={`Showing activity for ${department.department_name}.`}
-              showHeader={false}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  //         <div className="flex-1 overflow-hidden p-4">
+  //           <ActivityLogsPanel
+  //             scopeType="department"
+  //             scopeId={departmentId}
+  //             title="Department Logs"
+  //             description={`Showing activity for ${department.department_name}.`}
+  //             showHeader={false}
+  //           />
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="flex flex-col h-full">
@@ -284,14 +285,13 @@ export default function DepartmentDetailPage() {
             {/* Actions */}
             <div className="flex items-center gap-2 w-full p-2">
               {isAdmin && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLogsToggle}
-                    >
+                <ActivityLogsSheet
+                  scopeType="department"
+                  scopeId={departmentId ?? ""}
+                  title="Department Logs"
+                  tooltip="All the timeline logs for this department. When it was created or updated. What was updated/created/deleted. The user/admin who took the action. Date and time"
+                  trigger={
+                    <Button type="button" variant="outline" size="sm">
                       <HugeiconsIcon
                         className="transition-colors delay-100 duration-200 ease-in-out"
                         icon={ProfileIcon}
@@ -300,12 +300,8 @@ export default function DepartmentDetailPage() {
                       />
                       Logs
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Department Logs - When was the department created, when it
-                    was updated, who updated it, what was updated
-                  </TooltipContent>
-                </Tooltip>
+                  }
+                />
               )}
               <UpdateDepartmentDialog department={department} />
               <ShareDepartmentDialog department={department} />

@@ -89,11 +89,11 @@ const columnHeaderMap = [
   },
   {
     title: "Created",
-    info: "Date of the project creation",
+    info: "Date of the project creation and the user who created it",
   },
   {
     title: "Modified",
-    info: "Date of project updated last time",
+    info: "Date of project updated last and the user who updated it",
   },
 ];
 
@@ -113,7 +113,7 @@ const SortableHeader = ({
         >
           <div className="flex items-center justify-between w-full gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="whitespace-nowrap">{title}</span>
+              <span className="whitespace-nowrap truncate">{title}</span>
             </div>
             {column.getIsSorted() === "desc" ? (
               <HugeiconsIcon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
@@ -135,33 +135,34 @@ const SortableHeader = ({
 const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "project_number",
-    size: 140,
+    size: 120,
     header: ({ column }) => (
       <SortableHeader column={column} title="Project No." />
     ),
     cell: ({ row }) => (
-      <div className="text-sm font-medium">
+      <div className="text-sm font-medium truncate">
         {row.getValue("project_number")}
       </div>
     ),
-    minSize: 140,
   },
   {
     accessorKey: "project_name",
-    size: 200,
+    size: 250,
     enableHiding: false,
     header: ({ column }) => (
       <SortableHeader column={column} title="Project Name" />
     ),
     cell: ({ row }) => {
       return (
-        <p className="text-sm font-medium">{row.getValue("project_name")}</p>
+        <p className="text-sm font-medium truncate">
+          {row.getValue("project_name")}
+        </p>
       );
     },
   },
   {
     accessorKey: "project_description",
-    size: 280,
+    size: 220,
     header: ({ column }) => (
       <SortableHeader column={column} title="Description" />
     ),
@@ -175,16 +176,17 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "users",
-    size: 88,
+    size: 80,
+    maxSize: 80,
     header: ({ column }) => <SortableHeader column={column} title="Users" />,
     cell: ({ row }) => {
       const users = row.original.users?.length || 0;
-      return <p className="text-sm font-medium">{users}</p>;
+      return <p className="text-sm font-medium truncate">{users}</p>;
     },
   },
   {
     accessorKey: "createdOn",
-    size: 175,
+    size: 110,
     header: ({ column }) => <SortableHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const createdBy = row.original.auditLogs?.filter(
@@ -195,7 +197,7 @@ const columns: ColumnDef<Project>[] = [
       )[0]?.actionAt;
       if (createdBy && createdAt)
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col truncate">
             <p className="text-sm font-medium">{createdBy}</p>
             <p className="text-xs text-muted-foreground">
               {Intl.DateTimeFormat("en-US", {
@@ -209,7 +211,7 @@ const columns: ColumnDef<Project>[] = [
   },
   {
     accessorKey: "modifiedOn",
-    size: 175,
+    size: 110,
     header: ({ column }) => <SortableHeader column={column} title="Modified" />,
     cell: ({ row }) => {
       const modifiedBy = row.original.auditLogs?.filter(
@@ -220,7 +222,7 @@ const columns: ColumnDef<Project>[] = [
       )[0]?.actionAt;
       if (modifiedBy && modifiedAt)
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col truncate">
             <p className="text-sm font-medium">{modifiedBy}</p>
             <p className="text-xs text-muted-foreground">
               {Intl.DateTimeFormat("en-US", {

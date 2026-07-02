@@ -90,7 +90,7 @@ function DepartmentsPage() {
   return (
     <div className="flex flex-col gap-2 min-h-full">
       <div className="flex flex-1 flex-col items-start justify-start w-full h-auto">
-        <div className="flex flex-col items-start w-full mb-4">
+        <div className="flex flex-col items-start w-full">
           <div className="p-2 h-10 pl-3 w-full flex border-b border-border items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">All Departments</p>
@@ -196,7 +196,7 @@ function DepartmentsPage() {
                 />
               ))
             )}
-            <div className="py-2 px-4 border-b">
+            <div className="flex items-center border-b h-10">
               {!isLoading ? (
                 <WorkspaceListPagination
                   pagination={pagination}
