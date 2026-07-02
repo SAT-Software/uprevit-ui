@@ -12,6 +12,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { cn } from "@uprevit/ui/lib/utils";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { DashboardErrorState } from "./DashboardErrorState";
 
 interface StatsCardProps {
   id: string;
@@ -79,7 +81,7 @@ export function StatsGrid({ location }: { location: string }) {
     return (
       <div
         className={cn(
-          "grid grid-cols-2 border-b border-border bg-linear-to-br from-background/90 to-background",
+          "grid grid-cols-2 border-b border-border",
           location === "archive"
             ? "min-[1200px]:grid-cols-5"
             : "min-[1200px]:grid-cols-5",
@@ -88,19 +90,22 @@ export function StatsGrid({ location }: { location: string }) {
         {visibleStats.map((stat) => (
           <div
             key={stat.id}
-            className="relative flex w-full items-center justify-between p-4 group before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
+            className="relative group flex w-full items-center justify-between p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
           >
             <div className="relative flex items-center gap-4">
-              <div className="hidden size-10 mb-1 shrink-0 animate-pulse items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground/60 sm:flex">
+              <div className="hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground/60 sm:flex">
                 {stat.icon}
               </div>
               <div>
-                <div className="font-medium text-xs text-muted-foreground/60">
-                  {stat.title}
+                <div className="flex items-center gap-2">
+                  <p className="font-normal text-sm text-muted-foreground/60">
+                    {stat.title}
+                  </p>
+                  <InfoTooltip content={stat.info} />
                 </div>
-                <div className="mb-2 text-2xl font-semibold">
-                  <div className="h-8 animate-pulse rounded bg-muted" />
-                </div>
+                <p className="mb-2 h-8 text-2xl font-semibold leading-8">
+                  <Skeleton className="inline-block h-8 w-10 rounded" />
+                </p>
               </div>
             </div>
           </div>
@@ -111,24 +116,16 @@ export function StatsGrid({ location }: { location: string }) {
 
   if (statsError)
     return (
-      <div className={cn("h-22 border-b border-border w-full")}>
-        <div className="relative flex w-full items-center justify-center gap-4 p-4 group border border-dashed border-destructive/40 h-full bg-destructive/5">
-          <div
-            className={cn(
-              "hidden size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/40 bg-background text-destructive sm:flex",
-            )}
-          >
-            <HugeiconsIcon icon={DashboardSpeed01Icon} />
-          </div>
-          <div>
-            <p className="text-destructive text-sm">
-              Failed to load dashboard stats
-            </p>
-            <p className="text-foreground/40 text-xs">
-              Reload the page or login again
-            </p>
-          </div>
-        </div>
+      <div
+        className={cn(
+          "flex h-22 items-center border-b border-border w-full p-2",
+        )}
+      >
+        <DashboardErrorState
+          icon={DashboardSpeed01Icon}
+          title="Failed to load dashboard stats"
+          className="h-full w-full"
+        />
       </div>
     );
 
@@ -163,7 +160,7 @@ export function StatsGrid({ location }: { location: string }) {
                   </p>
                   <InfoTooltip content={info} />
                 </div>
-                <p className="mb-2 text-2xl font-semibold">
+                <p className="mb-2 h-8 text-2xl font-semibold leading-8">
                   {typeof value === "number" ? formatStatValue(value) : value}
                 </p>
               </div>

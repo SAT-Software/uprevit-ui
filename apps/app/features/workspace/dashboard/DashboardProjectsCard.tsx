@@ -17,8 +17,10 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
+import { DashboardErrorState, DASHBOARD_CARDS_ERROR_MIN_HEIGHT } from "./DashboardErrorState";
 
 interface ProjectUser {
   _id: string;
@@ -46,7 +48,6 @@ function DashboardProjectsCard() {
     data: projectsData,
     isLoading,
     isError,
-    refetch,
   } = useGetAllProjects({ limit: 5, sort: "actionAt", order: "desc" });
 
   const projects = projectsData?.result?.projects ?? [];
@@ -54,9 +55,20 @@ function DashboardProjectsCard() {
   if (isLoading) {
     return (
       <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-2 justify-start px-4">
-        <div className="flex items-center justify-between w-full">
-          <p className="text-base font-semibold">Projects</p>
-          <Link href="/projects">
+        <div className="flex w-full min-w-0 items-center justify-between gap-2">
+          <div className="flex flex-col min-w-0 flex-1 items-start gap-0 overflow-hidden">
+            <div className="flex gap-2 items-center">
+              <p className="shrink-0 text-base font-semibold">Projects</p>
+              <InfoTooltip
+                content="Projects is between departments and products. Each project
+                  belongs to one department and holds multiple products"
+              />
+            </div>
+            <p className="truncate text-sm font-normal text-muted-foreground/80">
+              Latest projects of your workspace
+            </p>
+          </div>
+          <Link href="/projects" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
               <HugeiconsIcon
@@ -69,7 +81,7 @@ function DashboardProjectsCard() {
           </Link>
         </div>
 
-        <div className="flex flex-col items-start gap-2 w-full">
+        <div className="flex w-full min-w-0 flex-col items-start gap-2">
           {[...Array(2)].map((_, index) => (
             <ProjectLoadingCard key={index} />
           ))}
@@ -81,9 +93,20 @@ function DashboardProjectsCard() {
   if (isError) {
     return (
       <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-2 justify-start px-4">
-        <div className="flex items-center justify-between w-full">
-          <p className="text-base font-semibold">Projects</p>
-          <Link href="/projects">
+        <div className="flex w-full min-w-0 items-center justify-between gap-2">
+          <div className="flex flex-col min-w-0 flex-1 items-start gap-0 overflow-hidden">
+            <div className="flex gap-2 items-center">
+              <p className="shrink-0 text-base font-semibold">Projects</p>
+              <InfoTooltip
+                content="Projects is between departments and products. Each project
+                  belongs to one department and holds multiple products"
+              />
+            </div>
+            <p className="truncate text-sm font-normal text-muted-foreground/80">
+              Latest projects of your workspace
+            </p>
+          </div>
+          <Link href="/projects" className="shrink-0 group">
             <Button size="sm" variant="secondary">
               Show All
               <HugeiconsIcon
@@ -96,7 +119,12 @@ function DashboardProjectsCard() {
           </Link>
         </div>
 
-        <ProjectErrorState onRetry={() => refetch()} />
+        <DashboardErrorState
+          variant="panel"
+          icon={KanbanIcon}
+          title="Failed to load projects"
+          className={DASHBOARD_CARDS_ERROR_MIN_HEIGHT}
+        />
       </div>
     );
   }
@@ -239,41 +267,30 @@ function DashboardProjectsCard() {
   );
 }
 
-export default DashboardProjectsCard;
-
 function ProjectLoadingCard() {
   return (
-    <div className="flex flex-col md:flex-row items-center w-full border border-border bg-card rounded-xl p-3 gap-4">
-      <div className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg bg-muted animate-pulse" />
-      <div className="flex flex-col flex-1 gap-2 w-full">
-        <div className="flex flex-col gap-1 w-full">
-          <div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
-          <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
+    <div className="relative w-full">
+      <div className="flex flex-col md:flex-row items-start md:items-center w-full border border-border rounded-2xl p-3 gap-4">
+        <Skeleton className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg" />
+        <div className="flex flex-col flex-1 gap-1 min-w-0 w-full">
+          <div className="flex flex-col gap-1 w-full">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-3 w-2/3" />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
+            <Skeleton className="h-6 w-28 rounded-full" />
+          </div>
         </div>
-        <div className="flex items-center justify-between w-full gap-4 mt-1">
-          <div className="h-6 bg-muted rounded w-24 animate-pulse" />
-          <div className="h-6 bg-muted rounded w-16 animate-pulse" />
+      </div>
+      <div className="absolute flex items-center bottom-3 right-3">
+        <div className="flex items-center -space-x-2">
+          <Skeleton className="size-7 rounded-full border-2 border-background" />
+          <Skeleton className="size-7 rounded-full border-2 border-background" />
+          <Skeleton className="size-7 rounded-full border-2 border-background" />
         </div>
       </div>
     </div>
   );
 }
 
-function ProjectErrorState({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
-      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
-        <HugeiconsIcon icon={KanbanIcon} size={16} strokeWidth={2} />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-destructive">
-          Failed to load projects
-        </p>
-        <p className="text-xs text-muted-foreground">Please try again later</p>
-      </div>
-      <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
-        Try Again
-      </Button>
-    </div>
-  );
-}
+export default DashboardProjectsCard;

@@ -12,15 +12,18 @@ import {
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductProcessDropdown } from "@/components/common/ProductProgressDropdown";
+import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { AuditLog } from "@/types/product";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
+  Blockchain03Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -39,6 +42,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PiPackageDuotone } from "react-icons/pi";
 import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
+import {
+  DashboardErrorState,
+  DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
+} from "./DashboardErrorState";
 
 export type Item = {
   _id: string;
@@ -70,6 +77,16 @@ export type Item = {
   }>;
   complete_count: number;
 };
+
+const dashboardTableColumns = [
+  { title: "PPN", width: 100 },
+  { title: "Product Name", width: 270 },
+  { title: "Project", width: 160 },
+  { title: "Department", width: 160 },
+  { title: "Status", width: 80 },
+  { title: "Version", width: 80 },
+  { title: "Progress", width: 90 },
+] as const;
 
 const columnHeaderMap = [
   {
@@ -371,28 +388,39 @@ export default function DashboardProductsTable() {
 
   if (isLoading) {
     return (
-      <div className="w-full border border-border rounded-lg overflow-hidden">
-        <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20"></div>
+      <div className="w-full border border-border rounded-2xl overflow-hidden">
+        <div className="w-full flex items-center justify-between border-b h-10 pl-4 pr-2">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">Recent Products</p>
+            <InfoTooltip content="Recently created or updated products" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-7 rounded-md" />
+          </div>
+        </div>
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent bg-muted/50">
-              {[...Array(7)].map((_, i) => (
-                <TableHead key={i}>
-                  <div className="h-4 bg-muted rounded w-24 animate-pulse" />
-                </TableHead>
-              ))}
+            <TableRow>
+              {dashboardTableColumns.map(({ title, width }, index) => {
+                const isLastColumn = index === dashboardTableColumns.length - 1;
+                return (
+                  <TableHead
+                    key={title}
+                    style={{ width: `${width}px` }}
+                    className={cn(!isLastColumn && "border-r border-border")}
+                  >
+                    <div className="h-10 flex items-center">
+                      <span className="text-sm text-muted-foreground/60">
+                        {title}
+                      </span>
+                    </div>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...Array(3)].map((_, index) => (
-              <TableRow key={index}>
-                {[...Array(7)].map((_, i) => (
-                  <TableCell key={i}>
-                    <div className="h-4 bg-muted rounded w-full animate-pulse" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            <TableBodySkeleton columnCount={7} rowCount={5} />
           </TableBody>
         </Table>
       </div>
@@ -401,18 +429,20 @@ export default function DashboardProductsTable() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
-        <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
-          <PiPackageDuotone className="w-8 h-8 text-destructive" />
+      <div className="w-full border border-border rounded-2xl overflow-hidden">
+        <div className="w-full flex items-center justify-between border-b h-10 pl-4 pr-2">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">Recent Products</p>
+            <InfoTooltip content="Recently created or updated products" />
+          </div>
         </div>
-        <div className="text-center space-y-1">
-          <p className="text-sm font-medium text-destructive">
-            Failed to load products
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {error.message || "Please try again later"}
-          </p>
-        </div>
+        <DashboardErrorState
+          variant="panel"
+          embedded
+          icon={Blockchain03Icon}
+          title="Failed to load products"
+          className={DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT}
+        />
       </div>
     );
   }
