@@ -2,7 +2,7 @@
 
 import { ColumnsThreeCogIcon, Refresh04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Table } from "@tanstack/react-table";
+import { Table, Column } from "@tanstack/react-table";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import {
@@ -21,10 +21,21 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 
+type ColumnLabelMeta = {
+  label?: string;
+};
+
+const getColumnLabel = <TData,>(column: Column<TData, unknown>) => {
+  const meta = column.columnDef.meta as ColumnLabelMeta | undefined;
+  return meta?.label ?? column.id;
+};
+
 function ShowOrHideTableColumnsDropdown<TData>({
   table,
+  onResetDefault,
 }: {
   table: Table<TData>;
+  onResetDefault?: () => void;
 }) {
   return (
     <DropdownMenu>
@@ -68,9 +79,9 @@ function ShowOrHideTableColumnsDropdown<TData>({
                     <Checkbox checked={column.getIsVisible()} disabled />
                     <FieldLabel
                       htmlFor="terms-checkbox-basic"
-                      className="font-normal capitalize"
+                      className="font-normal"
                     >
-                      {column.id}
+                      {getColumnLabel(column)}
                     </FieldLabel>
                   </Field>
                 </FieldGroup>
@@ -101,9 +112,9 @@ function ShowOrHideTableColumnsDropdown<TData>({
                     />
                     <FieldLabel
                       htmlFor="terms-checkbox-basic"
-                      className="font-normal capitalize"
+                      className="font-normal"
                     >
-                      {column.id}
+                      {getColumnLabel(column)}
                     </FieldLabel>
                   </Field>
                 </FieldGroup>
@@ -112,7 +123,15 @@ function ShowOrHideTableColumnsDropdown<TData>({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup className="group">
-          <DropdownMenuItem onClick={() => table.resetColumnVisibility()}>
+          <DropdownMenuItem
+            onClick={() => {
+              if (onResetDefault) {
+                onResetDefault();
+                return;
+              }
+              table.resetColumnVisibility();
+            }}
+          >
             <Icon
               icon={Refresh04Icon}
               size={14}

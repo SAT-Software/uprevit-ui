@@ -15,7 +15,7 @@ import {
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
-import { Item } from "./ProductsPageProductTable";
+import { ProductListItem } from "./productListItem";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { PiXCircleDuotone, PiCheckCircleDuotone } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
@@ -25,7 +25,7 @@ export default function UpdateProductDialog({
   open,
   onOpenChange,
 }: {
-  product: Item;
+  product: ProductListItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {

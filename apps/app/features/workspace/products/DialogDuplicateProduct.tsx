@@ -17,7 +17,7 @@ import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { useId, useState } from "react";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import { useGetProjectById } from "@/hooks/project/useGetProjectById";
-import { Item } from "./ProductsPageProductTable";
+import { ProductListItem } from "./productListItem";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
@@ -29,7 +29,7 @@ import {
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 export interface UpdateProductDialogProps {
-  product: Item;
+  product: ProductListItem;
 }
 
 interface FormValues {
