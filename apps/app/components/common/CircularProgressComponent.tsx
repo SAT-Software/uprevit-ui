@@ -28,7 +28,7 @@ const CircularProgress = forwardRef<
         cy={size / 2}
         r={radius}
         fill="none"
-        className="stroke-muted"
+        className="stroke-muted-foreground/20"
         strokeWidth={strokeWidth}
       />
       <circle

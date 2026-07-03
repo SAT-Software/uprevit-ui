@@ -34,10 +34,14 @@ import {
 } from "react-icons/pi";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
-import { ProductUpdateProgress } from "./ProductUpdateProgress";
-import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
+import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
 import { toast } from "sonner";
 import { useProductWorkbookUnsavedGuardOptional } from "@/lib/product-workbook-unsaved-guard";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  CancelCircleIcon,
+  CheckmarkCircle02Icon,
+} from "@hugeicons/core-free-icons";
 
 export type Item = {
   productId: string;
@@ -61,6 +65,52 @@ export type Item = {
 };
 
 const TOTAL_TABS = 7;
+
+const PROGRESS_STATES = [
+  {
+    min: 100,
+    label: "Ready to submit",
+    dot: "bg-emerald-500",
+    text: "text-emerald-600 dark:text-emerald-300",
+    bar: "from-emerald-400 via-emerald-500 to-emerald-600",
+  },
+  {
+    min: 70,
+    label: "On track",
+    dot: "bg-sky-500",
+    text: "text-sky-600 dark:text-sky-300",
+    bar: "from-sky-400 via-sky-500 to-sky-600",
+  },
+  {
+    min: 40,
+    label: "In progress",
+    dot: "bg-amber-500",
+    text: "text-amber-600 dark:text-amber-300",
+    bar: "from-amber-400 via-amber-500 to-amber-600",
+  },
+  {
+    min: 0,
+    label: "Getting started",
+    dot: "bg-slate-400",
+    text: "text-slate-600 dark:text-slate-300",
+    bar: "from-slate-400 via-slate-500 to-slate-600",
+  },
+] as const;
+
+const SUBMITTED_STATE = {
+  min: 100,
+  label: "Submitted",
+  dot: "bg-violet-500",
+  text: "text-violet-600 dark:text-violet-300",
+  bar: "from-violet-400 via-violet-500 to-violet-600",
+} as const;
+
+const getProgressState = (value: number) => {
+  for (const state of PROGRESS_STATES) {
+    if (value >= state.min) return state;
+  }
+  return PROGRESS_STATES[PROGRESS_STATES.length - 1];
+};
 
 interface ProductHeaderProps {
   isExportLocked?: boolean;
@@ -203,6 +253,14 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     : null;
 
   const completionPercentage = productCoreData?.complete_count ?? 0;
+  const clampedPercentage = Math.max(
+    0,
+    Math.min(100, Math.round(completionPercentage || 0)),
+  );
+  const progressState =
+    productCoreData?.status === "submitted"
+      ? SUBMITTED_STATE
+      : getProgressState(clampedPercentage);
 
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
@@ -228,45 +286,16 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
       : "Marking complete..."
     : isExportLocked
       ? "Export in progress"
-    : isReadOnly
-      ? "Submitted"
-      : isCurrentTabCompleted
-        ? "Mark Incomplete"
-        : "Mark Complete";
-
-  const toggleButtonSubtitle = isSyncingStatus
-    ? "Syncing with workspace"
-    : isExportLocked
-      ? "Export in progress"
       : isReadOnly
-      ? "This product is submitted"
-      : isCurrentTabCompleted
-        ? "Send back to in-progress"
-        : "Mark this tab completed";
-
-  const toggleButtonIcon = isSyncingStatus ? (
-    <Spinner className="size-3" />
-  ) : isEditLocked ? (
-    <PiLockKeyDuotone className="size-3 text-amber-600" />
-  ) : isCurrentTabCompleted ? (
-    <PiCircleDuotone className="size-3 text-emerald-600" />
-  ) : (
-    <PiCircleDuotone className="size-3" />
-  );
+        ? "Submitted"
+        : isCurrentTabCompleted
+          ? "Mark Incomplete"
+          : "Mark Complete";
 
   const toggleButtonClasses = cn(
     "group text-left text-xs flex items-center gap-2 font-semibold leading-tight transition-all disabled:text-muted-foreground rounded-lg border bg-accent",
     isEditLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer",
     isCurrentTabCompleted ? "text-foreground" : "text-foreground",
-  );
-
-  const toggleButtonIconClasses = cn(
-    "flex size-7 items-center justify-center rounded-xl border text-base transition-colors border-border bg-muted/60 text-muted-foreground",
-    isEditLocked
-      ? "dark:bg-amber-500/20 dark:text-amber-100"
-      : isCurrentTabCompleted
-        ? "dark:bg-emerald-500/20 dark:text-emerald-100 group-hover:border-foreground/30 group-hover:text-foreground"
-        : "dark:border-border/80 dark:bg-muted/40 group-hover:border-foreground/30 group-hover:text-foreground",
   );
 
   const handleToggleTab = async () => {
@@ -407,7 +436,11 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 : "Queue PDF export"
             }
           >
-            {isExportingPDF ? <Spinner className="size-3" /> : <PiFilePdfDuotone />}
+            {isExportingPDF ? (
+              <Spinner className="size-3" />
+            ) : (
+              <PiFilePdfDuotone />
+            )}
             {isExportingPDF ? "Queueing PDF..." : "Export PDF"}
           </Button>
 
@@ -509,48 +542,49 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
-        <ButtonGroup>
-          <ProductUpdateProgress
-            completionPercentage={completionPercentage}
-            completedTabsCount={completedTabsCount}
-            totalTabs={TOTAL_TABS}
-            productStatus={productCoreData?.status}
-          />
-          {isTabCompletionEnabled ? (
-            <ToggleTabCompletionDialog
-              tabName={currentTab}
-              isCompleted={isCurrentTabCompleted}
-              onConfirm={handleToggleTab}
-              disabled={!product || isSyncingStatus || isEditLocked}
-            >
-              <Button
-                variant="secondary"
-                size="default"
-                className={cn(toggleButtonClasses, "px-1")}
+        <ProductProgressHoverCard
+          percentage={clampedPercentage}
+          colorClass={progressState.bar}
+          progress={clampedPercentage}
+          product_name={product?.productName ?? ""}
+          tabsCompleted={completedTabsCount}
+          totalTabs={TOTAL_TABS}
+          showActions={isTabCompletionEnabled}
+          actions={
+            isTabCompletionEnabled ? (
+              <ToggleTabCompletionDialog
+                tabName={currentTab}
+                isCompleted={isCurrentTabCompleted}
+                onConfirm={handleToggleTab}
                 disabled={!product || isSyncingStatus || isEditLocked}
-                title={
-                  isExportLocked
-                    ? "Editing is disabled while export is in progress"
-                    : isReadOnly
-                      ? "Cannot edit submitted product"
-                      : undefined
-                }
               >
-                <span className={toggleButtonIconClasses}>
-                  {toggleButtonIcon}
-                </span>
-                <span className="flex flex-col items-start leading-tight">
-                  <span className="text-xs font-semibold">
-                    {toggleButtonTitle}
-                  </span>
-                  <span className="text-[0.65rem] font-medium text-muted-foreground">
-                    {toggleButtonSubtitle}
-                  </span>
-                </span>
-              </Button>
-            </ToggleTabCompletionDialog>
-          ) : null}
-        </ButtonGroup>
+                <Button
+                  variant="secondary"
+                  size="default"
+                  className={cn(
+                    toggleButtonClasses,
+                    "[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground ",
+                  )}
+                  disabled={!product || isSyncingStatus || isEditLocked}
+                  title={
+                    isExportLocked
+                      ? "Editing is disabled while export is in progress"
+                      : isReadOnly
+                        ? "Cannot edit submitted product"
+                        : undefined
+                  }
+                >
+                  {isCurrentTabCompleted ? (
+                    <Icon icon={CancelCircleIcon} />
+                  ) : (
+                    <Icon icon={CheckmarkCircle02Icon} />
+                  )}
+                  {toggleButtonTitle}
+                </Button>
+              </ToggleTabCompletionDialog>
+            ) : undefined
+          }
+        />
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
             <ConfirmSubmitProductDialog
@@ -569,10 +603,10 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                   isExportLocked
                     ? "Cannot submit while export is in progress"
                     : isReadOnly
-                    ? "Product is already submitted"
-                    : !isProductComplete
-                      ? "Complete all tabs to enable submission"
-                      : "Submit product"
+                      ? "Product is already submitted"
+                      : !isProductComplete
+                        ? "Complete all tabs to enable submission"
+                        : "Submit product"
                 }
               >
                 <PiPaperPlaneRightDuotone />

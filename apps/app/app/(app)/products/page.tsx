@@ -23,7 +23,7 @@ import {
 } from "react-icons/pi";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
-import { ProductProcessDropdown } from "@/components/common/ProductProgressDropdown";
+import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
@@ -393,19 +393,16 @@ const columns: ColumnDef<ProductListItem>[] = [
           : getProgressState(clampedPercentage);
 
       return (
-        <div onClick={(e) => e.stopPropagation()}>
-          <ProductProcessDropdown
-            percentage={clampedPercentage}
-            colorClass={progressState.bar}
-            size={18}
-            strokeWidth={2}
-            progress={progress}
-            product_name={row.original?.product_name}
-            complete_button={false}
-            tabsCompleted={tabsCompleted.length}
-            totalTabs={7}
-          />
-        </div>
+        <ProductProgressHoverCard
+          percentage={clampedPercentage}
+          colorClass={progressState.bar}
+          size={18}
+          strokeWidth={2}
+          progress={progress}
+          product_name={row.original?.product_name}
+          tabsCompleted={tabsCompleted.length}
+          totalTabs={7}
+        />
       );
     },
   },
