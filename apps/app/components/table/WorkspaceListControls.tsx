@@ -390,11 +390,7 @@ export function WorkspaceListControls({
                       onClick={() => handleRemoveFilter(filter.id)}
                       className="p-0 text-muted-foreground/60 hover:text-foreground"
                     >
-                      <Icon
-                        icon={CancelSquareIcon}
-                        size={16}
-                        strokeWidth={2}
-                      />
+                      <Icon icon={CancelSquareIcon} size={16} strokeWidth={2} />
                       <span className="sr-only">Remove filter</span>
                     </Button>
                   </div>
@@ -449,7 +445,7 @@ export function WorkspaceListControls({
             icon={FilterRemoveIcon}
             size={16}
             strokeWidth={2}
-            className="text-destructive/40 group-hover:text-destructive transition-colors delay-100 duration-200 ease-in-out"
+            className="text-destructive/70 group-hover:text-destructive dark:text-foreground/70 dark:group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
           />
           Clear filters
         </Button>

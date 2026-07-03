@@ -24,7 +24,6 @@ import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import {
   PiBuildingsDuotone,
   PiCaretDownDuotone,
-  PiPencilCircleDuotone,
   PiXCircleDuotone,
   PiCheckCircleDuotone,
 } from "react-icons/pi";
@@ -42,8 +41,15 @@ import {
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import Image from "next/image";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PropertyEditIcon } from "@hugeicons/core-free-icons";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
@@ -274,22 +280,32 @@ export default function UpdateProjectDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
-        >
-          <PiPencilCircleDuotone className="w-4 h-4" />
-          Update
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={(e) => {
+                if (!isAdmin) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.warning("Insufficient privileges, contact Admin");
+                  return;
+                }
+              }}
+            >
+              <Icon
+                className="transition-colors delay-100 duration-200 ease-in-out"
+                icon={PropertyEditIcon}
+                size={16}
+                strokeWidth={2}
+              />
+              Update
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Update project details</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">

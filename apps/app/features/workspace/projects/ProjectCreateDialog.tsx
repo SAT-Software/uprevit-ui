@@ -46,9 +46,16 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PlusSignSquareIcon } from "@hugeicons/core-free-icons";
 
 interface User {
   _id: string;
@@ -253,23 +260,27 @@ export default function ProjectCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="default"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
-        >
-          <PiPlusCircleDuotone className="w-5 h-5" />
-          Create Project
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                if (!isAdmin) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.warning("Insufficient privileges, contact Admin");
+                  return;
+                }
+              }}
+            >
+              <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
+              Create Project
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Create a new project</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
