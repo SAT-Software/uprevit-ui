@@ -387,7 +387,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 {
                   onSuccess: () => {
                     toast.success(
-                      "PDF export queued. Check Product Exports for status.",
+                      "PDF export queued. Open Exports to track status.",
                     );
                   },
                   onError: (error) => {

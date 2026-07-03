@@ -13,6 +13,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
@@ -42,6 +47,8 @@ import { Department } from "@/types/department";
 import { Project } from "@/types/project";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
 import { useAuth } from "react-oidc-context";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PlusSignSquareIcon } from "@hugeicons/core-free-icons";
 
 interface FormValues {
   ppn: string;
@@ -216,11 +223,16 @@ export default function CreateProductDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="flex items-center gap-2">
-          <PiPlusCircleDuotone className="w-5 h-5" />
-          Create New Product
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="default" size="sm" className="group">
+              <Icon icon={PlusSignSquareIcon} className="text-primary-foreground/60 group-hover:text-primary-foreground" />
+              Create New Product
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Create a new product</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">

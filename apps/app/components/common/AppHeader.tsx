@@ -32,10 +32,6 @@ const pathData = [
     url: "/products",
   },
   {
-    title: "Product Exports",
-    url: "/products/exports",
-  },
-  {
     title: "Source Files",
     url: "/source-files",
   },

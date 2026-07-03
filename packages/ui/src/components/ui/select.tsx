@@ -5,9 +5,8 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiCaretCircleDownDuotone, PiCheckCircleDuotone } from "react-icons/pi";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 function Select({
   ...props
@@ -127,7 +126,7 @@ function SelectItem({
     >
       <span className="absolute start-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <PiCheckCircleDuotone size={16} />
+          <Icon icon={Tick02Icon} size={16} strokeWidth={2} />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

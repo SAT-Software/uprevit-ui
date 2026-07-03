@@ -34,7 +34,7 @@ import {
 import { useAuth } from "react-oidc-context";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
-  FilterIcon,
+  FilterVerticalIcon,
   Refresh04Icon,
   Search02Icon,
 } from "@hugeicons/core-free-icons";
@@ -180,7 +180,7 @@ export function ActivityLogsSheet({
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-1">
                       <Icon
-                        icon={FilterIcon}
+                        icon={FilterVerticalIcon}
                         size={14}
                         strokeWidth={2}
                         className="shrink-0 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
@@ -193,11 +193,7 @@ export function ActivityLogsSheet({
               </SelectTrigger>
               <SelectContent container={portalContainer} className="z-110">
                 {actionFilters.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={option.value}
-                    className="text-xs"
-                  >
+                  <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
                 ))}

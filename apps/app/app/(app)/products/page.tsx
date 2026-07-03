@@ -40,19 +40,24 @@ import DialogShareProduct from "@/features/workspace/products/DialogShareProduct
 import { ProductListItem } from "@/features/workspace/products/productListItem";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
+import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import {
   ListFilterColumn,
   useWorkspaceListQuery,
 } from "@/lib/workspace-list-query";
-import { ExportJobStatus } from "@/types/export-job";
 import { AuditLog } from "@/types/product";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import {
+  ArchiveIcon,
   ArrowDown01Icon,
   ArrowUp01Icon,
   Blockchain03Icon,
+  BookmarkAdd01Icon,
   MoreVerticalSquare01Icon,
+  Pdf01Icon,
+  PropertyAddIcon,
+  PropertyEditIcon,
+  Share08Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -80,8 +85,6 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
-
-const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
 
 const PRODUCT_LIST_CONTENT_MIN_HEIGHT = "min-h-[55rem] md:min-h-[42rem]";
 
@@ -452,55 +455,10 @@ const columns: ColumnDef<ProductListItem>[] = [
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => <RowActions row={row} />,
-    size: 48,
+    size: 40,
     enableHiding: false,
   },
 ];
-
-function ProductExportsButton() {
-  const { data: exportJobsData } = useGetProductExportJobs(
-    { page: 1 },
-    { enabled: true, pollWhenActive: true },
-  );
-
-  const productExportJobs = exportJobsData?.result.jobs ?? [];
-  const activeProductExportCount =
-    typeof exportJobsData?.result.activeJobsCount === "number"
-      ? exportJobsData.result.activeJobsCount
-      : productExportJobs.filter((job) =>
-          ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
-        ).length;
-  const latestProductExportJob = productExportJobs[0];
-
-  const renderProductExportIndicator = () => {
-    if (activeProductExportCount > 0) {
-      return (
-        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-          {activeProductExportCount}
-        </span>
-      );
-    }
-
-    if (latestProductExportJob?.status === "failed") {
-      return <span className="h-2 w-2 rounded-full bg-destructive" />;
-    }
-
-    if (latestProductExportJob?.status === "completed") {
-      return <span className="h-2 w-2 rounded-full bg-emerald-500" />;
-    }
-
-    return null;
-  };
-
-  return (
-    <Button variant="outline" size="sm" asChild>
-      <Link href="/products/exports" className="gap-1.5">
-        Exports
-        {renderProductExportIndicator()}
-      </Link>
-    </Button>
-  );
-}
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -567,6 +525,10 @@ export default function ProductsPage() {
     },
   });
 
+  const showAuditColumns =
+    columnVisibility.createdOn !== false ||
+    columnVisibility.modifiedOn !== false;
+
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
@@ -588,7 +550,7 @@ export default function ProductsPage() {
               />
             </>
           ) : null}
-          <ProductExportsButton />
+          <ProductExportsSheet />
           <CreateProductDialog />
         </div>
       </div>
@@ -605,15 +567,23 @@ export default function ProductsPage() {
           <div className="flex flex-col items-end">
             <div className="w-full">
               <div className="w-full border-b border-border overflow-hidden">
-                <Table className="table-fixed w-full">
-                  <colgroup>
-                    {table.getHeaderGroups()[0]?.headers.map((header) => (
-                      <col
-                        key={header.id}
-                        style={{ width: `${header.getSize()}px` }}
-                      />
-                    ))}
-                  </colgroup>
+                <Table
+                  className={cn(
+                    showAuditColumns
+                      ? "table-auto w-max min-w-full"
+                      : "table-fixed",
+                  )}
+                >
+                  {!showAuditColumns ? (
+                    <colgroup>
+                      {table.getHeaderGroups()[0]?.headers.map((header) => (
+                        <col
+                          key={header.id}
+                          style={{ width: `${header.getSize()}px` }}
+                        />
+                      ))}
+                    </colgroup>
+                  ) : null}
                   <TableHeader className="bg-muted">
                     {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow
@@ -624,6 +594,19 @@ export default function ProductsPage() {
                           <TableHead
                             key={header.id}
                             className="h-11 border-r border-border last:border-r-0"
+                            style={
+                              showAuditColumns
+                                ? {
+                                    width: `${header.getSize()}px`,
+                                    ...(typeof header.column.columnDef
+                                      .minSize === "number"
+                                      ? {
+                                          minWidth: `${header.column.columnDef.minSize}px`,
+                                        }
+                                      : {}),
+                                  }
+                                : undefined
+                            }
                           >
                             {header.isPlaceholder
                               ? null
@@ -757,7 +740,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 setTimeout(() => setShowUpdateDialog(true), 100);
               }}
             >
-              <PiPencilCircleDuotone className="h-4 w-4" />
+              <Icon icon={PropertyEditIcon} />
               <span>Edit</span>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -770,7 +753,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 !canCreateVersion && "opacity-50 cursor-not-allowed",
               )}
             >
-              <PiGitMergeDuotone />
+              <Icon icon={PropertyAddIcon} />
               New version
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -779,7 +762,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 setTimeout(() => setShowExportPDFDialog(true), 100);
               }}
             >
-              <PiFilePdfDuotone className="h-4 w-4" />
+              <Icon icon={Pdf01Icon} />
               <span>Export to PDF</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -791,7 +774,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 setTimeout(() => setShowArchiveDialog(true), 100);
               }}
             >
-              <PiArchiveDuotone className="h-4 w-4" />
+              <Icon icon={ArchiveIcon} />
               <span>Archive</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -803,7 +786,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 setTimeout(() => setShowShareDialog(true), 100);
               }}
             >
-              <PiShareDuotone className="h-4 w-4" />
+              <Icon icon={Share08Icon} />
               <span>Share</span>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -812,7 +795,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 setTimeout(() => setShowBookmarkDialog(true), 100);
               }}
             >
-              <PiBookmarkDuotone className="h-4 w-4" />
+              <Icon icon={BookmarkAdd01Icon} />
               <span>Add to Bookmarks</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>

@@ -49,7 +49,7 @@ export default function DialogExportProductExcel({
       },
       {
         onSuccess: () => {
-          toast.success("Excel export queued. Check Product Exports for status.");
+          toast.success("Excel export queued. Open Exports to track status.");
           onOpenChange(false);
         },
         onError: (error) => {
