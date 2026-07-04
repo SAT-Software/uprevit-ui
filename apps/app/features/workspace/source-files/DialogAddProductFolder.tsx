@@ -30,6 +30,8 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { SourceFilesDuplicateProductLinkAlert } from "@/features/workspace/source-files/SourceFilesDuplicateProductLinkAlert";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { FolderAddIcon } from "@hugeicons/core-free-icons";
 
 interface FormValues {
   folderName: string;
@@ -68,8 +70,7 @@ export default function DialogAddProductFolder({
 
   const { data: productsData, isLoading: productsLoading } =
     useGetAllProducts();
-  const products =
-    (productsData?.result?.products as ProductLinkItem[]) ?? [];
+  const products = (productsData?.result?.products as ProductLinkItem[]) ?? [];
   const [selectedProductId, setSelectedProductId] = useState("");
   const noneProductValue = "none";
 
@@ -114,8 +115,11 @@ export default function DialogAddProductFolder({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
-          <PiFolderPlusDuotone className="w-5 h-5" />
+        <Button
+          variant="secondary"
+          className="[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground"
+        >
+          <Icon icon={FolderAddIcon} />
           Add Folder
         </Button>
       </DialogTrigger>
@@ -171,7 +175,9 @@ export default function DialogAddProductFolder({
                 <Select
                   value={selectedProductId || noneProductValue}
                   onValueChange={(value) =>
-                    setSelectedProductId(value === noneProductValue ? "" : value)
+                    setSelectedProductId(
+                      value === noneProductValue ? "" : value,
+                    )
                   }
                 >
                   <SelectTrigger>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145 126.7">
+  <style type="text/css">
+    .folder-back {
+      fill: url(#back-gradient);
+      stroke: #525252;
+      stroke-width: 0.4;
+      stroke-linecap: round;
+      stroke-miterlimit: 10;
+    }
+    .folder-detail {
+      opacity: 0.4;
+      fill: #404040;
+    }
+    .folder-front {
+      fill: url(#front-gradient);
+      stroke: #525252;
+      stroke-width: 0.4;
+      stroke-linecap: round;
+      stroke-miterlimit: 10;
+    }
+  </style>
+  <linearGradient id="back-gradient" x1="7" y1="25" x2="133" y2="25" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#262626" offset="0"/>
+    <stop stop-color="#171717" offset="1"/>
+  </linearGradient>
+  <linearGradient id="front-gradient" x1="7" y1="32" x2="138" y2="122" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#404040" offset="0"/>
+    <stop stop-color="#262626" offset="1"/>
+  </linearGradient>
+  <path class="folder-back" d="m121 11.3h-102c-6.4 0-12 4.6-12.1 12.1v16h126.9v-15.7c0-6.6-5.1-12.4-12.8-12.4z"/>
+  <path class="folder-detail" d="m29.1 15.3-0.2 0.7 5-0.2s0.5-0.2-0.2-0.6-4.6 0.1-4.6 0.1z"/>
+  <path class="folder-detail" d="m22.2 14.5-0.2 0.8 5.9-1.3-0.3-0.6-5.4 1.1z" clip-rule="evenodd" fill-rule="evenodd"/>
+  <path class="folder-front" d="m126.5 32h-36.6c-8.9 0-15.9-6.4-25.3-10.3-1.9-0.8-3.9-1.4-6-1.4h-39.9c-5.7 0.2-11.8 4.2-11.8 11.7v67.7c0 7.3 5.1 11.8 11.8 11.9h108c6.3 0 11.5-4.2 11.5-11.9v-55.7c0-6.4-4.8-11.8-11.7-12z"/>
+</svg>
