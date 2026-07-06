@@ -1,11 +1,20 @@
 "use client";
 
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@uprevit/ui/components/ui/dialog";
-import { cn } from "@uprevit/ui/lib/utils";
+import {
+  CancelSquareIcon,
+  DownloadSquare01Icon,
+} from "@hugeicons/core-free-icons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Image from "next/image";
-import { PiDownloadSimpleDuotone, PiXCircleDuotone } from "react-icons/pi";
+
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@uprevit/ui/components/ui/dialog";
+import { cn } from "@uprevit/ui/lib/utils";
 
 interface DialogImagePreviewProps {
   open: boolean;
@@ -26,48 +35,43 @@ export default function DialogImagePreview({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "w-[98vw] h-[98vh] max-w-[98vw] max-h-[98vh] p-0 bg-accent border-none",
-          "flex flex-col items-center justify-center gap-0"
+          "flex h-[98vh] max-h-[98vh] w-[98vw] max-w-[98vw] flex-col gap-0 border-none bg-muted p-0",
         )}
       >
-        {/* Accessible title (visually hidden) */}
         <VisuallyHidden>
           <DialogTitle>Image Preview: {fileName}</DialogTitle>
         </VisuallyHidden>
 
-        {/* Top Bar with Close and Download */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 border-b border-border">
-          <p className="text-foreground text-sm font-medium truncate max-w-[60%]">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-border px-3">
+          <p className="min-w-0 truncate text-sm font-medium text-foreground">
             {fileName}
           </p>
           <div className="flex items-center gap-2">
             {onDownload && (
               <Button
                 type="button"
-                variant="secondary"
-                size="sm"
+                variant="outline"
                 onClick={onDownload}
                 aria-label="Download image"
               >
-                <PiDownloadSimpleDuotone className="w-5 h-5" />
+                <Icon icon={DownloadSquare01Icon} size={16} strokeWidth={2} />
                 Download
               </Button>
             )}
             <Button
               type="button"
-              variant="secondary"
-              size="sm"
+              variant="outline"
+              size="icon-xs"
+              className="text-muted-foreground hover:text-foreground"
               onClick={() => onOpenChange(false)}
               aria-label="Close preview"
             >
-              <PiXCircleDuotone className="w-5 h-5" />
-              Close
+              <Icon icon={CancelSquareIcon} size={16} strokeWidth={2} />
             </Button>
           </div>
         </div>
 
-        {/* Image Container */}
-        <div className="relative w-full h-full flex items-center justify-center bg-background p-8">
+        <div className="relative min-h-0 flex-1 bg-background p-8">
           <Image
             src={imageUrl}
             alt={fileName}

@@ -45,6 +45,20 @@ function isSourceFilesTab(value: string | null): value is SourceFilesTab {
   return SOURCE_FILES_TABS.includes(value as SourceFilesTab);
 }
 
+function SourceFilesFoldersGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="flex flex-col items-center px-3 pt-4">
+          <Skeleton className="h-[78px] w-[92px] rounded-xl" />
+          <Skeleton className="mt-3 h-4 w-20" />
+          <Skeleton className="mt-1.5 h-3 w-14" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SourceFilesPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -90,88 +104,6 @@ function SourceFilesPage() {
   const bookmarkedFolders = (
     (bookmarkedData?.result ?? []) as BookmarkedSourceFilesFolder[]
   ).filter((f) => f.parentId === null);
-
-  // Loading state — matches modern page skeletons
-  if (foldersLoading) {
-    return (
-      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">Source Files</p>
-            <InfoTooltip content="Source file folders let you organize reference documents, images, and assets used across your products." />
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-7 w-16 rounded-md" />
-            <Skeleton className="h-7 w-7 rounded-md" />
-          </div>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="mb-6">
-            <div className="mb-3 flex items-center gap-2">
-              <Skeleton className="h-4 w-28" />
-            </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex flex-col items-center px-3 pt-4">
-                  <Skeleton className="h-[78px] w-[92px] rounded-xl" />
-                  <Skeleton className="mt-3 h-4 w-20" />
-                  <Skeleton className="mt-1.5 h-3 w-14" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-3">
-              <Skeleton className="h-4 w-20" />
-            </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex flex-col items-center px-3 pt-4">
-                  <Skeleton className="h-[78px] w-[92px] rounded-xl" />
-                  <Skeleton className="mt-3 h-4 w-20" />
-                  <Skeleton className="mt-1.5 h-3 w-14" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (foldersError) {
-    return (
-      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">Source Files</p>
-            <InfoTooltip content="Source file folders let you organize reference documents, images, and assets used across your products." />
-          </div>
-          <DialogAddProductFolder />
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <DashboardErrorState
-            variant="panel"
-            icon={Folder01Icon}
-            title="Failed to load source files folders"
-            description="Please try again later"
-            className="min-h-[320px]"
-          />
-          <div className="mt-3 flex justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetchFolders()}
-            >
-              Try again
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const hasAnyFolders = allFolders.length > 0;
   const hasBookmarks = bookmarkedFolders.length > 0;
@@ -238,15 +170,7 @@ function SourceFilesPage() {
         <div className="min-h-0 flex-1 overflow-y-auto p-2">
           <TabsContent value="bookmarked" className="mt-0">
             {bookmarkedLoading ? (
-              <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex flex-col items-center px-3 pt-4">
-                    <Skeleton className="h-[78px] w-[92px] rounded-xl" />
-                    <Skeleton className="mt-3 h-4 w-20" />
-                    <Skeleton className="mt-1.5 h-3 w-14" />
-                  </div>
-                ))}
-              </div>
+              <SourceFilesFoldersGridSkeleton />
             ) : bookmarkedError ? (
               <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
                 <span>Failed to load bookmarked folders.</span>
@@ -286,7 +210,28 @@ function SourceFilesPage() {
           </TabsContent>
 
           <TabsContent value="all-folders" className="mt-0">
-            {!hasAnyFolders ? (
+            {foldersLoading ? (
+              <SourceFilesFoldersGridSkeleton />
+            ) : foldersError ? (
+              <>
+                <DashboardErrorState
+                  variant="panel"
+                  icon={Folder01Icon}
+                  title="Failed to load source files folders"
+                  description="Please try again later"
+                  className="min-h-[320px]"
+                />
+                <div className="mt-3 flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchFolders()}
+                  >
+                    Try again
+                  </Button>
+                </div>
+              </>
+            ) : !hasAnyFolders ? (
               <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
                   <Icon

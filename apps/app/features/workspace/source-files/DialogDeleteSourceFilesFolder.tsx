@@ -20,6 +20,8 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Delete02Icon } from "@hugeicons/core-free-icons";
 
 interface DialogDeleteSourceFilesFolderProps {
   id: string;
@@ -49,8 +51,8 @@ export default function DialogDeleteSourceFilesFolder({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          <PiTrashDuotone className="h-5 w-5" />
+        <Button variant="destructive">
+          <Icon icon={Delete02Icon} />
           Delete
         </Button>
       </DialogTrigger>

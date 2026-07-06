@@ -38,6 +38,11 @@ import { ChevronRightIcon } from "lucide-react";
 
 import { AuditLogV2, AuditLogV2Change } from "@/types/audit-log";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
+import {
+  formatAuditChangePath,
+  getVisibleAuditChanges,
+  hasAuditChangeValue,
+} from "./auditLogChanges";
 
 import { ActivityLogsTimelineSkeleton } from "./ActivityLogsTimelineSkeleton";
 
@@ -69,20 +74,7 @@ const formatChangeValue = (value: unknown) => {
   }
 };
 
-const hasChangeValue = (value: unknown) => {
-  if (value === null || value === undefined) return false;
-  if (Array.isArray(value)) return value.length > 0;
-  if (typeof value === "string") return value.length > 0;
-  return true;
-};
-
-const formatChangePath = (path: string) =>
-  path
-    .replace(/\[(\d+)\]/g, ".$1")
-    .split(/[._]+/)
-    .filter(Boolean)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(" ");
+const hasChangeValue = hasAuditChangeValue;
 
 type ChangeValueVariant = "old" | "new" | "added" | "deleted";
 
@@ -147,10 +139,12 @@ function ActivityLogChangeItem({ change }: { change: AuditLogV2Change }) {
   const hasFrom = hasChangeValue(change.from);
   const hasTo = hasChangeValue(change.to);
 
+  if (!hasFrom && !hasTo) return null;
+
   return (
     <div className="space-y-2">
       <p className="text-xs font-medium text-foreground/80">
-        {formatChangePath(change.path)}
+        {formatAuditChangePath(change.path)}
       </p>
       {hasFrom && hasTo ? (
         <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2">
@@ -252,7 +246,7 @@ export function ActivityLogsTimeline({
     <div className={cn("", className)}>
       <Timeline defaultValue={logs.length}>
         {logs.map((log) => {
-          const changes = log.changes ?? [];
+          const visibleChanges = getVisibleAuditChanges(log.changes ?? []);
           const actorName = log.actor?.name || "Unknown";
 
           return (
@@ -274,53 +268,74 @@ export function ActivityLogsTimeline({
               </TimelineHeader>
               <TimelineContent className="mt-2">
                 <Frame stacked dense spacing="sm">
-                  <Collapsible defaultOpen className="group/collapsible">
-                    <CollapsibleTrigger className="flex w-full">
-                      <FrameHeader className="flex grow flex-row items-center justify-between gap-2">
-                        <div className="flex w-full items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="size-5">
-                              {log.actor?.profileAvatar ? (
-                                <AvatarImage
-                                  src={log.actor.profileAvatar}
-                                  alt={actorName}
-                                />
-                              ) : null}
-                              <AvatarFallback className="text-[10px]">
-                                {getActorInitials(actorName)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-muted-foreground text-xs font-medium">
-                              {actorName}
+                  {visibleChanges.length > 0 ? (
+                    <Collapsible defaultOpen className="group/collapsible">
+                      <CollapsibleTrigger className="flex w-full">
+                        <FrameHeader className="flex grow flex-row items-center justify-between gap-2">
+                          <div className="flex w-full items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="size-5">
+                                {log.actor?.profileAvatar ? (
+                                  <AvatarImage
+                                    src={log.actor.profileAvatar}
+                                    alt={actorName}
+                                  />
+                                ) : null}
+                                <AvatarFallback className="text-[10px]">
+                                  {getActorInitials(actorName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-muted-foreground text-xs font-medium">
+                                {actorName}
+                              </span>
+                            </div>
+
+                            <span className="text-xs">
+                              {formatToLocalDateTime(log.occurredAt)}
                             </span>
                           </div>
-
-                          <span className="text-xs">
-                            {formatToLocalDateTime(log.occurredAt)}
-                          </span>
-                        </div>
-                        <ChevronRightIcon className="text-muted-foreground size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </FrameHeader>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <FramePanel>
-                        {changes.length > 0 ? (
+                          <ChevronRightIcon className="text-muted-foreground size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </FrameHeader>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <FramePanel>
                           <div className="space-y-4">
-                            {changes.map((change, index) => (
+                            {visibleChanges.map((change, index) => (
                               <ActivityLogChangeItem
                                 key={`${log._id}-${change.path}-${index}`}
                                 change={change}
                               />
                             ))}
                           </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground/60">
-                            No changes found
-                          </p>
-                        )}
-                      </FramePanel>
-                    </CollapsibleContent>
-                  </Collapsible>
+                        </FramePanel>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ) : (
+                    <FrameHeader className="flex flex-row items-center justify-between gap-2">
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="size-5">
+                            {log.actor?.profileAvatar ? (
+                              <AvatarImage
+                                src={log.actor.profileAvatar}
+                                alt={actorName}
+                              />
+                            ) : null}
+                            <AvatarFallback className="text-[10px]">
+                              {getActorInitials(actorName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-muted-foreground text-xs font-medium">
+                            {actorName}
+                          </span>
+                        </div>
+
+                        <span className="text-xs">
+                          {formatToLocalDateTime(log.occurredAt)}
+                        </span>
+                      </div>
+                    </FrameHeader>
+                  )}
                 </Frame>
               </TimelineContent>
             </TimelineItem>

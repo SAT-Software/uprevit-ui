@@ -31,6 +31,8 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { SourceFilesDuplicateProductLinkAlert } from "@/features/workspace/source-files/SourceFilesDuplicateProductLinkAlert";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PropertyEditIcon } from "@hugeicons/core-free-icons";
 
 interface FormValues {
   folderName: string;
@@ -54,8 +56,7 @@ export default function DialogEditSourceFilesFolder({
   const [selectedProductId, setSelectedProductId] = useState("");
   const { data: productsData, isLoading: productsLoading } =
     useGetAllProducts();
-  const products =
-    (productsData?.result?.products as ProductLinkItem[]) ?? [];
+  const products = (productsData?.result?.products as ProductLinkItem[]) ?? [];
   const isRootFolder = currentFolder?.parentId == null;
   const noneProductValue = "none";
 
@@ -81,22 +82,40 @@ export default function DialogEditSourceFilesFolder({
   }, [open, currentFolder?.product_id]);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    updateSourceFilesFolder(
-      {
-        name: data.folderName,
-        id: currentFolder._id,
-        ...(isRootFolder && {
-          product_id: selectedProductId ? selectedProductId : null,
-        }),
-      },
-      {
-        onSuccess: () => {
-          reset();
-          setSelectedProductId("");
-          setOpen(false);
-        },
+    const trimmedName = data.folderName.trim();
+    const payload: {
+      id: string;
+      name?: string;
+      product_id?: string | null;
+    } = { id: currentFolder._id };
+
+    if (trimmedName !== currentFolder.name) {
+      payload.name = trimmedName;
+    }
+
+    if (isRootFolder) {
+      const nextProductId = selectedProductId || null;
+      const currentProductId = currentFolder.product_id || null;
+      if (nextProductId !== currentProductId) {
+        payload.product_id = nextProductId;
       }
-    );
+    }
+
+    if (
+      !payload.name &&
+      !Object.prototype.hasOwnProperty.call(payload, "product_id")
+    ) {
+      setOpen(false);
+      return;
+    }
+
+    updateSourceFilesFolder(payload, {
+      onSuccess: () => {
+        reset();
+        setSelectedProductId("");
+        setOpen(false);
+      },
+    });
   };
 
   return (
@@ -111,8 +130,8 @@ export default function DialogEditSourceFilesFolder({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" aria-label="Edit folder">
-          <PiPencilCircleDuotone />
+        <Button variant="outline">
+          <Icon icon={PropertyEditIcon} />
           Edit
         </Button>
       </DialogTrigger>
@@ -169,7 +188,9 @@ export default function DialogEditSourceFilesFolder({
                 <Select
                   value={selectedProductId || noneProductValue}
                   onValueChange={(value) =>
-                    setSelectedProductId(value === noneProductValue ? "" : value)
+                    setSelectedProductId(
+                      value === noneProductValue ? "" : value,
+                    )
                   }
                 >
                   <SelectTrigger>

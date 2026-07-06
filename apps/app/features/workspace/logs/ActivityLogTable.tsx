@@ -27,6 +27,10 @@ import {
 } from "react-icons/pi";
 
 import { AuditLogV2 } from "@/types/audit-log";
+import {
+  formatAuditChangePath,
+  getVisibleAuditChanges,
+} from "./auditLogChanges";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
@@ -207,7 +211,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
       <SortableHeader column={column} title="Changes" icon={PiInfoDuotone} />
     ),
     cell: ({ row }) => {
-      const changes = row.original.changes ?? [];
+      const changes = getVisibleAuditChanges(row.original.changes ?? []);
 
       if (!changes.length) {
         return (
@@ -219,7 +223,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
         <div className="flex flex-col gap-1 text-xs text-muted-foreground break-all">
           <p className="break-all">
             <span className="font-medium text-foreground break-all">
-              {changes[0].path}
+              {formatAuditChangePath(changes[0].path)}
             </span>
             : {formatValue(changes[0].from)} -&gt; {formatValue(changes[0].to)}
           </p>
@@ -384,7 +388,8 @@ export function ActivityLogTable({
                       {row.getVisibleCells().map((cell) => {
                         if (cell.column.id === "expand") {
                           const hasChanges =
-                            (row.original.changes?.length ?? 0) > 0;
+                            getVisibleAuditChanges(row.original.changes ?? [])
+                              .length > 0;
 
                           return (
                             <TableCell
@@ -451,15 +456,18 @@ export function ActivityLogTable({
                             <p className="text-xs font-semibold text-foreground">
                               All Changes
                             </p>
-                            {row.original.changes?.length ? (
+                            {getVisibleAuditChanges(row.original.changes ?? [])
+                              .length ? (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {row.original.changes.map((change, index) => (
+                                {getVisibleAuditChanges(
+                                  row.original.changes ?? [],
+                                ).map((change, index) => (
                                   <div
                                     key={`${row.original._id}-${change.path}-${index}`}
                                     className="border border-border rounded-lg bg-background p-2"
                                   >
                                     <p className="text-xs font-medium text-foreground mb-1">
-                                      {change.path}
+                                      {formatAuditChangePath(change.path)}
                                     </p>
                                     <p className="text-xs text-muted-foreground break-all">
                                       {formatValue(change.from)} -&gt;{" "}

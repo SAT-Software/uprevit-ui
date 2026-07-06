@@ -21,6 +21,8 @@ import {
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { UploadSquare01Icon } from "@hugeicons/core-free-icons";
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -74,7 +76,7 @@ export default function DialogUploadSourceFiles({
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="default" size="sm" className="flex items-center gap-2">
-          <PiCloudArrowUpDuotone className="w-5 h-5" />
+          <Icon icon={UploadSquare01Icon} />
           Upload Files
         </Button>
       </DialogTrigger>
