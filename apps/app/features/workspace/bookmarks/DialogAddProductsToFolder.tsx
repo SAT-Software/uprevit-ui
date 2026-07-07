@@ -38,6 +38,8 @@ import {
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useAddProductInBookmarkFolder } from "@/hooks/bookmark/useAddProductInBookmarkFolder";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PropertyAddIcon } from "@hugeicons/core-free-icons";
 
 interface FormValues {
   productId: string;
@@ -112,8 +114,8 @@ export default function DialogAddProductsToFolder({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="flex items-center gap-2">
-          <PiPlusCircleDuotone className="w-5 h-5" />
+        <Button variant="default" size="sm">
+          <Icon icon={PropertyAddIcon} />
           Add Products
         </Button>
       </DialogTrigger>

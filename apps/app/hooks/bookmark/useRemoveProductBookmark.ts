@@ -31,7 +31,7 @@ export function useRemoveProductBookmark() {
             Authorization: `Bearer ${auth.user.access_token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       if (!res.ok) {
         throw new Error(

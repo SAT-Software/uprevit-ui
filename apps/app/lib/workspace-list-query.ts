@@ -126,7 +126,8 @@ export function buildListSearchParams(
   if (query.order) params.set("order", query.order);
   if (query.projectId) params.set("projectId", query.projectId);
   if (query.departmentId) params.set("departmentId", query.departmentId);
-  if (query.filters?.length) params.set("filters", JSON.stringify(query.filters));
+  if (query.filters?.length)
+    params.set("filters", JSON.stringify(query.filters));
   if (query.includeInactive) params.set("includeInactive", "true");
 
   return params;
@@ -150,7 +151,10 @@ export function useWorkspaceListQuery({
 
   const query = useMemo(() => {
     const sortParam = searchParams.get("sort");
-    const sort = sortParam && allowedSortFields.includes(sortParam) ? sortParam : defaultSort;
+    const sort =
+      sortParam && allowedSortFields.includes(sortParam)
+        ? sortParam
+        : defaultSort;
     const order = isListOrder(searchParams.get("order"))
       ? (searchParams.get("order") as ListOrder)
       : defaultOrder;

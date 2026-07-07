@@ -27,7 +27,10 @@ export function useCreateBookmarkFolder() {
       });
       if (!res.ok) {
         throw new Error(
-          await getResponseErrorMessage(res, "Failed to create bookmark folder"),
+          await getResponseErrorMessage(
+            res,
+            "Failed to create bookmark folder",
+          ),
         );
       }
       return res.json().catch(() => null);
@@ -39,7 +42,10 @@ export function useCreateBookmarkFolder() {
       });
     },
     onError: (error) => {
-      const message = getErrorMessage(error, "Failed to create bookmark folder");
+      const message = getErrorMessage(
+        error,
+        "Failed to create bookmark folder",
+      );
       console.error(message);
       toast.error(message);
     },

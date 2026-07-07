@@ -9,6 +9,8 @@ import {
   PiXCircleDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { FolderAddIcon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -71,9 +73,13 @@ export default function DialogCreateFolder() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
-          <PiPlusCircleDuotone />
-          Create New Folder
+        <Button
+          variant="secondary"
+          size="sm"
+          className="[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground"
+        >
+          <Icon icon={FolderAddIcon} />
+          Create Folder
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">

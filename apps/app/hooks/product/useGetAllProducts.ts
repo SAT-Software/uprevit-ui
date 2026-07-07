@@ -18,16 +18,13 @@ async function getAllProducts({
     auth.user?.profile?.workspaceId as string | undefined,
     query,
   );
-  const response = await fetch(
-    `/api/products?${params.toString()}`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth?.user?.access_token}`,
-        "Content-Type": "application/json",
-      },
-      signal,
-    }
-  );
+  const response = await fetch(`/api/products?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
+    },
+    signal,
+  });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch products");

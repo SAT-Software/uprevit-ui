@@ -21,6 +21,8 @@ import {
 import { useDeleteBookmarkFolder } from "@/hooks/bookmark/useDeleteBookmarkFolder";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Delete02Icon } from "@hugeicons/core-free-icons";
 
 interface DialogDeleteBookmarkFolderProps {
   folderId: string;
@@ -53,7 +55,7 @@ export default function DialogDeleteBookmarkFolder({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="destructive" size="sm">
-            <PiTrashDuotone />
+            <Icon icon={Delete02Icon} />
             Delete
           </Button>
         )}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   PiBookmarkSimpleDuotone,
@@ -19,6 +21,10 @@ import {
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useRemoveProductBookmark } from "@/hooks/bookmark/useRemoveProductBookmark";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Tooltip, TooltipContent } from "@uprevit/ui/components/ui/tooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { BookmarkMinus01Icon } from "@hugeicons/core-free-icons";
+import { TooltipTrigger } from "@uprevit/ui/components/ui/tooltip";
 
 interface DialogRemoveProductBookmarkProps {
   productId: string;
@@ -26,14 +32,27 @@ interface DialogRemoveProductBookmarkProps {
   folderId: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactElement;
 }
 
 export default function DialogRemoveProductBookmark({
   productId,
   productName,
   folderId,
+  open,
+  onOpenChange,
+  trigger,
 }: DialogRemoveProductBookmarkProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(nextOpen);
+    }
+    onOpenChange?.(nextOpen);
+  };
   const { mutate: removeProductBookmark, isPending } =
     useRemoveProductBookmark();
   const auth = useAuth();
@@ -48,27 +67,35 @@ export default function DialogRemoveProductBookmark({
       },
       {
         onSuccess() {
-          setIsOpen(false);
+          handleOpenChange(false);
         },
         onError(error) {
-          setIsOpen(false);
+          handleOpenChange(false);
           console.error(
             "Failed to remove product from bookmark folder:",
-            error
+            error,
           );
         },
-      }
+      },
     );
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          <PiTrashDuotone className="h-4 w-4" />
-          Remove Bookmark
+        <Button
+          type="button"
+          variant="destructive"
+          className="group"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <Icon
+            icon={BookmarkMinus01Icon}
+            className="text-destructive/60 group-hover:text-destructive"
+          />
         </Button>
       </DialogTrigger>
+
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent/60 flex w-full justify-between items-center text-foreground">

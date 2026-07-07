@@ -9,18 +9,8 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  PiArchiveDuotone,
-  PiBookmarkDuotone,
-  PiFilePdfDuotone,
-  PiGitMergeDuotone,
-  PiPackageDuotone,
-  PiPencilCircleDuotone,
-  PiShareDuotone,
-} from "react-icons/pi";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
@@ -37,10 +27,10 @@ import DialogBookmarkProduct from "@/features/workspace/products/DialogBookmarkP
 import DialogCreateVersion from "@/features/workspace/products/DialogCreateVersion";
 import DialogExportProductPDF from "@/features/workspace/products/DialogExportProductPDF";
 import DialogShareProduct from "@/features/workspace/products/DialogShareProduct";
+import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductListItem } from "@/features/workspace/products/productListItem";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import {
   ListFilterColumn,
   useWorkspaceListQuery,
@@ -590,7 +580,7 @@ export default function ProductsPage() {
                         {headerGroup.headers.map((header) => (
                           <TableHead
                             key={header.id}
-                            className="h-11 border-r border-border last:border-r-0"
+                            className="border-r border-border last:border-r-0"
                             style={
                               showAuditColumns
                                 ? {
@@ -690,7 +680,7 @@ function ProductsEmptyState({ className }: { className?: string }) {
       )}
     >
       <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <PiPackageDuotone className="w-8 h-8 text-muted-foreground" />
+        <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
       </div>
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-foreground">No products found</p>

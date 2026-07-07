@@ -22,6 +22,8 @@ import {
 } from "react-icons/pi";
 import { useEditBookmarkFolder } from "@/hooks/bookmark/useEditBookmarkFolder";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PropertyEditIcon } from "@hugeicons/core-free-icons";
 
 interface FormValues {
   folder_name: string;
@@ -77,8 +79,8 @@ export default function DialogEditBookmarkFolder({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="secondary" size="sm">
-            <PiPencilDuotone />
+          <Button variant="outline" size="sm">
+            <Icon icon={PropertyEditIcon} />
             Edit
           </Button>
         )}

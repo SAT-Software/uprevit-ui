@@ -447,11 +447,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Skeleton className="h-6 w-28 bg-border" />
                   <Skeleton className="h-4 w-38 bg-border" />
                 </div>
-                <Icon
-                  icon={ArrowDown01Icon}
-                  size={16}
-                  strokeWidth={2}
-                />
+                <Icon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
