@@ -44,6 +44,7 @@ export function useBookmarkProduct() {
     onSuccess: () => {
       toast.success("Bookmark product created successfully");
       queryClient.invalidateQueries({ queryKey: ["all-bookmark-folders"] });
+      queryClient.invalidateQueries({ queryKey: ["all-user-bookmark-folders"] });
     },
     onError: (error) => {
       const message = getErrorMessage(

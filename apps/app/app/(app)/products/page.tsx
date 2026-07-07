@@ -27,6 +27,8 @@ import DialogBookmarkProduct from "@/features/workspace/products/DialogBookmarkP
 import DialogCreateVersion from "@/features/workspace/products/DialogCreateVersion";
 import DialogExportProductPDF from "@/features/workspace/products/DialogExportProductPDF";
 import DialogShareProduct from "@/features/workspace/products/DialogShareProduct";
+import { ProductBookmarkMenuItem } from "@/features/workspace/products/ProductBookmarkMenuItem";
+import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
 import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductListItem } from "@/features/workspace/products/productListItem";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
@@ -42,7 +44,6 @@ import {
   ArrowDown01Icon,
   ArrowUp01Icon,
   Blockchain03Icon,
-  BookmarkAdd01Icon,
   MoreVerticalSquare01Icon,
   Pdf01Icon,
   PropertyAddIcon,
@@ -696,6 +697,10 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
+  const [showRemoveBookmarkDialog, setShowRemoveBookmarkDialog] = useState(false);
+  const [removeBookmarkFolderId, setRemoveBookmarkFolderId] = useState<
+    string | null
+  >(null);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
@@ -776,15 +781,14 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
               <Icon icon={Share08Icon} />
               <span>Share</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => {
-                setTimeout(() => setShowBookmarkDialog(true), 100);
+            <ProductBookmarkMenuItem
+              productId={row.original._id}
+              onAddBookmark={() => setShowBookmarkDialog(true)}
+              onRemoveBookmark={(folderId) => {
+                setRemoveBookmarkFolderId(folderId);
+                setShowRemoveBookmarkDialog(true);
               }}
-            >
-              <Icon icon={BookmarkAdd01Icon} />
-              <span>Add to Bookmarks</span>
-            </DropdownMenuItem>
+            />
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -809,6 +813,15 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
         onOpenChange={setShowBookmarkDialog}
         product={row.original}
       />
+      {removeBookmarkFolderId && (
+        <DialogRemoveProductBookmark
+          open={showRemoveBookmarkDialog}
+          onOpenChange={setShowRemoveBookmarkDialog}
+          productId={row.original._id}
+          productName={row.original.product_name}
+          folderId={removeBookmarkFolderId}
+        />
+      )}
       <DialogCreateVersion
         open={showVersionDialog}
         onOpenChange={setShowVersionDialog}

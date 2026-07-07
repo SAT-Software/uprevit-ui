@@ -3,12 +3,16 @@
 import { useState } from "react";
 import {
   PiBookmarkSimpleDuotone,
+  PiTrashDuotone,
   PiWarningCircleDuotone,
   PiXCircleDuotone,
-  PiTrashDuotone,
 } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 
+import { useRemoveProductBookmark } from "@/hooks/bookmark/useRemoveProductBookmark";
+import { BookmarkMinus01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -18,13 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { useRemoveProductBookmark } from "@/hooks/bookmark/useRemoveProductBookmark";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { Tooltip, TooltipContent } from "@uprevit/ui/components/ui/tooltip";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { BookmarkMinus01Icon } from "@hugeicons/core-free-icons";
-import { TooltipTrigger } from "@uprevit/ui/components/ui/tooltip";
 
 interface DialogRemoveProductBookmarkProps {
   productId: string;
@@ -41,7 +39,6 @@ export default function DialogRemoveProductBookmark({
   folderId,
   open,
   onOpenChange,
-  trigger,
 }: DialogRemoveProductBookmarkProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined;

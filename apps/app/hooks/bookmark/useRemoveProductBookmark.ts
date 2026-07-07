@@ -48,6 +48,7 @@ export function useRemoveProductBookmark() {
       queryClient.invalidateQueries({
         queryKey: ["products-in-bookmark-folder"],
       });
+      queryClient.invalidateQueries({ queryKey: ["all-user-bookmark-folders"] });
     },
     onError: (error) => {
       const message = getErrorMessage(
