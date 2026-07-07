@@ -5,7 +5,7 @@ import {
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllProducts({
+async function getAllBookmarkedProducts({
   signal,
   auth,
   query,
@@ -18,28 +18,34 @@ async function getAllProducts({
     auth.user?.profile?.workspaceId as string | undefined,
     query,
   );
-  const response = await fetch(`/api/products?${params.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${auth?.user?.access_token}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `/api/bookmarks/products/all?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth?.user?.access_token}`,
+        "Content-Type": "application/json",
+      },
+      signal,
     },
-    signal,
-  });
+  );
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch products");
+    throw new Error(text || "Failed to fetch bookmarked products");
   }
   const data = await response.json();
 
   return data;
 }
 
-export function useGetAllProducts(query?: ListQueryParams, enabled = true) {
+export function useGetAllBookmarkedProducts(
+  query?: ListQueryParams,
+  enabled = true,
+) {
   const auth = useAuth();
 
   return useQuery({
-    queryKey: ["all-products", auth.user?.profile?.workspaceId, query],
-    queryFn: ({ signal }) => getAllProducts({ signal, auth, query }),
+    queryKey: ["all-bookmarked-products", auth.user?.profile?.workspaceId, query],
+    queryFn: ({ signal }) => getAllBookmarkedProducts({ signal, auth, query }),
     enabled: auth.isAuthenticated && enabled,
   });
 }

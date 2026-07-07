@@ -9,7 +9,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
@@ -33,6 +33,7 @@ import ProductExportsSheet from "@/features/workspace/products/ProductExportsShe
 import { ProductListItem } from "@/features/workspace/products/productListItem";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useGetAllBookmarkedProducts } from "@/hooks/product/useGetAllBookmarkedProducts";
 import {
   ListFilterColumn,
   useWorkspaceListQuery,
@@ -75,7 +76,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
 import { cn } from "@uprevit/ui/lib/utils";
+
+const PRODUCTS_TABS = ["all", "bookmarked"] as const;
+type ProductsTab = (typeof PRODUCTS_TABS)[number];
+const DEFAULT_PRODUCTS_TAB: ProductsTab = "all";
+
+const productsTabTriggerClassName =
+  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
+
+function isProductsTab(value: string | null): value is ProductsTab {
+  return PRODUCTS_TABS.includes(value as ProductsTab);
+}
 
 const PRODUCT_LIST_CONTENT_MIN_HEIGHT = "min-h-[55rem] md:min-h-[42rem]";
 
@@ -450,14 +467,51 @@ const columns: ColumnDef<ProductListItem>[] = [
 
 export default function ProductsPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab: ProductsTab = isProductsTab(tabParam)
+    ? tabParam
+    : DEFAULT_PRODUCTS_TAB;
+  const isBookmarkedTab = activeTab === "bookmarked";
+
+  const handleTabChange = (value: string) => {
+    if (!isProductsTab(value)) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    params.set("page", "1");
+
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+  };
+
   const listState = useWorkspaceListQuery({
     defaultSort: "product_name",
     allowedSortFields: PRODUCT_SORT_FIELDS,
     filterColumns: PRODUCT_FILTER_COLUMNS,
   });
-  const { data, isFetching, isPending, isError } = useGetAllProducts(
-    listState.query,
-  );
+  const {
+    data: allProductsData,
+    isFetching: isAllProductsFetching,
+    isPending: isAllProductsPending,
+    isError: isAllProductsError,
+  } = useGetAllProducts(listState.query, !isBookmarkedTab);
+  const {
+    data: bookmarkedProductsData,
+    isFetching: isBookmarkedProductsFetching,
+    isPending: isBookmarkedProductsPending,
+    isError: isBookmarkedProductsError,
+  } = useGetAllBookmarkedProducts(listState.query, isBookmarkedTab);
+
+  const data = isBookmarkedTab ? bookmarkedProductsData : allProductsData;
+  const isFetching = isBookmarkedTab
+    ? isBookmarkedProductsFetching
+    : isAllProductsFetching;
+  const isPending = isBookmarkedTab
+    ? isBookmarkedProductsPending
+    : isAllProductsPending;
+  const isError = isBookmarkedTab ? isBookmarkedProductsError : isAllProductsError;
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     DEFAULT_COLUMN_VISIBILITY,
   );
@@ -521,7 +575,7 @@ export default function ProductsPage() {
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium">All Products</p>
+          <p className="text-sm font-medium">Products</p>
           <InfoTooltip content="Manage and view all products in your workspace. Products are labeling documentation records with metadata, seven structured tabs, versions, and redlines." />
         </div>
         <div className="flex items-center gap-2">
@@ -543,130 +597,186 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {isError ? (
-          <DashboardErrorState
-            variant="panel"
-            icon={Blockchain03Icon}
-            title="Failed to load products"
-            className={PRODUCT_LIST_CONTENT_MIN_HEIGHT}
-          />
-        ) : hasProductsToList ? (
-          <div className="flex flex-col items-end">
-            <div className="w-full">
-              <div className="w-full border-b border-border overflow-hidden">
-                <Table
-                  className={cn(
-                    showAuditColumns
-                      ? "table-auto w-max min-w-full"
-                      : "table-fixed",
-                  )}
-                >
-                  {!showAuditColumns ? (
-                    <colgroup>
-                      {table.getHeaderGroups()[0]?.headers.map((header) => (
-                        <col
-                          key={header.id}
-                          style={{ width: `${header.getSize()}px` }}
-                        />
-                      ))}
-                    </colgroup>
-                  ) : null}
-                  <TableHeader className="bg-muted">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow
-                        key={headerGroup.id}
-                        className="hover:bg-transparent"
-                      >
-                        {headerGroup.headers.map((header) => (
-                          <TableHead
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
+      >
+        <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
+          <TabsList
+            variant="line"
+            className="h-auto gap-0.5 bg-transparent p-0"
+          >
+            <TabsTrigger value="all" className={productsTabTriggerClassName}>
+              All Products
+            </TabsTrigger>
+            <TabsTrigger
+              value="bookmarked"
+              className={productsTabTriggerClassName}
+            >
+              Bookmarked
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {isError ? (
+            <DashboardErrorState
+              variant="panel"
+              icon={Blockchain03Icon}
+              title={
+                isBookmarkedTab
+                  ? "Failed to load bookmarked products"
+                  : "Failed to load products"
+              }
+              className={PRODUCT_LIST_CONTENT_MIN_HEIGHT}
+            />
+          ) : hasProductsToList ? (
+            <div className="flex flex-col items-end">
+              <div className="w-full">
+                <div className="w-full border-b border-border overflow-hidden">
+                  <Table
+                    className={cn(
+                      showAuditColumns
+                        ? "table-auto w-max min-w-full"
+                        : "table-fixed",
+                    )}
+                  >
+                    {!showAuditColumns ? (
+                      <colgroup>
+                        {table.getHeaderGroups()[0]?.headers.map((header) => (
+                          <col
                             key={header.id}
-                            className="border-r border-border last:border-r-0"
-                            style={
-                              showAuditColumns
-                                ? {
-                                    width: `${header.getSize()}px`,
-                                    ...(typeof header.column.columnDef
-                                      .minSize === "number"
-                                      ? {
-                                          minWidth: `${header.column.columnDef.minSize}px`,
-                                        }
-                                      : {}),
-                                  }
-                                : undefined
-                            }
-                          >
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext(),
-                                )}
-                          </TableHead>
+                            style={{ width: `${header.getSize()}px` }}
+                          />
                         ))}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {isListBusy ? (
-                      <TableBodySkeleton
-                        columnCount={PRODUCT_TABLE_COLUMN_COUNT}
-                      />
-                    ) : table.getRowModel().rows?.length ? (
-                      table.getRowModel().rows.map((row) => (
+                      </colgroup>
+                    ) : null}
+                    <TableHeader className="bg-muted">
+                      {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow
-                          key={row.id}
-                          data-state={row.getIsSelected() && "selected"}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => {
-                            router.push(
-                              `/products/${row.original._id}/product-information`,
-                            );
-                          }}
+                          key={headerGroup.id}
+                          className="hover:bg-transparent"
                         >
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell
-                              key={cell.id}
-                              className={cn(
-                                cell.column.id === "actions" && "last:py-0",
-                              )}
+                          {headerGroup.headers.map((header) => (
+                            <TableHead
+                              key={header.id}
+                              className="border-r border-border last:border-r-0"
+                              style={
+                                showAuditColumns
+                                  ? {
+                                      width: `${header.getSize()}px`,
+                                      ...(typeof header.column.columnDef
+                                        .minSize === "number"
+                                        ? {
+                                            minWidth: `${header.column.columnDef.minSize}px`,
+                                          }
+                                        : {}),
+                                    }
+                                  : undefined
+                              }
                             >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
-                            </TableCell>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                  )}
+                            </TableHead>
                           ))}
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={columns.length}
-                          className="h-24 text-center"
-                        >
-                          <ProductsEmptyState />
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {isListBusy ? (
+                        <TableBodySkeleton
+                          columnCount={PRODUCT_TABLE_COLUMN_COUNT}
+                        />
+                      ) : table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => {
+                              router.push(
+                                `/products/${row.original._id}/product-information`,
+                              );
+                            }}
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell
+                                key={cell.id}
+                                className={cn(
+                                  cell.column.id === "actions" && "last:py-0",
+                                )}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columns.length}
+                            className="h-24 text-center"
+                          >
+                            {isBookmarkedTab ? (
+                              <BookmarkedProductsEmptyState />
+                            ) : (
+                              <ProductsEmptyState />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              <div className="flex h-10 w-full items-center border-b">
+                {isListBusy ? (
+                  <WorkspaceListPaginationSkeleton />
+                ) : (
+                  <WorkspaceListPagination
+                    pagination={paginationInfo}
+                    onPageChange={listState.setPage}
+                  />
+                )}
               </div>
             </div>
-            <div className="flex h-10 w-full items-center border-b">
-              {isListBusy ? (
-                <WorkspaceListPaginationSkeleton />
-              ) : (
-                <WorkspaceListPagination
-                  pagination={paginationInfo}
-                  onPageChange={listState.setPage}
-                />
-              )}
-            </div>
-          </div>
-        ) : (
-          <ProductsEmptyState className="m-4" />
-        )}
+          ) : isBookmarkedTab ? (
+            <BookmarkedProductsEmptyState className="m-4" />
+          ) : (
+            <ProductsEmptyState className="m-4" />
+          )}
+        </div>
+      </Tabs>
+    </div>
+  );
+}
+
+function BookmarkedProductsEmptyState({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+        <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
+      </div>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-foreground">
+          No bookmarked products
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Bookmark products from the All Products tab to see them here
+        </p>
       </div>
     </div>
   );
