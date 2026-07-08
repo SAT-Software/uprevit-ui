@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SortingState } from "@tanstack/react-table";
 
 import {
   ArchivedProductsTable,
   ProductArchiveRow,
 } from "@/features/workspace/archive/products/ArchivedProductsTable";
-import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
-import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { RestoreEntityDialog } from "@/features/workspace/archive/RestoreEntityDialog";
 import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
@@ -20,10 +17,6 @@ import {
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
-
-export type ArchivedProductsProps = {
-  onRowClick?: (row: ProductArchiveRow) => void;
-};
 
 const ARCHIVED_PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "product_plan_number", label: "PPN", type: "text" },
@@ -48,15 +41,21 @@ const ARCHIVED_PRODUCT_SORT_FIELDS = [
   "_id",
 ];
 
-export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
+export function ArchivedProducts() {
   const listState = useWorkspaceListQuery({
     defaultSort: "archivedOn",
     defaultOrder: "desc",
     allowedSortFields: ARCHIVED_PRODUCT_SORT_FIELDS,
     filterColumns: ARCHIVED_PRODUCT_FILTER_COLUMNS,
   });
-  const { data: archivedProducts } = useGetArchivedProducts(listState.query);
-  const { mutate: updateProductStatus, isPending } = useUpdateProduct();
+  const {
+    data: archivedProducts,
+    isFetching,
+    isPending,
+    isError,
+  } = useGetArchivedProducts(listState.query);
+  const { mutate: updateProductStatus, isPending: isRestorePending } =
+    useUpdateProduct();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
@@ -87,12 +86,19 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
       {
         onSuccess: () => setRestoreDialogOpen(false),
         onError: () => setRestoreDialogOpen(false),
-      }
+      },
     );
   };
 
   const items: ProductArchiveRow[] = archivedProducts?.result?.products ?? [];
   const pagination = archivedProducts?.result?.pagination;
+  const isListBusy = isPending || isFetching;
+  const hasItemsToList =
+    isListBusy ||
+    isError ||
+    (pagination?.totalCount ?? 0) > 0 ||
+    listState.query.filters.length > 0;
+
   const sorting = useMemo<SortingState>(
     () => [{ id: listState.query.sort, desc: listState.query.order === "desc" }],
     [listState.query.order, listState.query.sort],
@@ -111,41 +117,35 @@ export function ArchivedProducts({ onRowClick }: ArchivedProductsProps) {
 
   return (
     <>
-      <div className="flex flex-col gap-1 pt-3">
-        <WorkspaceListControls
-          filters={listState.query.filters}
-          filterColumns={ARCHIVED_PRODUCT_FILTER_COLUMNS}
-          onApplyFilters={listState.setFilters}
-          onClearFilters={listState.clearFilters}
-        />
-        <ArchivedProductsTable
-          data={items}
-          onRowClick={onRowClick}
-          onRestore={handleRestoreClick}
-          loadingRowId={isPending ? selectedItemToRestore?._id : null}
-          sorting={sorting}
-          onSortingChange={(updater) => {
-            const nextSorting =
-              typeof updater === "function" ? updater(sorting) : updater;
-            const next = nextSorting[0];
-            if (!next) return;
-            listState.setSort(next.id, next.desc ? "desc" : "asc");
-          }}
-        />
-        {pagination ? (
-          <WorkspaceListPagination
-            pagination={pagination}
-            onPageChange={listState.setPage}
-          />
-        ) : null}
-      </div>
+      <ArchivedProductsTable
+        data={items}
+        onRestore={handleRestoreClick}
+        loadingRowId={isRestorePending ? selectedItemToRestore?._id : null}
+        sorting={sorting}
+        onSortingChange={(updater) => {
+          const nextSorting =
+            typeof updater === "function" ? updater(sorting) : updater;
+          const next = nextSorting[0];
+          if (!next) return;
+          listState.setSort(next.id, next.desc ? "desc" : "asc");
+        }}
+        filters={listState.query.filters}
+        filterColumns={ARCHIVED_PRODUCT_FILTER_COLUMNS}
+        onApplyFilters={listState.setFilters}
+        onClearFilters={listState.clearFilters}
+        isLoading={isListBusy}
+        isError={isError}
+        hasItemsToList={hasItemsToList}
+        pagination={pagination}
+        onPageChange={listState.setPage}
+      />
 
       <RestoreEntityDialog
         open={restoreDialogOpen}
         onOpenChange={setRestoreDialogOpen}
         entityName={selectedItemToRestore?.product_name || ""}
         onConfirm={handleConfirmRestore}
-        isPending={isPending}
+        isPending={isRestorePending}
       />
     </>
   );
