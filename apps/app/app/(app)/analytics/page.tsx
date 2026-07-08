@@ -1,21 +1,15 @@
 "use client";
 
-import * as React from "react";
 import { useMemo } from "react";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
-import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
-import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
-import {
-  PiPackageDuotone,
-  PiPencilSimpleLineDuotone,
-  PiCheckCircleDuotone,
-  PiArchiveDuotone,
-  PiWarningDuotone,
-} from "react-icons/pi";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { AnalyticsStatsGrid } from "@/features/workspace/analytics/AnalyticsStatsGrid";
 import { ProductsByDepartmentChart } from "@/features/workspace/analytics/ProductsByDepartmentBarChart";
 import { ProductsByProjectChart } from "@/features/workspace/analytics/ProductsByProjectBarChart";
 import { ProductsOverTimeChart } from "@/features/workspace/analytics/ProductsVsTimeLineChart";
+import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
+import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import type { Department } from "@/types/department";
 import type { Project } from "@/types/project";
 
@@ -137,100 +131,37 @@ export default function AnalyticsPage() {
   }, [productsData, archivedProductsData, departmentsData, projectsData]);
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start gap-2 justify-start border border-border bg-background rounded-xl p-2 w-full h-full">
-        <div className="flex flex-wrap gap-2 items-center w-full justify-between">
-          <div className="flex items-center gap-2 p-2">
-            <h1 className="text-base font-semibold">Analytics</h1>
-            <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-            <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-              Visualize your workspace data with interactive charts
-            </p>
-          </div>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Analytics</p>
+          <InfoTooltip content="Visualize your workspace data with interactive charts across products, departments, and projects." />
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 w-full">
-          <KPICard
-            title="Total Products"
-            value={analytics.kpi.totalProducts}
-            icon={PiPackageDuotone}
-            isLoading={isLoading}
-          />
-          <KPICard
-            title="Draft"
-            value={analytics.kpi.draftCount}
-            icon={PiPencilSimpleLineDuotone}
-            isLoading={isLoading}
-          />
-          <KPICard
-            title="Submitted"
-            value={analytics.kpi.submittedCount}
-            icon={PiCheckCircleDuotone}
-            isLoading={isLoading}
-          />
-          <KPICard
-            title="Archived"
-            value={analytics.kpi.archivedCount}
-            icon={PiArchiveDuotone}
-            isLoading={isLoading}
-          />
-          <KPICard
-            title="Overdue"
-            value={analytics.kpi.overdueCount}
-            icon={PiWarningDuotone}
-            isLoading={isLoading}
-          />
-        </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <AnalyticsStatsGrid kpi={analytics.kpi} isLoading={isLoading} />
 
-        <div className="w-full">
+        <div className="flex flex-col gap-2 p-2">
           <ProductsOverTimeChart
             data={analytics.timeData}
             departments={analytics.departments}
             projects={analytics.projects}
             isLoading={isLoading}
           />
+
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+            <ProductsByDepartmentChart
+              data={analytics.departmentData}
+              isLoading={isLoading}
+            />
+
+            <ProductsByProjectChart
+              data={analytics.projectData}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 w-full">
-          <ProductsByDepartmentChart
-            data={analytics.departmentData}
-            isLoading={isLoading}
-          />
-
-          <ProductsByProjectChart
-            data={analytics.projectData}
-            isLoading={isLoading}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface KPICardProps {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  isLoading?: boolean;
-}
-
-function KPICard({ title, value, icon: Icon, isLoading }: KPICardProps) {
-  return (
-    <div className="flex items-center gap-3 p-4 border border-border rounded-lg bg-card">
-      <div className="flex items-center  justify-center size-10 rounded-full bg-muted">
-        <Icon className={`size-5 text-muted-foreground`} />
-      </div>
-      <div className="flex flex-col">
-        <span className="text-xs text-muted-foreground font-medium uppercase">
-          {title}
-        </span>
-        {isLoading ? (
-          <div className="h-7 w-12 bg-muted rounded animate-pulse" />
-        ) : (
-          <span className="text-2xl font-semibold">
-            {value <= 9 ? `0${value}` : value}
-          </span>
-        )}
       </div>
     </div>
   );
