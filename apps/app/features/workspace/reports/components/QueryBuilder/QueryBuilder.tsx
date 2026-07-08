@@ -1,7 +1,8 @@
 "use client";
 
+import { Add01Icon, FilterVerticalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { PiPlusCircleDuotone, PiPlusDuotone } from "react-icons/pi";
 import { QueryCondition } from "@/types/reports";
 import { ConditionRow } from "./ConditionRow";
 import { LogicToggle } from "./LogicToggle";
@@ -12,10 +13,9 @@ export interface QueryBuilderProps {
   onAddCondition: () => void;
   onUpdateCondition: (
     id: string,
-    updates: Partial<Omit<QueryCondition, "id">>
+    updates: Partial<Omit<QueryCondition, "id">>,
   ) => void;
   onRemoveCondition: (id: string) => void;
-  onLogicChange: (logic: "AND" | "OR") => void;
   onConditionLogicChange: (id: string, logic: "AND" | "OR") => void;
   maxConditions?: number;
 }
@@ -26,7 +26,6 @@ export function QueryBuilder({
   onAddCondition,
   onUpdateCondition,
   onRemoveCondition,
-  onLogicChange,
   onConditionLogicChange,
   maxConditions = 10,
 }: QueryBuilderProps) {
@@ -34,60 +33,77 @@ export function QueryBuilder({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm ml-1 font-medium text-muted-foreground">
-          Query Conditions
-        </h3>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onAddCondition}
-          disabled={!canAddMore}
-          className="gap-1"
-        >
-          <PiPlusCircleDuotone size={16} />
-          Add Condition
-        </Button>
+      <div className="flex items-center gap-2">
+        <p className="text-sm font-medium text-foreground">Query Conditions</p>
       </div>
 
       {conditions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-border rounded-lg bg-muted/20">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-12 text-center">
+          <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted">
+            <Icon
+              icon={FilterVerticalIcon}
+              size={20}
+              strokeWidth={2}
+              className="text-muted-foreground/60"
+            />
+          </div>
+          <p className="text-sm font-medium text-foreground">
             No conditions added yet
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Click &quot;Add Condition&quot; to start building your query
+          <p className="mt-1 text-xs text-muted-foreground">
+            Add conditions to filter and search products
           </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onAddCondition}
+            className="mt-4 gap-1.5"
+          >
+            <Icon icon={Add01Icon} size={16} strokeWidth={2} />
+            Add First Condition
+          </Button>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-0">
           {conditions.map((condition, index) => (
-            <div key={condition.id} className="mb-0">
+            <div key={condition.id}>
               <ConditionRow
                 condition={condition}
-                onUpdate={(updates: Partial<Omit<QueryCondition, "id">>) =>
-                  onUpdateCondition(condition.id, updates)
-                }
+                position={index + 1}
+                onUpdate={(updates) => onUpdateCondition(condition.id, updates)}
                 onRemove={() => onRemoveCondition(condition.id)}
               />
-              {index < conditions.length - 1 && (
+              {index < conditions.length - 1 ? (
                 <LogicToggle
                   value={conditions[index + 1].logic || conditionLogic}
-                  onChange={(logic: "AND" | "OR") =>
+                  onChange={(logic) =>
                     onConditionLogicChange(conditions[index + 1].id, logic)
                   }
                 />
-              )}
+              ) : null}
             </div>
           ))}
+
+          <div className="flex items-center justify-center pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onAddCondition}
+              disabled={!canAddMore}
+              className="gap-1.5"
+            >
+              <Icon icon={Add01Icon} size={16} strokeWidth={2} />
+              Add Another Condition
+            </Button>
+          </div>
         </div>
       )}
 
-      {!canAddMore && (
-        <p className="text-xs text-muted-foreground text-center">
+      {!canAddMore ? (
+        <p className="text-center text-xs text-muted-foreground">
           Maximum {maxConditions} conditions reached
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

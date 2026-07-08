@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Dialog,
   DialogContent,
@@ -9,11 +10,11 @@ import {
 } from "@uprevit/ui/components/ui/dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
-  PiFilePdfDuotone,
-  PiMicrosoftExcelLogoDuotone,
-  PiClockCountdownDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  Clock01Icon,
+  Pdf01Icon,
+  Xls01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 export type ExportFormat = "pdf" | "excel";
@@ -41,17 +42,15 @@ export function ExportReportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px] p-4">
+      <DialogContent className="p-4 sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {isPDF ? (
-              <PiFilePdfDuotone size={20} className="text-red-500" />
-            ) : (
-              <PiMicrosoftExcelLogoDuotone
-                size={20}
-                className="text-green-600"
-              />
-            )}
+            <Icon
+              icon={isPDF ? Pdf01Icon : Xls01Icon}
+              size={18}
+              strokeWidth={2}
+              className={isPDF ? "text-red-500" : "text-emerald-600"}
+            />
             Export as {isPDF ? "PDF" : "Excel"}
           </DialogTitle>
           <DialogDescription>
@@ -60,17 +59,22 @@ export function ExportReportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-lg border bg-muted/30 p-3">
+        <div className="rounded-xl border border-border bg-muted/30 p-3">
           <div className="flex items-start gap-2">
-            <PiClockCountdownDuotone className="mt-0.5 size-4 text-muted-foreground" />
+            <Icon
+              icon={Clock01Icon}
+              size={16}
+              strokeWidth={2}
+              className="mt-0.5 text-muted-foreground"
+            />
             <div className="space-y-1 text-sm">
               <p className="font-medium text-foreground">
-                This export will be generated in the background.
+                Background export
               </p>
               <p className="text-muted-foreground">
                 We will queue a {isPDF ? "PDF" : "Excel"} export for the current
-                filtered results; you can keep using the app while progress is
-                shown in the Exports tab.
+                filtered results. Track progress and download from the Exports
+                panel.
               </p>
             </div>
           </div>
@@ -82,19 +86,17 @@ export function ExportReportDialog({
             onClick={() => onOpenChange(false)}
             disabled={isExporting}
           >
-            <PiXCircleDuotone />
             Cancel
           </Button>
-          <Button
-            onClick={handleExport}
-            disabled={isExporting}
-          >
+          <Button onClick={handleExport} disabled={isExporting}>
             {isExporting ? (
-              <Spinner />
-            ) : isPDF ? (
-              <PiFilePdfDuotone size={16} />
+              <Spinner className="size-4" />
             ) : (
-              <PiMicrosoftExcelLogoDuotone size={16} />
+              <Icon
+                icon={isPDF ? Pdf01Icon : Xls01Icon}
+                size={14}
+                strokeWidth={2}
+              />
             )}
             {isExporting
               ? "Starting..."

@@ -10,10 +10,11 @@ import {
 import { Button } from "@uprevit/ui/components/ui/button";
 import { SavedQuery } from "@/types/reports";
 import {
-  PiFolderOpenDuotone,
-  PiTrashDuotone,
-  PiCalendarDuotone,
-} from "react-icons/pi";
+  Calendar03Icon,
+  Delete02Icon,
+  FolderOpenIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface LoadQueryDialogProps {
   open: boolean;
@@ -40,10 +41,10 @@ export function LoadQueryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-4">
+      <DialogContent className="p-4 sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <PiFolderOpenDuotone size={20} />
+            <Icon icon={FolderOpenIcon} size={18} strokeWidth={2} />
             Load Saved Query
           </DialogTitle>
           <DialogDescription>
@@ -51,11 +52,11 @@ export function LoadQueryDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className=" space-y-2 max-h-[400px] overflow-y-auto">
+        <div className="max-h-[400px] space-y-2 overflow-y-auto">
           {queries.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-8 text-center text-muted-foreground">
               <p className="text-sm">No saved queries yet</p>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 Save a query to access it here later
               </p>
             </div>
@@ -63,25 +64,25 @@ export function LoadQueryDialog({
             queries.map((query) => (
               <div
                 key={query.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20 hover:bg-muted/40 transition-colors"
+                className="flex items-center justify-between rounded-xl border border-border bg-muted/20 p-3 transition-colors hover:bg-muted/40"
               >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{query.name}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <PiCalendarDuotone size={12} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{query.name}</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Icon icon={Calendar03Icon} size={12} strokeWidth={2} />
                       {formatDate(query.createdAt)}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {query.conditions.length} condition
                       {query.conditions.length !== 1 ? "s" : ""}
                     </span>
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                       {query.conditionLogic}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 ml-2">
+                <div className="ml-2 flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -94,11 +95,12 @@ export function LoadQueryDialog({
                   </Button>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    size="icon-xs"
+                    className="text-muted-foreground hover:text-destructive"
                     onClick={() => onDelete(query.id)}
+                    aria-label="Delete saved query"
                   >
-                    <PiTrashDuotone size={16} />
+                    <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
                   </Button>
                 </div>
               </div>

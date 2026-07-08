@@ -12,7 +12,11 @@ import {
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
-import { PiFloppyDiskDuotone, PiInfoDuotone } from "react-icons/pi";
+import {
+  SaveIcon,
+  InformationCircleIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface SaveQueryDialogProps {
   open: boolean;
@@ -39,10 +43,10 @@ export function SaveQueryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px] p-4">
+      <DialogContent className="p-4 sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <PiFloppyDiskDuotone size={20} />
+            <Icon icon={SaveIcon} size={18} strokeWidth={2} />
             Save Query
           </DialogTitle>
           <DialogDescription>
@@ -51,11 +55,12 @@ export function SaveQueryDialog({
         </DialogHeader>
 
         <div className="space-y-2">
-          {/* Info Banner */}
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
-            <PiInfoDuotone
-              size={18}
-              className="text-blue-500 shrink-0 mt-0.5"
+          <div className="flex items-start gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+            <Icon
+              icon={InformationCircleIcon}
+              size={16}
+              strokeWidth={2}
+              className="mt-0.5 shrink-0 text-blue-500"
             />
             <p className="text-xs text-blue-600">
               Saved queries are stored locally in your browser. They will not
