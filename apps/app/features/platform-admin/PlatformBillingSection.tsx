@@ -18,11 +18,6 @@ import { BILLING_SUMMARY_FIELD_TOOLTIPS } from "@/features/platform-admin/platfo
 import { formatUploadVolumeDisplay } from "@/utils/formatUploadVolume";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import { getErrorMessage } from "@/lib/api-error";
-import {
-  PiCloudArrowUpDuotone,
-  PiExportDuotone,
-  PiUsersDuotone,
-} from "react-icons/pi";
 
 function ReadOnlyField({
   label,
@@ -274,7 +269,7 @@ export function PlatformBillingSection({
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <UsageMetricCard
               label="Active members"
-              icon={PiUsersDuotone}
+              info="Number of active members in this workspace for the current billing period."
               used={summary.usage.activeSeats}
               included={summary.usageLimits.seats}
               unit="seats"
@@ -286,10 +281,11 @@ export function PlatformBillingSection({
                 summary.usageLimits.seats > 0 &&
                 summary.limitStatus.seats.used >= summary.limitStatus.seats.limit
               }
+              colorClass="from-sky-400 via-sky-500 to-sky-600"
             />
             <UsageMetricCard
               label="Exports"
-              icon={PiExportDuotone}
+              info="Total product exports generated during this billing period."
               used={summary.usage.exports}
               included={summary.usageLimits.exports}
               unit="exports"
@@ -301,10 +297,11 @@ export function PlatformBillingSection({
                 summary.usageLimits.exports > 0 &&
                 summary.limitStatus.exports.used >= summary.limitStatus.exports.limit
               }
+              colorClass="from-amber-400 via-amber-500 to-amber-600"
             />
             <UsageMetricCard
               label="Upload volume"
-              icon={PiCloudArrowUpDuotone}
+              info="Total source file upload volume used during this billing period."
               used={uploadVolume.primary}
               included={summary.usageLimits.uploadGb}
               unit="GB"
@@ -317,6 +314,7 @@ export function PlatformBillingSection({
                 summary.usageLimits.uploadGb > 0 &&
                 summary.limitStatus.uploadGb.used >= summary.limitStatus.uploadGb.limit
               }
+              colorClass="from-emerald-400 via-emerald-500 to-emerald-600"
             />
         </div>
       </section>

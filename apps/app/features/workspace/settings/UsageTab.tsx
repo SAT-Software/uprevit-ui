@@ -1,17 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetBillingSummary } from "@/hooks/billing/useGetBillingSummary";
 import { useUpdateBillingPreferences } from "@/hooks/billing/useUpdateBillingPreferences";
 import { UsageMetricCard } from "@/features/billing/UsageMetricCard";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@uprevit/ui/components/ui/card";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import {
@@ -23,14 +18,9 @@ import {
 } from "@uprevit/ui/components/ui/select";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
-  PiChartBarDuotone,
-  PiExportDuotone,
-  PiCloudArrowUpDuotone,
-  PiShieldCheckDuotone,
-  PiSlidersHorizontalDuotone,
-  PiWarningCircleDuotone,
-  PiUsersDuotone,
-} from "react-icons/pi";
+  AlertCircleIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { formatUploadVolumeDisplay } from "@/utils/formatUploadVolume";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import type { EnforcementMode, WorkspaceBillingSummary } from "@/types/billing";
@@ -91,22 +81,28 @@ function UsageLimitEnforcementForm({
   };
 
   return (
-    <Card className="shadow-none">
-      <CardHeader className="space-y-1 p-6 pb-0">
-        <div className="flex items-center gap-2.5">
-          <div className="rounded-lg bg-muted p-2 shrink-0">
-            <PiSlidersHorizontalDuotone className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <CardTitle className="text-base">Limit enforcement</CardTitle>
+    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Limit enforcement</p>
+          <InfoTooltip content="Choose whether over-limit usage is allowed or blocked for exports and uploads." />
         </div>
-        <p className="text-sm text-muted-foreground">
-          Choose whether over-limit usage is allowed or blocked for exports and
-          uploads.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4 p-6 pt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7"
+          onClick={savePreferences}
+          disabled={!formDirty || !limitsValid || isSaving}
+        >
+          Save preferences
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="enforcement-mode">Enforcement mode</Label>
+          <Label htmlFor="enforcement-mode" className="text-sm font-medium">
+            Enforcement mode
+          </Label>
           <Select
             value={enforcementMode}
             onValueChange={(value) => {
@@ -115,7 +111,7 @@ function UsageLimitEnforcementForm({
             }}
             disabled={isSaving}
           >
-            <SelectTrigger id="enforcement-mode">
+            <SelectTrigger id="enforcement-mode" className="h-9 w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -125,49 +121,47 @@ function UsageLimitEnforcementForm({
           </Select>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="exports-limit">Export limit</Label>
-            <Input
-              id="exports-limit"
-              type="number"
-              min={0}
-              step={1}
-              value={exportsLimit}
-              onChange={(event) => {
-                markDirty();
-                setExportsLimit(event.target.value);
-              }}
-              disabled={isSaving}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="upload-limit">Upload limit (GB)</Label>
-            <Input
-              id="upload-limit"
-              type="number"
-              min={0}
-              step={0.1}
-              value={uploadGbLimit}
-              onChange={(event) => {
-                markDirty();
-                setUploadGbLimit(event.target.value);
-              }}
-              disabled={isSaving}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="exports-limit" className="text-sm font-medium">
+            Export limit
+          </Label>
+          <Input
+            id="exports-limit"
+            type="number"
+            min={0}
+            step={1}
+            value={exportsLimit}
+            onChange={(event) => {
+              markDirty();
+              setExportsLimit(event.target.value);
+            }}
+            disabled={isSaving}
+          />
         </div>
 
-        <div className="flex justify-end">
-          <Button
-            onClick={savePreferences}
-            disabled={!formDirty || !limitsValid || isSaving}
-          >
-            Save preferences
-          </Button>
+        <div className="space-y-2">
+          <Label htmlFor="upload-limit" className="text-sm font-medium">
+            Upload limit (GB)
+          </Label>
+          <Input
+            id="upload-limit"
+            type="number"
+            min={0}
+            step={0.1}
+            value={uploadGbLimit}
+            onChange={(event) => {
+              markDirty();
+              setUploadGbLimit(event.target.value);
+            }}
+            disabled={isSaving}
+          />
         </div>
-      </CardContent>
-    </Card>
+
+        <p className="text-xs text-muted-foreground lg:col-span-3">
+          Seat limits are set from your subscription and cannot be changed here.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -183,21 +177,15 @@ function UsageTab() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
-          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-72" />
-          </div>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-24 rounded-2xl" />
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <Skeleton className="h-36 rounded-2xl" />
+          <Skeleton className="h-36 rounded-2xl" />
+          <Skeleton className="h-36 rounded-2xl" />
+          <Skeleton className="h-36 rounded-2xl" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-        </div>
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-48 rounded-2xl" />
       </div>
     );
   }
@@ -210,11 +198,11 @@ function UsageTab() {
 
     if (isAccessFrozen || isUsageFrozen) {
       return (
-        <div className="flex items-center gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <div className="rounded-lg bg-amber-100 p-2.5 shrink-0">
-            <PiWarningCircleDuotone className="h-5 w-5 text-amber-700" />
+        <div className="flex items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-900/50 dark:bg-amber-900/40 dark:text-amber-300">
+            <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
           </div>
-          <p className="text-sm text-amber-900">
+          <p className="text-sm text-amber-900 dark:text-amber-100">
             {isAccessFrozen
               ? "Workspace access is frozen by a platform operator."
               : "Workspace usage is frozen. Invites, exports, and uploads are blocked."}
@@ -224,9 +212,9 @@ function UsageTab() {
     }
 
     return (
-      <div className="flex items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-        <div className="rounded-lg bg-destructive/10 p-2.5 shrink-0">
-          <PiWarningCircleDuotone className="h-5 w-5 text-destructive" />
+      <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
+          <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
         </div>
         <div className="flex-1 space-y-0.5">
           <div className="text-sm font-medium">Unable to load usage information</div>
@@ -234,7 +222,7 @@ function UsageTab() {
             Something went wrong while fetching your usage for this period.
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
+        <Button variant="outline" size="sm" className="h-7" onClick={() => refetch()}>
           Try again
         </Button>
       </div>
@@ -249,123 +237,135 @@ function UsageTab() {
     data.usage.uploadBytes,
     data.usage.uploadGb,
   );
+
   return (
-    <div className="space-y-6">
-      {/* Usage Header */}
-      <div className="flex flex-col gap-4 rounded-lg border bg-accent p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-border bg-background">
-            <PiChartBarDuotone className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold">Usage this period</h2>
-              <Badge variant="outline" className="capitalize">
-                {data.account.status}
-              </Badge>
-              <Badge variant="outline" className="capitalize">
-                {data.account.billingCadence}
-              </Badge>
-              {data.limitsEnabled ? (
-                <Badge>Limit enforcement on</Badge>
-              ) : (
-                <Badge variant="secondary">Limit enforcement off</Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {data.period.source === "chargebee"
+    <div className="flex flex-col gap-2">
+      <div className="overflow-hidden rounded-2xl border border-border bg-background">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border pl-3 pr-2">
+          <p className="text-sm font-medium">Usage this period</p>
+          <InfoTooltip
+            content={
+              data.period.source === "chargebee"
                 ? "Usage is aggregated for your current subscription term."
-                : "Usage is aggregated for the current billing period until your subscription is active."}
-            </p>
-            <p className="text-xs text-muted-foreground">
+                : "Usage is aggregated for the current billing period until your subscription is active."
+            }
+          />
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant="outline" className="h-6 capitalize">
+              {data.account.status}
+            </Badge>
+            <Badge variant="outline" className="h-6 capitalize">
+              {data.account.billingCadence}
+            </Badge>
+            {data.limitsEnabled ? (
+              <Badge variant="outline" className="h-6">
+                Limit enforcement on
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="h-6">
+                Limit enforcement off
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
               {formatToLocalDate(data.period.start)} –{" "}
               {formatToLocalDate(data.period.end)}
-              {" · "}
+            </p>
+            <p className="text-xs text-muted-foreground">
               {data.period.source === "chargebee"
                 ? "Subscription term"
                 : "Standard billing period"}
             </p>
           </div>
+          {hasOverage && data.enforcementMode === "overage" ? (
+            <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-900/50 dark:bg-amber-950/30">
+              <Icon
+                icon={AlertCircleIcon}
+                size={14}
+                strokeWidth={2}
+                className="shrink-0 text-amber-700 dark:text-amber-300"
+              />
+              <p className="text-xs text-amber-900 dark:text-amber-100">
+                Usage exceeds configured limits this period.
+              </p>
+            </div>
+          ) : null}
         </div>
-        {hasOverage && data.enforcementMode === "overage" ? (
-          <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 sm:max-w-[220px]">
-            <PiWarningCircleDuotone className="h-4 w-4 shrink-0 text-amber-700" />
-            <p className="text-xs text-amber-900">
-              Usage exceeds configured limits this period.
-            </p>
-          </div>
-        ) : null}
       </div>
 
-      {/* Usage Metrics */}
-      <div className="space-y-4">
-        <div className="text-lg font-medium">Usage breakdown</div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <UsageMetricCard
-            label="Active members"
-            icon={PiUsersDuotone}
-            used={data.usage.activeSeats}
-            included={data.usageLimits.seats}
-            unit="seats"
-            usedValue={data.limitStatus.seats.used}
-            limitValue={data.limitStatus.seats.limit}
-            isOverLimit={data.limitStatus.seats.overLimit}
-            isAtLimit={
-              !data.limitStatus.seats.overLimit &&
-              data.usageLimits.seats > 0 &&
-              data.limitStatus.seats.used >= data.limitStatus.seats.limit
-            }
-          />
-          <UsageMetricCard
-            label="Exports"
-            icon={PiExportDuotone}
-            used={data.usage.exports}
-            included={data.usageLimits.exports}
-            unit="exports"
-            usedValue={data.limitStatus.exports.used}
-            limitValue={data.limitStatus.exports.limit}
-            isOverLimit={data.limitStatus.exports.overLimit}
-            isAtLimit={
-              !data.limitStatus.exports.overLimit &&
-              data.usageLimits.exports > 0 &&
-              data.limitStatus.exports.used >= data.limitStatus.exports.limit
-            }
-          />
-          <UsageMetricCard
-            label="Upload volume"
-            icon={PiCloudArrowUpDuotone}
-            used={uploadVolume.primary}
-            included={data.usageLimits.uploadGb}
-            unit="GB"
-            usedValue={data.limitStatus.uploadGb.used}
-            limitValue={data.limitStatus.uploadGb.limit}
-            secondaryUsed={`${uploadVolume.secondary} used`}
-            isOverLimit={data.limitStatus.uploadGb.overLimit}
-            isAtLimit={
-              !data.limitStatus.uploadGb.overLimit &&
-              data.usageLimits.uploadGb > 0 &&
-              data.limitStatus.uploadGb.used >= data.limitStatus.uploadGb.limit
-            }
-          />
-          <Card className="shadow-none">
-            <CardContent className="space-y-3 p-4">
-              <div className="flex items-center gap-2.5">
-                <div className="rounded-lg bg-muted p-2 shrink-0">
-                  <PiShieldCheckDuotone className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span className="text-sm font-medium">SSO add-on</span>
-              </div>
-              <div className="flex justify-end">
-                <Badge variant={data.addOns.ssoEnabled ? "default" : "secondary"}>
-                  {data.addOns.ssoEnabled ? "Enabled" : "Disabled"}
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Seat limits are set from your subscription and cannot be changed
-                here.
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <UsageMetricCard
+          label="Active members"
+          info="Number of active members in your workspace for this billing period."
+          used={data.usage.activeSeats}
+          included={data.usageLimits.seats}
+          unit="seats"
+          usedValue={data.limitStatus.seats.used}
+          limitValue={data.limitStatus.seats.limit}
+          isOverLimit={data.limitStatus.seats.overLimit}
+          isAtLimit={
+            !data.limitStatus.seats.overLimit &&
+            data.usageLimits.seats > 0 &&
+            data.limitStatus.seats.used >= data.limitStatus.seats.limit
+          }
+          colorClass="from-sky-400 via-sky-500 to-sky-600"
+        />
+        <UsageMetricCard
+          label="Exports"
+          info="Total product exports generated during this billing period."
+          used={data.usage.exports}
+          included={data.usageLimits.exports}
+          unit="exports"
+          usedValue={data.limitStatus.exports.used}
+          limitValue={data.limitStatus.exports.limit}
+          isOverLimit={data.limitStatus.exports.overLimit}
+          isAtLimit={
+            !data.limitStatus.exports.overLimit &&
+            data.usageLimits.exports > 0 &&
+            data.limitStatus.exports.used >= data.limitStatus.exports.limit
+          }
+          colorClass="from-amber-400 via-amber-500 to-amber-600"
+        />
+        <UsageMetricCard
+          label="Upload volume"
+          info="Total source file upload volume used during this billing period."
+          used={uploadVolume.primary}
+          included={data.usageLimits.uploadGb}
+          unit="GB"
+          usedValue={data.limitStatus.uploadGb.used}
+          limitValue={data.limitStatus.uploadGb.limit}
+          secondaryUsed={`${uploadVolume.secondary} used`}
+          isOverLimit={data.limitStatus.uploadGb.overLimit}
+          isAtLimit={
+            !data.limitStatus.uploadGb.overLimit &&
+            data.usageLimits.uploadGb > 0 &&
+            data.limitStatus.uploadGb.used >= data.limitStatus.uploadGb.limit
+          }
+          colorClass="from-emerald-400 via-emerald-500 to-emerald-600"
+        />
+
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
+          <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border pl-3 pr-2">
+            <p className="text-sm font-medium">SSO add-on</p>
+            <InfoTooltip content="Single sign-on add-on status for your workspace subscription." />
+          </div>
+          <div className="flex flex-col gap-3 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-normal text-muted-foreground/60">
+                Single sign-on status
               </p>
-            </CardContent>
-          </Card>
+              <Badge variant="outline">
+                {data.addOns.ssoEnabled ? "Enabled" : "Disabled"}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Managed through your subscription plan.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -379,11 +379,11 @@ function UsageTab() {
 
       {(data.freezes?.usageFreeze.enabled ||
         data.freezes?.accessFreeze.enabled) && (
-        <div className="flex items-center gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <div className="rounded-lg bg-amber-100 p-2.5 shrink-0">
-            <PiWarningCircleDuotone className="h-5 w-5 text-amber-700" />
+        <div className="flex items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-900/50 dark:bg-amber-900/40 dark:text-amber-300">
+            <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
           </div>
-          <p className="text-sm text-amber-900">
+          <p className="text-sm text-amber-900 dark:text-amber-100">
             {data.freezes.accessFreeze.enabled
               ? "Workspace access is frozen by a platform operator."
               : "Workspace usage is frozen. Invites, exports, and uploads are blocked."}

@@ -27,7 +27,6 @@ import {
 import { useInviteWorkspaceMembers } from "@/hooks/workspace/useInviteWorkspaceMembers";
 import { toast } from "sonner";
 import {
-  PiUserPlusDuotone,
   PiXCircleDuotone,
   PiPaperPlaneRightDuotone,
   PiPlusCircleDuotone,
@@ -35,7 +34,10 @@ import {
   PiEnvelopeSimpleDuotone,
   PiUserDuotone,
 } from "react-icons/pi";
+import { UserAdd01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { cn } from "@uprevit/ui/lib/utils";
 
 type InviteMembersFormValues = {
   users: { name: string; email: string }[];
@@ -68,7 +70,7 @@ export function InviteMembersDialog() {
       .filter((user) => user.name.length > 0 && user.email.length > 0);
     if (users.length === 0) {
       toast.error(
-        "Please enter at least one user with a name and email address."
+        "Please enter at least one user with a name and email address.",
       );
       return;
     }
@@ -87,7 +89,6 @@ export function InviteMembersDialog() {
       <DialogTrigger asChild>
         <Button
           size="sm"
-          className="gap-2"
           onClick={(e) => {
             if (!isAdmin) {
               e.preventDefault();
@@ -97,7 +98,7 @@ export function InviteMembersDialog() {
             }
           }}
         >
-          <PiUserPlusDuotone className="w-4 h-4" />
+          <Icon icon={UserAdd01Icon} size={14} strokeWidth={2} />
           Invite Members
         </Button>
       </DialogTrigger>

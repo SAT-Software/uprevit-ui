@@ -18,12 +18,13 @@ import { useUpdateWorkspace } from "@/hooks/workspace/useUpdateWorkspace";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Workspace } from "@/types/workspace";
 import {
-  PiPencilSimpleDuotone,
   PiXCircleDuotone,
   PiCheckCircleDuotone,
   PiCameraDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
+import { PencilEdit01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
@@ -160,12 +161,8 @@ export function DialogUpdateWorkspace({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <PiPencilSimpleDuotone className="w-4 h-4" />
+        <Button variant="outline" size="sm" className="gap-2 h-7">
+          <Icon icon={PencilEdit01Icon} size={14} strokeWidth={2} />
           Edit Workspace
         </Button>
       </DialogTrigger>
