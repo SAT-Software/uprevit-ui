@@ -1,19 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import type { IconType } from "react-icons";
 import { useEffect, useMemo } from "react";
-import {
-  PiClockDuotone,
-  PiFingerprintDuotone,
-  PiListChecksDuotone,
-  PiPlugsConnectedDuotone,
-} from "react-icons/pi";
+import { CheckListIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -24,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { useGetUsageEvents } from "@/hooks/platform-admin/useGetUsageEvents";
@@ -36,6 +33,9 @@ import {
 import { getErrorMessage } from "@/lib/api-error";
 import type { UsageEvent, UsageEventSource } from "@/types/billing";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
+
+const USAGE_EVENTS_TOOLTIP =
+  "Ledger entries from exports, uploads, and adjustments.";
 
 const SOURCE_LABELS: Record<UsageEventSource, string> = {
   user_activation: "Seat activation",
@@ -60,23 +60,12 @@ function deduplicationId(event: UsageEvent): string {
   return event.chargebeeSync?.deduplicationId ?? event.sourceId;
 }
 
-const StaticHeader = ({
-  title,
-  icon: Icon,
-}: {
-  title: string;
-  icon: IconType;
-}) => (
-  <div className="flex h-8 items-center gap-2">
-    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-    <span className="whitespace-nowrap">{title}</span>
-  </div>
-);
-
 export function PlatformUsageEventsTable({
   workspaceId,
+  headerActions,
 }: {
   workspaceId: string;
+  headerActions?: ReactNode;
 }) {
   const listState = useWorkspaceListQuery({
     defaultSort: "occurredAt",
@@ -108,7 +97,11 @@ export function PlatformUsageEventsTable({
     () => [
       {
         accessorKey: "occurredAt",
-        header: () => <StaticHeader title="Occurred" icon={PiClockDuotone} />,
+        header: () => (
+          <span className="whitespace-nowrap text-muted-foreground/60">
+            Occurred
+          </span>
+        ),
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-xs text-muted-foreground">
             {formatToLocalDateTime(row.original.occurredAt)}
@@ -119,7 +112,11 @@ export function PlatformUsageEventsTable({
       {
         id: "event",
         accessorFn: (row) => eventTypeLabel(row),
-        header: () => <StaticHeader title="Event" icon={PiListChecksDuotone} />,
+        header: () => (
+          <span className="whitespace-nowrap text-muted-foreground/60">
+            Event
+          </span>
+        ),
         cell: ({ row }) => (
           <span className="text-sm">{eventTypeLabel(row.original)}</span>
         ),
@@ -129,7 +126,9 @@ export function PlatformUsageEventsTable({
         id: "chargebeeSync",
         accessorFn: (row) => row.chargebeeSync?.status ?? "",
         header: () => (
-          <StaticHeader title="Chargebee sync" icon={PiPlugsConnectedDuotone} />
+          <span className="whitespace-nowrap text-muted-foreground/60">
+            Chargebee sync
+          </span>
         ),
         cell: ({ row }) => {
           const status = row.original.chargebeeSync?.status;
@@ -148,7 +147,9 @@ export function PlatformUsageEventsTable({
         id: "dedupId",
         accessorFn: (row) => deduplicationId(row),
         header: () => (
-          <StaticHeader title="Dedup ID" icon={PiFingerprintDuotone} />
+          <span className="whitespace-nowrap text-muted-foreground/60">
+            Dedup ID
+          </span>
         ),
         cell: ({ row }) => (
           <span
@@ -193,35 +194,54 @@ export function PlatformUsageEventsTable({
 
   if (isError) {
     return (
-      <p className="text-sm text-destructive">
-        {getErrorMessage(error, "Unable to load usage events.")}
-      </p>
+      <div className="flex flex-col">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="shrink-0 text-sm font-medium">Usage events</p>
+            <InfoTooltip content={USAGE_EVENTS_TOOLTIP} />
+          </div>
+          {headerActions}
+        </div>
+        <p className="p-4 text-sm text-destructive">
+          {getErrorMessage(error, "Unable to load usage events.")}
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-2 w-full">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => retryAll.mutate()}
-          disabled={retryAll.isPending}
-        >
-          {retryAll.isPending ? "Retrying…" : "Retry failed syncs"}
-        </Button>
+    <div className="flex flex-col">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="shrink-0 text-sm font-medium">Usage events</p>
+          <InfoTooltip content={USAGE_EVENTS_TOOLTIP} />
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => retryAll.mutate()}
+            disabled={retryAll.isPending}
+          >
+            {retryAll.isPending ? "Retrying…" : "Retry failed syncs"}
+          </Button>
+          {headerActions}
+        </div>
       </div>
 
-      <div className="bg-background overflow-hidden rounded-xl border">
-        <Table className="table-fixed">
+      <div className="w-full overflow-hidden border-b border-border">
+        <Table className="table-fixed w-full">
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="h-10 hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     style={{ width: `${header.getSize()}px` }}
-                    className="h-11 border-r border-border last:border-r-0"
+                    className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0"
                   >
                     {header.isPlaceholder
                       ? null
@@ -241,7 +261,7 @@ export function PlatformUsageEventsTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/50">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="last:py-3">
+                    <TableCell key={cell.id} className="py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -254,9 +274,17 @@ export function PlatformUsageEventsTable({
               <TableRow>
                 <TableCell
                   colSpan={TABLE_COLUMN_COUNT}
-                  className="h-24 text-center text-sm text-muted-foreground"
+                  className="h-32 text-center text-muted-foreground"
                 >
-                  No usage events recorded yet
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Icon
+                      icon={CheckListIcon}
+                      size={24}
+                      strokeWidth={2}
+                      className="text-muted-foreground/30"
+                    />
+                    <p className="text-sm">No usage events recorded yet</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -264,10 +292,12 @@ export function PlatformUsageEventsTable({
         </Table>
       </div>
 
-      <WorkspaceListPagination
-        pagination={paginationInfo}
-        onPageChange={listState.setPage}
-      />
+      <div className="flex h-10 w-full items-center">
+        <WorkspaceListPagination
+          pagination={paginationInfo}
+          onPageChange={listState.setPage}
+        />
+      </div>
     </div>
   );
 }

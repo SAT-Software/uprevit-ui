@@ -61,11 +61,7 @@ export function SidebarNavWorkspace({
                   alt={workspace?.workspaceName}
                 />
                 <AvatarFallback>
-                  <Icon
-                    icon={MenuSquareIcon}
-                    size={16}
-                    strokeWidth={2}
-                  />
+                  <Icon icon={MenuSquareIcon} size={16} strokeWidth={2} />
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -76,7 +72,12 @@ export function SidebarNavWorkspace({
                   {workspace?.companyName}
                 </span>
               </div>
-              <Icon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
+              <Icon
+                className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                icon={ArrowDown01Icon}
+                size={16}
+                strokeWidth={2}
+              />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -93,11 +94,7 @@ export function SidebarNavWorkspace({
                     alt={workspace?.workspaceName}
                   />
                   <AvatarFallback className="">
-                    <Icon
-                      icon={MenuSquareIcon}
-                      size={16}
-                      strokeWidth={2}
-                    />
+                    <Icon icon={MenuSquareIcon} size={16} strokeWidth={2} />
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -134,27 +131,15 @@ export function SidebarNavWorkspace({
                     onValueChange={setTheme}
                   >
                     <DropdownMenuRadioItem value="light">
-                      <Icon
-                        icon={Sun01Icon}
-                        size={16}
-                        strokeWidth={2}
-                      />
+                      <Icon icon={Sun01Icon} size={16} strokeWidth={2} />
                       Light
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="dark">
-                      <Icon
-                        icon={Moon02Icon}
-                        size={16}
-                        strokeWidth={2}
-                      />
+                      <Icon icon={Moon02Icon} size={16} strokeWidth={2} />
                       Dark
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="system">
-                      <Icon
-                        icon={ComputerIcon}
-                        size={16}
-                        strokeWidth={2}
-                      />
+                      <Icon icon={ComputerIcon} size={16} strokeWidth={2} />
                       System
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
@@ -162,11 +147,7 @@ export function SidebarNavWorkspace({
               </DropdownMenuSub>
               <DropdownMenuItem asChild>
                 <Link href={`/settings?tab=workspace`}>
-                  <Icon
-                    icon={Settings01Icon}
-                    size={16}
-                    strokeWidth={2}
-                  />
+                  <Icon icon={Settings01Icon} size={16} strokeWidth={2} />
                   Settings
                 </Link>
               </DropdownMenuItem>

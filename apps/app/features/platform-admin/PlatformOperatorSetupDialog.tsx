@@ -12,34 +12,41 @@ import {
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
 import {
-  PiShieldCheckDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  CancelCircleIcon,
+  UserSettings01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 export function PlatformOperatorSetupDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-2">
-          <PiShieldCheckDuotone className="h-4 w-4" />
-          Add platform operator
+        <Button size="sm" variant="secondary">
+          <Icon icon={UserSettings01Icon} size={14} strokeWidth={2} />
+          Add Platform Admin
         </Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
-              <PiShieldCheckDuotone className="h-5 w-5 text-muted-foreground" />
+              <Icon
+                icon={UserSettings01Icon}
+                size={16}
+                strokeWidth={2}
+                className="text-muted-foreground"
+              />
               <p>Add platform operator</p>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
           <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Phase 1 requires a one-time manual setup. Use the steps below to grant a teammate or co-founder access to the platform admin area.
+            Phase 1 requires a one-time manual setup. Use the steps below to
+            grant a teammate or co-founder access to the platform admin area.
           </div>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -84,7 +91,7 @@ export function PlatformOperatorSetupDialog() {
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
+              <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
               Close
             </Button>
           </DialogClose>

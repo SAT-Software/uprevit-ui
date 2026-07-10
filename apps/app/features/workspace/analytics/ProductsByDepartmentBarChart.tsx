@@ -107,7 +107,7 @@ export function ProductsByDepartmentChart({
                 dataKey="department"
                 position="insideLeft"
                 offset={8}
-                className="fill-foreground"
+                className="fill-background dark:fill-foreground"
                 fontSize={12}
               />
               <LabelList

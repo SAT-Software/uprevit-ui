@@ -19,10 +19,12 @@ const pathData = [
   { title: "Settings", url: "/settings" },
   { title: "Feedback", url: "/feedback" },
   { title: "Help Center", url: "/help-center" },
+  { title: "Platform admin", url: "/platform-admin" },
+  { title: "Workspaces", url: "/platform-admin/workspaces" },
 ];
 
 const NESTED_ROUTE_PATTERN =
-  /^\/(departments|projects|source-files|bookmarked-products)\/.+/;
+  /^\/(departments|projects|source-files|bookmarked-products)\/.+|^\/platform-admin\/workspaces\/.+/;
 
 export function AppHeader() {
   const pathname = usePathname();

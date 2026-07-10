@@ -17,11 +17,12 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useProvisionInvite } from "@/hooks/platform-admin/useProvisionInvite";
 import {
-  PiBuildingsDuotone,
-  PiPaperPlaneRightDuotone,
-  PiUserPlusDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  CancelCircleIcon,
+  MailSend01Icon,
+  NewOfficeIcon,
+  UserAdd01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 export function ProvisionInviteDialog() {
   const formId = useId();
@@ -54,8 +55,8 @@ export function ProvisionInviteDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2">
-          <PiUserPlusDuotone className="h-4 w-4" />
+        <Button size="sm">
+          <Icon icon={UserAdd01Icon} size={14} strokeWidth={2} />
           Invite new org admin
         </Button>
       </DialogTrigger>
@@ -63,17 +64,23 @@ export function ProvisionInviteDialog() {
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
-              <PiBuildingsDuotone className="h-5 w-5 text-muted-foreground" />
+              <Icon
+                icon={NewOfficeIcon}
+                size={16}
+                strokeWidth={2}
+                className="text-muted-foreground"
+              />
               <p>Invite new org admin</p>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
           <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Sends an invite for a new organization admin. They will set up their own workspace the first time they log in.
+            Sends an invite for a new organization admin. They will set up their
+            own workspace the first time they log in.
           </div>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -120,7 +127,7 @@ export function ProvisionInviteDialog() {
               size="sm"
               disabled={mutation.isPending}
             >
-              <PiXCircleDuotone />
+              <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
               Cancel
             </Button>
           </DialogClose>
@@ -134,7 +141,7 @@ export function ProvisionInviteDialog() {
             {mutation.isPending ? (
               <Spinner />
             ) : (
-              <PiPaperPlaneRightDuotone />
+              <Icon icon={MailSend01Icon} size={14} strokeWidth={2} />
             )}
             {mutation.isPending ? "Sending..." : "Send invite"}
           </Button>

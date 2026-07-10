@@ -93,17 +93,13 @@ export function UserNav() {
           {isPlatformOperator ? (
             <DropdownMenuItem asChild>
               <GuardedLink href="/platform-admin">
-                <Icon
-                  icon={AccountSetting02Icon}
-                  size={16}
-                  strokeWidth={2}
-                />
+                <Icon icon={AccountSetting02Icon} size={16} strokeWidth={2} />
                 Platform admin
               </GuardedLink>
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={signOut}>
+          <DropdownMenuItem variant="destructive" onClick={signOut}>
             <Icon icon={Logout02Icon} size={16} strokeWidth={2} />
             Log out
           </DropdownMenuItem>

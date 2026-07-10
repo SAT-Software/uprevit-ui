@@ -25,11 +25,12 @@ import {
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
-  PiChecksDuotone,
-  PiCreditCardDuotone,
-  PiPencilCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  CancelCircleIcon,
+  CreditCardIcon,
+  Edit02Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import type { UpdatePlatformBillingAccountInput } from "@/types/platform-admin";
 import type { BillingAccount, EnforcementMode, WorkspaceBillingSummary } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
@@ -216,8 +217,8 @@ export function DialogEditPlatformBillingAccount({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="secondary" className="gap-2">
-            <PiPencilCircleDuotone className="h-4 w-4" />
+          <Button size="sm" variant="secondary">
+            <Icon icon={Edit02Icon} size={14} strokeWidth={2} />
             Edit billing account
           </Button>
         </DialogTrigger>
@@ -226,12 +227,17 @@ export function DialogEditPlatformBillingAccount({
           <DialogHeader className="contents space-y-0 text-left">
             <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
               <div className="flex items-center gap-2">
-                <PiCreditCardDuotone className="h-5 w-5 text-muted-foreground" />
+                <Icon
+                  icon={CreditCardIcon}
+                  size={16}
+                  strokeWidth={2}
+                  className="text-muted-foreground"
+                />
                 <p>Edit billing account</p>
               </div>
               <DialogClose asChild>
                 <button type="button" className="cursor-pointer">
-                  <PiXCircleDuotone size={18} />
+                  <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
                 </button>
               </DialogClose>
             </DialogTitle>
@@ -426,7 +432,7 @@ export function DialogEditPlatformBillingAccount({
           <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
             <DialogClose asChild>
               <Button type="button" variant="secondary" size="sm" disabled={isPending}>
-                <PiXCircleDuotone />
+                <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
                 Cancel
               </Button>
             </DialogClose>
@@ -437,7 +443,11 @@ export function DialogEditPlatformBillingAccount({
               disabled={isPending || !pendingPayload}
               aria-busy={isPending}
             >
-              {isPending ? <Spinner /> : <PiChecksDuotone />}
+              {isPending ? (
+                <Spinner />
+              ) : (
+                <Icon icon={Tick02Icon} size={14} strokeWidth={2} />
+              )}
               {isPending ? "Saving…" : "Save changes"}
             </Button>
           </DialogFooter>
@@ -448,7 +458,7 @@ export function DialogEditPlatformBillingAccount({
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Save billing account changes?"
-        icon={PiCreditCardDuotone}
+        icon={CreditCardIcon}
         confirmLabel="Confirm save"
         isPending={isPending}
         onConfirm={handleConfirmSave}

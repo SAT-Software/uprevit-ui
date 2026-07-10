@@ -7,7 +7,8 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiInfo } from "react-icons/pi";
+import { InformationCircleIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 export function PlatformBillingFieldLabel({
   label,
@@ -38,7 +39,12 @@ export function PlatformBillingFieldLabel({
             className="inline-flex text-muted-foreground/40 transition-colors hover:text-muted-foreground group-hover/field-label:text-muted-foreground/70"
             aria-label={`More about ${label}`}
           >
-            <PiInfo className="size-3 shrink-0" />
+            <Icon
+              icon={InformationCircleIcon}
+              size={12}
+              strokeWidth={2}
+              className="shrink-0"
+            />
           </button>
         </TooltipTrigger>
         <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">

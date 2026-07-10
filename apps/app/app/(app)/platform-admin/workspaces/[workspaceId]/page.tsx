@@ -1,27 +1,45 @@
 "use client";
 
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
-  PiBuildingsDuotone,
-  PiClockDuotone,
-  PiUsersDuotone,
-  PiUserCheckDuotone,
-  PiUserPlusDuotone,
-  PiCreditCardDuotone,
-  PiArrowLeftDuotone,
-  PiListChecksDuotone,
-  PiReceiptDuotone,
-} from "react-icons/pi";
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import {
+  AlertCircleIcon,
+  TimelineEventIcon,
+  DashboardBrowsingIcon,
+  Invoice01Icon,
+  Wallet01Icon,
+  NewOfficeIcon,
+  ProfileIcon,
+  Timer01Icon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
 import { PlatformAdminGuard } from "@/components/common/PlatformAdminGuard";
-import { PlatformAdminNav } from "@/features/platform-admin/PlatformAdminNav";
-import { PlatformBillingSection } from "@/features/platform-admin/PlatformBillingSection";
+import { PlatformAdminHeader } from "@/features/platform-admin/PlatformAdminHeader";
+import { PlatformAuditLogsSheet } from "@/features/platform-admin/PlatformAuditLogsSheet";
+import {
+  PlatformBillingChargebeeTab,
+  PlatformBillingOverviewSection,
+  PlatformBillingUsageSection,
+} from "@/features/platform-admin/PlatformBillingSection";
 import { WorkspaceAdminInviteDialog } from "@/features/platform-admin/WorkspaceAdminInviteDialog";
+import { WorkspaceStatsRow } from "@/features/platform-admin/WorkspaceStatsRow";
 import { useGetPlatformWorkspaceDetail } from "@/hooks/platform-admin/useGetPlatformWorkspaceDetail";
+import type { PlatformWorkspaceAdmin } from "@/types/platform-admin";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { getBillingStatusLabel } from "@/utils/billingStatusDisplay";
-import type { WorkspaceBillingPreview } from "@/types/platform-admin";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -30,84 +48,99 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
+import Link from "next/link";
+
+const WORKSPACE_TABS = ["overview", "usage", "chargebee", "admins"] as const;
+type WorkspaceTab = (typeof WORKSPACE_TABS)[number];
+
+const workspaceTabTriggerClassName =
+  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
+
+function isWorkspaceTab(value: string | null): value is WorkspaceTab {
+  return (
+    value !== null && (WORKSPACE_TABS as readonly string[]).includes(value)
+  );
+}
 
 function WorkspaceDetailErrorState({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-10 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
-      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
-        <PiBuildingsDuotone className="w-8 h-8 text-destructive" />
+    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 py-10">
+      <div className="flex size-10 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
+        <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
       </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-destructive">
+      <div className="space-y-0.5 text-center">
+        <p className="text-sm font-medium">
           We couldn&apos;t load the workspace details
         </p>
-        <p className="text-xs text-muted-foreground">Please try again in a moment</p>
+        <p className="text-sm text-muted-foreground">
+          Please try again in a moment
+        </p>
       </div>
-      <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
+      <Button variant="outline" size="sm" onClick={onRetry}>
         Try again
       </Button>
     </div>
   );
 }
 
-function BillingStatusDisplay({ billing }: { billing: WorkspaceBillingPreview }) {
-  const label = getBillingStatusLabel(billing.status, billing.pastDue);
-  const isPastDue = billing.pastDue || billing.status === "past_due";
-
+function WorkspaceAdminsTab({ admins }: { admins: PlatformWorkspaceAdmin[] }) {
   return (
-    <div
-      className={`text-2xl font-semibold tabular-nums capitalize ${
-        isPastDue ? "text-destructive" : billing.status === "not_set" ? "text-muted-foreground" : "text-primary"
-      }`}
-    >
-      {label}
-    </div>
-  );
-}
-
-function WorkspaceStatsRow({
-  members,
-  active,
-  invited,
-  billing,
-}: {
-  members: number;
-  active: number;
-  invited: number;
-  billing: WorkspaceBillingPreview;
-}) {
-  const items = [
-    { label: "Total members", value: members, icon: PiUsersDuotone, isBilling: false },
-    { label: "Active now", value: active, icon: PiUserCheckDuotone, isBilling: false },
-    { label: "Pending invites", value: invited, icon: PiUserPlusDuotone, isBilling: false },
-    { label: "Billing status", value: null, icon: PiCreditCardDuotone, isBilling: true },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 border border-border rounded-xl bg-linear-to-br from-background/90 to-background min-[900px]:grid-cols-4">
-      {items.map((item, idx) => {
-        const Icon = item.icon;
-        return (
-          <div
-            key={idx}
-            className="relative flex w-full items-center gap-4 p-4 lg:p-5 group before:absolute before:inset-y-8 before:right-0 before:w-px before:bg-linear-to-b before:from-input/30 before:via-input before:to-input/30 last:before:hidden"
-          >
-            <div className="hidden size-9 shrink-0 items-center justify-center rounded-full border border-border bg-accent/80 text-accent-foreground sm:flex">
-              <Icon className="size-4.5" />
-            </div>
-            <div>
-              <div className="font-medium text-xs uppercase text-muted-foreground">
-                {item.label}
-              </div>
-              {item.isBilling ? (
-                <BillingStatusDisplay billing={billing} />
-              ) : (
-                <div className="text-2xl font-semibold tabular-nums">{item.value}</div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border pl-3 pr-2">
+        <p className="text-sm font-medium">Organization admins</p>
+        <InfoTooltip content="Users who can manage this workspace." />
+      </div>
+      <div className="overflow-hidden border-b border-border">
+        <Table className="table-fixed">
+          <TableHeader className="bg-muted">
+            <TableRow className="h-10 hover:bg-transparent">
+              <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                Name
+              </TableHead>
+              <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                Email
+              </TableHead>
+              <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                Status
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {admins.length ? (
+              admins.map((admin) => (
+                <TableRow key={admin.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">
+                    {admin.name || "—"}
+                  </TableCell>
+                  <TableCell>{admin.email}</TableCell>
+                  <TableCell className="capitalize text-sm text-muted-foreground">
+                    {admin.status}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  className="h-32 text-center text-muted-foreground"
+                >
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Icon
+                      icon={NewOfficeIcon}
+                      size={24}
+                      strokeWidth={2}
+                      className="text-muted-foreground/30"
+                    />
+                    <p className="text-sm">
+                      No organization admins yet. Use invite to add one.
+                    </p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
@@ -115,137 +148,195 @@ function WorkspaceStatsRow({
 export default function PlatformAdminWorkspaceDetailPage() {
   const params = useParams<{ workspaceId: string }>();
   const workspaceId = params.workspaceId;
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const { data, isLoading, isError, refetch } =
     useGetPlatformWorkspaceDetail(workspaceId);
   const hasLoadError = !isLoading && (isError || !data);
 
+  const tabParam = searchParams.get("tab");
+  const activeTab: WorkspaceTab = isWorkspaceTab(tabParam)
+    ? tabParam
+    : "overview";
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
+  const [syncedActiveTab, setSyncedActiveTab] = useState(activeTab);
+
+  if (activeTab !== syncedActiveTab) {
+    setSyncedActiveTab(activeTab);
+    setPendingTab(null);
+  }
+
+  const tabValue = pendingTab ?? activeTab;
+
+  const handleTabChange = (value: string) => {
+    const nextTab = isWorkspaceTab(value) ? value : "overview";
+    const nextParams = new URLSearchParams(searchParams.toString());
+    setPendingTab(nextTab);
+    nextParams.set("tab", nextTab);
+    const next = nextParams.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+  };
+
+  const title = isLoading
+    ? "Workspace"
+    : (data?.workspace.workspaceName ?? "Workspace");
+
   return (
     <PlatformAdminGuard>
-      <div className="flex flex-col gap-4 p-2">
-        {/* Workspace context header */}
-        <div className="rounded-xl border border-border bg-background p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className="mb-1 -ml-2 h-8 gap-1.5 px-2 text-muted-foreground"
-              >
-                <Link href="/platform-admin/workspaces">
-                  <PiArrowLeftDuotone className="h-4 w-4" />
-                  All workspaces
-                </Link>
-              </Button>
-
-              {isLoading ? (
-                <Skeleton className="h-8 w-56" />
-              ) : hasLoadError ? (
-                <div>
-                  <h1 className="text-base font-semibold">Workspace</h1>
-                  <p className="text-sm text-muted-foreground">Unable to load details</p>
-                </div>
-              ) : data ? (
-                <div>
-                  <h1 className="text-base font-semibold truncate">
-                    {data.workspace.workspaceName}
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    {data.workspace.companyName}
-                  </p>
-                </div>
-              ) : null}
-
-              <div className="mt-3">
-                <PlatformAdminNav />
-              </div>
-            </div>
-
-            {!hasLoadError && workspaceId ? (
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <Button asChild size="sm" variant="secondary" className="gap-2">
-                  <Link href={`/platform-admin/workspaces/${workspaceId}/logs`}>
-                    <PiClockDuotone className="h-4 w-4" />
-                    View logs
-                  </Link>
-                </Button>
-                <Button asChild size="sm" variant="secondary" className="gap-2">
-                  <Link href={`/platform-admin/workspaces/${workspaceId}/usage-events`}>
-                    <PiListChecksDuotone className="h-4 w-4" />
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <PlatformAdminHeader
+          title={title}
+          tooltip={
+            data?.workspace.companyName
+              ? `${data.workspace.companyName}`
+              : "Inspect billing, admins, and activity for this workspace."
+          }
+          actions={
+            !hasLoadError && workspaceId ? (
+              <>
+                <PlatformAuditLogsSheet
+                  workspaceId={workspaceId}
+                  title="Workspace audit logs"
+                  tooltip="Admin and system activity for this workspace."
+                  trigger={
+                    <Button type="button" variant="outline" size="sm">
+                      <Icon icon={ProfileIcon} size={16} strokeWidth={2} />
+                      Logs
+                    </Button>
+                  }
+                />
+                <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={`/platform-admin/workspaces/${workspaceId}/usage-events`}
+                  >
+                    <Icon icon={TimelineEventIcon} size={14} strokeWidth={2} />
                     Usage events
                   </Link>
                 </Button>
-                <Button asChild size="sm" variant="secondary" className="gap-2">
-                  <Link href={`/platform-admin/workspaces/${workspaceId}/invoices`}>
-                    <PiReceiptDuotone className="h-4 w-4" />
+                <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={`/platform-admin/workspaces/${workspaceId}/invoices`}
+                  >
+                    <Icon icon={Invoice01Icon} size={14} strokeWidth={2} />
                     Invoices
                   </Link>
                 </Button>
                 <WorkspaceAdminInviteDialog workspaceId={workspaceId} />
-              </div>
-            ) : null}
-          </div>
-        </div>
+              </>
+            ) : null
+          }
+        />
 
         {isLoading ? (
-          <Skeleton className="h-40 w-full rounded-xl" />
+          <div className="flex flex-col gap-2 p-2">
+            <Skeleton className="h-10 w-full rounded-lg" />
+            <Skeleton className="h-28 w-full rounded-2xl" />
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          </div>
         ) : hasLoadError ? (
-          <WorkspaceDetailErrorState onRetry={() => refetch()} />
+          <div className="p-2">
+            <WorkspaceDetailErrorState onRetry={() => refetch()} />
+          </div>
         ) : (
-          <>
-            {/* At-a-glance stats — clean grouped row */}
-            <WorkspaceStatsRow
-              members={data?.counts.members ?? 0}
-              active={data?.counts.activeMembers ?? 0}
-              invited={data?.counts.invitedMembers ?? 0}
-              billing={data?.billing ?? { status: "not_set", limitsEnabled: null, billingCadence: null, currency: null, pastDue: null }}
-            />
-
-            {/* Billing & freezes & operations — the heavy section, improved internally */}
-            <PlatformBillingSection
-              workspaceId={workspaceId}
-              billingStatus={data?.billing.status}
-            />
-
-            {/* Workspace admins table — wrapped cleanly like other tables */}
-            <div className="border border-border bg-background rounded-xl p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <p className="text-sm font-semibold">Organization admins</p>
-                <div className="w-1 h-1 bg-border border border-border rounded-full" />
-                <p className="text-xs text-muted-foreground">
-                  Users who can manage this workspace
-                </p>
-              </div>
-              <div className="bg-background overflow-hidden rounded-xl border">
-                <Table className="table-fixed">
-                  <TableHeader className="bg-muted">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="h-11 border-r border-border last:border-r-0">Name</TableHead>
-                      <TableHead className="h-11 border-r border-border last:border-r-0">Email</TableHead>
-                      <TableHead className="h-11 border-r border-border last:border-r-0">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(data?.admins ?? []).length ? (
-                      data?.admins.map((admin) => (
-                        <TableRow key={admin.id} className="hover:bg-muted/50">
-                          <TableCell className="font-medium">{admin.name || "—"}</TableCell>
-                          <TableCell>{admin.email}</TableCell>
-                          <TableCell className="capitalize text-sm text-muted-foreground">{admin.status}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={3} className="h-20 text-center text-sm text-muted-foreground">
-                          No organization admins yet. Use the invite button above to add one.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+          <Tabs
+            value={tabValue}
+            onValueChange={handleTabChange}
+            className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
+          >
+            <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
+              <TabsList
+                variant="line"
+                className="h-auto gap-1 bg-transparent p-0"
+              >
+                <TabsTrigger
+                  value="overview"
+                  className={workspaceTabTriggerClassName}
+                >
+                  <Icon
+                    icon={DashboardBrowsingIcon}
+                    size={14}
+                    strokeWidth={2}
+                  />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="usage"
+                  className={workspaceTabTriggerClassName}
+                >
+                  <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
+                  Usage
+                </TabsTrigger>
+                <TabsTrigger
+                  value="chargebee"
+                  className={workspaceTabTriggerClassName}
+                >
+                  <Icon icon={Wallet01Icon} size={14} strokeWidth={2} />
+                  Chargebee
+                </TabsTrigger>
+                <TabsTrigger
+                  value="admins"
+                  className={workspaceTabTriggerClassName}
+                >
+                  <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
+                  Admins
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </>
+
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <TabsContent value="overview" className="mt-0">
+                {activeTab === "overview" ? (
+                  <>
+                    <WorkspaceStatsRow
+                      members={data?.counts.members ?? 0}
+                      active={data?.counts.activeMembers ?? 0}
+                      invited={data?.counts.invitedMembers ?? 0}
+                      billing={
+                        data?.billing ?? {
+                          status: "not_set",
+                          limitsEnabled: null,
+                          billingCadence: null,
+                          currency: null,
+                          pastDue: null,
+                        }
+                      }
+                    />
+                    <div className="flex flex-col gap-2 p-2">
+                      <PlatformBillingOverviewSection
+                        workspaceId={workspaceId}
+                        billingStatus={data?.billing.status}
+                      />
+                    </div>
+                  </>
+                ) : null}
+              </TabsContent>
+
+              <TabsContent value="usage" className="mt-0 p-2">
+                {activeTab === "usage" ? (
+                  <PlatformBillingUsageSection
+                    workspaceId={workspaceId}
+                    billingStatus={data?.billing.status}
+                  />
+                ) : null}
+              </TabsContent>
+
+              <TabsContent value="chargebee" className="mt-0 p-2">
+                {activeTab === "chargebee" ? (
+                  <PlatformBillingChargebeeTab
+                    workspaceId={workspaceId}
+                    billingStatus={data?.billing.status}
+                  />
+                ) : null}
+              </TabsContent>
+
+              <TabsContent value="admins" className="mt-0 p-2">
+                {activeTab === "admins" ? (
+                  <WorkspaceAdminsTab admins={data?.admins ?? []} />
+                ) : null}
+              </TabsContent>
+            </div>
+          </Tabs>
         )}
       </div>
     </PlatformAdminGuard>

@@ -8,18 +8,19 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import type { IconType } from "react-icons";
-import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import {
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiClockDuotone,
-  PiListChecksDuotone,
-  PiNoteDuotone,
-  PiUserCircleDuotone,
-} from "react-icons/pi";
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  ArrowUpDownIcon,
+  CheckListIcon,
+  Clock01Icon,
+  NoteIcon,
+  ProfileIcon,
+  UserCircleIcon,
+} from "@hugeicons/core-free-icons";
+import type { IconProps } from "@uprevit/ui/components/common/Icon";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -52,29 +53,39 @@ const TABLE_COLUMN_COUNT = 5;
 const SortableHeader = ({
   column,
   title,
-  icon: Icon,
+  icon,
 }: {
   column: Column<PlatformAuditLogItem, unknown>;
   title: string;
-  icon: IconType;
+  icon: IconProps["icon"];
 }) => (
   <button
     type="button"
     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    className="flex h-8 w-full cursor-pointer items-center justify-between hover:bg-muted/50 data-[state=open]:bg-accent"
   >
-    <div className="flex items-center justify-between w-full gap-2">
-      <div className="flex items-center gap-2 min-w-0">
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+    <div className="flex w-full items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center gap-2">
+        <Icon
+          icon={icon}
+          size={14}
+          strokeWidth={2}
+          className="shrink-0 text-muted-foreground"
+        />
         <span className="whitespace-nowrap">{title}</span>
       </div>
-      {column.getIsSorted() === "desc" ? (
-        <PiCaretDownDuotone className="ml-1 h-3 w-3" />
-      ) : column.getIsSorted() === "asc" ? (
-        <PiCaretUpDuotone className="ml-1 h-3 w-3" />
-      ) : (
-        <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
-      )}
+      <Icon
+        icon={
+          column.getIsSorted() === "desc"
+            ? ArrowDown01Icon
+            : column.getIsSorted() === "asc"
+              ? ArrowUp01Icon
+              : ArrowUpDownIcon
+        }
+        size={12}
+        strokeWidth={2}
+        className={column.getIsSorted() ? "ml-1" : "ml-1 opacity-50"}
+      />
     </div>
   </button>
 );
@@ -83,10 +94,10 @@ const columns: ColumnDef<PlatformAuditLogItem>[] = [
   {
     accessorKey: "occurredAt",
     header: ({ column }) => (
-      <SortableHeader column={column} title="When" icon={PiClockDuotone} />
+      <SortableHeader column={column} title="When" icon={Clock01Icon} />
     ),
     cell: ({ row }) => (
-      <span className="text-xs text-muted-foreground whitespace-nowrap">
+      <span className="whitespace-nowrap text-xs text-muted-foreground">
         {new Date(row.getValue("occurredAt")).toLocaleString()}
       </span>
     ),
@@ -95,7 +106,7 @@ const columns: ColumnDef<PlatformAuditLogItem>[] = [
   {
     accessorKey: "action",
     header: ({ column }) => (
-      <SortableHeader column={column} title="Action" icon={PiListChecksDuotone} />
+      <SortableHeader column={column} title="Action" icon={CheckListIcon} />
     ),
     cell: ({ row }) => (
       <span className="text-xs">{row.getValue("action")}</span>
@@ -107,11 +118,18 @@ const columns: ColumnDef<PlatformAuditLogItem>[] = [
     enableSorting: false,
     header: () => (
       <div className="flex h-8 items-center gap-2">
-        <PiNoteDuotone className="h-4 w-4 text-muted-foreground" />
+        <Icon
+          icon={NoteIcon}
+          size={14}
+          strokeWidth={2}
+          className="text-muted-foreground"
+        />
         <span>Summary</span>
       </div>
     ),
-    cell: ({ row }) => <span className="text-sm">{row.getValue("summary")}</span>,
+    cell: ({ row }) => (
+      <span className="text-sm">{row.getValue("summary")}</span>
+    ),
     size: 280,
   },
   {
@@ -120,7 +138,12 @@ const columns: ColumnDef<PlatformAuditLogItem>[] = [
     enableSorting: false,
     header: () => (
       <div className="flex h-8 items-center gap-2">
-        <PiUserCircleDuotone className="h-4 w-4 text-muted-foreground" />
+        <Icon
+          icon={UserCircleIcon}
+          size={14}
+          strokeWidth={2}
+          className="text-muted-foreground"
+        />
         <span>Actor</span>
       </div>
     ),
@@ -134,14 +157,16 @@ const columns: ColumnDef<PlatformAuditLogItem>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <SortableHeader column={column} title="Status" icon={PiListChecksDuotone} />
+      <SortableHeader column={column} title="Status" icon={CheckListIcon} />
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (
         <span
           className={
-            status === "failed" ? "text-destructive text-sm" : "text-muted-foreground text-sm"
+            status === "failed"
+              ? "text-sm text-destructive"
+              : "text-sm text-muted-foreground"
           }
         >
           {status}
@@ -217,22 +242,24 @@ export function PlatformAuditLogsTable({
   });
 
   return (
-    <div className="space-y-2 w-full">
+    <div className="w-full space-y-2">
       {workspaceId && !hideWorkspaceFilter ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
             Showing audit events for workspace{" "}
-            <span className="font-mono text-xs text-foreground">{workspaceId}</span>
+            <span className="font-mono text-xs text-foreground">
+              {workspaceId}
+            </span>
           </p>
           {onClearWorkspaceFilter ? (
-            <Button size="sm" variant="outline" onClick={onClearWorkspaceFilter}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onClearWorkspaceFilter}
+            >
               Clear filter
             </Button>
-          ) : (
-            <Button size="sm" variant="outline" asChild>
-              <Link href="/platform-admin/audit-logs">Clear filter</Link>
-            </Button>
-          )}
+          ) : null}
         </div>
       ) : !workspaceId ? (
         <Input
@@ -243,16 +270,16 @@ export function PlatformAuditLogsTable({
         />
       ) : null}
 
-      <div className="bg-background overflow-hidden rounded-xl border">
+      <div className="overflow-hidden border-b border-border bg-background">
         <Table className="table-fixed">
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="h-10 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     style={{ width: `${header.getSize()}px` }}
-                    className="h-11 border-r border-border last:border-r-0"
+                    className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0"
                   >
                     {header.isPlaceholder
                       ? null
@@ -285,9 +312,17 @@ export function PlatformAuditLogsTable({
               <TableRow>
                 <TableCell
                   colSpan={TABLE_COLUMN_COUNT}
-                  className="h-24 text-center text-sm text-muted-foreground"
+                  className="h-32 text-center text-muted-foreground"
                 >
-                  No audit events found
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Icon
+                      icon={ProfileIcon}
+                      size={24}
+                      strokeWidth={2}
+                      className="text-muted-foreground/30"
+                    />
+                    <p className="text-sm">No audit events found</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -295,10 +330,12 @@ export function PlatformAuditLogsTable({
         </Table>
       </div>
 
-      <WorkspaceListPagination
-        pagination={paginationInfo}
-        onPageChange={listState.setPage}
-      />
+      <div className="flex h-10 w-full items-center">
+        <WorkspaceListPagination
+          pagination={paginationInfo}
+          onPageChange={listState.setPage}
+        />
+      </div>
     </div>
   );
 }

@@ -3,7 +3,11 @@
 import { useState, useId } from "react";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Input } from "@uprevit/ui/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +26,7 @@ import {
   PiCameraDuotone,
   PiTrashDuotone,
 } from "react-icons/pi";
-import { PencilEdit01Icon } from "@hugeicons/core-free-icons";
+import { UserEdit01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
@@ -95,7 +99,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   };
 
   const handleAvatarChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -152,8 +156,8 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 h-7">
-          <Icon icon={PencilEdit01Icon} size={14} strokeWidth={2} />
+        <Button variant="secondary" size="sm">
+          <Icon icon={UserEdit01Icon} size={14} strokeWidth={2} />
           Edit Profile
         </Button>
       </DialogTrigger>

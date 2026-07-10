@@ -29,6 +29,31 @@ function getStaticBackNav(pathname: string): BackNav | null {
   if (/^\/bookmarked-products\/[^/]+$/.test(pathname)) {
     return { href: "/bookmarked-products", label: "Bookmarked products" };
   }
+
+  const platformWorkspaceMatch = pathname.match(
+    /^\/platform-admin\/workspaces\/([^/]+)(?:\/(.*))?$/,
+  );
+  if (platformWorkspaceMatch) {
+    const workspaceId = platformWorkspaceMatch[1];
+    const rest = platformWorkspaceMatch[2] ?? "";
+
+    if (!rest) {
+      return { href: "/platform-admin/workspaces", label: "All workspaces" };
+    }
+
+    if (rest.startsWith("invoices/")) {
+      return {
+        href: `/platform-admin/workspaces/${workspaceId}/invoices`,
+        label: "Invoices",
+      };
+    }
+
+    return {
+      href: `/platform-admin/workspaces/${workspaceId}`,
+      label: "Workspace",
+    };
+  }
+
   return null;
 }
 

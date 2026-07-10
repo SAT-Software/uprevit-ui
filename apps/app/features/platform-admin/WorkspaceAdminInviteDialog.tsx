@@ -17,11 +17,12 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useInviteWorkspaceAdmin } from "@/hooks/platform-admin/useInviteWorkspaceAdmin";
 import {
-  PiPaperPlaneRightDuotone,
-  PiUserPlusDuotone,
-  PiUsersDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  CancelCircleIcon,
+  MailSend01Icon,
+  UserAdd01Icon,
+  UserMultipleIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 export function WorkspaceAdminInviteDialog({
   workspaceId,
@@ -58,8 +59,8 @@ export function WorkspaceAdminInviteDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" className="gap-2">
-          <PiUserPlusDuotone className="h-4 w-4" />
+        <Button size="sm">
+          <Icon icon={UserAdd01Icon} size={14} strokeWidth={2} />
           Invite org admin
         </Button>
       </DialogTrigger>
@@ -67,17 +68,23 @@ export function WorkspaceAdminInviteDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
-              <PiUsersDuotone className="h-5 w-5 text-muted-foreground" />
+              <Icon
+                icon={UserMultipleIcon}
+                size={16}
+                strokeWidth={2}
+                className="text-muted-foreground"
+              />
               <p>Invite org admin</p>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
           <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Adds an admin to this workspace. The person will finish a short onboarding before they can access it.
+            Adds an admin to this workspace. The person will finish a short
+            onboarding before they can access it.
           </div>
         </DialogHeader>
         <DialogDescription className="sr-only">
@@ -123,7 +130,7 @@ export function WorkspaceAdminInviteDialog({
               size="sm"
               disabled={mutation.isPending}
             >
-              <PiXCircleDuotone />
+              <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
               Cancel
             </Button>
           </DialogClose>
@@ -137,7 +144,7 @@ export function WorkspaceAdminInviteDialog({
             {mutation.isPending ? (
               <Spinner />
             ) : (
-              <PiPaperPlaneRightDuotone />
+              <Icon icon={MailSend01Icon} size={14} strokeWidth={2} />
             )}
             {mutation.isPending ? "Sending..." : "Send invite"}
           </Button>

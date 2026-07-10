@@ -7,11 +7,11 @@ import { useDownloadPlatformBillingInvoice } from "@/hooks/platform-admin/useDow
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@uprevit/ui/components/ui/card";
+  Frame,
+  FrameHeader,
+  FramePanel,
+  FrameTitle,
+} from "@uprevit/ui/components/ui/frame";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
@@ -29,16 +29,14 @@ import {
 } from "@/utils/billingFormat";
 import type { ChargebeeBillingAddress } from "@/types/billing";
 import {
-  PiArrowLeft,
-  PiCalendarDuotone,
-  PiDownloadDuotone,
-  PiListBulletsDuotone,
-  PiMapPinDuotone,
-  PiReceiptDuotone,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
+  Download04Icon,
+  Invoice01Icon,
+  AlertCircleIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import Link from "next/link";
 import { toast } from "sonner";
+import { cn } from "@uprevit/ui/lib/utils";
 
 function formatBillingAddress(address: ChargebeeBillingAddress): string[] {
   const name = [address.firstName, address.lastName].filter(Boolean).join(" ");
@@ -56,11 +54,49 @@ function formatBillingAddress(address: ChargebeeBillingAddress): string[] {
   ].filter((line): line is string => Boolean(line?.trim()));
 }
 
+function TotalsRow({
+  label,
+  value,
+  emphasize,
+  destructive,
+}: {
+  label: string;
+  value: string;
+  emphasize?: boolean;
+  destructive?: boolean;
+}) {
+  return (
+    <Frame stacked dense spacing="sm" className="w-full">
+      <FrameHeader className="flex flex-row items-center justify-between gap-3">
+        <span
+          className={cn(
+            "text-sm",
+            emphasize ? "font-semibold text-foreground" : "text-muted-foreground",
+          )}
+        >
+          {label}
+        </span>
+        <span
+          className={cn(
+            "text-sm tabular-nums",
+            emphasize && "font-semibold",
+            destructive && "font-semibold text-destructive",
+          )}
+        >
+          {value}
+        </span>
+      </FrameHeader>
+    </Frame>
+  );
+}
+
 type BillingInvoiceDetailProps = {
   workspaceId: string;
   invoiceId: string;
   backHref?: string;
   apiScope?: "workspace" | "platform-admin";
+  showBackLink?: boolean;
+  edgeConnected?: boolean;
 };
 
 function BillingInvoiceDetail({
@@ -68,12 +104,27 @@ function BillingInvoiceDetail({
   invoiceId,
   backHref = "/settings?tab=billing",
   apiScope = "workspace",
+  showBackLink,
+  edgeConnected = false,
 }: BillingInvoiceDetailProps) {
   const isPlatformAdmin = apiScope === "platform-admin";
-  const workspaceInvoice = useGetBillingInvoice(workspaceId, invoiceId, !isPlatformAdmin);
-  const platformInvoice = useGetPlatformBillingInvoice(workspaceId, invoiceId, isPlatformAdmin);
+  const shouldShowBackLink =
+    showBackLink ?? !isPlatformAdmin;
+  const workspaceInvoice = useGetBillingInvoice(
+    workspaceId,
+    invoiceId,
+    !isPlatformAdmin,
+  );
+  const platformInvoice = useGetPlatformBillingInvoice(
+    workspaceId,
+    invoiceId,
+    isPlatformAdmin,
+  );
   const workspaceDownload = useDownloadBillingInvoice(workspaceId, invoiceId);
-  const platformDownload = useDownloadPlatformBillingInvoice(workspaceId, invoiceId);
+  const platformDownload = useDownloadPlatformBillingInvoice(
+    workspaceId,
+    invoiceId,
+  );
 
   const { data: invoice, isLoading, isError, error, refetch } =
     apiScope === "platform-admin" ? platformInvoice : workspaceInvoice;
@@ -83,7 +134,8 @@ function BillingInvoiceDetail({
   const handleDownload = () => {
     downloadInvoice.mutate(undefined, {
       onSuccess: (data) => {
-        const downloadUrl = data.pdfDownloadUrl ?? data.downloads[0]?.downloadUrl;
+        const downloadUrl =
+          data.pdfDownloadUrl ?? data.downloads[0]?.downloadUrl;
         if (!downloadUrl) {
           toast.error("Invoice PDF is not available");
           return;
@@ -103,33 +155,32 @@ function BillingInvoiceDetail({
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-[120px] w-full rounded-lg" />
-        <Skeleton className="h-56 w-full rounded-xl" />
-        <div className="grid gap-4 md:grid-cols-2">
-          <Skeleton className="h-56 rounded-xl" />
-          <Skeleton className="h-56 rounded-xl" />
+      <div className={cn("flex flex-col", !edgeConnected && "gap-2")}>
+        <Skeleton className={cn("h-20 w-full", !edgeConnected && "rounded-xl")} />
+        <Skeleton className={cn("h-56 w-full", !edgeConnected && "rounded-xl")} />
+        <div className="grid gap-2 md:grid-cols-2">
+          <Skeleton className="h-48 rounded-xl" />
+          <Skeleton className="h-48 rounded-xl" />
         </div>
       </div>
     );
   }
 
   if (isError || !invoice) {
-    const message = error instanceof Error ? error.message : "Unable to load invoice.";
+    const message =
+      error instanceof Error ? error.message : "Unable to load invoice.";
     const isNotFound = message.toLowerCase().includes("not found");
 
     return (
-      <div className="space-y-4">
-        <Button variant="ghost" size="sm" className="-ml-2 w-fit" asChild>
-          <Link href={backHref} className="flex items-center gap-2">
-            <PiArrowLeft className="h-4 w-4" />
-            Back to invoices
-          </Link>
-        </Button>
+      <div className={cn("space-y-4", edgeConnected ? "p-4" : undefined)}>
+        {shouldShowBackLink ? (
+          <Button variant="ghost" size="sm" className="-ml-2 w-fit" asChild>
+            <Link href={backHref}>Back to invoices</Link>
+          </Button>
+        ) : null}
         <div className="flex items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-          <div className="rounded-lg bg-destructive/10 p-2.5 shrink-0">
-            <PiWarningCircleDuotone className="h-5 w-5 text-destructive" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
+            <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
           </div>
           <div className="flex-1 space-y-0.5">
             <div className="text-sm font-medium">
@@ -155,233 +206,220 @@ function BillingInvoiceDetail({
   const addressLines = invoice.billingAddress
     ? formatBillingAddress(invoice.billingAddress)
     : [];
-
   const amountDuePositive = invoice.amountDue > 0;
 
   return (
-    <div className="space-y-6">
-      <Button variant="ghost" size="sm" className="-ml-2 w-fit" asChild>
-        <Link href={backHref} className="flex items-center gap-2">
-          <PiArrowLeft className="h-4 w-4" />
-          Back to invoices
-        </Link>
-      </Button>
-
-      {/* Header */}
-      <div className="flex flex-col gap-4 rounded-lg border bg-accent p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="rounded-xl border border-border bg-background p-3 shrink-0">
-            <PiReceiptDuotone className="h-7 w-7 text-muted-foreground" />
+    <div className="flex flex-col">
+      {/* Header — edge-connected when used in platform admin */}
+      <div
+        className={cn(
+          "flex flex-col gap-3 border-b border-border bg-background sm:flex-row sm:items-center sm:justify-between",
+          edgeConnected ? "px-4 py-4" : "rounded-xl border p-4",
+        )}
+      >
+        <div className="min-w-0 space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-base font-semibold">Invoice {invoice.id}</h2>
+            <Badge
+              variant={invoiceStatusVariant(invoice.status)}
+              className="capitalize"
+            >
+              {invoice.status.replace(/_/g, " ")}
+            </Badge>
           </div>
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold">Invoice {invoice.id}</h2>
-              <Badge
-                variant={invoiceStatusVariant(invoice.status)}
-                className="capitalize"
-              >
-                {invoice.status.replace(/_/g, " ")}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <PiCalendarDuotone className="h-4 w-4" />
-                Issued{" "}
-                <span className="font-medium text-foreground">
-                  {invoice.date ? formatToLocalDate(invoice.date) : "—"}
-                </span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <span>
+              Issued{" "}
+              <span className="font-medium text-foreground">
+                {invoice.date ? formatToLocalDate(invoice.date) : "—"}
               </span>
-              <span className="flex items-center gap-1.5">
-                <PiCalendarDuotone className="h-4 w-4" />
-                Due{" "}
-                <span className="font-medium text-foreground">
-                  {invoice.dueDate ? formatToLocalDate(invoice.dueDate) : "—"}
-                </span>
+            </span>
+            <span>
+              Due{" "}
+              <span className="font-medium text-foreground">
+                {invoice.dueDate ? formatToLocalDate(invoice.dueDate) : "—"}
               </span>
-            </div>
+            </span>
           </div>
         </div>
 
         <Button
           onClick={handleDownload}
           disabled={downloadInvoice.isPending}
-          className="w-fit"
+          size="sm"
+          className="w-fit shrink-0"
         >
           {downloadInvoice.isPending ? (
-            <Spinner className="mr-2 h-4 w-4" />
+            <Spinner className="size-4" />
           ) : (
-            <PiDownloadDuotone className="mr-2 h-4 w-4" />
+            <Icon icon={Download04Icon} size={14} strokeWidth={2} />
           )}
           Download PDF
         </Button>
       </div>
 
       {/* Line items */}
-      <Card className="shadow-none">
-        <CardHeader className="space-y-1 p-6 pb-0">
-          <div className="flex items-center gap-2.5">
-            <div className="rounded-lg bg-muted p-2 shrink-0">
-              <PiListBulletsDuotone className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <CardTitle className="text-base">Line items</CardTitle>
+      <div className="border-b border-border">
+        <div className="flex h-10 shrink-0 items-center border-b border-border pl-3 pr-2">
+          <p className="text-sm font-medium">Line items</p>
+        </div>
+        {invoice.lineItems.length === 0 ? (
+          <div className="flex h-32 flex-col items-center justify-center gap-2 text-center">
+            <Icon
+              icon={Invoice01Icon}
+              size={24}
+              strokeWidth={2}
+              className="text-muted-foreground/30"
+            />
+            <p className="text-sm text-muted-foreground">
+              No line items on this invoice.
+            </p>
           </div>
-        </CardHeader>
-        <CardContent className="p-6 pt-4">
-          {invoice.lineItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
-              <PiListBulletsDuotone className="h-8 w-8 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">
-                No line items on this invoice.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-hidden rounded-xl border bg-background">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      Description
-                    </TableHead>
-                    <TableHead className="h-11 border-r border-border text-right text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      Qty
-                    </TableHead>
-                    <TableHead className="h-11 border-r border-border text-right text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      Unit price
-                    </TableHead>
-                    <TableHead className="h-11 border-r border-border text-right text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-                      Amount
-                    </TableHead>
-                    <TableHead className="h-11 text-xs uppercase font-medium text-muted-foreground">
-                      Period
-                    </TableHead>
+        ) : (
+          <div className="w-full overflow-hidden">
+            <Table className="table-fixed w-full">
+              <TableHeader className="bg-muted">
+                <TableRow className="h-10 hover:bg-transparent">
+                  <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                    Description
+                  </TableHead>
+                  <TableHead className="h-10 border-r border-border text-right text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                    Qty
+                  </TableHead>
+                  <TableHead className="h-10 border-r border-border text-right text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                    Unit price
+                  </TableHead>
+                  <TableHead className="h-10 border-r border-border text-right text-xs font-medium text-muted-foreground/60 last:border-r-0">
+                    Amount
+                  </TableHead>
+                  <TableHead className="h-10 text-xs font-medium text-muted-foreground/60">
+                    Period
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invoice.lineItems.map((item) => (
+                  <TableRow key={item.id} className="hover:bg-muted/50">
+                    <TableCell className="py-3 font-medium">
+                      {item.description ?? "—"}
+                    </TableCell>
+                    <TableCell className="py-3 text-right">
+                      {item.quantity}
+                    </TableCell>
+                    <TableCell className="py-3 text-right">
+                      {formatBillingMoney(item.unitAmount, currencyCode)}
+                    </TableCell>
+                    <TableCell className="py-3 text-right font-medium">
+                      {formatBillingMoney(item.amount, currencyCode)}
+                    </TableCell>
+                    <TableCell className="py-3 text-sm text-muted-foreground">
+                      {item.dateFrom && item.dateTo
+                        ? `${formatToLocalDate(item.dateFrom)} – ${formatToLocalDate(item.dateTo)}`
+                        : "—"}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invoice.lineItems.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/30">
-                      <TableCell className="py-3 font-medium">
-                        {item.description ?? "—"}
-                      </TableCell>
-                      <TableCell className="py-3 text-right">
-                        {item.quantity}
-                      </TableCell>
-                      <TableCell className="py-3 text-right">
-                        {formatBillingMoney(item.unitAmount, currencyCode)}
-                      </TableCell>
-                      <TableCell className="py-3 text-right font-medium">
-                        {formatBillingMoney(item.amount, currencyCode)}
-                      </TableCell>
-                      <TableCell className="py-3 text-sm text-muted-foreground">
-                        {item.dateFrom && item.dateTo
-                          ? `${formatToLocalDate(item.dateFrom)} – ${formatToLocalDate(item.dateTo)}`
-                          : "—"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 p-4 md:grid-cols-2">
         {/* Totals */}
-        <Card className="shadow-none">
-          <CardHeader className="space-y-1 p-6 pb-0">
-            <div className="flex items-center gap-2.5">
-              <div className="rounded-lg bg-muted p-2 shrink-0">
-                <PiReceiptDuotone className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <CardTitle className="text-base">Totals</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 pt-4">
-            <dl className="space-y-2.5 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Subtotal</dt>
-                <dd>{formatBillingMoney(invoice.subTotal, currencyCode)}</dd>
-              </div>
-              {typeof invoice.tax === "number" ? (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Tax</dt>
-                  <dd>{formatBillingMoney(invoice.tax, currencyCode)}</dd>
-                </div>
-              ) : null}
-              {typeof invoice.creditsApplied === "number" &&
-              invoice.creditsApplied > 0 ? (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Credits applied</dt>
-                  <dd>
-                    -{formatBillingMoney(invoice.creditsApplied, currencyCode)}
-                  </dd>
-                </div>
-              ) : null}
-              <div className="flex justify-between gap-4 border-t border-border pt-3 text-base font-semibold">
-                <dt>Total</dt>
-                <dd>{formatBillingMoney(invoice.total, currencyCode)}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Amount paid</dt>
-                <dd>{formatBillingMoney(invoice.amountPaid, currencyCode)}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-muted-foreground">Amount due</dt>
-                <dd
-                  className={
-                    amountDuePositive ? "font-semibold text-destructive" : ""
-                  }
-                >
-                  {formatBillingMoney(invoice.amountDue, currencyCode)}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Totals</p>
+          <div className="flex flex-col gap-1.5">
+            <TotalsRow
+              label="Subtotal"
+              value={formatBillingMoney(invoice.subTotal, currencyCode)}
+            />
+            {typeof invoice.tax === "number" ? (
+              <TotalsRow
+                label="Tax"
+                value={formatBillingMoney(invoice.tax, currencyCode)}
+              />
+            ) : null}
+            {typeof invoice.creditsApplied === "number" &&
+            invoice.creditsApplied > 0 ? (
+              <TotalsRow
+                label="Credits applied"
+                value={`-${formatBillingMoney(invoice.creditsApplied, currencyCode)}`}
+              />
+            ) : null}
+            <TotalsRow
+              label="Total"
+              value={formatBillingMoney(invoice.total, currencyCode)}
+              emphasize
+            />
+            <TotalsRow
+              label="Amount paid"
+              value={formatBillingMoney(invoice.amountPaid, currencyCode)}
+            />
+            <TotalsRow
+              label="Amount due"
+              value={formatBillingMoney(invoice.amountDue, currencyCode)}
+              destructive={amountDuePositive}
+            />
+          </div>
+        </div>
 
         {/* Billing details */}
-        <Card className="shadow-none">
-          <CardHeader className="space-y-1 p-6 pb-0">
-            <div className="flex items-center gap-2.5">
-              <div className="rounded-lg bg-muted p-2 shrink-0">
-                <PiMapPinDuotone className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <CardTitle className="text-base">Billing details</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 p-6 pt-4">
-            {addressLines.length > 0 ? (
-              <address className="space-y-0.5 text-sm not-italic">
-                {addressLines.map((line, index) => (
-                  <div
-                    key={line}
-                    className={index === 0 ? "font-medium" : "text-muted-foreground"}
-                  >
-                    {line}
-                  </div>
-                ))}
-              </address>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No billing address on file.
-              </p>
-            )}
-            <dl className="grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-xs text-muted-foreground">Customer ID</dt>
-                <dd className="font-mono text-xs mt-1 break-all">
-                  {invoice.customerId}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">Subscription ID</dt>
-                <dd className="font-mono text-xs mt-1 break-all">
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Billing details</p>
+          <Frame stacked dense spacing="sm" className="w-full">
+            <FrameHeader>
+              <FrameTitle className="text-xs font-normal uppercase tracking-wide text-muted-foreground">
+                Address
+              </FrameTitle>
+            </FrameHeader>
+            <FramePanel>
+              {addressLines.length > 0 ? (
+                <address className="space-y-0.5 text-sm not-italic">
+                  {addressLines.map((line, index) => (
+                    <div
+                      key={line}
+                      className={
+                        index === 0 ? "font-medium" : "text-muted-foreground"
+                      }
+                    >
+                      {line}
+                    </div>
+                  ))}
+                </address>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No billing address on file.
+                </p>
+              )}
+            </FramePanel>
+          </Frame>
+
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            <Frame stacked dense spacing="sm" className="w-full">
+              <FrameHeader>
+                <FrameTitle className="text-xs font-normal uppercase tracking-wide text-muted-foreground">
+                  Customer ID
+                </FrameTitle>
+              </FrameHeader>
+              <FramePanel>
+                <p className="break-all font-mono text-xs">{invoice.customerId}</p>
+              </FramePanel>
+            </Frame>
+            <Frame stacked dense spacing="sm" className="w-full">
+              <FrameHeader>
+                <FrameTitle className="text-xs font-normal uppercase tracking-wide text-muted-foreground">
+                  Subscription ID
+                </FrameTitle>
+              </FrameHeader>
+              <FramePanel>
+                <p className="break-all font-mono text-xs">
                   {invoice.subscriptionId ?? "—"}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+                </p>
+              </FramePanel>
+            </Frame>
+          </div>
+        </div>
       </div>
     </div>
   );

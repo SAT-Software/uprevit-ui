@@ -9,13 +9,13 @@ import {
 import { DialogUpdateWorkspace } from "./DialogUpdateWorkspace";
 import {
   AlertCircleIcon,
-  Briefcase01Icon,
+  DashboardSquareSettingIcon,
   Copy01Icon,
   CrownIcon,
-  IdentificationIcon,
-  Tag01Icon,
+  IdentityCardIcon,
+  IdCardLanyardIcon,
   TextAlignLeftIcon,
-  UserMultipleIcon,
+  UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
@@ -29,14 +29,14 @@ const WORKSPACE_FIELDS = [
   {
     id: "workspaceName",
     label: "Workspace Name",
-    icon: Briefcase01Icon,
+    icon: DashboardSquareSettingIcon,
     key: "workspaceName" as const,
     span: 1,
   },
   {
     id: "companyName",
     label: "Company Name",
-    icon: IdentificationIcon,
+    icon: IdentityCardIcon,
     key: "companyName" as const,
     span: 1,
   },
@@ -51,7 +51,7 @@ const WORKSPACE_FIELDS = [
   {
     id: "userCount",
     label: "User Count",
-    icon: UserMultipleIcon,
+    icon: UserGroupIcon,
     key: "userCount" as const,
     span: 1,
   },
@@ -152,7 +152,7 @@ function WorkspaceTab() {
     return (
       <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-          <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
+          <Icon icon={AlertCircleIcon} size={18} strokeWidth={2} />
         </div>
         <div className="space-y-0.5">
           <div className="text-sm font-medium">Failed to load workspace</div>
@@ -200,7 +200,7 @@ function WorkspaceTab() {
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className={workspaceFieldCellClassName(0, 1)}>
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60">
-              <Icon icon={Tag01Icon} size={16} strokeWidth={2} />
+              <Icon icon={IdCardLanyardIcon} size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 space-y-0.5">
               <p className="text-sm font-normal text-muted-foreground/60">
@@ -232,7 +232,7 @@ function WorkspaceTab() {
               className={workspaceFieldCellClassName(index + 1, field.span)}
             >
               <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
-                <Icon icon={field.icon} size={16} strokeWidth={2} />
+                <Icon icon={field.icon} size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 space-y-0.5">
                 <p className="text-sm font-normal text-muted-foreground/60">

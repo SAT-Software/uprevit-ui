@@ -16,11 +16,12 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
-  PiChecksDuotone,
-  PiLockDuotone,
-  PiPencilCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  CancelCircleIcon,
+  Edit02Icon,
+  LockIcon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import type { WorkspaceFreezes } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
 type FreezeForm = {
@@ -112,7 +113,7 @@ export function DialogEditPlatformWorkspaceFreezes({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button size="sm" variant="secondary" className="gap-2">
-            <PiPencilCircleDuotone className="h-4 w-4" />
+            <Icon icon={Edit02Icon} size={14} strokeWidth={2} />
             Edit freezes
           </Button>
         </DialogTrigger>
@@ -121,12 +122,17 @@ export function DialogEditPlatformWorkspaceFreezes({
           <DialogHeader className="contents space-y-0 text-left">
             <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
               <div className="flex items-center gap-2">
-                <PiLockDuotone className="h-5 w-5 text-muted-foreground" />
+                <Icon
+                  icon={LockIcon}
+                  size={16}
+                  strokeWidth={2}
+                  className="text-muted-foreground"
+                />
                 <p>Edit workspace freezes</p>
               </div>
               <DialogClose asChild>
                 <button type="button" className="cursor-pointer">
-                  <PiXCircleDuotone size={18} />
+                  <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
                 </button>
               </DialogClose>
             </DialogTitle>
@@ -185,7 +191,7 @@ export function DialogEditPlatformWorkspaceFreezes({
           <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
             <DialogClose asChild>
               <Button type="button" variant="secondary" size="sm" disabled={isPending}>
-                <PiXCircleDuotone />
+                <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
                 Cancel
               </Button>
             </DialogClose>
@@ -196,7 +202,11 @@ export function DialogEditPlatformWorkspaceFreezes({
               disabled={isPending || !hasChanges}
               aria-busy={isPending}
             >
-              {isPending ? <Spinner /> : <PiChecksDuotone />}
+              {isPending ? (
+                <Spinner />
+              ) : (
+                <Icon icon={Tick02Icon} size={14} strokeWidth={2} />
+              )}
               {isPending ? "Saving…" : "Save changes"}
             </Button>
           </DialogFooter>
@@ -207,7 +217,7 @@ export function DialogEditPlatformWorkspaceFreezes({
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Apply workspace freeze changes?"
-        icon={PiLockDuotone}
+        icon={LockIcon}
         confirmLabel="Confirm save"
         isPending={isPending}
         onConfirm={handleConfirmSave}

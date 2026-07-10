@@ -11,15 +11,16 @@ import {
 } from "@uprevit/ui/components/ui/alert-dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import type { IconType } from "react-icons";
-import { PiChecksDuotone, PiXCircleDuotone } from "react-icons/pi";
+import type { IconProps } from "@uprevit/ui/components/common/Icon";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { CancelCircleIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 export function PlatformBillingConfirmDialog({
   open,
   onOpenChange,
   title,
   description,
-  icon: Icon,
+  icon,
   confirmLabel = "Confirm",
   isPending,
   onConfirm,
@@ -28,7 +29,7 @@ export function PlatformBillingConfirmDialog({
   onOpenChange: (open: boolean) => void;
   title: string;
   description: ReactNode;
-  icon?: IconType;
+  icon?: IconProps["icon"];
   confirmLabel?: string;
   isPending: boolean;
   onConfirm: () => void | Promise<void>;
@@ -39,7 +40,14 @@ export function PlatformBillingConfirmDialog({
         <AlertDialogHeader className="contents space-y-0 text-left">
           <AlertDialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
-              {Icon ? <Icon className="h-5 w-5 text-muted-foreground" /> : null}
+              {icon ? (
+                <Icon
+                  icon={icon}
+                  size={16}
+                  strokeWidth={2}
+                  className="text-muted-foreground"
+                />
+              ) : null}
               <p>{title}</p>
             </div>
             <button
@@ -48,7 +56,7 @@ export function PlatformBillingConfirmDialog({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              <PiXCircleDuotone size={18} />
+              <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
             </button>
           </AlertDialogTitle>
         </AlertDialogHeader>
@@ -67,11 +75,20 @@ export function PlatformBillingConfirmDialog({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            <PiXCircleDuotone />
+            <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
             Cancel
           </Button>
-          <Button type="button" size="sm" onClick={onConfirm} disabled={isPending}>
-            {isPending ? <Spinner /> : <PiChecksDuotone />}
+          <Button
+            type="button"
+            size="sm"
+            onClick={onConfirm}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <Spinner />
+            ) : (
+              <Icon icon={Tick02Icon} size={14} strokeWidth={2} />
+            )}
             {isPending ? "Saving…" : confirmLabel}
           </Button>
         </AlertDialogFooter>

@@ -20,10 +20,11 @@ import {
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
 import {
-  PiGearDuotone,
-  PiSlidersHorizontalDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  CancelCircleIcon,
+  Settings01Icon,
+  SlidersHorizontalIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import type { BillingUsageMetric } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
 import { PlatformBillingFieldLabel } from "@/features/platform-admin/PlatformBillingFieldLabel";
@@ -95,9 +96,9 @@ export function DialogPlatformBillingOperations({
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="secondary" className="gap-2">
-            <PiGearDuotone className="h-4 w-4" />
-            Usage corrections
+          <Button size="sm" variant="secondary">
+            <Icon icon={SlidersHorizontalIcon} size={14} strokeWidth={2} />
+            Apply correction
           </Button>
         </DialogTrigger>
 
@@ -105,12 +106,17 @@ export function DialogPlatformBillingOperations({
           <DialogHeader className="contents space-y-0 text-left">
             <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
               <div className="flex items-center gap-2">
-                <PiGearDuotone className="h-5 w-5 text-muted-foreground" />
+                <Icon
+                  icon={Settings01Icon}
+                  size={16}
+                  strokeWidth={2}
+                  className="text-muted-foreground"
+                />
                 <p>Usage corrections</p>
               </div>
               <DialogClose asChild>
                 <button type="button" className="cursor-pointer">
-                  <PiXCircleDuotone size={18} />
+                  <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
                 </button>
               </DialogClose>
             </DialogTitle>
@@ -185,7 +191,7 @@ export function DialogPlatformBillingOperations({
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Apply usage adjustment?"
-        icon={PiSlidersHorizontalDuotone}
+        icon={SlidersHorizontalIcon}
         confirmLabel="Apply adjustment"
         isPending={isAdjustmentPending}
         onConfirm={handleConfirm}

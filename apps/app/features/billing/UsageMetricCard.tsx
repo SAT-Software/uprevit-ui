@@ -92,7 +92,7 @@ export function UsageMetricCard({
 
       <div className="flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-normal text-muted-foreground/60">
+          <p className="text-xs font-normal text-muted-foreground/80">
             {overLimit
               ? "Over usage limit"
               : atLimit
@@ -112,8 +112,39 @@ export function UsageMetricCard({
         />
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{secondaryUsed ?? "Usage this period"}</span>
-          <span className="font-medium text-foreground">{percent}%</span>
+          <span className="text-xs font-normal text-muted-foreground/80">
+            Usage this period
+          </span>
+          {/* <span
+            className={cn(
+              secondaryUsed && overLimit
+                ? "text-destructive"
+                : secondaryUsed && atLimit
+                  ? "text-yellow-500"
+                  : "text-foreground",
+            )}
+          >
+            {secondaryUsed ?? "Usage this period"}
+          </span> */}
+          <div className="flex items-center gap-1">
+            {secondaryUsed && (
+              <span className="text-[10px] font-normal text-muted-foreground/60">
+                ({secondaryUsed})
+              </span>
+            )}
+            <span
+              className={cn(
+                "font-medium",
+                overLimit
+                  ? "text-destructive"
+                  : atLimit
+                    ? "text-yellow-500"
+                    : "text-foreground",
+              )}
+            >
+              {percent}%
+            </span>
+          </div>
         </div>
       </div>
     </div>

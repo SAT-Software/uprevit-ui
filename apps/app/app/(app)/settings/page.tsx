@@ -16,11 +16,11 @@ import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
 import {
-  ChartHistogramIcon,
-  NewOfficeIcon,
+  Timer01Icon,
+  DashboardSquare01Icon,
   UserIcon,
-  UserMultipleIcon,
-  UserSettings01Icon,
+  UserGroupIcon,
+  UserShield01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
@@ -94,10 +94,7 @@ function SettingsPage() {
         className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
       >
         <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
-          <TabsList
-            variant="line"
-            className="h-auto gap-0.5 bg-transparent p-0"
-          >
+          <TabsList variant="line" className="h-auto gap-1 bg-transparent p-0">
             <TabsTrigger
               value="profile"
               className={settingsTabTriggerClassName}
@@ -109,15 +106,15 @@ function SettingsPage() {
               value="workspace"
               className={settingsTabTriggerClassName}
             >
-              <Icon icon={NewOfficeIcon} size={14} strokeWidth={2} />
+              <Icon icon={DashboardSquare01Icon} size={14} strokeWidth={2} />
               Workspace
             </TabsTrigger>
             <TabsTrigger value="users" className={settingsTabTriggerClassName}>
-              <Icon icon={UserMultipleIcon} size={14} strokeWidth={2} />
+              <Icon icon={UserGroupIcon} size={14} strokeWidth={2} />
               Users
             </TabsTrigger>
             <TabsTrigger value="admins" className={settingsTabTriggerClassName}>
-              <Icon icon={UserSettings01Icon} size={14} strokeWidth={2} />
+              <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
               Admins
             </TabsTrigger>
             {isAdmin ? (
@@ -126,7 +123,7 @@ function SettingsPage() {
                   value="usage"
                   className={settingsTabTriggerClassName}
                 >
-                  <Icon icon={ChartHistogramIcon} size={14} strokeWidth={2} />
+                  <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
                   Usage
                 </TabsTrigger>
                 {/* <TabsTrigger value="billing">

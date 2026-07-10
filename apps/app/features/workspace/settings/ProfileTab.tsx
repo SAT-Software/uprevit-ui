@@ -157,7 +157,7 @@ function ProfileTab() {
             <InfoTooltip content="Your personal details visible to other members of the workspace." />
           </div>
           {auth.isAuthenticated ? (
-            <Button onClick={signOut} variant="destructive" size="sm" className="h-7">
+            <Button onClick={signOut} variant="destructive" size="sm">
               <Icon icon={Logout02Icon} size={14} strokeWidth={2} />
               Sign Out
             </Button>
@@ -167,7 +167,7 @@ function ProfileTab() {
           {PROFILE_FIELDS.map((field, index) => (
             <div key={field.id} className={profileFieldCellClassName(index)}>
               <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
-                <Icon icon={field.icon} size={16} strokeWidth={2} />
+                <Icon icon={field.icon} size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 space-y-0.5">
                 <p className="text-sm font-normal text-muted-foreground/60">
