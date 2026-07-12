@@ -1,6 +1,8 @@
 "use client";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
+import { RedlineValue } from "@/components/common/RedlineValue";
 import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
 import ProductInfoEditMetadataDialog from "@/features/workspace/products/product/product-information/ProductInfoEditMetadataDialog";
@@ -20,7 +22,6 @@ import { isAdminProfile } from "@/utils/isAdmin";
 import { hasChangedRedlineStatus } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import {
-  cnRedlineBadge,
   redlineBannerText,
   redlineCardAdded,
   redlineCardModified,
@@ -28,11 +29,8 @@ import {
   redlineFieldHighlightAdded,
   redlineFieldHighlightModified,
   redlineFieldHighlightRemoved,
-  redlineNewValue,
-  redlineOldValue,
 } from "@/utils/redlineStyles";
 import {
-  ArrowRight01Icon,
   Building03Icon,
   CalendarDownload01Icon,
   CalendarUpload01Icon,
@@ -121,70 +119,6 @@ type ProductInformationTabPayload = {
 type ProductInformationTabResponse = {
   result?: { data?: ProductInformationTabPayload };
 };
-
-type RedlineValueProps = {
-  value: string;
-  diff?: DiffItem | null;
-  formatFn?: (v: unknown) => string;
-  isRedlineView: boolean;
-  oldValueClassName?: string;
-  newValueClassName?: string;
-};
-
-function RedlineValue({
-  value,
-  diff,
-  formatFn,
-  isRedlineView,
-  oldValueClassName,
-  newValueClassName,
-}: RedlineValueProps) {
-  if (!isRedlineView || !diff) return <>{value}</>;
-  const format =
-    formatFn ||
-    ((v: unknown) => {
-      if (v && typeof v === "object" && "value" in v) {
-        const objectValue = (v as { value?: unknown }).value;
-        return typeof objectValue === "string"
-          ? objectValue
-          : objectValue != null
-            ? String(objectValue)
-            : "";
-      }
-      return typeof v === "string" ? v : v != null ? String(v) : "";
-    });
-
-  const isRemoved = diff.status === "removed";
-  const isAdded = diff.status === "added";
-
-  return (
-    <span className="inline-flex flex-wrap items-center gap-2">
-      {(diff.old_value !== null || isRemoved) && (
-        <span className={cn(redlineOldValue, oldValueClassName)}>
-          {format(diff.old_value) || ""}
-        </span>
-      )}
-
-      {diff.old_value !== null &&
-        diff.new_value !== null &&
-        !isRemoved &&
-        !isAdded && (
-          <Icon
-            icon={ArrowRight01Icon}
-            size={12}
-            strokeWidth={2}
-            className="text-muted-foreground/50"
-          />
-        )}
-
-      {(diff.new_value !== null || isAdded) && !isRemoved && (
-        <span className={cn(redlineNewValue, newValueClassName)}>
-          {format(diff.new_value) || ""}
-        </span>
-      )}
-    </span>
-  );
-}
 
 type ProductInfoField = {
   label: string;
@@ -521,6 +455,7 @@ export default function Page() {
     const isRemoved = fieldStatus === "removed";
     const isAdded = fieldStatus === "added";
     const isModified = fieldStatus === "modified";
+    const showBadge = isRedlineView && hasChangedRedlineStatus(fieldStatus);
 
     return (
       <div
@@ -532,36 +467,7 @@ export default function Page() {
           isRedlineView && isModified && redlineCardModified,
         )}
       >
-        {isRedlineView && isAdded && (
-          <span
-            className={cn(
-              "absolute top-3 right-3 rounded px-1.5 py-0.5 text-[10px] font-medium",
-              cnRedlineBadge("added"),
-            )}
-          >
-            NEW
-          </span>
-        )}
-        {isRedlineView && isRemoved && (
-          <span
-            className={cn(
-              "absolute top-3 right-3 rounded px-1.5 py-0.5 text-[10px] font-medium",
-              cnRedlineBadge("removed"),
-            )}
-          >
-            DEL
-          </span>
-        )}
-        {isRedlineView && isModified && (
-          <span
-            className={cn(
-              "absolute top-3 right-3 rounded px-1.5 py-0.5 text-[10px] font-medium",
-              cnRedlineBadge("modified"),
-            )}
-          >
-            MOD
-          </span>
-        )}
+        {showBadge && <RedlineStatusBadge status={fieldStatus} />}
 
         <Icon
           icon={field.icon}
@@ -575,7 +481,7 @@ export default function Page() {
           )}
         />
 
-        <div className="min-w-0 flex-1 space-y-1.5 pr-8">
+        <div className="min-w-0 flex-1 space-y-1.5">
           <p
             className={cn(
               "text-sm font-medium text-muted-foreground",
@@ -677,9 +583,9 @@ export default function Page() {
     formatToLocalDate(productMetadata?.actual_completion_date) || "N/A";
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col">
       {isRedlineView && (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-2 text-sm">
+        <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
           <span className={cn("font-medium", redlineBannerText)}>
             {diffRedlineLoading
               ? "Loading changes..."

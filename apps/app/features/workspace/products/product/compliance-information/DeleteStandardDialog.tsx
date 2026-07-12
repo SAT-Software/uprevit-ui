@@ -1,9 +1,10 @@
 import { useState } from "react";
 import {
-  PiTrashDuotone,
-  PiXCircleDuotone,
-  PiWarningDuotone,
-} from "react-icons/pi";
+  Alert01Icon,
+  Cancel01Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 import {
@@ -64,16 +65,20 @@ export default function DeleteStandardDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="destructive" disabled={isSubmitted}>
-          <PiTrashDuotone />
-          Delete
+        <Button
+          size="icon-xs"
+          variant="destructive"
+          disabled={isSubmitted}
+          aria-label="Delete standard"
+        >
+          <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
         <AlertDialogHeader className="contents space-y-0 text-left">
           <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
             <div className="flex items-center gap-2 text-destructive">
-              <PiWarningDuotone className="w-4 h-4" />
+              <Icon icon={Alert01Icon} size={16} strokeWidth={2} />
               <span>Delete Standard</span>
             </div>
             <button
@@ -81,7 +86,7 @@ export default function DeleteStandardDialog({
               className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setOpen(false)}
             >
-              <PiXCircleDuotone size={18} />
+              <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
             </button>
           </AlertDialogTitle>
         </AlertDialogHeader>
@@ -102,7 +107,7 @@ export default function DeleteStandardDialog({
             onClick={() => setOpen(false)}
             disabled={isPending}
           >
-            <PiXCircleDuotone />
+            <Icon icon={Cancel01Icon} />
             Cancel
           </Button>
           <Button
@@ -113,7 +118,7 @@ export default function DeleteStandardDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            {isPending ? <Spinner /> : <PiTrashDuotone />}
+            {isPending ? <Spinner /> : <Icon icon={Delete02Icon} />}
             {isPending ? "Deleting..." : "Delete Standard"}
           </Button>
         </AlertDialogFooter>

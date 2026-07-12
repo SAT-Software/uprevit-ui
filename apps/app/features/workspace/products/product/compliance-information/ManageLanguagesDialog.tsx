@@ -25,11 +25,11 @@ import {
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
-  PiCheckCircleDuotone,
-  PiGlobeDuotone,
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  LanguageSquareIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 type ManageLanguagesDialogProps = {
   productId: string;
@@ -198,13 +198,8 @@ export default function ManageLanguagesDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="flex items-center gap-2"
-          disabled={isSubmitted}
-        >
-          <PiPlusCircleDuotone className="h-4 w-4" />
+        <Button size="sm" variant="secondary" disabled={isSubmitted}>
+          <Icon icon={LanguageSquareIcon} />
           Manage Languages
         </Button>
       </DialogTrigger>
@@ -212,12 +207,12 @@ export default function ManageLanguagesDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
-              <PiGlobeDuotone className="h-4 w-4" />
+              <Icon icon={LanguageSquareIcon} size={16} strokeWidth={2} />
               <span>Manage Product Languages</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -295,9 +290,12 @@ export default function ManageLanguagesDialog({
                             </p>
                           )}
                         </div>
-                        <PiCheckCircleDuotone
+                        <Icon
+                          icon={CheckmarkCircle01Icon}
+                          size={16}
+                          strokeWidth={2}
                           className={cn(
-                            "mt-0.5 h-4 w-4 shrink-0 transition-opacity",
+                            "mt-0.5 shrink-0 transition-opacity",
                             isSelected ? "text-primary opacity-100" : "opacity-0"
                           )}
                         />
@@ -373,7 +371,7 @@ export default function ManageLanguagesDialog({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-start gap-3">
               <div className="mt-0.5 rounded-md bg-primary/10 p-1 text-primary">
-                <PiCheckCircleDuotone className="h-4 w-4" />
+                <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">{selectedCountLabel}</p>
@@ -396,7 +394,7 @@ export default function ManageLanguagesDialog({
           </Button>
           <DialogClose asChild>
             <Button type="button" variant="secondary" size="sm" disabled={isPending}>
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -407,7 +405,7 @@ export default function ManageLanguagesDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            {isPending ? <Spinner /> : <PiCheckCircleDuotone />}
+            {isPending ? <Spinner /> : <Icon icon={CheckmarkCircle01Icon} />}
             {isPending ? "Saving..." : "Save Languages"}
           </Button>
         </DialogFooter>

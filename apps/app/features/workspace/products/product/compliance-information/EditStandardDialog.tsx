@@ -17,12 +17,15 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import {
-  PiPencilSimpleDuotone,
-  PiXCircleDuotone,
-  PiFloppyDiskDuotone,
   PiCheck,
   PiCaretUpDown,
 } from "react-icons/pi";
+import {
+  Cancel01Icon,
+  FloppyDiskIcon,
+  PropertyEditIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Popover,
@@ -145,21 +148,25 @@ export default function EditStandardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" disabled={isSubmitted}>
-          <PiPencilSimpleDuotone />
-          Edit
+        <Button
+          size="icon-xs"
+          variant="outline"
+          disabled={isSubmitted}
+          aria-label="Edit standard"
+        >
+          <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiPencilSimpleDuotone className="w-4 h-4" />
+              <Icon icon={PropertyEditIcon} size={16} strokeWidth={2} />
               <span>Update Standard Details</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -365,7 +372,7 @@ export default function EditStandardDialog({
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -377,7 +384,7 @@ export default function EditStandardDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            {isPending ? <Spinner /> : <PiFloppyDiskDuotone />}
+            {isPending ? <Spinner /> : <Icon icon={FloppyDiskIcon} />}
             {isPending ? "Updating..." : "Update Standard"}
           </Button>
         </DialogFooter>

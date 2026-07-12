@@ -18,12 +18,15 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import {
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-  PiShieldCheckDuotone,
   PiCheck,
   PiCaretUpDown,
 } from "react-icons/pi";
+import {
+  Cancel01Icon,
+  Certificate01Icon,
+  PlusSignSquareIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Popover,
@@ -124,13 +127,8 @@ export default function AddStandardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="flex items-center gap-2"
-          disabled={isSubmitted}
-        >
-          <PiPlusCircleDuotone className="w-4 h-4" />
+        <Button size="sm" variant="secondary" disabled={isSubmitted}>
+          <Icon icon={PlusSignSquareIcon} />
           Add Standard
         </Button>
       </DialogTrigger>
@@ -138,12 +136,12 @@ export default function AddStandardDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiShieldCheckDuotone className="w-4 h-4" />
+              <Icon icon={Certificate01Icon} size={16} strokeWidth={2} />
               <span>Add New Standard</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -356,7 +354,7 @@ export default function AddStandardDialog({
         <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
           <DialogClose asChild>
             <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -368,7 +366,7 @@ export default function AddStandardDialog({
             disabled={isPending}
             aria-busy={isPending}
           >
-            {isPending ? <Spinner /> : <PiPlusCircleDuotone />}
+            {isPending ? <Spinner /> : <Icon icon={PlusSignSquareIcon} />}
             {isPending ? "Adding..." : "Add Standard"}
           </Button>
         </DialogFooter>
