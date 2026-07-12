@@ -32,12 +32,12 @@ import {
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import {
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
   PiPictureInPictureDuotone,
 } from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { Cancel01Icon, PlusSignSquareIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 type FormData = {
   componentNumber: string;
@@ -137,13 +137,8 @@ export default function AddComponentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="flex items-center gap-2"
-          disabled={isSubmitted}
-        >
-          <PiPlusCircleDuotone className="w-4 h-4" />
+        <Button size="sm" variant="secondary" disabled={isSubmitted}>
+          <Icon icon={PlusSignSquareIcon} />
           Add Component
         </Button>
       </DialogTrigger>
@@ -151,12 +146,12 @@ export default function AddComponentDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiPlusCircleDuotone className="w-4 h-4" />
+              <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
               <span>Add New Component</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -286,7 +281,7 @@ export default function AddComponentDialog({
                 setLabelType([]);
               }}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -301,7 +296,7 @@ export default function AddComponentDialog({
             {isPending || isUploadingImage || uploadingImage ? (
               <Spinner />
             ) : (
-              <PiPlusCircleDuotone />
+              <Icon icon={PlusSignSquareIcon} />
             )}
             {isPending
               ? "Adding..."

@@ -66,12 +66,11 @@ import EditOtherComponentsDialog from "./EditOtherComponentsDialog";
 import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 import type { DiffItem } from "@/utils/deepDiff";
 import { cn } from "@uprevit/ui/lib/utils";
+import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
+import { RedlineCell } from "@/components/common/RedlineCell";
 import {
-  cnRedlineBadge,
   redlineChipAdded,
   redlineChipRemoved,
-  redlineNewValueCompact,
-  redlineOldValueCompact,
 } from "@/utils/redlineStyles";
 
 type Item = {
@@ -165,45 +164,6 @@ const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
     frameClassName: undefined as string | undefined,
     imageClassName: undefined as string | undefined,
   };
-};
-
-// Helper component for displaying redline values
-const RedlineCell = ({
-  value,
-  diff,
-  formatFn,
-}: {
-  value: unknown;
-  diff: DiffItem | null;
-  formatFn?: (v: unknown, isOld?: boolean, isNew?: boolean) => React.ReactNode;
-}) => {
-  const format =
-    formatFn ||
-    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
-  if (!diff) return <>{format(value)}</>;
-
-  const isAdded = diff.status === "added";
-  const isRemoved = diff.status === "removed";
-  const isModified = diff.status === "modified";
-
-  return (
-    <div className="flex flex-col gap-1">
-      {(isModified || isRemoved) && diff.old_value !== null && (
-        <div
-          className={cn(redlineOldValueCompact, "px-1.5 py-0.5")}
-        >
-          {format(diff.old_value, true, false)}
-        </div>
-      )}
-      {(isModified || isAdded) && !isRemoved && (
-        <div
-          className={cn(redlineNewValueCompact, "px-1.5 py-0.5")}
-        >
-          {format(diff.new_value, false, true)}
-        </div>
-      )}
-    </div>
-  );
 };
 
 const SortableHeader = ({
@@ -618,17 +578,12 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                           className="last:py-0 whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
                         >
                           <div className="flex items-center gap-2">
-                            {cellIdx === 0 && isRedlineView && rowStatus && (
-                              <span
-                                className={cn(
-                                  "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px]",
-                                  isAdded && cnRedlineBadge("added"),
-                                  isRemoved && cnRedlineBadge("removed"),
-                                  isModified && cnRedlineBadge("modified"),
-                                )}
-                              >
-                                {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
-                              </span>
+                            {cellIdx === 0 && (
+                              <RedlineStatusBadge
+                                status={rowStatus}
+                                inline
+                                className="rounded-full"
+                              />
                             )}
                             {flexRender(
                               cell.column.columnDef.cell,
