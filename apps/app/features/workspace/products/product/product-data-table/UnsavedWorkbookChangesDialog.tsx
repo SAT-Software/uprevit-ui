@@ -13,11 +13,12 @@ import {
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
-  PiCloudArrowUpDuotone,
-  PiTrashDuotone,
-  PiWarningDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  Alert01Icon,
+  Cancel01Icon,
+  CloudUploadIcon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface UnsavedWorkbookChangesDialogProps {
   open: boolean;
@@ -71,7 +72,7 @@ export function UnsavedWorkbookChangesDialog({
                 onClick={onCancel}
                 disabled={isBusy}
               >
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -86,7 +87,7 @@ export function UnsavedWorkbookChangesDialog({
               className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
               aria-hidden="true"
             >
-              <PiWarningDuotone size={20} />
+              <Icon icon={Alert01Icon} size={20} strokeWidth={2} />
             </div>
             <div className="space-y-1">
               <h4 className="font-medium text-sm">You have unsaved changes</h4>
@@ -105,7 +106,7 @@ export function UnsavedWorkbookChangesDialog({
             onClick={onCancel}
             disabled={isBusy}
           >
-            <PiXCircleDuotone />
+            <Icon icon={Cancel01Icon} size={16} strokeWidth={2} />
             Stay on page
           </Button>
           <div className="flex gap-2 order-1 sm:order-2">
@@ -115,11 +116,15 @@ export function UnsavedWorkbookChangesDialog({
               onClick={handleDiscard}
               disabled={isBusy}
             >
-              <PiTrashDuotone />
+              <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
               Discard &amp; Continue
             </Button>
             <Button size="sm" onClick={handleSave} disabled={isBusy}>
-              {isBusy ? <Spinner /> : <PiCloudArrowUpDuotone />}
+              {isBusy ? (
+                <Spinner />
+              ) : (
+                <Icon icon={CloudUploadIcon} size={16} strokeWidth={2} />
+              )}
               {isBusy ? "Saving..." : "Save & Continue"}
             </Button>
           </div>

@@ -84,7 +84,7 @@ export default function SchematicsSymbolsTabs({
       className="flex flex-1 min-h-0 flex-col gap-0"
     >
       <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background p-2 pl-3">
-        <p className="text-base font-medium">Symbols & Graphics</p>
+        <p className="text-sm font-medium">Symbols & Graphics</p>
         <InfoTooltip content="Add and manage product symbols, schematics, barcodes, and other graphical components." />
       </div>
 

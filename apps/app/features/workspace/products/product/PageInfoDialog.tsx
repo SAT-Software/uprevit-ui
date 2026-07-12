@@ -1,7 +1,8 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { PiInfoDuotone, PiXCircleDuotone } from "react-icons/pi";
+import { Cancel01Icon, InformationCircleIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Dialog,
   DialogContent,
@@ -38,7 +39,12 @@ export function PageInfoDialog({
               size="icon"
               className={`size-5 rounded-full hover:bg-muted ${buttonClassName}`}
             >
-              <PiInfoDuotone className="size-4 text-muted-foreground" />
+              <Icon
+                icon={InformationCircleIcon}
+                size={16}
+                strokeWidth={2}
+                className="text-muted-foreground"
+              />
             </Button>
           </DialogTrigger>
         </TooltipTrigger>
@@ -46,7 +52,7 @@ export function PageInfoDialog({
       </Tooltip>
       <DialogContent>
         <DialogPrimitive.Close className="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <PiXCircleDuotone className="h-5 w-5" />
+          <Icon icon={Cancel01Icon} size={20} strokeWidth={2} />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
         <DialogHeader>

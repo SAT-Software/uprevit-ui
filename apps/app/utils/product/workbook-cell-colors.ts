@@ -113,3 +113,49 @@ export function getWorkbookTextPalette(
 export function getWorkbookTheme(resolvedTheme: string | undefined): WorkbookTheme {
   return resolvedTheme === "dark" ? "dark" : "light";
 }
+
+export function getWorkbookSelectionKeys(
+  selectedCells: Set<string>,
+  activeCell: { row: number; col: number } | null,
+): string[] {
+  if (selectedCells.size > 0) return [...selectedCells];
+  if (activeCell) return [`${activeCell.row},${activeCell.col}`];
+  return [];
+}
+
+export function getWorkbookSelectionFillState(
+  keys: string[],
+  cellFormats: Record<string, { bgColor?: string }>,
+  theme: WorkbookTheme,
+): { color: string | undefined; isMixed: boolean } {
+  if (keys.length === 0) return { color: undefined, isMixed: false };
+
+  const colors = keys.map((key) => {
+    const stored = cellFormats[key]?.bgColor;
+    const resolved = resolveWorkbookFillColor(stored, theme);
+    return resolved ?? NO_FILL_COLOR;
+  });
+
+  const first = colors[0];
+  const isMixed = colors.some((c) => c !== first);
+  return { color: isMixed ? undefined : first, isMixed };
+}
+
+export function getWorkbookSelectionTextState(
+  keys: string[],
+  cellFormats: Record<string, { textColor?: string }>,
+  theme: WorkbookTheme,
+  defaultTextColor: string,
+): { color: string | undefined; isMixed: boolean } {
+  if (keys.length === 0) return { color: undefined, isMixed: false };
+
+  const colors = keys.map((key) => {
+    const stored = cellFormats[key]?.textColor;
+    const resolved = resolveWorkbookTextColor(stored, theme);
+    return resolved ?? defaultTextColor;
+  });
+
+  const first = colors[0];
+  const isMixed = colors.some((c) => c !== first);
+  return { color: isMixed ? undefined : first, isMixed };
+}

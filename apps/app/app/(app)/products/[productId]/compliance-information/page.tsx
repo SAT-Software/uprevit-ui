@@ -247,7 +247,7 @@ export default function Page() {
 
       <div className="flex h-full w-full flex-col overflow-y-auto">
         <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
-          <p className="text-base font-semibold">Compliance Information</p>
+          <p className="text-sm font-medium">Compliance Information</p>
           <InfoTooltip content="Document regulatory standards and packaging or labeling languages for this product." />
         </div>
 
