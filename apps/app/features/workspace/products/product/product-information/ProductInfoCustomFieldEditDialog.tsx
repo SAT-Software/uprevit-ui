@@ -37,6 +37,13 @@ import {
 } from "react-icons/pi";
 import { ProductMetadata } from "@/types/product";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Settings05Icon } from "@hugeicons/core-free-icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 
 // Interface that matches the actual API response structure
 interface ProductData {
@@ -152,7 +159,7 @@ export default function ProductInformationCustomFieldEditDialog({
 
     // Filter out empty fields
     const validFields = data.customFields.filter(
-      (field) => field.label.trim() !== "" || field.value.trim() !== ""
+      (field) => field.label.trim() !== "" || field.value.trim() !== "",
     );
 
     if (validFields.length === 0) {
@@ -189,7 +196,7 @@ export default function ProductInformationCustomFieldEditDialog({
   const handleUpdateCustomField = async (
     fieldId: string,
     label: string,
-    value: string
+    value: string,
   ) => {
     if (isSubmitted) {
       return;
@@ -202,7 +209,7 @@ export default function ProductInformationCustomFieldEditDialog({
 
     // Send all custom fields data instead of just the updated field
     const allCustomFields = customFieldsData?.map((field) =>
-      field._id === fieldId ? { ...field, label: label, value: value } : field
+      field._id === fieldId ? { ...field, label: label, value: value } : field,
     );
 
     const updateData = {
@@ -272,17 +279,23 @@ export default function ProductInformationCustomFieldEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="flex items-center gap-2"
-          disabled={isSubmitted}
-        >
-          <PiPencilLineDuotone className="w-4 h-4" />
-          Manage Custom Fields
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" disabled={isSubmitted}>
+                <Icon icon={Settings05Icon} />
+                Manage Custom Fields
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {isSubmitted
+            ? "Submitted products can't be edited"
+            : "Add and manage custom fields"}
+        </TooltipContent>
+      </Tooltip>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-2xl max-h-[90vh] [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
@@ -415,7 +428,7 @@ export default function ProductInformationCustomFieldEditDialog({
                           type="text"
                           {...registerManage(
                             `existingFields.${index}.label` as const,
-                            { required: "Label is required" }
+                            { required: "Label is required" },
                           )}
                         />
                         {errorsManage.existingFields?.[index]?.label && (
@@ -432,7 +445,7 @@ export default function ProductInformationCustomFieldEditDialog({
                           type="text"
                           {...registerManage(
                             `existingFields.${index}.value` as const,
-                            { required: "Value is required" }
+                            { required: "Value is required" },
                           )}
                         />
                         {errorsManage.existingFields?.[index]?.value && (
@@ -449,12 +462,12 @@ export default function ProductInformationCustomFieldEditDialog({
                           size="sm"
                           onClick={() => {
                             const data = getValuesManage(
-                              `existingFields.${index}`
+                              `existingFields.${index}`,
                             );
                             handleUpdateCustomField(
                               data._id,
                               data.label,
-                              data.value
+                              data.value,
                             );
                           }}
                           disabled={isPending || isSubmitted}

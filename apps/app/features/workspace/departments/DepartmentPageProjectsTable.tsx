@@ -319,7 +319,7 @@ export default function DepartmentPageProjectsTable({
       <div className="flex flex-col border rounded-2xl">
         <div className="h-10 flex items-center justify-between pl-3 pr-2">
           <div className="flex items-center gap-2">
-            <p className="text-base font-semibold">Projects</p>
+            <p className="text-sm font-medium">Projects</p>
             <InfoTooltip
               content="All the projects that belongs to this department."
               className="mt-0.5"

@@ -22,6 +22,7 @@ export function ProductProgressHoverCard({
   totalTabs,
   showActions = false,
   actions,
+  variant = "ghost",
 }: {
   percentage: number;
   colorClass: string;
@@ -33,6 +34,7 @@ export function ProductProgressHoverCard({
   totalTabs: number;
   showActions?: boolean;
   actions?: ReactNode;
+  variant?: "ghost" | "secondary";
 }) {
   return (
     <div
@@ -43,7 +45,7 @@ export function ProductProgressHoverCard({
     >
       <HoverCard openDelay={200} closeDelay={100}>
         <HoverCardTrigger asChild>
-          <Button variant="ghost" className="flex items-center gap-2">
+          <Button variant={variant} className="flex items-center gap-2">
             <CircularProgress
               percentage={percentage}
               colorClass={colorClass}

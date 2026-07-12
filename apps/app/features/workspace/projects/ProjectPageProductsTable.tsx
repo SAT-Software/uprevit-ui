@@ -114,12 +114,24 @@ const PROJECT_PRODUCT_SORT_FIELDS = [
 ];
 
 const columnHeaderMap = [
-  { title: "PPN", info: "Product Plan Number - Unique identifier for the product plan" },
+  {
+    title: "PPN",
+    info: "Product Plan Number - Unique identifier for the product plan",
+  },
   { title: "Product Name", info: "Name of the product" },
-  { title: "Department", info: "Name of the department this product belongs to" },
-  { title: "Status", info: "Current status of the product. Draft, Submitted or Archived" },
+  {
+    title: "Department",
+    info: "Name of the department this product belongs to",
+  },
+  {
+    title: "Status",
+    info: "Current status of the product. Draft, Submitted or Archived",
+  },
   { title: "Version", info: "Latest version number of the product" },
-  { title: "Progress", info: "Completion progress in percentage of the product. How many tabs are completed out of 7" },
+  {
+    title: "Progress",
+    info: "Completion progress in percentage of the product. How many tabs are completed out of 7",
+  },
 ];
 
 const SortableHeader = ({
@@ -415,7 +427,7 @@ export default function ProjectPageProductsTable({
       <div className="flex flex-col border rounded-2xl">
         <div className="h-10 flex items-center justify-between pl-3 pr-2">
           <div className="flex items-center gap-2">
-            <p className="text-base font-semibold">Products</p>
+            <p className="text-sm font-medium">Products</p>
             <InfoTooltip
               content="All the products that belong to this project."
               className="mt-0.5"
@@ -524,7 +536,8 @@ export default function ProjectPageProductsTable({
                                   No products found
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  This project doesn&apos;t have any products yet.
+                                  This project doesn&apos;t have any products
+                                  yet.
                                 </p>
                               </div>
                             </div>

@@ -53,7 +53,7 @@ export default function ProductLayout({
         onOpenChange={setExportsOpen}
         showTrigger={false}
       />
-      <div className="relative flex flex-1 flex-col min-h-0 bg-accent/60">
+      <div className="relative flex flex-1 flex-col min-h-0 bg-background">
         {children}
         {hasActiveExport ? (
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-accent/80 backdrop-blur-[2px]">
