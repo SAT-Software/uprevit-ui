@@ -1,7 +1,15 @@
 "use client";
 
 import { useId, useState } from "react";
-import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
+import {
+  PiPlusSquareDuotone,
+  PiXDuotone,
+  PiPictureInPictureDuotone,
+  PiCaretUpDown,
+  PiCheck,
+} from "react-icons/pi";
+import { Cancel01Icon, PlusSignSquareIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useForm, Controller } from "react-hook-form";
 import {
   useFileUpload,
@@ -25,13 +33,6 @@ import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import {
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-  PiPictureInPictureDuotone,
-  PiCaretUpDown,
-  PiCheck,
-} from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { BARCODE_STANDARDS } from "@/data/barcode-standards";
 import {
@@ -162,7 +163,7 @@ export default function AddBarcodesDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="secondary" disabled={isSubmitted}>
-          <PiPlusCircleDuotone />
+          <Icon icon={PlusSignSquareIcon} />
           Add Barcode
         </Button>
       </DialogTrigger>
@@ -170,12 +171,12 @@ export default function AddBarcodesDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiPlusCircleDuotone className="w-4 h-4" />
+              <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
               <span>Add New Barcode</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -364,7 +365,7 @@ export default function AddBarcodesDialog({
                 setLabelPresence([]);
               }}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -381,7 +382,11 @@ export default function AddBarcodesDialog({
             aria-busy={isPending || uploadingImage}
             variant="default"
           >
-            {isPending || uploadingImage ? <Spinner /> : <PiPlusCircleDuotone />}
+            {isPending || uploadingImage ? (
+              <Spinner />
+            ) : (
+              <Icon icon={PlusSignSquareIcon} />
+            )}
             {isPending
               ? "Adding..."
               : uploadingImage

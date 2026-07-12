@@ -7,11 +7,11 @@ import {
   PiCheckCircleDuotone,
   PiMagnifyingGlassDuotone,
   PiPictureInPictureDuotone,
-  PiPlusCircleDuotone,
   PiPlusSquareDuotone,
-  PiXCircleDuotone,
   PiXDuotone,
 } from "react-icons/pi";
+import { Cancel01Icon, PlusSignSquareIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import {
   FileWithPreview,
@@ -295,7 +295,7 @@ export default function AddSymbolsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" variant="secondary" disabled={isSubmitted}>
-          <PiPlusCircleDuotone />
+          <Icon icon={PlusSignSquareIcon} />
           Add Symbol
         </Button>
       </DialogTrigger>
@@ -303,12 +303,12 @@ export default function AddSymbolsDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
             <div className="flex items-center gap-2">
-              <PiPlusCircleDuotone className="h-4 w-4" />
+              <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
               <span>Add Symbol</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -635,7 +635,7 @@ export default function AddSymbolsDialog({
               size="sm"
               onClick={resetDialogState}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -662,7 +662,7 @@ export default function AddSymbolsDialog({
               {isPending || uploadingImage ? (
                 <Spinner />
               ) : (
-                <PiPlusCircleDuotone />
+                <Icon icon={PlusSignSquareIcon} />
               )}
               {isPending
                 ? "Adding..."

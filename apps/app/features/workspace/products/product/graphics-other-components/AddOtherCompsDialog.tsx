@@ -1,7 +1,13 @@
 "use client";
 
 import { useId, useState } from "react";
-import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
+import {
+  PiPlusSquareDuotone,
+  PiXDuotone,
+  PiPictureInPictureDuotone,
+} from "react-icons/pi";
+import { Cancel01Icon, PlusSignSquareIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useForm, Controller } from "react-hook-form";
 import {
   useFileUpload,
@@ -25,11 +31,6 @@ import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
 import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import {
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-  PiPictureInPictureDuotone,
-} from "react-icons/pi";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type FormData = {
@@ -121,7 +122,7 @@ export default function AddOtherCompsDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="secondary" disabled={isSubmitted}>
-          <PiPlusCircleDuotone />
+          <Icon icon={PlusSignSquareIcon} />
           Add Other Component
         </Button>
       </DialogTrigger>
@@ -129,12 +130,12 @@ export default function AddOtherCompsDialog({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiPlusCircleDuotone className="w-4 h-4" />
+              <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
               <span>Add New Other Component</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -227,7 +228,7 @@ export default function AddOtherCompsDialog({
                 setLabelPresence([]);
               }}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -240,7 +241,11 @@ export default function AddOtherCompsDialog({
             aria-busy={isPending || uploadingImage}
             variant="default"
           >
-            {isPending || uploadingImage ? <Spinner /> : <PiPlusCircleDuotone />}
+            {isPending || uploadingImage ? (
+              <Spinner />
+            ) : (
+              <Icon icon={PlusSignSquareIcon} />
+            )}
             {isPending
               ? "Adding..."
               : uploadingImage
