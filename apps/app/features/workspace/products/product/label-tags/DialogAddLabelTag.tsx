@@ -25,11 +25,13 @@ import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-  PiTagDuotone,
-  PiPictureInPictureDuotone,
-} from "react-icons/pi";
+  Cancel01Icon,
+  FloppyDiskIcon,
+  Image01Icon,
+  PlusSignSquareIcon,
+  Tag01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type FormData = {
@@ -127,7 +129,7 @@ export default function DialogAddLabelTag({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="secondary" disabled={isSubmitted}>
-          <PiPlusCircleDuotone />
+          <Icon icon={PlusSignSquareIcon} />
           Add Label
         </Button>
       </DialogTrigger>
@@ -135,12 +137,12 @@ export default function DialogAddLabelTag({
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiTagDuotone className="w-4 h-4" />
+              <Icon icon={Tag01Icon} size={16} strokeWidth={2} />
               <span>Add New Label</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -224,7 +226,7 @@ export default function DialogAddLabelTag({
                 reset();
               }}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -240,7 +242,7 @@ export default function DialogAddLabelTag({
             {uploadingImage || isPending ? (
               <Spinner />
             ) : (
-              <PiPlusCircleDuotone />
+              <Icon icon={PlusSignSquareIcon} />
             )}
             {uploadingImage
               ? "Uploading..."
@@ -292,7 +294,7 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiPictureInPictureDuotone className="w-12 h-12" />
+            <Icon icon={Image01Icon} size={40} strokeWidth={1.5} />
             <span className="text-xs font-medium">Upload Image</span>
           </div>
         )}

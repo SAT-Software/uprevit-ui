@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @source "../../../packages/ui/src";
+@source "../features/**/*.{ts,tsx}";
+@source "../app/**/*.{ts,tsx}";
 
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";

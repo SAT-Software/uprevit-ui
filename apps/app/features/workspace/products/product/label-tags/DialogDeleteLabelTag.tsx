@@ -11,7 +11,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@uprevit/ui/components/ui/alert-dialog";
-import { PiTrashDuotone, PiXCircleDuotone } from "react-icons/pi";
+import {
+  Alert01Icon,
+  Cancel01Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 
@@ -39,7 +44,6 @@ export default function DialogDeleteLabelTag({
   async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     try {
-      console.log("Deleting label tag:", labelTag._id);
       const deleteData = {
         id: productId,
         action: "delete_label_tags",
@@ -48,8 +52,6 @@ export default function DialogDeleteLabelTag({
           id: labelTag._id,
         },
       };
-
-      console.log("Deleting label tag:", deleteData);
 
       deleteLabelTag(deleteData, {
         onSuccess: () => {
@@ -68,24 +70,28 @@ export default function DialogDeleteLabelTag({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" disabled={isSubmitted}>
-          <PiTrashDuotone />
-          Delete
+        <Button
+          size="icon-xs"
+          variant="destructive"
+          disabled={isSubmitted}
+          aria-label="Delete label"
+        >
+          <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
         <AlertDialogHeader className="contents space-y-0 text-left">
-          <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
+          <AlertDialogTitle className="flex w-full items-center justify-between border-b bg-destructive/10 px-4 py-4 text-sm">
             <div className="flex items-center gap-2 text-destructive">
-              <PiTrashDuotone className="w-4 h-4" />
+              <Icon icon={Alert01Icon} size={16} strokeWidth={2} />
               <span>Delete Label</span>
             </div>
             <button
               type="button"
-              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
               onClick={() => setOpen(false)}
             >
-              <PiXCircleDuotone size={18} />
+              <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
             </button>
           </AlertDialogTitle>
         </AlertDialogHeader>
@@ -106,7 +112,7 @@ export default function DialogDeleteLabelTag({
             onClick={() => setOpen(false)}
             disabled={isPending}
           >
-            <PiXCircleDuotone />
+            <Icon icon={Cancel01Icon} />
             Cancel
           </Button>
           <Button
@@ -115,7 +121,7 @@ export default function DialogDeleteLabelTag({
             variant="destructive"
             size="sm"
           >
-            {isPending ? <Spinner /> : <PiTrashDuotone />}
+            {isPending ? <Spinner /> : <Icon icon={Delete02Icon} />}
             {isPending ? "Deleting..." : "Delete Label"}
           </Button>
         </AlertDialogFooter>

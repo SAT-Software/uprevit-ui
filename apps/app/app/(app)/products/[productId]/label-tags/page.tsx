@@ -4,14 +4,15 @@ import LabelTagsTabs from "@/features/workspace/products/product/label-tags/labe
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
-import {
-  PiTagDuotone,
-} from "react-icons/pi";
 import { LegendItem } from "@/features/workspace/products/product/label-tags/legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
 import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import type { GetSingleTabResponse, ProductDataContent } from "@/types/product";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
+import { cn } from "@uprevit/ui/lib/utils";
+import { redlineBannerText } from "@/utils/redlineStyles";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface LabelTagItem {
   _id: string;
@@ -43,67 +44,47 @@ export default function Page() {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
 
-  // Fetch label tags data
   const { data, isLoading, error } = useGetProductTabData(
     productId as string,
-    "label-tags"
+    "label-tags",
   );
 
-  // Fetch Product Information for breadcrumb
   const { data: productInfoData } = useGetProductTabData(
     productId as string,
-    "product-information"
+    "product-information",
   );
 
-  // Only fetch redline data when compareVersion is in URL
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId as string,
-    compareVersionId
+    compareVersionId,
   );
 
-  // Check if product is submitted - disable editing buttons
   const productInfo = (productInfoData as ProductInfoResponse | undefined)
     ?.result?.data;
   const isSubmitted = productInfo?.product_data?.data?.status === "submitted";
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-          <div className="flex flex-col md:flex-row gap-4 items-start justify-between border-b p-2 border-border">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-24 bg-muted rounded animate-pulse" />
-              <div className="h-2 w-2 bg-muted rounded-full animate-pulse" />
-              <div className="h-4 w-48 bg-muted rounded animate-pulse" />
-            </div>
-            <div className="h-9 w-32 bg-muted rounded-md animate-pulse" />
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+            <div className="size-3 animate-pulse rounded-full bg-muted" />
           </div>
-
-          {/* Tabs Skeleton */}
-          <div className="px-2">
-            <div className="flex gap-0 mb-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-10 w-28 bg-muted rounded-none first:rounded-l-lg last:rounded-r-lg border border-border animate-pulse"
-                />
-              ))}
-            </div>
-            {/* Content Card Skeleton */}
-            <div className="border border-border rounded-xl p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <div className="h-6 w-48 bg-muted rounded animate-pulse" />
-                  <div className="h-5 w-20 bg-muted rounded animate-pulse" />
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-8 w-16 bg-muted rounded animate-pulse" />
-                  <div className="h-8 w-16 bg-muted rounded animate-pulse" />
-                </div>
-              </div>
-              <div className="h-64 w-full max-w-md bg-muted rounded-lg animate-pulse" />
-            </div>
+          <div className="h-7 w-28 animate-pulse rounded-md bg-muted" />
+        </div>
+        <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
+          <div className="flex gap-1">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-7 w-20 animate-pulse rounded-lg bg-muted"
+              />
+            ))}
           </div>
+        </div>
+        <div className="min-h-0 flex-1 overflow-hidden p-2">
+          <div className="h-full min-h-96 animate-pulse rounded-2xl border border-border bg-muted/30" />
         </div>
       </div>
     );
@@ -111,21 +92,27 @@ export default function Page() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-          <div className="flex items-center justify-center p-12">
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="p-3 rounded-full bg-destructive/10">
-                <PiTagDuotone className="w-8 h-8 text-destructive" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-destructive">
-                  Error Loading Label Tags
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  {error.message}
-                </p>
-              </div>
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background p-2 pl-3">
+          <p className="text-sm font-medium">Label Tags</p>
+        </div>
+        <div className="flex flex-1 items-center justify-center p-12">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="rounded-full bg-destructive/10 p-3">
+              <Icon
+                icon={Alert01Icon}
+                size={32}
+                strokeWidth={1.5}
+                className="text-destructive"
+              />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold text-destructive">
+                Error Loading Label Tags
+              </h3>
+              <p className="max-w-md text-sm text-muted-foreground">
+                {error.message}
+              </p>
             </div>
           </div>
         </div>
@@ -136,16 +123,16 @@ export default function Page() {
   const labelTagsTabData = (data as LabelTagsResponse | undefined)?.result?.data;
   const currentLabelTags = labelTagsTabData?.data ?? [];
   const hasDiffVersions = Boolean(
-    diffData?.result?.base_version && diffData?.result?.next_version
+    diffData?.result?.base_version && diffData?.result?.next_version,
   );
-  const baseLabelTags =
-    hasDiffVersions
-      ? ((diffData?.result?.base_version?.label_tags?.data ?? []) as LabelTagItem[])
-      : [];
-  const nextLabelTags =
-    hasDiffVersions
-      ? ((diffData?.result?.next_version?.label_tags?.data ?? []) as LabelTagItem[])
-      : [];
+  const baseLabelTags = hasDiffVersions
+    ? ((diffData?.result?.base_version?.label_tags?.data ??
+        []) as LabelTagItem[])
+    : [];
+  const nextLabelTags = hasDiffVersions
+    ? ((diffData?.result?.next_version?.label_tags?.data ??
+        []) as LabelTagItem[])
+    : [];
   const labelTagRedlineItems =
     isRedlineView && hasDiffVersions
       ? buildRedlineArray(baseLabelTags, nextLabelTags, {
@@ -178,25 +165,26 @@ export default function Page() {
   })();
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
       {isRedlineView && (
-        <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
-          <span className="text-amber-600 font-medium">
+        <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
+          <span className={cn("font-medium", redlineBannerText)}>
             {isLoadingDiff
               ? "Loading changes..."
               : `Redline View: ${labelTagsChangeCount} changes in Label Tags`}
           </span>
+          <span className="text-xs text-muted-foreground">
+            (comparing with previous version)
+          </span>
         </div>
       )}
 
-      <div className="flex flex-col gap-0 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-        <LabelTagsTabs
-          labelTagsData={labelTagsData}
-          productId={productId}
-          isSubmitted={isSubmitted}
-          isRedlineView={isRedlineView}
-        />
-      </div>
+      <LabelTagsTabs
+        labelTagsData={labelTagsData}
+        productId={productId}
+        isSubmitted={isSubmitted}
+        isRedlineView={isRedlineView}
+      />
     </div>
   );
 }

@@ -24,14 +24,15 @@ import {
 } from "./legendTypes";
 import { LegendSwatch } from "./LegendSwatch";
 import {
-  PiArrowUpRightDuotone,
-  PiCircle,
-  PiFloppyDiskDuotone,
-  PiLineSegmentDuotone,
-  PiPlusCircleDuotone,
-  PiSquare,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  ArrowUpRight01Icon,
+  Cancel01Icon,
+  CircleIcon,
+  FloppyDiskIcon,
+  LineIcon,
+  PlusSignSquareIcon,
+  Square01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { defaultColorsWithTransparent } from "@/types/colors";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
@@ -148,7 +149,7 @@ export function LegendDialog({
                 }`}
                 disabled={isSaving}
               >
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -187,16 +188,16 @@ export function LegendDialog({
                 }
               >
                 <ToggleGroupItem value="rectangle" title="Rectangle">
-                  <PiSquare />
+                  <Icon icon={Square01Icon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
                 <ToggleGroupItem value="ellipse" title="Ellipse">
-                  <PiCircle />
+                  <Icon icon={CircleIcon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
                 <ToggleGroupItem value="line" title="Line">
-                  <PiLineSegmentDuotone />
+                  <Icon icon={LineIcon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
                 <ToggleGroupItem value="arrow" title="Arrow">
-                  <PiArrowUpRightDuotone />
+                  <Icon icon={ArrowUpRight01Icon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
@@ -356,7 +357,7 @@ export function LegendDialog({
               size="sm"
               disabled={disabled || isSaving}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -370,9 +371,9 @@ export function LegendDialog({
             {isSaving ? (
               <Spinner />
             ) : mode === "add" ? (
-              <PiPlusCircleDuotone />
+              <Icon icon={PlusSignSquareIcon} />
             ) : (
-              <PiFloppyDiskDuotone />
+              <Icon icon={FloppyDiskIcon} />
             )}
             {isSaving
               ? mode === "add"

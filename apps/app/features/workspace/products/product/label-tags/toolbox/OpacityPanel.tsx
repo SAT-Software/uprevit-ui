@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { PiDropHalfBottomDuotone } from "react-icons/pi";
+import { DropletIcon } from "@hugeicons/core-free-icons";
 import { Slider } from "@uprevit/ui/components/ui/slider";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
@@ -37,7 +37,7 @@ const OpacityPanelBody = ({ markerEditor }: PanelProps) => {
   };
 
   return (
-    <ToolboxPanel title="Opacity" icon={PiDropHalfBottomDuotone}>
+    <ToolboxPanel title="Opacity" icon={DropletIcon}>
       <div className="flex flex-col space-y-4">
         <div className="flex justify-between items-center space-x-2">
           <Label htmlFor="opacityInput">Value</Label>

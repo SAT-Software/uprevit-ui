@@ -3,18 +3,19 @@
 import { useState } from "react";
 
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
+import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import {
   MarkerTypeList,
   MarkerTypeItem,
   isMarkerTypeGroup,
 } from "@/types/toolbar";
-import { PiPlusDuotone } from "react-icons/pi";
 import {
   Tooltip,
   TooltipContent,
@@ -40,22 +41,23 @@ const ToolbarMarkersButton = ({
   };
 
   return (
-    <div className="inline-flex border rounded-md border-transparent hover:border hover:border-slate-200">
+    <div className="inline-flex">
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
             variant={variant}
-            title="Add Marker"
-            className="bg-transparent"
+            size="icon-sm"
+            className="size-7"
+            aria-label="Add marker"
             onClick={() => setPopoverOpen(!popoverOpen)}
           >
-            <PiPlusDuotone />
+            <Icon icon={Add01Icon} size={14} strokeWidth={2} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="flex flex-col w-auto max-w-60 p-2">
+        <PopoverContent className="flex w-auto max-w-60 flex-col p-2">
           {markerList.map((markers) => (
-            <div key={markers.name} className="flex flex-col mb-3 last:mb-0">
-              <h2 className="text-sm bg-slate-100 py-1 px-2 rounded-sm mb-1">
+            <div key={markers.name} className="mb-3 flex flex-col last:mb-0">
+              <h2 className="mb-1 rounded-sm bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
                 {markers.name}
               </h2>
               <div className="flex flex-wrap">
@@ -65,11 +67,15 @@ const ToolbarMarkersButton = ({
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="icon"
-                          // title={markerType.name}
+                          size="icon-sm"
+                          className="size-7"
                           onClick={() => handleMarkerSelection(markerType)}
                         >
-                          <markerType.icon />
+                          <Icon
+                            icon={markerType.icon}
+                            size={14}
+                            strokeWidth={2}
+                          />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>

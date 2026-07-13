@@ -25,11 +25,12 @@ import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import {
-  PiPencilSimpleDuotone,
-  PiXCircleDuotone,
-  PiFloppyDiskDuotone,
-  PiPictureInPictureDuotone,
-} from "react-icons/pi";
+  Cancel01Icon,
+  FloppyDiskIcon,
+  Image01Icon,
+  PropertyEditIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type FormData = {
@@ -144,21 +145,25 @@ export default function DialogEditLabelTag({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" disabled={isSubmitted}>
-          <PiPencilSimpleDuotone />
-          Edit
+        <Button
+          size="icon-xs"
+          variant="outline"
+          disabled={isSubmitted}
+          aria-label="Edit label"
+        >
+          <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
             <div className="flex items-center gap-2">
-              <PiPencilSimpleDuotone className="w-4 h-4" />
+              <Icon icon={PropertyEditIcon} size={16} strokeWidth={2} />
               <span>Edit Label</span>
             </div>
             <DialogClose asChild>
               <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
+                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </button>
             </DialogClose>
           </DialogTitle>
@@ -241,7 +246,7 @@ export default function DialogEditLabelTag({
                 reset();
               }}
             >
-              <PiXCircleDuotone />
+              <Icon icon={Cancel01Icon} />
               Cancel
             </Button>
           </DialogClose>
@@ -257,7 +262,7 @@ export default function DialogEditLabelTag({
             {uploadingImage || isPending ? (
               <Spinner />
             ) : (
-              <PiFloppyDiskDuotone />
+              <Icon icon={FloppyDiskIcon} />
             )}
             {uploadingImage
               ? "Uploading..."
@@ -313,7 +318,7 @@ function ComponentImage({ value, onChange }: ComponentImageProps) {
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiPictureInPictureDuotone className="w-12 h-12" />
+            <Icon icon={Image01Icon} size={40} strokeWidth={1.5} />
             <span className="text-xs font-medium">Upload Image</span>
           </div>
         )}

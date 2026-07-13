@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { PiPaintBucketDuotone } from "react-icons/pi";
+import { PaintBoardIcon } from "@hugeicons/core-free-icons";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 import ColorPicker from "../ui/ColorPicker";
 import { defaultColorsWithTransparent } from "@/types/colors";
@@ -32,7 +32,7 @@ const FillPanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
   };
 
   return (
-    <ToolboxPanel title="Fill" icon={PiPaintBucketDuotone} variant={variant}>
+    <ToolboxPanel title="Fill" icon={PaintBoardIcon} variant={variant}>
       <div className="flex flex-col space-y-4">
         <ColorPicker
           color={fillColor}

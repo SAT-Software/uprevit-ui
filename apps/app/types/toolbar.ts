@@ -1,5 +1,5 @@
 import { MarkerBase } from "@markerjs/markerjs3";
-import { IconType } from "react-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 
 export type ToolbarAction =
   | "select"
@@ -17,7 +17,7 @@ export type ToolbarAction =
   | "zoom-reset";
 
 export type MarkerTypeItem = {
-  icon: IconType;
+  icon: IconSvgElement;
   name: string;
   markerType: typeof MarkerBase;
 };
@@ -30,7 +30,7 @@ export type MarkerTypeGroup = {
 export type MarkerTypeList = Array<MarkerTypeGroup | MarkerTypeItem>;
 
 export function isMarkerTypeGroup(
-  item: MarkerTypeGroup | MarkerTypeItem
+  item: MarkerTypeGroup | MarkerTypeItem,
 ): item is MarkerTypeGroup {
   return "name" in item && "markerTypes" in item;
 }
