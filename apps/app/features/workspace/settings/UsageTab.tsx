@@ -196,7 +196,7 @@ function UsageLimitEnforcementForm({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Limit enforcement</p>
           <InfoTooltip content="Choose whether over-limit usage is allowed or blocked for exports and uploads." />
@@ -290,7 +290,7 @@ function UsageTab() {
   if (isLoading) {
     return (
       <div className="-m-2 flex flex-col">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Usage & limits</p>
             <InfoTooltip content="Review workspace usage for the current billing period and configure export and upload limit enforcement." />
@@ -318,7 +318,7 @@ function UsageTab() {
 
     return (
       <div className="-m-2 flex flex-col">
-        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <p className="text-sm font-medium">Usage & limits</p>
           <InfoTooltip content="Review workspace usage for the current billing period and configure export and upload limit enforcement." />
         </div>
@@ -374,7 +374,7 @@ function UsageTab() {
 
   return (
     <div className="-m-2 flex flex-col">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Usage & limits</p>
           <InfoTooltip content="Review workspace usage for the current billing period and configure export and upload limit enforcement." />
@@ -456,7 +456,7 @@ function UsageTab() {
           />
 
           <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
-            <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border pl-3 pr-2">
+            <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
               <p className="text-sm font-medium">SSO add-on</p>
               <InfoTooltip content="Single sign-on add-on status for your workspace subscription." />
             </div>

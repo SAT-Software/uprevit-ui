@@ -213,7 +213,7 @@ export function PlatformWorkspacesTable({
 
   const content = (
     <>
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex min-w-0 items-center gap-2">
           <p className="shrink-0 text-sm font-medium">Workspaces</p>
           <InfoTooltip content="Search, inspect, and open any organization workspace." />

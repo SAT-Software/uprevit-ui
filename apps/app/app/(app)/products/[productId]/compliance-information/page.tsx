@@ -54,7 +54,7 @@ export default function Page() {
     return (
       <div className="flex h-full flex-col gap-2">
         <div className="flex h-full w-full flex-col overflow-y-auto">
-          <div className="flex h-10 items-center gap-2 border-b border-border px-3">
+          <div className="flex h-10 items-center gap-2 border-b border-border bg-muted/60 px-3">
             <div className="h-4 w-44 animate-pulse rounded bg-muted" />
             <div className="size-3 animate-pulse rounded-full bg-muted" />
           </div>
@@ -64,7 +64,7 @@ export default function Page() {
                 key={section}
                 className="overflow-hidden rounded-2xl border border-border"
               >
-                <div className="flex h-10 items-center justify-between border-b border-border px-3">
+                <div className="flex h-10 items-center justify-between border-b border-border bg-muted/60 px-3">
                   <div className="h-4 w-40 animate-pulse rounded bg-muted" />
                   <div className="h-7 w-28 animate-pulse rounded-md bg-muted" />
                 </div>
@@ -246,7 +246,7 @@ export default function Page() {
       )}
 
       <div className="flex h-full w-full flex-col overflow-y-auto">
-        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 px-3">
           <p className="text-sm font-medium">Compliance Information</p>
           <InfoTooltip content="Document regulatory standards and packaging or labeling languages for this product." />
         </div>

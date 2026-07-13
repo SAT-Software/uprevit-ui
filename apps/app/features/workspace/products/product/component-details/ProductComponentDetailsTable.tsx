@@ -644,7 +644,7 @@ export default function ProductComponentDetailsTable({
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Label Components</p>
           <InfoTooltip content="Add and organize label components such as labels, tags, stickers, and packaging materials for your product." />

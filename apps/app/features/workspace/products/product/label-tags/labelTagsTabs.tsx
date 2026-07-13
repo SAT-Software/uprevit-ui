@@ -45,9 +45,6 @@ import {
   redlineOldValue,
 } from "@/utils/redlineStyles";
 
-const labelTagsTabTriggerClassName =
-  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
-
 interface LabelTagItem {
   _id: string;
   name?: string;
@@ -148,22 +145,19 @@ export default function LabelTagsTabs({
     });
   };
 
-  const completePendingSaveFlow = useCallback(
-    (error?: unknown) => {
-      const completion = pendingSaveFlowRef.current;
-      if (!completion) return;
+  const completePendingSaveFlow = useCallback((error?: unknown) => {
+    const completion = pendingSaveFlowRef.current;
+    if (!completion) return;
 
-      pendingSaveFlowRef.current = null;
-      if (error) {
-        completion.reject(
-          error instanceof Error ? error : new Error("Failed to save annotation"),
-        );
-      } else {
-        completion.resolve();
-      }
-    },
-    [],
-  );
+    pendingSaveFlowRef.current = null;
+    if (error) {
+      completion.reject(
+        error instanceof Error ? error : new Error("Failed to save annotation"),
+      );
+    } else {
+      completion.resolve();
+    }
+  }, []);
 
   const handleRendered = useCallback(
     async (dataUrl: string) => {
@@ -341,7 +335,9 @@ export default function LabelTagsTabs({
       const item = labelTagsData.find((labelTag) => labelTag._id === itemId);
       const itemImage = item?.image;
       if (!itemImage) {
-        return Promise.reject(new Error("No image available for this label tag"));
+        return Promise.reject(
+          new Error("No image available for this label tag"),
+        );
       }
 
       return new Promise((resolve, reject) => {
@@ -492,12 +488,7 @@ export default function LabelTagsTabs({
       setActiveTab(pendingTabChange);
       setPendingTabChange(null);
     }
-  }, [
-    effectiveActiveTab,
-    labelTagsData,
-    pendingTabChange,
-    saveDirtyItemIds,
-  ]);
+  }, [effectiveActiveTab, labelTagsData, pendingTabChange, saveDirtyItemIds]);
 
   const handleUnsavedDiscard = useCallback(() => {
     discardDirtyInTab(effectiveActiveTab);
@@ -520,11 +511,7 @@ export default function LabelTagsTabs({
       save: saveAllDirtyAndContinue,
       discard: discardAllDirty,
     }),
-    [
-      discardAllDirty,
-      hasEditableDirtyItems,
-      saveAllDirtyAndContinue,
-    ],
+    [discardAllDirty, hasEditableDirtyItems, saveAllDirtyAndContinue],
   );
 
   useRegisterProductWorkbookGuard(
@@ -602,7 +589,12 @@ export default function LabelTagsTabs({
       item.image ??
       (typeof diff.new_value === "string" ? diff.new_value : null);
 
-    if (diff === keyDiff && resolvedOld && resolvedNew && resolvedOld === resolvedNew) {
+    if (
+      diff === keyDiff &&
+      resolvedOld &&
+      resolvedNew &&
+      resolvedOld === resolvedNew
+    ) {
       return undefined;
     }
 
@@ -769,7 +761,7 @@ export default function LabelTagsTabs({
   if (!labelTagsData || labelTagsData.length === 0) {
     return (
       <div className="flex h-full w-full flex-col overflow-y-auto">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border px-3 pr-2">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 px-3 pr-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Label Tags</p>
             <InfoTooltip content="Add and organize label tags with annotations to highlight specific areas on label images." />
@@ -801,7 +793,7 @@ export default function LabelTagsTabs({
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border px-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 px-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Label Tags</p>
           <InfoTooltip content="Add and organize label tags with annotations to highlight specific areas on label images." />
@@ -846,68 +838,66 @@ export default function LabelTagsTabs({
         onValueChange={handleTabChange}
         className="flex min-h-0 flex-1 flex-col gap-0 overflow-hidden"
       >
-        <div className="flex shrink-0 items-end overflow-x-auto border-b border-border px-2 py-2">
-          <TabsList variant="line" className="h-auto gap-0.5 bg-transparent p-0">
+        <div className="flex h-10 shrink-0 items-center overflow-x-auto border-b border-border px-2">
+          <TabsList variant="line">
             {filteredLabelTypesForTabs?.map((type, i) => {
-                const typeStatus = typeStatusMap[type]?.status;
-                const typeDiff = typeStatusMap[type]?.typeDiff;
-                const isTypeAdded = isRedlineView && typeStatus === "added";
-                const isTypeRemoved = isRedlineView && typeStatus === "removed";
-                const isTypeModified =
-                  isRedlineView && typeStatus === "modified";
-                return (
-                  <TabsTrigger
-                    key={`${i}-${type}`}
-                    value={type}
-                    className={cn(
-                      labelTagsTabTriggerClassName,
-                      "gap-2",
-                      isTypeAdded &&
-                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800 dark:text-blue-400 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:text-blue-300",
-                      isTypeRemoved &&
-                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800 dark:text-red-400 dark:data-[state=active]:bg-red-950/30 dark:data-[state=active]:text-red-300",
-                      isTypeModified &&
-                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800 dark:text-amber-400 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:text-amber-300",
-                    )}
-                  >
-                    {isTypeModified && typeDiff ? (
-                      <RedlineValue value={type} diff={typeDiff} />
-                    ) : (
-                      <span>{type}</span>
-                    )}
-                    {isTypeAdded && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[9px]",
-                          cnRedlineBadge("added"),
-                        )}
-                      >
-                        NEW
-                      </span>
-                    )}
-                    {isTypeRemoved && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[9px]",
-                          cnRedlineBadge("removed"),
-                        )}
-                      >
-                        DEL
-                      </span>
-                    )}
-                    {isTypeModified && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[9px]",
-                          cnRedlineBadge("modified"),
-                        )}
-                      >
-                        MOD
-                      </span>
-                    )}
-                  </TabsTrigger>
-                );
-              })}
+              const typeStatus = typeStatusMap[type]?.status;
+              const typeDiff = typeStatusMap[type]?.typeDiff;
+              const isTypeAdded = isRedlineView && typeStatus === "added";
+              const isTypeRemoved = isRedlineView && typeStatus === "removed";
+              const isTypeModified = isRedlineView && typeStatus === "modified";
+              return (
+                <TabsTrigger
+                  key={`${i}-${type}`}
+                  value={type}
+                  className={cn(
+                    "gap-2",
+                    isTypeAdded &&
+                      "text-blue-700 data-[state=active]:!bg-blue-50 data-[state=active]:!text-blue-800 dark:text-blue-400 dark:data-[state=active]:!bg-blue-950/30 dark:data-[state=active]:!text-blue-300",
+                    isTypeRemoved &&
+                      "text-red-700 data-[state=active]:!bg-red-50 data-[state=active]:!text-red-800 dark:text-red-400 dark:data-[state=active]:!bg-red-950/30 dark:data-[state=active]:!text-red-300",
+                    isTypeModified &&
+                      "text-amber-700 data-[state=active]:!bg-amber-50 data-[state=active]:!text-amber-800 dark:text-amber-400 dark:data-[state=active]:!bg-amber-950/30 dark:data-[state=active]:!text-amber-300",
+                  )}
+                >
+                  {isTypeModified && typeDiff ? (
+                    <RedlineValue value={type} diff={typeDiff} />
+                  ) : (
+                    <span>{type}</span>
+                  )}
+                  {isTypeAdded && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[9px]",
+                        cnRedlineBadge("added"),
+                      )}
+                    >
+                      NEW
+                    </span>
+                  )}
+                  {isTypeRemoved && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[9px]",
+                        cnRedlineBadge("removed"),
+                      )}
+                    >
+                      DEL
+                    </span>
+                  )}
+                  {isTypeModified && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[9px]",
+                        cnRedlineBadge("modified"),
+                      )}
+                    >
+                      MOD
+                    </span>
+                  )}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </div>
 
@@ -928,7 +918,11 @@ export default function LabelTagsTabs({
                 const imageDiff = getImageDiff(item);
 
                 return (
-                  <TabsContent key={`${i}-${type}`} value={type} className="mt-0">
+                  <TabsContent
+                    key={`${i}-${type}`}
+                    value={type}
+                    className="mt-0"
+                  >
                     <div
                       className={cn(
                         "flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-all duration-200",
@@ -937,7 +931,7 @@ export default function LabelTagsTabs({
                         isRedlineView && isModified && redlineCardModified,
                       )}
                     >
-                      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+                      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
                         <div className="flex min-w-0 items-center gap-2">
                           {isRedlineView && isAdded && (
                             <span
@@ -990,7 +984,8 @@ export default function LabelTagsTabs({
                                 {item.name || "Untitled Label"}
                               </span>
                             )}
-                            {(item.description || (isRedlineView && descriptionDiff)) && (
+                            {(item.description ||
+                              (isRedlineView && descriptionDiff)) && (
                               <>
                                 <span className="text-muted-foreground">·</span>
                                 <span
@@ -1044,11 +1039,7 @@ export default function LabelTagsTabs({
                                   const annotation =
                                     currentEditorState[item._id];
                                   if (!annotation || !item.image) return;
-                                  handleSave(
-                                    item._id,
-                                    item.image,
-                                    annotation,
-                                  );
+                                  handleSave(item._id, item.image, annotation);
                                 }}
                               >
                                 {isPersisting &&
@@ -1069,57 +1060,55 @@ export default function LabelTagsTabs({
 
                       <div className="relative min-h-0">
                         <div className="min-w-0 lg:pr-[280px] xl:pr-[300px]">
-                            {isRedlineView && imageDiff ? (
-                              <div className="relative w-full max-w-md">
-                                <RedlineValue
-                                  value={item.image || ""}
-                                  diff={imageDiff}
-                                  isImage={true}
-                                />
-                              </div>
-                            ) : item.image ? (
-                              <Editor
-                                targetImageSrc={item.image}
-                                annotation={
-                                  currentEditorState[item._id] ??
-                                  savedAnnotations[item._id] ??
-                                  item.annotation_state ??
-                                  annotations[item._id] ??
-                                  null
-                                }
-                                legendItems={item.legend_items ?? []}
-                                showLegendOverlay={
-                                  !!legendOverlayById[item._id]
-                                }
-                                onStateChange={(newAnnotation) => {
-                                  handleStateChange(item._id, newAnnotation);
-                                }}
+                          {isRedlineView && imageDiff ? (
+                            <div className="relative w-full max-w-md">
+                              <RedlineValue
+                                value={item.image || ""}
+                                diff={imageDiff}
+                                isImage={true}
                               />
-                            ) : (
-                              <div
-                                className={cn(
-                                  "flex min-h-[360px] w-full flex-col items-center justify-center rounded-lg border border-dashed p-12 text-muted-foreground",
-                                  isRedlineView && isRemoved
-                                    ? "border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20"
-                                    : isRedlineView && isAdded
-                                      ? "border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
-                                      : "border-border bg-muted/30",
-                                )}
-                              >
-                                <Icon
-                                  icon={Image01Icon}
-                                  size={40}
-                                  strokeWidth={1.5}
-                                  className="mb-3 opacity-50"
-                                />
-                                <p className="text-sm font-medium">
-                                  No Image Available
-                                </p>
-                                <p className="mt-1 text-center text-xs">
-                                  Add an image to better visualize this label
-                                </p>
-                              </div>
-                            )}
+                            </div>
+                          ) : item.image ? (
+                            <Editor
+                              targetImageSrc={item.image}
+                              annotation={
+                                currentEditorState[item._id] ??
+                                savedAnnotations[item._id] ??
+                                item.annotation_state ??
+                                annotations[item._id] ??
+                                null
+                              }
+                              legendItems={item.legend_items ?? []}
+                              showLegendOverlay={!!legendOverlayById[item._id]}
+                              onStateChange={(newAnnotation) => {
+                                handleStateChange(item._id, newAnnotation);
+                              }}
+                            />
+                          ) : (
+                            <div
+                              className={cn(
+                                "flex min-h-[360px] w-full flex-col items-center justify-center rounded-lg border border-dashed p-12 text-muted-foreground",
+                                isRedlineView && isRemoved
+                                  ? "border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20"
+                                  : isRedlineView && isAdded
+                                    ? "border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
+                                    : "border-border bg-muted/30",
+                              )}
+                            >
+                              <Icon
+                                icon={Image01Icon}
+                                size={40}
+                                strokeWidth={1.5}
+                                className="mb-3 opacity-50"
+                              />
+                              <p className="text-sm font-medium">
+                                No Image Available
+                              </p>
+                              <p className="mt-1 text-center text-xs">
+                                Add an image to better visualize this label
+                              </p>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex min-h-0 w-full flex-col overflow-hidden border-t border-border lg:absolute lg:inset-y-0 lg:right-0 lg:w-[280px] lg:border-l lg:border-t-0 xl:w-[300px]">
@@ -1144,45 +1133,45 @@ export default function LabelTagsTabs({
         </div>
 
         {renderItem && annotations[renderItem.id] && (
-            <Render
-              targetImage={renderItem.image}
-              annotation={annotations[renderItem.id]}
-              mode="upload"
-              onRendered={handleRendered}
-              onComplete={() => {
-                setRenderItem(null);
-                if (!isRenderingRef.current) {
-                  setIsSaving(false);
-                }
-              }}
-            />
-          )}
-
-          <SaveTaggedImageDialog
-            open={saveDialogOpen}
-            onOpenChange={(open) => {
-              if ((isSaving || isUpdating) && !open) {
-                return;
-              }
-              setSaveDialogOpen(open);
-              if (!open) {
-                setPendingSave(null);
+          <Render
+            targetImage={renderItem.image}
+            annotation={annotations[renderItem.id]}
+            mode="upload"
+            onRendered={handleRendered}
+            onComplete={() => {
+              setRenderItem(null);
+              if (!isRenderingRef.current) {
+                setIsSaving(false);
               }
             }}
-            onConfirm={handleConfirmSave}
-            isPending={isSaving || isUpdating}
           />
+        )}
 
-          <UnsavedWorkbookChangesDialog
-            open={unsavedDialogOpen}
-            tabLabel="Label Tags"
-            onOpenChange={(open) => {
-              if (!open) handleUnsavedCancel();
-            }}
-            onSave={handleUnsavedSave}
-            onDiscard={handleUnsavedDiscard}
-            onCancel={handleUnsavedCancel}
-            isSaving={isPersisting}
+        <SaveTaggedImageDialog
+          open={saveDialogOpen}
+          onOpenChange={(open) => {
+            if ((isSaving || isUpdating) && !open) {
+              return;
+            }
+            setSaveDialogOpen(open);
+            if (!open) {
+              setPendingSave(null);
+            }
+          }}
+          onConfirm={handleConfirmSave}
+          isPending={isSaving || isUpdating}
+        />
+
+        <UnsavedWorkbookChangesDialog
+          open={unsavedDialogOpen}
+          tabLabel="Label Tags"
+          onOpenChange={(open) => {
+            if (!open) handleUnsavedCancel();
+          }}
+          onSave={handleUnsavedSave}
+          onDiscard={handleUnsavedDiscard}
+          onCancel={handleUnsavedCancel}
+          isSaving={isPersisting}
         />
       </Tabs>
     </div>

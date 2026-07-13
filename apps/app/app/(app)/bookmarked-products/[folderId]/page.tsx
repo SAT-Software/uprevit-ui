@@ -69,7 +69,7 @@ export default function FolderPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <div className="flex min-w-0 items-center gap-2">
             <Skeleton className="h-5 w-6 rounded" />
             <Skeleton className="h-4 w-32" />
@@ -91,7 +91,7 @@ export default function FolderPage() {
   if (error) {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <div className="flex min-w-0 items-center gap-2">
             <FolderTitleIcon className="shrink-0" />
             <p className="truncate text-sm font-medium text-muted-foreground">
@@ -126,7 +126,7 @@ export default function FolderPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex min-w-0 items-center gap-2">
           <FolderTitleIcon className="shrink-0" />
           <p className="truncate text-sm font-medium">

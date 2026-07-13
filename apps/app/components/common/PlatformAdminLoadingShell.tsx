@@ -14,7 +14,7 @@ const TABLE_COLUMN_COUNT = 4;
 export function PlatformAdminLoadingShell() {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="h-4 w-32 animate-pulse rounded bg-muted" />
         <div className="flex items-center gap-1.5">
           <div className="h-7 w-20 animate-pulse rounded-md bg-muted" />
@@ -22,7 +22,7 @@ export function PlatformAdminLoadingShell() {
         </div>
       </div>
 
-      <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
+      <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
         <div className="flex gap-0.5">
           <div className="h-7 w-20 animate-pulse rounded-lg bg-muted" />
           <div className="h-7 w-24 animate-pulse rounded-lg bg-muted" />
@@ -49,7 +49,7 @@ export function PlatformAdminLoadingShell() {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-background">
-            <div className="flex h-10 items-center border-b border-border pl-3 pr-2">
+            <div className="flex h-10 items-center border-b border-border bg-muted/60 pl-3 pr-2">
               <div className="h-4 w-28 animate-pulse rounded bg-muted" />
             </div>
             <div className="p-2">

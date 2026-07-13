@@ -82,7 +82,7 @@ function ProfileTab() {
 
         {/* Personal Information Skeleton */}
         <div className="overflow-hidden rounded-2xl border border-border bg-background">
-          <div className="flex h-10 items-center justify-between border-b border-border pl-3 pr-2">
+          <div className="flex h-10 items-center justify-between border-b border-border bg-muted/60 pl-3 pr-2">
             <Skeleton className="h-4 w-40" />
             <Skeleton className="h-7 w-24 rounded-md" />
           </div>
@@ -151,7 +151,7 @@ function ProfileTab() {
 
       {/* Personal Information */}
       <div className="overflow-hidden rounded-2xl border border-border bg-background">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Personal Information</p>
             <InfoTooltip content="Your personal details visible to other members of the workspace." />

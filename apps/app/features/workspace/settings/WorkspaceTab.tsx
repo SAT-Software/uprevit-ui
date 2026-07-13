@@ -126,7 +126,7 @@ function WorkspaceTab() {
           <Skeleton className="h-7 w-32 rounded-md" />
         </div>
         <div className="overflow-hidden rounded-2xl border border-border bg-background">
-          <div className="flex h-10 items-center border-b border-border pl-3">
+          <div className="flex h-10 items-center border-b border-border bg-muted/60 pl-3">
             <Skeleton className="h-4 w-44" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2">
@@ -193,7 +193,7 @@ function WorkspaceTab() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-background">
-        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border pl-3 pr-2">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
           <p className="text-sm font-medium">Workspace Information</p>
           <InfoTooltip content="Organization details and identifiers for your workspace." />
         </div>

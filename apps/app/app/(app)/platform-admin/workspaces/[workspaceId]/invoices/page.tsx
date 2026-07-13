@@ -85,7 +85,7 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
 
         <div className="min-h-0 flex-1 overflow-y-auto p-2">
           <div className="overflow-hidden rounded-2xl border border-border bg-background">
-            <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+            <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium">Invoices</p>
                 <InfoTooltip content="Billing invoices for this workspace. Open one to view details or download." />

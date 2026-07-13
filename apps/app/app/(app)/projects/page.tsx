@@ -73,7 +73,7 @@ function ProjectsPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">All Projects</p>
           <InfoTooltip content="All the projects in your workspace. Projects sit between departments and products — each project belongs to one department and holds multiple products." />
@@ -127,7 +127,7 @@ function ProjectsPage() {
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon-xs"
                       className="h-7 px-2 text-xs text-muted-foreground/60 hover:text-muted-foreground"
                       onClick={() =>
                         listState.setSort(

@@ -54,7 +54,7 @@ export default function Page() {
   if (isLoading) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <div className="h-4 w-36 animate-pulse rounded bg-muted" />
           <div className="h-7 w-36 animate-pulse rounded-md bg-muted" />
         </div>

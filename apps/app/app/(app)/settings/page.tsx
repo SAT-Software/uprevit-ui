@@ -32,9 +32,6 @@ import { toast } from "sonner";
 
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
 
-const settingsTabTriggerClassName =
-  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
-
 function SettingsPage() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -77,7 +74,7 @@ function SettingsPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Settings</p>
           <InfoTooltip content="Manage your account settings and preferences." />
@@ -93,36 +90,27 @@ function SettingsPage() {
         onValueChange={handleTabChange}
         className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
       >
-        <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
-          <TabsList variant="line" className="h-auto gap-1 bg-transparent p-0">
-            <TabsTrigger
-              value="profile"
-              className={settingsTabTriggerClassName}
-            >
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+          <TabsList variant="line">
+            <TabsTrigger value="profile">
               <Icon icon={UserIcon} size={14} strokeWidth={2} />
               Profile
             </TabsTrigger>
-            <TabsTrigger
-              value="workspace"
-              className={settingsTabTriggerClassName}
-            >
+            <TabsTrigger value="workspace">
               <Icon icon={DashboardSquare01Icon} size={14} strokeWidth={2} />
               Workspace
             </TabsTrigger>
-            <TabsTrigger value="users" className={settingsTabTriggerClassName}>
+            <TabsTrigger value="users">
               <Icon icon={UserGroupIcon} size={14} strokeWidth={2} />
               Users
             </TabsTrigger>
-            <TabsTrigger value="admins" className={settingsTabTriggerClassName}>
+            <TabsTrigger value="admins">
               <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
               Admins
             </TabsTrigger>
             {isAdmin ? (
               <>
-                <TabsTrigger
-                  value="usage"
-                  className={settingsTabTriggerClassName}
-                >
+                <TabsTrigger value="usage">
                   <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
                   Usage
                 </TabsTrigger>

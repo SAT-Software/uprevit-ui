@@ -88,7 +88,7 @@ export function PlatformChargebeeSection({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Chargebee</p>
           <InfoTooltip content="Customer and subscription linkage used for invoicing and usage sync." />

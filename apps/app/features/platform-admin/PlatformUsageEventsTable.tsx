@@ -195,7 +195,7 @@ export function PlatformUsageEventsTable({
   if (isError) {
     return (
       <div className="flex flex-col">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
           <div className="flex min-w-0 items-center gap-2">
             <p className="shrink-0 text-sm font-medium">Usage events</p>
             <InfoTooltip content={USAGE_EVENTS_TOOLTIP} />
@@ -211,7 +211,7 @@ export function PlatformUsageEventsTable({
 
   return (
     <div className="flex flex-col">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex min-w-0 items-center gap-2">
           <p className="shrink-0 text-sm font-medium">Usage events</p>
           <InfoTooltip content={USAGE_EVENTS_TOOLTIP} />

@@ -46,15 +46,21 @@ function DepartmentCard({
   const departmentImageSrc = getNextImageSrc(department.image);
 
   return (
-    <div key={department._id} className="relative w-full">
+    <div
+      key={department._id}
+      className={cn(
+        "relative w-full",
+
+        "border-b border-border",
+        location === "dashboard" && "last:border-b-0",
+      )}
+    >
       <Link
         href={`/departments/${department._id}`}
         className={cn(
           "group relative flex flex-col md:flex-row items-start md:items-center w-full p-3 gap-4  transition-all delay-100 duration-200 ease-in-out",
-          location === "dashboard" &&
-            "border border-border rounded-2xl hover:ring-2 hover:ring-border/60 hover:border-border",
-          location === "departments" &&
-            "border-b border-border rounded-none hover:bg-muted",
+
+          "rounded-none hover:bg-muted",
         )}
       >
         <div className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
@@ -93,11 +99,7 @@ function DepartmentCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge variant="large">
-                  <Icon
-                    icon={Calendar03Icon}
-                    size={14}
-                    strokeWidth={2}
-                  />
+                  <Icon icon={Calendar03Icon} size={14} strokeWidth={2} />
                   <span>
                     {department?.auditLogs?.[0]?.actionAt
                       ? formatToLocalDate(department?.auditLogs?.[0].actionAt)

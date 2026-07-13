@@ -72,8 +72,7 @@ const DEPARTMENT_SORT_OPTIONS = [
   { value: "actionAt", label: "Last Changed" },
 ];
 
-const DEPARTMENT_LIST_CONTENT_MIN_HEIGHT =
-  "min-h-[55rem] md:min-h-[42rem]";
+const DEPARTMENT_LIST_CONTENT_MIN_HEIGHT = "min-h-[55rem] md:min-h-[42rem]";
 
 function DepartmentsPage() {
   const listState = useWorkspaceListQuery({
@@ -92,7 +91,7 @@ function DepartmentsPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">All Departments</p>
           <InfoTooltip content="All the departments in your workspace. Departments group your work inside your workspace, for example by function, site, or product line." />
@@ -147,7 +146,7 @@ function DepartmentsPage() {
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon-xs"
                       className="h-7 px-2 text-xs text-muted-foreground/60 hover:text-muted-foreground"
                       onClick={() =>
                         listState.setSort(

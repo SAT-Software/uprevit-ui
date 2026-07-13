@@ -55,7 +55,7 @@ export function ComplianceStandardsSection({
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Compliance Standards</p>
           <InfoTooltip content="Add and manage regulatory compliance standards and certifications for this product." />

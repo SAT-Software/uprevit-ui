@@ -268,7 +268,7 @@ export function WorkspaceListControls({
             <TooltipTrigger>
               <Button
                 variant="outline"
-                size="sm"
+                size="icon-xs"
                 className="text-muted-foreground/60 hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out"
               >
                 <Icon

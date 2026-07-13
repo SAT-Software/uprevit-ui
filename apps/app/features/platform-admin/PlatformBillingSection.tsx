@@ -111,7 +111,7 @@ function PlatformBillingNotSetState({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-dashed border-border bg-muted/30">
-      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <p className="text-sm font-medium">Billing account</p>
         <InfoTooltip content="Create a billing account to configure limits, freezes, and Chargebee linking." />
       </div>
@@ -290,7 +290,7 @@ function BillingAccountCard({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex min-w-0 items-center gap-2">
           <p className="text-sm font-medium">Billing account</p>
           <InfoTooltip content="Subscription status, cadence, and add-on configuration for this workspace." />
@@ -371,7 +371,7 @@ function WorkspaceFreezesCard({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Workspace freezes</p>
           <InfoTooltip content="Operator controls that temporarily restrict usage or block access for this workspace." />
@@ -473,7 +473,7 @@ function UsageCorrectionsCard({
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Usage corrections</p>
           <InfoTooltip

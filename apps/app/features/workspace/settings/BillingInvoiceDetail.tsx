@@ -260,7 +260,7 @@ function BillingInvoiceDetail({
 
       {/* Line items */}
       <div className="border-b border-border">
-        <div className="flex h-10 shrink-0 items-center border-b border-border pl-3 pr-2">
+        <div className="flex h-10 shrink-0 items-center border-b border-border bg-muted/60 pl-3 pr-2">
           <p className="text-sm font-medium">Line items</p>
         </div>
         {invoice.lineItems.length === 0 ? (

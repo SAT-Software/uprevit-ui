@@ -66,14 +66,14 @@ export default function Page() {
   if (isLoading) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <div className="flex items-center gap-2">
             <div className="h-4 w-24 animate-pulse rounded bg-muted" />
             <div className="size-3 animate-pulse rounded-full bg-muted" />
           </div>
           <div className="h-7 w-28 animate-pulse rounded-md bg-muted" />
         </div>
-        <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
           <div className="flex gap-1">
             {[1, 2, 3].map((i) => (
               <div
@@ -93,7 +93,7 @@ export default function Page() {
   if (error) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <p className="text-sm font-medium">Label Tags</p>
         </div>
         <div className="flex flex-1 items-center justify-center p-12">
@@ -120,7 +120,8 @@ export default function Page() {
     );
   }
 
-  const labelTagsTabData = (data as LabelTagsResponse | undefined)?.result?.data;
+  const labelTagsTabData = (data as LabelTagsResponse | undefined)?.result
+    ?.data;
   const currentLabelTags = labelTagsTabData?.data ?? [];
   const hasDiffVersions = Boolean(
     diffData?.result?.base_version && diffData?.result?.next_version,

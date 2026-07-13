@@ -8,9 +8,6 @@ import {
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 
-const platformAdminTabTriggerClassName =
-  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
-
 const tabs = [
   {
     value: "overview",
@@ -44,15 +41,11 @@ export function PlatformAdminNav() {
   };
 
   return (
-    <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
+    <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList variant="line" className="h-auto gap-0.5 bg-transparent p-0">
+        <TabsList variant="line">
           {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              className={platformAdminTabTriggerClassName}
-            >
+            <TabsTrigger key={tab.value} value={tab.value}>
               <Icon icon={tab.icon} size={14} strokeWidth={2} />
               {tab.label}
             </TabsTrigger>

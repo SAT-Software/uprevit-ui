@@ -159,7 +159,7 @@ export default function Page() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Reports</p>
           <InfoTooltip content="Build custom queries across product data, run searches, and export results as PDF or Excel." />

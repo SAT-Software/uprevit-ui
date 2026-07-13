@@ -317,7 +317,7 @@ export default function DepartmentPageProjectsTable({
   return (
     <div className="px-2">
       <div className="flex flex-col border rounded-2xl">
-        <div className="h-10 flex items-center justify-between pl-3 pr-2">
+        <div className="h-10 flex items-center justify-between border-b border-border bg-muted/60 pl-3 pr-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Projects</p>
             <InfoTooltip

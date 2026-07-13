@@ -76,19 +76,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@uprevit/ui/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import { cn } from "@uprevit/ui/lib/utils";
 
 const PRODUCTS_TABS = ["all", "bookmarked"] as const;
 type ProductsTab = (typeof PRODUCTS_TABS)[number];
 const DEFAULT_PRODUCTS_TAB: ProductsTab = "all";
-
-const productsTabTriggerClassName =
-  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
 
 function isProductsTab(value: string | null): value is ProductsTab {
   return PRODUCTS_TABS.includes(value as ProductsTab);
@@ -511,7 +504,9 @@ export default function ProductsPage() {
   const isPending = isBookmarkedTab
     ? isBookmarkedProductsPending
     : isAllProductsPending;
-  const isError = isBookmarkedTab ? isBookmarkedProductsError : isAllProductsError;
+  const isError = isBookmarkedTab
+    ? isBookmarkedProductsError
+    : isAllProductsError;
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     DEFAULT_COLUMN_VISIBILITY,
   );
@@ -573,7 +568,7 @@ export default function ProductsPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Products</p>
           <InfoTooltip content="Manage and view all products in your workspace. Products are labeling documentation records with metadata, seven structured tabs, versions, and redlines." />
@@ -602,20 +597,10 @@ export default function ProductsPage() {
         onValueChange={handleTabChange}
         className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
       >
-        <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
-          <TabsList
-            variant="line"
-            className="h-auto gap-0.5 bg-transparent p-0"
-          >
-            <TabsTrigger value="all" className={productsTabTriggerClassName}>
-              All Products
-            </TabsTrigger>
-            <TabsTrigger
-              value="bookmarked"
-              className={productsTabTriggerClassName}
-            >
-              Bookmarked
-            </TabsTrigger>
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+          <TabsList variant="line">
+            <TabsTrigger value="all">All Products</TabsTrigger>
+            <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
           </TabsList>
         </div>
 
@@ -807,7 +792,8 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
-  const [showRemoveBookmarkDialog, setShowRemoveBookmarkDialog] = useState(false);
+  const [showRemoveBookmarkDialog, setShowRemoveBookmarkDialog] =
+    useState(false);
   const [removeBookmarkFolderId, setRemoveBookmarkFolderId] = useState<
     string | null
   >(null);

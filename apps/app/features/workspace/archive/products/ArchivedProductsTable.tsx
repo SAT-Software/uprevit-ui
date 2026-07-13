@@ -327,7 +327,7 @@ export function ArchivedProductsTable({
   return (
     <div className="px-2 pb-2">
       <div className="flex flex-col border rounded-2xl">
-        <div className="flex h-10 items-center justify-between gap-2 pl-3 pr-2">
+        <div className="flex h-10 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Products</p>
             <InfoTooltip content="Archived products in your workspace. Restore a product to return it to draft status." />

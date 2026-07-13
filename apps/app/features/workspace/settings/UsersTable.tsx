@@ -89,7 +89,7 @@ export function UsersTable() {
   if (isLoading) {
     return (
       <div className="overflow-hidden rounded-2xl border border-border bg-background">
-        <div className="flex h-10 items-center border-b border-border pl-3 pr-2">
+        <div className="flex h-10 items-center border-b border-border bg-muted/60 pl-3 pr-2">
           <Skeleton className="h-4 w-24" />
         </div>
         <div className="space-y-2 p-4">
@@ -116,7 +116,7 @@ export function UsersTable() {
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Users</p>
           <InfoTooltip content="Manage workspace members, roles, and access." />

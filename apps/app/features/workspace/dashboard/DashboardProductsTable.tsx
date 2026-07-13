@@ -18,11 +18,13 @@ import { AuditLog } from "@/types/product";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
+  ArrowUpRight01Icon,
   Blockchain03Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
   Table,
@@ -38,6 +40,7 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PiPackageDuotone } from "react-icons/pi";
@@ -139,10 +142,7 @@ const SortableHeader = ({
             </div>
             <div className="opacity-50 group-hover:opacity-100 transition-all delay-100 duration-200 ease-in-out">
               {column.getIsSorted() === "desc" ? (
-                <Icon
-                  icon={ArrowDown01Icon}
-                  className="ml-1 h-3 w-3"
-                />
+                <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
               ) : column.getIsSorted() === "asc" ? (
                 <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
               ) : (
@@ -386,13 +386,14 @@ export default function DashboardProductsTable() {
   if (isLoading) {
     return (
       <div className="w-full border border-border rounded-2xl overflow-hidden">
-        <div className="w-full flex items-center justify-between border-b h-10 pl-4 pr-2">
+        <div className="w-full flex items-center justify-between border-b h-10 pl-3 pr-2 bg-muted/60">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">Recent Products</p>
-            <InfoTooltip content="Recently created or updated products" />
+            <p className="text-sm font-medium">Products</p>
+            <InfoTooltip content="A product in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and redlines" />
           </div>
           <div className="flex items-center gap-2">
             <Skeleton className="size-7 rounded-md" />
+            <Skeleton className="h-8 w-24 rounded-md" />
           </div>
         </div>
         <Table>
@@ -427,11 +428,22 @@ export default function DashboardProductsTable() {
   if (error) {
     return (
       <div className="w-full border border-border rounded-2xl overflow-hidden">
-        <div className="w-full flex items-center justify-between border-b h-10 pl-4 pr-2">
+        <div className="w-full flex items-center justify-between border-b h-10 pl-3 pr-2 bg-muted/60">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">Recent Products</p>
-            <InfoTooltip content="Recently created or updated products" />
+            <p className="text-sm font-medium">Products</p>
+            <InfoTooltip content="A product in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and redlines" />
           </div>
+          <Link href="/products" className="shrink-0 group">
+            <Button size="sm" variant="secondary">
+              Show All
+              <Icon
+                icon={ArrowUpRight01Icon}
+                size={16}
+                strokeWidth={2}
+                className="text-foreground/40 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+              />
+            </Button>
+          </Link>
         </div>
         <DashboardErrorState
           variant="panel"
@@ -446,13 +458,24 @@ export default function DashboardProductsTable() {
 
   return (
     <div className="w-full border border-border rounded-2xl overflow-hidden">
-      <div className="w-full flex items-center justify-between border-b h-10 pl-4 pr-2">
+      <div className="w-full flex items-center justify-between border-b h-10 pl-3 pr-2 bg-muted/60">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium">Recent Products</p>
-          <InfoTooltip content="Recently created or updated products" />
+          <p className="text-sm font-medium">Products</p>
+          <InfoTooltip content="A product in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and redlines" />
         </div>
         <div className="flex items-center gap-2">
           <ShowOrHideTableColumnsDropdown table={table} />
+          <Link href="/products" className="shrink-0 group">
+            <Button size="sm" variant="secondary">
+              Show All
+              <Icon
+                icon={ArrowUpRight01Icon}
+                size={16}
+                strokeWidth={2}
+                className="text-foreground/40 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+              />
+            </Button>
+          </Link>
         </div>
       </div>
       <Table>

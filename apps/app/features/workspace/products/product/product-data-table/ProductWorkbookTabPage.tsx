@@ -106,7 +106,7 @@ export function ProductWorkbookTabPage({
   if (isLoading) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <div className="flex items-center gap-2">
             <div className="h-4 w-40 animate-pulse rounded bg-muted" />
             <div className="size-3 animate-pulse rounded-full bg-muted" />
@@ -123,7 +123,7 @@ export function ProductWorkbookTabPage({
   if (error) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background p-2 pl-3">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <p className="text-base font-medium">{title}</p>
         </div>
         <div className="flex flex-1 items-center justify-center p-12">
@@ -163,7 +163,7 @@ export function ProductWorkbookTabPage({
         </div>
       )}
 
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">{title}</p>
           <InfoTooltip content={subtitle} />

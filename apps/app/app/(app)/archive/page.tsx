@@ -29,9 +29,6 @@ const ARCHIVE_TABS = ["department", "project", "product"] as const;
 type ArchiveTab = (typeof ARCHIVE_TABS)[number];
 const DEFAULT_ARCHIVE_TAB: ArchiveTab = "department";
 
-const archiveTabTriggerClassName =
-  "flex-none h-7 shrink-0 rounded-lg px-2 text-sm font-medium text-foreground/40 shadow-none transition-colors hover:text-foreground/60 data-[state=active]:bg-foreground/[0.08] data-[state=active]:text-foreground data-[state=active]:shadow-none group-data-[variant=line]/tabs-list:data-[state=active]:!bg-foreground/[0.08] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:z-10 after:h-0.5 after:rounded-full after:bg-foreground after:opacity-0 data-[state=active]:after:opacity-100";
-
 function isArchiveTab(value: string | null): value is ArchiveTab {
   return ARCHIVE_TABS.includes(value as ArchiveTab);
 }
@@ -64,7 +61,7 @@ function ArchivePage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-background p-2 pl-3">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Archive</p>
           <InfoTooltip content="Browse and restore archived departments, projects, and products from your workspace." />
@@ -96,37 +93,18 @@ function ArchivePage() {
         onValueChange={handleTabChange}
         className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
       >
-        <div className="flex shrink-0 items-end border-b border-border px-2 py-2">
-          <TabsList
-            variant="line"
-            className="h-auto gap-0.5 bg-transparent p-0"
-          >
-            <TabsTrigger
-              value="department"
-              className={archiveTabTriggerClassName}
-            >
-              <Icon
-                icon={NewOfficeIcon}
-                size={14}
-                strokeWidth={2}
-              />
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+          <TabsList variant="line">
+            <TabsTrigger value="department">
+              <Icon icon={NewOfficeIcon} size={14} strokeWidth={2} />
               Departments
             </TabsTrigger>
-            <TabsTrigger value="project" className={archiveTabTriggerClassName}>
-              <Icon
-                icon={KanbanIcon}
-                size={14}
-                strokeWidth={2}
-              />
+            <TabsTrigger value="project">
+              <Icon icon={KanbanIcon} size={14} strokeWidth={2} />
               Projects
             </TabsTrigger>
-            <TabsTrigger value="product" className={archiveTabTriggerClassName}>
-              <Icon
-                icon={Blockchain03Icon}
-                size={14}
-                strokeWidth={2}
-           
-              />
+            <TabsTrigger value="product">
+              <Icon icon={Blockchain03Icon} size={14} strokeWidth={2} />
               Products
             </TabsTrigger>
           </TabsList>
