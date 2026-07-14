@@ -1,16 +1,34 @@
 "use client";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import {
+  ARCHIVE_ACTIVITY_META,
+  DashboardStatActivityBadge,
+  DEPARTMENT_ACTIVITY_META,
+  PRODUCT_ACTIVITY_META,
+  PROJECT_ACTIVITY_META,
+  SOURCE_FILE_ACTIVITY_META,
+} from "@/features/workspace/dashboard/DashboardStatActivityBadge";
+import { useGetDashboardActivityStats } from "@/hooks/dashboard/useGetDashboardActivityStats";
 import { useGetDashboardStats } from "@/hooks/dashboard/useGetDashboardStats";
 import {
   ArchiveIcon,
   Blockchain03Icon,
+  Chart01Icon,
+  Chart02Icon,
+  ChartBreakoutSquareIcon,
+  ChartBubble02Icon,
+  ChartNoAxesCombinedIcon,
+  ChartUpIcon,
   DashboardSpeed01Icon,
   Folder02Icon,
   KanbanIcon,
   NewOfficeIcon,
+  TimelineEventIcon,
+  UploadSquare01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import type { IconProps } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { DashboardErrorState } from "./DashboardErrorState";
@@ -37,6 +55,13 @@ export function StatsGrid({ location }: { location: string }) {
     isLoading: statsLoading,
     error: statsError,
   } = useGetDashboardStats();
+  const {
+    data: activityStats,
+    isLoading: activityLoading,
+    isError: activityError,
+  } = useGetDashboardActivityStats();
+
+  const activity = activityStats?.data;
 
   const stats: StatsCardProps[] = [
     {
@@ -70,12 +95,73 @@ export function StatsGrid({ location }: { location: string }) {
     {
       id: "archives",
       title: "Archives",
-      value: "TBD", //To be updated
+      value: dashboardStats?.data?.total_archives ?? 0,
       icon: <Icon icon={ArchiveIcon} size={16} strokeWidth={2} />,
       info: "Total archived departments, projects and products in your organization's workspace",
     },
   ];
   const visibleStats = location === "archive" ? stats.slice(0, 3) : stats;
+
+  function renderActivityBadge(statId: string) {
+    if (activityLoading) {
+      return <Skeleton className="h-4 w-16" />;
+    }
+
+    if (activityError || !activity) {
+      return null;
+    }
+
+    switch (statId) {
+      case "departments":
+        return (
+          <DashboardStatActivityBadge
+            total={activity.departments.total}
+            breakdown={activity.departments}
+            meta={DEPARTMENT_ACTIVITY_META}
+            icon={Chart01Icon}
+          />
+        );
+      case "projects":
+        return (
+          <DashboardStatActivityBadge
+            total={activity.projects.total}
+            breakdown={activity.projects}
+            meta={PROJECT_ACTIVITY_META}
+            icon={Chart01Icon}
+          />
+        );
+      case "products":
+        return (
+          <DashboardStatActivityBadge
+            total={activity.products.total}
+            breakdown={activity.products}
+            meta={PRODUCT_ACTIVITY_META}
+            icon={Chart01Icon}
+          />
+        );
+      case "source-files":
+        return (
+          <DashboardStatActivityBadge
+            total={activity.source_files.total}
+            breakdown={activity.source_files}
+            meta={SOURCE_FILE_ACTIVITY_META}
+            icon={Chart01Icon}
+          />
+        );
+      case "archives":
+        return (
+          <DashboardStatActivityBadge
+            total={activity.archives.total}
+            breakdown={activity.archives}
+            meta={ARCHIVE_ACTIVITY_META}
+            icon={Chart01Icon}
+            variant="archive"
+          />
+        );
+      default:
+        return null;
+    }
+  }
 
   if (statsLoading) {
     return (
@@ -88,10 +174,7 @@ export function StatsGrid({ location }: { location: string }) {
         )}
       >
         {visibleStats.map((stat) => (
-          <div
-            key={stat.id}
-            className="relative group flex w-full items-center justify-between p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
-          >
+          <div key={stat.id} className="relative group flex w-full min-h-[88px] p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4">
             <div className="relative flex items-center gap-4">
               <div className="hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground/60 sm:flex">
                 {stat.icon}
@@ -103,10 +186,13 @@ export function StatsGrid({ location }: { location: string }) {
                   </p>
                   <InfoTooltip content={stat.info} />
                 </div>
-                <p className="mb-2 h-8 text-2xl font-semibold leading-8">
+                <p className="h-8 text-2xl font-semibold leading-8">
                   <Skeleton className="inline-block h-8 w-10 rounded" />
                 </p>
               </div>
+            </div>
+            <div className="absolute bottom-3 right-3 lg:bottom-4 lg:right-4">
+              <Skeleton className="h-4 w-16" />
             </div>
           </div>
         ))}
@@ -140,10 +226,7 @@ export function StatsGrid({ location }: { location: string }) {
     >
       {visibleStats.map(({ id, title, value, icon, info }) => {
         return (
-          <div
-            key={id}
-            className="relative group flex w-full items-center justify-between p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
-          >
+          <div key={id} className="relative group flex w-full min-h-[88px] p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4">
             <div className="relative flex items-center gap-4">
               <div
                 className={cn(
@@ -160,10 +243,13 @@ export function StatsGrid({ location }: { location: string }) {
                   </p>
                   <InfoTooltip content={info} />
                 </div>
-                <p className="mb-2 h-8 text-2xl font-semibold leading-8">
+                <p className="h-8 text-2xl font-semibold leading-8">
                   {typeof value === "number" ? formatStatValue(value) : value}
                 </p>
               </div>
+            </div>
+            <div className="absolute bottom-3 right-3 lg:bottom-4 lg:right-4">
+              {renderActivityBadge(id)}
             </div>
           </div>
         );
