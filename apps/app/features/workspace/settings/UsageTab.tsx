@@ -235,7 +235,7 @@ function UsageLimitEnforcementForm({
 
         <Field>
           <FieldLabel htmlFor="exports-limit">Export limit</FieldLabel>
-          <InputGroup className="h-9">
+          <InputGroup size="md">
             <InputGroupInput
               id="exports-limit"
               type="number"
@@ -253,7 +253,7 @@ function UsageLimitEnforcementForm({
 
         <Field>
           <FieldLabel htmlFor="upload-limit">Upload limit (GB)</FieldLabel>
-          <InputGroup className="h-9">
+          <InputGroup size="md">
             <InputGroupInput
               id="upload-limit"
               type="number"

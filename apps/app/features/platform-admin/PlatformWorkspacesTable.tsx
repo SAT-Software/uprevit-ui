@@ -219,12 +219,12 @@ export function PlatformWorkspacesTable({
           <InfoTooltip content="Search, inspect, and open any organization workspace." />
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <InputGroup className="h-7 w-48">
+          <InputGroup className="w-48">
             <InputGroupInput
               value={listState.searchDraft}
               onChange={(event) => listState.setSearchDraft(event.target.value)}
               placeholder="Search workspaces…"
-              className="h-7 text-sm"
+              className="text-sm"
             />
             <InputGroupAddon>
               <Icon icon={Search02Icon} size={14} strokeWidth={2} />

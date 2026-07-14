@@ -160,7 +160,7 @@ export function ActivityLogsSheet({
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search logs..."
-                className="h-7 w-full text-sm"
+                className="w-full text-sm"
               />
               <InputGroupAddon>
                 <Icon icon={Search02Icon} size={14} strokeWidth={2} />

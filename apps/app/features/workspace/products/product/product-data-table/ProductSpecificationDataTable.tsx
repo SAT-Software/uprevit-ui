@@ -1537,7 +1537,7 @@ export function ProductSpecificationDataTable({
 
         <div className="flex-1" />
 
-        <InputGroup className="max-w-48 h-7">
+        <InputGroup className="max-w-48">
           <InputGroupInput
             placeholder="Search..."
             value={searchQuery}

@@ -1,49 +1,36 @@
 "use client";
 
+import { useId } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@uprevit/ui/components/ui/dialog";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@uprevit/ui/components/ui/field";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup, FieldError } from "@uprevit/ui/components/ui/field";
 import {
   InputGroup,
   InputGroupInput,
-  InputGroupText,
 } from "@uprevit/ui/components/ui/input-group";
 import { useInviteWorkspaceMembers } from "@/hooks/workspace/useInviteWorkspaceMembers";
 import { toast } from "sonner";
 import {
-  PiXCircleDuotone,
-  PiPaperPlaneRightDuotone,
-  PiPlusCircleDuotone,
-  PiTrashDuotone,
-  PiEnvelopeSimpleDuotone,
-  PiUserDuotone,
-} from "react-icons/pi";
-import { UserAdd01Icon } from "@hugeicons/core-free-icons";
+  Cancel01Icon,
+  Delete02Icon,
+  MailSend01Icon,
+  UserAdd01Icon,
+  MinusSignSquareIcon,
+  MailAccount01Icon,
+} from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { cn } from "@uprevit/ui/lib/utils";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
 type InviteMembersFormValues = {
   users: { name: string; email: string }[];
 };
 
 export function InviteMembersDialog() {
+  const id = useId();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
@@ -75,8 +62,6 @@ export function InviteMembersDialog() {
       return;
     }
 
-    console.log("Inviting users:", users);
-
     inviteMembersMutation(users, {
       onSuccess: () => {
         form.reset();
@@ -98,38 +83,42 @@ export function InviteMembersDialog() {
             }
           }}
         >
-          <Icon icon={UserAdd01Icon} size={14} strokeWidth={2} />
-          Invite Members
+          <Icon icon={MailAccount01Icon} size={14} strokeWidth={2} />
+          Invite Users
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-[600px] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Invite Users</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-          <div className="px-4 py-3 text-sm text-muted-foreground bg-muted/20 border-b">
-            Enter the name and email address of the users you want to invite to
-            this workspace.
-          </div>
-        </DialogHeader>
-
+      <AppDialogContent
+        title="Invite Users"
+        description="Invite users to this workspace by name and email."
+        subtitle="Enter the name and email address of the users you want to invite to this workspace."
+        variant="form"
+        size="xl"
+        primaryAction={{
+          label: "Send Invitations",
+          loadingLabel: "Sending...",
+          form: `invite-users-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: MailSend01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
         <form
-          id="invite-users-form"
+          id={`invite-users-form-${id}`}
           onSubmit={form.handleSubmit(onSubmit)}
-          className="overflow-y-auto p-4"
+          noValidate
         >
-          <FieldGroup className="space-y-2 gap-4">
+          <FieldGroup className="gap-4 p-4">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="flex items-center gap-2 p-2 border rounded-lg bg-background/50 group hover:bg-muted/20 transition-colors"
+                className="group flex items-center gap-2 bg-background/50 transition-colors hover:bg-muted/20"
               >
-                <div className="grid flex-1 grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex w-full items-center gap-2">
                   <Controller
                     name={`users.${index}.name`}
                     control={form.control}
@@ -139,22 +128,18 @@ export function InviteMembersDialog() {
                         data-invalid={fieldState.invalid}
                         className="space-y-0"
                       >
-                        <FieldLabel
+                        <FormFieldLabel
                           htmlFor={`invite-name-${index}`}
-                          className="text-xs font-medium text-muted-foreground"
-                        >
-                          Name
-                        </FieldLabel>
-                        <InputGroup className="bg-background">
-                          <InputGroupText>
-                            <PiUserDuotone className="ml-2" />
-                          </InputGroupText>
+                          label="Name"
+                          tooltip="Full name of the person you are inviting."
+                        />
+                        <InputGroup size="md" className="bg-background">
                           <InputGroupInput
                             {...controllerField}
                             id={`invite-name-${index}`}
                             placeholder="John Doe"
                             autoComplete="off"
-                            className="pl-2"
+                            // className="pl-2"
                             aria-invalid={fieldState.invalid}
                           />
                         </InputGroup>
@@ -179,22 +164,17 @@ export function InviteMembersDialog() {
                         data-invalid={fieldState.invalid}
                         className="space-y-0"
                       >
-                        <FieldLabel
+                        <FormFieldLabel
                           htmlFor={`invite-email-${index}`}
-                          className="text-xs font-medium text-muted-foreground"
-                        >
-                          Email
-                        </FieldLabel>
-                        <InputGroup className="bg-background">
-                          <InputGroupText>
-                            <PiEnvelopeSimpleDuotone className="ml-2" />
-                          </InputGroupText>
+                          label="Email"
+                          tooltip="Email address where the workspace invitation will be sent."
+                        />
+                        <InputGroup size="md" className="bg-background">
                           <InputGroupInput
                             {...controllerField}
                             id={`invite-email-${index}`}
                             placeholder="name@example.com"
                             type="email"
-                            className="pl-2"
                             autoComplete="off"
                             aria-invalid={fieldState.invalid}
                           />
@@ -209,59 +189,45 @@ export function InviteMembersDialog() {
                 {fields.length > 1 && (
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="destructive"
                     size="icon"
-                    className="mt-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    className="self-end text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => remove(index)}
                     aria-label={`Remove user ${index + 1}`}
                   >
-                    <PiTrashDuotone className="w-4 h-4" />
+                    <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
                   </Button>
                 )}
               </div>
             ))}
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full border-dashed gap-2 p-4 text-muted-foreground hover:text-foreground"
-              onClick={() => append({ name: "", email: "" })}
-              disabled={fields.length >= 10}
-            >
-              <PiPlusCircleDuotone className="w-4 h-4" />
-              Add Another User
-            </Button>
+            <div className="flex flex-col items-center gap-2 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1 gap-2 border-dashed p-4 text-muted-foreground hover:text-foreground"
+                onClick={() => append({ name: "", email: "" })}
+                disabled={fields.length >= 10}
+              >
+                <Icon icon={UserAdd01Icon} size={16} strokeWidth={2} />
+                Add Another User
+              </Button>
+              {fields.length > 1 && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => form.reset()}
+                >
+                  <Icon icon={MinusSignSquareIcon} size={16} strokeWidth={2} />
+                  Reset
+                </Button>
+              )}
+            </div>
           </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => form.reset()}
-            className="text-muted-foreground"
-          >
-            <PiXCircleDuotone className="mr-2 h-4 w-4" />
-            Reset
-          </Button>
-          <Button
-            type="submit"
-            form="invite-users-form"
-            disabled={isPending}
-            size="sm"
-            className="gap-2"
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiPaperPlaneRightDuotone className="w-4 h-4" />
-            )}
-            {isPending ? "Sending..." : "Send Invitations"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

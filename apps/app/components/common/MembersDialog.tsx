@@ -5,12 +5,8 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@uprevit/ui/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
   InputGroup,
   InputGroupAddon,
@@ -21,9 +17,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useMemo, useState } from "react";
-import { PiMagnifyingGlassDuotone, PiUserDuotone } from "react-icons/pi";
+import { PiMagnifyingGlassDuotone } from "react-icons/pi";
+import { Search02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 
 export type User = {
   _id: string;
@@ -47,14 +44,17 @@ function MembersSearchBar({
   onChange: (v: string) => void;
 }) {
   return (
-    <InputGroup>
+    <InputGroup size="lg">
       <InputGroupInput
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search..."
       />
       <InputGroupAddon>
-        <PiMagnifyingGlassDuotone />
+        <Icon
+          icon={Search02Icon}
+          className="text-muted-foreground/60 group-hover:text-muted-foreground"
+        />
       </InputGroupAddon>
     </InputGroup>
   );
@@ -71,7 +71,7 @@ function MemberRow({ member }: { member: User }) {
   }, [member.name]);
 
   return (
-    <div className="flex items-center gap-3 rounded-lg p-2 transition-colors border border-border hover:bg-muted/50 group">
+    <div className="group flex items-center gap-2 transition-colors hover:bg-muted/50 p-2">
       <Avatar className="h-9 w-9 border border-border">
         {member.profileAvatar ? (
           <AvatarImage src={member.profileAvatar} alt={member.name} />
@@ -81,12 +81,12 @@ function MemberRow({ member }: { member: User }) {
         </AvatarFallback>
       </Avatar>
 
-      <div className="min-w-0 flex-1 flex flex-col gap-0.5">
-        <p className="truncate text-sm font-medium text-foreground leading-none">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="truncate text-sm font-medium leading-none text-foreground">
           {member.name}
         </p>
         {member.email ? (
-          <p className="truncate text-xs text-muted-foreground leading-none">
+          <p className="truncate text-xs leading-none text-muted-foreground">
             {member.email}
           </p>
         ) : null}
@@ -111,49 +111,53 @@ export function MembersDialog({
     );
   }, [users, query]);
 
+  const title = (
+    <span className="flex items-center gap-2">
+      {titlePrefix ? `${titlePrefix} ` : ""}Members
+      <span className="flex h-5 min-w-5 items-center justify-center rounded-full border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+        {users?.length}
+      </span>
+    </span>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
+      <AppDialogContent
+        title={title}
+        description={`${titlePrefix ? `${titlePrefix} ` : ""}Members list`}
+        variant="inform"
+        size="sm"
+        className="max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
-        className="max-h-[85vh] max-w-md overflow-hidden p-0 gap-0 border-border shadow-lg sm:rounded-xl"
-      >
-        <DialogHeader className="px-4 py-3 border-b border-border flex flex-row items-center justify-between space-y-0 bg-muted/10">
-          <DialogTitle className="text-base font-semibold flex items-center gap-2">
-            {titlePrefix ? `${titlePrefix} ` : ""}Members
-            <span className="flex items-center justify-center bg-muted border border-border text-muted-foreground text-[10px] font-medium px-1.5 h-5 rounded-full min-w-5">
-              {users?.length}
-            </span>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="p-3 border-b border-border bg-muted/5">
-          <MembersSearchBar value={query} onChange={setQuery} />
-        </div>
-
-        <ScrollArea className="max-h-[400px] overflow-y-auto my-2">
-          <div className="p-2 space-y-2">
-            {filtered?.length ? (
-              filtered?.map((m: User) => <MemberRow key={m._id} member={m} />)
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted/50">
-                  <PiUserDuotone className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium text-foreground">
-                    No members found
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Try searching for a different name
-                  </p>
-                </div>
-              </div>
-            )}
+        headerExtra={
+          <div className="border-b border-border bg-muted/20 p-2">
+            <MembersSearchBar value={query} onChange={setQuery} />
           </div>
-        </ScrollArea>
-      </DialogContent>
+        }
+        // bodyClassName="p-2"
+      >
+        <div className="space-y-2">
+          {filtered?.length ? (
+            filtered?.map((m: User) => <MemberRow key={m._id} member={m} />)
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
+                <Icon icon={UserGroupIcon} size={20} strokeWidth={2} />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-foreground">
+                  No members found
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Try searching for a different name
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </AppDialogContent>
     </Dialog>
   );
 }
@@ -177,7 +181,7 @@ export function MembersInlineTrigger({
         <TooltipTrigger asChild>
           <button
             type="button"
-            className={"flex items-center gap-3 cursor-pointer"}
+            className={"flex cursor-pointer items-center gap-3"}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -194,7 +198,7 @@ export function MembersInlineTrigger({
                     {m?.profileAvatar ? (
                       <AvatarImage src={m.profileAvatar} alt={m.name} />
                     ) : null}
-                    <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
+                    <AvatarFallback className="border border-border bg-muted text-[10px] text-muted-foreground">
                       {m?.name
                         ?.split(" ")
                         ?.map((p) => p[0]?.toUpperCase())
@@ -207,7 +211,7 @@ export function MembersInlineTrigger({
 
               {extra > 0 ? (
                 <Avatar className="h-7 w-7 ring-2 ring-background">
-                  <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
+                  <AvatarFallback className="border border-border bg-muted text-[10px] text-muted-foreground">
                     +{extra}
                   </AvatarFallback>
                 </Avatar>
@@ -215,7 +219,7 @@ export function MembersInlineTrigger({
 
               {users?.length === 0 ? (
                 <Avatar className="h-7 w-7 ring-2 ring-background">
-                  <AvatarFallback className="bg-muted text-[10px] border border-border text-muted-foreground">
+                  <AvatarFallback className="border border-border bg-muted text-[10px] text-muted-foreground">
                     0
                   </AvatarFallback>
                 </Avatar>

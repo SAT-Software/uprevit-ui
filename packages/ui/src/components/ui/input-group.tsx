@@ -8,14 +8,33 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 
-function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
+const inputGroupVariants = cva(
+  "group/input-group border-border dark:bg-input/30 relative flex w-full items-center rounded-lg border outline-none transition-[color,box-shadow] has-[>textarea]:h-auto",
+  {
+    variants: {
+      size: {
+        sm: "h-7",
+        md: "h-9",
+        lg: "h-10",
+      },
+    },
+    defaultVariants: {
+      size: "sm",
+    },
+  },
+);
+
+function InputGroup({
+  className,
+  size,
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupVariants>) {
   return (
     <div
       data-slot="input-group"
       role="group"
       className={cn(
-        "group/input-group border-border dark:bg-input/30 relative flex w-full items-center rounded-lg border outline-none transition-[color,box-shadow]",
-        "h-7 has-[>textarea]:h-auto",
+        inputGroupVariants({ size }),
 
         // Variants based on alignment.
         "has-[>[data-align=inline-start]]:[&>input]:pl-2",
@@ -136,7 +155,7 @@ function InputGroupInput({
     <Input
       data-slot="input-group-control"
       className={cn(
-        "flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent",
+        "h-full min-h-0 flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent",
         className,
       )}
       {...props}
@@ -167,4 +186,5 @@ export {
   InputGroupText,
   InputGroupInput,
   InputGroupTextarea,
+  inputGroupVariants,
 };

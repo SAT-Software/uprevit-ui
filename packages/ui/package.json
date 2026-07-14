@@ -11,6 +11,7 @@
     "./components/common/ThemeToggle": "./src/components/common/ThemeToggle.tsx",
     "./components/common/SlidingNumber": "./src/components/common/SlidingNumber.tsx",
     "./components/common/Icon": "./src/components/common/Icon.tsx",
+    "./components/common/app-dialog": "./src/components/common/app-dialog.tsx",
     "./components/kibo-ui/video-player": "./src/components/kibo-ui/video-player/index.tsx",
     "./hooks/general/use-mobile": "./src/hooks/general/use-mobile.ts",
     "./lib/utils": "./src/lib/utils.ts",
