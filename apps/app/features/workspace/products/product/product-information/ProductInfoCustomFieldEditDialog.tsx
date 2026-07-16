@@ -21,6 +21,7 @@ import {
   Delete02Icon,
   PencilEdit01Icon,
   PlusSignSquareIcon,
+  PropertyEditIcon,
   Settings05Icon,
 } from "@hugeicons/core-free-icons";
 import {
@@ -28,6 +29,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
 interface ProductData {
@@ -260,16 +267,14 @@ export default function ProductInformationCustomFieldEditDialog({
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex">
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline" disabled={isSubmitted}>
-                  <Icon icon={Settings05Icon} />
-                  Manage Custom Fields
-                </Button>
-              </DialogTrigger>
-            </span>
-          </TooltipTrigger>
+          <DialogTrigger asChild>
+            <TooltipTrigger asChild>
+              <Button size="sm" variant="outline" disabled={isSubmitted}>
+                <Icon icon={Settings05Icon} />
+                Manage Custom Fields
+              </Button>
+            </TooltipTrigger>
+          </DialogTrigger>
           <TooltipContent side="bottom">
             {isSubmitted
               ? "Submitted products can't be edited"
@@ -281,28 +286,6 @@ export default function ProductInformationCustomFieldEditDialog({
           description="Manage custom fields for product information."
           variant="form"
           size="xl"
-          headerExtra={
-            <div className="border-b bg-muted/5 px-4 py-3">
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant={activeTab === "add" ? "secondary" : "outline"}
-                  onClick={() => setActiveTab("add")}
-                >
-                  <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
-                  Add New Field
-                </Button>
-                <Button
-                  size="sm"
-                  variant={activeTab === "manage" ? "secondary" : "outline"}
-                  onClick={() => setActiveTab("manage")}
-                >
-                  <Icon icon={PencilEdit01Icon} size={16} strokeWidth={2} />
-                  Manage Existing Fields
-                </Button>
-              </div>
-            </div>
-          }
           primaryAction={
             activeTab === "add"
               ? {
@@ -321,188 +304,227 @@ export default function ProductInformationCustomFieldEditDialog({
             icon: Cancel01Icon,
           }}
         >
-          {activeTab === "add" ? (
-            <form
-              id={`edit-custom-fields-form-${id}`}
-              onSubmit={handleSubmit(onSubmit)}
-              noValidate
-            >
-              <FieldGroup className="gap-4 p-4">
-                {fields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="space-y-3 rounded-lg border bg-muted/30 p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-base font-medium text-muted-foreground">
-                        New Field
-                      </span>
-                      {fields.length > 1 ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCustomField(index)}
-                          className="h-6 w-6 p-0"
-                          aria-label="Remove field"
-                        >
-                          <Icon icon={Cancel01Icon} size={16} strokeWidth={2} />
-                        </Button>
-                      ) : null}
-                    </div>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "add" | "manage")}
+            className="gap-0"
+          >
+            <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+              <TabsList variant="line">
+                <TabsTrigger value="add">
+                  <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
+                  Add New Field
+                </TabsTrigger>
+                <TabsTrigger value="manage">
+                  <Icon icon={PencilEdit01Icon} size={16} strokeWidth={2} />
+                  Manage Existing Fields
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-                    <Field data-invalid={!!errors.customFields?.[index]?.label}>
-                      <FormFieldLabel
-                        htmlFor={`${id}-field-name-${index}`}
-                        label="Label"
-                      />
-                      <InputGroup size="md" className="bg-background">
-                        <InputGroupInput
-                          id={`${id}-field-name-${index}`}
-                          placeholder="Enter label"
-                          type="text"
-                          {...register(`customFields.${index}.label` as const, {
-                            required: "Label is required",
-                          })}
-                        />
-                      </InputGroup>
-                      <FieldError
-                        errors={[errors.customFields?.[index]?.label]}
-                      />
-                    </Field>
-
-                    <Field data-invalid={!!errors.customFields?.[index]?.value}>
-                      <FormFieldLabel
-                        htmlFor={`${id}-field-value-${index}`}
-                        label="Value"
-                      />
-                      <InputGroup size="md" className="bg-background">
-                        <InputGroupInput
-                          id={`${id}-field-value-${index}`}
-                          placeholder="Enter value"
-                          type="text"
-                          {...register(`customFields.${index}.value` as const, {
-                            required: "Value is required",
-                          })}
-                        />
-                      </InputGroup>
-                      <FieldError
-                        errors={[errors.customFields?.[index]?.value]}
-                      />
-                    </Field>
-                  </div>
-                ))}
-              </FieldGroup>
-            </form>
-          ) : (
-            <form className="p-4" onSubmit={(e) => e.preventDefault()}>
-              <FieldGroup className="gap-4">
-                {manageFields.length > 0 ? (
-                  manageFields.map((field, index) => (
+            <TabsContent value="add" className="mt-0">
+              <form
+                id={`edit-custom-fields-form-${id}`}
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+              >
+                <FieldGroup className="gap-4 p-4">
+                  {fields.map((field, index) => (
                     <div
                       key={field.id}
                       className="space-y-3 rounded-lg border bg-muted/30 p-4"
                     >
-                      <Field
-                        data-invalid={
-                          !!errorsManage.existingFields?.[index]?.label
-                        }
-                      >
-                        <FormFieldLabel label="Field Label" />
-                        <InputGroup size="md" className="bg-background">
-                          <InputGroupInput
-                            placeholder="Enter field label"
-                            type="text"
-                            {...registerManage(
-                              `existingFields.${index}.label` as const,
-                              { required: "Label is required" },
-                            )}
-                          />
-                        </InputGroup>
-                        <FieldError
-                          errors={[
-                            errorsManage.existingFields?.[index]?.label,
-                          ]}
-                        />
-                      </Field>
-
-                      <Field
-                        data-invalid={
-                          !!errorsManage.existingFields?.[index]?.value
-                        }
-                      >
-                        <FormFieldLabel label="Field Value" />
-                        <InputGroup size="md" className="bg-background">
-                          <InputGroupInput
-                            placeholder="Enter field value"
-                            type="text"
-                            {...registerManage(
-                              `existingFields.${index}.value` as const,
-                              { required: "Value is required" },
-                            )}
-                          />
-                        </InputGroup>
-                        <FieldError
-                          errors={[
-                            errorsManage.existingFields?.[index]?.value,
-                          ]}
-                        />
-                      </Field>
-
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const data = getValuesManage(
-                              `existingFields.${index}`,
-                            );
-                            handleUpdateCustomField(
-                              data._id,
-                              data.label,
-                              data.value,
-                            );
-                          }}
-                          disabled={isPending || isSubmitted}
-                        >
-                          <Icon
-                            icon={CheckmarkCircle01Icon}
-                            size={16}
-                            strokeWidth={2}
-                          />
-                          Update
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            setDeleteFieldId(field._id);
-                            setDeleteFieldOpen(true);
-                          }}
-                          disabled={isPending || isSubmitted}
-                        >
-                          <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
-                          Delete
-                        </Button>
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-medium text-muted-foreground">
+                          New Field
+                        </span>
+                        {fields.length > 1 ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeCustomField(index)}
+                            className="h-6 w-6 p-0"
+                            aria-label="Remove field"
+                          >
+                            <Icon
+                              icon={Cancel01Icon}
+                              size={16}
+                              strokeWidth={2}
+                            />
+                          </Button>
+                        ) : null}
                       </div>
+
+                      <Field
+                        data-invalid={!!errors.customFields?.[index]?.label}
+                      >
+                        <FormFieldLabel
+                          htmlFor={`${id}-field-name-${index}`}
+                          label="Label"
+                        />
+                        <InputGroup size="md" className="bg-background">
+                          <InputGroupInput
+                            id={`${id}-field-name-${index}`}
+                            placeholder="Enter label"
+                            type="text"
+                            {...register(
+                              `customFields.${index}.label` as const,
+                              {
+                                required: "Label is required",
+                              },
+                            )}
+                          />
+                        </InputGroup>
+                        <FieldError
+                          errors={[errors.customFields?.[index]?.label]}
+                        />
+                      </Field>
+
+                      <Field
+                        data-invalid={!!errors.customFields?.[index]?.value}
+                      >
+                        <FormFieldLabel
+                          htmlFor={`${id}-field-value-${index}`}
+                          label="Value"
+                        />
+                        <InputGroup size="md" className="bg-background">
+                          <InputGroupInput
+                            id={`${id}-field-value-${index}`}
+                            placeholder="Enter value"
+                            type="text"
+                            {...register(
+                              `customFields.${index}.value` as const,
+                              {
+                                required: "Value is required",
+                              },
+                            )}
+                          />
+                        </InputGroup>
+                        <FieldError
+                          errors={[errors.customFields?.[index]?.value]}
+                        />
+                      </Field>
                     </div>
-                  ))
-                ) : (
-                  <div className="py-8 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      No custom fields available.
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Switch to &quot;Add New Field&quot; tab to create your
-                      first custom field.
-                    </p>
-                  </div>
-                )}
-              </FieldGroup>
-            </form>
-          )}
+                  ))}
+                </FieldGroup>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="manage" className="mt-0">
+              <form className="p-4" onSubmit={(e) => e.preventDefault()}>
+                <FieldGroup className="gap-4">
+                  {manageFields.length > 0 ? (
+                    manageFields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="space-y-3 rounded-lg border bg-muted/30 p-4"
+                      >
+                        <Field
+                          data-invalid={
+                            !!errorsManage.existingFields?.[index]?.label
+                          }
+                        >
+                          <FormFieldLabel label="Field Label" />
+                          <InputGroup size="md" className="bg-background">
+                            <InputGroupInput
+                              placeholder="Enter field label"
+                              type="text"
+                              {...registerManage(
+                                `existingFields.${index}.label` as const,
+                                { required: "Label is required" },
+                              )}
+                            />
+                          </InputGroup>
+                          <FieldError
+                            errors={[
+                              errorsManage.existingFields?.[index]?.label,
+                            ]}
+                          />
+                        </Field>
+
+                        <Field
+                          data-invalid={
+                            !!errorsManage.existingFields?.[index]?.value
+                          }
+                        >
+                          <FormFieldLabel label="Field Value" />
+                          <InputGroup size="md" className="bg-background">
+                            <InputGroupInput
+                              placeholder="Enter field value"
+                              type="text"
+                              {...registerManage(
+                                `existingFields.${index}.value` as const,
+                                { required: "Value is required" },
+                              )}
+                            />
+                          </InputGroup>
+                          <FieldError
+                            errors={[
+                              errorsManage.existingFields?.[index]?.value,
+                            ]}
+                          />
+                        </Field>
+
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const data = getValuesManage(
+                                `existingFields.${index}`,
+                              );
+                              handleUpdateCustomField(
+                                data._id,
+                                data.label,
+                                data.value,
+                              );
+                            }}
+                            disabled={isPending || isSubmitted}
+                          >
+                            <Icon
+                              icon={PropertyEditIcon}
+                              size={16}
+                              strokeWidth={2}
+                            />
+                            Update
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              setDeleteFieldId(field._id);
+                              setDeleteFieldOpen(true);
+                            }}
+                            disabled={isPending || isSubmitted}
+                          >
+                            <Icon
+                              icon={Delete02Icon}
+                              size={16}
+                              strokeWidth={2}
+                            />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-8 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        No custom fields available.
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Switch to &quot;Add New Field&quot; tab to create your
+                        first custom field.
+                      </p>
+                    </div>
+                  )}
+                </FieldGroup>
+              </form>
+            </TabsContent>
+          </Tabs>
         </AppDialogContent>
       </Dialog>
 

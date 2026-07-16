@@ -119,15 +119,13 @@ export default function ProductInfoEditMetadataDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" disabled={isSubmitted}>
-                <Icon icon={PropertyEditIcon} /> Update
-              </Button>
-            </DialogTrigger>
-          </span>
-        </TooltipTrigger>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="outline" disabled={isSubmitted}>
+              <Icon icon={PropertyEditIcon} /> Update
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
         <TooltipContent side="bottom">
           {isSubmitted
             ? "Submitted products can't be edited"

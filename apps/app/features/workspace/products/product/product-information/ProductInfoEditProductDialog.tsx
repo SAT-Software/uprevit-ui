@@ -185,15 +185,13 @@ export default function EditProductDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" disabled={isSubmitted}>
-                <Icon icon={TaskEdit01Icon} /> Update Product Info
-              </Button>
-            </DialogTrigger>
-          </span>
-        </TooltipTrigger>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="outline" disabled={isSubmitted}>
+              <Icon icon={TaskEdit01Icon} /> Update Product Info
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
         <TooltipContent side="bottom">
           {isSubmitted
             ? "Submitted products can't be edited"
@@ -224,119 +222,121 @@ export default function EditProductDialog({
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <FieldGroup className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-            <Field
+          <FieldGroup className="gap-6 p-4">
+            <div
+              className="space-y-3 rounded-lg border bg-muted/30 p-4"
               data-invalid={
                 !!(errors.marketGeographySelect || errors.marketGeographyInput)
               }
             >
-              <FormFieldLabel
-                htmlFor={`${id}-market-geography`}
-                label="Market / Geography"
-              />
-              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    role="combobox"
-                    aria-expanded={comboboxOpen}
-                    className="h-9 w-full justify-between font-normal text-foreground/80"
-                    disabled={!!marketGeographyInput}
-                  >
-                    {marketGeographySelect
-                      ? GEO_MARKETS.find(
-                          (market) =>
-                            market.regionAcronym === marketGeographySelect,
-                        )?.regionAcronym
-                      : "Select market..."}
-                    <Icon
-                      icon={UnfoldMoreIcon}
-                      size={16}
-                      className="ml-2 shrink-0 opacity-50"
+              <FormFieldLabel label="Market / Geography" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-market-geography`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-expanded={comboboxOpen}
+                        className="h-9 w-full justify-between font-normal text-foreground/80"
+                        disabled={!!marketGeographyInput}
+                      >
+                        {marketGeographySelect
+                          ? GEO_MARKETS.find(
+                              (market) =>
+                                market.regionAcronym === marketGeographySelect,
+                            )?.regionAcronym
+                          : "Select market..."}
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search market..." />
+                        <CommandList className="max-h-60 overflow-y-auto">
+                          <CommandEmpty>No market found.</CommandEmpty>
+                          <CommandGroup>
+                            {GEO_MARKETS.map((market) => (
+                              <CommandItem
+                                key={market.regionAcronym}
+                                value={market.regionAcronym}
+                                onSelect={(currentValue) => {
+                                  const originalValue = GEO_MARKETS.find(
+                                    (m) =>
+                                      m.regionAcronym.toLowerCase() ===
+                                      currentValue.toLowerCase(),
+                                  )?.regionAcronym;
+
+                                  if (originalValue) {
+                                    setValue(
+                                      "marketGeographySelect",
+                                      originalValue === marketGeographySelect
+                                        ? ""
+                                        : originalValue,
+                                      { shouldValidate: true },
+                                    );
+                                    setComboboxOpen(false);
+                                  }
+                                }}
+                              >
+                                <Icon
+                                  icon={Tick01Icon}
+                                  size={16}
+                                  className={cn(
+                                    "mr-2",
+                                    marketGeographySelect === market.regionAcronym
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {market.regionAcronym} - {market.fullName}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-market-geography-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
+                      id={`${id}-market-geography-custom`}
+                      placeholder="Enter custom market/geography"
+                      type="text"
+                      disabled={!!marketGeographySelect}
+                      {...register("marketGeographyInput", {
+                        validate: (value) => {
+                          const selectValue = watch("marketGeographySelect");
+                          if (!value && !selectValue) {
+                            return "Market/Geography is required";
+                          }
+                          return true;
+                        },
+                      })}
                     />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0"
-                  onWheel={(e) => e.stopPropagation()}
-                >
-                  <Command>
-                    <CommandInput placeholder="Search market..." />
-                    <CommandList className="max-h-60 overflow-y-auto">
-                      <CommandEmpty>No market found.</CommandEmpty>
-                      <CommandGroup>
-                        {GEO_MARKETS.map((market) => (
-                          <CommandItem
-                            key={market.regionAcronym}
-                            value={market.regionAcronym}
-                            onSelect={(currentValue) => {
-                              const originalValue = GEO_MARKETS.find(
-                                (m) =>
-                                  m.regionAcronym.toLowerCase() ===
-                                  currentValue.toLowerCase(),
-                              )?.regionAcronym;
-
-                              if (originalValue) {
-                                setValue(
-                                  "marketGeographySelect",
-                                  originalValue === marketGeographySelect
-                                    ? ""
-                                    : originalValue,
-                                  { shouldValidate: true },
-                                );
-                                setComboboxOpen(false);
-                              }
-                            }}
-                          >
-                            <Icon
-                              icon={Tick01Icon}
-                              size={16}
-                              className={cn(
-                                "mr-2",
-                                marketGeographySelect === market.regionAcronym
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                            {market.regionAcronym} - {market.fullName}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-
-              <div className="flex items-center gap-2 py-1">
-                <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light uppercase text-muted-foreground">
-                  OR
-                </p>
-                <div className="h-0 w-full border-t border-dashed" />
+                  </InputGroup>
+                </Field>
               </div>
-
-              <FormFieldLabel
-                htmlFor={`${id}-market-geography-custom`}
-                label="Enter Custom Market"
-              />
-              <InputGroup size="md" className="bg-background">
-                <InputGroupInput
-                  id={`${id}-market-geography-custom`}
-                  placeholder="Enter custom market/geography"
-                  type="text"
-                  disabled={!!marketGeographySelect}
-                  {...register("marketGeographyInput", {
-                    validate: (value) => {
-                      const selectValue = watch("marketGeographySelect");
-                      if (!value && !selectValue) {
-                        return "Market/Geography is required";
-                      }
-                      return true;
-                    },
-                  })}
-                />
-              </InputGroup>
               <FieldError
                 errors={[
                   errors.marketGeographySelect || errors.marketGeographyInput
@@ -344,144 +344,146 @@ export default function EditProductDialog({
                     : undefined,
                 ]}
               />
-            </Field>
+            </div>
 
-            <Field
+            <div
+              className="space-y-3 rounded-lg border bg-muted/30 p-4"
               data-invalid={
                 !!(errors.countryOfOriginSelect || errors.countryOfOriginInput)
               }
             >
-              <FormFieldLabel
-                htmlFor={`${id}-country-origin`}
-                label="Country of Origin"
-              />
-              <Popover
-                open={countryComboboxOpen}
-                onOpenChange={setCountryComboboxOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    role="combobox"
-                    aria-expanded={countryComboboxOpen}
-                    className="h-9 w-full justify-between font-normal text-foreground/80"
-                    disabled={!!countryOfOriginInput}
+              <FormFieldLabel label="Country of Origin" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-country-origin`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <Popover
+                    open={countryComboboxOpen}
+                    onOpenChange={setCountryComboboxOpen}
                   >
-                    {countryOfOriginSelect ? (
-                      <span className="flex items-center gap-2">
-                        {(() => {
-                          const country = COUNTRIES.find(
-                            (c) => c.name === countryOfOriginSelect,
-                          );
-                          if (country) {
-                            const FlagComponent =
-                              Flags[country.code as keyof typeof Flags];
-                            return FlagComponent ? (
-                              <FlagComponent className="h-3 w-4 rounded-sm" />
-                            ) : null;
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-expanded={countryComboboxOpen}
+                        className="h-9 w-full justify-between font-normal text-foreground/80"
+                        disabled={!!countryOfOriginInput}
+                      >
+                        {countryOfOriginSelect ? (
+                          <span className="flex items-center gap-2">
+                            {(() => {
+                              const country = COUNTRIES.find(
+                                (c) => c.name === countryOfOriginSelect,
+                              );
+                              if (country) {
+                                const FlagComponent =
+                                  Flags[country.code as keyof typeof Flags];
+                                return FlagComponent ? (
+                                  <FlagComponent className="h-3 w-4 rounded-sm" />
+                                ) : null;
+                              }
+                              return null;
+                            })()}
+                            {countryOfOriginSelect}
+                          </span>
+                        ) : (
+                          "Select country..."
+                        )}
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search country..." />
+                        <CommandList className="max-h-60 overflow-y-auto">
+                          <CommandEmpty>No country found.</CommandEmpty>
+                          <CommandGroup>
+                            {COUNTRIES.map((country) => {
+                              const FlagComponent =
+                                Flags[country.code as keyof typeof Flags];
+                              return (
+                                <CommandItem
+                                  key={country.code}
+                                  value={country.name}
+                                  onSelect={(currentValue) => {
+                                    const originalValue = COUNTRIES.find(
+                                      (c) =>
+                                        c.name.toLowerCase() ===
+                                        currentValue.toLowerCase(),
+                                    )?.name;
+
+                                    if (originalValue) {
+                                      setValue(
+                                        "countryOfOriginSelect",
+                                        originalValue === countryOfOriginSelect
+                                          ? ""
+                                          : originalValue,
+                                        { shouldValidate: true },
+                                      );
+                                      setCountryComboboxOpen(false);
+                                    }
+                                  }}
+                                >
+                                  <Icon
+                                    icon={Tick01Icon}
+                                    size={16}
+                                    className={cn(
+                                      "mr-2",
+                                      countryOfOriginSelect === country.name
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                  />
+                                  {FlagComponent && (
+                                    <FlagComponent className="mr-2 h-3 w-4 rounded-sm" />
+                                  )}
+                                  {country.name} ({country.code})
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-country-origin-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
+                      id={`${id}-country-origin-custom`}
+                      placeholder="Enter custom country of origin"
+                      type="text"
+                      disabled={!!countryOfOriginSelect}
+                      {...register("countryOfOriginInput", {
+                        validate: (value) => {
+                          const selectValue = watch("countryOfOriginSelect");
+                          if (!value && !selectValue) {
+                            return "Country of Origin is required";
                           }
-                          return null;
-                        })()}
-                        {countryOfOriginSelect}
-                      </span>
-                    ) : (
-                      "Select country..."
-                    )}
-                    <Icon
-                      icon={UnfoldMoreIcon}
-                      size={16}
-                      className="ml-2 shrink-0 opacity-50"
+                          return true;
+                        },
+                      })}
                     />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0"
-                  onWheel={(e) => e.stopPropagation()}
-                >
-                  <Command>
-                    <CommandInput placeholder="Search country..." />
-                    <CommandList className="max-h-60 overflow-y-auto">
-                      <CommandEmpty>No country found.</CommandEmpty>
-                      <CommandGroup>
-                        {COUNTRIES.map((country) => {
-                          const FlagComponent =
-                            Flags[country.code as keyof typeof Flags];
-                          return (
-                            <CommandItem
-                              key={country.code}
-                              value={country.name}
-                              onSelect={(currentValue) => {
-                                const originalValue = COUNTRIES.find(
-                                  (c) =>
-                                    c.name.toLowerCase() ===
-                                    currentValue.toLowerCase(),
-                                )?.name;
-
-                                if (originalValue) {
-                                  setValue(
-                                    "countryOfOriginSelect",
-                                    originalValue === countryOfOriginSelect
-                                      ? ""
-                                      : originalValue,
-                                    { shouldValidate: true },
-                                  );
-                                  setCountryComboboxOpen(false);
-                                }
-                              }}
-                            >
-                              <Icon
-                                icon={Tick01Icon}
-                                size={16}
-                                className={cn(
-                                  "mr-2",
-                                  countryOfOriginSelect === country.name
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              {FlagComponent && (
-                                <FlagComponent className="mr-2 h-3 w-4 rounded-sm" />
-                              )}
-                              {country.name} ({country.code})
-                            </CommandItem>
-                          );
-                        })}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-
-              <div className="flex items-center gap-2 py-1">
-                <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light uppercase text-muted-foreground">
-                  OR
-                </p>
-                <div className="h-0 w-full border-t border-dashed" />
+                  </InputGroup>
+                </Field>
               </div>
-
-              <FormFieldLabel
-                htmlFor={`${id}-country-origin-custom`}
-                label="Enter Custom Country"
-              />
-              <InputGroup size="md" className="bg-background">
-                <InputGroupInput
-                  id={`${id}-country-origin-custom`}
-                  placeholder="Enter custom country of origin"
-                  type="text"
-                  disabled={!!countryOfOriginSelect}
-                  {...register("countryOfOriginInput", {
-                    validate: (value) => {
-                      const selectValue = watch("countryOfOriginSelect");
-                      if (!value && !selectValue) {
-                        return "Country of Origin is required";
-                      }
-                      return true;
-                    },
-                  })}
-                />
-              </InputGroup>
               <FieldError
                 errors={[
                   errors.countryOfOriginSelect || errors.countryOfOriginInput
@@ -489,7 +491,7 @@ export default function EditProductDialog({
                     : undefined,
                 ]}
               />
-            </Field>
+            </div>
 
             <Field data-invalid={!!errors.oemContractManufacturer}>
               <FormFieldLabel
@@ -547,131 +549,126 @@ export default function EditProductDialog({
               <FieldError errors={[errors.manufacturingLocation]} />
             </Field>
 
-            <Field>
-              <FormFieldLabel
-                htmlFor={`${id}-class-device`}
-                label="Class of Device"
-                optional
-              />
-              <Popover
-                open={classComboboxOpen}
-                onOpenChange={setClassComboboxOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    role="combobox"
-                    aria-expanded={classComboboxOpen}
-                    className="h-9 w-full justify-between font-normal text-foreground/80"
-                    disabled={!!classOfDeviceInput}
+            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+              <FormFieldLabel label="Class of Device" optional />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-class-device`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <Popover
+                    open={classComboboxOpen}
+                    onOpenChange={setClassComboboxOpen}
                   >
-                    {selectedDeviceClass ? (
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span className="truncate">
-                          {selectedDeviceClass.className}
-                        </span>
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {selectedDeviceClass.regulation}
-                        </span>
-                      </span>
-                    ) : (
-                      "Select device class..."
-                    )}
-                    <Icon
-                      icon={UnfoldMoreIcon}
-                      size={16}
-                      className="ml-2 shrink-0 opacity-50"
-                    />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0"
-                  onWheel={(e) => e.stopPropagation()}
-                >
-                  <Command>
-                    <CommandInput placeholder="Search class or regulation..." />
-                    <CommandList className="max-h-72 overflow-y-auto">
-                      <CommandEmpty>No device class found.</CommandEmpty>
-                      {DEVICE_CLASS_GROUPS.map((group) => (
-                        <CommandGroup
-                          key={group.regulation}
-                          heading={group.regulation}
-                        >
-                          {group.options.map((deviceClass) => (
-                            <CommandItem
-                              key={deviceClass.value}
-                              value={`${deviceClass.value} ${deviceClass.description || ""}`}
-                              onSelect={() => {
-                                setValue(
-                                  "classOfDeviceSelect",
-                                  deviceClass.value === classOfDeviceSelect
-                                    ? ""
-                                    : deviceClass.value,
-                                  { shouldValidate: true },
-                                );
-                                setClassComboboxOpen(false);
-                              }}
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-expanded={classComboboxOpen}
+                        className="h-9 w-full justify-between font-normal text-foreground/80"
+                        disabled={!!classOfDeviceInput}
+                      >
+                        {selectedDeviceClass ? (
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="truncate">
+                              {selectedDeviceClass.className}
+                            </span>
+                            <span className="shrink-0 text-xs text-muted-foreground">
+                              ({selectedDeviceClass.regulation})
+                            </span>
+                          </span>
+                        ) : (
+                          "Select device class..."
+                        )}
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search device class..." />
+                        <CommandList className="max-h-72 overflow-y-auto">
+                          <CommandEmpty>No device class found.</CommandEmpty>
+                          {DEVICE_CLASS_GROUPS.map((group) => (
+                            <CommandGroup
+                              key={group.regulation}
+                              heading={group.regulation}
                             >
-                              <Icon
-                                icon={Tick01Icon}
-                                size={16}
-                                className={cn(
-                                  "mr-2 shrink-0",
-                                  classOfDeviceSelect === deviceClass.value
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              <span className="flex min-w-0 flex-1 items-center gap-2">
-                                <span className="truncate">
-                                  {deviceClass.className}
-                                </span>
-                                <span className="shrink-0 text-xs text-muted-foreground">
-                                  {deviceClass.regulation}
-                                </span>
-                              </span>
-                              {deviceClass.description && (
-                                <span className="ml-auto truncate text-xs text-muted-foreground/70">
-                                  {deviceClass.description}
-                                </span>
-                              )}
-                            </CommandItem>
+                              {group.options.map((deviceClass) => (
+                                <CommandItem
+                                  key={deviceClass.value}
+                                  value={`${deviceClass.value} ${deviceClass.description || ""}`}
+                                  className="items-start py-2"
+                                  onSelect={() => {
+                                    setValue(
+                                      "classOfDeviceSelect",
+                                      deviceClass.value === classOfDeviceSelect
+                                        ? ""
+                                        : deviceClass.value,
+                                      { shouldValidate: true },
+                                    );
+                                    setClassComboboxOpen(false);
+                                  }}
+                                >
+                                  <Icon
+                                    icon={Tick01Icon}
+                                    size={16}
+                                    className={cn(
+                                      "mt-0.5 shrink-0",
+                                      classOfDeviceSelect === deviceClass.value
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                  />
+                                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                    <span className="text-sm font-medium leading-snug">
+                                      {deviceClass.className}
+                                    </span>
+                                    {deviceClass.description ? (
+                                      <span className="text-xs leading-snug text-muted-foreground">
+                                        {deviceClass.description}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
                           ))}
-                        </CommandGroup>
-                      ))}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
 
-              <div className="flex items-center gap-2 py-1">
-                <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light uppercase text-muted-foreground">
-                  OR
-                </p>
-                <div className="h-0 w-full border-t border-dashed" />
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-class-device-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
+                      id={`${id}-class-device-custom`}
+                      placeholder="Enter custom device class"
+                      type="text"
+                      disabled={!!classOfDeviceSelect}
+                      {...register("classOfDeviceInput")}
+                    />
+                  </InputGroup>
+                </Field>
               </div>
+            </div>
 
-              <FormFieldLabel
-                htmlFor={`${id}-class-device-custom`}
-                label="Enter Custom Class"
-              />
-              <InputGroup size="md" className="bg-background">
-                <InputGroupInput
-                  id={`${id}-class-device-custom`}
-                  placeholder="Enter custom device class"
-                  type="text"
-                  disabled={!!classOfDeviceSelect}
-                  {...register("classOfDeviceInput")}
-                />
-              </InputGroup>
-            </Field>
-
-            <Field
-              className="md:col-span-2"
-              data-invalid={!!errors.basicUdiDi}
-            >
+            <Field data-invalid={!!errors.basicUdiDi}>
               <FormFieldLabel
                 htmlFor={`${id}-basic-udi-di`}
                 label="Basic UDI-DI"
