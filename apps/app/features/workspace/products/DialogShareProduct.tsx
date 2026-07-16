@@ -1,24 +1,25 @@
-import { PiLinkDuotone, PiCopyDuotone, PiCheckDuotone } from "react-icons/pi";
-import { PiShareNetworkDuotone, PiXCircleDuotone } from "react-icons/pi";
-import { useState, useMemo } from "react";
+"use client";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
+import { useMemo, useState } from "react";
+
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Label } from "@uprevit/ui/components/ui/label";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@uprevit/ui/components/ui/input-group";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  Copy01Icon,
+  Link01Icon,
+  Share08Icon,
+  Tick01Icon,
+} from "@hugeicons/core-free-icons";
 
 export default function DialogShareProduct({
   open,
@@ -53,98 +54,86 @@ export default function DialogShareProduct({
   };
 
   const dialogContent = (
-    <>
-      <DialogHeader className="contents space-y-0 text-left">
-        <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-          <p>Share Product</p>
-          <DialogClose asChild>
-            <button type="button" className="cursor-pointer">
-              <PiXCircleDuotone size={18} />
-            </button>
-          </DialogClose>
-        </DialogTitle>
-      </DialogHeader>
-      <DialogDescription className="sr-only">
-        Share this product with others by copying the link below.
-      </DialogDescription>
-
-      <div className="p-4 space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="product-link">Product Link</Label>
-          <div className="flex items-center space-x-2">
-            <InputGroup>
+    <AppDialogContent
+      title="Share Product"
+      description="Share this product with others by copying the link below."
+      subtitle="Copy the link below and send it to workspace members."
+      variant="inform"
+      size="lg"
+      secondaryAction={{
+        label: "Close",
+        icon: Cancel01Icon,
+      }}
+    >
+      <FieldGroup className="gap-4 p-4">
+        <Field>
+          <FormFieldLabel
+            htmlFor="product-link"
+            label="Product Link"
+            tooltip="Anyone with this link who belongs to the workspace can open this product."
+          />
+          <div className="flex items-center gap-2">
+            <InputGroup size="md" className="bg-background">
+              <InputGroupAddon>
+                <Icon icon={Link01Icon} size={16} strokeWidth={2} />
+              </InputGroupAddon>
               <InputGroupInput
                 id="product-link"
                 value={productLink}
                 readOnly
-                className="pl-10"
               />
-              <InputGroupAddon>
-                <PiLinkDuotone size={16} />
-              </InputGroupAddon>
             </InputGroup>
-            <Button size="sm" onClick={handleCopyLink} className="shrink-0">
-              {copied ? (
-                <>
-                  <PiCheckDuotone size={16} className="mr-1" />
-                  Copied
-                </>
-              ) : (
-                <>
-                  <PiCopyDuotone size={16} className="mr-1" />
-                  Copy
-                </>
-              )}
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleCopyLink}
+              className="shrink-0"
+            >
+              <Icon
+                icon={copied ? Tick01Icon : Copy01Icon}
+                size={16}
+                strokeWidth={2}
+              />
+              {copied ? "Copied" : "Copy"}
             </Button>
           </div>
-        </div>
+        </Field>
 
-        {product?.product_name && (
-          <div className="rounded-lg border p-3 bg-muted/50">
-            <h4 className="font-medium text-sm">{product.product_name}</h4>
-            <p className="text-xs text-muted-foreground mt-1">
+        {product?.product_name ? (
+          <div className="rounded-lg border bg-muted/50 p-3">
+            <h4 className="text-sm font-medium">{product.product_name}</h4>
+            <p className="mt-1 text-xs text-muted-foreground">
               Product ID: {product._id}
             </p>
           </div>
-        )}
-      </div>
-
-      <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-        <DialogClose asChild>
-          <Button variant="secondary" size="sm">
-            <PiXCircleDuotone />
-            Close
-          </Button>
-        </DialogClose>
-      </DialogFooter>
-    </>
+        ) : null}
+      </FieldGroup>
+    </AppDialogContent>
   );
 
-  // If external state control is provided, use controlled mode
   if (open !== undefined && onOpenChange !== undefined) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
-          {dialogContent}
-        </DialogContent>
+        {dialogContent}
       </Dialog>
     );
   }
 
-  // Original trigger-based mode
   return (
     <Dialog>
       <DialogTrigger asChild>
         {children || (
           <div className="focus:bg-accent hover:bg-accent focus:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none">
-            <PiShareNetworkDuotone className="h-4 w-4 text-muted-foreground" />
+            <Icon
+              icon={Share08Icon}
+              size={16}
+              className="text-muted-foreground"
+            />
             <span>Share</span>
           </div>
         )}
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
-        {dialogContent}
-      </DialogContent>
+      {dialogContent}
     </Dialog>
   );
 }
