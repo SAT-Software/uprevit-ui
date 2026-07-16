@@ -1,21 +1,21 @@
 "use client";
 
 import { useId, useState } from "react";
-import { PiUserMinusDuotone } from "react-icons/pi";
 
-import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useRemoveUser } from "@/hooks/user/useRemoveUser";
+import {
+  Alert01Icon,
+  Cancel01Icon,
+  UserRemove01Icon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
 export interface DialogRemoveUserProps {
   userId: string;
@@ -46,59 +46,67 @@ export default function DialogRemoveUser({
     });
   }
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
-        <div className="flex flex-col items-start gap-2">
-          <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border"
-            aria-hidden="true"
-          >
-            <PiUserMinusDuotone className="opacity-80" size={16} />
-          </div>
-          <DialogHeader>
-            <DialogTitle className="sm:text-center">
-              Remove from workspace
-            </DialogTitle>
-          </DialogHeader>
-        </div>
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setValue("");
+    }
+  }
 
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-          <p className="text-xs text-muted-foreground">
-            You are about to remove <strong>{userName}</strong> from this
-            workspace. They will lose access immediately, but their historical
-            activity in the workspace will be preserved.
-          </p>
-          <div className="space-y-4">
-            <Label htmlFor={inputId} className="mb-1">
-              User name
-            </Label>
-            <Input
-              id={inputId}
-              type="text"
-              placeholder={`Type ${userName} to confirm`}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <AppDialogContent
+        title="Remove from workspace"
+        description={`Remove ${userName} from this workspace.`}
+        variant="confirm-destructive"
+        size="md"
+        confirmContent={{
+          heading: "Remove from workspace",
+          message: (
+            <>
+              You are about to remove <strong>{userName}</strong> from this
+              workspace. They will lose access immediately, but their historical
+              activity in the workspace will be preserved.
+            </>
+          ),
+          icon: Alert01Icon,
+        }}
+        primaryAction={{
+          label: "Remove",
+          loadingLabel: "Removing...",
+          onClick: handleConfirm,
+          loading: isPending,
+          disabled,
+          icon: UserRemove01Icon,
+          variant: "destructive",
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
+        <FieldGroup className="gap-4 px-4 pb-4">
+          <Field>
+            <FormFieldLabel
+              htmlFor={inputId}
+              label="User name"
+              tooltip={`Type "${userName}" to confirm removal.`}
             />
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" className="flex-1">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={disabled}
-              onClick={handleConfirm}
-            >
-              {isPending ? "Removing..." : "Remove"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+            <InputGroup size="md" className="bg-background">
+              <InputGroupInput
+                id={inputId}
+                type="text"
+                placeholder={`Type ${userName} to confirm`}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                autoComplete="off"
+              />
+            </InputGroup>
+          </Field>
+        </FieldGroup>
+      </AppDialogContent>
     </Dialog>
   );
 }

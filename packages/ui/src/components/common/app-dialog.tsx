@@ -96,7 +96,6 @@ type AppDialogContentProps = Omit<
     title: React.ReactNode;
     description?: string;
     subtitle?: string;
-    headerIcon?: IconSvgElement;
     confirmContent?: AppDialogConfirmContent;
     footer?: React.ReactNode;
     primaryAction?: AppDialogAction;
@@ -110,7 +109,6 @@ function AppDialogContent({
   title,
   description,
   subtitle,
-  headerIcon,
   confirmContent,
   footer,
   primaryAction,
@@ -159,12 +157,7 @@ function AppDialogContent({
     >
       <DialogHeader className="contents space-y-0 text-left ">
         <DialogTitle className="flex h-10 w-full shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2 text-sm font-medium">
-          <span className="flex min-w-0 items-center gap-2">
-            {headerIcon ? (
-              <Icon icon={headerIcon} size={16} strokeWidth={2} />
-            ) : null}
-            <span className="truncate">{title}</span>
-          </span>
+          <span className="min-w-0 truncate">{title}</span>
           <DialogClose asChild>
             <Button
               type="button"
