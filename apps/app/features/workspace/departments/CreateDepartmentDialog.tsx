@@ -469,9 +469,8 @@ function DepartmentImageUpload({
           {currentImage ? (
             <Button
               type="button"
-              variant="outline"
+              variant="destructive"
               size="sm"
-              className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
               onClick={handleRemove}
             >
               <Icon icon={Delete02Icon} size={14} strokeWidth={2} />

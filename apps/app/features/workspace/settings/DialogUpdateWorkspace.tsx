@@ -254,9 +254,8 @@ export function DialogUpdateWorkspace({
                   {currentLogo ? (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
-                      className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
                       disabled={uploadingLogo}
                       onClick={removeLogo}
                     >

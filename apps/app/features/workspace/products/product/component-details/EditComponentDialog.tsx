@@ -2,25 +2,15 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useForm, Controller } from "react-hook-form";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  useFileUpload,
-  FileWithPreview,
-} from "@/hooks/general/use-file-upload";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
+  InputGroup,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
 import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
 import {
   Select,
@@ -29,16 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
-import Image from "next/image";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import {
-  PiPencilSimpleDuotone,
-  PiXCircleDuotone,
-  PiCheckCircleDuotone,
-  PiPictureInPictureDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+} from "@hugeicons/core-free-icons";
+import { ComponentImageUpload } from "./ComponentImageUpload";
 
 type ComponentItem = {
   _id: string;
@@ -54,13 +42,10 @@ type ComponentItem = {
 type FormData = {
   componentNumber: string;
   componentDescription: string;
-  image: FileWithPreview | null;
   labelType: Tag[];
   dimensions: string;
   componentType: string;
 };
-
-type ImageChangeState = "unchanged" | "removed" | "replaced";
 
 export default function EditComponentDialog({
   productId,
@@ -76,7 +61,8 @@ export default function EditComponentDialog({
   const id = useId();
   const queryClient = useQueryClient();
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
+  const [newComponentImage, setNewComponentImage] = useState<File | null>(null);
+  const [removeComponentImage, setRemoveComponentImage] = useState(false);
   const buildTags = (labels: string[]) =>
     labels.map((text, index) => ({
       id: `tag-${index}-${text}`,
@@ -86,7 +72,6 @@ export default function EditComponentDialog({
     () => ({
       componentNumber: component.component_number || "",
       componentDescription: component.component_description || "",
-      image: null,
       labelType: buildTags(component.label_type || []),
       dimensions: component.dimensions || "",
       componentType: component.component_type || "",
@@ -105,7 +90,6 @@ export default function EditComponentDialog({
     control,
     formState: { errors },
     reset,
-    setValue,
   } = useForm<FormData>({
     defaultValues: formDefaults,
   });
@@ -116,8 +100,11 @@ export default function EditComponentDialog({
   useEffect(() => {
     if (!open) return;
     reset(formDefaults);
-    setImageState("unchanged");
+    setNewComponentImage(null);
+    setRemoveComponentImage(false);
   }, [formDefaults, open, reset]);
+
+  const isSaving = isPending || isUploadingImage || uploadingImage;
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -125,11 +112,10 @@ export default function EditComponentDialog({
       let uploadedImageKey: string | undefined;
       let uploadedImageSizeBytes: number | undefined;
 
-      // Only upload if there's a new image file
-      if (data.image && data.image.file instanceof File) {
+      if (newComponentImage) {
         const uploadRes = await uploadImage({
-          file: data.image.file,
-          contentType: data.image.file.type || "application/octet-stream",
+          file: newComponentImage,
+          contentType: newComponentImage.type || "application/octet-stream",
           uploadScope: "product-assets",
           productId,
         });
@@ -138,14 +124,16 @@ export default function EditComponentDialog({
       }
       setUploadingImage(false);
 
-      const nextImage =
-        imageState === "unchanged" ? component.image : "";
-      const nextKey =
-        imageState === "replaced"
+      const nextImage = removeComponentImage
+        ? ""
+        : newComponentImage
+          ? ""
+          : component.image;
+      const nextKey = removeComponentImage
+        ? ""
+        : newComponentImage
           ? (uploadedImageKey ?? "")
-          : imageState === "removed"
-            ? ""
-            : (component.key ?? "");
+          : (component.key ?? "");
 
       const updatedComponentData = {
         id: productId,
@@ -180,7 +168,8 @@ export default function EditComponentDialog({
           } finally {
             onOpenChange(false);
             reset();
-            setImageState("unchanged");
+            setNewComponentImage(null);
+            setRemoveComponentImage(false);
           }
         },
         onError: () => {
@@ -193,268 +182,162 @@ export default function EditComponentDialog({
     }
   };
 
+  const handleCancel = () => {
+    reset(formDefaults);
+    setNewComponentImage(null);
+    setRemoveComponentImage(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiPencilSimpleDuotone className="w-4 h-4" />
-              <span>Edit Component</span>
-            </div>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Edit component by updating component details and uploading a new
-          image.
-        </DialogDescription>
+      <AppDialogContent
+        title="Edit Component"
+        description="Edit component by updating component details and uploading a new image."
+        variant="form"
+        size="lg"
+        primaryAction={{
+          label: "Update Component",
+          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          form: `edit-component-form-${id}`,
+          type: "submit",
+          loading: isSaving,
+          disabled: isSaving,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+          onClick: handleCancel,
+        }}
+      >
         <form
+          id={`edit-component-form-${id}`}
           onSubmit={handleSubmit(onSubmit)}
-          id="edit-component-form"
-          className="overflow-y-auto"
+          noValidate
         >
-          <div className="flex gap-4 p-4">
-            <div className="w-1/3">
-              <Controller
-                name="image"
-                control={control}
-                render={({ field }) => (
-                  <ComponentImage
-                    currentImage={component.image}
-                    value={field.value}
-                    imageState={imageState}
-                    onImageStateChange={setImageState}
-                    onChange={(file) => {
-                      field.onChange(file);
-                      setValue("image", file);
-                    }}
-                  />
-                )}
+          <FieldGroup className="gap-4 p-4">
+            <Field>
+              <ComponentImageUpload
+                imageUrl={component.image}
+                setNewComponentImage={setNewComponentImage}
+                setRemoveComponentImage={setRemoveComponentImage}
               />
-            </div>
-            <div className="flex-1 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-component-number`}>
-                  Component Number
-                </Label>
-                <Input
+            </Field>
+
+            <Field data-invalid={!!errors.componentNumber}>
+              <FormFieldLabel
+                htmlFor={`${id}-component-number`}
+                label="Component Number"
+                tooltip="A unique identifier or reference number for this label component."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-component-number`}
                   placeholder="Enter component number"
                   type="text"
+                  aria-invalid={errors.componentNumber ? "true" : "false"}
                   {...register("componentNumber", {
                     required: "Component number is required",
                   })}
                 />
-                {errors.componentNumber && (
-                  <p className="text-xs text-red-500">
-                    {errors.componentNumber.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-component-type`}>Component Type</Label>
-                <Controller
-                  name="componentType"
-                  control={control}
-                  rules={{
-                    required: "Component type is required",
-                  }}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select component type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Preprinted">Preprinted</SelectItem>
-                        <SelectItem value="Pre-printed">Pre-printed</SelectItem>
-                        <SelectItem value="Blank">Blank</SelectItem>
-                        <SelectItem value="N/A">N/A</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.componentType && (
-                  <p className="text-xs text-red-500">
-                    {errors.componentType.message}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+              </InputGroup>
+              <FieldError errors={[errors.componentNumber]} />
+            </Field>
 
-          <div className="px-4 pb-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Description</Label>
-                <Textarea
+            <Field data-invalid={!!errors.componentType}>
+              <FormFieldLabel
+                htmlFor={`${id}-component-type`}
+                label="Component Type"
+                tooltip="Indicates whether the component is pre-printed, blank, or not applicable."
+              />
+              <Controller
+                name="componentType"
+                control={control}
+                rules={{
+                  required: "Component type is required",
+                }}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger
+                      id={`${id}-component-type`}
+                      size="md"
+                      className="w-full bg-background"
+                    >
+                      <SelectValue placeholder="Select component type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Preprinted">Preprinted</SelectItem>
+                      <SelectItem value="Pre-printed">Pre-printed</SelectItem>
+                      <SelectItem value="Blank">Blank</SelectItem>
+                      <SelectItem value="N/A">N/A</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <FieldError errors={[errors.componentType]} />
+            </Field>
+
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-description`}
+                label="Description"
+                tooltip="Describe the component's purpose, material, and specifications."
+                optional
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupTextarea
                   id={`${id}-description`}
                   placeholder="Describe the component's purpose and specifications"
+                  className="min-h-24 resize-none"
                   {...register("componentDescription")}
-                  className="min-h-[100px] resize-none"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-dimensions`}>Dimensions</Label>
-                <Input
+              </InputGroup>
+            </Field>
+
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-dimensions`}
+                label="Dimensions"
+                tooltip="Physical dimensions of the component (e.g., width x height)."
+                optional
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-dimensions`}
                   placeholder="Enter dimensions"
                   type="text"
                   {...register("dimensions")}
                 />
-              </div>
-              <div className="space-y-2">
-                <Controller
-                  name="labelType"
-                  control={control}
-                  render={({ field }) => (
-                    <TagInput
-                      label="Label Type"
-                      tags={field.value || []}
-                      setTags={field.onChange}
-                      placeholder="Add label type and press Enter"
-                    />
-                  )}
-                />
-                <p className="text-xs text-muted-foreground -mt-1">
-                  Press Enter to add a label type. You can add multiple label
-                  types.
-                </p>
-              </div>
-            </div>
-          </div>
+              </InputGroup>
+            </Field>
+
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-label-type`}
+                label="Label Type"
+                tooltip="Label types associated with this component. Press Enter after each entry."
+                optional
+              />
+              <Controller
+                name="labelType"
+                control={control}
+                render={({ field }) => (
+                  <TagInput
+                    id={`${id}-label-type`}
+                    tags={field.value || []}
+                    setTags={field.onChange}
+                    placeholder="Add label type and press Enter"
+                  />
+                )}
+              />
+              <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+                Press Enter to add a label type. You can add multiple label
+                types.
+              </p>
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                reset();
-                setImageState("unchanged");
-              }}
-            >
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            form="edit-component-form"
-            type="button"
-            size="sm"
-            onClick={handleSubmit(onSubmit)}
-            disabled={isPending || uploadingImage}
-            variant="default"
-          >
-            {isPending || uploadingImage || isUploadingImage ? (
-              <Spinner />
-            ) : (
-              <PiCheckCircleDuotone />
-            )}
-            {isPending
-              ? "Updating..."
-              : uploadingImage || isUploadingImage
-              ? "Uploading..."
-              : "Update Component"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
-  );
-}
-
-interface ComponentImageProps {
-  currentImage: string;
-  value: FileWithPreview | null;
-  imageState: ImageChangeState;
-  onImageStateChange: (state: ImageChangeState) => void;
-  onChange: (file: FileWithPreview | null) => void;
-}
-
-function ComponentImage({
-  currentImage,
-  value,
-  imageState,
-  onImageStateChange,
-  onChange,
-}: ComponentImageProps) {
-  const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-      onFilesChange: (newFiles) => {
-        if (newFiles.length > 0) {
-          onImageStateChange("replaced");
-          onChange(newFiles[0]);
-        } else {
-          onChange(null);
-        }
-      },
-    });
-
-  // Show current image if no new file is selected
-  const displayImage =
-    value?.preview ||
-    files[0]?.preview ||
-    (imageState !== "removed" ? currentImage : "");
-
-  return (
-    <div className="h-40 w-full">
-      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
-        {displayImage ? (
-          <Image
-            className="size-full object-cover rounded-xl"
-            src={displayImage}
-            alt="Component image"
-            width={512}
-            height={96}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiPictureInPictureDuotone className="w-12 h-12" />
-            <span className="text-xs font-medium">Upload Image</span>
-          </div>
-        )}
-
-        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
-          <button
-            type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
-            onClick={openFileDialog}
-            aria-label={displayImage ? "Change image" : "Upload image"}
-          >
-            <PiPlusSquareDuotone size={16} aria-hidden="true" />
-          </button>
-          {displayImage && (
-            <button
-              type="button"
-              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
-              onClick={() => {
-                const fileId = value?.id || files[0]?.id;
-                if (fileId) {
-                  removeFile(fileId);
-                  onImageStateChange(currentImage ? "unchanged" : "removed");
-                } else if (currentImage) {
-                  onImageStateChange("removed");
-                }
-                onChange(null);
-              }}
-              aria-label="Remove image"
-            >
-              <PiXDuotone size={16} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-        <input
-          {...getInputProps()}
-          className="sr-only"
-          aria-label="Upload component image"
-        />
-      </div>
-    </div>
   );
 }

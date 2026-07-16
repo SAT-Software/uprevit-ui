@@ -65,10 +65,7 @@ import AddComponentDialog from "./AddComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 import EditComponentDialog from "./EditComponentDialog";
 import type { DiffItem } from "@/utils/deepDiff";
-import {
-  redlineChipAdded,
-  redlineChipRemoved,
-} from "@/utils/redlineStyles";
+import { redlineChipAdded, redlineChipRemoved } from "@/utils/redlineStyles";
 import { ProductImageFrame } from "../ProductImageFrame";
 
 type ComponentItem = {
@@ -657,10 +654,7 @@ export default function ProductComponentDetailsTable({
             onApplyFilters={handleApplyFilters}
             onClearFilters={handleClearFilters}
           />
-          <AddComponentDialog
-            productId={productId}
-            isSubmitted={isSubmitted}
-          />
+          <AddComponentDialog productId={productId} isSubmitted={isSubmitted} />
         </div>
       </div>
 
