@@ -13,10 +13,10 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@uprevit/ui/components/ui/dialog";
 import { FieldGroup } from "@uprevit/ui/components/ui/field";
+import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 const appDialogVariants = cva("", {
@@ -149,13 +149,16 @@ function AppDialogContent({
   return (
     <DialogContent
       className={cn(
-        "flex flex-col gap-0 overflow-y-visible p-0",
+        "grid max-h-[90vh] gap-0 overflow-hidden p-0",
+        showDefaultFooter
+          ? "grid-rows-[auto_minmax(0,1fr)_auto]"
+          : "grid-rows-[auto_minmax(0,1fr)]",
         appDialogVariants({ size }),
         className,
       )}
       {...props}
     >
-      <DialogHeader className="contents space-y-0 text-left ">
+      <div className="shrink-0">
         <DialogTitle className="flex h-10 w-full shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2 text-sm font-medium">
           <span className="min-w-0 truncate">{title}</span>
           <DialogClose asChild>
@@ -179,20 +182,23 @@ function AppDialogContent({
           </div>
         ) : null}
         {headerExtra}
-      </DialogHeader>
+        {description ? (
+          <DialogDescription className="sr-only">{description}</DialogDescription>
+        ) : null}
+      </div>
 
-      {description ? (
-        <DialogDescription className="sr-only">{description}</DialogDescription>
-      ) : null}
-
-      {wrapBodyInFieldGroup ? (
-        <FieldGroup className={cn("overflow-y-auto p-4", bodyClassName)}>
-          {bodyContent}
-        </FieldGroup>
-      ) : bodyContent ? (
-        <div className={cn("overflow-y-auto", bodyClassName)}>
-          {bodyContent}
-        </div>
+      {bodyContent ? (
+        <ScrollArea
+          className={cn("h-full min-h-0", bodyClassName)}
+          scrollFade
+          type="always"
+        >
+          {wrapBodyInFieldGroup ? (
+            <FieldGroup className="p-4">{bodyContent}</FieldGroup>
+          ) : (
+            bodyContent
+          )}
+        </ScrollArea>
       ) : null}
 
       {showDefaultFooter ? (

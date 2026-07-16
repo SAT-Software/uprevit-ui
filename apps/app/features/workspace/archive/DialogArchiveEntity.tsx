@@ -4,33 +4,31 @@ import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { useId, useMemo, useState } from "react";
-import { PiWarningCircleDuotone } from "react-icons/pi";
+import Link from "next/link";
 
 import { Button, buttonVariants } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import Link from "next/link";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
+import {
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useArchiveDepartment } from "@/hooks/department/useArchiveDepartment";
 import { useArchiveProject } from "@/hooks/project/useArchiveProject";
-import { PiArchiveDuotone } from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { ArchiveIcon } from "@hugeicons/core-free-icons";
+import {
+  Alert01Icon,
+  ArchiveIcon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
 export type ArchiveEntityType = "project" | "department";
 
@@ -52,7 +50,6 @@ export default function DialogArchiveEntity({
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
-  // Prepare mutations
   const departmentArchive = useArchiveDepartment();
   const projectArchive = useArchiveProject();
 
@@ -68,6 +65,8 @@ export default function DialogArchiveEntity({
   }, [entityType, departmentArchive, projectArchive]);
 
   const disabled = value.trim() !== entityName.trim() || isPending;
+  const entityLabel =
+    entityType.charAt(0).toUpperCase() + entityType.slice(1);
 
   async function handleConfirm() {
     if (!isAdmin) {
@@ -80,8 +79,15 @@ export default function DialogArchiveEntity({
     setValue("");
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setValue("");
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -108,8 +114,8 @@ export default function DialogArchiveEntity({
           </TooltipTrigger>
           <TooltipContent>
             <div>
-              Archive the department. This action is reversible and you can
-              restore the department from
+              Archive the {entityType}. This action is reversible and you can
+              restore the {entityType} from
               <Link
                 href="/archive"
                 className={cn(
@@ -124,65 +130,63 @@ export default function DialogArchiveEntity({
           </TooltipContent>
         </Tooltip>
       </DialogTrigger>
-      <DialogContent>
-        <div className="flex flex-col items-start gap-2">
-          <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border"
-            aria-hidden="true"
-          >
-            <PiWarningCircleDuotone className="opacity-80" size={16} />
-          </div>
-          <DialogHeader>
-            <DialogTitle className="sm:text-center">
-              Final confirmation
-            </DialogTitle>
-          </DialogHeader>
-        </div>
-
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-          <p className="text-xs text-muted-foreground">
-            You are archiving {entityType} <strong>{entityName}</strong>. You
-            can restore your {entityType} anytime from the{" "}
-            <Link href="/archive" className="underline underline-offset-4">
-              Archive page
-            </Link>
-            .
-          </p>
-          <div className="space-y-4">
-            <Label htmlFor={inputId} className="mb-1">
-              {entityType.charAt(0).toUpperCase() + entityType.slice(1)} name
-            </Label>
-            <Input
-              id={inputId}
-              type="text"
-              placeholder={`Type ${entityName} to confirm`}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                disabled={isPending}
+      <AppDialogContent
+        title={`Archive ${entityLabel}`}
+        description={`Archive ${entityName}. This action is reversible from the archive page.`}
+        variant="confirm-destructive"
+        size="md"
+        confirmContent={{
+          heading: "Final confirmation",
+          message: (
+            <>
+              You are archiving {entityType}{" "}
+              <strong>{entityName}</strong>. You can restore your {entityType}{" "}
+              anytime from the{" "}
+              <Link
+                href="/archive"
+                className="underline underline-offset-4 hover:text-foreground"
               >
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={disabled}
-              onClick={handleConfirm}
-            >
-              {isPending ? <Spinner /> : <PiArchiveDuotone />}
-              {isPending ? "Archiving..." : "Archive"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+                Archive page
+              </Link>
+              .
+            </>
+          ),
+          icon: Alert01Icon,
+        }}
+        primaryAction={{
+          label: "Archive",
+          loadingLabel: "Archiving...",
+          onClick: handleConfirm,
+          loading: isPending,
+          disabled,
+          icon: ArchiveIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
+        <FieldGroup className="gap-4 px-4 pb-4">
+          <Field>
+            <FormFieldLabel
+              htmlFor={inputId}
+              label={`${entityLabel} name`}
+              tooltip={`Type "${entityName}" to confirm archiving.`}
+            />
+            <InputGroup size="md" className="bg-background">
+              <InputGroupInput
+                id={inputId}
+                type="text"
+                placeholder={`Type ${entityName} to confirm`}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                autoComplete="off"
+              />
+            </InputGroup>
+          </Field>
+        </FieldGroup>
+      </AppDialogContent>
     </Dialog>
   );
 }

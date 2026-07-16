@@ -5,28 +5,10 @@ import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
-import {
-  PiBuildingsDuotone,
-  PiCaretDownDuotone,
-  PiXCircleDuotone,
-  PiCheckCircleDuotone,
-} from "react-icons/pi";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
   Command,
   CommandEmpty,
@@ -40,6 +22,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Tooltip,
@@ -48,8 +38,8 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import Image from "next/image";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { PropertyEditIcon } from "@hugeicons/core-free-icons";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
@@ -57,6 +47,21 @@ import type { Project } from "@/types/project";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsInfinite";
 import { Department } from "@/types/department";
+import {
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Delete02Icon,
+  KanbanIcon,
+  PropertyEditIcon,
+  UnfoldMoreIcon,
+  UploadSquare01Icon,
+} from "@hugeicons/core-free-icons";
+
+const PROJECT_IMAGE_ACCEPT =
+  "image/png,image/jpg,image/jpeg,image/gif,image/webp";
+const PROJECT_IMAGE_MAX_SIZE = 500 * 1024;
+const PROJECT_IMAGE_HELPER_TEXT =
+  "Supports PNG, JPEG, JPG, GIF, WEBP (under 500KB)";
 
 interface User {
   _id: string;
@@ -88,7 +93,7 @@ export default function UpdateProjectDialog({
     string | null
   >(null);
   const [selectedUsers, setSelectedUsers] = useState<User[]>(
-    project?.users ?? []
+    project?.users ?? [],
   );
   const [newProjectImage, setNewProjectImage] = useState<File | null>(null);
   const [removeProjectImage, setRemoveProjectImage] = useState(false);
@@ -188,8 +193,7 @@ export default function UpdateProjectDialog({
     [departmentsData],
   );
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const descriptionText = watch("project_description") || "";
+  const descriptionLength = (watch("project_description") || "").length;
   const selectedDepartmentId = watch("department");
   const selectedDepartment = departments.find(
     (dept: Department) => dept._id === selectedDepartmentId,
@@ -268,7 +272,7 @@ export default function UpdateProjectDialog({
             setDebouncedUserSearch("");
             setOpen(false);
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Error uploading project image:", error);
@@ -307,80 +311,87 @@ export default function UpdateProjectDialog({
           <TooltipContent>Update project details</TooltipContent>
         </Tooltip>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Update Project</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Update this project&apos;s details and members.
-        </DialogDescription>
+      <AppDialogContent
+        title="Update Project"
+        description="Update this project's details and members."
+        variant="form"
+        size="lg"
+        primaryAction={{
+          label: "Update Project",
+          loadingLabel: uploadingImage ? "Uploading..." : "Updating...",
+          form: `mutate-project-form-${id}`,
+          type: "submit",
+          loading: uploadingImage || isPending,
+          disabled: uploadingImage || isPending,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`mutate-project-form-${id}`}
-          className="overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="flex gap-4 p-4">
-            <div className="w-1/3">
-              <ProfileBg
+          <FieldGroup className="gap-4 p-4">
+            <Field>
+              <ProjectImageUpload
                 setNewProjectImage={setNewProjectImage}
                 setRemoveProjectImage={setRemoveProjectImage}
                 imageUrl={project?.image}
               />
-            </div>
-            <div className="flex-1 space-y-4">
-              <div className="space-y-4">
-                <Label htmlFor={`${id}-project-name`}>Project Name</Label>
-                <div className="flex flex-col gap-2">
-                  <Input
-                    id={`${id}-project-name`}
-                    placeholder="Enter project name"
-                    type="text"
-                    defaultValue={project?.project_name}
-                    aria-invalid={errors.project_name ? "true" : "false"}
-                    {...register("project_name", {
-                      required: "Project name is required",
-                    })}
-                  />
-                  {errors.project_name && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.project_name.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <Label htmlFor={`${id}-project-number`}>Project Number</Label>
-                <div className="flex flex-col gap-2">
-                  <Input
-                    id={`${id}-project-number`}
-                    placeholder="Enter project number"
-                    type="text"
-                    defaultValue={project?.project_number}
-                    aria-invalid={errors.project_number ? "true" : "false"}
-                    {...register("project_number", {
-                      required: "Project number is required",
-                    })}
-                  />
-                  {errors.project_number && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.project_number.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-4 w-full px-4 pb-4">
-            <div className="space-y-2 w-1/2">
-              <Label htmlFor={`${id}-department`}>Department</Label>
+            </Field>
+
+            <Field data-invalid={!!errors.project_name}>
+              <FormFieldLabel
+                htmlFor={`${id}-project-name`}
+                label="Project Name"
+                tooltip="The display name shown across the workspace for this project."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-project-name`}
+                  placeholder="Enter project name"
+                  type="text"
+                  defaultValue={project?.project_name}
+                  aria-invalid={errors.project_name ? "true" : "false"}
+                  {...register("project_name", {
+                    required: "Project name is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.project_name]} />
+            </Field>
+
+            <Field data-invalid={!!errors.project_number}>
+              <FormFieldLabel
+                htmlFor={`${id}-project-number`}
+                label="Project Number"
+                tooltip="A unique identifier or reference number for this project."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-project-number`}
+                  placeholder="Enter project number"
+                  type="text"
+                  defaultValue={project?.project_number}
+                  aria-invalid={errors.project_number ? "true" : "false"}
+                  {...register("project_number", {
+                    required: "Project number is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.project_number]} />
+            </Field>
+
+            <Field data-invalid={!!errors.department}>
+              <FormFieldLabel
+                htmlFor={`${id}-department`}
+                label="Department"
+                tooltip="The department this project belongs to."
+              />
               <Popover
                 open={departmentPopoverOpen}
                 onOpenChange={setDepartmentPopoverOpen}
@@ -392,14 +403,18 @@ export default function UpdateProjectDialog({
                     variant="outline"
                     role="combobox"
                     aria-expanded={departmentPopoverOpen}
-                    className="w-full justify-between font-normal h-9"
+                    className="h-9 w-full justify-between bg-background font-normal"
                   >
                     <span className="truncate">
                       {selectedDepartmentLabel ||
                         selectedDepartment?.department_name ||
                         "Select department"}
                     </span>
-                    <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Icon
+                      icon={UnfoldMoreIcon}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50"
+                    />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -451,64 +466,75 @@ export default function UpdateProjectDialog({
                   </Command>
                 </PopoverContent>
               </Popover>
-              {errors.department && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.department.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-4 w-1/2">
-              <Label htmlFor={`${id}-manager-name`}>Project Manager</Label>
-              <Input
-                id={`${id}-manager-name`}
-                placeholder="Enter manager's name"
-                defaultValue={project?.project_manager}
-                type="text"
-                aria-invalid={errors.project_manager ? "true" : "false"}
-                {...register("project_manager")}
-              />
-            </div>
-          </div>
+              <FieldError errors={[errors.department]} />
+            </Field>
 
-          <div className="px-4 pb-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-description`}>Project Description</Label>
-                <Textarea
+            <Field data-invalid={!!errors.project_manager}>
+              <FormFieldLabel
+                htmlFor={`${id}-manager-name`}
+                label="Project Manager"
+                tooltip="Name of the person responsible for managing this project."
+                optional
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-manager-name`}
+                  placeholder="Enter manager's name"
+                  defaultValue={project?.project_manager}
+                  type="text"
+                  aria-invalid={errors.project_manager ? "true" : "false"}
+                  {...register("project_manager")}
+                />
+              </InputGroup>
+            </Field>
+
+            <Field data-invalid={!!errors.project_description}>
+              <FormFieldLabel
+                htmlFor={`${id}-description`}
+                label="Project Description"
+                tooltip="A short summary of the project's purpose and goals."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupTextarea
                   id={`${id}-description`}
                   placeholder="Describe the project's purpose and goals"
                   maxLength={220}
                   defaultValue={project?.project_description}
-                  aria-describedby={`${id}-description`}
-                  className="h-24 resize-none"
+                  className="min-h-24 resize-none"
                   aria-invalid={errors.project_description ? "true" : "false"}
                   {...register("project_description", {
                     required: "Description is required",
                     maxLength: {
                       value: 220,
-                      message: `Description must be at most ${220} characters`,
+                      message: "Description must be at most 220 characters",
                     },
                   })}
                 />
-                {errors.project_description && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.project_description.message}
-                  </p>
-                )}
-                <p
-                  id={`${id}-description`}
-                  className="text-muted-foreground mt-2 text-right text-xs"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <span className="tabular-nums">
-                    {220 - descriptionText.length}
-                  </span>{" "}
-                  characters left
-                </p>
-              </div>
+                <InputGroupAddon align="block-end">
+                  <div className="flex w-full items-center justify-between gap-2">
+                    {errors.project_description ? (
+                      <FieldError errors={[errors.project_description]} />
+                    ) : (
+                      <span />
+                    )}
+                    <InputGroupText className="text-xs text-muted-foreground/60">
+                      <span className="tabular-nums">
+                        {220 - descriptionLength}
+                      </span>{" "}
+                      characters left
+                    </InputGroupText>
+                  </div>
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
 
-              <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
+            <Field>
+              <FormFieldLabel
+                label="Members"
+                tooltip="Add or remove workspace users assigned to this project."
+                optional
+              />
+              <div className="flex w-full items-center justify-between gap-4 rounded-lg border border-border bg-muted/5 p-4">
                 <AddUsersDropdown
                   users={users.map((user) => ({
                     _id: user._id as string,
@@ -525,9 +551,9 @@ export default function UpdateProjectDialog({
                   isError={isUsersError}
                   isFetchingNextPage={isUsersFetchingNextPage}
                 />
-                <div className="flex items-center justify-end flex-1">
+                <div className="flex flex-1 items-center justify-end">
                   {selectedUsers.length > 0 && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <div className="flex items-center -space-x-2">
                         {selectedUsers.slice(0, 4).map((user) => {
                           if (user.profileAvatar)
@@ -536,63 +562,38 @@ export default function UpdateProjectDialog({
                                 key={user._id}
                                 className="ring-background rounded-full ring-2"
                                 src={user.profileAvatar}
-                                width={32}
-                                height={32}
+                                width={24}
+                                height={24}
                                 alt={user.name}
                               />
                             );
                           return (
                             <div
                               key={user._id}
-                              className="flex h-8 w-8 items-center justify-center border border-border rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                              className="flex h-6 w-6 items-center justify-center rounded-full border border-border bg-muted text-xs font-medium ring-2 ring-background"
                             >
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                           );
                         })}
                       </div>
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {selectedUsers.length} Users
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {selectedUsers.length}{" "}
+                        {selectedUsers.length > 1 ? "Users" : "User"}
                       </p>
                     </div>
                   )}
                 </div>
               </div>
-            </div>
-          </div>
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            size="sm"
-            variant="default"
-            form={`mutate-project-form-${id}`}
-            disabled={uploadingImage || isPending}
-          >
-            {uploadingImage || isPending ? (
-              <Spinner />
-            ) : (
-              <PiCheckCircleDuotone />
-            )}
-            {uploadingImage
-              ? "Uploading..."
-              : isPending
-              ? "Updating..."
-              : "Update Project"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }
 
-function ProfileBg({
+function ProjectImageUpload({
   setNewProjectImage,
   setRemoveProjectImage,
   imageUrl,
@@ -601,6 +602,8 @@ function ProfileBg({
   setRemoveProjectImage: (removed: boolean) => void;
   imageUrl?: string;
 }) {
+  const uploadId = useId();
+
   const initialFiles = imageUrl
     ? [
         {
@@ -613,18 +616,21 @@ function ProfileBg({
       ]
     : [];
 
-  const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-	useFileUpload({
-		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-		initialFiles,
-	});
+  const [
+    { files, errors },
+    { removeFile, openFileDialog, clearErrors, getInputProps },
+  ] = useFileUpload({
+    accept: PROJECT_IMAGE_ACCEPT,
+    maxSize: PROJECT_IMAGE_MAX_SIZE,
+    initialFiles,
+  });
 
-  const fileItem = files[0];
-  const ImageFile = fileItem?.file;
+  const imageFile = files[0]?.file;
+
   const currentImage =
-    fileItem?.preview ||
-    (ImageFile && !(ImageFile instanceof File)
-      ? (ImageFile as FileMetadata).url
+    files[0]?.preview ||
+    (imageFile && !(imageFile instanceof File)
+      ? (imageFile as FileMetadata).url
       : null);
 
   useEffect(() => {
@@ -632,64 +638,97 @@ function ProfileBg({
     if (files.length === 0) {
       setNewProjectImage(null);
       setRemoveProjectImage(hadInitialImage);
-    } else {
-      const file = files[0]?.file;
-      if (file instanceof File) {
-        setNewProjectImage(file);
-        setRemoveProjectImage(false);
-      } else {
-        setNewProjectImage(null);
-        setRemoveProjectImage(false);
-      }
+      return;
     }
+
+    const file = files[0]?.file;
+    if (file instanceof File) {
+      setNewProjectImage(file);
+      setRemoveProjectImage(false);
+      return;
+    }
+
+    setNewProjectImage(null);
+    setRemoveProjectImage(false);
   }, [files, imageUrl, setNewProjectImage, setRemoveProjectImage]);
 
+  useEffect(() => {
+    if (errors.length === 0) return;
+
+    toast.error(errors[0]);
+    clearErrors();
+  }, [errors, clearErrors]);
+
+  const handleRemove = () => {
+    if (files[0]?.id) {
+      removeFile(files[0].id);
+    }
+  };
+
   return (
-    <div className="h-40 w-full">
-      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
+    <div className="flex items-start gap-4">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted/30">
         {currentImage ? (
           <Image
-            className="size-full object-cover rounded-xl"
+            className="size-full object-cover"
             src={currentImage}
             alt={
               files[0]?.preview
-                ? "Preview of uploaded image"
-                : "Profile background"
+                ? "Preview of uploaded project image"
+                : "Project image"
             }
-            width={512}
-            height={96}
+            width={80}
+            height={80}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiBuildingsDuotone className="w-12 h-12" />
-            <span className="text-xs font-medium">Upload Image</span>
+          <div className="flex size-full items-center justify-center text-muted-foreground/50">
+            <Icon icon={KanbanIcon} size={28} strokeWidth={1.5} />
           </div>
         )}
-        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
-          <button
-            type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
-            onClick={openFileDialog}
-            aria-label={currentImage ? "Change image" : "Upload image"}
-          >
-            <PiPlusSquareDuotone size={16} aria-hidden="true" />
-          </button>
-          {currentImage && (
-            <button
-              type="button"
-              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
-              onClick={() => removeFile(files[0]?.id)}
-              aria-label="Remove image"
-            >
-              <PiXDuotone size={16} aria-hidden="true" />
-            </button>
-          )}
-        </div>
       </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <FormFieldLabel
+          htmlFor={uploadId}
+          label="Project Image"
+          tooltip="Update or remove the image used to identify this project."
+          optional
+        />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={openFileDialog}
+          >
+            <Icon icon={UploadSquare01Icon} size={14} strokeWidth={2} />
+            Upload Image
+          </Button>
+
+          {currentImage ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
+              onClick={handleRemove}
+            >
+              <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+              Remove
+            </Button>
+          ) : null}
+        </div>
+
+        <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+          {PROJECT_IMAGE_HELPER_TEXT}
+        </p>
+      </div>
+
       <input
-        {...getInputProps()}
+        {...getInputProps({ id: uploadId })}
         className="sr-only"
-        aria-label="Upload image file"
+        aria-label="Upload project image"
       />
     </div>
   );
