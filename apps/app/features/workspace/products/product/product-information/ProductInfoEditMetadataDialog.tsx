@@ -161,6 +161,7 @@ export default function ProductInfoEditMetadataDialog({
               <FormFieldLabel
                 htmlFor={`${id}-product-name`}
                 label="Product Name"
+                tooltip="Official name of the product as it appears on labeling and documentation."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
@@ -181,6 +182,7 @@ export default function ProductInfoEditMetadataDialog({
                 htmlFor={`${id}-description`}
                 label="Description"
                 optional
+                tooltip="Longer narrative description of the product beyond the short list summary."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupTextarea
@@ -199,13 +201,15 @@ export default function ProductInfoEditMetadataDialog({
                 htmlFor={`${id}-target-date`}
                 label="Target Date"
                 optional
+                tooltip="Planned target date for completing this product version."
               />
               <Popover open={openTargetDate} onOpenChange={setOpenTargetDate}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
+                    size="default"
                     id={`${id}-target-date`}
-                    className="h-9 w-full justify-between font-normal"
+                    className="w-full justify-between font-normal"
                     aria-invalid={errors.targetDate ? "true" : "false"}
                   >
                     {targetDateValue

@@ -3,33 +3,38 @@
 import { useId, useMemo, useState } from "react";
 
 import { CountryFlag } from "@/components/common/CountryFlag";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import {
   COMPLIANCE_LANGUAGES,
   COMPLIANCE_LANGUAGE_GROUPS,
 } from "@/data/compliance-languages";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { cn } from "@uprevit/ui/lib/utils";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
+  Add01Icon,
   Cancel01Icon,
   CheckmarkCircle01Icon,
+  Delete02Icon,
   LanguageSquareIcon,
+  Tick01Icon,
 } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
 
 type ManageLanguagesDialogProps = {
   productId: string;
@@ -63,14 +68,17 @@ export default function ManageLanguagesDialog({
   const { mutate: updateLanguages, isPending } = useUpdateProductTabData();
 
   const catalog = useMemo(() => {
-    const entries = [...COMPLIANCE_LANGUAGES, ...selectedLanguages].map((item) => [
-      item.code.toUpperCase(),
-      {
-        code: item.code.toUpperCase(),
-        name: item.name,
-        ...(item.country ? { country: item.country } : {}),
-      },
-    ] as const);
+    const entries = [...COMPLIANCE_LANGUAGES, ...selectedLanguages].map(
+      (item) =>
+        [
+          item.code.toUpperCase(),
+          {
+            code: item.code.toUpperCase(),
+            name: item.name,
+            ...(item.country ? { country: item.country } : {}),
+          },
+        ] as const,
+    );
 
     return new Map<string, LanguageRecord>(entries);
   }, [selectedLanguages]);
@@ -90,16 +98,20 @@ export default function ManageLanguagesDialog({
     });
   }, [orderedLanguages, search]);
 
-  const selectedCodeSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
+  const selectedCodeSet = useMemo(
+    () => new Set(selectedCodes),
+    [selectedCodes],
+  );
   const visibleCodes = filteredLanguages.map((item) => item.code);
   const allVisibleSelected =
-    visibleCodes.length > 0 && visibleCodes.every((code) => selectedCodeSet.has(code));
+    visibleCodes.length > 0 &&
+    visibleCodes.every((code) => selectedCodeSet.has(code));
 
   const selectedLanguageItems = useMemo(() => {
     return sortLanguages(
       selectedCodes
         .map((code) => catalog.get(code))
-        .filter((item): item is LanguageRecord => Boolean(item))
+        .filter((item): item is LanguageRecord => Boolean(item)),
     );
   }, [catalog, selectedCodes]);
 
@@ -109,17 +121,6 @@ export default function ManageLanguagesDialog({
     }
 
     return `${selectedLanguageItems.length} language${selectedLanguageItems.length === 1 ? "" : "s"} selected`;
-  }, [selectedLanguageItems]);
-
-  const selectedPreview = useMemo(() => {
-    const previewCodes = selectedLanguageItems.slice(0, 6).map((item) => item.code);
-    const remainingCount = selectedLanguageItems.length - previewCodes.length;
-
-    if (previewCodes.length === 0) {
-      return "Choose individual languages or apply a market group.";
-    }
-
-    return `${previewCodes.join(", ")}${remainingCount > 0 ? ` +${remainingCount} more` : ""}`;
   }, [selectedLanguageItems]);
 
   const toggleLanguage = (code: string) => {
@@ -165,7 +166,7 @@ export default function ManageLanguagesDialog({
     const languages = sortLanguages(
       selectedCodes
         .map((code) => catalog.get(code))
-        .filter((item): item is LanguageRecord => Boolean(item))
+        .filter((item): item is LanguageRecord => Boolean(item)),
     );
 
     updateLanguages(
@@ -182,7 +183,7 @@ export default function ManageLanguagesDialog({
         onError: (error) => {
           console.error("Failed to update languages information:", error);
         },
-      }
+      },
     );
   };
 
@@ -191,225 +192,269 @@ export default function ManageLanguagesDialog({
 
     if (nextOpen) {
       setSearch("");
-      setSelectedCodes(selectedLanguages.map((item) => item.code.toUpperCase()));
+      setSelectedCodes(
+        selectedLanguages.map((item) => item.code.toUpperCase()),
+      );
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" disabled={isSubmitted}>
-          <Icon icon={LanguageSquareIcon} />
-          Manage Languages
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl [&>button:last-child]:hidden">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Icon icon={LanguageSquareIcon} size={16} strokeWidth={2} />
-              <span>Manage Product Languages</span>
-            </div>
+      <Tooltip>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="secondary" disabled={isSubmitted}>
+              <Icon icon={LanguageSquareIcon} />
+              Manage Languages
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
+        <TooltipContent side="bottom">
+          {isSubmitted
+            ? "Submitted products can't be edited"
+            : "Manage product languages for packaging and labeling"}
+        </TooltipContent>
+      </Tooltip>
+      <AppDialogContent
+        title="Manage Product Languages"
+        description="Select individual languages or apply preset market language groups."
+        variant="custom"
+        className="sm:max-w-4xl"
+        bodyClassName="overflow-hidden p-0"
+        footer={
+          <>
             <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Select individual languages or apply preset market language groups.
-        </DialogDescription>
-
-        <div className="grid gap-4 overflow-hidden p-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.85fr)]">
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border bg-background">
-            <div className="flex flex-col gap-3 border-b bg-muted/30 px-4 py-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Language Catalog</p>
-                <p className="text-xs text-muted-foreground">
-                  Search by code, language, or country. Click anywhere on a row to select or clear it.
-                </p>
-              </div>
               <Button
                 type="button"
+                variant="secondary"
                 size="sm"
-                variant="outline"
-                onClick={handleSelectAllVisible}
-                disabled={!visibleCodes.length}
+                disabled={isPending}
               >
-                {allVisibleSelected ? "Clear Visible" : "Select Visible"}
+                <Icon icon={Cancel01Icon} size={16} strokeWidth={2} />
+                Cancel
               </Button>
-            </div>
+            </DialogClose>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSave}
+              disabled={isPending}
+              aria-busy={isPending}
+            >
+              {isPending ? (
+                <Spinner />
+              ) : (
+                <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
+              )}
+              {isPending ? "Saving..." : "Save Languages"}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex h-[560px] flex-col">
+          <div className="grid min-h-0 flex-1 divide-x divide-border lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.85fr)]">
+            <section className="flex min-h-0 flex-col">
+              <div className="flex h-10 shrink-0 items-center justify-between border-b bg-muted/30 px-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-foreground">
+                    Language Catalog
+                  </p>
+                  <InfoTooltip content="Search by code, language, or country. Click anywhere on a row to select or clear it." />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedCodes([])}
+                    disabled={isPending || selectedLanguageItems.length === 0}
+                  >
+                    <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
+                    Clear All
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSelectAllVisible}
+                    disabled={!visibleCodes.length}
+                  >
+                    <Icon
+                      icon={allVisibleSelected ? Cancel01Icon : Tick01Icon}
+                      size={16}
+                      strokeWidth={2}
+                    />
+                    {allVisibleSelected ? "Clear Visible" : "Select Visible"}
+                  </Button>
+                </div>
+              </div>
 
-            <div className="border-b px-4 py-3">
-              <Input
-                id={`${id}-language-search`}
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by code, language, or country"
-              />
-            </div>
+              <div className="shrink-0 border-b px-3 py-2">
+                <Input
+                  id={`${id}-language-search`}
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by code, language, or country"
+                />
+              </div>
 
-            <ScrollArea className="h-[420px] overflow-hidden">
-              <div className="pb-1">
-                {filteredLanguages.length === 0 ? (
-                  <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-                    No languages match your search.
-                  </div>
-                ) : (
-                  filteredLanguages.map((language, index) => {
-                    const isSelected = selectedCodeSet.has(language.code);
-                    const checkboxId = `${id}-${language.code.toLowerCase()}`;
+              <ScrollArea className="min-h-0 flex-1">
+                <div className="pb-1">
+                  {filteredLanguages.length === 0 ? (
+                    <div className="px-3 py-10 text-center text-sm text-muted-foreground">
+                      No languages match your search.
+                    </div>
+                  ) : (
+                    filteredLanguages.map((language, index) => {
+                      const isSelected = selectedCodeSet.has(language.code);
+                      const checkboxId = `${id}-${language.code.toLowerCase()}`;
 
-                    return (
-                      <label
-                        key={language.code}
-                        htmlFor={checkboxId}
-                        className={cn(
-                          "flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors",
-                          index !== filteredLanguages.length - 1 && "border-b border-border",
-                          isSelected ? "bg-accent/50" : "hover:bg-accent/30"
-                        )}
-                      >
-                        <div className="mt-0.5">
+                      return (
+                        <label
+                          key={language.code}
+                          htmlFor={checkboxId}
+                          className={cn(
+                            "flex w-full cursor-pointer items-start gap-3 px-3 py-3 text-left transition-colors",
+                            index !== filteredLanguages.length - 1 &&
+                              "border-b border-border",
+                            isSelected ? "bg-accent/50" : "hover:bg-accent/30",
+                          )}
+                        >
                           <Checkbox
                             id={checkboxId}
                             checked={isSelected}
-                            onCheckedChange={() => toggleLanguage(language.code)}
+                            onCheckedChange={() =>
+                              toggleLanguage(language.code)
+                            }
                           />
-                        </div>
-                        <CountryFlag country={language.country} className="mt-0.5" />
-                        <div className="min-w-[2.75rem] shrink-0 pt-0.5 text-xs font-medium tracking-wide text-muted-foreground">
-                          {language.code}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-foreground">{language.name}</p>
-                          {language.country && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {language.country}
+                          <CountryFlag country={language.country} />
+                          <div className="min-w-11 shrink-0 text-xs font-medium tracking-wide text-muted-foreground">
+                            {language.code}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground">
+                              {language.name}
                             </p>
-                          )}
-                        </div>
-                        <Icon
-                          icon={CheckmarkCircle01Icon}
-                          size={16}
-                          strokeWidth={2}
-                          className={cn(
-                            "mt-0.5 shrink-0 transition-opacity",
-                            isSelected ? "text-primary opacity-100" : "opacity-0"
-                          )}
-                        />
-                      </label>
-                    );
-                  })
-                )}
+                            {language.country && (
+                              <p className="mt-0.5 text-xs text-muted-foreground">
+                                {language.country}
+                              </p>
+                            )}
+                          </div>
+                          <Icon
+                            icon={CheckmarkCircle01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className={cn(
+                              "shrink-0 transition-opacity",
+                              isSelected
+                                ? "text-primary opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </ScrollArea>
+            </section>
+
+            <section className="flex min-h-0 flex-col">
+              <div className="flex h-10 shrink-0 items-center border-b bg-muted/30 px-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-foreground">
+                    Market Groups
+                  </p>
+                  <InfoTooltip content="Add common packaging and labeling sets for major launch regions." />
+                </div>
               </div>
-            </ScrollArea>
-          </section>
 
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border bg-background">
-            <div className="space-y-1 border-b bg-primary/5 px-4 py-4">
-              <p className="text-sm font-medium text-foreground">Market Groups</p>
-              <p className="text-xs text-muted-foreground">
-                Add common packaging and labeling sets for major launch regions.
-              </p>
-            </div>
+              <ScrollArea className="min-h-0 flex-1">
+                <div className="pb-1">
+                  {COMPLIANCE_LANGUAGE_GROUPS.map((group, index) => {
+                    const selectedCount = group.languages.filter((code) =>
+                      selectedCodeSet.has(code.toUpperCase()),
+                    ).length;
+                    const allGroupLanguagesSelected =
+                      selectedCount === group.languages.length;
 
-            <ScrollArea className="h-[420px] overflow-hidden">
-              <div className="pb-1">
-                {COMPLIANCE_LANGUAGE_GROUPS.map((group, index) => {
-                  const selectedCount = group.languages.filter((code) =>
-                    selectedCodeSet.has(code.toUpperCase())
-                  ).length;
-                  const allGroupLanguagesSelected =
-                    selectedCount === group.languages.length;
-
-                  return (
-                    <div
-                      key={group.id}
-                      className={cn(
-                        "px-4 py-3 transition-colors",
-                        allGroupLanguagesSelected && "bg-muted/25",
-                        index !== COMPLIANCE_LANGUAGE_GROUPS.length - 1 &&
-                          "border-b border-border"
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground">{group.name}</p>
-                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                            {group.description}
-                          </p>
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            {group.languages.join(", ")}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 flex-col items-end gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleApplyGroup(group.languages)}
-                            disabled={allGroupLanguagesSelected}
-                          >
-                            {allGroupLanguagesSelected ? "Added" : "Add"}
-                          </Button>
-                          <p className="text-[11px] text-muted-foreground">
-                            {selectedCount}/{group.languages.length} selected
-                          </p>
+                    return (
+                      <div
+                        key={group.id}
+                        className={cn(
+                          "px-3 py-3 transition-colors",
+                          allGroupLanguagesSelected && "bg-muted/25",
+                          index !== COMPLIANCE_LANGUAGE_GROUPS.length - 1 &&
+                            "border-b border-border",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium text-foreground">
+                                {group.name}
+                              </p>
+                              <InfoTooltip content={group.description} />
+                            </div>
+                            <p className="mt-1.5 text-xs text-muted-foreground w-[80%]">
+                              {group.languages.join(", ")}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  size="icon-xs"
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleApplyGroup(group.languages)
+                                  }
+                                  disabled={allGroupLanguagesSelected}
+                                  aria-label={
+                                    allGroupLanguagesSelected
+                                      ? `${group.name} languages added`
+                                      : `Add ${group.name} languages`
+                                  }
+                                >
+                                  <Icon
+                                    icon={
+                                      allGroupLanguagesSelected
+                                        ? CheckmarkCircle01Icon
+                                        : Add01Icon
+                                    }
+                                    size={14}
+                                    strokeWidth={2}
+                                  />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">
+                                {allGroupLanguagesSelected
+                                  ? "All languages added"
+                                  : "Add languages"}
+                              </TooltipContent>
+                            </Tooltip>
+                            <p className="text-[11px] text-muted-foreground">
+                              {selectedCount}/{group.languages.length} selected
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </section>
-        </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </section>
+          </div>
 
-        <div className="border-t bg-muted/20 px-4 py-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="mt-0.5 rounded-md bg-primary/10 p-1 text-primary">
-                <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{selectedCountLabel}</p>
-                <p className="truncate text-xs text-muted-foreground">{selectedPreview}</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">{visibleCodes.length} visible in current search</p>
+          <div className="flex h-10 shrink-0 items-center border-t bg-muted/20 px-3">
+            <p className="text-sm font-medium text-foreground">
+              {selectedCountLabel}
+            </p>
           </div>
         </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => setSelectedCodes([])}
-            disabled={isPending || selectedLanguageItems.length === 0}
-          >
-            Clear All
-          </Button>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm" disabled={isPending}>
-              <Icon icon={Cancel01Icon} />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSave}
-            disabled={isPending}
-            aria-busy={isPending}
-          >
-            {isPending ? <Spinner /> : <Icon icon={CheckmarkCircle01Icon} />}
-            {isPending ? "Saving..." : "Save Languages"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

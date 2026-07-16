@@ -1,23 +1,21 @@
+"use client";
+
 import { useState } from "react";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Alert01Icon,
   Cancel01Icon,
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@uprevit/ui/components/ui/alert-dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 
 interface DeleteStandardDialogProps {
   productId: string;
@@ -63,66 +61,59 @@ export default function DeleteStandardDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          size="icon-xs"
-          variant="destructive"
-          disabled={isSubmitted}
-          aria-label="Delete standard"
-        >
-          <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
-        <AlertDialogHeader className="contents space-y-0 text-left">
-          <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 flex w-full justify-between items-center">
-            <div className="flex items-center gap-2 text-destructive">
-              <Icon icon={Alert01Icon} size={16} strokeWidth={2} />
-              <span>Delete Standard</span>
-            </div>
-            <button
-              type="button"
-              className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setOpen(false)}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Tooltip>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon-xs"
+              variant="destructive"
+              disabled={isSubmitted}
+              aria-label="Delete standard"
             >
-              <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
-            </button>
-          </AlertDialogTitle>
-        </AlertDialogHeader>
-        <div className="p-4">
-          <AlertDialogDescription className="text-sm text-muted-foreground">
-            This will permanently delete the compliance standard{" "}
-            <span className="font-semibold text-foreground">
-              &quot;{standardName}&quot;
-            </span>
-            . This action cannot be undone.
-          </AlertDialogDescription>
-        </div>
-        <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => setOpen(false)}
-            disabled={isPending}
-          >
-            <Icon icon={Cancel01Icon} />
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isPending}
-            aria-busy={isPending}
-          >
-            {isPending ? <Spinner /> : <Icon icon={Delete02Icon} />}
-            {isPending ? "Deleting..." : "Delete Standard"}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+              <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
+        <TooltipContent side="bottom">
+          {isSubmitted
+            ? "Submitted products can't be edited"
+            : "Delete standard"}
+        </TooltipContent>
+      </Tooltip>
+      <AppDialogContent
+        title="Delete Standard"
+        description="Delete this compliance standard. This action cannot be undone."
+        variant="confirm-destructive"
+        size="md"
+        confirmContent={{
+          heading: "Are you sure?",
+          message: (
+            <>
+              This will permanently delete the compliance standard{" "}
+              <span className="font-semibold text-foreground">
+                &quot;{standardName}&quot;
+              </span>
+              . This action cannot be undone.
+            </>
+          ),
+          icon: Alert01Icon,
+        }}
+        primaryAction={{
+          label: "Delete Standard",
+          loadingLabel: "Deleting...",
+          onClick: handleDelete,
+          loading: isPending,
+          disabled: isPending,
+          icon: Delete02Icon,
+          variant: "destructive",
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      />
+    </Dialog>
   );
 }

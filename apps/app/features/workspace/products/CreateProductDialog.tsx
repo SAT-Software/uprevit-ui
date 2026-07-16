@@ -378,9 +378,10 @@ export default function CreateProductDialog() {
                       id={`${id}-department`}
                       type="button"
                       variant="outline"
+                      size="default"
                       role="combobox"
                       aria-expanded={departmentPopoverOpen}
-                      className="h-9 w-full justify-between bg-background font-normal"
+                      className="w-full justify-between bg-background font-normal"
                     >
                       <span className="truncate">
                         {selectedDepartmentLabel ||
@@ -469,10 +470,11 @@ export default function CreateProductDialog() {
                       id={`${id}-project`}
                       type="button"
                       variant="outline"
+                      size="default"
                       role="combobox"
                       aria-expanded={projectPopoverOpen}
                       disabled={!selectedDepartment}
-                      className="h-9 w-full justify-between bg-background font-normal"
+                      className="w-full justify-between bg-background font-normal"
                     >
                       <span className="truncate">
                         {selectedProjectLabel ||

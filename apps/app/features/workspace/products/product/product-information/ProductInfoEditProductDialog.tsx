@@ -229,8 +229,11 @@ export default function EditProductDialog({
                 !!(errors.marketGeographySelect || errors.marketGeographyInput)
               }
             >
-              <FormFieldLabel label="Market / Geography" />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormFieldLabel
+                label="Market / Geography"
+                tooltip="Target market or geographic region for this product. Choose one option: select from the list or enter a custom value."
+              />
+              <div className="space-y-2">
                 <Field>
                   <FormFieldLabel
                     htmlFor={`${id}-market-geography`}
@@ -241,10 +244,10 @@ export default function EditProductDialog({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         role="combobox"
                         aria-expanded={comboboxOpen}
-                        className="h-9 w-full justify-between font-normal text-foreground/80"
+                        className="w-full justify-between font-normal text-foreground/80"
                         disabled={!!marketGeographyInput}
                       >
                         {marketGeographySelect
@@ -312,6 +315,14 @@ export default function EditProductDialog({
                   </Popover>
                 </Field>
 
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
+
                 <Field>
                   <FormFieldLabel
                     htmlFor={`${id}-market-geography-custom`}
@@ -352,8 +363,11 @@ export default function EditProductDialog({
                 !!(errors.countryOfOriginSelect || errors.countryOfOriginInput)
               }
             >
-              <FormFieldLabel label="Country of Origin" />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormFieldLabel
+                label="Country of Origin"
+                tooltip="Country where the product is manufactured or originates. Choose one option: select from the list or enter a custom value."
+              />
+              <div className="space-y-2">
                 <Field>
                   <FormFieldLabel
                     htmlFor={`${id}-country-origin`}
@@ -367,10 +381,10 @@ export default function EditProductDialog({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         role="combobox"
                         aria-expanded={countryComboboxOpen}
-                        className="h-9 w-full justify-between font-normal text-foreground/80"
+                        className="w-full justify-between font-normal text-foreground/80"
                         disabled={!!countryOfOriginInput}
                       >
                         {countryOfOriginSelect ? (
@@ -459,6 +473,14 @@ export default function EditProductDialog({
                   </Popover>
                 </Field>
 
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
+
                 <Field>
                   <FormFieldLabel
                     htmlFor={`${id}-country-origin-custom`}
@@ -497,6 +519,7 @@ export default function EditProductDialog({
               <FormFieldLabel
                 htmlFor={`${id}-oem-contract`}
                 label="OEM / Contract manufacturer"
+                tooltip="Original equipment manufacturer or contract manufacturer responsible for production."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
@@ -516,6 +539,7 @@ export default function EditProductDialog({
               <FormFieldLabel
                 htmlFor={`${id}-commercial-clinical`}
                 label="Commercial / Clinical"
+                tooltip="Whether the device is intended for commercial or clinical use."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
@@ -536,6 +560,7 @@ export default function EditProductDialog({
                 htmlFor={`${id}-manufacturing-location`}
                 label="Manufacturing Location"
                 optional
+                tooltip="Physical location where the product is manufactured."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
@@ -550,8 +575,12 @@ export default function EditProductDialog({
             </Field>
 
             <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-              <FormFieldLabel label="Class of Device" optional />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormFieldLabel
+                label="Class of Device"
+                optional
+                tooltip="Regulatory device classification (e.g., EU MDR, FDA). Choose one option: select from the list or enter a custom value."
+              />
+              <div className="space-y-2">
                 <Field>
                   <FormFieldLabel
                     htmlFor={`${id}-class-device`}
@@ -565,10 +594,10 @@ export default function EditProductDialog({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         role="combobox"
                         aria-expanded={classComboboxOpen}
-                        className="h-9 w-full justify-between font-normal text-foreground/80"
+                        className="w-full justify-between font-normal text-foreground/80"
                         disabled={!!classOfDeviceInput}
                       >
                         {selectedDeviceClass ? (
@@ -649,6 +678,14 @@ export default function EditProductDialog({
                   </Popover>
                 </Field>
 
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
+
                 <Field>
                   <FormFieldLabel
                     htmlFor={`${id}-class-device-custom`}
@@ -673,6 +710,7 @@ export default function EditProductDialog({
                 htmlFor={`${id}-basic-udi-di`}
                 label="Basic UDI-DI"
                 optional
+                tooltip="Basic Unique Device Identification — device identifier used for regulatory tracking when applicable."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
