@@ -3,21 +3,15 @@
 import { useId, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { PiCheckCircleDuotone, PiXCircleDuotone } from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import {
   Popover,
   PopoverContent,
@@ -38,11 +32,16 @@ import {
   CommandList,
 } from "@uprevit/ui/components/ui/command";
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiCheck, PiCaretUpDown } from "react-icons/pi";
 import { COUNTRIES } from "@/data/countries";
 import * as Flags from "country-flag-icons/react/3x2";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { TaskEdit01Icon } from "@hugeicons/core-free-icons";
+import {
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  TaskEdit01Icon,
+  Tick01Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
 import {
   Tooltip,
   TooltipContent,
@@ -201,31 +200,40 @@ export default function EditProductDialog({
             : "Edit product information fields"}
         </TooltipContent>
       </Tooltip>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-2xl max-h-[90vh] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Edit Product Information</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Edit product information fields.
-        </DialogDescription>
+      <AppDialogContent
+        title="Edit Product Information"
+        description="Edit product information fields."
+        variant="form"
+        size="xl"
+        primaryAction={{
+          label: "Save Changes",
+          loadingLabel: "Saving...",
+          form: `edit-product-info-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`edit-product-info-form-${id}`}
-          className="overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-market-geography`} className="text-sm">
-                Market / Geography
-              </Label>
+          <FieldGroup className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
+            <Field
+              data-invalid={
+                !!(errors.marketGeographySelect || errors.marketGeographyInput)
+              }
+            >
+              <FormFieldLabel
+                htmlFor={`${id}-market-geography`}
+                label="Market / Geography"
+              />
               <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -233,7 +241,7 @@ export default function EditProductDialog({
                     size="sm"
                     role="combobox"
                     aria-expanded={comboboxOpen}
-                    className="w-full justify-between text-foreground/80 font-normal h-9"
+                    className="h-9 w-full justify-between font-normal text-foreground/80"
                     disabled={!!marketGeographyInput}
                   >
                     {marketGeographySelect
@@ -242,7 +250,11 @@ export default function EditProductDialog({
                             market.regionAcronym === marketGeographySelect,
                         )?.regionAcronym
                       : "Select market..."}
-                    <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Icon
+                      icon={UnfoldMoreIcon}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50"
+                    />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -277,9 +289,11 @@ export default function EditProductDialog({
                               }
                             }}
                           >
-                            <PiCheck
+                            <Icon
+                              icon={Tick01Icon}
+                              size={16}
                               className={cn(
-                                "mr-2 h-4 w-4",
+                                "mr-2",
                                 marketGeographySelect === market.regionAcronym
                                   ? "opacity-100"
                                   : "opacity-0",
@@ -296,20 +310,18 @@ export default function EditProductDialog({
 
               <div className="flex items-center gap-2 py-1">
                 <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light text-muted-foreground uppercase">
+                <p className="text-[10px] font-light uppercase text-muted-foreground">
                   OR
                 </p>
                 <div className="h-0 w-full border-t border-dashed" />
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor={`${id}-market-geography-custom`}
-                  className="text-sm"
-                >
-                  Enter Custom Market
-                </Label>
-                <Input
+              <FormFieldLabel
+                htmlFor={`${id}-market-geography-custom`}
+                label="Enter Custom Market"
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-market-geography-custom`}
                   placeholder="Enter custom market/geography"
                   type="text"
@@ -324,19 +336,25 @@ export default function EditProductDialog({
                     },
                   })}
                 />
-                {(errors.marketGeographySelect ||
-                  errors.marketGeographyInput) && (
-                  <p role="alert" className="text-xs text-destructive">
-                    Market/Geography is required
-                  </p>
-                )}
-              </div>
-            </div>
+              </InputGroup>
+              <FieldError
+                errors={[
+                  errors.marketGeographySelect || errors.marketGeographyInput
+                    ? { message: "Market/Geography is required" }
+                    : undefined,
+                ]}
+              />
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-country-origin`} className="text-sm">
-                Country of Origin
-              </Label>
+            <Field
+              data-invalid={
+                !!(errors.countryOfOriginSelect || errors.countryOfOriginInput)
+              }
+            >
+              <FormFieldLabel
+                htmlFor={`${id}-country-origin`}
+                label="Country of Origin"
+              />
               <Popover
                 open={countryComboboxOpen}
                 onOpenChange={setCountryComboboxOpen}
@@ -347,7 +365,7 @@ export default function EditProductDialog({
                     size="sm"
                     role="combobox"
                     aria-expanded={countryComboboxOpen}
-                    className="w-full justify-between text-foreground/80 font-normal h-9"
+                    className="h-9 w-full justify-between font-normal text-foreground/80"
                     disabled={!!countryOfOriginInput}
                   >
                     {countryOfOriginSelect ? (
@@ -370,7 +388,11 @@ export default function EditProductDialog({
                     ) : (
                       "Select country..."
                     )}
-                    <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Icon
+                      icon={UnfoldMoreIcon}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50"
+                    />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -408,9 +430,11 @@ export default function EditProductDialog({
                                 }
                               }}
                             >
-                              <PiCheck
+                              <Icon
+                                icon={Tick01Icon}
+                                size={16}
                                 className={cn(
-                                  "mr-2 h-4 w-4",
+                                  "mr-2",
                                   countryOfOriginSelect === country.name
                                     ? "opacity-100"
                                     : "opacity-0",
@@ -431,20 +455,18 @@ export default function EditProductDialog({
 
               <div className="flex items-center gap-2 py-1">
                 <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light text-muted-foreground uppercase">
+                <p className="text-[10px] font-light uppercase text-muted-foreground">
                   OR
                 </p>
                 <div className="h-0 w-full border-t border-dashed" />
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor={`${id}-country-origin-custom`}
-                  className="text-sm"
-                >
-                  Enter Custom Country
-                </Label>
-                <Input
+              <FormFieldLabel
+                htmlFor={`${id}-country-origin-custom`}
+                label="Enter Custom Country"
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-country-origin-custom`}
                   placeholder="Enter custom country of origin"
                   type="text"
@@ -459,80 +481,78 @@ export default function EditProductDialog({
                     },
                   })}
                 />
-                {(errors.countryOfOriginSelect ||
-                  errors.countryOfOriginInput) && (
-                  <p role="alert" className="text-xs text-destructive">
-                    Country of Origin is required
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-oem-contract`} className="text-sm">
-                OEM / Contract manufacturer
-              </Label>
-              <Input
-                id={`${id}-oem-contract`}
-                placeholder="Enter OEM/contract manufacturer"
-                type="text"
-                aria-invalid={errors.oemContractManufacturer ? "true" : "false"}
-                {...register("oemContractManufacturer", {
-                  required: "OEM/Contract manufacturer is required",
-                })}
+              </InputGroup>
+              <FieldError
+                errors={[
+                  errors.countryOfOriginSelect || errors.countryOfOriginInput
+                    ? { message: "Country of Origin is required" }
+                    : undefined,
+                ]}
               />
-              {errors.oemContractManufacturer && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.oemContractManufacturer.message}
-                </p>
-              )}
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-commercial-clinical`} className="text-sm">
-                Commercial / Clinical
-              </Label>
-              <Input
-                id={`${id}-commercial-clinical`}
-                placeholder="Enter commercial/clinical"
-                type="text"
-                aria-invalid={errors.commercialClinical ? "true" : "false"}
-                {...register("commercialClinical", {
-                  required: "Commercial/Clinical is required",
-                })}
+            <Field data-invalid={!!errors.oemContractManufacturer}>
+              <FormFieldLabel
+                htmlFor={`${id}-oem-contract`}
+                label="OEM / Contract manufacturer"
               />
-              {errors.commercialClinical && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.commercialClinical.message}
-                </p>
-              )}
-            </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-oem-contract`}
+                  placeholder="Enter OEM/contract manufacturer"
+                  type="text"
+                  aria-invalid={errors.oemContractManufacturer ? "true" : "false"}
+                  {...register("oemContractManufacturer", {
+                    required: "OEM/Contract manufacturer is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.oemContractManufacturer]} />
+            </Field>
 
-            <div className="space-y-2">
-              <Label
+            <Field data-invalid={!!errors.commercialClinical}>
+              <FormFieldLabel
+                htmlFor={`${id}-commercial-clinical`}
+                label="Commercial / Clinical"
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-commercial-clinical`}
+                  placeholder="Enter commercial/clinical"
+                  type="text"
+                  aria-invalid={errors.commercialClinical ? "true" : "false"}
+                  {...register("commercialClinical", {
+                    required: "Commercial/Clinical is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.commercialClinical]} />
+            </Field>
+
+            <Field data-invalid={!!errors.manufacturingLocation}>
+              <FormFieldLabel
                 htmlFor={`${id}-manufacturing-location`}
-                className="text-sm"
-              >
-                Manufacturing Location
-              </Label>
-              <Input
-                id={`${id}-manufacturing-location`}
-                placeholder="Enter manufacturing location"
-                type="text"
-                aria-invalid={errors.manufacturingLocation ? "true" : "false"}
-                {...register("manufacturingLocation")}
+                label="Manufacturing Location"
+                optional
               />
-              {errors.manufacturingLocation && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.manufacturingLocation.message}
-                </p>
-              )}
-            </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-manufacturing-location`}
+                  placeholder="Enter manufacturing location"
+                  type="text"
+                  aria-invalid={errors.manufacturingLocation ? "true" : "false"}
+                  {...register("manufacturingLocation")}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.manufacturingLocation]} />
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-class-device`} className="text-sm">
-                Class of Device
-              </Label>
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-class-device`}
+                label="Class of Device"
+                optional
+              />
               <Popover
                 open={classComboboxOpen}
                 onOpenChange={setClassComboboxOpen}
@@ -543,7 +563,7 @@ export default function EditProductDialog({
                     size="sm"
                     role="combobox"
                     aria-expanded={classComboboxOpen}
-                    className="w-full justify-between text-foreground/80 font-normal h-9"
+                    className="h-9 w-full justify-between font-normal text-foreground/80"
                     disabled={!!classOfDeviceInput}
                   >
                     {selectedDeviceClass ? (
@@ -558,7 +578,11 @@ export default function EditProductDialog({
                     ) : (
                       "Select device class..."
                     )}
-                    <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Icon
+                      icon={UnfoldMoreIcon}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50"
+                    />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -589,9 +613,11 @@ export default function EditProductDialog({
                                 setClassComboboxOpen(false);
                               }}
                             >
-                              <PiCheck
+                              <Icon
+                                icon={Tick01Icon}
+                                size={16}
                                 className={cn(
-                                  "mr-2 h-4 w-4 shrink-0",
+                                  "mr-2 shrink-0",
                                   classOfDeviceSelect === deviceClass.value
                                     ? "opacity-100"
                                     : "opacity-0",
@@ -621,67 +647,50 @@ export default function EditProductDialog({
 
               <div className="flex items-center gap-2 py-1">
                 <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light text-muted-foreground uppercase">
+                <p className="text-[10px] font-light uppercase text-muted-foreground">
                   OR
                 </p>
                 <div className="h-0 w-full border-t border-dashed" />
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor={`${id}-class-device-custom`}
-                  className="text-sm"
-                >
-                  Enter Custom Class
-                </Label>
-                <Input
+              <FormFieldLabel
+                htmlFor={`${id}-class-device-custom`}
+                label="Enter Custom Class"
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-class-device-custom`}
                   placeholder="Enter custom device class"
                   type="text"
                   disabled={!!classOfDeviceSelect}
                   {...register("classOfDeviceInput")}
                 />
-              </div>
-            </div>
+              </InputGroup>
+            </Field>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor={`${id}-basic-udi-di`} className="text-sm">
-                Basic UDI-DI
-              </Label>
-              <Input
-                id={`${id}-basic-udi-di`}
-                placeholder="Enter Basic UDI-DI"
-                type="text"
-                aria-invalid={errors.basicUdiDi ? "true" : "false"}
-                {...register("basicUdiDi")}
+            <Field
+              className="md:col-span-2"
+              data-invalid={!!errors.basicUdiDi}
+            >
+              <FormFieldLabel
+                htmlFor={`${id}-basic-udi-di`}
+                label="Basic UDI-DI"
+                optional
               />
-              {errors.basicUdiDi && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.basicUdiDi.message}
-                </p>
-              )}
-            </div>
-          </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-basic-udi-di`}
+                  placeholder="Enter Basic UDI-DI"
+                  type="text"
+                  aria-invalid={errors.basicUdiDi ? "true" : "false"}
+                  {...register("basicUdiDi")}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.basicUdiDi]} />
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            form={`edit-product-info-form-${id}`}
-            disabled={isPending}
-            aria-busy={isPending}
-            size="sm"
-          >
-            {isPending ? <Spinner /> : <PiCheckCircleDuotone />}
-            {isPending ? "Saving..." : "Save Changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

@@ -3,49 +3,33 @@
 import { useId, useState, useEffect } from "react";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@uprevit/ui/components/ui/alert-dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { toast } from "sonner";
-import {
-  PiPencilLineDuotone,
-  PiCheckCircleDuotone,
-  PiXCircleDuotone,
-  PiPlusCircleDuotone,
-  PiPencilCircleDuotone,
-  PiTrashDuotone,
-} from "react-icons/pi";
 import { ProductMetadata } from "@/types/product";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Settings05Icon } from "@hugeicons/core-free-icons";
+import {
+  Alert01Icon,
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Delete02Icon,
+  PencilEdit01Icon,
+  PlusSignSquareIcon,
+  Settings05Icon,
+} from "@hugeicons/core-free-icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
-// Interface that matches the actual API response structure
 interface ProductData {
   id?: string;
   custom_fields?: Array<{
@@ -89,7 +73,6 @@ export default function ProductInformationCustomFieldEditDialog({
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const isSubmitted = productMetadata?.status === "submitted";
 
-  // Initialize form with react-hook-form and field array for new fields
   const {
     register,
     handleSubmit,
@@ -108,7 +91,6 @@ export default function ProductInformationCustomFieldEditDialog({
     name: "customFields",
   });
 
-  // Form for managing existing fields
   const {
     register: registerManage,
     control: controlManage,
@@ -133,7 +115,6 @@ export default function ProductInformationCustomFieldEditDialog({
     name: "existingFields",
   });
 
-  // Sync manage form with product data
   useEffect(() => {
     if (customFieldsData) {
       resetManage({
@@ -157,7 +138,6 @@ export default function ProductInformationCustomFieldEditDialog({
       return;
     }
 
-    // Filter out empty fields
     const validFields = data.customFields.filter(
       (field) => field.label.trim() !== "" || field.value.trim() !== "",
     );
@@ -207,7 +187,6 @@ export default function ProductInformationCustomFieldEditDialog({
       return;
     }
 
-    // Send all custom fields data instead of just the updated field
     const allCustomFields = customFieldsData?.map((field) =>
       field._id === fieldId ? { ...field, label: label, value: value } : field,
     );
@@ -247,8 +226,6 @@ export default function ProductInformationCustomFieldEditDialog({
       return;
     }
 
-    console.log("Deleting custom field with ID:", fieldId);
-
     const deleteData = {
       id: product.id,
       action: "delete_custom_field",
@@ -263,12 +240,14 @@ export default function ProductInformationCustomFieldEditDialog({
         toast.success("Custom field deleted successfully");
         reset();
         setOpen(false);
-        setDeleteFieldOpen(true);
+        setDeleteFieldOpen(false);
+        setDeleteFieldId(null);
       },
       onError: () => {
         reset();
         setOpen(false);
-        setDeleteFieldOpen(true);
+        setDeleteFieldOpen(false);
+        setDeleteFieldId(null);
       },
     });
   };
@@ -278,182 +257,197 @@ export default function ProductInformationCustomFieldEditDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" disabled={isSubmitted}>
-                <Icon icon={Settings05Icon} />
-                Manage Custom Fields
-              </Button>
-            </DialogTrigger>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
-            : "Add and manage custom fields"}
-        </TooltipContent>
-      </Tooltip>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-2xl max-h-[90vh] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Manage Custom Fields</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Manage custom fields for product information.
-        </DialogDescription>
-
-        {/* Tab Navigation */}
-        <div className="border-b px-4 py-3 bg-muted/5">
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant={activeTab === "add" ? "secondary" : "outline"}
-              onClick={() => setActiveTab("add")}
-            >
-              <PiPlusCircleDuotone className="h-4 w-4 mr-1" />
-              Add New Field
-            </Button>
-            <Button
-              size="sm"
-              variant={activeTab === "manage" ? "secondary" : "outline"}
-              onClick={() => setActiveTab("manage")}
-            >
-              <PiPencilCircleDuotone className="h-4 w-4 mr-1" />
-              Manage Existing Fields
-            </Button>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto">
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" disabled={isSubmitted}>
+                  <Icon icon={Settings05Icon} />
+                  Manage Custom Fields
+                </Button>
+              </DialogTrigger>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {isSubmitted
+              ? "Submitted products can't be edited"
+              : "Add and manage custom fields"}
+          </TooltipContent>
+        </Tooltip>
+        <AppDialogContent
+          title="Manage Custom Fields"
+          description="Manage custom fields for product information."
+          variant="form"
+          size="xl"
+          headerExtra={
+            <div className="border-b bg-muted/5 px-4 py-3">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={activeTab === "add" ? "secondary" : "outline"}
+                  onClick={() => setActiveTab("add")}
+                >
+                  <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
+                  Add New Field
+                </Button>
+                <Button
+                  size="sm"
+                  variant={activeTab === "manage" ? "secondary" : "outline"}
+                  onClick={() => setActiveTab("manage")}
+                >
+                  <Icon icon={PencilEdit01Icon} size={16} strokeWidth={2} />
+                  Manage Existing Fields
+                </Button>
+              </div>
+            </div>
+          }
+          primaryAction={
+            activeTab === "add"
+              ? {
+                  label: "Add Field(s)",
+                  loadingLabel: "Adding...",
+                  form: `edit-custom-fields-form-${id}`,
+                  type: "submit",
+                  loading: isPending,
+                  disabled: isPending || isSubmitted,
+                  icon: CheckmarkCircle01Icon,
+                }
+              : undefined
+          }
+          secondaryAction={{
+            label: "Close",
+            icon: Cancel01Icon,
+          }}
+        >
           {activeTab === "add" ? (
             <form
               id={`edit-custom-fields-form-${id}`}
-              className="p-4"
               onSubmit={handleSubmit(onSubmit)}
               noValidate
             >
-              <div className="space-y-4">
+              <FieldGroup className="gap-4 p-4">
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="space-y-3 p-4 border rounded-lg bg-muted/30"
+                    className="space-y-3 rounded-lg border bg-muted/30 p-4"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-base font-medium text-muted-foreground">
                         New Field
                       </span>
-                      {fields.length > 1 && (
+                      {fields.length > 1 ? (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeCustomField(index)}
                           className="h-6 w-6 p-0"
+                          aria-label="Remove field"
                         >
-                          <PiXCircleDuotone className="h-4 w-4" />
+                          <Icon icon={Cancel01Icon} size={16} strokeWidth={2} />
                         </Button>
-                      )}
+                      ) : null}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label
+                    <Field data-invalid={!!errors.customFields?.[index]?.label}>
+                      <FormFieldLabel
                         htmlFor={`${id}-field-name-${index}`}
-                        className="text-sm"
-                      >
-                        Label
-                      </Label>
-                      <Input
-                        id={`${id}-field-name-${index}`}
-                        placeholder="Enter label"
-                        type="text"
-                        {...register(`customFields.${index}.label` as const, {
-                          required: "Label is required",
-                        })}
+                        label="Label"
                       />
-                      {errors.customFields?.[index]?.label && (
-                        <p role="alert" className="text-xs text-destructive">
-                          {errors.customFields[index]?.label?.message}
-                        </p>
-                      )}
-                    </div>
+                      <InputGroup size="md" className="bg-background">
+                        <InputGroupInput
+                          id={`${id}-field-name-${index}`}
+                          placeholder="Enter label"
+                          type="text"
+                          {...register(`customFields.${index}.label` as const, {
+                            required: "Label is required",
+                          })}
+                        />
+                      </InputGroup>
+                      <FieldError
+                        errors={[errors.customFields?.[index]?.label]}
+                      />
+                    </Field>
 
-                    <div className="space-y-2">
-                      <Label
+                    <Field data-invalid={!!errors.customFields?.[index]?.value}>
+                      <FormFieldLabel
                         htmlFor={`${id}-field-value-${index}`}
-                        className="text-sm"
-                      >
-                        Value
-                      </Label>
-                      <Input
-                        id={`${id}-field-value-${index}`}
-                        placeholder="Enter value"
-                        type="text"
-                        {...register(`customFields.${index}.value` as const, {
-                          required: "Value is required",
-                        })}
+                        label="Value"
                       />
-                      {errors.customFields?.[index]?.value && (
-                        <p role="alert" className="text-xs text-destructive">
-                          {errors.customFields[index]?.value?.message}
-                        </p>
-                      )}
-                    </div>
+                      <InputGroup size="md" className="bg-background">
+                        <InputGroupInput
+                          id={`${id}-field-value-${index}`}
+                          placeholder="Enter value"
+                          type="text"
+                          {...register(`customFields.${index}.value` as const, {
+                            required: "Value is required",
+                          })}
+                        />
+                      </InputGroup>
+                      <FieldError
+                        errors={[errors.customFields?.[index]?.value]}
+                      />
+                    </Field>
                   </div>
                 ))}
-              </div>
+              </FieldGroup>
             </form>
           ) : (
             <form className="p-4" onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-4">
+              <FieldGroup className="gap-4">
                 {manageFields.length > 0 ? (
                   manageFields.map((field, index) => (
                     <div
                       key={field.id}
-                      className="space-y-3 p-4 border rounded-lg bg-muted/30"
+                      className="space-y-3 rounded-lg border bg-muted/30 p-4"
                     >
-                      <div className="space-y-2">
-                        <Label className="text-sm">Field Label</Label>
-                        <Input
-                          placeholder="Enter field label"
-                          type="text"
-                          {...registerManage(
-                            `existingFields.${index}.label` as const,
-                            { required: "Label is required" },
-                          )}
+                      <Field
+                        data-invalid={
+                          !!errorsManage.existingFields?.[index]?.label
+                        }
+                      >
+                        <FormFieldLabel label="Field Label" />
+                        <InputGroup size="md" className="bg-background">
+                          <InputGroupInput
+                            placeholder="Enter field label"
+                            type="text"
+                            {...registerManage(
+                              `existingFields.${index}.label` as const,
+                              { required: "Label is required" },
+                            )}
+                          />
+                        </InputGroup>
+                        <FieldError
+                          errors={[
+                            errorsManage.existingFields?.[index]?.label,
+                          ]}
                         />
-                        {errorsManage.existingFields?.[index]?.label && (
-                          <p role="alert" className="text-xs text-destructive">
-                            {errorsManage.existingFields[index]?.label?.message}
-                          </p>
-                        )}
-                      </div>
+                      </Field>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm">Field Value</Label>
-                        <Input
-                          placeholder="Enter field value"
-                          type="text"
-                          {...registerManage(
-                            `existingFields.${index}.value` as const,
-                            { required: "Value is required" },
-                          )}
+                      <Field
+                        data-invalid={
+                          !!errorsManage.existingFields?.[index]?.value
+                        }
+                      >
+                        <FormFieldLabel label="Field Value" />
+                        <InputGroup size="md" className="bg-background">
+                          <InputGroupInput
+                            placeholder="Enter field value"
+                            type="text"
+                            {...registerManage(
+                              `existingFields.${index}.value` as const,
+                              { required: "Value is required" },
+                            )}
+                          />
+                        </InputGroup>
+                        <FieldError
+                          errors={[
+                            errorsManage.existingFields?.[index]?.value,
+                          ]}
                         />
-                        {errorsManage.existingFields?.[index]?.value && (
-                          <p role="alert" className="text-xs text-destructive">
-                            {errorsManage.existingFields[index]?.value?.message}
-                          </p>
-                        )}
-                      </div>
+                      </Field>
 
                       <div className="flex gap-2">
                         <Button
@@ -472,7 +466,11 @@ export default function ProductInformationCustomFieldEditDialog({
                           }}
                           disabled={isPending || isSubmitted}
                         >
-                          <PiCheckCircleDuotone className="h-4 w-4 mr-1" />
+                          <Icon
+                            icon={CheckmarkCircle01Icon}
+                            size={16}
+                            strokeWidth={2}
+                          />
                           Update
                         </Button>
                         <Button
@@ -485,81 +483,61 @@ export default function ProductInformationCustomFieldEditDialog({
                           }}
                           disabled={isPending || isSubmitted}
                         >
-                          <PiTrashDuotone className="h-4 w-4 mr-1" />
+                          <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
                           Delete
                         </Button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8">
+                  <div className="py-8 text-center">
                     <p className="text-sm text-muted-foreground">
                       No custom fields available.
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Switch to &quot;Add New Field&quot; tab to create your
                       first custom field.
                     </p>
                   </div>
                 )}
-              </div>
+              </FieldGroup>
             </form>
           )}
-        </div>
+        </AppDialogContent>
+      </Dialog>
 
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Close
-            </Button>
-          </DialogClose>
-          {activeTab === "add" && (
-            <Button
-              type="submit"
-              form={`edit-custom-fields-form-${id}`}
-              disabled={isPending || isSubmitted}
-              aria-busy={isPending}
-              size="sm"
-            >
-              {isPending ? (
-                <Spinner className="w-4 h-4 mr-1" />
-              ) : (
-                <PiCheckCircleDuotone className="w-4 h-4 mr-1" />
-              )}
-              {isPending ? "Adding..." : "Add Field(s)"}
-            </Button>
-          )}
-        </DialogFooter>
-
-        {/* Delete Confirmation Alert Dialog */}
-        <AlertDialog open={deleteFieldOpen} onOpenChange={setDeleteFieldOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this custom field? This action
-                cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  if (deleteFieldId) {
-                    handleDeleteCustomField(deleteFieldId);
-                    setDeleteFieldId(null);
-                  }
-                }}
-                disabled={isPending || isSubmitted}
-                className="bg-destructive text-white hover:bg-destructive/90"
-              >
-                {isPending ? "Deleting..." : "Delete Field"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={deleteFieldOpen} onOpenChange={setDeleteFieldOpen}>
+        <AppDialogContent
+          title="Delete Custom Field"
+          description="Delete this custom field. This action cannot be undone."
+          variant="confirm-destructive"
+          size="md"
+          confirmContent={{
+            heading: "Are you sure?",
+            message:
+              "Are you sure you want to delete this custom field? This action cannot be undone.",
+            icon: Alert01Icon,
+          }}
+          primaryAction={{
+            label: "Delete Field",
+            loadingLabel: "Deleting...",
+            onClick: () => {
+              if (deleteFieldId) {
+                handleDeleteCustomField(deleteFieldId);
+              }
+            },
+            loading: isPending,
+            disabled: isPending || isSubmitted,
+            icon: Delete02Icon,
+            variant: "destructive",
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            disabled: isPending,
+            icon: Cancel01Icon,
+          }}
+        />
+      </Dialog>
+    </>
   );
 }
