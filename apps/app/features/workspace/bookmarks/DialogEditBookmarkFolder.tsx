@@ -2,28 +2,23 @@
 
 import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import {
-  PiPencilDuotone,
-  PiCheckCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
-import { useEditBookmarkFolder } from "@/hooks/bookmark/useEditBookmarkFolder";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { PropertyEditIcon } from "@hugeicons/core-free-icons";
+import {
+  Cancel01Icon,
+  PropertyEditIcon,
+  Tick01Icon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { useEditBookmarkFolder } from "@/hooks/bookmark/useEditBookmarkFolder";
 
 interface FormValues {
   folder_name: string;
@@ -71,12 +66,21 @@ export default function DialogEditBookmarkFolder({
         onError: (error) => {
           console.error("Failed to edit bookmark folder:", error);
         },
-      }
+      },
     );
   };
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      reset({ folder_name: currentFolderName });
+    } else {
+      reset();
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
@@ -85,83 +89,64 @@ export default function DialogEditBookmarkFolder({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiPencilDuotone size={18} />
-              <p>Edit Folder Name</p>
-            </div>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Edit the name of this bookmark folder.
-        </DialogDescription>
-
+      <AppDialogContent
+        title="Edit Folder Name"
+        description="Edit the name of this bookmark folder."
+        variant="form"
+        size="md"
+        primaryAction={{
+          label: "Save Changes",
+          loadingLabel: "Saving...",
+          form: `edit-folder-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: Tick01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`edit-folder-form-${id}`}
-          className="p-4"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-folder-name`}>Folder Name</Label>
-            <Input
-              id={`${id}-folder-name`}
-              placeholder="Enter folder name..."
-              type="text"
-              aria-invalid={errors.folder_name ? "true" : "false"}
-              {...register("folder_name", {
-                required: "Folder name is required",
-                minLength: {
-                  value: 1,
-                  message: "Folder name must not be empty",
-                },
-                maxLength: {
-                  value: 50,
-                  message: "Folder name must be at most 50 characters",
-                },
-              })}
-            />
-            {errors.folder_name && (
-              <p role="alert" className="text-xs text-destructive">
-                {errors.folder_name.message}
-              </p>
-            )}
-          </div>
+          <FieldGroup className="gap-4 p-4">
+            <Field data-invalid={!!errors.folder_name}>
+              <FormFieldLabel
+                htmlFor={`${id}-folder-name`}
+                label="Folder Name"
+                tooltip="Update the name of this bookmark folder."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-folder-name`}
+                  placeholder="Enter folder name..."
+                  type="text"
+                  aria-invalid={errors.folder_name ? "true" : "false"}
+                  {...register("folder_name", {
+                    required: "Folder name is required",
+                    minLength: {
+                      value: 1,
+                      message: "Folder name must not be empty",
+                    },
+                    maxLength: {
+                      value: 50,
+                      message: "Folder name must be at most 50 characters",
+                    },
+                  })}
+                />
+              </InputGroup>
+              {errors.folder_name ? (
+                <FieldError>{errors.folder_name.message}</FieldError>
+              ) : null}
+            </Field>
+          </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 sm:justify-end">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <Button
-            type="submit"
-            size="sm"
-            form={`edit-folder-form-${id}`}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiCheckCircleDuotone className="w-4 h-4 mr-2" />
-            )}
-            {isPending ? "Saving..." : "Save Changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

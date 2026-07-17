@@ -1,27 +1,14 @@
-import { useState } from "react";
+"use client";
+
+import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
-import {
-  PiPlusCircleDuotone,
-  PiFolderDuotone,
-  PiPackageDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
-import { PiCheckDuotone, PiCaretUpDownDuotone } from "react-icons/pi";
 
 import { cn } from "@uprevit/ui/lib/utils";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Label } from "@uprevit/ui/components/ui/label";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
   Command,
   CommandEmpty,
@@ -35,11 +22,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  Folder02Icon,
+  PackageIcon,
+  PropertyAddIcon,
+  Tick01Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useAddProductInBookmarkFolder } from "@/hooks/bookmark/useAddProductInBookmarkFolder";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { PropertyAddIcon } from "@hugeicons/core-free-icons";
 
 interface FormValues {
   productId: string;
@@ -57,6 +51,7 @@ export default function DialogAddProductsToFolder({
   folderName,
   folderId,
 }: DialogAddProductsToFolderProps) {
+  const formId = useId();
   const { data: productsData, isLoading, error } = useGetAllProducts();
   const products = productsData?.result?.products ?? [];
   const [open, setOpen] = useState(false);
@@ -87,7 +82,7 @@ export default function DialogAddProductsToFolder({
       product_name?: string;
       product_plan_number?: string;
       status?: string;
-    }) => product._id === selectedProductId
+    }) => product._id === selectedProductId,
   );
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -102,66 +97,76 @@ export default function DialogAddProductsToFolder({
           reset();
           setOpen(false);
         },
-        onError: (error) => {
+        onError: (submitError) => {
           reset();
           setOpen(false);
-          console.error("Failed to add product to folder:", error);
+          console.error("Failed to add product to folder:", submitError);
         },
-      }
+      },
     );
   };
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      reset();
+      setComboboxOpen(false);
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="default" size="sm">
           <Icon icon={PropertyAddIcon} />
           Add Products
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiPlusCircleDuotone className="w-5 h-5" />
-              <p>Add Product to Folder</p>
-            </div>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Choose a product to add to this bookmark folder.
-        </DialogDescription>
-
+      <AppDialogContent
+        title="Add Product to Folder"
+        description="Choose a product to add to this bookmark folder."
+        variant="form"
+        size="md"
+        primaryAction={{
+          label: "Add Product",
+          loadingLabel: "Adding...",
+          form: formId,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: PropertyAddIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
         <form
-          id="add-products-form"
-          className="p-4 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(onSubmit)(e);
-          }}
+          id={formId}
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
         >
-          <div className="space-y-4">
-            {/* Folder Display */}
-            <div className="rounded-lg border p-3 bg-muted/30">
+          <FieldGroup className="gap-4 p-4">
+            <div className="rounded-lg border bg-muted/30 p-3">
               <div className="flex items-center gap-2">
-                <PiFolderDuotone size={16} className="text-muted-foreground" />
-                <h4 className="font-medium text-sm">{folderName}</h4>
+                <Icon
+                  icon={Folder02Icon}
+                  size={16}
+                  className="text-muted-foreground"
+                />
+                <h4 className="text-sm font-medium">{folderName}</h4>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 font-mono">
+              <p className="mt-1 font-mono text-xs text-muted-foreground">
                 {folderId}
               </p>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Select Product</Label>
+            <Field>
+              <FormFieldLabel
+                label="Select Product"
+                tooltip="Choose a product to add to this bookmark folder."
+              />
               <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -174,10 +179,14 @@ export default function DialogAddProductsToFolder({
                     {selectedProductId
                       ? products.find(
                           (product: { _id: string; product_name?: string }) =>
-                            product._id === selectedProductId
+                            product._id === selectedProductId,
                         )?.product_name || "Unnamed Product"
                       : "Choose a product..."}
-                    <PiCaretUpDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Icon
+                      icon={UnfoldMoreIcon}
+                      size={16}
+                      className="ml-2 shrink-0 opacity-50"
+                    />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
@@ -191,8 +200,8 @@ export default function DialogAddProductsToFolder({
                         {isLoading
                           ? "Loading products..."
                           : error
-                          ? "Error loading products"
-                          : "No product found."}
+                            ? "Error loading products"
+                            : "No product found."}
                       </CommandEmpty>
                       <CommandGroup>
                         {products
@@ -212,97 +221,77 @@ export default function DialogAddProductsToFolder({
                                     "productId",
                                     product._id === selectedProductId
                                       ? ""
-                                      : product._id
+                                      : product._id,
                                   );
                                   setComboboxOpen(false);
                                 }}
                               >
-                                <PiPackageDuotone
+                                <Icon
+                                  icon={PackageIcon}
                                   size={16}
                                   className="mr-2 text-muted-foreground"
                                 />
                                 <span className="flex-1 truncate">
                                   {product.product_name || "Unnamed Product"}
                                 </span>
-                                {product.status && (
-                                  <span className="text-xs text-muted-foreground ml-2 uppercase border border-border px-1.5 rounded-[4px]">
+                                {product.status ? (
+                                  <span className="ml-2 rounded-[4px] border border-border px-1.5 text-xs uppercase text-muted-foreground">
                                     {product.status}
                                   </span>
-                                )}
-                                <PiCheckDuotone
+                                ) : null}
+                                <Icon
+                                  icon={Tick01Icon}
+                                  size={16}
                                   className={cn(
-                                    "ml-2 h-4 w-4",
+                                    "ml-2",
                                     selectedProductId === product._id
                                       ? "opacity-100"
-                                      : "opacity-0"
+                                      : "opacity-0",
                                   )}
                                 />
                               </CommandItem>
-                            )
+                            ),
                           )}
                       </CommandGroup>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
-              {errors.productId && (
+              {errors.productId ? (
                 <p className="text-sm text-destructive">
                   {errors.productId.message}
                 </p>
-              )}
-            </div>
+              ) : null}
+            </Field>
 
-            {/* Selected Product Preview */}
-            {selectedProduct && (
-              <div className="rounded-lg border p-3 bg-primary/5 border-primary/20">
+            {selectedProduct ? (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
                 <div className="flex items-center gap-2">
-                  <PiPackageDuotone size={16} className="text-primary" />
-                  <h4 className="font-semibold text-sm text-foreground">
+                  <Icon icon={PackageIcon} size={16} className="text-primary" />
+                  <h4 className="text-sm font-semibold text-foreground">
                     {selectedProduct.product_name || "Unnamed Product"}
                   </h4>
                 </div>
-                {selectedProduct.product_plan_number && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                {selectedProduct.product_plan_number ? (
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Plan:{" "}
                     <span className="font-mono">
                       {selectedProduct.product_plan_number}
                     </span>
                   </p>
-                )}
-                {selectedProduct.status && (
+                ) : null}
+                {selectedProduct.status ? (
                   <div className="mt-2 flex">
-                    <span className="text-[10px] font-medium bg-background border px-1.5 py-0.5 rounded-sm shadow-sm uppercase">
+                    <span className="rounded-sm border bg-background px-1.5 py-0.5 text-[10px] font-medium uppercase shadow-sm">
                       {selectedProduct.status}
                     </span>
                   </div>
-                )}
+                ) : null}
               </div>
-            )}
-          </div>
+            ) : null}
+          </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 sm:justify-end">
-          <DialogClose asChild>
-            <Button variant="secondary" type="button" size="sm">
-              <PiXCircleDuotone className="mr-2 w-4 h-4" />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={isPending}
-            form="add-products-form"
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiPlusCircleDuotone className="mr-2 w-4 h-4" />
-            )}
-            {isPending ? "Adding..." : "Add Product"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

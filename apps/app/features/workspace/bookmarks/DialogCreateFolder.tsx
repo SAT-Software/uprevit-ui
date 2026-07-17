@@ -3,28 +3,21 @@
 import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
-import {
-  PiFolderPlusDuotone,
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { FolderAddIcon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  FolderAddIcon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { useCreateBookmarkFolder } from "@/hooks/bookmark/useCreateBookmarkFolder";
 
 interface FormValues {
@@ -70,8 +63,15 @@ export default function DialogCreateFolder() {
     });
   };
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      reset();
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant="secondary"
@@ -82,84 +82,64 @@ export default function DialogCreateFolder() {
           Create Folder
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiFolderPlusDuotone className="w-5 h-5" />
-              <p>Create New Folder</p>
-            </div>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Create a new folder to organize your bookmarked products.
-        </DialogDescription>
-
+      <AppDialogContent
+        title="Create New Folder"
+        description="Create a new folder to organize your bookmarked products."
+        variant="form"
+        size="md"
+        primaryAction={{
+          label: "Create Folder",
+          loadingLabel: "Creating...",
+          form: `create-folder-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: FolderAddIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`create-folder-form-${id}`}
-          className="p-4"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-folder-name`}>Folder Name</Label>
-            <Input
-              id={`${id}-folder-name`}
-              placeholder="Enter folder name..."
-              type="text"
-              aria-invalid={errors.folderName ? "true" : "false"}
-              {...register("folderName", {
-                required: "Folder name is required",
-                minLength: {
-                  value: 1,
-                  message: "Folder name must not be empty",
-                },
-                maxLength: {
-                  value: 50,
-                  message: "Folder name must be at most 50 characters",
-                },
-              })}
-            />
-            {errors.folderName && (
-              <p role="alert" className="text-xs text-destructive">
-                {errors.folderName.message}
-              </p>
-            )}
-          </div>
+          <FieldGroup className="gap-4 p-4">
+            <Field data-invalid={!!errors.folderName}>
+              <FormFieldLabel
+                htmlFor={`${id}-folder-name`}
+                label="Folder Name"
+                tooltip="Enter a name for the new bookmark folder."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-folder-name`}
+                  placeholder="Enter folder name..."
+                  type="text"
+                  aria-invalid={errors.folderName ? "true" : "false"}
+                  {...register("folderName", {
+                    required: "Folder name is required",
+                    minLength: {
+                      value: 1,
+                      message: "Folder name must not be empty",
+                    },
+                    maxLength: {
+                      value: 50,
+                      message: "Folder name must be at most 50 characters",
+                    },
+                  })}
+                />
+              </InputGroup>
+              {errors.folderName ? (
+                <FieldError>{errors.folderName.message}</FieldError>
+              ) : null}
+            </Field>
+          </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 sm:justify-end">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <Button
-            type="submit"
-            size="sm"
-            variant="default"
-            form={`create-folder-form-${id}`}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiPlusCircleDuotone className="w-4 h-4 mr-2" />
-            )}
-            {isPending ? "Creating..." : "Create Folder"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }
