@@ -1,39 +1,17 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
-import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useId, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  useFileUpload,
-  FileWithPreview,
-} from "@/hooks/general/use-file-upload";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
+  InputGroup,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
 import { TagInput, Tag } from "@uprevit/ui/components/ui/tag-input";
-import Image from "next/image";
-import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import {
-  PiPencilSimpleDuotone,
-  PiXCircleDuotone,
-  PiCheckCircleDuotone,
-  PiPictureInPictureDuotone,
-  PiCaretUpDown,
-  PiCheck,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { BARCODE_STANDARDS } from "@/data/barcode-standards";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -47,7 +25,19 @@ import {
   CommandItem,
   CommandList,
 } from "@uprevit/ui/components/ui/command";
+import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Tick01Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { BARCODE_STANDARDS } from "@/data/barcode-standards";
 import { cn } from "@uprevit/ui/lib/utils";
+import { GraphicsImageUpload } from "./GraphicsImageUpload";
 
 type Item = {
   id: string;
@@ -64,11 +54,8 @@ type FormData = {
   barcodeTypeInput: string;
   componentDescription: string;
   labelPresence: Tag[];
-  image: FileWithPreview | null;
   count: number;
 };
-
-type ImageChangeState = "unchanged" | "removed" | "replaced";
 
 export default function EditBarcodesDialog({
   productId,
@@ -82,37 +69,41 @@ export default function EditBarcodesDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const id = useId();
+  const formId = `edit-barcodes-form-${id}`;
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [newGraphicImage, setNewGraphicImage] = useState<File | null>(null);
+  const [removeGraphicImage, setRemoveGraphicImage] = useState(false);
   const [comboboxOpen, setComboboxOpen] = useState(false);
-  const [labelPresence, setLabelPresence] = useState<Tag[]>(
-    barcode.labelPresence.map((label, index) => ({
-      id: `tag-${index}-${label}`,
-      text: label,
-    }))
-  );
 
   const isStandardBarcode = BARCODE_STANDARDS.some(
-    (std) => std.name === barcode.componentName
+    (std) => std.name === barcode.componentName,
+  );
+
+  const buildTags = (labels: string[]) =>
+    labels.map((label, index) => ({
+      id: `tag-${index}-${label}`,
+      text: label,
+    }));
+
+  const [labelPresence, setLabelPresence] = useState<Tag[]>(
+    buildTags(barcode.labelPresence),
   );
 
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
     reset,
     setValue,
     watch,
+    clearErrors,
   } = useForm<FormData>({
+    mode: "onSubmit",
     defaultValues: {
       barcodeTypeSelect: isStandardBarcode ? barcode.componentName : "",
       barcodeTypeInput: isStandardBarcode ? "" : barcode.componentName,
       componentDescription: barcode.description,
-      labelPresence: barcode.labelPresence.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      })),
-      image: null,
+      labelPresence: buildTags(barcode.labelPresence),
       count: barcode.count ?? 1,
     },
   });
@@ -120,43 +111,29 @@ export default function EditBarcodesDialog({
   const barcodeTypeSelect = watch("barcodeTypeSelect");
   const barcodeTypeInput = watch("barcodeTypeInput");
 
-  const [imageState, setImageState] = useState<ImageChangeState>("unchanged");
-
   useEffect(() => {
     const isStandard = BARCODE_STANDARDS.some(
-      (std) => std.name === barcode.componentName
+      (std) => std.name === barcode.componentName,
     );
 
     reset({
       barcodeTypeSelect: isStandard ? barcode.componentName : "",
       barcodeTypeInput: isStandard ? "" : barcode.componentName,
       componentDescription: barcode.description,
-      labelPresence: barcode.labelPresence.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      })),
-      image: null,
+      labelPresence: buildTags(barcode.labelPresence),
       count: barcode.count ?? 1,
     });
-    setLabelPresence(
-      barcode.labelPresence.map((label, index) => ({
-        id: `tag-${index}-${label}`,
-        text: label,
-      }))
-    );
-    setImageState("unchanged");
+    setLabelPresence(buildTags(barcode.labelPresence));
+    setNewGraphicImage(null);
+    setRemoveGraphicImage(false);
   }, [barcode, reset]);
 
   const { mutate: updateBarcodesData, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
 
-  const onSubmit = async (data: FormData) => {
-    // Validate that at least one barcode type is selected/entered
-    if (!data.barcodeTypeSelect && !data.barcodeTypeInput) {
-      // You might want to handle this validation error more gracefully
-      return;
-    }
+  const isSaving = uploadingImage || isPending;
 
+  const onSubmit = async (data: FormData) => {
     const componentName = data.barcodeTypeSelect || data.barcodeTypeInput;
 
     try {
@@ -164,10 +141,10 @@ export default function EditBarcodesDialog({
       let uploadedImageKey: string | undefined;
       let uploadedImageSizeBytes: number | undefined;
 
-      if (data.image && data.image.file instanceof File) {
+      if (newGraphicImage) {
         const s3UploadResult = await uploadFileToS3({
-          file: data.image.file,
-          contentType: data.image.file.type || "application/octet-stream",
+          file: newGraphicImage,
+          contentType: newGraphicImage.type || "application/octet-stream",
           uploadScope: "product-assets",
           productId,
         });
@@ -177,14 +154,16 @@ export default function EditBarcodesDialog({
       }
       setUploadingImage(false);
 
-      const finalImage =
-        imageState === "unchanged" ? barcode.componentImage : "";
-      const finalKey =
-        imageState === "replaced"
+      const nextImage = removeGraphicImage
+        ? ""
+        : newGraphicImage
+          ? ""
+          : barcode.componentImage;
+      const nextKey = removeGraphicImage
+        ? ""
+        : newGraphicImage
           ? (uploadedImageKey ?? "")
-          : imageState === "removed"
-            ? ""
-            : (barcode.key ?? "");
+          : (barcode.key ?? "");
 
       const updatedBarcodesData = {
         id: productId,
@@ -193,8 +172,8 @@ export default function EditBarcodesDialog({
         data: {
           id: barcode.id,
           text: componentName,
-          image: finalImage,
-          key: finalKey,
+          image: nextImage,
+          key: nextKey,
           ...(uploadedImageSizeBytes ? { sizeBytes: uploadedImageSizeBytes } : {}),
           entity: "Barcodes",
           description: data.componentDescription,
@@ -204,12 +183,11 @@ export default function EditBarcodesDialog({
       };
 
       updateBarcodesData(updatedBarcodesData, {
-          onSuccess: () => {
-            onOpenChange(false);
-            reset();
-            setLabelPresence([]);
-            setImageState("unchanged");
-          },
+        onSuccess: () => {
+          onOpenChange(false);
+          setNewGraphicImage(null);
+          setRemoveGraphicImage(false);
+        },
         onError: () => {
           setUploadingImage(false);
         },
@@ -220,324 +198,257 @@ export default function EditBarcodesDialog({
     }
   };
 
+  const handleCancel = () => {
+    const isStandard = BARCODE_STANDARDS.some(
+      (std) => std.name === barcode.componentName,
+    );
+    reset({
+      barcodeTypeSelect: isStandard ? barcode.componentName : "",
+      barcodeTypeInput: isStandard ? "" : barcode.componentName,
+      componentDescription: barcode.description,
+      labelPresence: buildTags(barcode.labelPresence),
+      count: barcode.count ?? 1,
+    });
+    setLabelPresence(buildTags(barcode.labelPresence));
+    setNewGraphicImage(null);
+    setRemoveGraphicImage(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiPencilSimpleDuotone className="w-4 h-4" />
-              <span>Edit Barcode</span>
-            </div>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Edit barcodes item by updating details and uploading a new image.
-        </DialogDescription>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          id="edit-barcodes-form"
-          className="overflow-y-auto"
-        >
-          <div className="flex gap-4 p-4">
-            <div className="w-1/3">
-              <Controller
-                name="image"
-                control={control}
-                render={({ field }) => (
-                  <ComponentImage
-                    currentImage={barcode.componentImage}
-                    value={field.value}
-                    imageState={imageState}
-                    onImageStateChange={setImageState}
-                    onChange={(file) => {
-                      field.onChange(file);
-                      setValue("image", file);
-                    }}
+      <AppDialogContent
+        title="Edit Barcode"
+        description="Edit barcodes item by updating details and uploading a new image."
+        variant="form"
+        size="lg"
+        primaryAction={{
+          label: "Update Barcode",
+          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          form: formId,
+          type: "submit",
+          loading: isSaving,
+          disabled: isSaving,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+          onClick: handleCancel,
+        }}
+      >
+        <form id={formId} onSubmit={handleSubmit(onSubmit)} noValidate>
+          <FieldGroup className="gap-4 p-4">
+            <Field>
+              <GraphicsImageUpload
+                key={`${barcode.id}-${open ? "open" : "closed"}`}
+                imageUrl={barcode.componentImage}
+                label="Barcode Image"
+                tooltip="Upload a reference image for this barcode."
+                setNewImage={setNewGraphicImage}
+                setRemoveImage={setRemoveGraphicImage}
+              />
+            </Field>
+
+            <div
+              className="space-y-3 rounded-lg border bg-muted/30 p-4"
+              data-invalid={!!(errors.barcodeTypeSelect || errors.barcodeTypeInput)}
+            >
+              <FormFieldLabel
+                label="Barcode Type"
+                tooltip="Choose a standard barcode format from the list or enter a custom type."
+              />
+              <div className="space-y-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-barcode-select`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
                   />
-                )}
+                  <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id={`${id}-barcode-select`}
+                        type="button"
+                        variant="outline"
+                        size="default"
+                        role="combobox"
+                        aria-expanded={comboboxOpen}
+                        className="w-full justify-between bg-background font-normal text-foreground/80"
+                        disabled={!!barcodeTypeInput}
+                      >
+                        <span className="truncate">
+                          {barcodeTypeSelect || "Select barcode type..."}
+                        </span>
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          strokeWidth={2}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search barcode type..." />
+                        <CommandList>
+                          <CommandEmpty>No barcode type found.</CommandEmpty>
+                          <CommandGroup>
+                            {BARCODE_STANDARDS.map((framework) => (
+                              <CommandItem
+                                key={framework.name}
+                                value={framework.name}
+                                onSelect={(currentValue) => {
+                                  setValue(
+                                    "barcodeTypeSelect",
+                                    currentValue === barcodeTypeSelect
+                                      ? ""
+                                      : currentValue,
+                                    { shouldValidate: true },
+                                  );
+                                  clearErrors("barcodeTypeInput");
+                                  setComboboxOpen(false);
+                                }}
+                              >
+                                <Icon
+                                  icon={Tick01Icon}
+                                  size={16}
+                                  strokeWidth={2}
+                                  className={cn(
+                                    "mr-2",
+                                    barcodeTypeSelect === framework.name
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {framework.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
+
+                <Field data-invalid={!!errors.barcodeTypeInput}>
+                  <FormFieldLabel
+                    htmlFor={`${id}-barcode-type-input`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
+                      id={`${id}-barcode-type-input`}
+                      placeholder="Enter custom barcode type"
+                      type="text"
+                      disabled={!!barcodeTypeSelect}
+                      aria-invalid={errors.barcodeTypeInput ? "true" : "false"}
+                      {...register("barcodeTypeInput", {
+                        validate: (value) => {
+                          const selectValue = watch("barcodeTypeSelect");
+                          if (!value && !selectValue) {
+                            return "Please select a barcode type or enter one manually.";
+                          }
+                          return true;
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                </Field>
+              </div>
+              <FieldError
+                errors={[
+                  errors.barcodeTypeSelect || errors.barcodeTypeInput
+                    ? {
+                        message:
+                          "Please select a barcode type or enter one manually.",
+                      }
+                    : undefined,
+                ]}
               />
             </div>
-            <div className="flex-1 space-y-2">
-              <div className="space-y-2">
-                <Label>Select Barcode Type</Label>
-                <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="default"
-                      role="combobox"
-                      aria-expanded={comboboxOpen}
-                      className="w-full justify-between text-foreground/80"
-                      disabled={!!barcodeTypeInput}
-                    >
-                      {barcodeTypeSelect
-                        ? BARCODE_STANDARDS.find(
-                            (framework) => framework.name === barcodeTypeSelect
-                          )?.name
-                        : "Select barcode type..."}
-                      <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[var(--radix-popover-trigger-width)] p-0"
-                    onWheel={(e) => e.stopPropagation()}
-                  >
-                    <Command>
-                      <CommandInput placeholder="Search barcode type..." />
-                      <CommandList>
-                        <CommandEmpty>No barcode type found.</CommandEmpty>
-                        <CommandGroup>
-                          {BARCODE_STANDARDS.map((framework) => (
-                            <CommandItem
-                              key={framework.name}
-                              value={framework.name}
-                              onSelect={(currentValue) => {
-                                setValue(
-                                  "barcodeTypeSelect",
-                                  currentValue === barcodeTypeSelect
-                                    ? ""
-                                    : currentValue
-                                );
-                                setComboboxOpen(false);
-                              }}
-                            >
-                              <PiCheck
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  barcodeTypeSelect === framework.name
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {framework.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-xs font-light text-muted-foreground">OR</p>
-                <div className="h-0 w-full border-t border-dashed" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-component-name`}>
-                  Enter Custom Barcode Type
-                </Label>
-                <Input
-                  id={`${id}-component-name`}
-                  placeholder="Enter custom barcode type"
-                  type="text"
-                  {...register("barcodeTypeInput")}
-                  disabled={!!barcodeTypeSelect}
-                />
-              </div>
 
-              {/* Validation Error Display */}
-              {!barcodeTypeSelect &&
-                !barcodeTypeInput &&
-                (errors.barcodeTypeSelect || errors.barcodeTypeInput) && (
-                  <p className="text-xs text-red-500">
-                    Please select a barcode type or enter one manually.
-                  </p>
-                )}
-            </div>
-          </div>
-
-          <div className="px-4 pb-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-component-description`}>
-                  Barcode Data
-                </Label>
-                <Textarea
+            <Field data-invalid={!!errors.componentDescription}>
+              <FormFieldLabel
+                htmlFor={`${id}-component-description`}
+                label="Barcode Data"
+                tooltip="The encoded data or content represented by this barcode."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupTextarea
                   id={`${id}-component-description`}
                   placeholder="Enter barcode data/content"
+                  className="min-h-20 resize-none"
+                  aria-invalid={
+                    errors.componentDescription ? "true" : "false"
+                  }
                   {...register("componentDescription", {
                     required: "Barcode data is required",
                   })}
-                  className="min-h-[80px] resize-none"
                 />
-                {errors.componentDescription && (
-                  <p className="text-xs text-red-500">
-                    {errors.componentDescription.message}
-                  </p>
-                )}
-              </div>
+              </InputGroup>
+              <FieldError errors={[errors.componentDescription]} />
+            </Field>
 
-              <div className="space-y-2">
-                <TagInput
-                  label="Presence on labels"
-                  tags={labelPresence}
-                  setTags={setLabelPresence}
-                  placeholder="Add label and press Enter"
-                />
-                <input
-                  type="hidden"
-                  {...register("labelPresence")}
-                  value={JSON.stringify(labelPresence)}
-                />
-                <p className="text-xs text-muted-foreground -mt-1">
-                  Press Enter to add a label type. You can add multiple label
-                  types.
-                </p>
-              </div>
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-label-presence`}
+                label="Presence on labels"
+                tooltip="Label types where this barcode appears. Press Enter after each entry."
+                optional
+              />
+              <TagInput
+                id={`${id}-label-presence`}
+                tags={labelPresence}
+                setTags={setLabelPresence}
+                placeholder="Add label and press Enter"
+              />
+              <input
+                type="hidden"
+                {...register("labelPresence")}
+                value={JSON.stringify(labelPresence)}
+              />
+              <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+                Press Enter to add a label type. You can add multiple label
+                types.
+              </p>
+            </Field>
 
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-count`}>Count</Label>
-                <Input
+            <Field data-invalid={!!errors.count}>
+              <FormFieldLabel
+                htmlFor={`${id}-count`}
+                label="Count"
+                tooltip="Number of barcodes of this type on the product labels."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-count`}
                   type="number"
                   min={1}
+                  aria-invalid={errors.count ? "true" : "false"}
                   {...register("count", {
                     required: "Count is required",
                     min: { value: 1, message: "Count must be at least 1" },
                     valueAsNumber: true,
                   })}
                 />
-                {errors.count && (
-                  <p className="text-xs text-red-500">{errors.count.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
+              </InputGroup>
+              <FieldError errors={[errors.count]} />
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                reset();
-                setImageState("unchanged");
-              }}
-            >
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            form="edit-barcodes-form"
-            type="button"
-            size="sm"
-            onClick={handleSubmit(onSubmit)}
-            disabled={
-              isPending ||
-              uploadingImage ||
-              (!barcodeTypeSelect && !barcodeTypeInput)
-            }
-            aria-busy={isPending || uploadingImage}
-            variant="default"
-          >
-            {isPending || uploadingImage ? <Spinner /> : <PiCheckCircleDuotone />}
-            {isPending
-              ? "Updating..."
-              : uploadingImage
-              ? "Uploading..."
-              : "Update Barcode"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
-  );
-}
-
-interface ComponentImageProps {
-  currentImage: string;
-  value: FileWithPreview | null;
-  imageState: ImageChangeState;
-  onImageStateChange: (state: ImageChangeState) => void;
-  onChange: (file: FileWithPreview | null) => void;
-}
-
-function ComponentImage({
-  currentImage,
-  value,
-  imageState,
-  onImageStateChange,
-  onChange,
-}: ComponentImageProps) {
-  const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-      onFilesChange: (newFiles) => {
-        if (newFiles.length > 0) {
-          onImageStateChange("replaced");
-          onChange(newFiles[0]);
-        } else {
-          onChange(null);
-        }
-      },
-    });
-
-  const displayImage =
-    value?.preview ||
-    files[0]?.preview ||
-    (imageState !== "removed" ? currentImage : "");
-
-  return (
-    <div className="h-40 w-full">
-      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
-        {displayImage ? (
-          <Image
-            className="size-full object-cover rounded-xl"
-            src={displayImage}
-            alt="Barcode image"
-            width={512}
-            height={96}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiPictureInPictureDuotone className="w-12 h-12" />
-            <span className="text-xs font-medium">Upload Image</span>
-          </div>
-        )}
-
-        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
-          <button
-            type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
-            onClick={openFileDialog}
-            aria-label={displayImage ? "Change image" : "Upload image"}
-          >
-            <PiPlusSquareDuotone size={16} aria-hidden="true" />
-          </button>
-          {displayImage && (
-            <button
-              type="button"
-              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
-              onClick={() => {
-                const fileId = value?.id || files[0]?.id;
-                if (fileId) {
-                  removeFile(fileId);
-                  onImageStateChange(currentImage ? "unchanged" : "removed");
-                } else {
-                  onImageStateChange("removed");
-                }
-                onChange(null);
-              }}
-              aria-label="Remove image"
-            >
-              <PiXDuotone size={16} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-        <input
-          {...getInputProps()}
-          className="sr-only"
-          aria-label="Upload barcode image"
-        />
-      </div>
-    </div>
   );
 }
