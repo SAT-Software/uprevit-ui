@@ -1,16 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { FieldGroup } from "@uprevit/ui/components/ui/field";
 import { Input } from "@uprevit/ui/components/ui/input";
 import {
   Select,
@@ -20,8 +14,7 @@ import {
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
 import {
-  CancelCircleIcon,
-  Settings01Icon,
+  Cancel01Icon,
   SlidersHorizontalIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -36,7 +29,10 @@ type PendingOperation = {
   quantityDelta: number;
 };
 
-type AdjustableUsageMetric = Extract<BillingUsageMetric, "completed_export" | "upload_bytes">;
+type AdjustableUsageMetric = Extract<
+  BillingUsageMetric,
+  "completed_export" | "upload_bytes"
+>;
 
 const METRIC_LABELS: Record<AdjustableUsageMetric, string> = {
   completed_export: "Export",
@@ -53,9 +49,11 @@ export function DialogPlatformBillingOperations({
     quantityDelta: number;
   }) => Promise<void>;
 }) {
+  const formId = useId();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingOperation, setPendingOperation] = useState<PendingOperation | null>(null);
+  const [pendingOperation, setPendingOperation] =
+    useState<PendingOperation | null>(null);
   const [adjustmentMetric, setAdjustmentMetric] =
     useState<AdjustableUsageMetric>("completed_export");
   const [adjustmentDelta, setAdjustmentDelta] = useState("1");
@@ -82,7 +80,7 @@ export function DialogPlatformBillingOperations({
     }
   };
 
-  const handleApplyAdjustmentClick = () => {
+  const handleApplyAdjustment = () => {
     const quantityDelta = Number(adjustmentDelta);
     if (!Number.isFinite(quantityDelta) || quantityDelta === 0) {
       setAdjustmentError("Enter a non-zero numeric delta.");
@@ -102,35 +100,37 @@ export function DialogPlatformBillingOperations({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
-          <DialogHeader className="contents space-y-0 text-left">
-            <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon={Settings01Icon}
-                  size={16}
-                  strokeWidth={2}
-                  className="text-muted-foreground"
-                />
-                <p>Usage corrections</p>
-              </div>
-              <DialogClose asChild>
-                <button type="button" className="cursor-pointer">
-                  <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
-                </button>
-              </DialogClose>
-            </DialogTitle>
-            <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-              Manual usage corrections for the current billing period. Each adjustment asks for confirmation.
-            </div>
-          </DialogHeader>
-          <DialogDescription className="sr-only">
-            Apply manual usage adjustments for this workspace.
-          </DialogDescription>
-
-          <div className="space-y-4 overflow-y-auto p-4">
-            <div className="space-y-3 rounded-lg border border-border p-3">
-              <div className="space-y-3">
+        <AppDialogContent
+          title="Usage corrections"
+          description="Apply manual usage adjustments for this workspace."
+          subtitle="Manual usage corrections for the current billing period. Each adjustment asks for confirmation."
+          variant="form"
+          size="lg"
+          primaryAction={{
+            label: "Apply adjustment",
+            loadingLabel: "Applying...",
+            form: formId,
+            type: "submit",
+            loading: isAdjustmentPending,
+            disabled: isAdjustmentPending,
+            icon: SlidersHorizontalIcon,
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            disabled: isAdjustmentPending,
+            icon: Cancel01Icon,
+          }}
+        >
+          <form
+            id={formId}
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleApplyAdjustment();
+            }}
+            noValidate
+          >
+            <FieldGroup className="gap-4 p-4">
+              <div className="space-y-3 rounded-lg border border-border p-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <PlatformBillingFieldLabel
@@ -144,7 +144,11 @@ export function DialogPlatformBillingOperations({
                         setAdjustmentMetric(value as AdjustableUsageMetric)
                       }
                     >
-                      <SelectTrigger id="adjustment-metric" className="w-full">
+                      <SelectTrigger
+                        id="adjustment-metric"
+                        size="md"
+                        className="w-full bg-background"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -171,20 +175,13 @@ export function DialogPlatformBillingOperations({
                     />
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  disabled={isAdjustmentPending}
-                  onClick={handleApplyAdjustmentClick}
-                >
-                  Apply adjustment
-                </Button>
+                {adjustmentError ? (
+                  <p className="text-xs text-destructive">{adjustmentError}</p>
+                ) : null}
               </div>
-              {adjustmentError ? (
-                <p className="text-xs text-destructive">{adjustmentError}</p>
-              ) : null}
-            </div>
-          </div>
-        </DialogContent>
+            </FieldGroup>
+          </form>
+        </AppDialogContent>
       </Dialog>
 
       <PlatformBillingConfirmDialog
@@ -203,8 +200,8 @@ export function DialogPlatformBillingOperations({
                 {pendingOperation.quantityDelta > 0 ? "+" : ""}
                 {pendingOperation.quantityDelta}
               </strong>{" "}
-              to <strong>{METRIC_LABELS[pendingOperation.metric]}</strong> for the current billing
-              period.
+              to <strong>{METRIC_LABELS[pendingOperation.metric]}</strong> for
+              the current billing period.
             </p>
           ) : (
             <p>Confirm this usage adjustment.</p>

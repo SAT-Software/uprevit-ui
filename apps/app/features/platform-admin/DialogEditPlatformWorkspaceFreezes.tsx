@@ -2,34 +2,30 @@
 
 import { useId, useMemo, useState } from "react";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { FieldGroup } from "@uprevit/ui/components/ui/field";
 import { Label } from "@uprevit/ui/components/ui/label";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
-  CancelCircleIcon,
-  Edit02Icon,
+  Cancel01Icon,
   LockIcon,
+  PropertyEditIcon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import type { WorkspaceFreezes } from "@/types/billing";
 import { PlatformBillingConfirmDialog } from "@/features/platform-admin/PlatformBillingConfirmDialog";
+
 type FreezeForm = {
   usageFreezeEnabled: boolean;
   accessFreezeEnabled: boolean;
 };
 
-function describeFreezeChanges(form: FreezeForm, freezes: WorkspaceFreezes): string[] {
+function describeFreezeChanges(
+  form: FreezeForm,
+  freezes: WorkspaceFreezes,
+): string[] {
   const changes: string[] = [];
   if (form.usageFreezeEnabled !== freezes.usageFreeze.enabled) {
     changes.push(
@@ -92,7 +88,10 @@ export function DialogEditPlatformWorkspaceFreezes({
   };
 
   const handleConfirmSave = async () => {
-    const payload: { usageFreezeEnabled?: boolean; accessFreezeEnabled?: boolean } = {};
+    const payload: {
+      usageFreezeEnabled?: boolean;
+      accessFreezeEnabled?: boolean;
+    } = {};
     if (form.usageFreezeEnabled !== freezes.usageFreeze.enabled) {
       payload.usageFreezeEnabled = form.usageFreezeEnabled;
     }
@@ -113,47 +112,41 @@ export function DialogEditPlatformWorkspaceFreezes({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button size="sm" variant="secondary" className="gap-2">
-            <Icon icon={Edit02Icon} size={14} strokeWidth={2} />
+            <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
             Edit freezes
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
-          <DialogHeader className="contents space-y-0 text-left">
-            <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon={LockIcon}
-                  size={16}
-                  strokeWidth={2}
-                  className="text-muted-foreground"
-                />
-                <p>Edit workspace freezes</p>
-              </div>
-              <DialogClose asChild>
-                <button type="button" className="cursor-pointer">
-                  <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
-                </button>
-              </DialogClose>
-            </DialogTitle>
-            <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-              These controls take effect immediately. They work independently of the billing account.
-            </div>
-          </DialogHeader>
-          <DialogDescription className="sr-only">
-            Edit usage and access freeze settings for this workspace.
-          </DialogDescription>
-
+        <AppDialogContent
+          title="Edit workspace freezes"
+          description="Edit usage and access freeze settings for this workspace."
+          subtitle="These controls take effect immediately. They work independently of the billing account."
+          variant="form"
+          size="lg"
+          primaryAction={{
+            label: "Save changes",
+            loadingLabel: "Saving…",
+            form: formId,
+            type: "submit",
+            loading: isPending,
+            disabled: isPending || !hasChanges,
+            icon: Tick02Icon,
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            disabled: isPending,
+            icon: Cancel01Icon,
+          }}
+        >
           <form
             id={formId}
-            className="overflow-y-auto p-4"
             onSubmit={(event) => {
               event.preventDefault();
               handleSaveClick();
             }}
             noValidate
           >
-            <div className="space-y-3">
+            <FieldGroup className="gap-3 p-4">
               <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
                 <div className="space-y-1">
                   <Label htmlFor="usage-freeze">Usage freeze</Label>
@@ -185,32 +178,9 @@ export function DialogEditPlatformWorkspaceFreezes({
                   }
                 />
               </div>
-            </div>
+            </FieldGroup>
           </form>
-
-          <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary" size="sm" disabled={isPending}>
-                <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              size="sm"
-              form={formId}
-              disabled={isPending || !hasChanges}
-              aria-busy={isPending}
-            >
-              {isPending ? (
-                <Spinner />
-              ) : (
-                <Icon icon={Tick02Icon} size={14} strokeWidth={2} />
-              )}
-              {isPending ? "Saving…" : "Save changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+        </AppDialogContent>
       </Dialog>
 
       <PlatformBillingConfirmDialog

@@ -1,18 +1,10 @@
 "use client";
 
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import {
-  CancelCircleIcon,
+  Cancel01Icon,
   UserSettings01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -26,77 +18,48 @@ export function PlatformOperatorSetupDialog() {
           Add Platform Admin
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Icon
-                icon={UserSettings01Icon}
-                size={16}
-                strokeWidth={2}
-                className="text-muted-foreground"
-              />
-              <p>Add platform operator</p>
-            </div>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-          <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Phase 1 requires a one-time manual setup. Use the steps below to
-            grant a teammate or co-founder access to the platform admin area.
-          </div>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Manual steps to add a platform operator via Cognito and the backend
-          bootstrap script.
-        </DialogDescription>
-
-        <div className="flex-1 overflow-y-auto p-4">
-          <ol className="list-decimal space-y-3 pl-5 text-sm text-muted-foreground">
-            <li>
-              In AWS Cognito, add their user to the{" "}
-              <span className="font-mono text-foreground">platform-admin</span>{" "}
-              group.
-            </li>
-            <li>
-              Copy their Cognito{" "}
-              <span className="font-mono text-foreground">sub</span> from the
-              user pool user details.
-            </li>
-            <li>
-              From the backend repo{" "}
-              <span className="font-mono text-foreground">src/</span>, with{" "}
-              <span className="font-mono text-foreground">MONGODB_URI</span> and{" "}
-              <span className="font-mono text-foreground">DB_NAME</span> set,
-              run:
-              <pre className="mt-2 overflow-x-auto rounded-md border bg-muted p-3 text-xs text-foreground">
-                {`npm run bootstrap:platform-admin -- \\
+      <AppDialogContent
+        title="Add platform operator"
+        description="Manual steps to add a platform operator via Cognito and the backend bootstrap script."
+        subtitle="Phase 1 requires a one-time manual setup. Use the steps below to grant a teammate or co-founder access to the platform admin area."
+        variant="inform"
+        size="lg"
+        secondaryAction={{
+          label: "Close",
+          icon: Cancel01Icon,
+        }}
+      >
+        <ol className="list-decimal space-y-3 p-4 pl-9 text-sm text-muted-foreground">
+          <li>
+            In AWS Cognito, add their user to the{" "}
+            <span className="font-mono text-foreground">platform-admin</span>{" "}
+            group.
+          </li>
+          <li>
+            Copy their Cognito{" "}
+            <span className="font-mono text-foreground">sub</span> from the user
+            pool user details.
+          </li>
+          <li>
+            From the backend repo{" "}
+            <span className="font-mono text-foreground">src/</span>, with{" "}
+            <span className="font-mono text-foreground">MONGODB_URI</span> and{" "}
+            <span className="font-mono text-foreground">DB_NAME</span> set, run:
+            <pre className="mt-2 overflow-x-auto rounded-md border bg-muted p-3 text-xs text-foreground">
+              {`npm run bootstrap:platform-admin -- \\
   --email colleague@company.com \\
   --cognito-sub <cognito-sub> \\
   --name "Colleague Name" \\
   --role operator`}
-              </pre>
-            </li>
-            <li>
-              They must also have an{" "}
-              <strong className="text-foreground">active</strong> workspace user
-              record (dual-hat operator) to use platform admin in Phase 1.
-            </li>
-          </ol>
-        </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
+            </pre>
+          </li>
+          <li>
+            They must also have an{" "}
+            <strong className="text-foreground">active</strong> workspace user
+            record (dual-hat operator) to use platform admin in Phase 1.
+          </li>
+        </ol>
+      </AppDialogContent>
     </Dialog>
   );
 }

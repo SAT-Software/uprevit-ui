@@ -2,34 +2,29 @@
 
 import { useId, useState } from "react";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useInviteWorkspaceAdmin } from "@/hooks/platform-admin/useInviteWorkspaceAdmin";
 import {
-  CancelCircleIcon,
+  Cancel01Icon,
   MailSend01Icon,
   UserAdd01Icon,
-  UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
 export function WorkspaceAdminInviteDialog({
   workspaceId,
 }: {
   workspaceId: string;
 }) {
-  const formId = useId();
+  const id = useId();
+  const formId = `workspace-admin-invite-form-${id}`;
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -64,92 +59,65 @@ export function WorkspaceAdminInviteDialog({
           Invite org admin
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Icon
-                icon={UserMultipleIcon}
-                size={16}
-                strokeWidth={2}
-                className="text-muted-foreground"
+      <AppDialogContent
+        title="Invite org admin"
+        description="Invite an administrator to an existing organization workspace."
+        subtitle="Adds an admin to this workspace. The person will finish a short onboarding before they can access it."
+        variant="form"
+        size="md"
+        primaryAction={{
+          label: "Send invite",
+          loadingLabel: "Sending...",
+          form: formId,
+          type: "submit",
+          loading: mutation.isPending,
+          disabled: !email || !name || mutation.isPending,
+          icon: MailSend01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: mutation.isPending,
+          icon: Cancel01Icon,
+        }}
+      >
+        <form id={formId} onSubmit={handleSubmit} noValidate>
+          <FieldGroup className="gap-4 p-4">
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-workspace-admin-name`}
+                label="Name"
+                tooltip="Full name of the person you are inviting."
               />
-              <p>Invite org admin</p>
-            </div>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <Icon icon={CancelCircleIcon} size={18} strokeWidth={2} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-          <div className="border-b bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-            Adds an admin to this workspace. The person will finish a short
-            onboarding before they can access it.
-          </div>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Invite an administrator to an existing organization workspace.
-        </DialogDescription>
-
-        <form
-          id={formId}
-          className="overflow-y-auto p-4"
-          onSubmit={handleSubmit}
-          noValidate
-        >
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="workspace-admin-name">Name</Label>
-              <Input
-                id="workspace-admin-name"
-                placeholder="Full name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                required
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-workspace-admin-name`}
+                  placeholder="Full name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                />
+              </InputGroup>
+            </Field>
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-workspace-admin-email`}
+                label="Email"
+                tooltip="Invite will be sent to this email address."
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="workspace-admin-email">Email</Label>
-              <Input
-                id="workspace-admin-email"
-                type="email"
-                placeholder="name@company.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </div>
-          </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-workspace-admin-email`}
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </InputGroup>
+            </Field>
+          </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={mutation.isPending}
-            >
-              <Icon icon={CancelCircleIcon} size={14} strokeWidth={2} />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            size="sm"
-            form={formId}
-            disabled={!email || !name || mutation.isPending}
-            aria-busy={mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <Spinner />
-            ) : (
-              <Icon icon={MailSend01Icon} size={14} strokeWidth={2} />
-            )}
-            {mutation.isPending ? "Sending..." : "Send invite"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

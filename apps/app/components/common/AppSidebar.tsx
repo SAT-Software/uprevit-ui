@@ -2,7 +2,9 @@ import * as React from "react";
 
 import { GuardedLink } from "@/components/common/GuardedLink";
 import { UprevitLogo } from "@/components/common/UprevitLogo";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
+import type { AllTabsData } from "@/types/product";
 import {
   AiSheetsIcon,
   Album02Icon,
@@ -214,10 +216,16 @@ const data = {
   ],
 };
 
-const productSubItems = [
+const productSubItems: {
+  title: string;
+  url: string;
+  completionKey: keyof AllTabsData;
+  icon: React.ReactNode;
+}[] = [
   {
     title: "Product Information",
     url: "/product-information",
+    completionKey: "product_information",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -230,6 +238,7 @@ const productSubItems = [
   {
     title: "Compliance Information",
     url: "/compliance-information",
+    completionKey: "compliance_information",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -242,6 +251,7 @@ const productSubItems = [
   {
     title: "Label Components",
     url: "/label-components",
+    completionKey: "label_components",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -254,6 +264,7 @@ const productSubItems = [
   {
     title: "Symbols & Graphics",
     url: "/symbols-graphics",
+    completionKey: "symbols_graphics",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -266,6 +277,7 @@ const productSubItems = [
   {
     title: "Product Specifications",
     url: "/product-specifications",
+    completionKey: "product_data",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -278,6 +290,7 @@ const productSubItems = [
   {
     title: "Operational Parameters",
     url: "/operational-parameters",
+    completionKey: "operational_parameters",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -290,6 +303,7 @@ const productSubItems = [
   {
     title: "Label Tags",
     url: "/label-tags",
+    completionKey: "label_tags",
     icon: (
       <Icon
         className="transition-all delay-100 duration-200 ease-in-out"
@@ -300,6 +314,32 @@ const productSubItems = [
     ),
   },
 ];
+
+function ProductTabCompletionDot({ isCompleted }: { isCompleted: boolean }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          role="img"
+          aria-label={isCompleted ? "Marked complete" : "Not marked complete"}
+          className={cn(
+            "ml-auto size-1.5 shrink-0 rounded-full",
+            isCompleted
+              ? "bg-emerald-500"
+              : "bg-transparent ring-1 ring-sidebar-foreground/30",
+          )}
+        />
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        sideOffset={6}
+        className="pointer-events-none"
+      >
+        {isCompleted ? "Marked complete" : "Not marked complete"}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
@@ -314,6 +354,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ? pathSegments[1]
       : undefined;
   const showProductSubNavigation = Boolean(productId);
+  const { data: productTabData } = useGetProductTabData(
+    productId ?? "",
+    "all-tabs",
+  );
+
+  const tabCompletionByUrl = React.useMemo(() => {
+    const allTabsData = productTabData?.result?.data;
+    if (!allTabsData) return null;
+
+    return Object.fromEntries(
+      productSubItems.map((subItem) => [
+        subItem.url,
+        Boolean(allTabsData[subItem.completionKey]?.tab_completed),
+      ]),
+    ) as Record<string, boolean>;
+  }, [productTabData]);
 
   return (
     <Sidebar {...props}>
@@ -401,12 +457,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         ? `?compareVersion=${compareVersionId}`
                                         : ""
                                     }`}
+                                    className="flex w-full min-w-0 items-center gap-2"
                                   >
                                     {subItem.icon && (
                                       <span>{subItem.icon}</span>
                                     )}
                                     <span
                                       className={cn(
+                                        "truncate",
                                         pathname.includes(subItem.url)
                                           ? "text-sidebar-foreground"
                                           : "text-sidebar-foreground",
@@ -414,6 +472,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     >
                                       {subItem.title}
                                     </span>
+                                    {tabCompletionByUrl ? (
+                                      <ProductTabCompletionDot
+                                        isCompleted={
+                                          tabCompletionByUrl[subItem.url]
+                                        }
+                                      />
+                                    ) : null}
                                   </GuardedLink>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
