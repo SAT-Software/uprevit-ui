@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
   Cancel01Icon,
   CloudUploadIcon,
@@ -50,51 +41,39 @@ export default function SaveTaggedImageDialog({
         onOpenChange(nextOpen);
       }}
     >
-      <DialogContent
-        className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5"
+      <AppDialogContent
+        title="Save Tagged Image"
+        description="Save the annotated image to the cloud. This will update the label tag with the tagged version of the image."
+        variant="confirm"
+        size="md"
         onEscapeKeyDown={(event) => {
           if (isPending) event.preventDefault();
         }}
         onInteractOutside={(event) => {
           if (isPending) event.preventDefault();
         }}
+        confirmContent={{
+          heading: "Upload Tagged Image",
+          message:
+            "Your annotated image will be saved to the cloud and linked to this label tag.",
+          icon: CloudUploadIcon,
+        }}
+        primaryAction={{
+          label: "Yes, Save Image",
+          loadingLabel: "Saving...",
+          onClick: handleConfirm,
+          loading: isPending,
+          disabled: isPending,
+          icon: SaveIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
       >
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="flex w-full items-center justify-between border-b bg-accent px-4 py-4 text-sm">
-            <p>Save Tagged Image</p>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className="cursor-pointer"
-                disabled={isPending}
-              >
-                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Save the annotated image to the cloud. This will update the label tag
-          with the tagged version of the image.
-        </DialogDescription>
-        <div className="space-y-4 p-4">
-          <div className="flex items-start gap-3">
-            <div
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
-              aria-hidden="true"
-            >
-              <Icon icon={CloudUploadIcon} size={20} strokeWidth={2} />
-            </div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-medium">Upload Tagged Image</h4>
-              <p className="text-sm text-muted-foreground">
-                Your annotated image will be saved to the cloud and linked to
-                this label tag.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+        <div className="space-y-2 px-4 pb-4">
+          <div className="rounded-lg bg-muted/50 p-3">
             <div className="flex items-center gap-2 text-sm">
               <Icon
                 icon={InformationCircleIcon}
@@ -106,7 +85,7 @@ export default function SaveTaggedImageDialog({
                 What happens next
               </span>
             </div>
-            <ul className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
+            <ul className="ml-6 mt-2 list-disc space-y-1 text-sm text-muted-foreground">
               <li>
                 The annotated image will be <strong>uploaded</strong> to cloud
                 storage
@@ -120,29 +99,7 @@ export default function SaveTaggedImageDialog({
             </ul>
           </div>
         </div>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={isPending}
-            >
-              <Icon icon={Cancel01Icon} />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleConfirm}
-            disabled={isPending}
-          >
-            {isPending ? <Spinner /> : <Icon icon={SaveIcon} />}
-            {isPending ? "Saving..." : "Yes, Save Image"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

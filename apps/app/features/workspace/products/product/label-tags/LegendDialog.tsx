@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
 import { Slider } from "@uprevit/ui/components/ui/slider";
-import { ToggleGroup, ToggleGroupItem } from "@uprevit/ui/components/ui/toggle-group";
+import {
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@uprevit/ui/components/ui/toggle-group";
 import ColorPicker from "./ui/ColorPicker";
 import {
   DEFAULT_LEGEND_ITEM,
@@ -23,18 +23,19 @@ import {
   LegendStrokeStyle,
 } from "./legendTypes";
 import { LegendSwatch } from "./LegendSwatch";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import {
   ArrowUpRight01Icon,
   Cancel01Icon,
-  CircleIcon,
+  EllipseIcon,
   FloppyDiskIcon,
-  LineIcon,
+  LinerIcon,
   PlusSignSquareIcon,
-  Square01Icon,
+  SquareIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { defaultColorsWithTransparent } from "@/types/colors";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { cn } from "@uprevit/ui/lib/utils";
 
 type LegendDialogProps = {
   open: boolean;
@@ -45,17 +46,24 @@ type LegendDialogProps = {
   disabled?: boolean;
 };
 
+const toggleItemClassName =
+  "size-8 min-w-8 shrink-0 border border-border/60 shadow-none p-0 data-[state=on]:border-primary data-[state=on]:bg-accent";
+
+const colorPickerItemClassName =
+  "size-7 min-w-7 shrink-0 border border-border/60 shadow-none p-0.5 data-[state=on]:border-primary data-[state=on]:ring-1 data-[state=on]:ring-primary/40";
+
 const StrokeStyleVisual = ({ dashArray }: { dashArray?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="butt"
     strokeLinejoin="round"
+    aria-hidden="true"
   >
     <path strokeDasharray={dashArray} d="M2,12 H22" />
   </svg>
@@ -127,133 +135,158 @@ export function LegendDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:hidden"
+      <AppDialogContent
+        title={mode === "add" ? "Add Legend Item" : "Edit Legend Item"}
+        description="Configure legend appearance and label text."
+        variant="form"
+        size="lg"
         onPointerDownOutside={(event) => {
           if (isSaving) event.preventDefault();
         }}
         onEscapeKeyDown={(event) => {
           if (isSaving) event.preventDefault();
         }}
+        primaryAction={{
+          label: mode === "add" ? "Add Legend" : "Save Changes",
+          loadingLabel: mode === "add" ? "Adding..." : "Saving...",
+          onClick: handleSave,
+          loading: isSaving,
+          disabled: disabled || isSaving,
+          icon: mode === "add" ? PlusSignSquareIcon : FloppyDiskIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: disabled || isSaving,
+          icon: Cancel01Icon,
+        }}
       >
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <span className="font-semibold">
-              {mode === "add" ? "Add Legend Item" : "Edit Legend Item"}
-            </span>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className={`cursor-pointer ${
-                  isSaving ? "pointer-events-none opacity-50" : ""
-                }`}
-                disabled={isSaving}
-              >
-                <Icon icon={Cancel01Icon} size={18} strokeWidth={2} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Configure legend appearance and label text.
-        </DialogDescription>
-
-        <div className="p-4 space-y-4">
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
-            <LegendSwatch
-              item={{ id: "preview", ...values }}
-              size={22}
-              className="text-muted-foreground"
+        <FieldGroup className="gap-4 p-4">
+          <Field data-invalid={textTouched && !isTextValid}>
+            <FormFieldLabel
+              htmlFor="legendText"
+              label="Legend Text"
+              tooltip="Short description shown next to the legend swatch in the panel."
             />
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Preview</span>
-              <span className="text-sm font-medium text-foreground">
-                {values.text || "Legend text"}
-              </span>
-            </div>
-          </div>
+            <InputGroup size="md" className="bg-background">
+              <InputGroupInput
+                id="legendText"
+                value={values.text}
+                placeholder="Describe the annotation"
+                disabled={isSaving || disabled}
+                aria-invalid={textTouched && !isTextValid ? "true" : "false"}
+                onChange={(e) => {
+                  setValues((prev) => ({ ...prev, text: e.target.value }));
+                  if (!textTouched) setTextTouched(true);
+                }}
+                maxLength={80}
+              />
+            </InputGroup>
+            {textTouched && !isTextValid ? (
+              <p className="text-xs text-destructive">Text is required.</p>
+            ) : null}
+          </Field>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Shape</Label>
+            <Field>
+              <FormFieldLabel
+                label="Shape"
+                tooltip="Visual shape used to represent this legend item."
+              />
               <ToggleGroup
                 type="single"
                 value={values.shape}
-                variant="outline"
+                variant="default"
                 size="sm"
-                className="justify-start"
+                className="flex-wrap justify-start gap-1.5"
                 disabled={isSaving || disabled}
                 onValueChange={(value: string) =>
                   value && handleShapeChange(value as LegendShape)
                 }
               >
-                <ToggleGroupItem value="rectangle" title="Rectangle">
-                  <Icon icon={Square01Icon} size={14} strokeWidth={2} />
+                <ToggleGroupItem
+                  value="rectangle"
+                  title="Rectangle"
+                  className={toggleItemClassName}
+                >
+                  <Icon icon={SquareIcon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="ellipse" title="Ellipse">
-                  <Icon icon={CircleIcon} size={14} strokeWidth={2} />
+                <ToggleGroupItem
+                  value="ellipse"
+                  title="Ellipse"
+                  className={toggleItemClassName}
+                >
+                  <Icon icon={EllipseIcon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="line" title="Line">
-                  <Icon icon={LineIcon} size={14} strokeWidth={2} />
+                <ToggleGroupItem
+                  value="line"
+                  title="Line"
+                  className={toggleItemClassName}
+                >
+                  <Icon icon={LinerIcon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="arrow" title="Arrow">
+                <ToggleGroupItem
+                  value="arrow"
+                  title="Arrow"
+                  className={toggleItemClassName}
+                >
                   <Icon icon={ArrowUpRight01Icon} size={14} strokeWidth={2} />
                 </ToggleGroupItem>
               </ToggleGroup>
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label>Line Style</Label>
+            <Field>
+              <FormFieldLabel
+                label="Line Style"
+                tooltip="Stroke pattern for the legend shape outline."
+              />
               <ToggleGroup
                 type="single"
                 value={values.strokeStyle || "solid"}
-                variant="outline"
+                variant="default"
                 size="sm"
-                className="justify-start"
+                className="flex-wrap justify-start gap-1.5"
                 disabled={isSaving || disabled}
                 onValueChange={(value: string) =>
                   value && handleStrokeStyleChange(value as LegendStrokeStyle)
                 }
               >
-                <ToggleGroupItem value="solid" title="Solid">
+                <ToggleGroupItem
+                  value="solid"
+                  title="Solid"
+                  className={toggleItemClassName}
+                >
                   <StrokeStyleVisual />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="dashed" title="Dashed">
+                <ToggleGroupItem
+                  value="dashed"
+                  title="Dashed"
+                  className={toggleItemClassName}
+                >
                   <StrokeStyleVisual dashArray="6 4" />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="dotted" title="Dotted">
+                <ToggleGroupItem
+                  value="dotted"
+                  title="Dotted"
+                  className={toggleItemClassName}
+                >
                   <StrokeStyleVisual dashArray="2 3" />
                 </ToggleGroupItem>
               </ToggleGroup>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="legendText">Legend Text</Label>
-            <Input
-              id="legendText"
-              value={values.text}
-              placeholder="Describe the annotation"
-              disabled={isSaving || disabled}
-              onChange={(e) => {
-                setValues((prev) => ({ ...prev, text: e.target.value }));
-                if (!textTouched) setTextTouched(true);
-              }}
-              maxLength={80}
-            />
-            {textTouched && !isTextValid && (
-              <p className="text-xs text-destructive">Text is required.</p>
-            )}
+            </Field>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">Border</Label>
-                <div className="flex items-center gap-2">
+            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <FormFieldLabel
+                  label="Border"
+                  tooltip="Color and width of the legend shape outline."
+                  className="min-w-0"
+                />
+                <div className="flex shrink-0 items-center gap-2">
                   <Label
                     htmlFor="strokeWidth"
-                    className="text-[11px] text-muted-foreground"
+                    className="text-xs text-muted-foreground"
                   >
                     Width
                   </Label>
@@ -270,7 +303,7 @@ export function LegendDialog({
                         strokeWidth: Number(e.target.value || 0),
                       }))
                     }
-                    className="h-7 w-14 px-2 text-xs"
+                    className="h-8 w-14 px-2 text-xs"
                   />
                 </div>
               </div>
@@ -279,10 +312,10 @@ export function LegendDialog({
                 onValueChange={(value) =>
                   setValues((prev) => ({ ...prev, strokeColor: value }))
                 }
-                size="icon-sm"
-                variant="outline"
-                className="max-w-none gap-0.5"
-                itemClassName="p-0"
+                size="sm"
+                variant="default"
+                className="max-w-none gap-1.5"
+                itemClassName={colorPickerItemClassName}
               />
               <Slider
                 value={[values.strokeWidth ?? 2]}
@@ -293,17 +326,20 @@ export function LegendDialog({
                 onValueChange={(v) =>
                   setValues((prev) => ({ ...prev, strokeWidth: v[0] }))
                 }
-                className="mt-6"
               />
             </div>
 
-            <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">Fill</Label>
-                <div className="flex items-center gap-2">
+            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <FormFieldLabel
+                  label="Fill"
+                  tooltip="Interior color and opacity of the legend shape."
+                  className="min-w-0"
+                />
+                <div className="flex shrink-0 items-center gap-2">
                   <Label
                     htmlFor="fillOpacity"
-                    className="text-[11px] text-muted-foreground"
+                    className="text-xs text-muted-foreground"
                   >
                     Opacity
                   </Label>
@@ -319,7 +355,7 @@ export function LegendDialog({
                     onChange={(e) =>
                       handleFillOpacityChange(Number(e.target.value || 0))
                     }
-                    className="h-7 w-14 px-2 text-xs"
+                    className="h-8 w-14 px-2 text-xs"
                   />
                 </div>
               </div>
@@ -329,10 +365,10 @@ export function LegendDialog({
                 onValueChange={(value) =>
                   setValues((prev) => ({ ...prev, fillColor: value }))
                 }
-                size="icon-sm"
-                variant="outline"
-                className="max-w-none gap-0.5"
-                itemClassName="p-0"
+                size="sm"
+                variant="default"
+                className="max-w-none gap-1.5"
+                itemClassName={colorPickerItemClassName}
               />
               <Slider
                 value={[fillOpacityPercent]}
@@ -343,48 +379,42 @@ export function LegendDialog({
                   values.fillColor === "transparent" || isSaving || disabled
                 }
                 onValueChange={(v) => handleFillOpacityChange(v[0])}
-                className="mt-6"
               />
             </div>
           </div>
-        </div>
 
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={disabled || isSaving}
+          <Field>
+            <FormFieldLabel
+              label="Live Preview"
+              tooltip="How this legend item will appear in the legend panel."
+            />
+            <div
+              className={cn(
+                "rounded-lg border border-dashed border-border bg-muted/20 p-3",
+              )}
             >
-              <Icon icon={Cancel01Icon} />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSave}
-            disabled={disabled || isSaving}
-            aria-busy={isSaving}
-          >
-            {isSaving ? (
-              <Spinner />
-            ) : mode === "add" ? (
-              <Icon icon={PlusSignSquareIcon} />
-            ) : (
-              <Icon icon={FloppyDiskIcon} />
-            )}
-            {isSaving
-              ? mode === "add"
-                ? "Adding..."
-                : "Saving..."
-              : mode === "add"
-                ? "Add Legend"
-                : "Save Changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5">
+                <LegendSwatch
+                  item={{ id: "preview", ...values }}
+                  size={24}
+                  className="shrink-0 text-foreground"
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {values.text.trim() || "Legend text"}
+                  </p>
+                  <p className="truncate text-xs capitalize text-muted-foreground">
+                    {values.shape}
+                    {values.strokeStyle && values.strokeStyle !== "solid"
+                      ? ` · ${values.strokeStyle}`
+                      : ""}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Field>
+        </FieldGroup>
+      </AppDialogContent>
     </Dialog>
   );
 }

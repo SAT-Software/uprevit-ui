@@ -1,18 +1,9 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@uprevit/ui/components/ui/alert-dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Label } from "@uprevit/ui/components/ui/label";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
   Tooltip,
@@ -230,14 +221,14 @@ export function LegendPanel({
                         />
                       </Button>
 
-                      <AlertDialog
+                      <Dialog
                         open={deleteDialogId === item.id}
                         onOpenChange={(open) => {
                           if (isDeleting) return;
                           setDeleteDialogId(open ? item.id : null);
                         }}
                       >
-                        <AlertDialogTrigger asChild>
+                        <DialogTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon-xs"
@@ -251,80 +242,49 @@ export function LegendPanel({
                               strokeWidth={2}
                             />
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-sm">
-                          <AlertDialogHeader className="contents space-y-0 text-left">
-                            <AlertDialogTitle className="flex w-full items-center justify-between border-b bg-destructive/10 px-4 py-4 text-sm">
-                              <div className="flex items-center gap-2 text-destructive">
-                                <Icon
-                                  icon={Alert01Icon}
-                                  size={16}
-                                  strokeWidth={2}
-                                />
-                                <span className="font-semibold">
-                                  Delete legend item
+                        </DialogTrigger>
+                        <AppDialogContent
+                          title="Delete Legend Item"
+                          description="Delete this legend item. This action cannot be undone."
+                          variant="confirm-destructive"
+                          size="sm"
+                          confirmContent={{
+                            heading: "Are you sure?",
+                            message: (
+                              <>
+                                You are about to permanently delete
+                                <span className="font-semibold text-foreground">
+                                  {" "}
+                                  &quot;{item.text}&quot;{" "}
                                 </span>
-                              </div>
-                              <button
-                                type="button"
-                                className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
-                                onClick={() => setDeleteDialogId(null)}
-                              >
-                                <Icon
-                                  icon={Cancel01Icon}
-                                  size={18}
-                                  strokeWidth={2}
-                                />
-                              </button>
-                            </AlertDialogTitle>
-                          </AlertDialogHeader>
-                          <div className="p-4">
-                            <AlertDialogDescription className="text-sm text-muted-foreground">
-                              You are about to permanently delete
-                              <span className="font-semibold text-foreground">
-                                {" "}
-                                &quot;{item.text}&quot;{" "}
-                              </span>
-                              from this legend. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </div>
-                          <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-                            <AlertDialogCancel asChild>
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                disabled={isDeleting}
-                              >
-                                <Icon icon={Cancel01Icon} />
-                                Cancel
-                              </Button>
-                            </AlertDialogCancel>
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              disabled={isDeleting}
-                              aria-busy={isDeleting}
-                              onClick={async () => {
-                                setIsDeleting(true);
-                                const success = await handleDelete(item.id);
-                                if (success) {
-                                  setDeleteDialogId(null);
-                                }
-                                setIsDeleting(false);
-                              }}
-                            >
-                              {isDeleting ? (
-                                <Spinner />
-                              ) : (
-                                <Icon icon={Delete02Icon} />
-                              )}
-                              {isDeleting ? "Deleting..." : "Delete Legend"}
-                            </Button>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                                from this legend. This action cannot be undone.
+                              </>
+                            ),
+                            icon: Alert01Icon,
+                          }}
+                          primaryAction={{
+                            label: "Delete Legend",
+                            loadingLabel: "Deleting...",
+                            loading: isDeleting,
+                            disabled: isDeleting,
+                            icon: Delete02Icon,
+                            variant: "destructive",
+                            onClick: async () => {
+                              setIsDeleting(true);
+                              const success = await handleDelete(item.id);
+                              if (success) {
+                                setDeleteDialogId(null);
+                              }
+                              setIsDeleting(false);
+                            },
+                          }}
+                          secondaryAction={{
+                            label: "Cancel",
+                            disabled: isDeleting,
+                            icon: Cancel01Icon,
+                          }}
+                        />
+                      </Dialog>
                     </div>
                   )}
                 </div>
