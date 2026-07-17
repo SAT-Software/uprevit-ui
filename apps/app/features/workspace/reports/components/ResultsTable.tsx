@@ -157,7 +157,7 @@ export function ResultsTable({
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border">
-      <div className="flex h-10 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Results</p>
           <Badge variant="secondary" className="font-normal">
@@ -169,27 +169,26 @@ export function ResultsTable({
         ) : null}
       </div>
 
-      <div className="w-full overflow-hidden border-b border-border">
+      <div className="w-full border-y border-border overflow-hidden">
         <Table className="table-fixed w-full">
           <colgroup>
             {reportResultColumns.map((column) => (
               <col key={column.title} style={{ width: `${column.width}px` }} />
             ))}
           </colgroup>
-          <TableHeader>
+          <TableHeader className="bg-muted">
             <TableRow className="hover:bg-transparent">
               {reportResultColumns.map((column, index) => {
                 const isLastColumn = index === reportResultColumns.length - 1;
                 return (
                   <TableHead
                     key={column.title}
-                    className={cn(!isLastColumn && "border-r border-border")}
+                    className={cn(
+                      "text-muted-foreground/60",
+                      !isLastColumn && "border-r border-border",
+                    )}
                   >
-                    <div className="flex h-10 items-center">
-                      <span className="text-sm text-muted-foreground/60">
-                        {column.title}
-                      </span>
-                    </div>
+                    {column.title}
                   </TableHead>
                 );
               })}
@@ -199,7 +198,7 @@ export function ResultsTable({
         </Table>
       </div>
 
-      {pagination.totalPages > 1 ? (
+      <div className="flex h-10 w-full shrink-0 items-center">
         <WorkspaceListPagination
           pagination={{
             currentPage: pagination.page,
@@ -211,7 +210,7 @@ export function ResultsTable({
           }}
           onPageChange={onPageChange}
         />
-      ) : null}
+      </div>
     </div>
   );
 }
