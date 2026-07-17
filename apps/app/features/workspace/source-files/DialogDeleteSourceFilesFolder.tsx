@@ -1,27 +1,23 @@
 "use client";
 
 import { useId, useState } from "react";
+
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useDeleteSourceFilesFolder } from "@/hooks/source-files/useDeleteSourceFilesFolder";
-import {
-  PiTrashDuotone,
-  PiWarningCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import {
+  Alert01Icon,
+  Cancel01Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
 
 interface DialogDeleteSourceFilesFolderProps {
   id: string;
@@ -48,77 +44,72 @@ export default function DialogDeleteSourceFilesFolder({
     setValue("");
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setValue("");
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="destructive">
           <Icon icon={Delete02Icon} />
           Delete
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10 text-destructive flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiWarningCircleDuotone className="w-5 h-5" />
-              <p>Delete Folder</p>
-            </div>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className="cursor-pointer text-destructive hover:text-destructive/80"
-              >
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="p-4 flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <p className="text-sm text-muted-foreground">
+      <AppDialogContent
+        title="Delete Folder"
+        description={`Delete the folder ${folderName}. This action cannot be undone.`}
+        variant="confirm-destructive"
+        size="md"
+        confirmContent={{
+          heading: "Delete folder",
+          message: (
+            <>
               You are about to delete the folder <strong>{folderName}</strong>.
-              This action cannot be undone.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Please type <strong>{folderName}</strong> to confirm.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor={inputId} className="text-sm font-medium">
-              Folder Name
-            </Label>
-            <Input
-              id={inputId}
-              type="text"
-              placeholder={`Type ${folderName} to confirm`}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="border-destructive/30 focus-visible:ring-destructive/30"
+              This action cannot be undone. Please type the folder name below to
+              confirm.
+            </>
+          ),
+          icon: Alert01Icon,
+        }}
+        primaryAction={{
+          label: "Delete Folder",
+          loadingLabel: "Deleting...",
+          onClick: handleConfirm,
+          loading: deleteFolder.isPending,
+          disabled,
+          icon: Delete02Icon,
+          variant: "destructive",
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: deleteFolder.isPending,
+          icon: Cancel01Icon,
+        }}
+      >
+        <FieldGroup className="gap-4 px-4 pb-4">
+          <Field>
+            <FormFieldLabel
+              htmlFor={inputId}
+              label="Folder Name"
+              tooltip={`Type "${folderName}" to confirm deletion.`}
             />
-          </div>
-        </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="mr-2" />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            disabled={disabled}
-            onClick={handleConfirm}
-          >
-            {deleteFolder.isPending ? <Spinner /> : <PiTrashDuotone />}
-            {deleteFolder.isPending ? "Deleting..." : "Delete Folder"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+            <InputGroup size="md" className="bg-background">
+              <InputGroupInput
+                id={inputId}
+                type="text"
+                placeholder={`Type ${folderName} to confirm`}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                autoComplete="off"
+              />
+            </InputGroup>
+          </Field>
+        </FieldGroup>
+      </AppDialogContent>
     </Dialog>
   );
 }

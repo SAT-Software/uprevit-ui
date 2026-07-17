@@ -1,28 +1,20 @@
+"use client";
+
+import { useState } from "react";
+import { useAuth } from "react-oidc-context";
+
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@uprevit/ui/components/ui/dialog";
+  Cancel01Icon,
+  UploadSquare01Icon,
+} from "@hugeicons/core-free-icons";
 import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFiles";
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { SourceFilesFolder } from "@/types/source-files";
-import { useState } from "react";
-import {
-  PiCloudArrowUpDuotone,
-  PiXCircleDuotone,
-  PiUploadSimpleDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { useAuth } from "react-oidc-context";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { UploadSquare01Icon } from "@hugeicons/core-free-icons";
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -72,63 +64,47 @@ export default function DialogUploadSourceFiles({
     }
   };
 
+  function handleOpenChange(nextOpen: boolean) {
+    setIsDialogOpen(nextOpen);
+    if (!nextOpen) {
+      setSelectedFiles([]);
+    }
+  }
+
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="default" size="sm" className="flex items-center gap-2">
           <Icon icon={UploadSquare01Icon} />
           Upload Files
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl max-h-[90vh] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiCloudArrowUpDuotone className="w-5 h-5 text-muted-foreground" />
-              <p>Upload Source Files for {folder?.name}</p>
-            </div>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            Upload source files for this product. You can drag and drop files or
-            click to browse.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="p-4 flex-1 overflow-y-auto">
+      <AppDialogContent
+        title={`Upload Source Files for ${folder?.name}`}
+        description="Upload source files for this product. You can drag and drop files or click to browse."
+        variant="form"
+        className="sm:max-w-2xl"
+        primaryAction={{
+          label: "Upload Files",
+          loadingLabel: "Uploading...",
+          onClick: handleUploadClick,
+          loading: isUploading,
+          disabled: !selectedFiles.length || isUploading,
+          icon: UploadSquare01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isUploading,
+          icon: Cancel01Icon,
+        }}
+      >
+        <div className="p-4">
           <UploadSourceFiles
             onSelectionChange={setSelectedFiles}
             accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.psd,.ai"
           />
         </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setIsDialogOpen(false)}
-          >
-            <PiXCircleDuotone className="mr-2" />
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleUploadClick}
-            disabled={!selectedFiles.length || isUploading}
-          >
-            {isUploading ? (
-              <Spinner />
-            ) : (
-              <PiUploadSimpleDuotone className="mr-2" />
-            )}
-            {isUploading ? "Uploading..." : "Upload Files"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

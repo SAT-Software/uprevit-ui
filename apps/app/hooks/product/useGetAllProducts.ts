@@ -5,7 +5,7 @@ import {
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllProducts({
+export async function getAllProducts({
   signal,
   auth,
   query,

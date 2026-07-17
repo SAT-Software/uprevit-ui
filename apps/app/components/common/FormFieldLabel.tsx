@@ -18,14 +18,12 @@ export function FormFieldLabel({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-full items-center gap-2", className)}>
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+    <div className={cn("flex w-full items-center gap-1", className)}>
+      <div className="flex min-w-0 flex-1 items-center gap-1">
         <FieldLabel htmlFor={htmlFor} className="text-sm font-medium">
           {label}
         </FieldLabel>
-        {tooltip ? (
-          <InfoTooltip content={tooltip} className="ml-0.5 shrink-0" />
-        ) : null}
+        {tooltip ? <InfoTooltip content={tooltip} /> : null}
       </div>
       {optional ? (
         <span className="shrink-0 text-xs text-muted-foreground/40">

@@ -1,13 +1,17 @@
 "use client";
 
+import { Alert01Icon } from "@hugeicons/core-free-icons";
+
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import { SourceFilesFolder } from "@/types/source-files";
-import { PiWarningCircleDuotone } from "react-icons/pi";
 
 interface SourceFilesDuplicateProductLinkAlertProps {
   productId: string;
   productName?: string;
   excludeFolderId?: string;
+  enabled?: boolean;
 }
 
 function formatFolderList(names: string[]): string {
@@ -26,14 +30,31 @@ export function SourceFilesDuplicateProductLinkAlert({
   productId,
   productName,
   excludeFolderId,
+  enabled = true,
 }: SourceFilesDuplicateProductLinkAlertProps) {
-  const { data, isLoading } = useGetAllSourceFileFolders(productId);
+  const { data, isLoading } = useGetAllSourceFileFolders(productId, enabled);
 
   const existingFolders = ((data?.result ?? []) as SourceFilesFolder[]).filter(
     (folder) => folder._id !== excludeFolderId,
   );
 
-  if (!productId || isLoading || existingFolders.length === 0) {
+  if (!productId || !enabled) {
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div
+        aria-hidden="true"
+        className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground"
+      >
+        <Spinner className="size-4 shrink-0" />
+        Checking existing product links...
+      </div>
+    );
+  }
+
+  if (existingFolders.length === 0) {
     return null;
   }
 
@@ -44,29 +65,35 @@ export function SourceFilesDuplicateProductLinkAlert({
   return (
     <div
       role="alert"
-      className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
+      className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
     >
-      <PiWarningCircleDuotone className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-      <p className="text-sm text-amber-800 dark:text-amber-300 mb-1">
-        {isSingleFolder ? (
-          <>
-            The source file folder {formatFolderList(folderNames)} is already
-            attached to {productLabel}.
-          </>
-        ) : (
-          <>
-            The source file folders {formatFolderList(folderNames)} are already
-            attached to {productLabel}.
-          </>
-        )}{" "}
-      </p>
-      <p className="text-sm text-amber-800 dark:text-amber-300">
-        {" "}
-        Do you want to attach this folder as well?{" "}
-        {isSingleFolder
-          ? "Both source file folders will be linked to the same product."
-          : "All source file folders will be linked to the same product."}{" "}
-      </p>
+      <div
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+        aria-hidden="true"
+      >
+        <Icon icon={Alert01Icon} size={16} strokeWidth={2} />
+      </div>
+      <div className="space-y-1 text-sm text-amber-800 dark:text-amber-300">
+        <p>
+          {isSingleFolder ? (
+            <>
+              The source file folder {formatFolderList(folderNames)} is already
+              attached to {productLabel}.
+            </>
+          ) : (
+            <>
+              The source file folders {formatFolderList(folderNames)} are
+              already attached to {productLabel}.
+            </>
+          )}
+        </p>
+        <p>
+          Do you want to attach this folder as well?{" "}
+          {isSingleFolder
+            ? "Both source file folders will be linked to the same product."
+            : "All the existing  and current source file folders will be linked to the same product."}
+        </p>
+      </div>
     </div>
   );
 }

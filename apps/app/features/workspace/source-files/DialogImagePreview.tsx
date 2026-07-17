@@ -35,7 +35,7 @@ export default function DialogImagePreview({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "flex h-[98vh] max-h-[98vh] w-[98vw] max-w-[98vw] flex-col gap-0 border-none bg-muted p-0",
+          "flex h-[98vh] max-h-[98vh] w-[98vw] max-w-[98vw] flex-col gap-0 border-none bg-muted p-0 sm:max-w-[98vw]",
         )}
       >
         <VisuallyHidden>
@@ -47,7 +47,7 @@ export default function DialogImagePreview({
             {fileName}
           </p>
           <div className="flex items-center gap-2">
-            {onDownload && (
+            {onDownload ? (
               <Button
                 type="button"
                 variant="outline"
@@ -57,7 +57,7 @@ export default function DialogImagePreview({
                 <Icon icon={DownloadSquare01Icon} size={16} strokeWidth={2} />
                 Download
               </Button>
-            )}
+            ) : null}
             <Button
               type="button"
               variant="outline"

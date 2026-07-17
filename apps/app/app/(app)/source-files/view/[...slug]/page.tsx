@@ -201,6 +201,7 @@ export default function ProductSourceFilesPage() {
             <DialogEditSourceFilesFolder
               currentFolder={currentFolder}
               folderId={folderId}
+              linkedProductName={linkedProduct?.product_name}
             />
           )}
           <DialogDeleteSourceFilesFolder

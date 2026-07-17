@@ -36,12 +36,15 @@ async function getAllSourceFileFolders({
   return res.json();
 }
 
-export function useGetAllSourceFileFolders(productId?: string) {
+export function useGetAllSourceFileFolders(
+  productId?: string,
+  queryEnabled = true,
+) {
   const auth = useAuth();
 
   return useQuery({
     queryKey: ["source-files-folders", productId || "all"],
     queryFn: ({ signal }) => getAllSourceFileFolders({ signal, auth, productId }),
-    enabled: auth.isAuthenticated,
+    enabled: auth.isAuthenticated && queryEnabled,
   });
 }
