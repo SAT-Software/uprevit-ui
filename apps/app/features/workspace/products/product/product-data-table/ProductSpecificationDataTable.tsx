@@ -1592,7 +1592,7 @@ export function ProductSpecificationDataTable({
               <Icon icon={FileExportIcon} size={14} strokeWidth={2} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Export file</TooltipContent>
+          <TooltipContent>Export this table</TooltipContent>
         </Tooltip>
       </div>
 

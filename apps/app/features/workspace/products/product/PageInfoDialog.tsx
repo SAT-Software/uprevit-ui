@@ -1,22 +1,15 @@
 "use client";
 
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Cancel01Icon, InformationCircleIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Cancel01Icon, InformationCircleIcon } from "@hugeicons/core-free-icons";
 
 interface PageInfoDialogProps {
   title: string;
@@ -50,17 +43,18 @@ export function PageInfoDialog({
         </TooltipTrigger>
         <TooltipContent>More information</TooltipContent>
       </Tooltip>
-      <DialogContent>
-        <DialogPrimitive.Close className="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <Icon icon={Cancel01Icon} size={20} strokeWidth={2} />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="hidden" />
-        <div className="text-sm text-muted-foreground">{content}</div>
-      </DialogContent>
+      <AppDialogContent
+        title={title}
+        description={typeof content === "string" ? content : title}
+        variant="inform"
+        size="sm"
+        secondaryAction={{
+          label: "Close",
+          icon: Cancel01Icon,
+        }}
+      >
+        <div className="p-4 text-sm text-muted-foreground">{content}</div>
+      </AppDialogContent>
     </Dialog>
   );
 }
