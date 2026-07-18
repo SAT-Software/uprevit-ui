@@ -1,5 +1,6 @@
 "use client";
 
+import { UIEvent, useMemo, useState } from "react";
 import { useAuth } from "react-oidc-context";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -8,10 +9,17 @@ import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFile
 import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
 import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
-import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
+import { useGetSourceFileFoldersInfinite } from "@/hooks/source-files/useGetSourceFileFoldersInfinite";
 import { SourceFilesFolder } from "@/types/source-files";
 import { isAdminProfile } from "@/utils/isAdmin";
+import { isRootSourceFolder } from "@/utils/source-files-list-response";
+import {
+  ListFilter,
+  ListFilterColumn,
+  ListOrder,
+} from "@/lib/workspace-list-query";
 import {
   Tabs,
   TabsContent,
@@ -21,11 +29,27 @@ import {
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 
 import {
   Folder01Icon,
   FolderAddIcon,
   ProfileIcon,
+  SortingAZ01Icon,
+  SortingAZ02Icon,
+  SortingZA01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 
@@ -37,6 +61,15 @@ interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
 const SOURCE_FILES_TABS = ["bookmarked", "all-folders"];
 type SourceFilesTab = (typeof SOURCE_FILES_TABS)[number];
 const DEFAULT_SOURCE_FILES_TAB: SourceFilesTab = "bookmarked";
+
+const SOURCE_FILES_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "name", label: "Folder Name", type: "text" },
+];
+
+const SOURCE_FILES_SORT_OPTIONS = [
+  { value: "name", label: "Folder Name" },
+  { value: "_id", label: "Date Created" },
+];
 
 function isSourceFilesTab(value: string | null): value is SourceFilesTab {
   return SOURCE_FILES_TABS.includes(value as SourceFilesTab);
@@ -65,6 +98,10 @@ function SourceFilesPage() {
     ? tabParam
     : DEFAULT_SOURCE_FILES_TAB;
 
+  const [sort, setSort] = useState("name");
+  const [order, setOrder] = useState<ListOrder>("asc");
+  const [filters, setFilters] = useState<ListFilter[]>([]);
+
   const handleTabChange = (value: string) => {
     if (!isSourceFilesTab(value)) {
       return;
@@ -77,15 +114,6 @@ function SourceFilesPage() {
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname);
   };
-
-  const {
-    data: foldersData,
-    isLoading: foldersLoading,
-    isError: foldersError,
-    refetch: refetchFolders,
-  } = useGetAllSourceFileFolders();
-
-  const allFolders: SourceFilesFolder[] = foldersData?.result ?? [];
 
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
@@ -100,14 +128,45 @@ function SourceFilesPage() {
 
   const bookmarkedFolders = (
     (bookmarkedData?.result ?? []) as BookmarkedSourceFilesFolder[]
-  ).filter((f) => f.parentId === null);
+  ).filter(isRootSourceFolder);
 
-  const hasAnyFolders = allFolders.length > 0;
+  const {
+    data: infiniteData,
+    isLoading: foldersLoading,
+    isError: foldersError,
+    refetch: refetchFolders,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetSourceFileFoldersInfinite({
+    sort,
+    order,
+    filters,
+    enabled: activeTab === "all-folders",
+  });
+
+  const allFolders = useMemo(
+    () =>
+      infiniteData?.pages.flatMap((page) => page?.result?.folders ?? []) ?? [],
+    [infiniteData],
+  );
+
   const hasBookmarks = bookmarkedFolders.length > 0;
+
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (activeTab !== "all-folders") return;
+
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+
+    if (nearBottom && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  };
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-      {/* Header bar (matches products / departments pattern) */}
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Source Files</p>
@@ -144,14 +203,90 @@ function SourceFilesPage() {
         onValueChange={handleTabChange}
         className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
       >
-        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border px-2">
           <TabsList variant="line">
             <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
             <TabsTrigger value="all-folders">All Folders</TabsTrigger>
           </TabsList>
+
+          {activeTab === "all-folders" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <WorkspaceListControls
+                filters={filters}
+                filterColumns={SOURCE_FILES_FILTER_COLUMNS}
+                onApplyFilters={setFilters}
+                onClearFilters={() => setFilters([])}
+              />
+              <div className="flex items-center gap-2">
+                <Select
+                  value={sort}
+                  onValueChange={(nextSort) => setSort(nextSort)}
+                >
+                  <SelectTrigger className="group w-auto truncate">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2">
+                          <Icon
+                            icon={SortingAZ01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
+                          />
+                          <SelectValue />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>Sort by different fields</TooltipContent>
+                    </Tooltip>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SOURCE_FILES_SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <span className="text-muted-foreground/60">
+                          Sort by:
+                        </span>{" "}
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon-xs"
+                      className="h-7 px-2 text-xs text-muted-foreground/60 hover:text-muted-foreground"
+                      onClick={() =>
+                        setOrder((current) =>
+                          current === "asc" ? "desc" : "asc",
+                        )
+                      }
+                    >
+                      {order === "asc" ? (
+                        <Icon
+                          icon={SortingAZ02Icon}
+                          size={16}
+                          strokeWidth={2}
+                        />
+                      ) : (
+                        <Icon
+                          icon={SortingZA01Icon}
+                          size={16}
+                          strokeWidth={2}
+                        />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Toggle sort order</TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+        <div
+          className="min-h-0 flex-1 overflow-y-auto p-2"
+          onScroll={handleScroll}
+        >
           <TabsContent value="bookmarked" className="mt-0">
             {bookmarkedLoading ? (
               <SourceFilesFoldersGridSkeleton />
@@ -215,7 +350,7 @@ function SourceFilesPage() {
                   </Button>
                 </div>
               </>
-            ) : !hasAnyFolders ? (
+            ) : allFolders.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
                   <Icon
@@ -236,13 +371,20 @@ function SourceFilesPage() {
                 </div>
               </div>
             ) : (
-              <SourceFilesFoldersCard
-                folders={allFolders}
-                variant="large"
-                bookmarkedFolderIds={
-                  new Set(bookmarkedFolders.map((folder) => folder._id))
-                }
-              />
+              <>
+                <SourceFilesFoldersCard
+                  folders={allFolders}
+                  variant="large"
+                  bookmarkedFolderIds={
+                    new Set(bookmarkedFolders.map((folder) => folder._id))
+                  }
+                />
+                {isFetchingNextPage ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Spinner className="size-5" />
+                  </div>
+                ) : null}
+              </>
             )}
           </TabsContent>
         </div>

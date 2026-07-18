@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { PiBookmarkSimpleDuotone } from "react-icons/pi";
 
 import { useToggleBookmarkSourceFilesFolder } from "@/hooks/source-files/useToggleBookmarkSourceFilesFolder";
-import { useSourceFolderFileCounts } from "@/hooks/source-files/useSourceFolderFileCounts";
+import { SourceFilesFolder } from "@/types/source-files";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { cn } from "@uprevit/ui/lib/utils";
@@ -21,13 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-
-interface SourceFilesFolder {
-  _id: string;
-  name: string;
-  product_id?: string | null;
-  created_at?: string;
-}
 
 interface SourceFilesFoldersCardProps {
   folders: SourceFilesFolder[];
@@ -57,8 +49,6 @@ function SourceFilesFoldersCard({
   const [pendingFolderId, setPendingFolderId] = useState<string | null>(null);
 
   const isLarge = variant === "large";
-  const folderIds = folders.map((folder) => folder._id);
-  const { countsByFolderId } = useSourceFolderFileCounts(folderIds);
 
   if (!folders?.length) {
     return (
@@ -78,7 +68,6 @@ function SourceFilesFoldersCard({
       )}
     >
       {folders.map((folder) => {
-        const fileCount = countsByFolderId.get(folder._id);
         const isBookmarked =
           showAsBookmarked || bookmarkedFolderIds?.has(folder._id) === true;
 
@@ -179,7 +168,7 @@ function SourceFilesFoldersCard({
                   isLarge ? "text-xs" : "text-[11px]",
                 )}
               >
-                {formatFileCount(fileCount)}
+                {formatFileCount(folder.fileCount)}
               </p>
             </div>
           </div>

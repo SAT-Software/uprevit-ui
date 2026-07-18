@@ -12,7 +12,7 @@ import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import { AuditLog } from "@/types/audit-log";
 import type { ProductMetadata } from "@/types/product";
-import { SourceFilesFolder } from "@/types/source-files";
+import type { SourceFilesFolder } from "@/types/source-files";
 import {
   formatToLocalDate,
   formatToLocalDateTime,
@@ -205,10 +205,13 @@ export default function Page() {
     useGetProductDiffRedline(productId, compareVersionId);
 
   const { data: linkedFoldersData, isLoading: linkedFoldersLoading } =
-    useGetAllSourceFileFolders(productId);
+    useGetAllSourceFileFolders({
+      productId,
+      query: { limit: 100 },
+    });
 
-  const linkedFolders = (linkedFoldersData?.result ||
-    []) as SourceFilesFolder[];
+  const linkedFolders: SourceFilesFolder[] =
+    linkedFoldersData?.result?.folders ?? [];
 
   const redlineDiffs = diffRedlineData?.result?.diffs;
   const productInfoDiffLookup = useMemo(() => {

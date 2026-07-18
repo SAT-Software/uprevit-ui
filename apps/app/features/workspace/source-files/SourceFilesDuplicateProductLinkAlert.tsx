@@ -5,7 +5,7 @@ import { Alert01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
-import { SourceFilesFolder } from "@/types/source-files";
+import type { SourceFilesFolder } from "@/types/source-files";
 
 interface SourceFilesDuplicateProductLinkAlertProps {
   productId: string;
@@ -32,9 +32,14 @@ export function SourceFilesDuplicateProductLinkAlert({
   excludeFolderId,
   enabled = true,
 }: SourceFilesDuplicateProductLinkAlertProps) {
-  const { data, isLoading } = useGetAllSourceFileFolders(productId, enabled);
+  const { data, isLoading } = useGetAllSourceFileFolders({
+    productId,
+    query: { limit: 100 },
+    enabled,
+  });
 
-  const existingFolders = ((data?.result ?? []) as SourceFilesFolder[]).filter(
+  const folders: SourceFilesFolder[] = data?.result?.folders ?? [];
+  const existingFolders = folders.filter(
     (folder) => folder._id !== excludeFolderId,
   );
 
