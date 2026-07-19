@@ -2,12 +2,15 @@
 
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@uprevit/ui/lib/utils";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
 
 const selectTriggerVariants = cva(
   "border-border text-foreground cursor-pointer data-placeholder:text-foreground hover:bg-muted focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex w-full items-center justify-between gap-2 rounded-lg border bg-background text-sm transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&>span]:line-clamp-1 delay-100 duration-200 ease-in-out",
@@ -176,7 +179,7 @@ function SelectScrollUpButton({
       )}
       {...props}
     >
-      <ChevronUpIcon size={16} />
+      <Icon icon={ArrowUp01Icon} size={16} strokeWidth={2} />
     </SelectPrimitive.ScrollUpButton>
   );
 }
@@ -194,7 +197,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <ChevronDownIcon size={16} />
+      <Icon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
     </SelectPrimitive.ScrollDownButton>
   );
 }

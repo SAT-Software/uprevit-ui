@@ -2,12 +2,14 @@
 
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { CircleIcon } from "lucide-react";
 
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiCheckCircleDuotone } from "react-icons/pi";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowDown01Icon,
+  CheckmarkCircle01Icon,
+  CircleIcon,
+} from "@hugeicons/core-free-icons";
 
 function DropdownMenu({
   ...props
@@ -103,7 +105,7 @@ function DropdownMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <PiCheckCircleDuotone className="size-4" />
+          <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -138,7 +140,12 @@ function DropdownMenuRadioItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <CircleIcon className="size-2 fill-current" />
+          <Icon
+            icon={CircleIcon}
+            size={8}
+            strokeWidth={2}
+            className="fill-current"
+          />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}

@@ -1,8 +1,9 @@
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircle } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
+import { Presentation01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useTheme } from "next-themes";
-import { PiPresentationChartDuotone } from "react-icons/pi";
 
 export default function ReportSection() {
   const { resolvedTheme } = useTheme();
@@ -16,7 +17,12 @@ export default function ReportSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiPresentationChartDuotone className="mr-1 text-foreground/50" />
+          <Icon
+            icon={Presentation01Icon}
+            size={16}
+            strokeWidth={2}
+            className="mr-1 text-foreground/50"
+          />
           <span className="font-medium">Report</span>
         </Badge>
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">

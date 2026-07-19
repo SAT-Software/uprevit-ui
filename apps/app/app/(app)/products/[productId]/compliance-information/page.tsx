@@ -12,9 +12,8 @@ import { cn } from "@uprevit/ui/lib/utils";
 import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type WithRedlineMeta } from "@/utils/redlineArray";
 import { redlineBannerText } from "@/utils/redlineStyles";
-import { Alert01Icon } from "@hugeicons/core-free-icons";
+import { Alert01Icon, ArrowRight01Icon, Home04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { PiCaretRightDuotone, PiHouseDuotone } from "react-icons/pi";
 
 type ComplianceItem = {
   _id: string;
@@ -98,16 +97,26 @@ export default function Page() {
             href="/dashboard"
             className="flex items-center transition-colors hover:text-foreground"
           >
-            <PiHouseDuotone className="h-4 w-4" />
+            <Icon icon={Home04Icon} size={16} strokeWidth={2} />
           </Link>
-          <PiCaretRightDuotone className="h-3 w-3 text-muted-foreground/50" />
+          <Icon
+            icon={ArrowRight01Icon}
+            size={12}
+            strokeWidth={2}
+            className="text-muted-foreground/50"
+          />
           <Link
             href="/products"
             className="transition-colors hover:text-foreground"
           >
             Products
           </Link>
-          <PiCaretRightDuotone className="h-3 w-3 text-muted-foreground/50" />
+          <Icon
+            icon={ArrowRight01Icon}
+            size={12}
+            strokeWidth={2}
+            className="text-muted-foreground/50"
+          />
           <span className="font-medium text-foreground">
             Compliance Information
           </span>

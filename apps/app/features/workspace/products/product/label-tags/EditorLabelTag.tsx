@@ -8,14 +8,14 @@ import {
   MarkerArea,
   RectangularBoxMarkerBase,
 } from "@markerjs/markerjs3";
-import { Button } from "@uprevit/ui/components/ui/button";
-import Image from "next/image";
 import {
-  PiArrowUpRightDuotone,
-  PiFloppyDiskBackDuotone,
-  PiSquareDuotone,
-  PiTrashDuotone,
-} from "react-icons/pi";
+  ArrowUpRight01Icon,
+  Delete02Icon,
+  FloppyDiskIcon,
+  SquareIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Button } from "@uprevit/ui/components/ui/button";
 
 type Props = {
   targetImage: string;
@@ -53,7 +53,7 @@ export default function EditorLabelTag({ targetImage, onSave }: Props) {
           }}
           variant="secondary"
         >
-          <PiArrowUpRightDuotone />
+          <Icon icon={ArrowUpRight01Icon} size={16} strokeWidth={2} />
         </Button>
         <Button
           onClick={() => {
@@ -61,7 +61,7 @@ export default function EditorLabelTag({ targetImage, onSave }: Props) {
           }}
           variant="secondary"
         >
-          <PiSquareDuotone />
+          <Icon icon={SquareIcon} size={16} strokeWidth={2} />
         </Button>
         <Button
           onClick={() => {
@@ -71,7 +71,7 @@ export default function EditorLabelTag({ targetImage, onSave }: Props) {
           }}
           variant="secondary"
         >
-          <PiFloppyDiskBackDuotone />
+          <Icon icon={FloppyDiskIcon} size={16} strokeWidth={2} />
         </Button>
         <Button
           onClick={() => {
@@ -81,7 +81,7 @@ export default function EditorLabelTag({ targetImage, onSave }: Props) {
           }}
           variant="secondary"
         >
-          <PiTrashDuotone />
+          <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
         </Button>
       </div>
     </div>

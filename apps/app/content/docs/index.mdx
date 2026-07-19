@@ -3,19 +3,20 @@ title: Introduction
 description: Learn how to organize your workspace, document medical device labeling products, and produce reviewed outputs.
 ---
 
+import { DocsIcon } from "@/components/docs/DocsIcon";
 import {
-  PiArchiveDuotone,
-  PiBookmarkSimpleDuotone,
-  PiBuildingsDuotone,
-  PiExportDuotone,
-  PiFolderOpenDuotone,
-  PiGitBranchDuotone,
-  PiHouseDuotone,
-  PiKanbanDuotone,
-  PiLayoutDuotone,
-  PiPackageDuotone,
-  PiPresentationChartDuotone,
-} from "react-icons/pi";
+  ArchiveIcon,
+  Bookmark01Icon,
+  Download01Icon,
+  Folder02Icon,
+  GitBranchIcon,
+  Home04Icon,
+  KanbanIcon,
+  LayoutGridIcon,
+  NewOfficeIcon,
+  Presentation01Icon,
+  Blockchain03Icon,
+} from "@hugeicons/core-free-icons";
 
 Uprevit helps teams document medical device labeling in one place—from workspace setup through reviewed outputs.
 
@@ -38,67 +39,67 @@ Each card below opens a guide for that part of Uprevit. Jump to whatever you nee
     title="Workspace"
     href="/docs/getting-started/workspace"
     description="Your organization container, settings, and who can manage them."
-    icon={<PiHouseDuotone />}
+    icon={<DocsIcon icon={Home04Icon} />}
   />
   <Card
     title="Departments"
     href="/docs/getting-started/departments"
     description="Group teams and projects; admins create and maintain departments."
-    icon={<PiBuildingsDuotone />}
+    icon={<DocsIcon icon={NewOfficeIcon} />}
   />
   <Card
     title="Projects"
     href="/docs/getting-started/projects"
     description="Work streams under a department; where products are filed."
-    icon={<PiKanbanDuotone />}
+    icon={<DocsIcon icon={KanbanIcon} />}
   />
   <Card
     title="Products"
     href="/docs/getting-started/products"
     description="Create products, track status and versions, open documentation tabs."
-    icon={<PiPackageDuotone />}
+    icon={<DocsIcon icon={Blockchain03Icon} />}
   />
   <Card
     title="Product documentation"
     href="/docs/product-documentation/product-overview"
     description="Overview of all seven tabs; complete each one before submit."
-    icon={<PiLayoutDuotone />}
+    icon={<DocsIcon icon={LayoutGridIcon} />}
   />
   <Card
     title="Redlines and versions"
     href="/docs/review-outputs/redlines-versions"
     description="Submit a version, compare changes, and start a new draft when needed."
-    icon={<PiGitBranchDuotone />}
+    icon={<DocsIcon icon={GitBranchIcon} />}
   />
   <Card
     title="Source files"
     href="/docs/source-files-bookmarks/source-files"
     description="Store and browse reference folders linked to products."
-    icon={<PiFolderOpenDuotone />}
+    icon={<DocsIcon icon={Folder02Icon} />}
   />
   <Card
     title="Bookmarks"
     href="/docs/source-files-bookmarks/bookmarks"
     description="Personal folders of products for quick access."
-    icon={<PiBookmarkSimpleDuotone />}
+    icon={<DocsIcon icon={Bookmark01Icon} />}
   />
   <Card
     title="Reports"
     href="/docs/review-outputs/reports"
     description="Query products across tabs and export result sets."
-    icon={<PiPresentationChartDuotone />}
+    icon={<DocsIcon icon={Presentation01Icon} />}
   />
   <Card
     title="Exports"
     href="/docs/review-outputs/exports"
     description="Download PDFs, Excel jobs, and specification workbooks."
-    icon={<PiExportDuotone />}
+    icon={<DocsIcon icon={Download01Icon} />}
   />
   <Card
     title="Archives"
     href="/docs/review-outputs/archives"
     description="Archive and restore departments, projects, and products."
-    icon={<PiArchiveDuotone />}
+    icon={<DocsIcon icon={ArchiveIcon} />}
   />
 </Cards>
 

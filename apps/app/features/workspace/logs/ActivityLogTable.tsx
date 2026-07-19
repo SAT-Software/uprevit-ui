@@ -11,20 +11,22 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  PiCalendarDuotone,
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleDownDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiCircleNotchDuotone,
-  PiInfoDuotone,
-  PiMapPinDuotone,
-  PiUserCircleGearDuotone,
-} from "react-icons/pi";
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  ArrowUpDownIcon,
+  Calendar03Icon,
+  CircleArrowLeftDoubleIcon,
+  CircleArrowRightDoubleIcon,
+  CircleChevronDownIcon,
+  CircleChevronLeftIcon,
+  CircleChevronRightIcon,
+  InformationCircleIcon,
+  Loading03Icon,
+  Location01Icon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
+import type { IconProps } from "@uprevit/ui/components/common/Icon";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { AuditLogV2 } from "@/types/audit-log";
 import {
@@ -100,29 +102,35 @@ const SortableHeader = ({
 }: {
   column: Column<AuditLogV2, unknown>;
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) => {
-  const Icon = icon;
-
-  return (
-    <button
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      className="h-8 w-full flex items-center justify-between gap-2 hover:bg-muted/50 rounded-md px-2 cursor-pointer"
-    >
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        <span>{title}</span>
-      </div>
-      {column.getIsSorted() === "desc" ? (
-        <PiCaretDownDuotone className="h-3.5 w-3.5" />
-      ) : column.getIsSorted() === "asc" ? (
-        <PiCaretUpDuotone className="h-3.5 w-3.5" />
-      ) : (
-        <PiCaretUpDownDuotone className="h-3.5 w-3.5 opacity-50" />
-      )}
-    </button>
-  );
-};
+  icon: IconProps["icon"];
+}) => (
+  <button
+    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    className="h-8 w-full flex items-center justify-between gap-2 hover:bg-muted/50 rounded-md px-2 cursor-pointer"
+  >
+    <div className="flex items-center gap-2">
+      <Icon
+        icon={icon}
+        size={16}
+        strokeWidth={2}
+        className="text-muted-foreground"
+      />
+      <span>{title}</span>
+    </div>
+    <Icon
+      icon={
+        column.getIsSorted() === "desc"
+          ? ArrowDown01Icon
+          : column.getIsSorted() === "asc"
+            ? ArrowUp01Icon
+            : ArrowUpDownIcon
+      }
+      size={14}
+      strokeWidth={2}
+      className={column.getIsSorted() ? undefined : "opacity-50"}
+    />
+  </button>
+);
 
 const columns: ColumnDef<AuditLogV2>[] = [
   {
@@ -138,7 +146,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
       <SortableHeader
         column={column}
         title="User"
-        icon={PiUserCircleGearDuotone}
+        icon={UserShield01Icon}
       />
     ),
     cell: ({ row }) => (
@@ -159,7 +167,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
     id: "action",
     accessorFn: (row) => row.action,
     header: ({ column }) => (
-      <SortableHeader column={column} title="Action" icon={PiInfoDuotone} />
+      <SortableHeader column={column} title="Action" icon={InformationCircleIcon} />
     ),
     cell: ({ row }) => (
       <p className="text-sm leading-5 text-foreground line-clamp-2 break-words">
@@ -174,7 +182,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
       <SortableHeader
         column={column}
         title="Date & Time"
-        icon={PiCalendarDuotone}
+        icon={Calendar03Icon}
       />
     ),
     cell: ({ row }) => (
@@ -188,7 +196,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
     id: "context",
     accessorFn: (row) => `${row.where.module}:${row.where.tab ?? ""}`,
     header: ({ column }) => (
-      <SortableHeader column={column} title="Context" icon={PiMapPinDuotone} />
+      <SortableHeader column={column} title="Context" icon={Location01Icon} />
     ),
     cell: ({ row }) => (
       <div className="flex flex-col text-xs">
@@ -208,7 +216,7 @@ const columns: ColumnDef<AuditLogV2>[] = [
     id: "changes",
     accessorFn: (row) => row.changes?.length ?? 0,
     header: ({ column }) => (
-      <SortableHeader column={column} title="Changes" icon={PiInfoDuotone} />
+      <SortableHeader column={column} title="Changes" icon={InformationCircleIcon} />
     ),
     cell: ({ row }) => {
       const changes = getVisibleAuditChanges(row.original.changes ?? []);
@@ -282,7 +290,12 @@ export function ActivityLogTable({
         {isRefreshing ? (
           <div className="absolute inset-0 z-10 bg-background/70 backdrop-blur-[1px] flex items-center justify-center">
             <div className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-muted-foreground">
-              <PiCircleNotchDuotone className="h-3.5 w-3.5 animate-spin" />
+              <Icon
+                icon={Loading03Icon}
+                size={14}
+                strokeWidth={2}
+                className="animate-spin"
+              />
               Updating logs...
             </div>
           </div>
@@ -417,15 +430,19 @@ export function ActivityLogTable({
                                   }
                                 >
                                   {isExpanded ? (
-                                    <PiCaretCircleDownDuotone
-                                      className="opacity-60"
+                                    <Icon
+                                      icon={CircleChevronDownIcon}
                                       size={16}
+                                      strokeWidth={2}
+                                      className="opacity-60"
                                       aria-hidden="true"
                                     />
                                   ) : (
-                                    <PiCaretCircleRightDuotone
-                                      className="opacity-60"
+                                    <Icon
+                                      icon={CircleChevronRightIcon}
                                       size={16}
+                                      strokeWidth={2}
+                                      className="opacity-60"
                                       aria-hidden="true"
                                     />
                                   )}
@@ -530,8 +547,10 @@ export function ActivityLogTable({
                     disabled={!canGoPrev}
                     aria-label="Go to first page"
                   >
-                    <PiCaretCircleDoubleLeftDuotone
+                    <Icon
+                      icon={CircleArrowLeftDoubleIcon}
                       size={16}
+                      strokeWidth={2}
                       aria-hidden="true"
                     />
                   </Button>
@@ -545,7 +564,12 @@ export function ActivityLogTable({
                     disabled={!canGoPrev}
                     aria-label="Go to previous page"
                   >
-                    <PiCaretCircleLeftDuotone size={16} aria-hidden="true" />
+                    <Icon
+                      icon={CircleChevronLeftIcon}
+                      size={16}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
                   </Button>
                 </PaginationItem>
                 <PaginationItem>
@@ -557,7 +581,12 @@ export function ActivityLogTable({
                     disabled={!canGoNext}
                     aria-label="Go to next page"
                   >
-                    <PiCaretCircleRightDuotone size={16} aria-hidden="true" />
+                    <Icon
+                      icon={CircleChevronRightIcon}
+                      size={16}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
                   </Button>
                 </PaginationItem>
                 <PaginationItem>
@@ -569,8 +598,10 @@ export function ActivityLogTable({
                     disabled={!canGoNext}
                     aria-label="Go to last page"
                   >
-                    <PiCaretCircleDoubleRightDuotone
+                    <Icon
+                      icon={CircleArrowRightDoubleIcon}
                       size={16}
+                      strokeWidth={2}
                       aria-hidden="true"
                     />
                   </Button>

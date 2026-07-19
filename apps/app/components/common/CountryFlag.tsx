@@ -1,7 +1,8 @@
 "use client";
 
 import * as Flags from "country-flag-icons/react/3x2";
-import { PiGlobeDuotone } from "react-icons/pi";
+import { GlobalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { COUNTRIES } from "@/data/countries";
 import { cn } from "@uprevit/ui/lib/utils";
@@ -39,8 +40,11 @@ export function CountryFlag({
       {FlagComponent ? (
         <FlagComponent className="h-full w-full" />
       ) : (
-        <PiGlobeDuotone
-          className={cn("h-3 w-3 text-muted-foreground", iconClassName)}
+        <Icon
+          icon={GlobalIcon}
+          size={12}
+          strokeWidth={2}
+          className={cn("text-muted-foreground", iconClassName)}
         />
       )}
     </span>

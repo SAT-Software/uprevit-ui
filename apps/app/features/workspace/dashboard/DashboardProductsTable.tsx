@@ -43,7 +43,6 @@ import { cn } from "@uprevit/ui/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { PiPackageDuotone } from "react-icons/pi";
 import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
 import {
   DashboardErrorState,
@@ -530,7 +529,12 @@ export default function DashboardProductsTable() {
               <TableCell colSpan={columns.length} className="h-24 text-center">
                 <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
                   <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                    <PiPackageDuotone className="w-8 h-8 text-muted-foreground" />
+                    <Icon
+                      icon={Blockchain03Icon}
+                      size={32}
+                      strokeWidth={2}
+                      className="text-muted-foreground"
+                    />
                   </div>
                   <div className="text-center space-y-1">
                     <p className="text-sm font-medium text-foreground">

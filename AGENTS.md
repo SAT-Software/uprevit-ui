@@ -81,7 +81,7 @@ onError: (error) => {
 - Use shadcn/ui components (configured in components.json, style: "new-york")
 - Prefix custom components with the function (e.g., `ArchiveProductDialog`)
 - Use Tailwind CSS with `cn()` utility for conditional classes
-- Icons from react-icons (prefer Pi prefix for Phosphor icons)
+- Icons from `@hugeicons/core-free-icons` via the shared `Icon` wrapper (`@uprevit/ui/components/common/Icon`)
 
 ### Authentication
 

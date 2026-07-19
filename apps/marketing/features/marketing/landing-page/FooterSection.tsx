@@ -1,6 +1,7 @@
 "use client";
 
-import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
+import { Linkedin02Icon, NewTwitterIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
@@ -94,7 +95,7 @@ export default function FooterSection() {
                   target="_blank"
                   className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors"
                 >
-                  <FaXTwitter className="w-4 h-4" />
+                  <Icon icon={NewTwitterIcon} size={16} strokeWidth={2} />
                   <span>x.com</span>
                 </Link>
               </li>
@@ -104,7 +105,7 @@ export default function FooterSection() {
                   target="_blank"
                   className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors"
                 >
-                  <FaLinkedin className="w-4 h-4" />
+                  <Icon icon={Linkedin02Icon} size={16} strokeWidth={2} />
                   <span>LinkedIn</span>
                 </Link>
               </li>

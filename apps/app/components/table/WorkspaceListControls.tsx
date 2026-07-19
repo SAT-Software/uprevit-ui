@@ -3,13 +3,6 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { format } from "date-fns";
-import {
-  PiCalendarBlankDuotone,
-  PiFunnelDuotone,
-  PiPlusCircleDuotone,
-  PiSlidersDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Calendar } from "@uprevit/ui/components/ui/calendar";

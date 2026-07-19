@@ -52,7 +52,6 @@ import {
 import { cn } from "@uprevit/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { PiPackageDuotone } from "react-icons/pi";
 
 export type Item = {
   _id: string;
@@ -529,7 +528,12 @@ export default function ProjectPageProductsTable({
                           >
                             <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
                               <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                                <PiPackageDuotone className="w-8 h-8 text-muted-foreground" />
+                                <Icon
+                                  icon={Blockchain03Icon}
+                                  size={32}
+                                  strokeWidth={2}
+                                  className="text-muted-foreground"
+                                />
                               </div>
                               <div className="text-center space-y-1">
                                 <p className="text-sm font-medium text-foreground">
@@ -562,8 +566,13 @@ export default function ProjectPageProductsTable({
           ) : (
             <div className="flex flex-col gap-2">
               <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
-                  <PiPackageDuotone className="w-8 h-8 text-muted-foreground/50" />
+                <div className="flex items-center justify-center p-4 border border-dashed border-border bg-muted/50 rounded-full mb-3">
+                  <Icon
+                    icon={Blockchain03Icon}
+                    size={32}
+                    strokeWidth={2}
+                    className="text-muted-foreground/50"
+                  />
                 </div>
                 <p className="text-sm font-medium text-foreground">
                   No products found

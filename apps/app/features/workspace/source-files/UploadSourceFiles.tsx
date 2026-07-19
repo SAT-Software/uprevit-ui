@@ -1,46 +1,22 @@
 "use client";
 
 import {
-  PiFileArchiveDuotone,
-  PiFileDuotone,
-  PiFileTextDuotone,
-  PiHeadphonesDuotone,
-  PiImageDuotone,
-  PiTableDuotone,
-  PiUploadSimpleDuotone,
-  PiVideoDuotone,
-  PiWarningCircleDuotone,
-  PiXDuotone,
-} from "react-icons/pi";
+  Alert01Icon,
+  Cancel01Icon,
+  Doc01Icon,
+  File02Icon,
+  FileZipIcon,
+  HeadphonesIcon,
+  Image01Icon,
+  UploadSquare01Icon,
+  Video01Icon,
+  Xls01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { formatBytes, useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useMemo } from "react";
-
-// Create some dummy initial files
-// const initialFiles = [
-//   {
-//     name: "document.pdf",
-//     size: 528737,
-//     type: "application/pdf",
-//     url: "https://example.com/document.pdf",
-//     id: "document.pdf-1744638436563-8u5xuls",
-//   },
-//   {
-//     name: "intro.zip",
-//     size: 252873,
-//     type: "application/zip",
-//     url: "https://example.com/intro.zip",
-//     id: "intro.zip-1744638436563-8u5xuls",
-//   },
-//   {
-//     name: "conclusion.xlsx",
-//     size: 352873,
-//     type: "application/xlsx",
-//     url: "https://example.com/conclusion.xlsx",
-//     id: "conclusion.xlsx-1744638436563-8u5xuls",
-//   },
-// ]
 
 const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
   const fileType = file.file instanceof File ? file.file.type : file.file.type;
@@ -53,35 +29,64 @@ const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
     fileName.endsWith(".doc") ||
     fileName.endsWith(".docx")
   ) {
-    return <PiFileTextDuotone className="size-4 opacity-60" />;
-  } else if (
+    return (
+      <Icon icon={Doc01Icon} size={16} strokeWidth={2} className="opacity-60" />
+    );
+  }
+  if (
     fileType.includes("zip") ||
     fileType.includes("archive") ||
     fileName.endsWith(".zip") ||
     fileName.endsWith(".rar")
   ) {
-    return <PiFileArchiveDuotone className="size-4 opacity-60" />;
-  } else if (
+    return (
+      <Icon
+        icon={FileZipIcon}
+        size={16}
+        strokeWidth={2}
+        className="opacity-60"
+      />
+    );
+  }
+  if (
     fileType.includes("excel") ||
     fileName.endsWith(".xls") ||
     fileName.endsWith(".xlsx")
   ) {
-    return <PiTableDuotone className="size-4 opacity-60" />;
-  } else if (fileType.includes("video/")) {
-    return <PiVideoDuotone className="size-4 opacity-60" />;
-  } else if (fileType.includes("audio/")) {
-    return <PiHeadphonesDuotone className="size-4 opacity-60" />;
-  } else if (fileType.startsWith("image/")) {
-    return <PiImageDuotone className="size-4 opacity-60" />;
+    return (
+      <Icon icon={Xls01Icon} size={16} strokeWidth={2} className="opacity-60" />
+    );
   }
-  return <PiFileDuotone className="size-4 opacity-60" />;
+  if (fileType.includes("video/")) {
+    return (
+      <Icon icon={Video01Icon} size={16} strokeWidth={2} className="opacity-60" />
+    );
+  }
+  if (fileType.includes("audio/")) {
+    return (
+      <Icon
+        icon={HeadphonesIcon}
+        size={16}
+        strokeWidth={2}
+        className="opacity-60"
+      />
+    );
+  }
+  if (fileType.startsWith("image/")) {
+    return (
+      <Icon icon={Image01Icon} size={16} strokeWidth={2} className="opacity-60" />
+    );
+  }
+  return (
+    <Icon icon={File02Icon} size={16} strokeWidth={2} className="opacity-60" />
+  );
 };
 
 type UploadSourceFilesProps = {
   onSelectionChange?: (files: File[]) => void;
   accept?: string;
   maxFiles?: number;
-  maxSize?: number; // bytes
+  maxSize?: number;
 };
 
 export default function Component({
@@ -90,7 +95,6 @@ export default function Component({
   maxFiles: maxFilesProp,
   maxSize: maxSizeProp,
 }: UploadSourceFilesProps) {
-  // Match server route constraints by default: all files, max 4 files, 4MB
   const maxFiles = useMemo(() => maxFilesProp ?? 4, [maxFilesProp]);
   const maxSize = useMemo(() => maxSizeProp ?? 4 * 1024 * 1024, [maxSizeProp]);
 
@@ -117,12 +121,10 @@ export default function Component({
         .filter((f): f is File => f instanceof File);
       onSelectionChange?.(onlyFiles);
     },
-    // initialFiles,
   });
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Drop area */}
       <div
         role="button"
         onClick={openFileDialog}
@@ -144,7 +146,12 @@ export default function Component({
             className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border"
             aria-hidden="true"
           >
-            <PiUploadSimpleDuotone className="size-4 opacity-60" />
+            <Icon
+              icon={UploadSquare01Icon}
+              size={16}
+              strokeWidth={2}
+              className="opacity-60"
+            />
           </div>
           <p className="mb-1.5 text-sm font-medium">Upload files</p>
           <p className="text-muted-foreground mb-2 text-xs">
@@ -165,14 +172,11 @@ export default function Component({
           className="text-destructive flex items-center gap-1 text-xs"
           role="alert"
         >
-          <PiWarningCircleDuotone className="size-3 shrink-0" />
+          <Icon icon={Alert01Icon} size={12} strokeWidth={2} className="shrink-0" />
           <span>{errors[0]}</span>
         </div>
       )}
 
-      {/* Upload status and actions are handled by parent */}
-
-      {/* File list */}
       {files.length > 0 && (
         <div className="space-y-2">
           {files.map((file) => (
@@ -207,12 +211,16 @@ export default function Component({
                 onClick={() => removeFile(file.id)}
                 aria-label="Remove file"
               >
-                <PiXDuotone className="size-4" aria-hidden="true" />
+                <Icon
+                  icon={Cancel01Icon}
+                  size={16}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
               </Button>
             </div>
           ))}
 
-          {/* Remove file / reset */}
           {files.length >= 1 && (
             <div>
               <Button size="sm" variant="outline" onClick={clearFiles}>

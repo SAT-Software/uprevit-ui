@@ -6,12 +6,13 @@ import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/Decorati
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
-  PiBookOpenDuotone,
-  PiFilesDuotone,
-  PiNewspaperDuotone,
-  PiStackDuotone,
-  PiWrenchDuotone,
-} from "react-icons/pi";
+  BookOpen02Icon,
+  File02Icon,
+  Layers01Icon,
+  News01Icon,
+  Wrench01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const resources = [
   {
@@ -19,7 +20,7 @@ const resources = [
     title: "Templates",
     description:
       "Battle-tested checklists and templates built by regulatory experts to keep documentation audit-ready.",
-    icon: PiFilesDuotone,
+    icon: File02Icon,
     href: "/resources/templates",
     meta: "Checklists, validation kits, naming guides",
     highlights: [
@@ -34,7 +35,7 @@ const resources = [
     title: "Standards & Symbols",
     description:
       "Centralized ISO references and standardized medical device symbols for global regulatory alignment.",
-    icon: PiBookOpenDuotone,
+    icon: BookOpen02Icon,
     href: "/resources/standards-symbols",
     meta: "ISO library + symbol usage guidance",
     highlights: ["ISO 15223-1", "Device symbol library", "Usage references"],
@@ -45,7 +46,7 @@ const resources = [
     title: "Blogs",
     description:
       "Expert analysis of regulatory shifts with clear, actionable takeaways for labeling teams.",
-    icon: PiNewspaperDuotone,
+    icon: News01Icon,
     href: "/resources/blogs",
     meta: "Regulatory updates and field notes",
     highlights: [
@@ -60,7 +61,7 @@ const resources = [
     title: "Toolkits",
     description:
       "Free compliance tools to streamline labeling workflows, validation, and symbol management.",
-    icon: PiWrenchDuotone,
+    icon: Wrench01Icon,
     href: "/resources/toolkits",
     meta: "Free tools, rolling releases",
     highlights: ["Label generator", "Compliance checker", "Symbol manager"],
@@ -95,7 +96,12 @@ export default function ResourcesHub() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiStackDuotone className="text-foreground/60" />
+          <Icon
+            icon={Layers01Icon}
+            size={16}
+            strokeWidth={2}
+            className="text-foreground/60"
+          />
           <span className="font-medium">Resources</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
@@ -112,12 +118,12 @@ export default function ResourcesHub() {
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <Button size="lg" variant="outline" asChild>
             <Link href="/resources/standards-symbols">
-              <PiBookOpenDuotone /> Explore standards
+              <Icon icon={BookOpen02Icon} size={16} strokeWidth={2} /> Explore standards
             </Link>
           </Button>
           <Button size="lg" asChild>
             <Link href="/resources/templates">
-              <PiFilesDuotone />
+              <Icon icon={File02Icon} size={16} strokeWidth={2} />
               Browse templates
             </Link>
           </Button>
@@ -164,7 +170,11 @@ export default function ResourcesHub() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <div className="flex size-9 md:size-11 shrink-0 items-center justify-center rounded-lg md:rounded-xl bg-foreground text-background">
-                          <resource.icon className="size-4 md:size-5" />
+                          <Icon
+                            icon={resource.icon}
+                            size={20}
+                            strokeWidth={2}
+                          />
                         </div>
                         <div>
                           <h3 className="text-lg md:text-xl font-semibold">

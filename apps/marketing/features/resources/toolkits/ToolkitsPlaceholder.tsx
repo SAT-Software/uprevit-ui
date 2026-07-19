@@ -5,12 +5,11 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useTheme } from "next-themes";
 import {
-  PiBinocularsDuotone,
-  PiCheckCircleDuotone,
-  PiClockDuotone,
-  PiHourglassLowDuotone,
-  PiWrenchDuotone,
-} from "react-icons/pi";
+  BinocularsIcon,
+  HourglassIcon,
+  Wrench01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const upcomingTools = [
   {
@@ -52,7 +51,7 @@ export default function ToolkitsPlaceholder() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiWrenchDuotone />
+          <Icon icon={Wrench01Icon} size={16} strokeWidth={2} />
           <span className="font-medium">Toolkits</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
@@ -67,11 +66,11 @@ export default function ToolkitsPlaceholder() {
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <Button size="lg" variant="outline">
-            <PiBinocularsDuotone />
+            <Icon icon={BinocularsIcon} size={16} strokeWidth={2} />
             Request early access
           </Button>
           <Button size="lg">
-            <PiHourglassLowDuotone />
+            <Icon icon={HourglassIcon} size={16} strokeWidth={2} />
             Join the waitlist
           </Button>
         </div>
@@ -102,9 +101,6 @@ export default function ToolkitsPlaceholder() {
                   >
                     Coming soon
                   </Badge>
-                  {/* <span className="text-xs text-background/70">
-                    3 tools in pipeline
-                  </span> */}
                 </div>
                 <h3 className="mt-4 text-xl md:text-2xl font-semibold">
                   Build compliant labels without the manual chase
@@ -148,14 +144,16 @@ export default function ToolkitsPlaceholder() {
                     >
                       <div className="flex items-center justify-between">
                         <h5 className="text-sm font-semibold">{tool.title}</h5>
-                        <PiWrenchDuotone className="size-4 text-muted-foreground" />
+                        <Icon
+                          icon={Wrench01Icon}
+                          size={16}
+                          strokeWidth={2}
+                          className="text-muted-foreground"
+                        />
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {tool.description}
                       </p>
-                      {/* <div className="mt-2 text-[11px] uppercase tracking-wide text-muted-foreground">
-                        {tool.status}
-                      </div> */}
                     </div>
                   ))}
                 </div>

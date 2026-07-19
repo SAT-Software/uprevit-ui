@@ -19,7 +19,6 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useMemo, useState } from "react";
-import { PiMagnifyingGlassDuotone } from "react-icons/pi";
 import { Search02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 
 export type User = {

@@ -4,8 +4,9 @@ import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useScrollSection } from "@/lib/scroll-context";
+import { Image01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useTheme } from "next-themes";
-import { PiImageDuotone } from "react-icons/pi";
 import Lottie from "lottie-react";
 import uprevitMarketingVideo from "@/public/Uprevit-Marketing-Video.json";
 
@@ -22,7 +23,12 @@ export default function DemoSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiImageDuotone className="mr-1 text-foreground/50" />
+          <Icon
+            icon={Image01Icon}
+            size={16}
+            strokeWidth={2}
+            className="mr-1 text-foreground/50"
+          />
           <span className="font-medium">Uprevit Demo</span>
         </Badge>
 
@@ -59,13 +65,6 @@ export default function DemoSection() {
           <div className="p-1 bg-accent border-border border rounded-[12px]">
             <Card className="aspect-auto mx-auto border-border overflow-hidden">
               <CardContent className="p-0 overflow-hidden dark:hidden">
-                {/* <video
-                  src="/Uprevit-ComingSoon-Intro-Light.mp4"
-                  className="overflow-hidden rounded-xl"
-                  autoPlay
-                  loop
-                  muted
-                /> */}
                 <Lottie
                   animationData={uprevitMarketingVideo}
                   loop={true}
@@ -73,13 +72,6 @@ export default function DemoSection() {
                 />
               </CardContent>
               <CardContent className="p-0 overflow-hidden dark:block hidden">
-                {/* <video
-                  src="/Uprevit-ComingSoon-Intro-Dark.mp4"
-                  className="overflow-hidden rounded-xl"
-                  autoPlay
-                  loop
-                  muted
-                /> */}
                 <Lottie
                   animationData={uprevitMarketingVideo}
                   loop={true}

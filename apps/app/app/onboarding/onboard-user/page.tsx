@@ -22,9 +22,14 @@ import { useGetUser } from "@/hooks/user/useGetUser";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 import { isWorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
 import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccessFrozenScreen";
-import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
+import {
+  ArrowRight01Icon,
+  Cancel01Icon,
+  ImageAdd01Icon,
+  ProfileIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useAuth } from "react-oidc-context";
-import { PiUserCircleDuotone } from "react-icons/pi";
 import { toast } from "sonner";
 
 type UserFormValues = {
@@ -194,7 +199,7 @@ export default function OnboardUserPage() {
                         alt="Profile avatar"
                       />
                       <AvatarFallback className="border border-border bg-muted text-muted-foreground">
-                        <PiUserCircleDuotone className="h-8 w-8" />
+                        <Icon icon={ProfileIcon} size={32} strokeWidth={2} />
                       </AvatarFallback>
                     </Avatar>
                     {uploadingAvatar && (
@@ -223,7 +228,12 @@ export default function OnboardUserPage() {
                         asChild
                       >
                         <span>
-                          <ImagePlusIcon className="mr-2 h-4 w-4" />
+                          <Icon
+                            icon={ImageAdd01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="mr-2"
+                          />
                           {uploadingAvatar ? "Uploading..." : "Change Avatar"}
                         </span>
                       </Button>
@@ -238,7 +248,12 @@ export default function OnboardUserPage() {
                         disabled={uploadingAvatar}
                         className="w-fit text-destructive hover:text-destructive"
                       >
-                        <XIcon className="mr-2 h-4 w-4" />
+                        <Icon
+                          icon={Cancel01Icon}
+                          size={16}
+                          strokeWidth={2}
+                          className="mr-2"
+                        />
                         Remove
                       </Button>
                     )}
@@ -377,7 +392,7 @@ export default function OnboardUserPage() {
                   ) : (
                     <>
                       Create profile
-                      <ArrowRightIcon className="h-4 w-4" />
+                      <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} />
                     </>
                   )}
                 </Button>

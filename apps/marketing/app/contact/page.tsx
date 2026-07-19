@@ -23,16 +23,17 @@ import {
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
 import { useTheme } from "next-themes";
-import { FaLinkedin } from "react-icons/fa6";
 import {
-  PiEnvelopeSimpleDuotone,
-  PiClockClockwiseDuotone,
-  PiMapPinDuotone,
-  PiQuestionDuotone,
-  PiChatTextDuotone,
-  PiArrowRightDuotone,
-  PiEnvelopeOpenDuotone,
-} from "react-icons/pi";
+  ArrowRight01Icon,
+  Clock01Icon,
+  HelpCircleIcon,
+  Linkedin02Icon,
+  Location01Icon,
+  Mail01Icon,
+  MailOpen01Icon,
+  Message01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const contactFAQs = [
   {
@@ -78,7 +79,7 @@ export default function ContactPage() {
                   variant={badgeVariant}
                   className="mb-8 z-60 dark:px-2 dark:py-0.5"
                 >
-                  <PiEnvelopeOpenDuotone />
+                  <Icon icon={MailOpen01Icon} size={16} strokeWidth={2} />
                   <span className="font-medium">Contact</span>
                 </Badge>
                 <div className="w-full flex flex-col md:flex-row items-start gap-4">
@@ -102,7 +103,12 @@ export default function ContactPage() {
                       <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
                         <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
-                            <PiEnvelopeSimpleDuotone className="h-4 w-4 md:h-5 md:w-5" />
+                            <Icon
+                              icon={Mail01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="md:h-5 md:w-5"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -132,7 +138,12 @@ export default function ContactPage() {
                       <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
                         <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
-                            <PiChatTextDuotone className="h-4 w-4 md:h-5 md:w-5" />
+                            <Icon
+                              icon={Message01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="md:h-5 md:w-5"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -152,7 +163,12 @@ export default function ContactPage() {
                           rel="noreferrer"
                           className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          <FaLinkedin className="h-4 w-4 shrink-0" />
+                          <Icon
+                            icon={Linkedin02Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="shrink-0"
+                          />
                           <span>linkedin.com/company/uprevit</span>
                         </Link>
                       </CardContent>
@@ -162,7 +178,12 @@ export default function ContactPage() {
                       <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
                         <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
-                            <PiClockClockwiseDuotone className="h-4 w-4 md:h-5 md:w-5" />
+                            <Icon
+                              icon={Clock01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="md:h-5 md:w-5"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -176,7 +197,12 @@ export default function ContactPage() {
                       </CardHeader>
                       <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
                         <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <PiMapPinDuotone className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                          <Icon
+                            icon={Location01Icon}
+                            size={14}
+                            strokeWidth={2}
+                            className="mt-0.5 shrink-0"
+                          />
                           <span>
                             Serving medical device teams across North America,
                             EU, and APAC.
@@ -259,7 +285,12 @@ export default function ContactPage() {
                     variant={badgeVariant}
                     className="mb-6 z-60 dark:px-2 dark:py-0.5"
                   >
-                    <PiQuestionDuotone className="mr-1 text-foreground/50" />
+                    <Icon
+                      icon={HelpCircleIcon}
+                      size={16}
+                      strokeWidth={2}
+                      className="mr-1 text-foreground/50"
+                    />
                     <span className="font-medium">FAQ</span>
                   </Badge>
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
@@ -303,7 +334,12 @@ export default function ContactPage() {
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Button variant="secondary" className="text-foreground">
                         Book a demo
-                        <PiArrowRightDuotone className="ml-2 h-4 w-4" />
+                        <Icon
+                          icon={ArrowRight01Icon}
+                          size={16}
+                          strokeWidth={2}
+                          className="ml-2"
+                        />
                       </Button>
                     </div>
                   </div>

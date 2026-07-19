@@ -25,12 +25,12 @@ import {
 } from "@uprevit/ui/components/ui/card";
 import Link from "next/link";
 import {
-  PiArrowDownDuotone,
-  PiArrowRightDuotone,
-  PiCheckCircleDuotone,
-  PiCoinsDuotone,
-  PiQuestionDuotone,
-} from "react-icons/pi";
+  ArrowRight01Icon,
+  CheckmarkCircle01Icon,
+  Coins01Icon,
+  HelpCircleIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const pricingFAQs = [
   {
@@ -82,7 +82,7 @@ function PricingPageContent() {
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
               <Badge variant="outline" className={pricingBadgeClassName}>
-                <PiCoinsDuotone />
+                <Icon icon={Coins01Icon} size={16} strokeWidth={2} />
                 <span className="font-medium">Pricing</span>
               </Badge>
               <div className="w-full flex flex-col md:flex-row items-start gap-4">
@@ -141,7 +141,12 @@ function PricingPageContent() {
                         <Button asChild className="h-11 rounded-lg text-base">
                           <Link href="/contact">
                             Talk to Us
-                            <PiArrowRightDuotone className="ml-2 h-4 w-4" />
+                            <Icon
+                              icon={ArrowRight01Icon}
+                              size={16}
+                              strokeWidth={2}
+                              className="ml-2"
+                            />
                           </Link>
                         </Button>
                         {/* <Button
@@ -164,7 +169,12 @@ function PricingPageContent() {
                           "SSO add-on available",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
-                            <PiCheckCircleDuotone className="mt-0.5 h-5 w-5 text-foreground" />
+                            <Icon
+                              icon={CheckmarkCircle01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="mt-0.5 text-foreground"
+                            />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -370,7 +380,12 @@ function PricingPageContent() {
               >
                 <div className="flex flex-col items-center text-center mb-10">
                   <Badge variant="outline" className={pricingBadgeClassName}>
-                    <PiQuestionDuotone className="mr-1 text-foreground/60" />
+                    <Icon
+                      icon={HelpCircleIcon}
+                      size={16}
+                      strokeWidth={2}
+                      className="mr-1 text-foreground/60"
+                    />
                     <span className="font-medium">FAQ</span>
                   </Badge>
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
@@ -417,7 +432,7 @@ function PricingPageContent() {
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Button variant="secondary" className="text-foreground">
                         Book a demo
-                        <PiArrowRightDuotone />
+                        <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} />
                       </Button>
                     </div>
                   </div>
