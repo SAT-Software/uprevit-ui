@@ -171,7 +171,7 @@ export default function ProjectDetailPage() {
 
               <div className="w-full flex items-center justify-end gap-2 p-2">
                 <HoverCard>
-                  <HoverCardTrigger>
+                  <HoverCardTrigger asChild>
                     <Button
                       variant="outline"
                       className="text-muted-foreground/60 hover:text-muted-foreground"
@@ -221,7 +221,9 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
-        <ProjectPageProductsTable projectId={projectId} />
+        {!isLoading && !isError && project ? (
+          <ProjectPageProductsTable projectId={projectId} />
+        ) : null}
       </div>
     </div>
   );

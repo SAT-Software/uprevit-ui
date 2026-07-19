@@ -9,10 +9,9 @@ import ProductInfoEditMetadataDialog from "@/features/workspace/products/product
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
+import { useGetProductLinkedSourceFileFolders } from "@/hooks/source-files/useGetProductLinkedSourceFileFolders";
 import { AuditLog } from "@/types/audit-log";
 import type { ProductMetadata } from "@/types/product";
-import type { SourceFilesFolder } from "@/types/source-files";
 import {
   formatToLocalDate,
   formatToLocalDateTime,
@@ -204,14 +203,8 @@ export default function Page() {
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
 
-  const { data: linkedFoldersData, isLoading: linkedFoldersLoading } =
-    useGetAllSourceFileFolders({
-      productId,
-      query: { limit: 100 },
-    });
-
-  const linkedFolders: SourceFilesFolder[] =
-    linkedFoldersData?.result?.folders ?? [];
+  const { folders: linkedFolders, isLoading: linkedFoldersLoading } =
+    useGetProductLinkedSourceFileFolders(productId);
 
   const redlineDiffs = diffRedlineData?.result?.diffs;
   const productInfoDiffLookup = useMemo(() => {

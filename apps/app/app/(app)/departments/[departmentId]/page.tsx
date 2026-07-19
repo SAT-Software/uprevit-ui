@@ -196,7 +196,7 @@ export default function DepartmentDetailPage() {
                 {/* Manager & Users */}
                 <div className="w-full flex items-center justify-end gap-2 p-2">
                   <HoverCard>
-                    <HoverCardTrigger>
+                    <HoverCardTrigger asChild>
                       <Button
                         variant="outline"
                         className="text-muted-foreground/60 hover:text-muted-foreground"
@@ -244,11 +244,10 @@ export default function DepartmentDetailPage() {
                 </div>
               </div>
             </div>
+
+            <DepartmentPageProjectsTable departmentId={departmentId} />
           </>
         )}
-
-        {/* Department Projects */}
-        <DepartmentPageProjectsTable departmentId={departmentId} />
       </div>
     </div>
   );

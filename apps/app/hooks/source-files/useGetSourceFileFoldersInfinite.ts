@@ -11,6 +11,7 @@ export type UseGetSourceFileFoldersInfiniteOptions = {
   sort?: string;
   order?: ListOrder;
   filters?: ListFilter[];
+  productId?: string;
   enabled?: boolean;
 };
 
@@ -23,11 +24,13 @@ export function useGetSourceFileFoldersInfinite(
   const sort = options?.sort ?? "name";
   const order = options?.order ?? "asc";
   const filters = options?.filters ?? [];
+  const productId = options?.productId;
 
   return useInfiniteQuery({
     queryKey: [
       "source-files-folders-infinite",
       workspaceId,
+      productId ?? "all",
       limit,
       sort,
       order,
@@ -37,6 +40,7 @@ export function useGetSourceFileFoldersInfinite(
       getAllSourceFileFolders({
         signal,
         auth,
+        productId,
         query: {
           page: pageParam,
           limit,
