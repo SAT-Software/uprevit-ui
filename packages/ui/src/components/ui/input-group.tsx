@@ -8,14 +8,33 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 
-function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
+const inputGroupVariants = cva(
+  "group/input-group border-border dark:bg-input/30 relative flex w-full items-center rounded-lg border outline-none transition-[color,box-shadow] has-[>textarea]:h-auto",
+  {
+    variants: {
+      size: {
+        sm: "h-7",
+        md: "h-9",
+        lg: "h-10",
+      },
+    },
+    defaultVariants: {
+      size: "sm",
+    },
+  },
+);
+
+function InputGroup({
+  className,
+  size,
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupVariants>) {
   return (
     <div
       data-slot="input-group"
       role="group"
       className={cn(
-        "group/input-group border-border dark:bg-input/30 shadow-xs relative flex w-full items-center rounded-lg border outline-none transition-[color,box-shadow]",
-        "h-9 has-[>textarea]:h-auto",
+        inputGroupVariants({ size }),
 
         // Variants based on alignment.
         "has-[>[data-align=inline-start]]:[&>input]:pl-2",
@@ -29,7 +48,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
         // Error state.
         "has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40",
 
-        className
+        className,
       )}
       {...props}
     />
@@ -37,7 +56,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const inputGroupAddonVariants = cva(
-  "text-muted-foreground flex h-auto cursor-text select-none items-center justify-center gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4",
+  "text-muted-foreground flex h-auto cursor-text select-none items-center justify-center gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       align: {
@@ -54,7 +73,7 @@ const inputGroupAddonVariants = cva(
     defaultVariants: {
       align: "inline-start",
     },
-  }
+  },
 );
 
 function InputGroupAddon({
@@ -94,7 +113,7 @@ const inputGroupButtonVariants = cva(
     defaultVariants: {
       size: "xs",
     },
-  }
+  },
 );
 
 function InputGroupButton({
@@ -121,7 +140,7 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
     <span
       className={cn(
         "text-muted-foreground flex items-center gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
-        className
+        className,
       )}
       {...props}
     />
@@ -136,8 +155,8 @@ function InputGroupInput({
     <Input
       data-slot="input-group-control"
       className={cn(
-        "flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent",
-        className
+        "h-auto min-h-0 flex-1 rounded-none border-0 bg-transparent py-0 shadow-none focus-visible:ring-0 dark:bg-transparent",
+        className,
       )}
       {...props}
     />
@@ -153,7 +172,7 @@ function InputGroupTextarea({
       data-slot="input-group-control"
       className={cn(
         "flex-1 resize-none rounded-none border-0 bg-transparent py-3 shadow-none focus-visible:ring-0 dark:bg-transparent",
-        className
+        className,
       )}
       {...props}
     />
@@ -167,4 +186,5 @@ export {
   InputGroupText,
   InputGroupInput,
   InputGroupTextarea,
+  inputGroupVariants,
 };

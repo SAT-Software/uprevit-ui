@@ -14,12 +14,12 @@ import {
   TextMarkerEditor,
 } from "@markerjs/markerjs3";
 import {
-  PiArrowClockwiseDuotone,
-  PiArrowCounterClockwiseDuotone,
-  PiMagnifyingGlassMinusDuotone,
-  PiMagnifyingGlassPlusDuotone,
-  PiScanDuotone,
-} from "react-icons/pi";
+  RedoIcon,
+  ScanIcon,
+  UndoIcon,
+  ZoomInAreaIcon,
+  ZoomOutAreaIcon,
+} from "@hugeicons/core-free-icons";
 import ToolbarActionButton from "./toolbar/ToolbarActionButton";
 import FillPanel from "./toolbox/FillPanel";
 import FontPanel from "./toolbox/FontPanel";
@@ -37,13 +37,13 @@ type Props = {
 
 const EditorToolbox = ({
   editorState,
-  variant = "secondary",
+  variant = "ghost",
   markerEditor,
   onAction,
   ...props
 }: Props) => {
   const canEditOpacity = (
-    editor: MarkerBaseEditor | null
+    editor: MarkerBaseEditor | null,
   ): editor is MarkerBaseEditor => {
     if (editor === null) {
       return false;
@@ -53,7 +53,7 @@ const EditorToolbox = ({
   };
 
   const canEditStroke = (
-    editor: MarkerBaseEditor | null
+    editor: MarkerBaseEditor | null,
   ): editor is MarkerBaseEditor => {
     if (editor === null) {
       return false;
@@ -70,7 +70,7 @@ const EditorToolbox = ({
   };
 
   const canEditFill = (
-    editor: MarkerBaseEditor | null
+    editor: MarkerBaseEditor | null,
   ): editor is MarkerBaseEditor => {
     if (editor === null) {
       return false;
@@ -85,7 +85,7 @@ const EditorToolbox = ({
   };
 
   const canEditFont = (
-    editor: MarkerBaseEditor | null
+    editor: MarkerBaseEditor | null,
   ): editor is TextMarkerEditor => {
     if (editor === null) {
       return false;
@@ -95,7 +95,7 @@ const EditorToolbox = ({
   };
 
   const canEditNotes = (
-    editor: MarkerBaseEditor | null
+    editor: MarkerBaseEditor | null,
   ): editor is MarkerBaseEditor => {
     if (editor === null) {
       return false;
@@ -105,10 +105,13 @@ const EditorToolbox = ({
   };
 
   return (
-    <div className="flex space-x-1 p-2 justify-between" {...props}>
+    <div
+      className="flex h-10 items-center justify-between gap-1 border-t border-border px-2"
+      {...props}
+    >
       <ButtonGroup>
         <ToolbarActionButton
-          icon={PiArrowCounterClockwiseDuotone}
+          icon={UndoIcon}
           title="Undo"
           variant={variant}
           action="undo"
@@ -116,7 +119,7 @@ const EditorToolbox = ({
           disabled={!editorState.canUndo}
         />
         <ToolbarActionButton
-          icon={PiArrowClockwiseDuotone}
+          icon={RedoIcon}
           title="Redo"
           variant={variant}
           className="hidden sm:inline-flex"
@@ -126,7 +129,7 @@ const EditorToolbox = ({
         />
       </ButtonGroup>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {canEditFont(markerEditor) && (
           <FontPanel markerEditor={markerEditor} variant={variant} />
         )}
@@ -146,14 +149,14 @@ const EditorToolbox = ({
 
       <ButtonGroup>
         <ToolbarActionButton
-          icon={PiMagnifyingGlassMinusDuotone}
-          title="Zoom-out"
+          icon={ZoomOutAreaIcon}
+          title="Zoom out"
           variant={variant}
           action="zoom-out"
           onAction={onAction}
         />
         <ToolbarActionButton
-          icon={PiScanDuotone}
+          icon={ScanIcon}
           title="Reset zoom"
           variant={variant}
           className="hidden sm:inline-flex"
@@ -161,8 +164,8 @@ const EditorToolbox = ({
           onAction={onAction}
         />
         <ToolbarActionButton
-          icon={PiMagnifyingGlassPlusDuotone}
-          title="Zoom-in"
+          icon={ZoomInAreaIcon}
+          title="Zoom in"
           variant={variant}
           action="zoom-in"
           onAction={onAction}

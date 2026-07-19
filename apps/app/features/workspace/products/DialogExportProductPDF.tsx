@@ -1,24 +1,16 @@
 "use client";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  PiDownloadDuotone,
-  PiFilePdfDuotone,
-  PiInfoDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
 import { toast } from "sonner";
+import {
+  Cancel01Icon,
+  Download04Icon,
+  InformationCircleIcon,
+  Pdf01Icon,
+} from "@hugeicons/core-free-icons";
 
 interface DialogExportProductPDFProps {
   open: boolean;
@@ -49,58 +41,63 @@ export default function DialogExportProductPDF({
       },
       {
         onSuccess: () => {
-          toast.success("PDF export queued. Check Product Exports for status.");
+          toast.success("PDF export queued. Open Exports to track status.");
           onOpenChange(false);
         },
         onError: (error) => {
-          toast.error(error instanceof Error ? error.message : "Failed to queue PDF export");
+          toast.error(
+            error instanceof Error ? error.message : "Failed to queue PDF export",
+          );
         },
-      }
+      },
     );
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Export Product</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Export product data to a PDF file.
-        </DialogDescription>
-        <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3">
-            <div
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-500"
-              aria-hidden="true"
-            >
-              <PiFilePdfDuotone size={20} />
-            </div>
-            <div className="space-y-1">
-              <h4 className="font-medium text-sm">Export to PDF</h4>
-              <p className="text-sm text-muted-foreground">
-                Queue an export for{" "}
-                <span className="font-medium text-foreground">
-                  {product.product_name || "this product"}
-                </span>{" "}
-                as a PDF file. You can download it once processing finishes.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+      <AppDialogContent
+        title="Export Product"
+        description="Export product data to a PDF file."
+        variant="confirm"
+        size="md"
+        confirmContent={{
+          heading: "Export to PDF",
+          message: (
+            <>
+              Queue an export for{" "}
+              <span className="font-medium text-foreground">
+                {product.product_name || "this product"}
+              </span>{" "}
+              as a PDF file. You can download it once processing finishes.
+            </>
+          ),
+          icon: Pdf01Icon,
+        }}
+        primaryAction={{
+          label: "Queue PDF Export",
+          loadingLabel: "Queueing...",
+          onClick: handleExport,
+          loading: isPending,
+          disabled: isPending,
+          icon: Download04Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
+        <div className="space-y-4 px-4 pb-4">
+          <div className="space-y-2 rounded-lg bg-muted/50 p-3">
             <div className="flex items-center gap-2 text-sm">
-              <PiInfoDuotone className="size-4 text-muted-foreground" />
+              <Icon
+                icon={InformationCircleIcon}
+                size={16}
+                className="text-muted-foreground"
+              />
               <span className="text-muted-foreground">Export includes:</span>
             </div>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-6 list-disc">
+            <ul className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
               <li>Product Information</li>
               <li>Compliance Information</li>
               <li>Label Components</li>
@@ -111,47 +108,24 @@ export default function DialogExportProductPDF({
             </ul>
           </div>
 
-          {product.version && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
+          {product.version ? (
+            <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
               <span>Exporting:</span>
               <span className="font-medium text-foreground">
                 Version {product.version}
               </span>
-              {product.product_plan_number && (
+              {product.product_plan_number ? (
                 <>
                   <span className="text-muted-foreground/50">•</span>
                   <span className="font-mono text-xs">
                     {product.product_plan_number}
                   </span>
                 </>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={isPending}
-            >
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            variant="default"
-            onClick={handleExport}
-            disabled={isPending}
-          >
-            {isPending ? <Spinner /> : <PiDownloadDuotone />}
-            {isPending ? "Queueing..." : "Queue PDF Export"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

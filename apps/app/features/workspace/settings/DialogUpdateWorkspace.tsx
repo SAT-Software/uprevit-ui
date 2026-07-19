@@ -1,35 +1,47 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useRef, useState, useId } from "react";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-  DialogFooter,
-} from "@uprevit/ui/components/ui/dialog";
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
 import { useUpdateWorkspace } from "@/hooks/workspace/useUpdateWorkspace";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Workspace } from "@/types/workspace";
 import {
-  PiPencilSimpleDuotone,
-  PiXCircleDuotone,
-  PiCheckCircleDuotone,
-  PiCameraDuotone,
-  PiTrashDuotone,
-} from "react-icons/pi";
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  DashboardSquareEditIcon,
+  Delete02Icon,
+  UploadSquare01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+
+const WORKSPACE_LOGO_ACCEPT =
+  "image/png,image/jpg,image/jpeg,image/gif,image/webp";
+const WORKSPACE_LOGO_MAX_SIZE = 500 * 1024;
+const WORKSPACE_LOGO_HELPER_TEXT =
+  "Supports PNG, JPEG, JPG, GIF, WEBP (under 500KB)";
+const WORKSPACE_DESCRIPTION_MAX_LENGTH = 220;
 
 interface DialogUpdateWorkspaceProps {
   workspaceData: Workspace;
@@ -39,6 +51,9 @@ export function DialogUpdateWorkspace({
   workspaceData,
 }: DialogUpdateWorkspaceProps) {
   const id = useId();
+  const uploadId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const formId = `update-workspace-form-${id}`;
   const [open, setOpen] = useState(false);
   const { mutate: updateWorkspaceMutation, isPending } = useUpdateWorkspace();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -68,6 +83,8 @@ export function DialogUpdateWorkspace({
       logo: existingLogoValue,
     },
   });
+
+  const descriptionLength = (watch("description") || "").length;
 
   const resetUploadSessionState = () => {
     setLogoSizeBytes(undefined);
@@ -106,10 +123,15 @@ export function DialogUpdateWorkspace({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (file.size > WORKSPACE_LOGO_MAX_SIZE) {
+      toast.error("Logo must be under 500KB.");
+      event.target.value = "";
+      return;
+    }
+
     try {
       setUploadingLogo(true);
 
-      // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setLogoPreview(previewUrl);
 
@@ -123,10 +145,10 @@ export function DialogUpdateWorkspace({
       setLogoUploadedThisSession(true);
     } catch (error) {
       console.error("Failed to upload logo:", error);
-      // Reset preview on error
       setLogoPreview("");
     } finally {
       setUploadingLogo(false);
+      event.target.value = "";
     }
   };
 
@@ -160,40 +182,39 @@ export function DialogUpdateWorkspace({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <PiPencilSimpleDuotone className="w-4 h-4" />
+        <Button variant="secondary" size="sm">
+          <Icon icon={DashboardSquareEditIcon} size={14} strokeWidth={2} />
           Edit Workspace
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-[600px] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Edit Workspace</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-
-        <form
-          id="update-workspace-form"
-          onSubmit={handleSubmit(onSubmit)}
-          noValidate
-          className="overflow-y-auto"
-        >
+      <AppDialogContent
+        title="Edit Workspace"
+        description="Update workspace name, company details, description, and logo."
+        variant="form"
+        size="xl"
+        primaryAction={{
+          label: "Save Changes",
+          loadingLabel: "Saving...",
+          form: formId,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending || uploadingLogo,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending || uploadingLogo,
+          icon: Cancel01Icon,
+        }}
+      >
+        <form id={formId} onSubmit={handleSubmit(onSubmit)} noValidate>
           <input type="hidden" {...register("logo")} />
-          <div className="p-4 space-y-6">
-            <div className="flex items-center gap-6">
-              <div className="relative group">
-                <Avatar className="w-20 h-20 ring-2 ring-background">
+          <FieldGroup className="gap-6 p-4">
+            <div className="flex items-start gap-4">
+              <div className="relative size-20 shrink-0">
+                <Avatar className="size-20 ring-2 ring-background">
                   <AvatarImage src={currentLogo} alt="Workspace logo" />
-                  <AvatarFallback className="text-lg border">
+                  <AvatarFallback className="border text-lg">
                     {workspaceData?.workspaceName
                       ?.split(" ")
                       .map((word: string) => word[0])
@@ -203,130 +224,147 @@ export function DialogUpdateWorkspace({
                   </AvatarFallback>
                 </Avatar>
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px] rounded-full z-10">
-                  <label
-                    className="cursor-pointer p-2 bg-background text-foreground rounded-full hover:bg-accent transition-colors flex items-center justify-center"
-                    title="Change Logo"
-                  >
-                    <PiCameraDuotone size={16} />
-                    <input
-                      type="file"
-                      accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
-                      onChange={handleLogoChange}
-                      disabled={uploadingLogo}
-                      className="hidden"
-                    />
-                  </label>
+                {uploadingLogo ? (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                    <Spinner />
+                  </div>
+                ) : null}
+              </div>
 
-                  {watch("logo") && (
-                    <button
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <FormFieldLabel
+                  htmlFor={uploadId}
+                  label="Workspace Logo"
+                  tooltip="Update or remove the logo used to identify this workspace."
+                  optional
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingLogo}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Icon icon={UploadSquare01Icon} size={14} strokeWidth={2} />
+                    Upload Image
+                  </Button>
+
+                  {currentLogo ? (
+                    <Button
                       type="button"
-                      onClick={removeLogo}
+                      variant="destructive"
+                      size="sm"
                       disabled={uploadingLogo}
-                      className="cursor-pointer p-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors flex items-center justify-center"
-                      title="Remove Logo"
+                      onClick={removeLogo}
                     >
-                      <PiTrashDuotone size={16} />
-                    </button>
-                  )}
+                      <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+                      Remove
+                    </Button>
+                  ) : null}
                 </div>
 
-                {uploadingLogo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-20">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="font-medium text-sm">Workspace Logo</h3>
-                <p className="text-xs text-muted-foreground">
-                  Upload a new logo for your workspace.
+                <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+                  {WORKSPACE_LOGO_HELPER_TEXT}
                 </p>
               </div>
+
+              <input
+                ref={fileInputRef}
+                id={uploadId}
+                type="file"
+                accept={WORKSPACE_LOGO_ACCEPT}
+                onChange={handleLogoChange}
+                disabled={uploadingLogo}
+                className="sr-only"
+                aria-label="Upload workspace logo"
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Workspace Name</label>
-                <Input
-                  id={`${id}-name`}
-                  type="text"
-                  placeholder="Enter workspace name"
-                  className="w-full"
-                  {...register("workspaceName", {
-                    required: "Workspace name is required",
-                  })}
+            <div className="flex flex-col gap-4">
+              <Field data-invalid={!!errors.workspaceName}>
+                <FormFieldLabel
+                  htmlFor={`${id}-workspace-name`}
+                  label="Workspace Name"
+                  tooltip="The display name for this workspace."
                 />
-                {errors.workspaceName && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.workspaceName.message}
-                  </p>
-                )}
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-workspace-name`}
+                    type="text"
+                    placeholder="Enter workspace name"
+                    aria-invalid={errors.workspaceName ? "true" : "false"}
+                    {...register("workspaceName", {
+                      required: "Workspace name is required",
+                    })}
+                  />
+                </InputGroup>
+                <FieldError errors={[errors.workspaceName]} />
+              </Field>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Company Name</label>
-                <Input
-                  type="text"
-                  placeholder="Enter company name"
-                  className="w-full"
-                  {...register("companyName", {
-                    required: "Company name is required",
-                  })}
+              <Field data-invalid={!!errors.companyName}>
+                <FormFieldLabel
+                  htmlFor={`${id}-company-name`}
+                  label="Company Name"
+                  tooltip="The legal or brand name of your organization."
                 />
-                {errors.companyName && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.companyName.message}
-                  </p>
-                )}
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-company-name`}
+                    type="text"
+                    placeholder="Enter company name"
+                    aria-invalid={errors.companyName ? "true" : "false"}
+                    {...register("companyName", {
+                      required: "Company name is required",
+                    })}
+                  />
+                </InputGroup>
+                <FieldError errors={[errors.companyName]} />
+              </Field>
 
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium">
-                  Workspace Description
-                </label>
-                <Textarea
-                  placeholder="Enter workspace description"
-                  className="w-full min-h-24 resize-none"
-                  {...register("description", {
-                    required: "Workspace description is required",
-                  })}
+              <Field data-invalid={!!errors.description}>
+                <FormFieldLabel
+                  htmlFor={`${id}-description`}
+                  label="Workspace Description"
+                  tooltip="A short summary of what this workspace is used for."
                 />
-                {errors.description && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupTextarea
+                    id={`${id}-description`}
+                    placeholder="Enter workspace description"
+                    maxLength={WORKSPACE_DESCRIPTION_MAX_LENGTH}
+                    className="min-h-24 resize-none"
+                    aria-invalid={errors.description ? "true" : "false"}
+                    {...register("description", {
+                      required: "Workspace description is required",
+                      maxLength: {
+                        value: WORKSPACE_DESCRIPTION_MAX_LENGTH,
+                        message: `Description must be at most ${WORKSPACE_DESCRIPTION_MAX_LENGTH} characters`,
+                      },
+                    })}
+                  />
+                  <InputGroupAddon align="block-end">
+                    <div className="flex w-full items-center justify-between gap-2">
+                      {errors.description ? (
+                        <FieldError errors={[errors.description]} />
+                      ) : (
+                        <span />
+                      )}
+                      <InputGroupText className="text-xs text-muted-foreground/60">
+                        <span className="tabular-nums">
+                          {WORKSPACE_DESCRIPTION_MAX_LENGTH - descriptionLength}
+                        </span>{" "}
+                        characters left
+                      </InputGroupText>
+                    </div>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
             </div>
-          </div>
+          </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="h-4 w-4" />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            disabled={isPending || uploadingLogo}
-            variant="default"
-            size="sm"
-            form="update-workspace-form"
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiCheckCircleDuotone className="h-4 w-4" />
-            )}
-            {isPending ? "Saving..." : "Save Changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

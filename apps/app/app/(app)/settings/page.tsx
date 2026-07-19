@@ -16,14 +16,14 @@ import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
 import {
-  PiUserDuotone,
-  PiBriefcaseDuotone,
-  PiUsersDuotone,
-  PiUserGearDuotone,
-  PiShieldCheckDuotone,
-  PiChartBarDuotone,
-  PiCreditCardDuotone,
-} from "react-icons/pi";
+  Timer01Icon,
+  DashboardSquare01Icon,
+  UserIcon,
+  UserGroupIcon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 import { useAuth } from "react-oidc-context";
@@ -73,50 +73,45 @@ function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-2">
-      <div className="border border-input bg-background rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-semibold">Settings</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage your account settings and preferences.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <InviteMembersDialog />
-          </div>
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Settings</p>
+          <InfoTooltip content="Manage your account settings and preferences." />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle />
+          <InviteMembersDialog />
         </div>
       </div>
 
-      {/* Settings Tabs */}
-      <div className="border border-input bg-background rounded-xl p-4">
-        <Tabs
-          value={tabValue}
-          onValueChange={handleTabChange}
-          className="w-full"
-        >
-          <TabsList>
+      <Tabs
+        value={tabValue}
+        onValueChange={handleTabChange}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
+      >
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+          <TabsList variant="line">
             <TabsTrigger value="profile">
-              <PiUserDuotone className="mr-2 h-4 w-4" />
+              <Icon icon={UserIcon} size={14} strokeWidth={2} />
               Profile
             </TabsTrigger>
             <TabsTrigger value="workspace">
-              <PiBriefcaseDuotone className="mr-2 h-4 w-4" />
+              <Icon icon={DashboardSquare01Icon} size={14} strokeWidth={2} />
               Workspace
             </TabsTrigger>
             <TabsTrigger value="users">
-              <PiUsersDuotone className="mr-2 h-4 w-4" />
+              <Icon icon={UserGroupIcon} size={14} strokeWidth={2} />
               Users
             </TabsTrigger>
             <TabsTrigger value="admins">
-              <PiUserGearDuotone className="mr-2 h-4 w-4" />
+              <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
               Admins
             </TabsTrigger>
             {isAdmin ? (
               <>
                 <TabsTrigger value="usage">
-                  <PiChartBarDuotone className="mr-2 h-4 w-4" />
+                  <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
                   Usage
                 </TabsTrigger>
                 {/* <TabsTrigger value="billing">
@@ -126,24 +121,26 @@ function SettingsPage() {
               </>
             ) : null}
           </TabsList>
+        </div>
 
-          <TabsContent value="profile" className="mt-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          <TabsContent value="profile" className="mt-0">
             {activeTab === "profile" && <ProfileTab />}
           </TabsContent>
 
-          <TabsContent value="workspace" className="mt-6">
+          <TabsContent value="workspace" className="mt-0">
             {activeTab === "workspace" && <WorkspaceTab />}
           </TabsContent>
 
-          <TabsContent value="users" className="mt-6">
+          <TabsContent value="users" className="mt-0">
             {activeTab === "users" && <UsersTab />}
           </TabsContent>
 
-          <TabsContent value="admins" className="mt-6">
+          <TabsContent value="admins" className="mt-0">
             {activeTab === "admins" && <AdminsTab />}
           </TabsContent>
 
-          <TabsContent value="usage" className="mt-6">
+          <TabsContent value="usage" className="mt-0">
             {activeTab === "usage" && <UsageTab />}
           </TabsContent>
 
@@ -151,8 +148,8 @@ function SettingsPage() {
           {/* <TabsContent value="billing" className="mt-6">
             {activeTab === "billing" && <BillingTab />}
           </TabsContent> */}
-        </Tabs>
-      </div>
+        </div>
+      </Tabs>
     </div>
   );
 }

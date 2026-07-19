@@ -1,19 +1,20 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { SavedQuery } from "@/types/reports";
 import {
-  PiFolderOpenDuotone,
-  PiTrashDuotone,
-  PiCalendarDuotone,
-} from "react-icons/pi";
+  Calendar03Icon,
+  Delete02Icon,
+  HardDriveUploadIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface LoadQueryDialogProps {
   open: boolean;
@@ -38,74 +39,102 @@ export function LoadQueryDialog({
     });
   };
 
+  const title = (
+    <span className="flex items-center gap-2">
+      Load Saved Query
+      <span className="flex h-5 min-w-5 items-center justify-center rounded-full border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+        {queries.length}
+      </span>
+    </span>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-4">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <PiFolderOpenDuotone size={20} />
-            Load Saved Query
-          </DialogTitle>
-          <DialogDescription>
-            Select a previously saved query to load.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className=" space-y-2 max-h-[400px] overflow-y-auto">
-          {queries.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="text-sm">No saved queries yet</p>
-              <p className="text-xs mt-1">
+      <AppDialogContent
+        title={title}
+        description="Select a previously saved query to load."
+        variant="inform"
+        size="md"
+        className="max-h-[85vh]"
+      >
+        {queries.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
+              <Icon icon={HardDriveUploadIcon} size={20} strokeWidth={2} />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-foreground">
+                No saved queries yet
+              </p>
+              <p className="text-xs text-muted-foreground">
                 Save a query to access it here later
               </p>
             </div>
-          ) : (
-            queries.map((query) => (
+          </div>
+        ) : (
+          <div
+            className={
+              queries.length > 1 ? "divide-y divide-border" : undefined
+            }
+          >
+            {queries.map((query) => (
               <div
                 key={query.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20 hover:bg-muted/40 transition-colors"
+                className="flex items-center justify-between gap-2 px-4 py-2 transition-colors hover:bg-muted/50"
               >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{query.name}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <PiCalendarDuotone size={12} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{query.name}</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Icon icon={Calendar03Icon} size={12} strokeWidth={2} />
                       {formatDate(query.createdAt)}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    {/* <span className="text-xs text-muted-foreground">
                       {query.conditions.length} condition
                       {query.conditions.length !== 1 ? "s" : ""}
-                    </span>
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                      {query.conditionLogic}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 ml-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      onLoad(query);
-                      onOpenChange(false);
-                    }}
-                  >
-                    Load
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => onDelete(query.id)}
-                  >
-                    <PiTrashDuotone size={16} />
-                  </Button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="icon-xs"
+                        onClick={() => {
+                          onLoad(query);
+                          onOpenChange(false);
+                        }}
+                        aria-label={`Load ${query.name}`}
+                      >
+                        <Icon
+                          icon={HardDriveUploadIcon}
+                          size={14}
+                          strokeWidth={2}
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Load query</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="icon-xs"
+                        onClick={() => onDelete(query.id)}
+                        aria-label={`Delete ${query.name}`}
+                      >
+                        <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete query</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </DialogContent>
+            ))}
+          </div>
+        )}
+      </AppDialogContent>
     </Dialog>
   );
 }

@@ -13,7 +13,7 @@ type CountryFlagProps = {
 };
 
 const COUNTRY_CODE_BY_NAME = new Map(
-  COUNTRIES.map(({ name, code }) => [name.trim().toLowerCase(), code])
+  COUNTRIES.map(({ name, code }) => [name.trim().toLowerCase(), code]),
 );
 
 export function CountryFlag({
@@ -32,8 +32,8 @@ export function CountryFlag({
     <span
       aria-hidden="true"
       className={cn(
-        "flex h-4 w-5 shrink-0 items-center justify-center overflow-hidden rounded-[2px] border border-border/70 bg-muted/40",
-        className
+        "flex h-4 w-5 shrink-0 items-center justify-center overflow-hidden",
+        className,
       )}
     >
       {FlagComponent ? (

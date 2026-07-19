@@ -3,12 +3,13 @@
 import { FC, SVGProps, useEffect, useRef, useState } from "react";
 
 import {
-  PiPenDuotone,
-  PiLineSegmentDuotone,
-  PiArrowLeftDuotone,
-  PiArrowRightDuotone,
-  PiArrowsLeftRightDuotone,
-} from "react-icons/pi";
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  ArrowLeftRightIcon,
+  LineIcon,
+  PencilIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Slider } from "@uprevit/ui/components/ui/slider";
 import { Input } from "@uprevit/ui/components/ui/input";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
@@ -87,7 +88,7 @@ const StrokePanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
   };
 
   return (
-    <ToolboxPanel title="Stroke" icon={PiPenDuotone} variant={variant}>
+    <ToolboxPanel title="Stroke" icon={PencilIcon} variant={variant}>
       <div className="flex flex-col space-y-4">
         <div className="flex justify-between items-center space-x-2">
           <Label htmlFor="strokeWidthInput">Width</Label>
@@ -141,16 +142,16 @@ const StrokePanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
             onValueChange={handleArrowTypeChange}
           >
             <ToggleGroupItem value="none" title="None">
-              <PiLineSegmentDuotone />
+              <Icon icon={LineIcon} size={14} strokeWidth={2} />
             </ToggleGroupItem>
             <ToggleGroupItem value="start" title="Start">
-              <PiArrowLeftDuotone />
+              <Icon icon={ArrowLeft01Icon} size={14} strokeWidth={2} />
             </ToggleGroupItem>
             <ToggleGroupItem value="end" title="End">
-              <PiArrowRightDuotone />
+              <Icon icon={ArrowRight01Icon} size={14} strokeWidth={2} />
             </ToggleGroupItem>
             <ToggleGroupItem value="both" title="Both">
-              <PiArrowsLeftRightDuotone />
+              <Icon icon={ArrowLeftRightIcon} size={14} strokeWidth={2} />
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

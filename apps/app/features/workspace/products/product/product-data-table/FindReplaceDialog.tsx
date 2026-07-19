@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { useState, useMemo, useCallback, useId } from "react";
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import {
+  Cancel01Icon,
+  SearchReplaceIcon,
+} from "@hugeicons/core-free-icons";
 
 interface FindReplaceDialogProps {
   open: boolean;
@@ -26,6 +27,8 @@ export function FindReplaceDialog({
   cellData,
   onReplace,
 }: FindReplaceDialogProps) {
+  const findId = useId();
+  const replaceId = useId();
   const [findText, setFindText] = useState("");
   const [replaceText, setReplaceText] = useState("");
 
@@ -37,85 +40,97 @@ export function FindReplaceDialog({
       .map(([key]) => key);
   }, [cellData, findText]);
 
-  const handleReplaceAll = useCallback(() => {
-    if (matches.length === 0) return;
-
-    const searchTerm = findText.toLowerCase();
-    const updated = { ...cellData };
-
-    matches.forEach((key) => {
-      const currentValue = updated[key];
-      const regex = new RegExp(
-        findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        "gi"
-      );
-      updated[key] = currentValue.replace(regex, replaceText);
-    });
-
-    onReplace(updated);
-    onOpenChange(false);
+  const resetForm = useCallback(() => {
     setFindText("");
     setReplaceText("");
-  }, [matches, findText, replaceText, cellData, onReplace, onOpenChange]);
+  }, []);
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setFindText("");
-    setReplaceText("");
-  };
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen) {
+        resetForm();
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange, resetForm],
+  );
+
+  const handleReplaceAll = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      if (matches.length === 0) return;
+
+      const updated = { ...cellData };
+
+      matches.forEach((key) => {
+        const currentValue = updated[key];
+        const regex = new RegExp(
+          findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+          "gi",
+        );
+        updated[key] = currentValue.replace(regex, replaceText);
+      });
+
+      onReplace(updated);
+      handleOpenChange(false);
+    },
+    [matches, findText, replaceText, cellData, onReplace, handleOpenChange],
+  );
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Find & Replace</DialogTitle>
-          <DialogDescription>
-            Search and replace text across all cells in the table.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="find">Find</Label>
-            <Input
-              id="find"
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <AppDialogContent
+        title="Find & Replace"
+        description="Search and replace text across all cells in the table."
+        variant="form"
+        size="md"
+        wrapBodyInFieldGroup
+        primaryAction={{
+          label: "Replace All",
+          onClick: handleReplaceAll,
+          disabled: matches.length === 0,
+          icon: SearchReplaceIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
+        <Field>
+          <FormFieldLabel htmlFor={findId} label="Find" />
+          <InputGroup size="md">
+            <InputGroupInput
+              id={findId}
               placeholder="Text to find..."
               value={findText}
               onChange={(e) => setFindText(e.target.value)}
               autoFocus
             />
-          </div>
+          </InputGroup>
+        </Field>
 
-          <div className="grid gap-2">
-            <Label htmlFor="replace">Replace with</Label>
-            <Input
-              id="replace"
+        <Field>
+          <FormFieldLabel htmlFor={replaceId} label="Replace with" />
+          <InputGroup size="md">
+            <InputGroupInput
+              id={replaceId}
               placeholder="Replacement text..."
               value={replaceText}
               onChange={(e) => setReplaceText(e.target.value)}
             />
-          </div>
+          </InputGroup>
+        </Field>
 
-          {findText.trim() && (
-            <p className="text-sm text-muted-foreground">
-              {matches.length === 0
-                ? "No matches found"
-                : `${matches.length} cell${
-                    matches.length === 1 ? "" : "s"
-                  } found with matching text`}
-            </p>
-          )}
-        </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleReplaceAll} disabled={matches.length === 0}>
-            Replace All
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+        {findText.trim() ? (
+          <p className="text-sm text-muted-foreground">
+            {matches.length === 0
+              ? "No matches found"
+              : `${matches.length} cell${
+                  matches.length === 1 ? "" : "s"
+                } found with matching text`}
+          </p>
+        ) : null}
+      </AppDialogContent>
     </Dialog>
   );
 }

@@ -1,22 +1,76 @@
 "use client";
 
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import { DialogUpdateWorkspace } from "./DialogUpdateWorkspace";
 import {
-  PiIdentificationCardDuotone,
-  PiTagDuotone,
-  PiCrownDuotone,
-  PiUsersDuotone,
-  PiTextAlignLeftDuotone,
-  PiBriefcaseDuotone,
-  PiWarningCircleDuotone,
-  PiCopyDuotone,
-} from "react-icons/pi";
+  AlertCircleIcon,
+  DashboardSquareSettingIcon,
+  Copy01Icon,
+  CrownIcon,
+  IdentityCardIcon,
+  IdCardLanyardIcon,
+  TextAlignLeftIcon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { toast } from "sonner";
+import { cn } from "@uprevit/ui/lib/utils";
+
+const WORKSPACE_FIELDS = [
+  {
+    id: "workspaceName",
+    label: "Workspace Name",
+    icon: DashboardSquareSettingIcon,
+    key: "workspaceName" as const,
+    span: 1,
+  },
+  {
+    id: "companyName",
+    label: "Company Name",
+    icon: IdentityCardIcon,
+    key: "companyName" as const,
+    span: 1,
+  },
+  {
+    id: "plan",
+    label: "Plan",
+    icon: CrownIcon,
+    key: "plan" as const,
+    span: 1,
+    getValue: () => "NA",
+  },
+  {
+    id: "userCount",
+    label: "User Count",
+    icon: UserGroupIcon,
+    key: "userCount" as const,
+    span: 1,
+  },
+  {
+    id: "description",
+    label: "Workspace Description",
+    icon: TextAlignLeftIcon,
+    key: "description" as const,
+    span: 1,
+  },
+] as const;
+
+const workspaceFieldCellClassName = (index: number, span: number) =>
+  cn(
+    "group flex items-start gap-4 p-4",
+    "border-b border-border md:[&:nth-last-child(-n+2)]:border-b-0 [&:last-child]:border-b-0",
+    index % 2 === 0 && span === 1 && "md:border-r",
+    span === 2 && "md:col-span-2",
+  );
 
 function WorkspaceTab() {
   const {
@@ -35,6 +89,7 @@ function WorkspaceTab() {
     workspaceId.length > 12
       ? `${workspaceId.slice(0, 6)}...${workspaceId.slice(-4)}`
       : workspaceId;
+  const userCount = workspaceUserData?.result?.pagination?.totalCount ?? 0;
 
   const copyWorkspaceId = async () => {
     if (!workspaceId) return;
@@ -48,37 +103,42 @@ function WorkspaceTab() {
     }
   };
 
+  const getFieldValue = (field: (typeof WORKSPACE_FIELDS)[number]) => {
+    if ("getValue" in field && field.getValue) {
+      return field.getValue();
+    }
+    if (field.key === "userCount") {
+      return String(userCount);
+    }
+    const value = workspaceData?.[field.key as keyof typeof workspaceData];
+    return typeof value === "string" ? value : "-";
+  };
+
   if (workspaceLoading) {
     return (
-      <div className="space-y-6">
-        {/* Workspace Header Skeleton */}
-        <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
-          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-background p-4">
+          <Skeleton className="size-16 shrink-0 rounded-full" />
           <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-5 w-20 rounded-full" />
-            </div>
-            <Skeleton className="h-4 w-80" />
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-72" />
           </div>
-          <Skeleton className="h-9 w-24 rounded-md" />
+          <Skeleton className="h-7 w-32 rounded-md" />
         </div>
-
-        {/* Workspace Information Skeleton */}
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-48" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...Array(5)].map((_, i) => (
+        <div className="overflow-hidden rounded-2xl border border-border bg-background">
+          <div className="flex h-10 items-center border-b border-border bg-muted/60 pl-3">
+            <Skeleton className="h-4 w-44" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {WORKSPACE_FIELDS.map((field, index) => (
               <div
-                key={i}
-                className={`flex items-start gap-4 p-4 border rounded-xl bg-background/50 ${
-                  i === 4 ? "md:col-span-2" : ""
-                }`}
+                key={field.id}
+                className={workspaceFieldCellClassName(index, field.span)}
               >
-                <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-3.5 w-24" />
-                  <Skeleton className="h-4 w-32" />
+                <Skeleton className="size-10 shrink-0 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3.5 w-28" />
+                  <Skeleton className="h-4 w-36" />
                 </div>
               </div>
             ))}
@@ -90,9 +150,9 @@ function WorkspaceTab() {
 
   if (workspaceError) {
     return (
-      <div className="flex items-center gap-4 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
-        <div className="p-2.5 bg-destructive/10 rounded-lg shrink-0">
-          <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
+      <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
+          <Icon icon={AlertCircleIcon} size={18} strokeWidth={2} />
         </div>
         <div className="space-y-0.5">
           <div className="text-sm font-medium">Failed to load workspace</div>
@@ -105,137 +165,91 @@ function WorkspaceTab() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Workspace Header */}
-      <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
-        <div className="relative">
-          <Avatar className="w-20 h-20">
-            <AvatarImage
-              src={workspaceData?.logo}
-              alt={workspaceData?.workspaceName}
-            />
-            <AvatarFallback className="text-lg bg-background border border-border">
-              {workspaceData?.workspaceName
-                ?.split(" ")
-                .map((word: string) => word[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold">{workspaceData?.workspaceName}</h2>
-          </div>
-          <p className="text-muted-foreground">
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-background p-4">
+        <Avatar className="size-16">
+          <AvatarImage
+            src={workspaceData?.logo}
+            alt={workspaceData?.workspaceName}
+          />
+          <AvatarFallback className="border border-border bg-accent text-base">
+            {workspaceData?.workspaceName
+              ?.split(" ")
+              .map((word: string) => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-semibold">
+            {workspaceData?.workspaceName}
+          </h2>
+          <p className="text-sm text-muted-foreground">
             Manage your workspace settings and organization details.
           </p>
         </div>
-        <div>
-          <DialogUpdateWorkspace workspaceData={workspaceData} />
-        </div>
+        <DialogUpdateWorkspace workspaceData={workspaceData} />
       </div>
 
-      {/* Workspace Information Read-Only View */}
-      <div className="space-y-4">
-        <div className="font-medium text-lg">Workspace Information</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiBriefcaseDuotone className="w-5 h-5 text-muted-foreground" />
+      <div className="overflow-hidden rounded-2xl border border-border bg-background">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+          <p className="text-sm font-medium">Workspace Information</p>
+          <InfoTooltip content="Organization details and identifiers for your workspace." />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className={workspaceFieldCellClassName(0, 1)}>
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60">
+              <Icon icon={IdCardLanyardIcon} size={18} strokeWidth={2} />
             </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Workspace Name
-              </div>
-              <div className="text-sm font-medium">
-                {workspaceData?.workspaceName || "-"}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiIdentificationCardDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Company Name
-              </div>
-              <div className="text-sm font-medium">
-                {workspaceData?.companyName || "-"}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiTagDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
+            <div className="min-w-0 space-y-0.5">
+              <p className="text-sm font-normal text-muted-foreground/60">
                 Workspace ID
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-sm font-medium font-mono">
+              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="truncate font-mono text-sm font-medium">
                   {displayWorkspaceId || "-"}
-                </div>
-                {workspaceId && (
+                </p>
+                {workspaceId ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="size-7 shrink-0"
                     onClick={copyWorkspaceId}
                     aria-label="Copy workspace ID"
                   >
-                    <PiCopyDuotone className="h-4 w-4" />
+                    <Icon icon={Copy01Icon} size={14} strokeWidth={2} />
                   </Button>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiCrownDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Plan
+          {WORKSPACE_FIELDS.map((field, index) => (
+            <div
+              key={field.id}
+              className={workspaceFieldCellClassName(index + 1, field.span)}
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
+                <Icon icon={field.icon} size={18} strokeWidth={2} />
               </div>
-              <div className="text-sm font-medium">NA</div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiUsersDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                User Count
-              </div>
-              <div className="text-sm font-medium">
-                {workspaceUserData?.result?.pagination?.totalCount ?? 0}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors md:col-span-2">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiTextAlignLeftDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Workspace Description
-              </div>
-              <div className="text-sm font-medium whitespace-pre-wrap">
-                {workspaceData?.description || "-"}
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-normal text-muted-foreground/60">
+                  {field.label}
+                </p>
+                <p
+                  className={cn(
+                    "text-sm font-medium",
+                    field.id === "description" && "whitespace-pre-wrap",
+                    field.id !== "description" && "truncate",
+                  )}
+                >
+                  {getFieldValue(field) || "-"}
+                </p>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

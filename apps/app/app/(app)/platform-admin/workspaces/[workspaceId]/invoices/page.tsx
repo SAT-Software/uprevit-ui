@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
-  PiArrowLeftDuotone,
-  PiClockDuotone,
-  PiListChecksDuotone,
-  PiReceiptDuotone,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
+  AlertCircleIcon,
+  CheckListIcon,
+  Invoice01Icon,
+  ProfileIcon,
+  Refresh04Icon,
+} from "@hugeicons/core-free-icons";
 import { PlatformAdminGuard } from "@/components/common/PlatformAdminGuard";
-import { PlatformAdminNav } from "@/features/platform-admin/PlatformAdminNav";
+import { PlatformAdminHeader } from "@/features/platform-admin/PlatformAdminHeader";
+import { PlatformAuditLogsSheet } from "@/features/platform-admin/PlatformAuditLogsSheet";
 import { BillingInvoicesTable } from "@/features/billing/BillingInvoicesTable";
 import { useGetPlatformBillingChargebee } from "@/hooks/platform-admin/useGetPlatformBillingChargebee";
 import { useGetPlatformWorkspaceDetail } from "@/hooks/platform-admin/useGetPlatformWorkspaceDetail";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
@@ -21,8 +24,11 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
   const params = useParams<{ workspaceId: string }>();
   const workspaceId = params.workspaceId;
   const router = useRouter();
-  const { data: workspace, isLoading: workspaceLoading, isError: workspaceError } =
-    useGetPlatformWorkspaceDetail(workspaceId);
+  const {
+    data: workspace,
+    isLoading: workspaceLoading,
+    isError: workspaceError,
+  } = useGetPlatformWorkspaceDetail(workspaceId);
   const {
     data: billing,
     isLoading: billingLoading,
@@ -38,112 +44,118 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
   };
 
   const isLoading = workspaceLoading || billingLoading;
+  const title = isLoading
+    ? "Invoices"
+    : (workspace?.workspace.workspaceName ?? "Invoices");
+  const tooltip =
+    workspaceError || !workspace
+      ? "Chargebee invoices for this workspace."
+      : `${workspace.workspace.companyName} · Open an invoice to view or download.`;
 
   return (
     <PlatformAdminGuard>
-      <div className="flex flex-col gap-4 p-2">
-        <div className="rounded-xl border border-border bg-background p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className="mb-1 -ml-2 h-8 gap-1.5 px-2 text-muted-foreground"
-              >
-                <Link href={`/platform-admin/workspaces/${workspaceId}`}>
-                  <PiArrowLeftDuotone className="h-4 w-4" />
-                  Back to workspace
-                </Link>
-              </Button>
-
-              {isLoading ? (
-                <Skeleton className="h-8 w-56" />
-              ) : (
-                <div>
-                  <h1 className="text-base font-semibold">
-                    {workspace?.workspace.workspaceName ?? "Workspace invoices"}
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    {workspaceError || !workspace
-                      ? "Chargebee invoices for this workspace"
-                      : `${workspace.workspace.companyName} · Open an invoice to view or download`}
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-3">
-                <PlatformAdminNav />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <Button asChild size="sm" variant="outline" className="gap-2">
-                <Link href={`/platform-admin/workspaces/${workspaceId}/logs`}>
-                  <PiClockDuotone className="h-4 w-4" />
-                  View logs
-                </Link>
-              </Button>
-              <Button asChild size="sm" variant="outline" className="gap-2">
-                <Link href={`/platform-admin/workspaces/${workspaceId}/usage-events`}>
-                  <PiListChecksDuotone className="h-4 w-4" />
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <PlatformAdminHeader
+          title={title}
+          tooltip={tooltip}
+          actions={
+            <>
+              <PlatformAuditLogsSheet
+                workspaceId={workspaceId}
+                title="Workspace audit logs"
+                tooltip="Admin and system activity for this workspace."
+                trigger={
+                  <Button type="button" variant="outline" size="sm">
+                    <Icon icon={ProfileIcon} size={16} strokeWidth={2} />
+                    Logs
+                  </Button>
+                }
+              />
+              <Button asChild size="sm" variant="outline">
+                <Link
+                  href={`/platform-admin/workspaces/${workspaceId}/usage-events`}
+                >
+                  <Icon icon={CheckListIcon} size={14} strokeWidth={2} />
                   Usage events
                 </Link>
               </Button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
 
-        <div className="border border-border bg-background rounded-xl p-5">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <PiReceiptDuotone className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm font-semibold">Invoices</p>
-              <div className="h-1 w-1 rounded-full border border-border bg-border" />
-              <p className="text-xs text-muted-foreground">
-                Refreshed when you open this page
-              </p>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Refresh
-            </Button>
-          </div>
-
-          {billingLoading ? (
-            <Skeleton className="h-64 w-full rounded-xl" />
-          ) : billingError || !billing ? (
-            <div className="flex items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-              <PiWarningCircleDuotone className="h-5 w-5 shrink-0 text-destructive" />
-              <div className="flex-1 text-sm text-muted-foreground">
-                {error instanceof Error ? error.message : "Unable to load invoices."}
+        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          <div className="overflow-hidden rounded-2xl border border-border bg-background">
+            <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium">Invoices</p>
+                <InfoTooltip content="Billing invoices for this workspace. Open one to view details or download." />
               </div>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
+                <Icon icon={Refresh04Icon} size={14} strokeWidth={2} />
+                Refresh
               </Button>
             </div>
-          ) : billing.invoiceError ? (
-            <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-              <PiWarningCircleDuotone className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
-              {billing.invoiceError}
-            </div>
-          ) : !billing.connection.customerId ? (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
-              <PiReceiptDuotone className="h-8 w-8 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">
-                Invoices will appear once billing is set up for this workspace.
-              </p>
-            </div>
-          ) : billing.invoices.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
-              <PiReceiptDuotone className="h-8 w-8 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No invoices found.</p>
-            </div>
-          ) : (
-            <BillingInvoicesTable
-              invoices={billing.invoices}
-              onInvoiceClick={openInvoice}
-            />
-          )}
+
+            {billingLoading ? (
+              <div className="p-4">
+                <Skeleton className="h-64 w-full rounded-xl" />
+              </div>
+            ) : billingError || !billing ? (
+              <div className="flex items-center gap-4 p-4">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
+                  <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
+                </div>
+                <div className="flex-1 text-sm text-muted-foreground">
+                  {error instanceof Error
+                    ? error.message
+                    : "Unable to load invoices."}
+                </div>
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              </div>
+            ) : billing.invoiceError ? (
+              <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
+                <Icon
+                  icon={AlertCircleIcon}
+                  size={14}
+                  strokeWidth={2}
+                  className="shrink-0"
+                />
+                {billing.invoiceError}
+              </div>
+            ) : !billing.connection.customerId ? (
+              <div className="flex h-32 flex-col items-center justify-center gap-2 text-center">
+                <Icon
+                  icon={Invoice01Icon}
+                  size={24}
+                  strokeWidth={2}
+                  className="text-muted-foreground/30"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Invoices will appear once billing is set up for this
+                  workspace.
+                </p>
+              </div>
+            ) : billing.invoices.length === 0 ? (
+              <div className="flex h-32 flex-col items-center justify-center gap-2 text-center">
+                <Icon
+                  icon={Invoice01Icon}
+                  size={24}
+                  strokeWidth={2}
+                  className="text-muted-foreground/30"
+                />
+                <p className="text-sm text-muted-foreground">
+                  No invoices found.
+                </p>
+              </div>
+            ) : (
+              <BillingInvoicesTable
+                invoices={billing.invoices}
+                onInvoiceClick={openInvoice}
+              />
+            )}
+          </div>
         </div>
       </div>
     </PlatformAdminGuard>

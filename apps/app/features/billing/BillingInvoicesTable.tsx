@@ -1,6 +1,5 @@
 "use client";
 
-import type { ComponentType } from "react";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Table,
@@ -16,36 +15,6 @@ import {
   invoiceStatusVariant,
 } from "@/utils/billingFormat";
 import type { ChargebeeInvoice } from "@/types/billing";
-import {
-  PiCalendarDuotone,
-  PiCoinsDuotone,
-  PiInfoDuotone,
-  PiMoneyDuotone,
-  PiReceiptDuotone,
-} from "react-icons/pi";
-
-function InvoiceTableHeader({
-  title,
-  icon: Icon,
-  align = "left",
-}: {
-  title: string;
-  icon: ComponentType<{ className?: string }>;
-  align?: "left" | "right";
-}) {
-  return (
-    <div
-      className={
-        align === "right"
-          ? "flex items-center justify-end gap-2"
-          : "flex items-center gap-2"
-      }
-    >
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <span>{title}</span>
-    </div>
-  );
-}
 
 export function BillingInvoicesTable({
   invoices,
@@ -55,32 +24,24 @@ export function BillingInvoicesTable({
   onInvoiceClick: (invoiceId: string) => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border bg-background">
-      <Table>
-        <TableHeader className="bg-muted/50">
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-              <InvoiceTableHeader title="Invoice" icon={PiReceiptDuotone} />
+    <div className="w-full overflow-hidden border-b border-border">
+      <Table className="table-fixed w-full">
+        <TableHeader className="bg-muted">
+          <TableRow className="h-10 hover:bg-transparent">
+            <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+              Invoice
             </TableHead>
-            <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-              <InvoiceTableHeader title="Date" icon={PiCalendarDuotone} />
+            <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+              Date
             </TableHead>
-            <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-              <InvoiceTableHeader title="Status" icon={PiInfoDuotone} />
+            <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
+              Status
             </TableHead>
-            <TableHead className="h-11 border-r border-border text-xs uppercase font-medium text-muted-foreground last:border-r-0">
-              <InvoiceTableHeader
-                title="Total"
-                icon={PiCoinsDuotone}
-                align="right"
-              />
+            <TableHead className="h-10 border-r border-border text-right text-xs font-medium text-muted-foreground/60 last:border-r-0">
+              Total
             </TableHead>
-            <TableHead className="h-11 text-xs uppercase font-medium text-muted-foreground">
-              <InvoiceTableHeader
-                title="Due"
-                icon={PiMoneyDuotone}
-                align="right"
-              />
+            <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground/60">
+              Due
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -88,10 +49,12 @@ export function BillingInvoicesTable({
           {invoices.map((invoice) => (
             <TableRow
               key={invoice.id}
-              className="cursor-pointer hover:bg-muted/30"
+              className="cursor-pointer hover:bg-muted/50"
               onClick={() => onInvoiceClick(invoice.id)}
             >
-              <TableCell className="py-3 font-mono text-xs">{invoice.id}</TableCell>
+              <TableCell className="py-3 font-mono text-xs">
+                {invoice.id}
+              </TableCell>
               <TableCell className="py-3">
                 {invoice.date ? formatToLocalDate(invoice.date) : "—"}
               </TableCell>

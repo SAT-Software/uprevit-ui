@@ -1,14 +1,45 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Badge } from "@uprevit/ui/components/ui/badge";
-import { Card, CardContent } from "@uprevit/ui/components/ui/card";
-import { Progress } from "@uprevit/ui/components/ui/progress";
 import { cn } from "@uprevit/ui/lib/utils";
+
+const SEGMENT_COUNT = 30;
+
+function SegmentedProgressBar({
+  percent,
+  colorClass,
+  overLimit,
+}: {
+  percent: number;
+  colorClass: string;
+  overLimit?: boolean;
+}) {
+  const barToHighlight = Math.ceil((SEGMENT_COUNT * percent) / 100);
+  const activeColorClass = overLimit
+    ? "from-red-400 via-red-500 to-red-600"
+    : colorClass;
+
+  return (
+    <div className="flex h-5 items-stretch gap-1">
+      {Array.from({ length: SEGMENT_COUNT }).map((_, index) => (
+        <div
+          key={index}
+          className={cn(
+            "min-w-0 flex-1 rounded-lg",
+            index < barToHighlight
+              ? `bg-linear-to-r ${activeColorClass}`
+              : "bg-accent",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function UsageMetricCard({
   label,
-  icon: Icon,
+  info,
   used,
   included,
   unit,
@@ -17,9 +48,10 @@ export function UsageMetricCard({
   secondaryUsed,
   isOverLimit,
   isAtLimit,
+  colorClass,
 }: {
   label: string;
-  icon: ComponentType<{ className?: string }>;
+  info?: string;
   used: number | string;
   included: number;
   unit: string;
@@ -28,6 +60,7 @@ export function UsageMetricCard({
   secondaryUsed?: string;
   isOverLimit?: boolean;
   isAtLimit?: boolean;
+  colorClass: string;
 }) {
   const numericUsed =
     usedValue ?? (typeof used === "number" ? used : Number(used));
@@ -51,41 +84,69 @@ export function UsageMetricCard({
       : 0;
 
   return (
-    <Card className="shadow-none">
-      <CardContent className="space-y-3 p-4">
-        <div className="flex items-center gap-2.5">
-          <div className="rounded-lg bg-muted p-2 shrink-0">
-            <Icon className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <span className="text-sm font-medium">{label}</span>
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+        <p className="text-sm font-medium">{label}</p>
+        {info ? <InfoTooltip content={info} /> : null}
+      </div>
+
+      <div className="flex flex-col gap-3 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-normal text-muted-foreground/80">
+            {overLimit
+              ? "Over usage limit"
+              : atLimit
+                ? "At usage limit"
+                : "Within usage limit"}
+          </p>
+          <Badge variant={exceeded ? "destructive" : "outline"}>
+            {typeof used === "number" ? used.toLocaleString() : used} /{" "}
+            {included.toLocaleString()} {unit}
+          </Badge>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-end">
-            <Badge variant={exceeded ? "destructive" : "secondary"}>
-              {typeof used === "number" ? used.toLocaleString() : used} /{" "}
-              {included.toLocaleString()} {unit}
-            </Badge>
-          </div>
-          <Progress
-            value={percent}
-            className={cn(exceeded && "[&>div]:bg-destructive")}
-          />
-        </div>
+        <SegmentedProgressBar
+          percent={percent}
+          colorClass={colorClass}
+          overLimit={overLimit}
+        />
 
-        <div className="flex items-center justify-between text-xs">
-          {overLimit ? (
-            <span className="text-destructive">Over usage limit</span>
-          ) : atLimit ? (
-            <span className="text-destructive">At usage limit</span>
-          ) : (
-            <span className="text-muted-foreground">Within usage limit</span>
-          )}
-          <span className="text-muted-foreground">
-            {secondaryUsed ? `${secondaryUsed} · ${percent}%` : `${percent}%`}
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span className="text-xs font-normal text-muted-foreground/80">
+            Usage this period
           </span>
+          {/* <span
+            className={cn(
+              secondaryUsed && overLimit
+                ? "text-destructive"
+                : secondaryUsed && atLimit
+                  ? "text-yellow-500"
+                  : "text-foreground",
+            )}
+          >
+            {secondaryUsed ?? "Usage this period"}
+          </span> */}
+          <div className="flex items-center gap-1">
+            {secondaryUsed && (
+              <span className="text-[10px] font-normal text-muted-foreground/60">
+                ({secondaryUsed})
+              </span>
+            )}
+            <span
+              className={cn(
+                "font-medium",
+                overLimit
+                  ? "text-destructive"
+                  : atLimit
+                    ? "text-yellow-500"
+                    : "text-foreground",
+              )}
+            >
+              {percent}%
+            </span>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

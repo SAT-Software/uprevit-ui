@@ -19,28 +19,25 @@ import {
 } from "@tanstack/react-table";
 import { cn } from "@uprevit/ui/lib/utils";
 import { usePathname } from "next/navigation";
-import { Fragment, useState, type ElementType } from "react";
+import { Fragment, useState } from "react";
 import {
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleDownDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiCirclesFourDuotone,
-  PiDotsThreeCircleDuotone,
-  PiHashDuotone,
-  PiImageDuotone,
-  PiPencilSimpleDuotone,
-  PiRulerDuotone,
-  PiTagDuotone,
-  PiTextAlignLeftDuotone,
-  PiTrashDuotone,
-} from "react-icons/pi";
+  ArrowDown01Icon,
+  ArrowRight01Icon,
+  ArrowUp01Icon,
+  Delete02Icon,
+  MoreVerticalSquare01Icon,
+  PropertyEditIcon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
-import TableControls from "@/components/table/TableControls";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
+import { RedlineCell } from "@/components/common/RedlineCell";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
+import type { ListFilter, ListFilterColumn } from "@/lib/workspace-list-query";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -51,11 +48,6 @@ import {
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@uprevit/ui/components/ui/pagination";
-import {
   Table,
   TableBody,
   TableCell,
@@ -63,17 +55,17 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { advancedFilterFn } from "@/lib/table-filters";
+import AddComponentDialog from "./AddComponentDialog";
 import DeleteComponentDialog from "./DeleteComponentDialog";
 import EditComponentDialog from "./EditComponentDialog";
 import type { DiffItem } from "@/utils/deepDiff";
-import {
-  cnRedlineBadge,
-  redlineChipAdded,
-  redlineChipRemoved,
-  redlineNewValueCompact,
-  redlineOldValueCompact,
-} from "@/utils/redlineStyles";
+import { redlineChipAdded, redlineChipRemoved } from "@/utils/redlineStyles";
 import { ProductImageFrame } from "../ProductImageFrame";
 
 type ComponentItem = {
@@ -103,51 +95,18 @@ type TableMeta = {
   ) => "added" | "removed" | "modified" | null;
 };
 
+const FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "component_number", label: "Component #", type: "text" },
+  { name: "component_description", label: "Description", type: "text" },
+  { name: "label_type", label: "Label Type", type: "text" },
+  { name: "dimensions", label: "Dimensions", type: "text" },
+  { name: "component_type", label: "Component Type", type: "text" },
+];
+
 const getPersistentComponentId = (item: ComponentItem): string =>
   item._redlineId ||
   item._id ||
   `${item.component_number}-${item.component_type}`;
-
-const RedlineCell = ({
-  value,
-  diff,
-  formatFn,
-}: {
-  value: unknown;
-  diff: DiffItem | null;
-  formatFn?: (v: unknown, state?: "old" | "new" | "current") => React.ReactNode;
-}) => {
-  const format =
-    formatFn ||
-    ((v: unknown, state = "current") => (
-      <span className={state === "old" ? "line-through" : undefined}>
-        {typeof v === "string" ? v : v != null ? String(v) : "-"}
-      </span>
-    ));
-
-  if (!diff) return <>{format(value, "current")}</>;
-
-  const isAdded = diff.status === "added";
-  const isRemoved = diff.status === "removed";
-  const isModified = diff.status === "modified";
-
-  return (
-    <div className="flex flex-col gap-0.5">
-      {/* Old value - show for modified and removed */}
-      {(isModified || isRemoved) && diff.old_value !== null && (
-        <div className={redlineOldValueCompact}>
-          {format(diff.old_value, "old")}
-        </div>
-      )}
-      {/* New value - show for modified and added */}
-      {(isModified || isAdded) && !isRemoved && (
-        <div className={redlineNewValueCompact}>
-          {format(diff.new_value, "new")}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const getUniqueStrings = (values: string[]) => [...new Set(values)];
 
@@ -246,43 +205,46 @@ const getRedlineImagePresentation = (row: ComponentItem, meta?: TableMeta) => {
   };
 };
 
-// Helper component for sortable headers
 const SortableHeader = ({
   column,
   title,
-  icon: Icon,
 }: {
   column?: Column<ComponentItem, unknown>;
   title: string;
-  icon: ElementType;
 }) => {
   if (!column) {
     return (
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center text-muted-foreground/60">
         <span>{title}</span>
       </div>
     );
   }
+
   return (
-    <button
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
-    >
-      <div className="flex items-center justify-between w-full gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{title}</span>
-        </div>
-        {column.getIsSorted() === "desc" ? (
-          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
-        ) : column.getIsSorted() === "asc" ? (
-          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
-        ) : (
-          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
-        )}
-      </div>
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-10 group data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+        >
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex items-center text-muted-foreground/60 group-hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out">
+              <span>{title}</span>
+            </div>
+            <div className="opacity-50 group-hover:opacity-100 transition-all delay-100 duration-200 ease-in-out">
+              {column.getIsSorted() === "desc" ? (
+                <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
+              ) : column.getIsSorted() === "asc" ? (
+                <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+              ) : (
+                <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+              )}
+            </div>
+          </div>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Sort by {title}</TooltipContent>
+    </Tooltip>
   );
 };
 
@@ -290,42 +252,36 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     id: "expander",
     enableHiding: false,
+    meta: { label: "Expand" },
     header: () => null,
     cell: ({ row }) => {
       return row.getCanExpand() ? (
         <Button
-          {...{
-            className: "size-7 shadow-none text-muted-foreground",
-            onClick: row.getToggleExpandedHandler(),
-            "aria-expanded": row.getIsExpanded(),
-            "aria-label": row.getIsExpanded()
+          className="size-7 shadow-none text-muted-foreground/60 hover:text-foreground"
+          onClick={row.getToggleExpandedHandler()}
+          aria-expanded={row.getIsExpanded()}
+          aria-label={
+            row.getIsExpanded()
               ? `Collapse details for ${row.original.component_number}`
-              : `Expand details for ${row.original.component_number}`,
-            size: "icon",
-            variant: "ghost",
-          }}
+              : `Expand details for ${row.original.component_number}`
+          }
+          size="icon"
+          variant="ghost"
         >
-          {row.getIsExpanded() ? (
-            <PiCaretCircleDownDuotone
-              className="opacity-60"
-              size={16}
-              aria-hidden="true"
-            />
-          ) : (
-            <PiCaretCircleRightDuotone
-              className="opacity-60"
-              size={16}
-              aria-hidden="true"
-            />
-          )}
+          <Icon
+            icon={row.getIsExpanded() ? ArrowDown01Icon : ArrowRight01Icon}
+            size={16}
+            className="opacity-60"
+          />
         </Button>
       ) : undefined;
     },
-    size: 30,
+    size: 40,
   },
   {
     accessorKey: "image",
-    header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
+    meta: { label: "Image" },
+    header: () => <SortableHeader title="Image" />,
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const imagePresentation = getRedlineImagePresentation(row.original, meta);
@@ -368,14 +324,14 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     accessorKey: "label_type",
     enableSorting: true,
+    meta: { label: "Label Type" },
     header: ({ column }) => (
-      <SortableHeader column={column} title="Label Type" icon={PiTagDuotone} />
+      <SortableHeader column={column} title="Label Type" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const currentTypes = row.getValue("label_type") as string[];
 
-      // Find all label_type diffs
       let addedTypes: string[] = [];
       let removedTypes: string[] = [];
       const rowStatus = row.original._redlineStatus;
@@ -393,8 +349,6 @@ const columns: ColumnDef<ComponentItem>[] = [
         }
       }
 
-      // Merge current types with added types (for redline view)
-      // Added types might not exist in current V1 data
       const displayTypes = meta?.isRedlineView
         ? [
             ...currentTypes,
@@ -407,7 +361,6 @@ const columns: ColumnDef<ComponentItem>[] = [
         <div className="flex flex-wrap gap-1">
           {displayTypes && displayTypes.length > 0 ? (
             displayTypes.map((type, index) => {
-              // Check if this specific type value was added
               const isNewlyAdded = addedTypes.includes(type);
               const isRemoved = removedTypes.includes(type);
               return (
@@ -434,12 +387,9 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     accessorKey: "component_number",
     enableSorting: true,
+    meta: { label: "Component #" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Component #"
-        icon={PiHashDuotone}
-      />
+      <SortableHeader column={column} title="Component #" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -483,12 +433,9 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     accessorKey: "component_description",
     enableSorting: true,
+    meta: { label: "Description" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Description"
-        icon={PiTextAlignLeftDuotone}
-      />
+      <SortableHeader column={column} title="Description" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -519,12 +466,9 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     accessorKey: "dimensions",
     enableSorting: true,
+    meta: { label: "Dimensions" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Dimensions"
-        icon={PiRulerDuotone}
-      />
+      <SortableHeader column={column} title="Dimensions" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -550,12 +494,9 @@ const columns: ColumnDef<ComponentItem>[] = [
   {
     accessorKey: "component_type",
     enableSorting: true,
+    meta: { label: "Component Type" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Component Type"
-        icon={PiCirclesFourDuotone}
-      />
+      <SortableHeader column={column} title="Component Type" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -580,6 +521,7 @@ const columns: ColumnDef<ComponentItem>[] = [
   },
   {
     id: "actions",
+    meta: { label: "Actions" },
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row, table }) => (
       <RowActions
@@ -596,10 +538,12 @@ const columns: ColumnDef<ComponentItem>[] = [
 
 export default function ProductComponentDetailsTable({
   data,
+  productId,
   isSubmitted = false,
   isRedlineView = false,
 }: {
   data: ComponentItem[];
+  productId: string;
   isSubmitted?: boolean;
   isRedlineView?: boolean;
 }) {
@@ -614,6 +558,7 @@ export default function ProductComponentDetailsTable({
     },
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [filters, setFilters] = useState<ListFilter[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const getRowStatus = (row: ComponentItem) => {
@@ -670,251 +615,188 @@ export default function ProductComponentDetailsTable({
     meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
   });
 
+  const handleApplyFilters = (nextFilters: ListFilter[]) => {
+    setFilters(nextFilters);
+    setColumnFilters(
+      nextFilters.map((filter) => ({
+        id: filter.field,
+        value: {
+          operator: filter.operator,
+          value: filter.value ?? "",
+        },
+      })),
+    );
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters([]);
+    setColumnFilters([]);
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  };
+
+  const filteredRowCount = table.getFilteredRowModel().rows.length;
+  const pageCount = Math.max(1, table.getPageCount());
+  const currentPage = pagination.pageIndex + 1;
+
   return (
-    <div className="flex flex-1 min-h-0 w-full flex-col gap-2 p-2">
-      <div className="shrink-0">
-        <TableControls
-          table={table}
-          filterColumns={[
-            { name: "component_number", label: "Component #", type: "text" },
-            {
-              name: "component_description",
-              label: "Description",
-              type: "text",
-            },
-            { name: "label_type", label: "Label Type", type: "text" },
-            { name: "dimensions", label: "Dimensions", type: "text" },
-            { name: "component_type", label: "Component Type", type: "text" },
-          ]}
-        />
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Label Components</p>
+          <InfoTooltip content="Add and organize label components such as labels, tags, stickers, and packaging materials for your product." />
+        </div>
+        <div className="flex items-center gap-2">
+          <ShowOrHideTableColumnsDropdown table={table} />
+          <WorkspaceListControls
+            filters={filters}
+            filterColumns={FILTER_COLUMNS}
+            onApplyFilters={handleApplyFilters}
+            onClearFilters={handleClearFilters}
+          />
+          <AddComponentDialog productId={productId} isSubmitted={isSubmitted} />
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto rounded-xl border bg-background">
-        <Table className="">
-          <TableHeader className="bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{ width: `${header.getSize()}px` }}
-                      className="h-11 border-r border-border last:border-r-0"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex flex-col items-end">
+          <div className="w-full overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow
+                    key={headerGroup.id}
+                    className="h-10 hover:bg-transparent"
+                  >
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{ width: `${header.getSize()}px` }}
+                        className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody className="[&_tr:last-child]:border-b">
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => {
+                    const rowStatus = getRowStatus(row.original);
+                    const isAdded = isRedlineView && rowStatus === "added";
+                    const isRemoved = isRedlineView && rowStatus === "removed";
+                    const isModified =
+                      isRedlineView && rowStatus === "modified";
+                    const componentId = getPersistentComponentId(row.original);
+
+                    return (
+                      <Fragment key={componentId}>
+                        <TableRow
+                          data-state={row.getIsSelected() && "selected"}
+                          className={cn(
+                            "hover:bg-muted/50",
+                            isAdded && "bg-blue-50/30 dark:bg-blue-950/20",
+                            isRemoved && "bg-red-50/30 dark:bg-red-950/20",
+                            isModified && "bg-amber-50/30 dark:bg-amber-950/20",
                           )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="[&_tr:last-child]:border-b">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                const rowStatus = getRowStatus(row.original);
-                const isAdded = isRedlineView && rowStatus === "added";
-                const isRemoved = isRedlineView && rowStatus === "removed";
-                const isModified = isRedlineView && rowStatus === "modified";
-                const componentId = getPersistentComponentId(row.original);
-
-                return (
-                  <Fragment key={componentId}>
-                    <TableRow
-                      data-state={row.getIsSelected() && "selected"}
-                      className={cn(
-                        "hover:bg-muted/50",
-                        isAdded && "bg-blue-50/30 dark:bg-blue-950/20",
-                        isRemoved && "bg-red-50/30 dark:bg-red-950/20",
-                        isModified && "bg-amber-50/30 dark:bg-amber-950/20",
-                      )}
-                    >
-                      {row.getVisibleCells().map((cell, cellIdx) => (
-                        <TableCell
-                          key={cell.id}
-                          className="last:py-0 [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
                         >
-                          <div className="flex items-center gap-2">
-                            {/* Status badge in expander column */}
-                            {cellIdx === 0 && isRedlineView && rowStatus && (
-                              <span
-                                className={cn(
-                                  "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px]",
-                                  isAdded && cnRedlineBadge("added"),
-                                  isRemoved && cnRedlineBadge("removed"),
-                                  isModified && cnRedlineBadge("modified"),
+                          {row.getVisibleCells().map((cell, cellIdx) => (
+                            <TableCell
+                              key={cell.id}
+                              className="last:py-0 [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                            >
+                              <div className="flex items-center gap-2">
+                                {cellIdx === 0 && (
+                                  <RedlineStatusBadge
+                                    status={rowStatus}
+                                    inline
+                                    className="rounded-full"
+                                  />
                                 )}
-                              >
-                                {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
-                              </span>
-                            )}
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </div>
-                        </TableCell>
-                      ))}
-                    </TableRow>
-
-                    {row.getIsExpanded() &&
-                      (() => {
-                        const imagePresentation = getRedlineImagePresentation(
-                          row.original,
-                          table.options.meta as TableMeta | undefined,
-                        );
-
-                        return (
-                          <TableRow>
-                            <TableCell colSpan={row.getVisibleCells().length}>
-                              <div className="flex flex-col items-center py-2">
-                                {imagePresentation.src ? (
-                                  <ProductImageFrame
-                                    src={imagePresentation.src}
-                                    alt={row.original.component_number}
-                                    variant="preview"
-                                    frameClassName={
-                                      imagePresentation.frameClassName
-                                    }
-                                    imageClassName={
-                                      imagePresentation.imageClassName
-                                    }
-                                    // badge={
-                                    //   imagePresentation.badge ? (
-                                    //     <span
-                                    //       className={`absolute -top-1 -left-1 z-65 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider shadow-sm ${
-                                    //         imagePresentation.badge === "NEW"
-                                    //           ? "border border-blue-200 bg-blue-100 text-blue-700"
-                                    //           : imagePresentation.badge ===
-                                    //               "DEL"
-                                    //             ? "border border-red-200 bg-red-100 text-red-700"
-                                    //             : "border border-amber-200 bg-amber-100 text-amber-700"
-                                    //       }`}
-                                    //     >
-                                    //       {imagePresentation.badge}
-                                    //     </span>
-                                    //   ) : undefined
-                                    // }
-                                    priority
-                                  />
-                                ) : (
-                                  <ProductImageFrame
-                                    alt={row.original.component_number}
-                                    variant="preview"
-                                  />
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
                                 )}
                               </div>
                             </TableCell>
-                          </TableRow>
-                        );
-                      })()}
-                  </Fragment>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      {/* Pagination */}
-      <div className="flex shrink-0 items-center justify-between gap-8">
-        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
-          <p
-            className="text-muted-foreground text-sm whitespace-nowrap"
-            aria-live="polite"
-          >
-            <span className="text-foreground">
-              {table.getState().pagination.pageIndex *
-                table.getState().pagination.pageSize +
-                1}
-              -
-              {Math.min(
-                Math.max(
-                  table.getState().pagination.pageIndex *
-                    table.getState().pagination.pageSize +
-                    table.getState().pagination.pageSize,
-                  0,
-                ),
-                table.getRowCount(),
-              )}
-            </span>{" "}
-            of{" "}
-            <span className="text-foreground">
-              {table.getRowCount().toString()}
-            </span>
-          </p>
-        </div>
+                          ))}
+                        </TableRow>
 
-        {/* Pagination buttons */}
-        <div>
-          <Pagination>
-            <PaginationContent>
-              {/* First page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.firstPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to first page"
-                >
-                  <PiCaretCircleDoubleLeftDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              {/* Previous page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  aria-label="Go to previous page"
-                >
-                  <PiCaretCircleLeftDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              {/* Next page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to next page"
-                >
-                  <PiCaretCircleRightDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-              {/* Last page button */}
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="disabled:pointer-events-none disabled:opacity-50"
-                  onClick={() => table.lastPage()}
-                  disabled={!table.getCanNextPage()}
-                  aria-label="Go to last page"
-                >
-                  <PiCaretCircleDoubleRightDuotone aria-hidden="true" />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+                        {row.getIsExpanded() &&
+                          (() => {
+                            const imagePresentation =
+                              getRedlineImagePresentation(
+                                row.original,
+                                table.options.meta as TableMeta | undefined,
+                              );
+
+                            return (
+                              <TableRow>
+                                <TableCell
+                                  colSpan={row.getVisibleCells().length}
+                                >
+                                  <div className="flex flex-col items-center py-2">
+                                    {imagePresentation.src ? (
+                                      <ProductImageFrame
+                                        src={imagePresentation.src}
+                                        alt={row.original.component_number}
+                                        variant="preview"
+                                        frameClassName={
+                                          imagePresentation.frameClassName
+                                        }
+                                        imageClassName={
+                                          imagePresentation.imageClassName
+                                        }
+                                        priority
+                                      />
+                                    ) : (
+                                      <ProductImageFrame
+                                        alt={row.original.component_number}
+                                        variant="preview"
+                                      />
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })()}
+                      </Fragment>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center text-sm text-muted-foreground"
+                    >
+                      No label components found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex h-10 w-full items-center border-b">
+            <WorkspaceListPagination
+              pagination={{
+                currentPage,
+                totalPages: pageCount,
+                totalCount: filteredRowCount,
+                limit: pagination.pageSize,
+                hasNextPage: table.getCanNextPage(),
+                hasPrevPage: table.getCanPreviousPage(),
+              }}
+              onPageChange={(page) => table.setPageIndex(page - 1)}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -934,7 +816,6 @@ function RowActions({
   const actionsDisabled =
     isSubmitted || row.original._redlineStatus === "removed";
 
-  // Get productId from the current URL using usePathname
   const pathname = usePathname();
   const getProductId = (): string => {
     if (!pathname) return "";
@@ -947,13 +828,13 @@ function RowActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            size="icon"
+            size="icon-sm"
             variant="ghost"
-            className="shadow-none"
+            className="shadow-none text-muted-foreground/60 hover:text-foreground"
             aria-label="More actions"
             disabled={actionsDisabled}
           >
-            <PiDotsThreeCircleDuotone size={18} aria-hidden="true" />
+            <Icon icon={MoreVerticalSquare01Icon} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -964,7 +845,7 @@ function RowActions({
                 setTimeout(() => setShowEditDialog(true), 100);
               }}
             >
-              <PiPencilSimpleDuotone className=" h-4 w-4" />
+              <Icon icon={PropertyEditIcon} />
               <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -976,7 +857,7 @@ function RowActions({
             }}
             className="text-destructive focus:text-destructive"
           >
-            <PiTrashDuotone className="text-destructive h-4 w-4" />
+            <Icon icon={Delete02Icon} className="text-destructive" />
             <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -1,35 +1,17 @@
 "use client";
 
-import type { ElementType } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { cn } from "@uprevit/ui/lib/utils";
-import {
-  PiTrashDuotone,
-  PiUserDuotone,
-  PiIdentificationCardDuotone,
-  PiBriefcaseDuotone,
-  PiMapPinDuotone,
-  PiInfoDuotone,
-  PiUserCircleGearDuotone,
-} from "react-icons/pi";
+import { PiTrashDuotone, PiUserDuotone, PiUserCircleGearDuotone } from "react-icons/pi";
 import { User } from "@/types/user";
 import DialogRemoveUser from "./DialogRemoveUser";
-
-const StaticHeader = ({
-  title,
-  icon: Icon,
-}: {
-  title: string;
-  icon: ElementType;
-}) => (
-  <div className="flex items-center gap-2">
-    <Icon className="h-4 w-4 text-muted-foreground" />
-    <span>{title}</span>
-  </div>
-);
 
 function UserStatusBadge({ status }: { status: User["status"] }) {
   const statusClasses = {
@@ -50,29 +32,31 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
   const baseColumns: ColumnDef<User>[] = [
     {
       accessorKey: "_id",
-      header: () => (
-        <StaticHeader title="ID" icon={PiIdentificationCardDuotone} />
-      ),
+      header: "ID",
+      size: 72,
       cell: ({ row }) => (
-        <div className="font-mono text-xs">
+        <div className="truncate font-mono text-xs">
           {String(row.getValue("_id") ?? "").slice(0, 8)}
         </div>
       ),
     },
     {
       accessorKey: "name",
-      header: () => <StaticHeader title="User" icon={PiUserDuotone} />,
+      header: "User",
+      size: 280,
       cell: ({ row }) => {
         const { name, email, profileAvatar } = row.original;
         return (
-          <div className="flex items-center gap-3">
-            <Avatar>
+          <div className="flex min-w-0 items-center gap-2">
+            <Avatar className="size-6 shrink-0">
               <AvatarImage src={profileAvatar} alt={name} />
-              <AvatarFallback>{name?.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="text-[10px]">
+                {name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="font-medium">{name}</p>
-              <p className="text-sm text-muted-foreground">{email}</p>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{name}</p>
+              <p className="truncate text-xs text-muted-foreground">{email}</p>
             </div>
           </div>
         );
@@ -80,22 +64,24 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
     },
     {
       accessorKey: "userType",
-      header: () => (
-        <StaticHeader title="User Type" icon={PiUserCircleGearDuotone} />
-      ),
+      header: "User Type",
+      size: 108,
       cell: ({ row }) => {
         const userType = row.getValue("userType") as string;
         if (userType === "admin") {
           return (
-            <Badge variant="secondary">
-              <PiUserCircleGearDuotone className="w-4 h-4" />
+            <Badge variant="secondary" className="max-w-full truncate">
+              <PiUserCircleGearDuotone className="h-3.5 w-3.5 shrink-0" />
               Admin
             </Badge>
           );
         }
         return (
-          <Badge variant="outline" className="gap-1 text-muted-foreground">
-            <PiUserDuotone className="w-4 h-4" />
+          <Badge
+            variant="outline"
+            className="max-w-full gap-1 truncate text-muted-foreground"
+          >
+            <PiUserDuotone className="h-3.5 w-3.5 shrink-0" />
             Member
           </Badge>
         );
@@ -103,27 +89,32 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
     },
     {
       accessorKey: "designation",
-      header: () => (
-        <StaticHeader title="Designation" icon={PiBriefcaseDuotone} />
-      ),
+      header: "Designation",
+      size: 132,
       cell: ({ row }) => {
         const designation = row.getValue("designation") as string;
-        if (designation) return <p>{designation}</p>;
-        return <p className="text-muted-foreground">N/A</p>;
+        if (designation) {
+          return <p className="truncate text-sm">{designation}</p>;
+        }
+        return <p className="text-sm text-muted-foreground">N/A</p>;
       },
     },
     {
       accessorKey: "location",
-      header: () => <StaticHeader title="Location" icon={PiMapPinDuotone} />,
+      header: "Location",
+      size: 132,
       cell: ({ row }) => {
         const location = row.getValue("location") as string;
-        if (location) return <p>{location}</p>;
-        return <p className="text-muted-foreground">N/A</p>;
+        if (location) {
+          return <p className="truncate text-sm">{location}</p>;
+        }
+        return <p className="text-sm text-muted-foreground">N/A</p>;
       },
     },
     {
       accessorKey: "status",
-      header: () => <StaticHeader title="Status" icon={PiInfoDuotone} />,
+      header: "Status",
+      size: 96,
       cell: ({ row }) => (
         <UserStatusBadge status={row.getValue("status") as User["status"]} />
       ),
@@ -138,14 +129,16 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
     ...baseColumns,
     {
       id: "remove",
+      header: () => <span className="sr-only">Remove</span>,
+      size: 44,
       enableHiding: false,
       cell: ({ row }) => {
         const { _id, name, status } = row.original;
         if (!_id || status === "inactive") {
           return (
-            <div className="text-right">
-              <Button variant="ghost" size="icon" disabled>
-                <PiTrashDuotone className="h-4 w-4" />
+            <div className="flex justify-end">
+              <Button variant="ghost" size="icon" className="size-7" disabled>
+                <PiTrashDuotone className="h-3.5 w-3.5" />
                 <span className="sr-only">Cannot remove user</span>
               </Button>
             </div>
@@ -153,7 +146,7 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
         }
 
         return (
-          <div className="text-right">
+          <div className="flex justify-end">
             <DialogRemoveUser
               userId={_id}
               userName={name}
@@ -161,9 +154,9 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <PiTrashDuotone className="h-4 w-4" />
+                  <PiTrashDuotone className="h-3.5 w-3.5" />
                   <span className="sr-only">Remove user</span>
                 </Button>
               }

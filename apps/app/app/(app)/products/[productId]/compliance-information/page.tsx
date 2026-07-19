@@ -3,61 +3,29 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
-import { CountryFlag } from "@/components/common/CountryFlag";
-import AddStandardDialog from "@/features/workspace/products/product/compliance-information/AddStandardDialog";
-import DeleteStandardDialog from "@/features/workspace/products/product/compliance-information/DeleteStandardDialog";
-import EditStandardDialog from "@/features/workspace/products/product/compliance-information/EditStandardDialog";
-import ManageLanguagesDialog from "@/features/workspace/products/product/compliance-information/ManageLanguagesDialog";
-import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { ComplianceLanguagesSection } from "@/features/workspace/products/product/compliance-information/ComplianceLanguagesSection";
+import { ComplianceStandardsSection } from "@/features/workspace/products/product/compliance-information/ComplianceStandardsSection";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { cn } from "@uprevit/ui/lib/utils";
-import type { DiffItem } from "@/utils/deepDiff";
 import { countChangedRedlineItems } from "@/utils/redlineCounts";
-import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
-import {
-  cnRedlineBadge,
-  redlineBannerText,
-  redlineCardAdded,
-  redlineCardModified,
-  redlineCardRemoved,
-  redlineFieldHighlightAdded,
-  redlineFieldHighlightModified,
-  redlineFieldHighlightRemoved,
-  redlineNewValue,
-  redlineOldValue,
-} from "@/utils/redlineStyles";
-import {
-  PiArrowRightBold,
-  PiCaretRightDuotone,
-  PiCertificateDuotone,
-  PiGlobeDuotone,
-  PiHouseDuotone,
-  PiShieldCheckDuotone,
-} from "react-icons/pi";
+import { buildRedlineArray, type WithRedlineMeta } from "@/utils/redlineArray";
+import { redlineBannerText } from "@/utils/redlineStyles";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { PiCaretRightDuotone, PiHouseDuotone } from "react-icons/pi";
 
-interface ComplianceItem {
+type ComplianceItem = {
   _id: string;
   standard: string;
   standard_description: string;
-}
+};
 
-interface LanguageItem {
+type LanguageItem = {
   code: string;
   name: string;
   country?: string;
-}
-
-type ComplianceItemWithDiff = ComplianceItem & {
-  _redlineStatus?: RedlineStatus;
-  _redlineDiffs?: DiffItem[];
-  _redlineId?: string;
-};
-
-type LanguageItemWithDiff = LanguageItem & {
-  _redlineStatus?: RedlineStatus;
-  _redlineDiffs?: DiffItem[];
-  _redlineId?: string;
 };
 
 type ComplianceTabsData = {
@@ -67,17 +35,6 @@ type ComplianceTabsData = {
     product_data?: { data?: { status?: "draft" | "submitted" | "archived" } };
   };
 };
-
-const createSyntheticDiff = (
-  path: string,
-  status: "added" | "removed",
-  value: unknown,
-): DiffItem => ({
-  path,
-  status,
-  old_value: status === "removed" ? value : null,
-  new_value: status === "added" ? value : null,
-});
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
@@ -93,105 +50,41 @@ export default function Page() {
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
 
-  const RedlineValue = ({
-    value,
-    diff,
-    formatFn,
-  }: {
-    value: string;
-    diff?: DiffItem | null;
-    formatFn?: (v: unknown) => string;
-  }) => {
-    if (!isRedlineView || !diff) return <>{value}</>;
-
-    const format =
-      formatFn ||
-      ((v: unknown) =>
-        typeof v === "string" ? v : v != null ? String(v) : "");
-
-    const isRemoved = diff.status === "removed";
-    const isAdded = diff.status === "added";
-    const oldValue = format(diff.old_value);
-    const newValue = format(diff.new_value);
-    const hasOldValue = oldValue.trim() !== "";
-    const hasNewValue = newValue.trim() !== "";
-
-    if (!hasOldValue && !hasNewValue) {
-      return null;
-    }
-
-    return (
-      <span className="inline-flex max-w-full flex-wrap items-center gap-2 whitespace-normal break-words">
-        {(diff.old_value !== null || isRemoved) && hasOldValue && (
-          <span
-            className={cn(
-              "max-w-full whitespace-pre-wrap break-words",
-              redlineOldValue,
-            )}
-          >
-            {oldValue}
-          </span>
-        )}
-
-        {diff.old_value !== null &&
-          diff.new_value !== null &&
-          !isRemoved &&
-          !isAdded &&
-          hasOldValue &&
-          hasNewValue && (
-            <PiArrowRightBold className="shrink-0 text-xs text-muted-foreground/50" />
-          )}
-
-        {(diff.new_value !== null || isAdded) && !isRemoved && hasNewValue && (
-          <span
-            className={cn(
-              "max-w-full whitespace-pre-wrap break-words",
-              redlineNewValue,
-            )}
-          >
-            {newValue}
-          </span>
-        )}
-      </span>
-    );
-  };
-
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col gap-2 p-2">
-        <div className="flex h-full w-full flex-col overflow-y-auto rounded-xl border border-border bg-background">
-          {[0, 1].map((section) => (
-            <div
-              key={section}
-              className={cn(section === 0 && "border-b border-border")}
-            >
-              <div className="flex flex-col items-start justify-between gap-4 border-b border-border p-6 md:flex-row">
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-48 animate-pulse rounded bg-muted" />
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
-                  <div className="h-4 w-64 animate-pulse rounded bg-muted" />
+      <div className="flex h-full flex-col gap-2">
+        <div className="flex h-full w-full flex-col overflow-y-auto">
+          <div className="flex h-10 items-center gap-2 border-b border-border bg-muted/60 px-3">
+            <div className="h-4 w-44 animate-pulse rounded bg-muted" />
+            <div className="size-3 animate-pulse rounded-full bg-muted" />
+          </div>
+          <div className="flex flex-col gap-2 px-2 py-2">
+            {[0, 1].map((section) => (
+              <div
+                key={section}
+                className="overflow-hidden rounded-2xl border border-border"
+              >
+                <div className="flex h-10 items-center justify-between border-b border-border bg-muted/60 px-3">
+                  <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+                  <div className="h-7 w-28 animate-pulse rounded-md bg-muted" />
                 </div>
-                <div className="h-9 w-36 animate-pulse rounded-md bg-muted" />
-              </div>
-              <div className="px-6 py-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                   {[1, 2, 3].map((item) => (
                     <div
                       key={`${section}-${item}`}
-                      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+                      className="flex min-h-22 items-start gap-3.5 border-b border-border px-4 py-4 last:border-b-0 lg:border-r lg:border-border lg:last:border-r-0"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 animate-pulse rounded-lg bg-muted" />
+                      <div className="mt-0.5 size-5 shrink-0 animate-pulse rounded bg-muted" />
+                      <div className="flex min-w-0 flex-1 flex-col gap-2">
                         <div className="h-5 w-32 animate-pulse rounded bg-muted" />
+                        <div className="h-4 w-full animate-pulse rounded bg-muted" />
                       </div>
-                      <div className="h-4 w-full animate-pulse rounded bg-muted" />
-                      <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -199,7 +92,7 @@ export default function Page() {
 
   if (error) {
     return (
-      <div className="flex h-full flex-col gap-2 p-2">
+      <div className="flex h-full flex-col gap-2">
         <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
           <Link
             href="/dashboard"
@@ -220,11 +113,16 @@ export default function Page() {
           </span>
         </div>
 
-        <div className="flex h-full w-full flex-col overflow-y-auto rounded-xl border border-border bg-background">
+        <div className="flex h-full w-full flex-col overflow-y-auto">
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="rounded-full bg-destructive/10 p-3">
-                <PiShieldCheckDuotone className="h-8 w-8 text-destructive" />
+                <Icon
+                  icon={Alert01Icon}
+                  size={32}
+                  strokeWidth={1.5}
+                  className="text-destructive"
+                />
               </div>
               <div className="space-y-1">
                 <h3 className="text-lg font-semibold text-destructive">
@@ -290,7 +188,7 @@ export default function Page() {
 
   const standards = (() => {
     if (!isRedlineView || !hasDiffVersions) {
-      return currentStandards as ComplianceItemWithDiff[];
+      return currentStandards as WithRedlineMeta<ComplianceItem>[];
     }
 
     return standardRedlineItems
@@ -305,12 +203,12 @@ export default function Page() {
           _redlineId: item.id,
         };
       })
-      .filter(Boolean) as ComplianceItemWithDiff[];
+      .filter(Boolean) as WithRedlineMeta<ComplianceItem>[];
   })();
 
   const languages = (() => {
     if (!isRedlineView || !hasDiffVersions) {
-      return currentLanguages as LanguageItemWithDiff[];
+      return currentLanguages as WithRedlineMeta<LanguageItem>[];
     }
 
     return languageRedlineItems
@@ -325,29 +223,17 @@ export default function Page() {
           _redlineId: item.id,
         };
       })
-      .filter(Boolean) as LanguageItemWithDiff[];
+      .filter(Boolean) as WithRedlineMeta<LanguageItem>[];
   })();
-  const desktopLanguageFillerCount = (3 - (languages.length % 3)) % 3;
-  const desktopLanguageEntries = [
-    ...languages.map((item, itemIndex) => ({
-      type: "item" as const,
-      item,
-      itemIndex,
-    })),
-    ...Array.from({ length: desktopLanguageFillerCount }, (_, fillerIndex) => ({
-      type: "placeholder" as const,
-      fillerIndex,
-    })),
-  ];
 
   const isSubmitted =
     allTabsData?.product_information?.product_data?.data?.status ===
     "submitted";
 
   return (
-    <div className="flex h-full flex-col gap-2 p-2">
+    <div className="flex h-full flex-col">
       {isRedlineView && (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-2 text-sm">
+        <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
           <span className={cn("font-medium", redlineBannerText)}>
             {diffRedlineLoading
               ? "Loading changes..."
@@ -359,395 +245,27 @@ export default function Page() {
         </div>
       )}
 
-      <div className="flex h-full w-full flex-col overflow-y-auto rounded-xl border border-border bg-background">
-        <section className="flex flex-col border-b border-border">
-          <div className="flex items-center justify-between border-b border-border p-2">
-            <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Compliance Standards</p>
-              <div className="h-1 w-1 rounded-full border border-border bg-border" />
-              <p className="text-xs font-medium text-muted-foreground">
-                Regulatory standards and certifications for this product
-              </p>
-              <PageInfoDialog
-                title="Compliance Standards"
-                content="Add and manage regulatory compliance standards, certifications, and safety documents for your product."
-              />
-            </div>
-            <AddStandardDialog
-              productId={productId}
-              isSubmitted={isSubmitted}
-            />
-          </div>
+      <div className="flex h-full w-full flex-col overflow-y-auto">
+        <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 px-3">
+          <p className="text-sm font-medium">Compliance Information</p>
+          <InfoTooltip content="Document regulatory standards and packaging or labeling languages for this product." />
+        </div>
 
-          <div className="px-2 py-2">
-            {standards.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-16">
-                <div className="rounded-full bg-muted p-4">
-                  <PiCertificateDuotone className="h-10 w-10 text-muted-foreground" />
-                </div>
-                <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    No Standards Added
-                  </h3>
-                  <p className="max-w-md text-sm text-muted-foreground">
-                    Add compliance standards and certifications to track
-                    regulatory requirements for this product.
-                  </p>
-                </div>
-                <AddStandardDialog
-                  productId={productId}
-                  isSubmitted={isSubmitted}
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                {standards.map((item) => {
-                  const itemStatus = item._redlineStatus;
-                  const hasAnyDiff =
-                    Boolean(itemStatus) && itemStatus !== "unchanged";
-                  const isAdded = itemStatus === "added";
-                  const isRemoved = itemStatus === "removed";
-                  const isModified = itemStatus === "modified";
-
-                  const standardDiff: DiffItem | null = isRedlineView
-                    ? itemStatus === "added"
-                      ? createSyntheticDiff("standard", "added", item.standard)
-                      : itemStatus === "removed"
-                        ? createSyntheticDiff(
-                            "standard",
-                            "removed",
-                            item.standard,
-                          )
-                        : (item._redlineDiffs?.find(
-                            (diff) => diff.path === "standard",
-                          ) ?? null)
-                    : null;
-
-                  const descriptionDiff: DiffItem | null = isRedlineView
-                    ? itemStatus === "added"
-                      ? createSyntheticDiff(
-                          "standard_description",
-                          "added",
-                          item.standard_description,
-                        )
-                      : itemStatus === "removed"
-                        ? createSyntheticDiff(
-                            "standard_description",
-                            "removed",
-                            item.standard_description,
-                          )
-                        : (item._redlineDiffs?.find(
-                            (diff) => diff.path === "standard_description",
-                          ) ?? null)
-                    : null;
-
-                  return (
-                    <div
-                      key={item._redlineId ?? item._id}
-                      className={cn(
-                        "group relative flex flex-col gap-3 rounded-xl border bg-card p-4 transition-all duration-200 hover:bg-accent/5",
-                        isRedlineView && isRemoved && redlineCardRemoved,
-                        isRedlineView && isAdded && redlineCardAdded,
-                        isRedlineView && isModified && redlineCardModified,
-                        (!isRedlineView || !hasAnyDiff) && "border-border",
-                      )}
-                    >
-                      {isRedlineView && isAdded && (
-                        <span
-                          className={cn(
-                            "absolute -top-2 -right-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
-                            cnRedlineBadge("added"),
-                          )}
-                        >
-                          NEW
-                        </span>
-                      )}
-                      {isRedlineView && isRemoved && (
-                        <span
-                          className={cn(
-                            "absolute -top-2 -right-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
-                            cnRedlineBadge("removed"),
-                          )}
-                        >
-                          DEL
-                        </span>
-                      )}
-                      {isRedlineView && isModified && (
-                        <span
-                          className={cn(
-                            "absolute -top-2 -right-2 z-10 rounded-full px-2 py-0.5 text-[10px]",
-                            cnRedlineBadge("modified"),
-                          )}
-                        >
-                          MOD
-                        </span>
-                      )}
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="flex min-w-0 flex-1 items-start gap-3">
-                          <div
-                            className={cn(
-                              "rounded-lg bg-green-500/10 p-2 text-green-600",
-                              isRedlineView &&
-                                isRemoved &&
-                                redlineFieldHighlightRemoved,
-                              isRedlineView &&
-                                isAdded &&
-                                redlineFieldHighlightAdded,
-                              isRedlineView &&
-                                isModified &&
-                                redlineFieldHighlightModified,
-                            )}
-                          >
-                            <PiShieldCheckDuotone className="h-4 w-4" />
-                          </div>
-                          <div className="flex min-w-0 flex-1 flex-col gap-2">
-                            <div className="flex min-w-0 flex-wrap items-center gap-2">
-                              <span
-                                className={cn(
-                                  "min-w-0 break-words text-base font-semibold text-foreground",
-                                  isRedlineView &&
-                                    isRemoved &&
-                                    "text-red-500/70 line-through dark:text-red-400/80",
-                                )}
-                              >
-                                <RedlineValue
-                                  value={item.standard}
-                                  diff={standardDiff}
-                                />
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        {!isRemoved && (
-                          <div className="flex shrink-0 items-center gap-1 self-start">
-                            <EditStandardDialog
-                              productId={productId}
-                              standards={item}
-                              isSubmitted={isSubmitted}
-                            />
-                            <DeleteStandardDialog
-                              productId={productId}
-                              standardId={item._id}
-                              standardName={item.standard}
-                              isSubmitted={isSubmitted}
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <p
-                        className={cn(
-                          "line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground",
-                          isRedlineView &&
-                            isRemoved &&
-                            "text-red-500/70 line-through dark:text-red-400/80",
-                        )}
-                      >
-                        <RedlineValue
-                          value={
-                            item.standard_description ||
-                            "No description provided."
-                          }
-                          diff={descriptionDiff}
-                        />
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="flex flex-col">
-          <div className="flex items-center justify-between border-b border-border p-2">
-            <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Languages</p>
-              <div className="h-1 w-1 rounded-full border border-border bg-border" />
-              <p className="text-xs font-medium text-muted-foreground">
-                Packaging and labeling languages selected for this product
-              </p>
-              <PageInfoDialog
-                title="Languages"
-                content="Manage individual product languages and apply preset market language groups for labeling and packaging workflows."
-              />
-            </div>
-            <ManageLanguagesDialog
-              productId={productId}
-              selectedLanguages={currentLanguages}
-              isSubmitted={isSubmitted}
-            />
-          </div>
-
-          <div className="px-2 py-2">
-            {languages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-16">
-                <div className="rounded-full bg-muted p-4">
-                  <PiGlobeDuotone className="h-10 w-10 text-muted-foreground" />
-                </div>
-                <div className="space-y-1 text-center">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    No Languages Selected
-                  </h3>
-                  <p className="max-w-md text-sm text-muted-foreground">
-                    Add required market languages individually or use language
-                    groups to build your labeling set faster.
-                  </p>
-                </div>
-                <ManageLanguagesDialog
-                  productId={productId}
-                  selectedLanguages={currentLanguages}
-                  isSubmitted={isSubmitted}
-                />
-              </div>
-            ) : (
-              <div className="grid overflow-hidden rounded-lg border border-border bg-background lg:grid-cols-3">
-                {desktopLanguageEntries.map((entry, index) => {
-                  const isInLastDesktopRow =
-                    index >= desktopLanguageEntries.length - 3;
-                  const hasDesktopItemToTheRight = index % 3 !== 2;
-
-                  if (entry.type === "placeholder") {
-                    return (
-                      <div
-                        key={`language-placeholder-${entry.fillerIndex}`}
-                        aria-hidden="true"
-                        className={cn(
-                          "hidden lg:block",
-                          !isInLastDesktopRow && "lg:border-b lg:border-border",
-                          hasDesktopItemToTheRight &&
-                            "lg:border-r lg:border-border",
-                        )}
-                      />
-                    );
-                  }
-
-                  const { item, itemIndex } = entry;
-                  const itemStatus = item._redlineStatus;
-                  const hasAnyDiff =
-                    Boolean(itemStatus) && itemStatus !== "unchanged";
-                  const isAdded = itemStatus === "added";
-                  const isRemoved = itemStatus === "removed";
-                  const isModified = itemStatus === "modified";
-                  const isLastItem = itemIndex === languages.length - 1;
-                  const statusLabel = isAdded
-                    ? "NEW"
-                    : isRemoved
-                      ? "DEL"
-                      : isModified
-                        ? "MOD"
-                        : null;
-                  const countryValue = item.country?.trim() || "";
-
-                  const codeDiff: DiffItem | null = isRedlineView
-                    ? itemStatus === "added"
-                      ? createSyntheticDiff("code", "added", item.code)
-                      : itemStatus === "removed"
-                        ? createSyntheticDiff("code", "removed", item.code)
-                        : (item._redlineDiffs?.find(
-                            (diff) => diff.path === "code",
-                          ) ?? null)
-                    : null;
-
-                  const nameDiff: DiffItem | null = isRedlineView
-                    ? itemStatus === "added"
-                      ? createSyntheticDiff("name", "added", item.name)
-                      : itemStatus === "removed"
-                        ? createSyntheticDiff("name", "removed", item.name)
-                        : (item._redlineDiffs?.find(
-                            (diff) => diff.path === "name",
-                          ) ?? null)
-                    : null;
-
-                  const countryDiff: DiffItem | null = isRedlineView
-                    ? itemStatus === "added"
-                      ? countryValue
-                        ? createSyntheticDiff("country", "added", countryValue)
-                        : null
-                      : itemStatus === "removed"
-                        ? countryValue
-                          ? createSyntheticDiff(
-                              "country",
-                              "removed",
-                              countryValue,
-                            )
-                          : null
-                        : (item._redlineDiffs?.find(
-                            (diff) => diff.path === "country",
-                          ) ?? null)
-                    : null;
-
-                  return (
-                    <div
-                      key={item._redlineId ?? item.code}
-                      className={cn(
-                        "flex relative flex-col gap-2 px-3 py-3 transition-colors sm:flex-row sm:items-start sm:justify-between",
-                        statusLabel && "pr-12",
-                        !isLastItem && "border-b border-border",
-                        isInLastDesktopRow && "lg:border-b-0",
-                        !isInLastDesktopRow && "lg:border-b lg:border-border",
-                        hasDesktopItemToTheRight &&
-                          "lg:border-r lg:border-border",
-                        isRedlineView && isRemoved && redlineCardRemoved,
-                        isRedlineView && isAdded && redlineCardAdded,
-                        isRedlineView && isModified && redlineCardModified,
-                        (!isRedlineView || !hasAnyDiff) && "hover:bg-accent/30",
-                      )}
-                    >
-                      <div className="flex min-w-0 items-start gap-3">
-                        <CountryFlag country={item.country} className="mt-1" />
-                        <div className="min-w-0 flex w-full items-start gap-3">
-                          <div className="min-w-[2.75rem] shrink-0 pt-0.5 text-xs font-medium tracking-wide text-muted-foreground">
-                            <RedlineValue value={item.code} diff={codeDiff} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className={cn(
-                                "text-sm font-medium text-foreground",
-                                isRedlineView &&
-                                  isRemoved &&
-                                  "text-red-500/70 line-through dark:text-red-400/80",
-                              )}
-                            >
-                              <RedlineValue value={item.name} diff={nameDiff} />
-                            </p>
-                            {(countryValue || countryDiff) && (
-                              <p
-                                className={cn(
-                                  "mt-0.5 text-xs text-muted-foreground",
-                                  isRedlineView &&
-                                    isRemoved &&
-                                    "text-red-500/70 line-through dark:text-red-400/80",
-                                )}
-                              >
-                                <RedlineValue
-                                  value={countryValue}
-                                  diff={countryDiff}
-                                />
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {statusLabel && (
-                        <span
-                          className={cn(
-                            "absolute right-1 top-1 z-10 rounded-full px-2 py-0.5 text-[10px]",
-                            isAdded && cnRedlineBadge("added"),
-                            isRemoved && cnRedlineBadge("removed"),
-                            isModified && cnRedlineBadge("modified"),
-                          )}
-                        >
-                          {statusLabel}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
+        <div className="flex flex-col gap-2 px-2 py-2">
+          <ComplianceStandardsSection
+            productId={productId}
+            standards={standards}
+            isSubmitted={isSubmitted}
+            isRedlineView={isRedlineView}
+          />
+          <ComplianceLanguagesSection
+            productId={productId}
+            languages={languages}
+            currentLanguages={currentLanguages}
+            isSubmitted={isSubmitted}
+            isRedlineView={isRedlineView}
+          />
+        </div>
       </div>
     </div>
   );

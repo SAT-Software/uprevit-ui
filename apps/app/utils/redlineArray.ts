@@ -124,3 +124,9 @@ export function buildRedlineArray<T>(
 
   return results;
 }
+
+export type WithRedlineMeta<T> = T & {
+  _redlineStatus?: RedlineStatus;
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
+};

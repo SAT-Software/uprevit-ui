@@ -1,24 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import {
-  PiPaperPlaneRightDuotone,
-  PiWarningDiamondDuotone,
-  PiXCircleDuotone,
-  PiInfoDuotone,
-} from "react-icons/pi";
+  Alert01Icon,
+  Cancel01Icon,
+  InformationCircleIcon,
+  SentIcon,
+} from "@hugeicons/core-free-icons";
 
 interface ConfirmSubmitProductDialogProps {
   children: React.ReactNode;
@@ -54,49 +45,52 @@ export default function ConfirmSubmitProductDialog({
       <DialogTrigger asChild disabled={disabled}>
         {children}
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Submit Product</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Submit this product for review. This action is irreversible and will
-          lock the product from further editing.
-        </DialogDescription>
-        <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3">
-            <div
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
-              aria-hidden="true"
-            >
-              <PiWarningDiamondDuotone size={20} />
-            </div>
-            <div className="space-y-1">
-              <h4 className="font-medium text-sm">Confirm Submission</h4>
-              <p className="text-sm text-muted-foreground">
-                You are about to submit{" "}
-                <span className="font-medium text-foreground">
-                  {productName || "this product"}
-                </span>{" "}
-                for review.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+      <AppDialogContent
+        title="Submit Product"
+        description="Submit this product for review. This action is irreversible and will lock the product from further editing."
+        variant="confirm"
+        size="md"
+        confirmContent={{
+          heading: "Confirm Submission",
+          message: (
+            <>
+              You are about to submit{" "}
+              <span className="font-medium text-foreground">
+                {productName || "this product"}
+              </span>{" "}
+              for review.
+            </>
+          ),
+          icon: Alert01Icon,
+        }}
+        primaryAction={{
+          label: "Yes, Submit Product",
+          loadingLabel: "Submitting...",
+          onClick: handleConfirm,
+          loading: isSubmitting,
+          disabled: isSubmitting,
+          icon: SentIcon,
+          className: "bg-emerald-600 hover:bg-emerald-700 text-white",
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isSubmitting,
+          icon: Cancel01Icon,
+        }}
+      >
+        <div className="space-y-4 px-4 pb-4">
+          <div className="space-y-2 rounded-lg bg-muted/50 p-3">
             <div className="flex items-center gap-2 text-sm">
-              <PiInfoDuotone className="size-4 text-muted-foreground" />
-              <span className="text-muted-foreground font-medium">
+              <Icon
+                icon={InformationCircleIcon}
+                size={16}
+                className="text-muted-foreground"
+              />
+              <span className="font-medium text-muted-foreground">
                 Important: This action is irreversible
               </span>
             </div>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-6 list-disc">
+            <ul className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
               <li>
                 Once submitted, you <strong>cannot edit</strong> this version
               </li>
@@ -114,30 +108,7 @@ export default function ConfirmSubmitProductDialog({
             </ul>
           </div>
         </div>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={isSubmitting}
-            >
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleConfirm}
-            disabled={isSubmitting}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            {isSubmitting ? <Spinner /> : <PiPaperPlaneRightDuotone />}
-            {isSubmitting ? "Submitting..." : "Yes, Submit Product"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

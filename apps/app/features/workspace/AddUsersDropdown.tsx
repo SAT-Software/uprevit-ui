@@ -19,8 +19,9 @@ import {
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { PiUserCirclePlusDuotone, PiXDuotone } from "react-icons/pi";
 import Image from "next/image";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Cancel01Icon, UserAdd01Icon } from "@hugeicons/core-free-icons";
 
 interface User {
   _id: string;
@@ -73,12 +74,8 @@ export default function AddUsersDropdown({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <PiUserCirclePlusDuotone />
+        <Button variant="secondary">
+          <Icon icon={UserAdd01Icon} />
           Add Users
         </Button>
       </PopoverTrigger>
@@ -124,14 +121,17 @@ export default function AddUsersDropdown({
                           className="size-6 shrink-0 rounded-full"
                         />
                       ) : (
-                        <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground">
+                        <div className="flex size-6 shrink-0 items-center justify-center rounded-full text-sm text-muted-foreground">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <span className="truncate">{user.name}</span>
                     </div>
                     {isSelected && (
-                      <PiXDuotone className="size-4 shrink-0 text-muted-foreground" />
+                      <Icon
+                        icon={Cancel01Icon}
+                        className="text-muted-foreground/60 hover:text-destructive"
+                      />
                     )}
                   </CommandItem>
                 );

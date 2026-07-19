@@ -37,6 +37,9 @@ export function useDeleteSourceFilesFolder(folderId?: string) {
       queryClient.invalidateQueries({
         queryKey: ["source-files-folders"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders-infinite"],
+      });
 
       queryClient.invalidateQueries({
         queryKey: ["source-files-folder", folderId],

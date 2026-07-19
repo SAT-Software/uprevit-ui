@@ -3,24 +3,21 @@
 import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  PiCaretDownDuotone,
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Command,
@@ -42,6 +39,13 @@ import { Department } from "@/types/department";
 import { Project } from "@/types/project";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
 import { useAuth } from "react-oidc-context";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  PlusSignSquareIcon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
 
 interface FormValues {
   ppn: string;
@@ -59,15 +63,16 @@ export default function CreateProductDialog() {
   const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState("");
-  const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] = useState("");
+  const [debouncedDepartmentSearch, setDebouncedDepartmentSearch] =
+    useState("");
   const [projectSearch, setProjectSearch] = useState("");
   const [debouncedProjectSearch, setDebouncedProjectSearch] = useState("");
   const [selectedDepartmentLabel, setSelectedDepartmentLabel] = useState<
     string | null
   >(null);
-  const [selectedProjectLabel, setSelectedProjectLabel] = useState<string | null>(
-    null,
-  );
+  const [selectedProjectLabel, setSelectedProjectLabel] = useState<
+    string | null
+  >(null);
   const auth = useAuth();
   const user = auth?.user?.profile;
 
@@ -95,6 +100,7 @@ export default function CreateProductDialog() {
   // eslint-disable-next-line react-hooks/incompatible-library
   const selectedDepartment = watch("department");
   const selectedProject = watch("project");
+  const descriptionLength = (watch("description") || "").length;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -206,7 +212,6 @@ export default function CreateProductDialog() {
         },
         onError: (error) => {
           console.error(error);
-          // Keep open on error
         },
       });
     } catch (error) {
@@ -216,80 +221,100 @@ export default function CreateProductDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="flex items-center gap-2">
-          <PiPlusCircleDuotone className="w-5 h-5" />
-          Create New Product
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="default" size="sm" className="group">
+              <Icon
+                icon={PlusSignSquareIcon}
+                className="text-primary-foreground/60 group-hover:text-primary-foreground"
+              />
+              Create New Product
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Create a new product</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Create New Product</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Create a new product by providing product details.
-        </DialogDescription>
+      <AppDialogContent
+        title="Create New Product"
+        description="Create a new product by providing product details."
+        variant="form"
+        size="lg"
+        primaryAction={{
+          label: "Create Product",
+          loadingLabel: "Creating...",
+          form: `create-product-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: PlusSignSquareIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`create-product-form-${id}`}
-          className="create-product-dialog-scrollbar overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="p-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-product-name`}>Product Name</Label>
-              <Input
-                id={`${id}-product-name`}
-                placeholder="Enter product name"
-                type="text"
-                {...register("productName", {
-                  required: "Product name is required",
-                })}
+          <FieldGroup className="gap-4 p-4">
+            <Field data-invalid={!!errors.productName}>
+              <FormFieldLabel
+                htmlFor={`${id}-product-name`}
+                label="Product Name"
+                tooltip="The display name shown across the workspace for this product."
               />
-              {errors.productName && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.productName.message}
-                </p>
-              )}
-            </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-product-name`}
+                  placeholder="Enter product name"
+                  type="text"
+                  aria-invalid={errors.productName ? "true" : "false"}
+                  {...register("productName", {
+                    required: "Product name is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.productName]} />
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-ppn`}>Product Plan Number (PPN)</Label>
-              <Input
-                id={`${id}-ppn`}
-                placeholder="Enter PPN"
-                type="text"
-                {...register("ppn", {
-                  required: "PPN is required",
-                  minLength: {
-                    value: 10,
-                    message: "PPN must be at least 10 alphanumeric characters",
-                  },
-                  pattern: {
-                    value: /^[a-zA-Z0-9]/,
-                    message: "PPN must be at least 10 alphanumeric characters",
-                  },
-                })}
+            <Field data-invalid={!!errors.ppn}>
+              <FormFieldLabel
+                htmlFor={`${id}-ppn`}
+                label="Product Plan Number (PPN)"
+                tooltip="A unique alphanumeric identifier for this product."
               />
-              {errors.ppn && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.ppn.message}
-                </p>
-              )}
-            </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-ppn`}
+                  placeholder="Enter PPN"
+                  type="text"
+                  aria-invalid={errors.ppn ? "true" : "false"}
+                  {...register("ppn", {
+                    required: "PPN is required",
+                    minLength: {
+                      value: 10,
+                      message:
+                        "PPN must be at least 10 alphanumeric characters",
+                    },
+                    pattern: {
+                      value: /^[a-zA-Z0-9]/,
+                      message:
+                        "PPN must be at least 10 alphanumeric characters",
+                    },
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.ppn]} />
+            </Field>
 
-            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-950 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-100">
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-950 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-100">
               <h4 className="mb-2 font-medium text-emerald-800 dark:text-emerald-200">
                 General Guidelines for PPN
               </h4>
-              <ul className="list-inside list-disc space-y-1 text-emerald-700 dark:text-emerald-300">
+              <ul className="list-inside list-disc space-y-1 text-emerald-900 dark:text-emerald-300">
                 <li>Must be alphanumeric & 10 characters long</li>
                 <li>Each product part number should be unique</li>
                 <li>Do not use special characters</li>
@@ -297,47 +322,53 @@ export default function CreateProductDialog() {
               </ul>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-description`}>Description</Label>
-              <Textarea
-                id={`${id}-description`}
-                placeholder="Enter product description"
-                className="min-h-[100px] resize-none"
-                aria-invalid={errors.description ? "true" : "false"}
-                {...register("description", {
-                  validate: (value) =>
-                    value.trim().length > 0 ||
-                    "Product description is required",
-                  maxLength: {
-                    value: 220,
-                    message: "Description must be at most 220 characters",
-                  },
-                })}
+            <Field data-invalid={!!errors.description}>
+              <FormFieldLabel
+                htmlFor={`${id}-description`}
+                label="Description"
+                tooltip="A short summary of the product's purpose and details."
               />
-              <div className="flex justify-between items-center">
-                {errors.description ? (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.description.message}
-                  </p>
-                ) : (
-                  <span />
-                )}
-                <p
-                  className="text-muted-foreground text-xs"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <span className="tabular-nums">
-                    {220 - (watch("description") || "").length}
-                  </span>{" "}
-                  characters left
-                </p>
-              </div>
-            </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupTextarea
+                  id={`${id}-description`}
+                  placeholder="Enter product description"
+                  className="min-h-24 resize-none"
+                  aria-invalid={errors.description ? "true" : "false"}
+                  {...register("description", {
+                    validate: (value) =>
+                      value.trim().length > 0 ||
+                      "Product description is required",
+                    maxLength: {
+                      value: 220,
+                      message: "Description must be at most 220 characters",
+                    },
+                  })}
+                />
+                <InputGroupAddon align="block-end">
+                  <div className="flex w-full items-center justify-between gap-2">
+                    {errors.description ? (
+                      <FieldError errors={[errors.description]} />
+                    ) : (
+                      <span />
+                    )}
+                    <InputGroupText className="text-xs text-muted-foreground/60">
+                      <span className="tabular-nums">
+                        {220 - descriptionLength}
+                      </span>{" "}
+                      characters left
+                    </InputGroupText>
+                  </div>
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-department`}>Department</Label>
+              <Field data-invalid={!!errors.department}>
+                <FormFieldLabel
+                  htmlFor={`${id}-department`}
+                  label="Department"
+                  tooltip="The department this product belongs to."
+                />
                 <Popover
                   open={departmentPopoverOpen}
                   onOpenChange={setDepartmentPopoverOpen}
@@ -347,18 +378,22 @@ export default function CreateProductDialog() {
                       id={`${id}-department`}
                       type="button"
                       variant="outline"
+                      size="default"
                       role="combobox"
                       aria-expanded={departmentPopoverOpen}
-                      className="w-full justify-between font-normal h-9"
+                      className="w-full justify-between bg-background font-normal"
                     >
                       <span className="truncate">
                         {selectedDepartmentLabel ||
-                          departments.find(
-                            (d) => d._id === selectedDepartment,
-                          )?.department_name ||
+                          departments.find((d) => d._id === selectedDepartment)
+                            ?.department_name ||
                           "Select department"}
                       </span>
-                      <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <Icon
+                        icon={UnfoldMoreIcon}
+                        size={16}
+                        className="ml-2 shrink-0 opacity-50"
+                      />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -393,7 +428,9 @@ export default function CreateProductDialog() {
                                 });
                                 setValue("project", "", { shouldDirty: true });
                                 clearErrors("project");
-                                setSelectedDepartmentLabel(dept.department_name);
+                                setSelectedDepartmentLabel(
+                                  dept.department_name,
+                                );
                                 setSelectedProjectLabel(null);
                                 setProjectSearch("");
                                 setDebouncedProjectSearch("");
@@ -415,15 +452,15 @@ export default function CreateProductDialog() {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {errors.department && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.department.message}
-                  </p>
-                )}
-              </div>
+                <FieldError errors={[errors.department]} />
+              </Field>
 
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-project`}>Project</Label>
+              <Field data-invalid={!!errors.project}>
+                <FormFieldLabel
+                  htmlFor={`${id}-project`}
+                  label="Project"
+                  tooltip="The project this product belongs to."
+                />
                 <Popover
                   open={projectPopoverOpen}
                   onOpenChange={setProjectPopoverOpen}
@@ -433,10 +470,11 @@ export default function CreateProductDialog() {
                       id={`${id}-project`}
                       type="button"
                       variant="outline"
+                      size="default"
                       role="combobox"
                       aria-expanded={projectPopoverOpen}
                       disabled={!selectedDepartment}
-                      className="w-full justify-between font-normal h-9"
+                      className="w-full justify-between bg-background font-normal"
                     >
                       <span className="truncate">
                         {selectedProjectLabel ||
@@ -444,7 +482,11 @@ export default function CreateProductDialog() {
                             ?.project_name ||
                           "Select project"}
                       </span>
-                      <PiCaretDownDuotone className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <Icon
+                        icon={UnfoldMoreIcon}
+                        size={16}
+                        className="ml-2 shrink-0 opacity-50"
+                      />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -496,59 +538,48 @@ export default function CreateProductDialog() {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {errors.project && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.project.message}
-                  </p>
-                )}
-              </div>
+                <FieldError errors={[errors.project]} />
+              </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-version`}>Version</Label>
-                <Input
-                  id={`${id}-version`}
-                  value="1.0"
-                  type="text"
-                  disabled
-                  className="bg-muted"
-                  {...register("version")}
+              <Field>
+                <FormFieldLabel
+                  htmlFor={`${id}-version`}
+                  label="Version"
+                  tooltip="New products always start at version 1.0."
                 />
-              </div>
+                <InputGroup size="md" className="bg-muted">
+                  <InputGroupInput
+                    id={`${id}-version`}
+                    value="1.0"
+                    type="text"
+                    disabled
+                    {...register("version")}
+                  />
+                </InputGroup>
+              </Field>
 
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-status`}>Status</Label>
-                <Input
-                  id={`${id}-status`}
-                  value="Draft"
-                  type="text"
-                  disabled
-                  className="bg-muted"
-                  {...register("status")}
+              <Field>
+                <FormFieldLabel
+                  htmlFor={`${id}-status`}
+                  label="Status"
+                  tooltip="New products are created in draft status."
                 />
-              </div>
+                <InputGroup size="md" className="bg-muted">
+                  <InputGroupInput
+                    id={`${id}-status`}
+                    value="Draft"
+                    type="text"
+                    disabled
+                    {...register("status")}
+                  />
+                </InputGroup>
+              </Field>
             </div>
-          </div>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            disabled={isPending}
-            type="submit"
-            size="sm"
-            form={`create-product-form-${id}`}
-          >
-            {isPending ? <Spinner /> : <PiPlusCircleDuotone />}
-            {isPending ? "Creating..." : "Create Product"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

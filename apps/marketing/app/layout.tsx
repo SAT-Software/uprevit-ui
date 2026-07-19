@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
+import { TooltipProvider } from "@uprevit/ui/components/ui/tooltip";
 
 const geist = Geist({
   variable: "--font-geist",
@@ -24,14 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+<ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>{children}</TooltipProvider>
+          </ThemeProvider>
       </body>
     </html>
   );

@@ -1,29 +1,27 @@
 "use client";
 
+import { EditorState } from "@/types/editor";
 import {
+  MarkerTypeItem,
   MarkerTypeList,
   ToolbarAction,
-  MarkerTypeItem,
   isMarkerTypeGroup,
 } from "@/types/toolbar";
 import {
-  PiTrashDuotone,
-  PiCursorDuotone,
-  PiFloppyDiskDuotone,
-  PiEraserDuotone,
-} from "react-icons/pi";
-import { EditorState } from "@/types/editor";
-import ToolbarMarkerGroup from "./toolbar/ToolbarMarkerGroup";
-import ToolbarActionButton from "./toolbar/ToolbarActionButton";
-import ToolbarMarkersButton from "./toolbar/ToolbarMarkersButton";
+  Cursor02Icon,
+  EraserIcon,
+  Delete03Icon,
+} from "@hugeicons/core-free-icons";
 import { ButtonGroup } from "@uprevit/ui/components/ui/button-group";
+import ToolbarActionButton from "./toolbar/ToolbarActionButton";
+import ToolbarMarkerGroup from "./toolbar/ToolbarMarkerGroup";
+import ToolbarMarkersButton from "./toolbar/ToolbarMarkersButton";
 
 type Props = {
   markerTypes: MarkerTypeList;
   currentMarkerType: MarkerTypeItem | null;
   editorState: EditorState;
   variant?: "ghost" | "outline" | "secondary";
-  saveVisible?: boolean;
   onAction: (action: ToolbarAction) => void;
   onNewMarker: (markerType: MarkerTypeItem) => void;
 } & React.ComponentProps<"div">;
@@ -32,17 +30,19 @@ const EditorToolbar = ({
   markerTypes,
   currentMarkerType,
   editorState,
-  variant = "secondary",
-  saveVisible = false,
+  variant = "outline",
   onAction,
   onNewMarker,
   ...props
 }: Props) => {
   return (
-    <div className="flex space-x-1 p-2 items-center justify-between" {...props}>
+    <div
+      className="flex items-center justify-between border-b border-border h-10 px-2"
+      {...props}
+    >
       <ButtonGroup>
         <ToolbarActionButton
-          icon={PiCursorDuotone}
+          icon={Cursor02Icon}
           title="Select"
           buttonType="toggle"
           variant={variant}
@@ -51,7 +51,7 @@ const EditorToolbar = ({
           onAction={onAction}
         />
         <ToolbarActionButton
-          icon={PiTrashDuotone}
+          icon={EraserIcon}
           title="Delete Selected"
           variant={variant}
           action="delete"
@@ -59,7 +59,7 @@ const EditorToolbar = ({
           disabled={!editorState.canDelete}
         />
         <ToolbarActionButton
-          icon={PiEraserDuotone}
+          icon={Delete03Icon}
           title="Clear All Annotations"
           variant={variant}
           action="clear-all"
@@ -67,41 +67,28 @@ const EditorToolbar = ({
         />
       </ButtonGroup>
 
-      <ButtonGroup>
-        {markerTypes.map(
-          (markerListItem) =>
-            isMarkerTypeGroup(markerListItem) ? (
-              <ToolbarMarkerGroup
-                key={markerListItem.name}
-                markers={markerListItem}
-                variant={variant}
-                toggled={
-                  editorState.mode === "create" && currentMarkerType
-                    ? markerListItem.markerTypes.includes(currentMarkerType)
-                    : false
-                }
-                onSelectionChange={onNewMarker}
-              />
-            ) : null // @todo handle single marker items
+      <ButtonGroup className="hidden flex-wrap sm:inline-flex">
+        {markerTypes.map((markerListItem) =>
+          isMarkerTypeGroup(markerListItem) ? (
+            <ToolbarMarkerGroup
+              key={markerListItem.name}
+              markers={markerListItem}
+              variant={variant}
+              toggled={
+                editorState.mode === "create" && currentMarkerType
+                  ? markerListItem.markerTypes.includes(currentMarkerType)
+                  : false
+              }
+              onSelectionChange={onNewMarker}
+            />
+          ) : null,
         )}
       </ButtonGroup>
-      <div className="sm:hidden space-x-1 items-center">
+      <div className="items-center space-x-1 sm:hidden">
         <ToolbarMarkersButton
           markerList={markerTypes}
           onSelectionChange={onNewMarker}
         />
-      </div>
-
-      <div className="inline-flex space-x-1">
-        {saveVisible && (
-          <ToolbarActionButton
-            icon={PiFloppyDiskDuotone}
-            title="Save"
-            variant={variant}
-            action="save"
-            onAction={onAction}
-          />
-        )}
       </div>
     </div>
   );

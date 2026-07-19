@@ -1,3 +1,5 @@
+import type { WorkspaceListPagination } from "./user";
+
 export interface SourceFilesFolder {
   _id: string;
   name: string;
@@ -8,4 +10,16 @@ export interface SourceFilesFolder {
   product_id?: string | null;
   url?: string;
   key?: string;
+  fileCount?: number;
+  created_at?: string;
 }
+
+export type SourceFilesFoldersListResult = {
+  folders: SourceFilesFolder[];
+  pagination: WorkspaceListPagination;
+};
+
+export type SourceFilesFoldersApiResponse = {
+  message?: string;
+  result: SourceFilesFoldersListResult;
+};

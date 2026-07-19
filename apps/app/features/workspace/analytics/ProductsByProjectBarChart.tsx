@@ -9,13 +9,8 @@ import {
   YAxis,
 } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@uprevit/ui/components/ui/card";
+import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
+import { BarChartLoadingSkeleton } from "@/features/workspace/analytics/ChartLoadingSkeleton";
 import {
   ChartContainer,
   ChartTooltip,
@@ -36,7 +31,7 @@ interface ProductsByProjectChartProps {
 const chartConfig = {
   products: {
     label: "Products",
-    color: "hsl(199, 89%, 48%)",
+    color: "var(--chart-3)",
   },
 } satisfies ChartConfig;
 
@@ -46,51 +41,38 @@ export function ProductsByProjectChart({
 }: ProductsByProjectChartProps) {
   if (isLoading) {
     return (
-      <Card className="flex flex-col col-span-3">
-        <CardHeader className="p-4">
-          <CardTitle className="text-base">Products by Project</CardTitle>
-          <CardDescription>Distribution across projects</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 p-4">
-          <div className="h-[250px] flex flex-col justify-around gap-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div
-                  className="h-10 bg-muted animate-pulse rounded"
-                  style={{ width: `${70 - i * 10}%` }}
-                />
-                <div className="h-4 w-8 bg-muted animate-pulse rounded" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <AnalyticsChartPanel
+        title="Products by Project"
+        info="Distribution of products across projects in your workspace"
+      >
+        <div className="p-4 pt-2">
+          <BarChartLoadingSkeleton />
+        </div>
+      </AnalyticsChartPanel>
     );
   }
 
   if (data.length === 0) {
     return (
-      <Card className="flex flex-col col-span-3">
-        <CardHeader className="p-4">
-          <CardTitle className="text-base">Products by Project</CardTitle>
-          <CardDescription>Distribution across projects</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 p-4 flex items-center justify-center min-h-[250px]">
+      <AnalyticsChartPanel
+        title="Products by Project"
+        info="Distribution of products across projects in your workspace"
+      >
+        <div className="flex min-h-[250px] items-center justify-center p-4">
           <p className="text-sm text-muted-foreground">No data available</p>
-        </CardContent>
-      </Card>
+        </div>
+      </AnalyticsChartPanel>
     );
   }
 
   const displayData = data.slice(0, 5);
 
   return (
-    <Card className="flex flex-col col-span-3">
-      <CardHeader className="p-4">
-        <CardTitle className="text-base">Products by Project</CardTitle>
-        <CardDescription>Distribution across projects</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 p-4">
+    <AnalyticsChartPanel
+      title="Products by Project"
+      info="Distribution of products across projects in your workspace"
+    >
+      <div className="p-4 pt-2">
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
           <BarChart
             accessibilityLayer
@@ -119,13 +101,13 @@ export function ProductsByProjectChart({
               dataKey="products"
               layout="vertical"
               fill="var(--color-products)"
-              radius={4}
+              radius={12}
             >
               <LabelList
                 dataKey="project"
                 position="insideLeft"
                 offset={8}
-                className="fill-background"
+                className="fill-background dark:fill-foreground"
                 fontSize={12}
               />
               <LabelList
@@ -138,7 +120,7 @@ export function ProductsByProjectChart({
             </Bar>
           </BarChart>
         </ChartContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </AnalyticsChartPanel>
   );
 }

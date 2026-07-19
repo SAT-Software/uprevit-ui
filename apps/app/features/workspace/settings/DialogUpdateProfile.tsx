@@ -1,31 +1,41 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useRef, useState, useId } from "react";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-  DialogFooter,
-} from "@uprevit/ui/components/ui/dialog";
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
+import {
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useUpdateUser } from "@/hooks/user/useUpdateUser";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { User } from "@/types/user";
 import {
-  PiPencilSimpleDuotone,
-  PiXCircleDuotone,
-  PiCheckCircleDuotone,
-  PiCameraDuotone,
-  PiTrashDuotone,
-} from "react-icons/pi";
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Delete02Icon,
+  UploadSquare01Icon,
+  UserEdit01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { toast } from "sonner";
+
+const PROFILE_AVATAR_ACCEPT =
+  "image/png,image/jpg,image/jpeg,image/gif,image/webp";
+const PROFILE_AVATAR_MAX_SIZE = 500 * 1024;
+const PROFILE_AVATAR_HELPER_TEXT =
+  "Supports PNG, JPEG, JPG, GIF, WEBP (under 500KB)";
 
 interface DialogUpdateProfileProps {
   userProfile: User;
@@ -33,6 +43,9 @@ interface DialogUpdateProfileProps {
 
 export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   const id = useId();
+  const uploadId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const formId = `update-user-profile-form-${id}`;
   const [open, setOpen] = useState(false);
   const { mutate: updateUserMutation, isPending } = useUpdateUser();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();
@@ -94,15 +107,20 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
   };
 
   const handleAvatarChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (file.size > PROFILE_AVATAR_MAX_SIZE) {
+      toast.error("Profile picture must be under 500KB.");
+      event.target.value = "";
+      return;
+    }
+
     try {
       setUploadingAvatar(true);
 
-      // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
@@ -116,10 +134,10 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
       setAvatarUploadedThisSession(true);
     } catch (error) {
       console.error("Failed to upload avatar:", error);
-      // Reset preview on error
       setAvatarPreview("");
     } finally {
       setUploadingAvatar(false);
+      event.target.value = "";
     }
   };
 
@@ -148,190 +166,213 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
     }
   };
 
+  const initials = userProfile?.name
+    ?.split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <PiPencilSimpleDuotone className="w-4 h-4" />
+        <Button variant="secondary" size="sm">
+          <Icon icon={UserEdit01Icon} size={14} strokeWidth={2} />
           Edit Profile
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-[600px] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Edit Profile</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-
-        <form
-          id="update-user-profile-form"
-          onSubmit={handleSubmit(onSubmit)}
-          noValidate
-          className="overflow-y-auto"
-        >
+      <AppDialogContent
+        title="Edit Profile"
+        description="Update your profile picture and personal information."
+        variant="form"
+        size="xl"
+        primaryAction={{
+          label: "Save Changes",
+          loadingLabel: "Saving...",
+          form: formId,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending || uploadingAvatar,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending || uploadingAvatar,
+          icon: Cancel01Icon,
+        }}
+      >
+        <form id={formId} onSubmit={handleSubmit(onSubmit)} noValidate>
           <input type="hidden" {...register("profileAvatar")} />
-          <div className="p-4 space-y-6">
-            <div className="flex items-center gap-6">
-              <div className="relative group">
-                <Avatar className="w-20 h-20 ring-2 ring-background">
+          <FieldGroup className="gap-6 p-4">
+            <div className="flex items-start gap-4">
+              <div className="relative size-20 shrink-0">
+                <Avatar className="size-20 ring-2 ring-background">
                   <AvatarImage src={currentAvatar} alt="Profile avatar" />
-                  <AvatarFallback className="text-lg border">AV</AvatarFallback>
+                  <AvatarFallback className="border text-lg">
+                    {initials || "AV"}
+                  </AvatarFallback>
                 </Avatar>
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px] rounded-full z-10">
-                  <label
-                    className="cursor-pointer p-2 bg-background text-foreground rounded-full hover:bg-accent transition-colors flex items-center justify-center"
-                    title="Change Avatar"
-                  >
-                    <PiCameraDuotone size={16} />
-                    <input
-                      type="file"
-                      accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
-                      onChange={handleAvatarChange}
-                      disabled={uploadingAvatar}
-                      className="hidden"
-                    />
-                  </label>
+                {uploadingAvatar ? (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                    <Spinner />
+                  </div>
+                ) : null}
+              </div>
 
-                  {watch("profileAvatar") && (
-                    <button
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <FormFieldLabel
+                  htmlFor={uploadId}
+                  label="Profile Picture"
+                  tooltip="Update or remove the image shown on your profile."
+                  optional
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingAvatar}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Icon icon={UploadSquare01Icon} size={14} strokeWidth={2} />
+                    Upload Image
+                  </Button>
+
+                  {currentAvatar ? (
+                    <Button
                       type="button"
-                      onClick={removeAvatar}
+                      variant="destructive"
+                      size="sm"
                       disabled={uploadingAvatar}
-                      className="cursor-pointer p-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors flex items-center justify-center"
-                      title="Remove Avatar"
+                      onClick={removeAvatar}
                     >
-                      <PiTrashDuotone size={16} />
-                    </button>
-                  )}
+                      <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+                      Remove
+                    </Button>
+                  ) : null}
                 </div>
 
-                {uploadingAvatar && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-20">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="font-medium text-sm">Profile Picture</h3>
-                <p className="text-xs text-muted-foreground">
-                  Upload a new picture to update your profile.
+                <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+                  {PROFILE_AVATAR_HELPER_TEXT}
                 </p>
               </div>
+
+              <input
+                ref={fileInputRef}
+                id={uploadId}
+                type="file"
+                accept={PROFILE_AVATAR_ACCEPT}
+                onChange={handleAvatarChange}
+                disabled={uploadingAvatar}
+                className="sr-only"
+                aria-label="Upload profile picture"
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Full Name</label>
-                <Input
-                  id={`${id}-name`}
-                  type="text"
-                  placeholder="Enter your full name"
-                  className="w-full"
-                  {...register("name", {
-                    required: "Full name is required",
-                  })}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Field data-invalid={!!errors.name}>
+                <FormFieldLabel
+                  htmlFor={`${id}-name`}
+                  label="Full Name"
+                  tooltip="Your name as it appears across the workspace."
                 />
-                {errors.name && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-name`}
+                    type="text"
+                    placeholder="Enter your full name"
+                    aria-invalid={errors.name ? "true" : "false"}
+                    {...register("name", {
+                      required: "Full name is required",
+                    })}
+                  />
+                </InputGroup>
+                <FieldError errors={[errors.name]} />
+              </Field>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email Address</label>
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^\S+@\S+$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
+              <Field data-invalid={!!errors.email}>
+                <FormFieldLabel
+                  htmlFor={`${id}-email`}
+                  label="Email Address"
+                  tooltip="The email address associated with your account."
                 />
-                {errors.email && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-email`}
+                    type="email"
+                    placeholder="Enter your email"
+                    aria-invalid={errors.email ? "true" : "false"}
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^\S+@\S+$/i,
+                        message: "Invalid email address",
+                      },
+                    })}
+                  />
+                </InputGroup>
+                <FieldError errors={[errors.email]} />
+              </Field>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Role / Designation
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Enter your role"
-                  className="w-full"
-                  {...register("designation", {
-                    required: "Designation is required",
-                  })}
+              <Field data-invalid={!!errors.designation}>
+                <FormFieldLabel
+                  htmlFor={`${id}-designation`}
+                  label="Role / Designation"
+                  tooltip="Your job title or role within the organization."
                 />
-                {errors.designation && (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.designation.message}
-                  </p>
-                )}
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-designation`}
+                    type="text"
+                    placeholder="Enter your role"
+                    aria-invalid={errors.designation ? "true" : "false"}
+                    {...register("designation", {
+                      required: "Designation is required",
+                    })}
+                  />
+                </InputGroup>
+                <FieldError errors={[errors.designation]} />
+              </Field>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Location</label>
-                <Input
-                  type="text"
-                  placeholder="Enter your location"
-                  className="w-full"
-                  {...register("location")}
+              <Field>
+                <FormFieldLabel
+                  htmlFor={`${id}-location`}
+                  label="Location"
+                  tooltip="Your city, region, or office location."
+                  optional
                 />
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-location`}
+                    type="text"
+                    placeholder="Enter your location"
+                    {...register("location")}
+                  />
+                </InputGroup>
+              </Field>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Phone Number</label>
-                <Input
-                  type="tel"
-                  placeholder="Enter your phone number"
-                  className="w-full"
-                  {...register("phone")}
+              <Field>
+                <FormFieldLabel
+                  htmlFor={`${id}-phone`}
+                  label="Phone Number"
+                  tooltip="Your contact phone number."
+                  optional
                 />
-              </div>
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-phone`}
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    {...register("phone")}
+                  />
+                </InputGroup>
+              </Field>
             </div>
-          </div>
+          </FieldGroup>
         </form>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="h-4 w-4" />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            disabled={isPending || uploadingAvatar}
-            variant="default"
-            size="sm"
-            form="update-user-profile-form"
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiCheckCircleDuotone className="h-4 w-4" />
-            )}
-            {isPending ? "Saving..." : "Save Changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

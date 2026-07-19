@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   type Column,
   type ColumnDef,
@@ -8,18 +9,23 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import type { IconType } from "react-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import {
-  PiBuildingsDuotone,
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiCreditCardDuotone,
-  PiUsersDuotone,
-} from "react-icons/pi";
-import { Input } from "@uprevit/ui/components/ui/input";
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  NewOfficeIcon,
+  Search02Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import {
   Table,
   TableBody,
@@ -35,7 +41,14 @@ import {
   mapPlatformPagination,
 } from "@/lib/platform-admin-list-query";
 import { useGetPlatformWorkspaces } from "@/hooks/platform-admin/useGetPlatformWorkspaces";
-import type { PlatformWorkspaceListItem } from "@/types/platform-admin";
+import type {
+  PlatformWorkspaceListItem,
+  WorkspaceBillingPreview,
+} from "@/types/platform-admin";
+import {
+  billingAccountStatusVariant,
+  getBillingStatusLabel,
+} from "@/utils/billingStatusDisplay";
 
 const WORKSPACE_SORT_FIELDS = ["workspaceName", "companyName", "memberCount"];
 
@@ -49,42 +62,58 @@ const TABLE_COLUMN_COUNT = 4;
 const SortableHeader = ({
   column,
   title,
-  icon: Icon,
 }: {
   column: Column<PlatformWorkspaceListItem, unknown>;
   title: string;
-  icon: IconType;
 }) => (
   <button
     type="button"
     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+    className="group flex h-8 w-full cursor-pointer items-center justify-between hover:bg-muted/50 data-[state=open]:bg-accent"
   >
-    <div className="flex items-center justify-between w-full gap-2">
-      <div className="flex items-center gap-2 min-w-0">
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className="whitespace-nowrap">{title}</span>
+    <div className="flex w-full items-center justify-between gap-2">
+      <span className="whitespace-nowrap text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
+        {title}
+      </span>
+      <div className="opacity-50 transition-all delay-100 duration-200 ease-in-out group-hover:opacity-100">
+        {column.getIsSorted() === "desc" ? (
+          <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
+        ) : column.getIsSorted() === "asc" ? (
+          <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+        ) : (
+          <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+        )}
       </div>
-      {column.getIsSorted() === "desc" ? (
-        <PiCaretDownDuotone className="ml-1 h-3 w-3" />
-      ) : column.getIsSorted() === "asc" ? (
-        <PiCaretUpDuotone className="ml-1 h-3 w-3" />
-      ) : (
-        <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
-      )}
     </div>
   </button>
 );
+
+function BillingCell({ billing }: { billing: WorkspaceBillingPreview }) {
+  const statusLabel = getBillingStatusLabel(billing.status, billing.pastDue);
+  const statusVariant = billingAccountStatusVariant(
+    billing.status,
+    billing.pastDue,
+  );
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <Badge variant={statusVariant} className="capitalize">
+        {statusLabel}
+      </Badge>
+      {billing.status !== "not_set" ? (
+        <Badge variant={billing.limitsEnabled ? "orange" : "gray"}>
+          {billing.limitsEnabled ? "Limits on" : "Limits off"}
+        </Badge>
+      ) : null}
+    </div>
+  );
+}
 
 const columns: ColumnDef<PlatformWorkspaceListItem>[] = [
   {
     accessorKey: "workspaceName",
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Workspace"
-        icon={PiBuildingsDuotone}
-      />
+      <SortableHeader column={column} title="Workspace" />
     ),
     cell: ({ row }) => (
       <p className="text-sm font-medium">{row.getValue("workspaceName")}</p>
@@ -93,23 +122,13 @@ const columns: ColumnDef<PlatformWorkspaceListItem>[] = [
   },
   {
     accessorKey: "companyName",
-    header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Company"
-        icon={PiBuildingsDuotone}
-      />
-    ),
-    cell: ({ row }) => (
-      <p className="text-sm">{row.getValue("companyName")}</p>
-    ),
+    header: ({ column }) => <SortableHeader column={column} title="Company" />,
+    cell: ({ row }) => <p className="text-sm">{row.getValue("companyName")}</p>,
     size: 200,
   },
   {
     accessorKey: "memberCount",
-    header: ({ column }) => (
-      <SortableHeader column={column} title="Users" icon={PiUsersDuotone} />
-    ),
+    header: ({ column }) => <SortableHeader column={column} title="Users" />,
     cell: ({ row }) => (
       <p className="text-sm tabular-nums">{row.getValue("memberCount")}</p>
     ),
@@ -120,28 +139,24 @@ const columns: ColumnDef<PlatformWorkspaceListItem>[] = [
     accessorFn: (row) => row.billing.status,
     enableSorting: false,
     header: () => (
-      <div className="flex h-8 items-center gap-2 px-0">
-        <PiCreditCardDuotone className="h-4 w-4 text-muted-foreground" />
-        <span>Billing</span>
+      <div className="flex h-8 items-center px-0">
+        <span className="text-muted-foreground/60">Billing</span>
       </div>
     ),
-    cell: ({ row }) => {
-      const billing = row.original.billing;
-      if (billing.status === "not_set") {
-        return <span className="text-sm text-muted-foreground">Not set</span>;
-      }
-      return (
-        <span className="text-sm capitalize">
-          {billing.status}
-          {billing.limitsEnabled ? " · limits" : ""}
-        </span>
-      );
-    },
-    size: 120,
+    cell: ({ row }) => <BillingCell billing={row.original.billing} />,
+    size: 180,
   },
 ];
 
-export function PlatformWorkspacesTable() {
+type PlatformWorkspacesTableProps = {
+  embedded?: boolean;
+  headerActions?: ReactNode;
+};
+
+export function PlatformWorkspacesTable({
+  embedded = false,
+  headerActions,
+}: PlatformWorkspacesTableProps) {
   const router = useRouter();
   const listState = usePlatformAdminListQuery({
     defaultSort: "workspaceName",
@@ -176,7 +191,7 @@ export function PlatformWorkspacesTable() {
     if (listState.query.page > paginationInfo.totalPages) {
       listState.setPage(1);
     }
-  }, [listState.query.page, listState.setPage, paginationInfo]);
+  }, [listState.query.page, listState, paginationInfo]);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -196,25 +211,42 @@ export function PlatformWorkspacesTable() {
     state: { sorting },
   });
 
-  return (
-    <div className="space-y-2 w-full">
-      <Input
-        placeholder="Search workspaces…"
-        value={listState.searchDraft}
-        onChange={(event) => listState.setSearchDraft(event.target.value)}
-        className="max-w-sm"
-      />
+  const content = (
+    <>
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="shrink-0 text-sm font-medium">Workspaces</p>
+          <InfoTooltip content="Search, inspect, and open any organization workspace." />
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <InputGroup className="w-48">
+            <InputGroupInput
+              value={listState.searchDraft}
+              onChange={(event) => listState.setSearchDraft(event.target.value)}
+              placeholder="Search workspaces…"
+              className="text-sm"
+            />
+            <InputGroupAddon>
+              <Icon icon={Search02Icon} size={14} strokeWidth={2} />
+            </InputGroupAddon>
+          </InputGroup>
+          {headerActions}
+        </div>
+      </div>
 
-      <div className="bg-background overflow-hidden rounded-xl border">
-        <Table className="table-fixed">
+      <div className="w-full overflow-hidden border-b border-border">
+        <Table className="table-fixed w-full">
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="h-10 hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     style={{ width: `${header.getSize()}px` }}
-                    className="h-11 border-r border-border last:border-r-0"
+                    className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0"
                   >
                     {header.isPlaceholder
                       ? null
@@ -236,13 +268,11 @@ export function PlatformWorkspacesTable() {
                   key={row.id}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() =>
-                    router.push(
-                      `/platform-admin/workspaces/${row.original.id}`,
-                    )
+                    router.push(`/platform-admin/workspaces/${row.original.id}`)
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="last:py-3">
+                    <TableCell key={cell.id} className="py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -255,10 +285,20 @@ export function PlatformWorkspacesTable() {
               <TableRow>
                 <TableCell
                   colSpan={TABLE_COLUMN_COUNT}
-                  className="h-24 text-center text-sm text-muted-foreground"
+                  className="h-32 text-center text-muted-foreground"
                 >
-                  No workspaces found
-                  {isFetching ? " · Updating…" : ""}
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Icon
+                      icon={NewOfficeIcon}
+                      size={24}
+                      strokeWidth={2}
+                      className="text-muted-foreground/30"
+                    />
+                    <p className="text-sm">
+                      No workspaces found
+                      {isFetching ? " · Updating…" : ""}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -266,10 +306,22 @@ export function PlatformWorkspacesTable() {
         </Table>
       </div>
 
-      <WorkspaceListPagination
-        pagination={paginationInfo}
-        onPageChange={listState.setPage}
-      />
+      <div className="flex h-10 w-full items-center">
+        <WorkspaceListPagination
+          pagination={paginationInfo}
+          onPageChange={listState.setPage}
+        />
+      </div>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="flex flex-col">{content}</div>;
+  }
+
+  return (
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
+      {content}
     </div>
   );
 }

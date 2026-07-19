@@ -38,6 +38,9 @@ import {
 } from "@/utils/redlineStyles";
 import {
   getWorkbookFillPalette,
+  getWorkbookSelectionFillState,
+  getWorkbookSelectionKeys,
+  getWorkbookSelectionTextState,
   getWorkbookTextPalette,
   getWorkbookTheme,
   isDefaultWorkbookTextColor,
@@ -90,22 +93,27 @@ import {
 } from "react";
 import { useTheme } from "next-themes";
 import {
-  PiArrowClockwiseBold,
-  PiArrowCounterClockwiseBold,
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiDotsSixVerticalBold,
-  PiDownloadSimpleDuotone,
-  PiMagnifyingGlassDuotone,
-  PiUploadSimpleDuotone,
-} from "react-icons/pi";
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  DragDropVerticalIcon,
+  FileExportIcon,
+  FileImportIcon,
+  PaintBucketIcon,
+  Redo02Icon,
+  Search02Icon,
+  SearchReplaceIcon,
+  TextSquareIcon,
+  Undo02Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { toast } from "sonner";
 import { applyFilter, detectColumnDataType } from "./column-filter-utils";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
 import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
 import { FindReplaceDialog } from "./FindReplaceDialog";
+import { WorkbookColorPopover } from "./WorkbookColorPopover";
 
 // History entry types (delta-based)
 type CellEditEntry = {
@@ -306,34 +314,51 @@ const EditableHeaderContent = ({
       ) : (
         headerInput
       )}
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="shrink-0 hover:bg-accent-foreground/10 rounded size-6"
-      >
-        {column.getIsSorted() === "desc" ? (
-          <PiCaretDownDuotone className="h-3 w-3" />
-        ) : column.getIsSorted() === "asc" ? (
-          <PiCaretUpDuotone className="h-3 w-3" />
-        ) : (
-          <PiCaretUpDownDuotone className="h-3 w-3 opacity-50" />
-        )}
-      </Button>
-      <ColumnFilterPopover
-        dataType={dataType}
-        filter={meta.columnFilters[colIndex]}
-        onApply={(filter) =>
-          meta.setColumnFilters((f) => ({ ...f, [colIndex]: filter }))
-        }
-        onClear={() =>
-          meta.setColumnFilters((f) => {
-            const updated = { ...f };
-            delete updated[colIndex];
-            return updated;
-          })
-        }
-      />
+      <div className="flex shrink-0 items-center">
+        <Button
+          variant="ghost"
+          size="icon-2xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-accent-foreground/10"
+        >
+          {column.getIsSorted() === "desc" ? (
+            <Icon
+              icon={ArrowDown01Icon}
+              size={10}
+              strokeWidth={2}
+              className="size-2.5"
+            />
+          ) : column.getIsSorted() === "asc" ? (
+            <Icon
+              icon={ArrowUp01Icon}
+              size={10}
+              strokeWidth={2}
+              className="size-2.5"
+            />
+          ) : (
+            <Icon
+              icon={UnfoldMoreIcon}
+              size={10}
+              strokeWidth={2}
+              className="size-2.5 opacity-50"
+            />
+          )}
+        </Button>
+        <ColumnFilterPopover
+          dataType={dataType}
+          filter={meta.columnFilters[colIndex]}
+          onApply={(filter) =>
+            meta.setColumnFilters((f) => ({ ...f, [colIndex]: filter }))
+          }
+          onClear={() =>
+            meta.setColumnFilters((f) => {
+              const updated = { ...f };
+              delete updated[colIndex];
+              return updated;
+            })
+          }
+        />
+      </div>
     </>
   );
 };
@@ -383,15 +408,20 @@ const DraggableHeader = ({
       )}
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
         disabled={isReadOnly}
-        className={`shrink-0 hover:bg-accent-foreground/10 rounded size-6 ml-0.5 ${
+        className={`shrink-0 hover:bg-accent-foreground/10 ml-0.5 ${
           isReadOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
         }`}
         {...attributes}
         {...listeners}
       >
-        <PiDotsSixVerticalBold className="h-3 w-3 opacity-50" />
+        <Icon
+          icon={DragDropVerticalIcon}
+          size={10}
+          strokeWidth={2}
+          className="size-2.5 opacity-50"
+        />
       </Button>
 
       <div className="flex items-center flex-1 min-w-0 gap-1 pr-1">
@@ -456,7 +486,7 @@ const DataTypeSelect = ({
     value={value ?? ""}
     onValueChange={(val) => onChange(colIndex, val as DataType)}
   >
-    <SelectTrigger className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2">
+    <SelectTrigger className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2 [&_svg]:size-2.5!">
       <SelectValue placeholder="" />
     </SelectTrigger>
     <SelectContent>
@@ -1004,6 +1034,28 @@ export function ProductSpecificationDataTable({
     [selectedCells, activeCell, cellFormats, isReadOnly, record],
   );
 
+  const selectionKeys = useMemo(
+    () => getWorkbookSelectionKeys(selectedCells, activeCell),
+    [selectedCells, activeCell],
+  );
+
+  const selectionFillState = useMemo(
+    () =>
+      getWorkbookSelectionFillState(selectionKeys, cellFormats, workbookTheme),
+    [selectionKeys, cellFormats, workbookTheme],
+  );
+
+  const selectionTextState = useMemo(
+    () =>
+      getWorkbookSelectionTextState(
+        selectionKeys,
+        cellFormats,
+        workbookTheme,
+        textColors[0],
+      ),
+    [selectionKeys, cellFormats, workbookTheme, textColors],
+  );
+
   const rows: { rowIndex: number }[] = useMemo(() => {
     return Array.from({ length: ROW_COUNT }, (_, i) => ({
       rowIndex: i,
@@ -1421,49 +1473,27 @@ export function ProductSpecificationDataTable({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Formatting Toolbar */}
-      <div className="flex items-center gap-2 px-2 py-2 border-b border-border bg-muted/50 shrink-0">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">Fill:</span>
-          <div className="flex gap-0.5">
-            {fillColors.map((color) => (
-              <button
-                key={`bg-${color}`}
-                onClick={() => applyBgColor(color)}
-                disabled={isReadOnly}
-                className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all"
-                style={
-                  color === NO_FILL_COLOR
-                    ? {
-                        backgroundColor: "var(--background)",
-                        backgroundImage:
-                          "linear-gradient(135deg, transparent 44%, rgba(248, 113, 113, 0.9) 44%, rgba(248, 113, 113, 0.9) 56%, transparent 56%)",
-                      }
-                    : { backgroundColor: color }
-                }
-                title={color === NO_FILL_COLOR ? "No fill" : color}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="w-px h-5 bg-border" />
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">Text:</span>
-          <div className="flex gap-0.5">
-            {textColors.map((color) => (
-              <button
-                key={`text-${color}`}
-                onClick={() => applyTextColor(color)}
-                disabled={isReadOnly}
-                className="size-5 rounded border border-border hover:ring-2 hover:ring-primary/50 transition-all flex items-center justify-center"
-                title={isDefaultWorkbookTextColor(color) ? "Default" : color}
-              >
-                <span className="text-xs font-bold" style={{ color }}>
-                  A
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center gap-2 px-2 h-10 border-b border-border bg-muted/50 shrink-0">
+        <WorkbookColorPopover
+          icon={PaintBucketIcon}
+          label="Fill color"
+          colors={fillColors}
+          currentColor={selectionFillState.color}
+          isMixed={selectionFillState.isMixed}
+          disabled={isReadOnly}
+          variant="fill"
+          onSelect={applyBgColor}
+        />
+        <WorkbookColorPopover
+          icon={TextSquareIcon}
+          label="Text color"
+          colors={textColors}
+          currentColor={selectionTextState.color}
+          isMixed={selectionTextState.isMixed}
+          disabled={isReadOnly}
+          variant="text"
+          onSelect={applyTextColor}
+        />
         {selectedCells.size > 1 && (
           <>
             <div className="w-px h-5 bg-border" />
@@ -1478,13 +1508,13 @@ export function ProductSpecificationDataTable({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon-sm"
+              variant="outline"
+              size="icon-xs"
               onClick={undo}
               disabled={isReadOnly || history.past.length === 0}
               className="hover:bg-accent-foreground/10"
             >
-              <PiArrowCounterClockwiseBold className="size-4" />
+              <Icon icon={Undo02Icon} size={16} strokeWidth={2} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Undo (Cmd+Z)</TooltipContent>
@@ -1493,13 +1523,13 @@ export function ProductSpecificationDataTable({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon-sm"
+              variant="outline"
+              size="icon-xs"
               onClick={redo}
               disabled={isReadOnly || history.future.length === 0}
               className="hover:bg-accent-foreground/10"
             >
-              <PiArrowClockwiseBold className="size-4" />
+              <Icon icon={Redo02Icon} size={16} strokeWidth={2} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Redo (Cmd+Shift+Z)</TooltipContent>
@@ -1507,7 +1537,7 @@ export function ProductSpecificationDataTable({
 
         <div className="flex-1" />
 
-        <InputGroup className="max-w-48 h-7">
+        <InputGroup className="max-w-48">
           <InputGroupInput
             placeholder="Search..."
             value={searchQuery}
@@ -1515,46 +1545,55 @@ export function ProductSpecificationDataTable({
             className=" text-xs"
           />
           <InputGroupAddon className="pl-2">
-            <PiMagnifyingGlassDuotone className="size-3" />
+            <Icon icon={Search02Icon} size={14} strokeWidth={2} />
           </InputGroupAddon>
         </InputGroup>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setShowFindReplace(true)}
-          disabled={isReadOnly}
-        >
-          <PiMagnifyingGlassDuotone className="size-3" />
-          Find & Replace
-        </Button>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              variant="outline"
+              size="icon-xs"
+              onClick={() => setShowFindReplace(true)}
+              disabled={isReadOnly}
+            >
+              <Icon icon={SearchReplaceIcon} size={14} strokeWidth={2} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Find &amp; Replace</TooltipContent>
+        </Tooltip>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.xlsx,.xls,.numbers"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isReadOnly}
-          // className="gap-1.5"
-        >
-          <PiUploadSimpleDuotone className="size-3" />
-          Import
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleExport}
-          // className="gap-1.5"
-        >
-          <PiDownloadSimpleDuotone className="size-3" />
-          Export
-        </Button>
+        <Tooltip>
+          <TooltipTrigger>
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.xlsx,.xls,.numbers"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="icon-xs"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isReadOnly}
+              >
+                <Icon icon={FileImportIcon} size={14} strokeWidth={2} />
+              </Button>
+            </>
+          </TooltipTrigger>
+          <TooltipContent>Import file</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger>
+            <Button variant="outline" size="icon-xs" onClick={handleExport}>
+              <Icon icon={FileExportIcon} size={14} strokeWidth={2} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Export this table</TooltipContent>
+        </Tooltip>
       </div>
 
       <DndContext
@@ -1803,8 +1842,7 @@ export function ProductSpecificationDataTable({
                             showInlineDiff && "caret-transparent",
                           )}
                           style={{
-                            backgroundColor:
-                              resolvedBg || "var(--background)",
+                            backgroundColor: resolvedBg || "var(--background)",
                             boxShadow: showHighlightDiff
                               ? getRedlineHighlightInsetShadow(workbookTheme)
                               : undefined,

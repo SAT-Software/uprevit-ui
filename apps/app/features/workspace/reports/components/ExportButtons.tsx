@@ -1,12 +1,14 @@
 "use client";
 
+import { Pdf01Icon, Xls01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { PiFilePdfDuotone, PiMicrosoftExcelLogoDuotone } from "react-icons/pi";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 interface ExportButtonsProps {
   onExportPDF: () => void;
@@ -28,37 +30,51 @@ export function ExportButtons({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="secondary"
+            type="button"
+            variant="outline"
             size="sm"
             onClick={onExportPDF}
             disabled={disabled || isExportingPDF}
-            className="gap-1.5"
           >
-            <PiFilePdfDuotone size={16} className="text-red-500" />
-            {isExportingPDF ? "Starting..." : "PDF"}
+            {isExportingPDF ? (
+              <Spinner className="size-3.5" />
+            ) : (
+              <Icon
+                icon={Pdf01Icon}
+                size={14}
+                strokeWidth={2}
+                
+              />
+            )}
+            PDF
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          <p>Queue PDF export</p>
-        </TooltipContent>
+        <TooltipContent>Queue PDF export</TooltipContent>
       </Tooltip>
 
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="secondary"
+            type="button"
+            variant="outline"
             size="sm"
             onClick={onExportExcel}
             disabled={disabled || isExportingExcel}
-            className="gap-1.5"
           >
-            <PiMicrosoftExcelLogoDuotone size={16} className="text-green-600" />
-            {isExportingExcel ? "Starting..." : "Excel"}
+            {isExportingExcel ? (
+              <Spinner className="size-3.5" />
+            ) : (
+              <Icon
+                icon={Xls01Icon}
+                size={14}
+                strokeWidth={2}
+                
+              />
+            )}
+            Excel
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          <p>Queue Excel export</p>
-        </TooltipContent>
+        <TooltipContent>Queue Excel export</TooltipContent>
       </Tooltip>
     </div>
   );

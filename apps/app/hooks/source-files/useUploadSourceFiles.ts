@@ -49,6 +49,12 @@ export function useUploadSourceFiles(currentFolderId: string) {
       queryClient.invalidateQueries({
         queryKey: ["source-files-folder", currentFolderId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders-infinite"],
+      });
       invalidateBillingSummary(queryClient);
     },
     onError: (error) => {

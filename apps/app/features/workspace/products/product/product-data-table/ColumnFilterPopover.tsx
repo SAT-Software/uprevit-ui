@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
-import { PiFunnel, PiFunnelDuotone, PiFunnelFill } from "react-icons/pi";
+import { FilterIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import type {
   ColumnDataType,
   ColumnFilter,
@@ -39,7 +40,7 @@ export function ColumnFilterPopover({
   const [open, setOpen] = useState(false);
   const operators = getFilterOperators(dataType);
   const [operator, setOperator] = useState<FilterOperator>(
-    filter?.operator ?? operators[0].value
+    filter?.operator ?? operators[0].value,
   );
   const [value, setValue] = useState(filter?.value ?? "");
 
@@ -62,16 +63,15 @@ export function ColumnFilterPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="shrink-0 hover:bg-accent-foreground/10 rounded size-6"
-        >
-          {hasFilter ? (
-            <PiFunnelFill className="size-3 text-primary" />
-          ) : (
-            <PiFunnelDuotone className="size-3 opacity-50" />
-          )}
+        <Button variant="ghost" size="icon-2xs" className="hover:bg-accent-foreground/10">
+          <Icon
+            icon={FilterIcon}
+            size={10}
+            strokeWidth={2}
+            className={
+              hasFilter ? "size-2.5 text-primary" : "size-2.5 opacity-50"
+            }
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3" align="start">

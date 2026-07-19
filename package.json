@@ -27,6 +27,8 @@
     "turbo": "^2.8.21"
   },
   "dependencies": {
+    "@hugeicons/core-free-icons": "^4.2.1",
+    "@hugeicons/react": "^1.1.9",
     "lottie-react": "^2.4.1"
   },
   "overrides": {

@@ -35,6 +35,12 @@ export function useDeleteSourceFiles(slug: string) {
       queryClient.invalidateQueries({
         queryKey: ["source-files-folder", slug],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders-infinite"],
+      });
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to delete source files");

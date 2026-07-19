@@ -5,7 +5,7 @@ import {
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 
-async function getAllProducts({
+export async function getAllProducts({
   signal,
   auth,
   query,
@@ -18,16 +18,13 @@ async function getAllProducts({
     auth.user?.profile?.workspaceId as string | undefined,
     query,
   );
-  const response = await fetch(
-    `/api/products?${params.toString()}`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth?.user?.access_token}`,
-        "Content-Type": "application/json",
-      },
-      signal,
-    }
-  );
+  const response = await fetch(`/api/products?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${auth?.user?.access_token}`,
+      "Content-Type": "application/json",
+    },
+    signal,
+  });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(text || "Failed to fetch products");
@@ -37,12 +34,12 @@ async function getAllProducts({
   return data;
 }
 
-export function useGetAllProducts(query?: ListQueryParams) {
+export function useGetAllProducts(query?: ListQueryParams, enabled = true) {
   const auth = useAuth();
 
   return useQuery({
     queryKey: ["all-products", auth.user?.profile?.workspaceId, query],
     queryFn: ({ signal }) => getAllProducts({ signal, auth, query }),
-    enabled: auth.isAuthenticated,
+    enabled: auth.isAuthenticated && enabled,
   });
 }

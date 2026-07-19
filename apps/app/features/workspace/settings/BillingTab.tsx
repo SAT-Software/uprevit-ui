@@ -1,6 +1,8 @@
 "use client";
 
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetBillingChargebee } from "@/hooks/billing/useGetBillingChargebee";
+import { useGetBillingSummary } from "@/hooks/billing/useGetBillingSummary";
 import { BillingInvoicesTable } from "@/features/billing/BillingInvoicesTable";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
@@ -10,13 +12,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@uprevit/ui/components/ui/hover-card";
+import { Separator } from "@uprevit/ui/components/ui/separator";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { cn } from "@uprevit/ui/lib/utils";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
   billingAccountStatusVariant,
   formatSubscriptionStatusLabel,
   getBillingStatusLabel,
 } from "@/utils/billingStatusDisplay";
+import {
+  AlertCircleIcon,
+  Calendar03Icon,
+  CreditCardIcon,
+  LimitationIcon,
+} from "@hugeicons/core-free-icons";
 import {
   PiCalendarDuotone,
   PiCreditCardDuotone,
@@ -28,10 +44,186 @@ import {
   PiWarningCircleDuotone,
 } from "react-icons/pi";
 import { useRouter } from "next/navigation";
+import type {
+  BillingAccountStatus,
+  BillingCadence,
+  WorkspaceBillingSummary,
+} from "@/types/billing";
+
+function billingStatusTone(
+  status: BillingAccountStatus,
+  pastDue?: boolean | null,
+): string {
+  if (pastDue || status === "past_due") return "bg-amber-500";
+  if (status === "active") return "bg-emerald-500";
+  if (status === "cancelled") return "bg-muted-foreground/50";
+  return "bg-sky-500";
+}
+
+function formatBillingCadenceLabel(cadence: BillingCadence): string {
+  return cadence === "yearly" ? "Yearly" : "Monthly";
+}
+
+function UsageBillingStatusHoverCard({
+  status,
+  pastDue,
+  billingCadence,
+  limitsEnabled,
+}: {
+  status: BillingAccountStatus;
+  pastDue?: boolean | null;
+  billingCadence: BillingCadence;
+  limitsEnabled: boolean;
+}) {
+  const statusLabel = getBillingStatusLabel(status, pastDue);
+  const cadenceLabel = formatBillingCadenceLabel(billingCadence);
+
+  return (
+    <HoverCard openDelay={150} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ml-auto h-7 gap-1.5 text-muted-foreground"
+          aria-label="View billing status"
+        >
+          <Icon icon={CreditCardIcon} size={14} strokeWidth={2} />
+          Billing status
+        </Button>
+      </HoverCardTrigger>
+      <HoverCardContent align="end" className="w-72 p-0">
+        <div className="px-4 py-3">
+          <p className="text-sm font-medium text-foreground">
+            Workspace billing
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Subscription status, plan, and limit enforcement
+          </p>
+        </div>
+
+        <Separator />
+
+        <div className="flex flex-col gap-3 px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span
+                className={cn(
+                  "ml-0.5 size-2.5 shrink-0 rounded-full",
+                  billingStatusTone(status, pastDue),
+                )}
+              />
+              <p className="text-xs text-muted-foreground">Status</p>
+            </div>
+            <p className="text-xs font-medium capitalize text-foreground">
+              {statusLabel}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Icon
+                icon={Calendar03Icon}
+                size={14}
+                strokeWidth={2}
+                className="text-muted-foreground/70"
+              />
+              <p className="text-xs text-muted-foreground">Plan</p>
+            </div>
+            <p className="text-xs font-medium text-foreground">{cadenceLabel}</p>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Icon
+                icon={LimitationIcon}
+                size={14}
+                strokeWidth={2}
+                className="text-muted-foreground/70"
+              />
+              <p className="text-xs text-muted-foreground">Limit enforcement</p>
+            </div>
+            <p
+              className={cn(
+                "text-xs font-medium",
+                limitsEnabled ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {limitsEnabled ? "On" : "Off"}
+            </p>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
+function BillingUsagePeriodCard({
+  summary,
+}: {
+  summary: WorkspaceBillingSummary;
+}) {
+  const hasOverage =
+    summary.limitStatus.seats.overLimit ||
+    summary.limitStatus.exports.overLimit ||
+    summary.limitStatus.uploadGb.overLimit;
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+        <p className="text-sm font-medium">Usage period</p>
+        <InfoTooltip
+          content={
+            summary.period.source === "chargebee"
+              ? "Dates for the current subscription term. Usage tracked from the start date to the end date of the subscription term."
+              : "Dates for the current billing period. Usage tracked from the start date to the end date of the billing period."
+          }
+        />
+        <UsageBillingStatusHoverCard
+          status={summary.account.status}
+          pastDue={summary.account.pastDue}
+          billingCadence={summary.account.billingCadence}
+          limitsEnabled={summary.limitsEnabled}
+        />
+      </div>
+
+      <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-foreground">
+            {formatToLocalDate(summary.period.start)} –{" "}
+            {formatToLocalDate(summary.period.end)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {summary.period.source === "chargebee"
+              ? "Subscription term"
+              : "Standard billing period"}
+          </p>
+        </div>
+        {hasOverage && summary.enforcementMode === "overage" ? (
+          <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-900/50 dark:bg-amber-950/30">
+            <Icon
+              icon={AlertCircleIcon}
+              size={14}
+              strokeWidth={2}
+              className="shrink-0 text-amber-700 dark:text-amber-300"
+            />
+            <p className="text-xs text-amber-900 dark:text-amber-100">
+              Usage exceeds configured limits this period.
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function BillingTab() {
   const router = useRouter();
   const { data, isLoading, isError, error, refetch } = useGetBillingChargebee();
+  const {
+    data: summary,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+  } = useGetBillingSummary();
 
   const openInvoice = (invoiceId: string) => {
     router.push(`/settings/billing/invoices/${encodeURIComponent(invoiceId)}`);
@@ -40,6 +232,7 @@ function BillingTab() {
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <Skeleton className="h-24 rounded-2xl" />
         <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
           <Skeleton className="w-20 h-20 rounded-full shrink-0" />
           <div className="flex-1 space-y-2">
@@ -86,6 +279,13 @@ function BillingTab() {
 
   return (
     <div className="space-y-6">
+      {/* Usage period — parked here while Usage tab focuses on metrics + enforcement */}
+      {isSummaryLoading ? (
+        <Skeleton className="h-24 rounded-2xl" />
+      ) : summary && !isSummaryError ? (
+        <BillingUsagePeriodCard summary={summary} />
+      ) : null}
+
       {/* Header */}
       <div className="flex flex-col gap-4 rounded-lg border bg-accent p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-6">

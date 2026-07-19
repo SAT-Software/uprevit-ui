@@ -1,19 +1,11 @@
-import { PiLinkDuotone, PiCopyDuotone, PiCheckDuotone } from "react-icons/pi";
-import { PiShareNetworkDuotone, PiXCircleDuotone } from "react-icons/pi";
+"use client";
+
 import { useState, useMemo } from "react";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Label } from "@uprevit/ui/components/ui/label";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
@@ -24,6 +16,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  Copy01Icon,
+  Link01Icon,
+  Share08Icon,
+  Tick01Icon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 
 export default function ShareDepartmentDialog({
   department,
@@ -54,79 +55,81 @@ export default function ShareDepartmentDialog({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
-          <PiShareNetworkDuotone className="h-4 w-4" />
-          Share
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Share Department</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Share this department with others by copying the link below.
-        </DialogDescription>
-
-        <div className="p-4 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="department-link">Department Link</Label>
-            <div className="flex items-center space-x-2">
-              <InputGroup>
+      <Tooltip>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Icon
+                className="transition-colors delay-100 duration-200 ease-in-out"
+                icon={Share08Icon}
+                size={16}
+                strokeWidth={2}
+              />
+              Share
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
+        <TooltipContent>
+          Share department with any user of this workspace. Copy link and send.
+        </TooltipContent>
+      </Tooltip>
+      <AppDialogContent
+        title="Share Department"
+        description="Share this department with others by copying the link below."
+        subtitle="Copy the link below and send it to workspace members."
+        variant="inform"
+        size="lg"
+        secondaryAction={{
+          label: "Close",
+          icon: Cancel01Icon,
+        }}
+      >
+        <FieldGroup className="gap-4 p-4">
+          <Field>
+            <FormFieldLabel
+              htmlFor="department-link"
+              label="Department Link"
+              tooltip="Anyone with this link who belongs to the workspace can open this department."
+            />
+            <div className="flex items-center gap-2">
+              <InputGroup size="md" className="bg-background">
+                <InputGroupAddon>
+                  <Icon icon={Link01Icon} size={16} strokeWidth={2} />
+                </InputGroupAddon>
                 <InputGroupInput
                   id="department-link"
                   value={departmentLink}
                   readOnly
-                  className="pl-10"
                 />
-                <InputGroupAddon>
-                  <PiLinkDuotone size={16} />
-                </InputGroupAddon>
               </InputGroup>
-              <Button size="sm" onClick={handleCopyLink} className="shrink-0">
-                {copied ? (
-                  <>
-                    <PiCheckDuotone size={16} className="mr-1" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <PiCopyDuotone size={16} className="mr-1" />
-                    Copy
-                  </>
-                )}
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleCopyLink}
+                className="shrink-0"
+              >
+                <Icon
+                  icon={copied ? Tick01Icon : Copy01Icon}
+                  size={16}
+                  strokeWidth={2}
+                />
+                {copied ? "Copied" : "Copy"}
               </Button>
             </div>
-          </div>
+          </Field>
 
-          {department?.department_name && (
-            <div className="rounded-lg border p-3 bg-muted/50">
-              <h4 className="font-medium text-sm">
+          {department?.department_name ? (
+            <div className="rounded-lg border bg-muted/50 p-3">
+              <h4 className="text-sm font-medium">
                 {department.department_name}
               </h4>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Department ID: {department._id}
               </p>
             </div>
-          )}
-        </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
+          ) : null}
+        </FieldGroup>
+      </AppDialogContent>
     </Dialog>
   );
 }

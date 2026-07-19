@@ -55,6 +55,9 @@ export function useUpdateSourceFilesFolder(folderId: string) {
       queryClient.invalidateQueries({
         queryKey: ["source-files-folders"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders-infinite"],
+      });
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to update source files folder");

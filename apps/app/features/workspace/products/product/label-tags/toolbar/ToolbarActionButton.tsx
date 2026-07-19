@@ -1,19 +1,19 @@
 "use client";
 
 import { Button } from "@uprevit/ui/components/ui/button";
-import { PiSpinnerDuotone } from "react-icons/pi";
-import { IconType } from "react-icons";
+import type { IconSvgElement } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ToolbarAction } from "@/types/toolbar";
-import { Toggle } from "@uprevit/ui/components/ui/toggle";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 type Props = {
-  icon: IconType;
+  icon: IconSvgElement;
   title: string;
   buttonType?: "button" | "toggle";
   variant?: "ghost" | "outline" | "secondary";
@@ -26,10 +26,10 @@ type Props = {
 };
 
 const ToolbarActionButton = ({
-  icon: Icon,
+  icon,
   title,
   buttonType,
-  variant = "secondary",
+  variant = "outline",
   toggled,
   disabled,
   loading = false,
@@ -37,6 +37,12 @@ const ToolbarActionButton = ({
   className,
   onAction,
 }: Props) => {
+  const iconNode = loading ? (
+    <Spinner className="size-3.5" />
+  ) : (
+    <Icon icon={icon} size={14} strokeWidth={2} />
+  );
+
   return (
     <>
       {(buttonType === undefined || buttonType === "button") && (
@@ -44,14 +50,12 @@ const ToolbarActionButton = ({
           <TooltipTrigger asChild>
             <Button
               variant={variant}
-              className={cn("", className)}
+              className={cn("size-7", className)}
               size="icon-sm"
-              // title={title}
               disabled={disabled}
               onClick={() => onAction(action)}
             >
-              {loading && <PiSpinnerDuotone className="animate-spin" />}
-              {!loading && <Icon />}
+              {iconNode}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -62,17 +66,16 @@ const ToolbarActionButton = ({
       {buttonType === "toggle" && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Toggle
-              variant={variant === "outline" ? "outline" : "outline"}
-              className={cn("", className)}
+            <Button
+              variant={toggled ? "secondary" : variant}
+              className={cn("size-7", className)}
               size="icon-sm"
-              // title={title}
-              pressed={toggled ? true : false}
               disabled={disabled}
+              aria-pressed={toggled}
               onClick={() => onAction(action)}
             >
-              <Icon />
-            </Toggle>
+              {iconNode}
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>{title}</p>

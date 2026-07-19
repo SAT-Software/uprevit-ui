@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@uprevit/ui/components/ui/sonner";
@@ -13,7 +13,7 @@ import { Toaster } from "@uprevit/ui/components/ui/sonner";
 // import "@univerjs/presets/lib/styles/preset-sheets-sort.css";
 import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 
-const geist = Geist({
+const outfit = Outfit({
   variable: "--font-geist",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
@@ -32,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geist.variable} antialiased`}>
+      <body className={`${outfit.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -1,5 +1,37 @@
 import * as React from "react";
 
+import { GuardedLink } from "@/components/common/GuardedLink";
+import { UprevitLogo } from "@/components/common/UprevitLogo";
+import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
+import type { AllTabsData } from "@/types/product";
+import {
+  AiSheetsIcon,
+  Album02Icon,
+  Archive01Icon,
+  ArchiveIcon,
+  ArrowDown01Icon,
+  Blockchain03Icon,
+  Bookmark01Icon,
+  BookOpen02Icon,
+  Chart02Icon,
+  ContractsIcon,
+  FileDatabaseIcon,
+  Folder02Icon,
+  Home04Icon,
+  KanbanIcon,
+  LabelImportantIcon,
+  LayerIcon,
+  Layout01Icon,
+  NewOfficeIcon,
+  Settings01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@uprevit/ui/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -15,43 +47,16 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@uprevit/ui/components/ui/sidebar";
-import { GuardedLink } from "@/components/common/GuardedLink";
-import { UprevitLogo } from "@/components/common/UprevitLogo";
-import {
-  PiArchiveDuotone,
-  PiBookmarkSimpleDuotone,
-  PiBookOpenDuotone,
-  PiBuildingsDuotone,
-  PiPresentationChartDuotone,
-  PiDatabaseDuotone,
-  PiHouseDuotone,
-  PiFolderOpenDuotone,
-  PiGearDuotone,
-  PiImageSquareDuotone,
-  PiKanbanDuotone,
-  PiLayoutDuotone,
-  PiMicrosoftExcelLogoDuotone,
-  PiPictureInPictureDuotone,
-  PiPackageDuotone,
-  PiTagChevronDuotone,
-  PiDotsThreeOutlineVerticalDuotone,
-  PiChartBarDuotone,
-} from "react-icons/pi";
-import { usePathname, useSearchParams } from "next/navigation";
-import { cn } from "@uprevit/ui/lib/utils";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@uprevit/ui/components/ui/collapsible";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
+import { cn } from "@uprevit/ui/lib/utils";
+import { usePathname, useSearchParams } from "next/navigation";
 import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
+import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
 const data = {
   navMain: [
@@ -61,22 +66,50 @@ const data = {
         {
           title: "Dashboard",
           url: "/dashboard",
-          icon: PiHouseDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Home04Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Departments",
           url: "/departments",
-          icon: PiBuildingsDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={NewOfficeIcon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Projects",
           url: "/projects",
-          icon: PiKanbanDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={KanbanIcon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Products",
           url: "/products",
-          icon: PiPackageDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Blockchain03Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
       ],
     },
@@ -86,17 +119,38 @@ const data = {
         {
           title: "Source Files",
           url: "/source-files",
-          icon: PiFolderOpenDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Folder02Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Bookmarked Products",
           url: "/bookmarked-products",
-          icon: PiBookmarkSimpleDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Bookmark01Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Archive",
           url: "/archive",
-          icon: PiArchiveDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={ArchiveIcon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
       ],
     },
@@ -106,12 +160,26 @@ const data = {
         {
           title: "Reports",
           url: "/reports",
-          icon: PiPresentationChartDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Archive01Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Analytics",
           url: "/analytics",
-          icon: PiChartBarDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Chart02Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
       ],
     },
@@ -122,59 +190,161 @@ const data = {
         {
           title: "Settings",
           url: "/settings",
-          icon: PiGearDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={Settings01Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
         {
           title: "Documentation",
           url: "/docs",
-          icon: PiBookOpenDuotone,
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={BookOpen02Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
         },
       ],
     },
   ],
 };
 
-const productSubItems = [
+const productSubItems: {
+  title: string;
+  url: string;
+  completionKey: keyof AllTabsData;
+  icon: React.ReactNode;
+}[] = [
   {
     title: "Product Information",
     url: "/product-information",
-    icon: PiLayoutDuotone,
+    completionKey: "product_information",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={Layout01Icon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Compliance Information",
     url: "/compliance-information",
-    icon: PiBookOpenDuotone,
+    completionKey: "compliance_information",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={ContractsIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Label Components",
     url: "/label-components",
-    icon: PiPictureInPictureDuotone,
+    completionKey: "label_components",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={LayerIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Symbols & Graphics",
     url: "/symbols-graphics",
-    icon: PiImageSquareDuotone,
+    completionKey: "symbols_graphics",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={Album02Icon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Product Specifications",
     url: "/product-specifications",
-    icon: PiMicrosoftExcelLogoDuotone,
+    completionKey: "product_data",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={AiSheetsIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Operational Parameters",
     url: "/operational-parameters",
-    icon: PiDatabaseDuotone,
+    completionKey: "operational_parameters",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={FileDatabaseIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
   {
     title: "Label Tags",
     url: "/label-tags",
-    icon: PiTagChevronDuotone,
+    completionKey: "label_tags",
+    icon: (
+      <Icon
+        className="transition-all delay-100 duration-200 ease-in-out"
+        icon={LabelImportantIcon}
+        size={16}
+        strokeWidth={2}
+      />
+    ),
   },
 ];
 
+function ProductTabCompletionDot({ isCompleted }: { isCompleted: boolean }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          role="img"
+          aria-label={isCompleted ? "Marked complete" : "Not marked complete"}
+          className={cn(
+            "ml-auto size-1.5 shrink-0 rounded-full",
+            isCompleted
+              ? "bg-emerald-500"
+              : "bg-transparent ring-1 ring-sidebar-foreground/30",
+          )}
+        />
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        sideOffset={6}
+        className="pointer-events-none"
+      >
+        {isCompleted ? "Marked complete" : "Not marked complete"}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { data: workspaceData, isLoading } = useGetWorkspace();
+  const { data: workspaceData, isLoading: isWorkspaceLoading } =
+    useGetWorkspace();
   const workspace = workspaceData?.workspace;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
@@ -184,28 +354,39 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ? pathSegments[1]
       : undefined;
   const showProductSubNavigation = Boolean(productId);
+  const { data: productTabData } = useGetProductTabData(
+    productId ?? "",
+    "all-tabs",
+  );
+
+  const tabCompletionByUrl = React.useMemo(() => {
+    const allTabsData = productTabData?.result?.data;
+    if (!allTabsData) return null;
+
+    return Object.fromEntries(
+      productSubItems.map((subItem) => [
+        subItem.url,
+        Boolean(allTabsData[subItem.completionKey]?.tab_completed),
+      ]),
+    ) as Record<string, boolean>;
+  }, [productTabData]);
 
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-b border-sidebar-border h-12 py-1">
         <GuardedLink
           href="/"
-          className="flex items-center gap-1 p-0.5 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          className="flex items-center gap-1 p-0.5 rounded mt-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <UprevitLogo className="mb-1 rounded-xl" />
           <div className="grid flex-1 text-left text-sm leading-tight">
             <div className="flex items-center gap-2">
-              <span className="truncate text-lg text-foreground font-black ">
+              <span className="truncate text-md text-foreground font-bold ">
                 UPREVIT
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    aria-label="Alpha release"
-                    className="rounded-full border border-sidebar-border bg-sidebar-accent px-1.5 py-0.5 text-xs font-semibold text-sidebar-foreground/70"
-                  >
-                    α
-                  </span>
+                  <Badge variant="secondary">alpha</Badge>
                 </TooltipTrigger>
                 <TooltipContent>
                   Early preview. Active updates are in progress.
@@ -223,21 +404,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {item.title}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-1">
+              <SidebarMenu className="gap-0.5">
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       className={cn(
-                        "h-7 border border-transparent",
                         pathname.startsWith(item.url)
-                          ? "bg-sidebar-accent border-sidebar-border rounded text-sidebar-primary"
-                          : "",
+                          ? "bg-sidebar-accent text-accent-foreground"
+                          : "text-sidebar-accent-foreground/40",
                       )}
                     >
-                      <GuardedLink href={item.url} className="flex items-center gap-2">
-                        {item.icon && <item.icon />}
-                        {item.title}
+                      <GuardedLink
+                        href={item.url}
+                        className="flex items-center gap-2"
+                      >
+                        <span>{item.icon}</span>
+
+                        <span
+                          className={cn(
+                            pathname.startsWith(item.url)
+                              ? " text-accent-foreground"
+                              : "text-sidebar-accent-foreground",
+                          )}
+                        >
+                          {item.title}
+                        </span>
                       </GuardedLink>
                     </SidebarMenuButton>
                     {item.title === "Products" && showProductSubNavigation && (
@@ -254,8 +446,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 <SidebarMenuSubButton
                                   className={cn(
                                     pathname.includes(subItem.url)
-                                      ? "bg-sidebar-border/50 rounded text-sidebar-foreground"
-                                      : "",
+                                      ? "bg-sidebar-accent text-sidebar-foreground"
+                                      : "text-sidebar-foreground/40",
                                   )}
                                   asChild
                                 >
@@ -265,9 +457,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         ? `?compareVersion=${compareVersionId}`
                                         : ""
                                     }`}
+                                    className="flex w-full min-w-0 items-center gap-2"
                                   >
-                                    {subItem.icon && <subItem.icon />}
-                                    <span>{subItem.title}</span>
+                                    {subItem.icon && (
+                                      <span>{subItem.icon}</span>
+                                    )}
+                                    <span
+                                      className={cn(
+                                        "truncate",
+                                        pathname.includes(subItem.url)
+                                          ? "text-sidebar-foreground"
+                                          : "text-sidebar-foreground",
+                                      )}
+                                    >
+                                      {subItem.title}
+                                    </span>
+                                    {tabCompletionByUrl ? (
+                                      <ProductTabCompletionDot
+                                        isCompleted={
+                                          tabCompletionByUrl[subItem.url]
+                                        }
+                                      />
+                                    ) : null}
                                   </GuardedLink>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
@@ -289,7 +500,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarGroup className="px-2 py-1">
-        {isLoading ? (
+        {isWorkspaceLoading ? (
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -301,7 +512,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Skeleton className="h-6 w-28 bg-border" />
                   <Skeleton className="h-4 w-38 bg-border" />
                 </div>
-                <PiDotsThreeOutlineVerticalDuotone className="ml-auto size-4 text-muted-foreground" />
+                <Icon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
