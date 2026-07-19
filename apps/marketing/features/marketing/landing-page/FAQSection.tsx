@@ -5,7 +5,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
-import { PiImageDuotone } from "react-icons/pi";
+import { HelpCircleIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useTheme } from "next-themes";
 
 const faqs = [
@@ -63,7 +64,12 @@ export default function FAQSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiImageDuotone className="mr-1 text-foreground/50" />
+          <Icon
+            icon={HelpCircleIcon}
+            size={16}
+            strokeWidth={2}
+            className="mr-1 text-foreground/50"
+          />
           <span className="font-medium">FAQ</span>
         </Badge>
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">

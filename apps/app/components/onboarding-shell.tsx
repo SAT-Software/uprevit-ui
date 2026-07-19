@@ -5,9 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { FloatingPaths } from "@/components/floating-paths";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Logout03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import { useAuth } from "react-oidc-context";
-import { PiSignOutDuotone } from "react-icons/pi";
 
 type OnboardingShellProps = {
   title: string;
@@ -66,7 +67,7 @@ export function OnboardingShell({
             onClick={signOut}
             className="absolute top-4 right-4 z-10 sm:top-6 sm:right-6 lg:top-8 lg:right-8"
           >
-            <PiSignOutDuotone className="h-4 w-4" />
+            <Icon icon={Logout03Icon} size={16} strokeWidth={2} />
             Sign out
           </Button>
         )}

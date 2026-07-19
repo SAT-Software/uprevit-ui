@@ -35,7 +35,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { PiBuildingsDuotone } from "react-icons/pi";
 
 interface DepartmentUser {
   _id: string;
@@ -248,7 +247,12 @@ function DepartmentEmptyState() {
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30">
       <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground" />
+        <Icon
+          icon={NewOfficeIcon}
+          size={32}
+          strokeWidth={2}
+          className="text-muted-foreground"
+        />
       </div>
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-foreground">

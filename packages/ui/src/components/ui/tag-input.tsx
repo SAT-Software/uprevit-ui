@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { useId, useState } from "react";
-import { XIcon } from "lucide-react";
 
 import { cn } from "@uprevit/ui/lib/utils";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Input } from "@uprevit/ui/components/ui/input";
 import { Label } from "@uprevit/ui/components/ui/label";
@@ -111,7 +112,12 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
                 onClick={() => removeTag(tag.id)}
                 disabled={disabled}
               >
-                <XIcon className="h-3 w-3" />
+                <Icon
+                  icon={Cancel01Icon}
+                  size={12}
+                  strokeWidth={2}
+                  className="h-3 w-3"
+                />
               </button>
             </Badge>
           ))}

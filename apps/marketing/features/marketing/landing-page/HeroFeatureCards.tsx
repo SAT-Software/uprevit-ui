@@ -7,24 +7,24 @@ import {
 } from "@uprevit/ui/components/ui/card";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
-  PiBarcodeDuotone,
-  PiCubeDuotone,
-  PiDatabaseFill,
-  PiFilePngDuotone,
-  PiFolderFill,
-  PiGavelDuotone,
-  PiGlobeHemisphereWestFill,
-  PiHashDuotone,
-  PiMapPinDuotone,
-  PiPenNibDuotone,
-  PiQrCodeDuotone,
-  PiRulerDuotone,
-  PiSealCheckDuotone,
-  PiShapesFill,
-  PiStackDuotone,
-  PiStackFill,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
+  AlertCircleIcon,
+  BarcodeScanIcon,
+  Certificate01Icon,
+  CubeIcon,
+  FileDatabaseIcon,
+  Folder02Icon,
+  GavelIcon,
+  Globe02Icon,
+  HashtagIcon,
+  Image01Icon,
+  Layers01Icon,
+  Location01Icon,
+  Pen01Icon,
+  QrCodeIcon,
+  RulerIcon,
+  ShapesIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 export default function HeroFeatureCards({
   activeIndex,
@@ -48,15 +48,22 @@ export default function HeroFeatureCards({
             >
               <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
-                  <PiGlobeHemisphereWestFill className="bg-amber-600 dark:bg-amber-700 text-white p-1 w-6 h-6 rounded" />
+                  <Icon
+                    icon={Globe02Icon}
+                    size={24}
+                    strokeWidth={2}
+                    className="bg-amber-600 dark:bg-amber-700 text-white p-1 w-6 h-6 rounded"
+                  />
                   <span>Labeling Standards</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiGavelDuotone
+                    <Icon
+                      icon={GavelIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 0 ? "text-amber-600" : ""
                       }`}
@@ -64,8 +71,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">Regulation Type</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiSealCheckDuotone
+                    <Icon
+                      icon={Certificate01Icon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 0 ? "text-amber-600" : ""
                       }`}
@@ -73,8 +82,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">Applicable Standards</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiMapPinDuotone
+                    <Icon
+                      icon={Location01Icon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 0 ? "text-amber-600" : ""
                       }`}
@@ -107,15 +118,22 @@ export default function HeroFeatureCards({
             >
               <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
-                  <PiDatabaseFill className="bg-blue-600 dark:bg-blue-700 text-white p-1 w-6 h-6 rounded" />
+                  <Icon
+                    icon={FileDatabaseIcon}
+                    size={24}
+                    strokeWidth={2}
+                    className="bg-blue-600 dark:bg-blue-700 text-white p-1 w-6 h-6 rounded"
+                  />
                   <span>Product Specifications</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiQrCodeDuotone
+                    <Icon
+                      icon={QrCodeIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 1 ? "text-blue-600" : ""
                       }`}
@@ -123,8 +141,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">UDI DI + PI</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiCubeDuotone
+                    <Icon
+                      icon={CubeIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 1 ? "text-blue-600" : ""
                       }`}
@@ -132,8 +152,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">Design Specifications</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiHashDuotone
+                    <Icon
+                      icon={HashtagIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 1 ? "text-blue-600" : ""
                       }`}
@@ -166,15 +188,22 @@ export default function HeroFeatureCards({
             >
               <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-[10.9px] text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
-                  <PiFolderFill className="bg-emerald-600 dark:bg-emerald-700 text-white p-1 w-6 h-6 rounded" />
+                  <Icon
+                    icon={Folder02Icon}
+                    size={24}
+                    strokeWidth={2}
+                    className="bg-emerald-600 dark:bg-emerald-700 text-white p-1 w-6 h-6 rounded"
+                  />
                   <span>Source Files</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiPenNibDuotone
+                    <Icon
+                      icon={Pen01Icon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 2 ? "text-emerald-600" : ""
                       }`}
@@ -182,8 +211,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">Label Artworks, IFUs</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiFilePngDuotone
+                    <Icon
+                      icon={Image01Icon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 2 ? "text-emerald-600" : ""
                       }`}
@@ -216,15 +247,22 @@ export default function HeroFeatureCards({
             >
               <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-[10.9px] text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
-                  <PiStackFill className="bg-violet-600 dark:bg-violet-700 text-white p-1 w-6 h-6 rounded" />
+                  <Icon
+                    icon={Layers01Icon}
+                    size={24}
+                    strokeWidth={2}
+                    className="bg-violet-600 dark:bg-violet-700 text-white p-1 w-6 h-6 rounded"
+                  />
                   <span>Label Components</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiStackDuotone
+                    <Icon
+                      icon={Layers01Icon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 3 ? "text-violet-600" : ""
                       }`}
@@ -232,8 +270,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">Label stocks</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiRulerDuotone
+                    <Icon
+                      icon={RulerIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 3 ? "text-violet-600" : ""
                       }`}
@@ -266,15 +306,22 @@ export default function HeroFeatureCards({
             >
               <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-[10.9px] text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
-                  <PiShapesFill className="bg-orange-600 dark:bg-orange-700 text-white p-1 w-6 h-6 rounded" />
+                  <Icon
+                    icon={ShapesIcon}
+                    size={24}
+                    strokeWidth={2}
+                    className="bg-orange-600 dark:bg-orange-700 text-white p-1 w-6 h-6 rounded"
+                  />
                   <span>Symbols-Graphics</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiWarningCircleDuotone
+                    <Icon
+                      icon={AlertCircleIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 4 ? "text-orange-600" : ""
                       }`}
@@ -282,8 +329,10 @@ export default function HeroFeatureCards({
                     <span className="truncate">Symbols, Schematics</span>
                   </li>
                   <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
-                    <PiBarcodeDuotone
+                    <Icon
+                      icon={BarcodeScanIcon}
                       size={14}
+                      strokeWidth={2}
                       className={`transition-colors duration-500 ${
                         activeIndex === 4 ? "text-orange-600" : ""
                       }`}

@@ -9,7 +9,12 @@ import {
 } from "@uprevit/ui/components/ui/avatar";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiTrashDuotone, PiUserDuotone, PiUserCircleGearDuotone } from "react-icons/pi";
+import {
+  Delete02Icon,
+  UserIcon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { User } from "@/types/user";
 import DialogRemoveUser from "./DialogRemoveUser";
 
@@ -71,7 +76,7 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
         if (userType === "admin") {
           return (
             <Badge variant="secondary" className="max-w-full truncate">
-              <PiUserCircleGearDuotone className="h-3.5 w-3.5 shrink-0" />
+              <Icon icon={UserShield01Icon} size={14} strokeWidth={2} className="shrink-0" />
               Admin
             </Badge>
           );
@@ -81,7 +86,7 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
             variant="outline"
             className="max-w-full gap-1 truncate text-muted-foreground"
           >
-            <PiUserDuotone className="h-3.5 w-3.5 shrink-0" />
+            <Icon icon={UserIcon} size={14} strokeWidth={2} className="shrink-0" />
             Member
           </Badge>
         );
@@ -138,7 +143,7 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
           return (
             <div className="flex justify-end">
               <Button variant="ghost" size="icon" className="size-7" disabled>
-                <PiTrashDuotone className="h-3.5 w-3.5" />
+                <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
                 <span className="sr-only">Cannot remove user</span>
               </Button>
             </div>
@@ -156,7 +161,7 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
                   size="icon"
                   className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <PiTrashDuotone className="h-3.5 w-3.5" />
+                  <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
                   <span className="sr-only">Remove user</span>
                 </Button>
               }

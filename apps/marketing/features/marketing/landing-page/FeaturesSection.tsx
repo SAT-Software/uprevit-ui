@@ -1,6 +1,7 @@
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { PiBoundingBoxDuotone } from "react-icons/pi";
+import { CubeIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";
 import { Worksteps } from "./Worksteps";
@@ -14,7 +15,12 @@ export default function FeaturesSection() {
           variant="outline"
           className="mb-8 z-60 bg-white text-foreground shadow-md px-2 py-0.5 dark:bg-transparent"
         >
-          <PiBoundingBoxDuotone className="mr-1 text-foreground/50" />
+          <Icon
+            icon={CubeIcon}
+            size={16}
+            strokeWidth={2}
+            className="mr-1 text-foreground/50"
+          />
           <span className="font-medium">Features</span>
         </Badge>
         <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">

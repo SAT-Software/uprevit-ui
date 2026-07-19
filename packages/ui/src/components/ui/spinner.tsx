@@ -1,5 +1,4 @@
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiSpinner } from "react-icons/pi";
 import { Icon } from "../common/Icon";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
 

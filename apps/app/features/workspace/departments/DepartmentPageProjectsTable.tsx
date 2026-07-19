@@ -41,19 +41,14 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  PiBuildingsDuotone,
-  PiCaretDownDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretUpDuotone,
-  PiKanbanDuotone,
-} from "react-icons/pi";
 import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
+  Blockchain03Icon,
   KanbanIcon,
+  NewOfficeIcon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 
@@ -421,7 +416,12 @@ export default function DepartmentPageProjectsTable({
                           >
                             <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
                               <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                                <PiKanbanDuotone className="w-8 h-8 text-muted-foreground" />
+                                <Icon
+                                  icon={KanbanIcon}
+                                  size={32}
+                                  strokeWidth={2}
+                                  className="text-muted-foreground"
+                                />
                               </div>
                               <div className="text-center space-y-1">
                                 <p className="text-sm font-medium text-foreground">
@@ -453,8 +453,13 @@ export default function DepartmentPageProjectsTable({
           ) : (
             <div className="flex flex-col gap-2">
               <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                <div className="flex items-center justify-center p-2 bg-muted/50 rounded-full mb-3">
-                  <PiBuildingsDuotone className="w-8 h-8 text-muted-foreground/50" />
+                <div className="flex items-center justify-center p-4 border border-dashed border-border bg-muted/50 rounded-full mb-3">
+                  <Icon
+                    icon={KanbanIcon}
+                    size={32}
+                    strokeWidth={2}
+                    className="text-muted-foreground/50 "
+                  />
                 </div>
                 <p className="text-sm font-medium text-foreground">
                   No projects found

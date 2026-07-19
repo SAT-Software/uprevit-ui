@@ -6,10 +6,11 @@ import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/Decorati
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import {
-  PiDownloadDuotone,
-  PiFilesDuotone,
-  PiTrayDuotone,
-} from "react-icons/pi";
+  Download01Icon,
+  File02Icon,
+  InboxIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const templateItems = [
   {
@@ -81,7 +82,7 @@ export default function TemplatesSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiFilesDuotone />
+          <Icon icon={File02Icon} size={16} strokeWidth={2} />
           <span className="font-medium">Templates</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
@@ -96,11 +97,11 @@ export default function TemplatesSection() {
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <Button size="lg" variant="outline">
-            <PiTrayDuotone />
+            <Icon icon={InboxIcon} size={16} strokeWidth={2} />
             Request a custom pack
           </Button>
           <Button size="lg">
-            <PiDownloadDuotone /> Download starter kit
+            <Icon icon={Download01Icon} size={16} strokeWidth={2} /> Download starter kit
           </Button>
         </div>
       </div>
@@ -207,7 +208,12 @@ export default function TemplatesSection() {
                           {item.format}
                         </span>
                         <Button variant="outline" size="sm">
-                          <PiDownloadDuotone className="mr-2 size-4" />
+                          <Icon
+                            icon={Download01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="mr-2"
+                          />
                           Download
                         </Button>
                       </div>

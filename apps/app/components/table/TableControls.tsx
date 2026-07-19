@@ -4,12 +4,13 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { Table } from "@tanstack/react-table";
 import {
-  PiColumnsDuotone,
-  PiFunnelDuotone,
-  PiPlusCircleDuotone,
-  PiSlidersDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  AddCircleIcon,
+  CancelCircleIcon,
+  ColumnsThreeCogIcon,
+  FilterIcon,
+  SlidersHorizontalIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -179,7 +180,7 @@ export default function TableControls<TData>({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="sm">
-              <PiFunnelDuotone />
+              <Icon icon={FilterIcon} size={16} strokeWidth={2} />
               Filter
               {hasActiveFilters && (
                 <span className="ml-1.5 rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">
@@ -284,7 +285,7 @@ export default function TableControls<TData>({
                         onClick={() => handleRemoveFilter(filter.id)}
                         className="p-0"
                       >
-                        <PiXCircleDuotone />
+                        <Icon icon={CancelCircleIcon} size={16} strokeWidth={2} />
                         <span className="sr-only">Remove filter</span>
                       </Button>
                     </div>
@@ -302,7 +303,7 @@ export default function TableControls<TData>({
                 className="text-sm"
                 onClick={handleAddFilter}
               >
-                <PiPlusCircleDuotone />
+                <Icon icon={AddCircleIcon} size={16} strokeWidth={2} />
                 Add filter
               </Button>
               <Button
@@ -311,7 +312,7 @@ export default function TableControls<TData>({
                 variant="secondary"
                 onClick={handleApplyFilters}
               >
-                <PiSlidersDuotone />
+                <Icon icon={SlidersHorizontalIcon} size={16} strokeWidth={2} />
                 Apply filter
               </Button>
             </div>
@@ -320,7 +321,7 @@ export default function TableControls<TData>({
 
         {hasActiveFilters && (
           <Button variant="outline" size="sm" onClick={handleClearFilters}>
-            <PiXCircleDuotone />
+            <Icon icon={CancelCircleIcon} size={16} strokeWidth={2} />
             Clear filters
           </Button>
         )}
@@ -328,7 +329,7 @@ export default function TableControls<TData>({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="sm">
-              <PiColumnsDuotone />
+              <Icon icon={ColumnsThreeCogIcon} size={16} strokeWidth={2} />
               View
             </Button>
           </DropdownMenuTrigger>

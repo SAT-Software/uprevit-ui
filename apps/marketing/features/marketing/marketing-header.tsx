@@ -2,16 +2,18 @@
 
 import * as React from "react";
 import Link from "next/link";
+import type { IconSvgElement } from "@hugeicons/react";
 import {
-  PiFileTextDuotone,
-  PiListDuotone,
-  PiSquaresFourDuotone,
-  PiNewspaperDuotone,
-  PiWrenchDuotone,
-  PiStackDuotone,
-  PiMoneyDuotone,
-  PiAtDuotone,
-} from "react-icons/pi";
+  AtSignIcon,
+  File02Icon,
+  GridViewIcon,
+  Layers01Icon,
+  Menu01Icon,
+  Money01Icon,
+  News01Icon,
+  Wrench01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Button } from "@uprevit/ui/components/ui/button";
 
@@ -45,25 +47,25 @@ const resourceLinks = [
     title: "Templates",
     href: "/resources/templates",
     description: "Compliance checklists and templates.",
-    icon: PiFileTextDuotone,
+    icon: File02Icon,
   },
   {
     title: "Standards & Symbols",
     href: "/resources/standards-symbols",
     description: "ISO documents and symbol library.",
-    icon: PiSquaresFourDuotone,
+    icon: GridViewIcon,
   },
   {
     title: "Blogs & News",
     href: "/resources/blogs",
     description: "Regulatory updates and insights.",
-    icon: PiNewspaperDuotone,
+    icon: News01Icon,
   },
   {
     title: "Free Tools",
     href: "/resources/toolkits",
     description: "Coming soon.",
-    icon: PiWrenchDuotone,
+    icon: Wrench01Icon,
   },
 ];
 
@@ -175,7 +177,12 @@ export default function MarketingHeader() {
                                 href="/resources"
                               >
                                 <div className="mb-3 flex size-10 items-center justify-center rounded-lg border border-border bg-background/80">
-                                  <PiStackDuotone className="size-5 text-foreground" />
+                                  <Icon
+                                    icon={Layers01Icon}
+                                    size={20}
+                                    strokeWidth={2}
+                                    className="text-foreground"
+                                  />
                                 </div>
                                 <div className="mb-2 text-lg font-medium">
                                   Resources Hub
@@ -228,7 +235,7 @@ export default function MarketingHeader() {
                       className="size-10 text-foreground"
                       aria-label="Open navigation menu"
                     >
-                      <PiListDuotone className="size-5" />
+                      <Icon icon={Menu01Icon} size={20} strokeWidth={2} />
                     </Button>
                   </SheetTrigger>
                   <SheetContent
@@ -253,7 +260,12 @@ export default function MarketingHeader() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-background">
-                              <PiMoneyDuotone className="size-5 text-foreground" />
+                              <Icon
+                                icon={Money01Icon}
+                                size={20}
+                                strokeWidth={2}
+                                className="text-foreground"
+                              />
                             </div>
                             <div>
                               <div className="text-sm font-medium text-foreground">
@@ -275,7 +287,12 @@ export default function MarketingHeader() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-background">
-                              <PiAtDuotone className="size-5 text-foreground" />
+                              <Icon
+                                icon={AtSignIcon}
+                                size={20}
+                                strokeWidth={2}
+                                className="text-foreground"
+                              />
                             </div>
                             <div>
                               <div className="text-sm font-medium text-foreground">
@@ -297,7 +314,12 @@ export default function MarketingHeader() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-background">
-                              <PiStackDuotone className="size-5 text-foreground" />
+                              <Icon
+                                icon={Layers01Icon}
+                                size={20}
+                                strokeWidth={2}
+                                className="text-foreground"
+                              />
                             </div>
                             <div>
                               <div className="text-sm font-medium text-foreground">
@@ -326,7 +348,12 @@ export default function MarketingHeader() {
                               )}
                             >
                               <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background">
-                                <link.icon className="size-4 text-foreground" />
+                                <Icon
+                                  icon={link.icon}
+                                  size={16}
+                                  strokeWidth={2}
+                                  className="text-foreground"
+                                />
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-foreground">
@@ -364,19 +391,24 @@ function ListItem({
   title,
   children,
   href,
-  icon: Icon,
+  icon: svgIcon,
   ...props
 }: React.ComponentPropsWithoutRef<"li"> & {
   href: string;
-  icon?: React.ElementType;
+  icon?: IconSvgElement;
 }) {
   return (
     <li {...props}>
       <NavigationMenuLink asChild>
         <Link href={href} className="flex flex-row items-center gap-3">
-          {Icon && (
+          {svgIcon && (
             <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-accent mt-0.5">
-              <Icon className="size-5 text-foreground" />
+              <Icon
+                icon={svgIcon}
+                size={20}
+                strokeWidth={2}
+                className="text-foreground"
+              />
             </div>
           )}
           <div className="flex flex-col">

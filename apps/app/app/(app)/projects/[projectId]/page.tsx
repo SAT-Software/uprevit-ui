@@ -12,9 +12,11 @@ import { AuditLog } from "@/types/audit-log";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { getNextImageSrc } from "@/utils/isNextImageSrc";
 import {
+  Calendar03Icon,
   KanbanIcon,
   ManagerIcon,
   ProfileIcon,
+  UserShield01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
@@ -26,11 +28,6 @@ import {
 } from "@uprevit/ui/components/ui/hover-card";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
-import {
-  PiCalendarDuotone,
-  PiKanbanDuotone,
-  PiUserCircleGearDuotone,
-} from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 
 interface ProjectUser {
@@ -97,7 +94,12 @@ export default function ProjectDetailPage() {
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full bg-muted/50">
-                    <PiKanbanDuotone className="h-8 w-8 md:w-12 md:h-12 text-muted-foreground/40" />
+                    <Icon
+                      icon={KanbanIcon}
+                      size={32}
+                      strokeWidth={2}
+                      className="text-muted-foreground/40"
+                    />
                   </div>
                 )}
               </div>
@@ -116,7 +118,12 @@ export default function ProjectDetailPage() {
               <div className="w-full flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground">
                 {creationLog && (
                   <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
-                    <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
+                    <Icon
+                      icon={Calendar03Icon}
+                      size={14}
+                      strokeWidth={2}
+                      className="shrink-0"
+                    />
                     <span className="truncate">
                       Created {formatAuditDate(creationLog.actionAt)} -{" "}
                       <span className="font-semibold">
@@ -127,7 +134,12 @@ export default function ProjectDetailPage() {
                 )}
                 {latestUpdateLog && (
                   <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
-                    <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
+                    <Icon
+                      icon={Calendar03Icon}
+                      size={14}
+                      strokeWidth={2}
+                      className="shrink-0"
+                    />
                     <span className="truncate">
                       Updated {formatAuditDate(latestUpdateLog.actionAt)} -{" "}
                       <span className="font-semibold">
@@ -186,7 +198,7 @@ export default function ProjectDetailPage() {
                   </HoverCardTrigger>
                   <HoverCardContent>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <PiUserCircleGearDuotone className="w-4 h-4" />
+                      <Icon icon={UserShield01Icon} size={16} strokeWidth={2} />
                       <span className="text-sm">
                         Manager:{" "}
                         <span className="text-foreground font-medium">

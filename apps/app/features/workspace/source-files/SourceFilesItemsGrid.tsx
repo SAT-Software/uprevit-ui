@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import {
-  PiFileDocDuotone,
-  PiFileDuotone,
-  PiFilePdfDuotone,
-} from "react-icons/pi";
+  Doc01Icon,
+  File02Icon,
+  Pdf01Icon,
+} from "@hugeicons/core-free-icons";
 import {
   Delete02Icon,
   DownloadSquare01Icon,
@@ -73,16 +73,31 @@ function FileTypeIcon({
 }) {
   if (kind === "pdf") {
     return (
-      <PiFilePdfDuotone className={cn("text-muted-foreground/50", className)} />
+      <Icon
+        icon={Pdf01Icon}
+        size={20}
+        strokeWidth={2}
+        className={cn("text-muted-foreground/50", className)}
+      />
     );
   }
   if (kind === "word") {
     return (
-      <PiFileDocDuotone className={cn("text-muted-foreground/50", className)} />
+      <Icon
+        icon={Doc01Icon}
+        size={20}
+        strokeWidth={2}
+        className={cn("text-muted-foreground/50", className)}
+      />
     );
   }
   return (
-    <PiFileDuotone className={cn("text-muted-foreground/50", className)} />
+    <Icon
+      icon={File02Icon}
+      size={20}
+      strokeWidth={2}
+      className={cn("text-muted-foreground/50", className)}
+    />
   );
 }
 

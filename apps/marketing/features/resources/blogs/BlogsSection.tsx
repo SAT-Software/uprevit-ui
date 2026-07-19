@@ -5,12 +5,13 @@ import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/Decorati
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
-  PiCalendarDuotone,
-  PiFileTextDuotone,
-  PiGlobeHemisphereWestDuotone,
-  PiNewspaperDuotone,
-  PiShieldCheckDuotone,
-} from "react-icons/pi";
+  Calendar03Icon,
+  File02Icon,
+  Globe02Icon,
+  News01Icon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const blogPosts = [
   {
@@ -44,7 +45,7 @@ const newsUpdates = [
       "New timeline for Unique Device Identifier requirements gives manufacturers additional flexibility.",
     date: "2024-12-10",
     source: "FDA",
-    icon: PiShieldCheckDuotone,
+    icon: UserShield01Icon,
   },
   {
     title: "EU MDR Implementation Extended for Certain Devices",
@@ -53,7 +54,7 @@ const newsUpdates = [
       "European Commission grants transition period for specific medical device categories.",
     date: "2024-12-05",
     source: "EU Commission",
-    icon: PiGlobeHemisphereWestDuotone,
+    icon: Globe02Icon,
   },
   {
     title: "New ISO Standard for Digital Labeling Published",
@@ -62,7 +63,7 @@ const newsUpdates = [
       "International Organization for Standardization releases guidance for electronic labeling.",
     date: "2024-11-28",
     source: "ISO",
-    icon: PiFileTextDuotone,
+    icon: File02Icon,
   },
 ];
 
@@ -86,7 +87,12 @@ export default function BlogsSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiNewspaperDuotone className="text-foreground/60" />
+          <Icon
+            icon={News01Icon}
+            size={16}
+            strokeWidth={2}
+            className="text-foreground/60"
+          />
           <span className="font-medium">Blogs</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
@@ -158,7 +164,7 @@ export default function BlogsSection() {
                       </p>
                     </div>
                     <div className="mt-8 flex items-center gap-2 text-xs text-white/70">
-                      <PiCalendarDuotone className="size-4" />
+                      <Icon icon={Calendar03Icon} size={16} strokeWidth={2} />
                       {featuredPost.date}
                     </div>
                   </div>
@@ -214,7 +220,7 @@ export default function BlogsSection() {
                         <span className="uppercase tracking-wide">
                           {news.source}
                         </span>
-                        <news.icon className="size-4" />
+                        <Icon icon={news.icon} size={16} strokeWidth={2} />
                       </div>
                       <div>
                         <p className="text-[11px] uppercase tracking-widest text-white/50">
@@ -234,7 +240,7 @@ export default function BlogsSection() {
                       {news.excerpt}
                     </p>
                     <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                      <PiCalendarDuotone className="size-4" />
+                      <Icon icon={Calendar03Icon} size={16} strokeWidth={2} />
                       {news.date}
                     </div>
                   </div>

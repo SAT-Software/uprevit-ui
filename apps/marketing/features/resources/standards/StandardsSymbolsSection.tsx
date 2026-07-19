@@ -4,12 +4,8 @@ import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useTheme } from "next-themes";
-import {
-  PiBookOpenDuotone,
-  PiFileTextDuotone,
-  PiImagesDuotone,
-  PiLinkDuotone,
-} from "react-icons/pi";
+import { BookOpen02Icon, Link01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const symbols = [
   {
@@ -59,7 +55,7 @@ export default function StandardsSymbolsSection() {
           variant={badgeVariant}
           className="mb-8 z-60 dark:px-2 dark:py-0.5"
         >
-          <PiBookOpenDuotone />
+          <Icon icon={BookOpen02Icon} size={16} strokeWidth={2} />
           <span className="font-medium">Standards & Symbols</span>
         </Badge>
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
@@ -122,7 +118,12 @@ export default function StandardsSymbolsSection() {
                           </p>
                         </div>
                         <div className="mt-5 flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3 md:p-4">
-                          <PiLinkDuotone className="size-4 md:size-5 text-muted-foreground shrink-0" />
+                          <Icon
+                            icon={Link01Icon}
+                            size={20}
+                            strokeWidth={2}
+                            className="text-muted-foreground shrink-0"
+                          />
                           <span className="text-sm font-medium leading-snug">
                             {symbol.usage}
                           </span>

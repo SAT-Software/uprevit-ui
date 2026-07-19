@@ -14,7 +14,6 @@ import {
 import { cn } from "@uprevit/ui/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { PiBuildingsDuotone } from "react-icons/pi";
 
 export interface DepartmentUser {
   _id: string;

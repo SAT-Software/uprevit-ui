@@ -15,16 +15,17 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { Slider } from "@uprevit/ui/components/ui/slider";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import { cn } from "@uprevit/ui/lib/utils";
+import type { IconSvgElement } from "@hugeicons/react";
 import {
-  PiArrowRightDuotone,
-  PiBuildingsDuotone,
-  PiCoinsDuotone,
-  PiDatabaseDuotone,
-  PiExportDuotone,
-  PiLockKeyDuotone,
-  PiUsersDuotone,
-} from "react-icons/pi";
-import type { IconType } from "react-icons";
+  ArrowRight01Icon,
+  Coins01Icon,
+  Download01Icon,
+  FileDatabaseIcon,
+  LockIcon,
+  NewOfficeIcon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 type BillingCycle = "annual" | "monthly";
 
@@ -195,7 +196,7 @@ function IncludedSummary({
 }
 
 function CalculatorCard({
-  icon: Icon,
+  icon: svgIcon,
   iconClassName,
   title,
   description,
@@ -205,7 +206,7 @@ function CalculatorCard({
   className,
   rightRailClassName,
 }: {
-  icon: IconType;
+  icon: IconSvgElement;
   iconClassName?: string;
   title: string;
   description: string;
@@ -230,7 +231,7 @@ function CalculatorCard({
               iconClassName,
             )}
           >
-            <Icon className="h-6 w-6" />
+            <Icon icon={svgIcon} size={24} strokeWidth={2} />
           </div>
           <div className="space-y-1">
             <CardTitle className="text-xl font-semibold tracking-tight">
@@ -289,7 +290,7 @@ function ScaleLink({ copy }: { copy: string }) {
       className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
       {copy}
-      <PiArrowRightDuotone className="h-4 w-4" />
+      <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} />
     </Link>
   );
 }
@@ -411,7 +412,7 @@ export function PricingCalculatorCards() {
       {billingToggle}
 
       <CalculatorCard
-        icon={PiBuildingsDuotone}
+        icon={NewOfficeIcon}
         iconClassName="text-foreground"
         title="Platform fee"
         description="One paid workspace with the core platform, collaboration surface, and audit-ready workspace foundation."
@@ -457,7 +458,7 @@ export function PricingCalculatorCards() {
       />
 
       <CalculatorCard
-        icon={PiUsersDuotone}
+        icon={UserGroupIcon}
         iconClassName="text-foreground"
         title="Seats"
         description="Licensed users in the workspace. Move the slider to estimate how the workspace scales with your team."
@@ -543,7 +544,7 @@ export function PricingCalculatorCards() {
       />
 
       <CalculatorCard
-        icon={PiDatabaseDuotone}
+        icon={FileDatabaseIcon}
         iconClassName="text-foreground"
         title="Uploads"
         description={`Committed upload volume for the workspace. The first ${includedUploadGb.toLocaleString()} GB per ${currentCycleLabel} stay included, then usage is metered in MB.`}
@@ -650,7 +651,7 @@ export function PricingCalculatorCards() {
       />
 
       <CalculatorCard
-        icon={PiExportDuotone}
+        icon={Download01Icon}
         iconClassName="text-foreground"
         title="Exports"
         description={`Completed PDF or XLSX product exports and report exports. The first ${includedExports.toLocaleString()} per ${currentCycleLabel} stay included.`}
@@ -758,7 +759,7 @@ export function PricingCalculatorCards() {
       />
 
       <CalculatorCard
-        icon={PiLockKeyDuotone}
+        icon={LockIcon}
         iconClassName="text-foreground"
         title="SSO add-on"
         description="Enable SAML or OIDC single sign-on for the workspace when your team needs centralized identity management."
@@ -832,7 +833,7 @@ export function PricingCalculatorCards() {
       />
 
       <CalculatorCard
-        icon={PiCoinsDuotone}
+        icon={Coins01Icon}
         iconClassName="text-foreground"
         title="Total"
         description="Estimated price for one workspace based on the current seat count, upload volume, export volume, and SSO selection."

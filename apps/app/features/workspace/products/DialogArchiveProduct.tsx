@@ -4,10 +4,10 @@ import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Product } from "@/types/product";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
-import { PiArchiveDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Alert01Icon,
   ArchiveIcon,
@@ -114,7 +114,12 @@ export default function DialogArchiveProduct({
               }
             }}
           >
-            <PiArchiveDuotone className="h-4 w-4 text-muted-foreground" />
+            <Icon
+              icon={ArchiveIcon}
+              size={16}
+              strokeWidth={2}
+              className="text-muted-foreground"
+            />
             <span>Archive</span>
           </div>
         )}

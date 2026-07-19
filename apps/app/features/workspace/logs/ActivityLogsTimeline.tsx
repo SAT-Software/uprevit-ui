@@ -2,6 +2,7 @@
 
 import {
   AddSquareIcon,
+  ArrowRight01Icon,
   Clock01Icon,
   Delete02Icon,
   PropertyEditIcon,
@@ -34,7 +35,6 @@ import {
   TimelineTitle,
 } from "@uprevit/ui/components/ui/timeline";
 import { cn } from "@uprevit/ui/lib/utils";
-import { ChevronRightIcon } from "lucide-react";
 
 import { AuditLogV2, AuditLogV2Change } from "@/types/audit-log";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
@@ -294,7 +294,12 @@ export function ActivityLogsTimeline({
                               {formatToLocalDateTime(log.occurredAt)}
                             </span>
                           </div>
-                          <ChevronRightIcon className="text-muted-foreground size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          <Icon
+                            icon={ArrowRight01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="text-muted-foreground transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                          />
                         </FrameHeader>
                       </CollapsibleTrigger>
                       <CollapsibleContent>

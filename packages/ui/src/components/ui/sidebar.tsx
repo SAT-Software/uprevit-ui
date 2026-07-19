@@ -23,7 +23,6 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { useIsMobile } from "@uprevit/ui/hooks/general/use-mobile";
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiSidebarSimpleDuotone } from "react-icons/pi";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   LayoutAlignLeftIcon,

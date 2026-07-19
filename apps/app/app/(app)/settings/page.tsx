@@ -16,6 +16,7 @@ import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
 import {
+  CreditCardIcon,
   Timer01Icon,
   DashboardSquare01Icon,
   UserIcon,
@@ -115,7 +116,7 @@ function SettingsPage() {
                   Usage
                 </TabsTrigger>
                 {/* <TabsTrigger value="billing">
-                  <PiCreditCardDuotone className="mr-2 h-4 w-4" />
+                  <Icon icon={CreditCardIcon} size={16} strokeWidth={2} className="mr-2" />
                   Billing
                 </TabsTrigger> */}
               </>

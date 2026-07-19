@@ -1,8 +1,9 @@
 "use client";
 
+import { ArrowLeft02Icon, Home04Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import Link from "next/link";
-import { PiArrowLeft, PiHouseLine } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 
 export default function NotFound() {
@@ -26,7 +27,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
           <Button asChild>
             <Link href="/dashboard" className="flex items-center gap-2">
-              <PiHouseLine className="text-base" />
+              <Icon icon={Home04Icon} size={16} strokeWidth={2} />
               Go to Dashboard
             </Link>
           </Button>
@@ -35,7 +36,7 @@ export default function NotFound() {
             onClick={() => router.back()}
             className="flex items-center gap-2"
           >
-            <PiArrowLeft className="text-base" />
+            <Icon icon={ArrowLeft02Icon} size={16} strokeWidth={2} />
             Go Back
           </Button>
         </div>

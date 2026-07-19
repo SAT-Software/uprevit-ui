@@ -2,11 +2,6 @@
 
 import * as React from "react";
 import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
-import {
   DayPicker,
   getDefaultClassNames,
   type DayButton,
@@ -14,6 +9,12 @@ import {
 
 import { Button, buttonVariants } from "./button";
 import { cn } from "@uprevit/ui/lib/utils";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  ArrowDown01Icon,
+  ArrowLeft02Icon,
+  ArrowRight01Icon,
+} from "@hugeicons/core-free-icons";
 
 function Calendar({
   className,
@@ -148,13 +149,22 @@ function Calendar({
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
+              <Icon
+                icon={ArrowLeft02Icon}
+                size={16}
+                strokeWidth={2}
+                className={cn("size-4", className)}
+                {...props}
+              />
             );
           }
 
           if (orientation === "right") {
             return (
-              <ChevronRightIcon
+              <Icon
+                icon={ArrowRight01Icon}
+                size={16}
+                strokeWidth={2}
                 className={cn("size-4", className)}
                 {...props}
               />
@@ -162,7 +172,13 @@ function Calendar({
           }
 
           return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
+            <Icon
+              icon={ArrowDown01Icon}
+              size={16}
+              strokeWidth={2}
+              className={cn("size-4", className)}
+              {...props}
+            />
           );
         },
         DayButton: CalendarDayButton,

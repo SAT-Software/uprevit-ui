@@ -12,10 +12,11 @@ import dynamic from "next/dynamic";
 import { useParams, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import {
-  PiFloppyDiskDuotone,
-  PiTableDuotone,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
+  Alert01Icon,
+  FloppyDiskIcon,
+  TableIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { toast } from "sonner";
 import type { DiffItem } from "@/utils/deepDiff";
 import type { IWorkbookData } from "@univerjs/core";
@@ -105,7 +106,12 @@ export default function Page() {
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="p-3 rounded-full bg-destructive/10">
-                <PiWarningCircleDuotone className="w-8 h-8 text-destructive" />
+                <Icon
+                  icon={Alert01Icon}
+                  size={32}
+                  strokeWidth={2}
+                  className="text-destructive"
+                />
               </div>
               <div className="space-y-1">
                 <h3 className="text-lg font-semibold text-destructive">
@@ -199,7 +205,12 @@ export default function Page() {
               <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col items-center gap-4">
                   <div className="p-4 rounded-full bg-muted animate-pulse">
-                    <PiTableDuotone className="w-10 h-10 text-muted-foreground" />
+                    <Icon
+                      icon={TableIcon}
+                      size={40}
+                      strokeWidth={2}
+                      className="text-muted-foreground"
+                    />
                   </div>
                   <p className="text-muted-foreground">
                     Loading comparison data...
@@ -210,7 +221,12 @@ export default function Page() {
               <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <div className="p-4 rounded-full bg-muted">
-                    <PiTableDuotone className="w-10 h-10 text-muted-foreground" />
+                    <Icon
+                      icon={TableIcon}
+                      size={40}
+                      strokeWidth={2}
+                      className="text-muted-foreground"
+                    />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-lg font-semibold">
@@ -269,7 +285,7 @@ export default function Page() {
             onClick={handleSave}
             disabled={isSaving || isSubmitted}
           >
-            <PiFloppyDiskDuotone />
+            <Icon icon={FloppyDiskIcon} size={16} strokeWidth={2} />
             {isSaving ? "Saving..." : "Save Data"}
           </Button>
         </div>
@@ -285,7 +301,12 @@ export default function Page() {
             <div className="flex items-center justify-center h-full w-full">
               <div className="flex flex-col items-center gap-4">
                 <div className="p-4 rounded-full bg-muted">
-                  <PiTableDuotone className="w-10 h-10 text-muted-foreground" />
+                  <Icon
+                    icon={TableIcon}
+                    size={40}
+                    strokeWidth={2}
+                    className="text-muted-foreground"
+                  />
                 </div>
                 <p className="text-muted-foreground">Loading spreadsheet...</p>
               </div>

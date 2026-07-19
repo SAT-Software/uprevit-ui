@@ -24,9 +24,14 @@ import {
   useOnboardAdminCreateWorkspace,
 } from "@/hooks/onboarding/useOnboardAdminCreateWorkspace";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
-import { ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
+import {
+  ArrowRight01Icon,
+  Cancel01Icon,
+  ImageAdd01Icon,
+  NewOfficeIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useAuth } from "react-oidc-context";
-import { PiBuildingsDuotone } from "react-icons/pi";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { toast } from "sonner";
 
@@ -191,7 +196,7 @@ export default function OnboardingCreateWorkspacePage() {
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                          <PiBuildingsDuotone className="h-8 w-8" />
+                          <Icon icon={NewOfficeIcon} size={32} strokeWidth={2} />
                         </div>
                       )}
                     </div>
@@ -224,7 +229,12 @@ export default function OnboardingCreateWorkspacePage() {
                         asChild
                       >
                         <span>
-                          <ImagePlusIcon className="mr-2 h-4 w-4" />
+                          <Icon
+                            icon={ImageAdd01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="mr-2"
+                          />
                           {uploadingLogo ? "Uploading..." : "Upload Logo"}
                         </span>
                       </Button>
@@ -239,7 +249,12 @@ export default function OnboardingCreateWorkspacePage() {
                         disabled={uploadingLogo}
                         className="w-fit text-destructive hover:text-destructive"
                       >
-                        <XIcon className="mr-2 h-4 w-4" />
+                        <Icon
+                          icon={Cancel01Icon}
+                          size={16}
+                          strokeWidth={2}
+                          className="mr-2"
+                        />
                         Remove
                       </Button>
                     )}
@@ -370,7 +385,7 @@ export default function OnboardingCreateWorkspacePage() {
                   ) : (
                     <>
                       Create workspace
-                      <ArrowRightIcon className="h-4 w-4" />
+                      <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} />
                     </>
                   )}
                 </Button>
