@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Tabs,
   TabsContent,
@@ -29,9 +29,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
-import { toast } from "sonner";
 
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
+const ADMIN_TABS = ["admins", "workspace", "usage", "security"] as const;
+
+function isAdminTab(tab: string | null) {
+  return tab !== null && (ADMIN_TABS as readonly string[]).includes(tab);
+}
 
 function SettingsPage() {
   const searchParams = useSearchParams();
@@ -41,10 +45,9 @@ function SettingsPage() {
   const router = useRouter();
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
-  const adminTabs = ["admins", "workspace", "usage", "security"];
   const resolvedTab = tab === "billing" ? "usage" : tab;
   const activeTab =
-    resolvedTab && (!adminTabs.includes(resolvedTab) || isAdmin)
+    resolvedTab && (!isAdminTab(resolvedTab) || isAdmin)
       ? resolvedTab
       : "profile";
   const [pendingTab, setPendingTab] = useState<string | null>(null);
@@ -57,9 +60,35 @@ function SettingsPage() {
 
   const tabValue = pendingTab ?? activeTab;
 
+  useEffect(() => {
+    if (
+      auth.isLoading ||
+      !auth.isAuthenticated ||
+      isAdmin ||
+      !resolvedTab ||
+      !isAdminTab(resolvedTab)
+    ) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of LIST_QUERY_PARAMS) {
+      params.delete(key);
+    }
+    params.set("tab", "profile");
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [
+    auth.isAuthenticated,
+    auth.isLoading,
+    isAdmin,
+    pathname,
+    resolvedTab,
+    router,
+    searchParams,
+  ]);
+
   const handleTabChange = (value: string) => {
-    if (adminTabs.includes(value) && !isAdmin) {
-      toast.error("Insufficient privileges, contact Admin");
+    if (isAdminTab(value) && !isAdmin) {
       return;
     }
 
@@ -97,20 +126,22 @@ function SettingsPage() {
               <Icon icon={UserIcon} size={14} strokeWidth={2} />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="workspace">
-              <Icon icon={DashboardSquare01Icon} size={14} strokeWidth={2} />
-              Workspace
-            </TabsTrigger>
+            {isAdmin ? (
+              <TabsTrigger value="workspace">
+                <Icon icon={DashboardSquare01Icon} size={14} strokeWidth={2} />
+                Workspace
+              </TabsTrigger>
+            ) : null}
             <TabsTrigger value="users">
               <Icon icon={UserGroupIcon} size={14} strokeWidth={2} />
               Users
             </TabsTrigger>
-            <TabsTrigger value="admins">
-              <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
-              Admins
-            </TabsTrigger>
             {isAdmin ? (
               <>
+                <TabsTrigger value="admins">
+                  <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
+                  Admins
+                </TabsTrigger>
                 <TabsTrigger value="usage">
                   <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
                   Usage
