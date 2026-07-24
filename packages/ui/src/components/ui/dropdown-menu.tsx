@@ -8,7 +8,7 @@ import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   ArrowDown01Icon,
   CheckmarkCircle01Icon,
-  CircleIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
 function DropdownMenu({
@@ -140,12 +140,7 @@ function DropdownMenuRadioItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Icon
-            icon={CircleIcon}
-            size={8}
-            strokeWidth={2}
-            className="fill-current"
-          />
+          <Icon icon={Tick02Icon} size={16} strokeWidth={2} />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}

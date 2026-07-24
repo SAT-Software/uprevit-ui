@@ -11,12 +11,11 @@ import { Badge } from "@uprevit/ui/components/ui/badge";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
   Delete02Icon,
-  UserIcon,
-  UserShield01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { User } from "@/types/user";
 import DialogRemoveUser from "./DialogRemoveUser";
+import { UserTypeBadge } from "./UserTypeBadge";
 
 function UserStatusBadge({ status }: { status: User["status"] }) {
   const statusClasses = {
@@ -71,26 +70,9 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
       accessorKey: "userType",
       header: "User Type",
       size: 108,
-      cell: ({ row }) => {
-        const userType = row.getValue("userType") as string;
-        if (userType === "admin") {
-          return (
-            <Badge variant="secondary" className="max-w-full truncate">
-              <Icon icon={UserShield01Icon} size={14} strokeWidth={2} className="shrink-0" />
-              Admin
-            </Badge>
-          );
-        }
-        return (
-          <Badge
-            variant="outline"
-            className="max-w-full gap-1 truncate text-muted-foreground"
-          >
-            <Icon icon={UserIcon} size={14} strokeWidth={2} className="shrink-0" />
-            Member
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <UserTypeBadge userType={row.original.userType} />
+      ),
     },
     {
       accessorKey: "designation",
