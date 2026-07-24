@@ -38,12 +38,18 @@ import { Label } from "@uprevit/ui/components/ui/label";
 import { getUserTableColumns } from "./userTableColumns";
 import { useMemberListIncludeInactive } from "./useMemberListIncludeInactive";
 import {
-  ArrowDown01Icon,
-  ArrowUp01Icon,
+  SortingAZ01Icon,
+  SortingAZ02Icon,
+  SortingZA01Icon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
 
 export function UsersTable() {
@@ -152,39 +158,53 @@ export function UsersTable() {
               listState.setSort(sort, listState.query.order)
             }
           >
-            <SelectTrigger className="h-7 w-[160px] text-xs">
-              <SelectValue />
+            <SelectTrigger className="group w-auto truncate">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon={SortingAZ01Icon}
+                      size={16}
+                      strokeWidth={2}
+                      className="text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
+                    />
+                    <SelectValue />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Sort by different fields</TooltipContent>
+              </Tooltip>
             </SelectTrigger>
             <SelectContent>
               {USER_SORT_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  Sort: {option.label}
+                  <span className="text-muted-foreground/60">Sort by:</span>{" "}
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2 text-xs text-muted-foreground"
-            onClick={() =>
-              listState.setSort(
-                listState.query.sort ?? "name",
-                listState.query.order === "asc" ? "desc" : "asc",
-              )
-            }
-          >
-            <Icon
-              icon={
-                listState.query.order === "asc"
-                  ? ArrowUp01Icon
-                  : ArrowDown01Icon
-              }
-              size={14}
-              strokeWidth={2}
-            />
-            {listState.query.order === "asc" ? "A-Z" : "Z-A"}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon-xs"
+                className="h-7 px-2 text-xs text-muted-foreground/60 hover:text-muted-foreground"
+                onClick={() =>
+                  listState.setSort(
+                    listState.query.sort ?? "name",
+                    listState.query.order === "asc" ? "desc" : "asc",
+                  )
+                }
+              >
+                {listState.query.order === "asc" ? (
+                  <Icon icon={SortingAZ02Icon} size={16} strokeWidth={2} />
+                ) : (
+                  <Icon icon={SortingZA01Icon} size={16} strokeWidth={2} />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Toggle sort order</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

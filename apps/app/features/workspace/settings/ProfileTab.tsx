@@ -6,7 +6,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@uprevit/ui/components/ui/avatar";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+
 import { DialogUpdateProfile } from "./DialogUpdateProfile";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useAuth } from "react-oidc-context";
@@ -23,6 +23,7 @@ import { Icon } from "@uprevit/ui/components/common/Icon";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { cn } from "@uprevit/ui/lib/utils";
+import { UserTypeBadge } from "./UserTypeBadge";
 
 const PROFILE_FIELDS = [
   {
@@ -140,7 +141,7 @@ function ProfileTab() {
             <h2 className="truncate text-base font-semibold">
               {userProfile?.name}
             </h2>
-            <Badge variant="default">{userProfile?.userType}</Badge>
+            <UserTypeBadge userType={userProfile?.userType} />
           </div>
           <p className="text-sm text-muted-foreground">
             Manage your personal information and account settings.
