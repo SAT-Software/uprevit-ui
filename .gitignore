@@ -47,5 +47,6 @@ next-env.d.ts
 
 .vscode/
 /staging-e2e
+.cursor/e2e-testing/
 monorepo*
 .source/
