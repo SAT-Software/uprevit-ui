@@ -304,7 +304,7 @@ export function AutomatedRedliningCard() {
 
         <div className="lg:absolute -bottom-16 lg:-right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out delay-300">
           <div className="p-1 bg-accent border border-border rounded-2xl">
-            <div className="relative h-full bg-background rounded-t-[15px] border border-border shadow-md overflow-hidden flex flex-col">
+            <div className="relative h-full bg-background rounded-t-2xl border border-border shadow-md overflow-hidden flex flex-col">
               <div className="flex flex-col items-start gap-2 px-2 py-2 sm:flex-row sm:items-center sm:justify-start sm:gap-4 border-b bg-muted/30">
                 <div className="text-xs font-bold text-foreground">
                   Label Components

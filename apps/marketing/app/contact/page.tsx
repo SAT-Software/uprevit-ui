@@ -4,7 +4,7 @@ import Link from "next/link";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
@@ -22,7 +22,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
-import { useTheme } from "next-themes";
 import {
   ArrowRight01Icon,
   Clock01Icon,
@@ -59,9 +58,6 @@ const contactFAQs = [
 ];
 
 export default function ContactPage() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
@@ -75,13 +71,7 @@ export default function ContactPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-                <Badge
-                  variant={badgeVariant}
-                  className="mb-8 z-60 dark:px-2 dark:py-0.5"
-                >
-                  <Icon icon={MailOpen01Icon} size={16} strokeWidth={2} />
-                  <span className="font-medium">Contact</span>
-                </Badge>
+                <MarketingSectionBadge icon={MailOpen01Icon} label="Contact" />
                 <div className="w-full flex flex-col md:flex-row items-start gap-4">
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Let&apos;s connect your labeling team with clarity
@@ -281,18 +271,11 @@ export default function ContactPage() {
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
                 <div className="flex flex-col items-center text-center mb-10">
-                  <Badge
-                    variant={badgeVariant}
-                    className="mb-6 z-60 dark:px-2 dark:py-0.5"
-                  >
-                    <Icon
-                      icon={HelpCircleIcon}
-                      size={16}
-                      strokeWidth={2}
-                      className="mr-1 text-foreground/50"
-                    />
-                    <span className="font-medium">FAQ</span>
-                  </Badge>
+                  <MarketingSectionBadge
+                    icon={HelpCircleIcon}
+                    label="FAQ"
+                    className="mb-6"
+                  />
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Contact FAQ
                   </h2>

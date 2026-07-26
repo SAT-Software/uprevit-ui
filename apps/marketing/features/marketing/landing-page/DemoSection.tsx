@@ -1,36 +1,20 @@
 "use client";
 
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useScrollSection } from "@/lib/scroll-context";
 import { Image01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { useTheme } from "next-themes";
 import Lottie from "lottie-react";
 import uprevitMarketingVideo from "@/public/Uprevit-Marketing-Video.json";
 
 export default function DemoSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
   const demoRef = useScrollSection("demo");
 
   return (
     <div ref={demoRef} className="w-full mt-40 mb-20">
       <div className="max-w-6xl mx-auto mb-8 relative px-2 md:px-2 lg:px-0">
-        <Badge
-          suppressHydrationWarning
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon
-            icon={Image01Icon}
-            size={16}
-            strokeWidth={2}
-            className="mr-1 text-foreground/50"
-          />
-          <span className="font-medium">Uprevit Demo</span>
-        </Badge>
+        <MarketingSectionBadge icon={Image01Icon} label="Uprevit Demo" />
 
         <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-1/2 font-medium mr-16 mb-4 md:mb-0">
@@ -62,7 +46,7 @@ export default function DemoSection() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
             <Card className="aspect-auto mx-auto border-border overflow-hidden">
               <CardContent className="p-0 overflow-hidden dark:hidden">
                 <Lottie

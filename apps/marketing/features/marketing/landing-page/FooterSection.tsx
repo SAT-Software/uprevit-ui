@@ -8,23 +8,23 @@ import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 
 export default function FooterSection() {
   return (
-    <footer className="w-full bg-black text-background mt-20 pointer-events-auto z-45">
+    <footer className="w-full bg-foreground text-background mt-20 pointer-events-auto z-45">
       <div className="relative max-w-6xl mx-auto py-16 px-2 md:px-2 lg:px-0">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-16">
           {/* Brand Column */}
           <div className="md:col-span-6 flex flex-col justify-between">
             <div>
-              <h3 className="text-lg md:text-xl font-medium text-gray-300 mb-0">
+              <h3 className="text-lg md:text-xl font-medium text-background/70 mb-0">
                 The unified cloud-based platform
               </h3>
-              <h3 className="text-lg md:text-xl font-medium text-gray-500 mb-12">
+              <h3 className="text-lg md:text-xl font-medium text-background/50 mb-12">
                 for total labeling governance
               </h3>
             </div>
 
             <Link
               href="/"
-              className="flex items-center gap-4 p-1 rounded hover:bg-white/10 transition-colors"
+              className="flex items-center gap-4 p-1 rounded hover:bg-background/10 transition-colors"
             >
               <div className="relative flex aspect-square mb-1 size-8 items-center justify-center">
                 <Image
@@ -35,7 +35,7 @@ export default function FooterSection() {
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate text-lg text-white font-black">
+                <span className="truncate text-lg text-background font-black">
                   UPREVIT
                 </span>
               </div>
@@ -44,14 +44,14 @@ export default function FooterSection() {
 
           {/* Product / Company Column */}
           <div className="md:col-span-3">
-            <h4 className="text-sm font-medium text-gray-400 mb-6">
+            <h4 className="text-sm font-medium text-background/60 mb-6">
               Product / Company
             </h4>
             <ul className="space-y-4">
               <li>
                 <Link
                   href="/"
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="text-background/50 hover:text-background transition-colors"
                 >
                   Home
                 </Link>
@@ -59,7 +59,7 @@ export default function FooterSection() {
               <li>
                 <Link
                   href="/resources"
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="text-background/50 hover:text-background transition-colors"
                 >
                   Resources
                 </Link>
@@ -67,7 +67,7 @@ export default function FooterSection() {
               <li>
                 <Link
                   href="/pricing"
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="text-background/50 hover:text-background transition-colors"
                 >
                   Pricing
                 </Link>
@@ -75,7 +75,7 @@ export default function FooterSection() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="text-background/50 hover:text-background transition-colors"
                 >
                   Contact
                 </Link>
@@ -85,7 +85,7 @@ export default function FooterSection() {
 
           {/* Follow Us Column */}
           <div className="md:col-span-3">
-            <h4 className="text-sm font-medium text-gray-400 mb-6">
+            <h4 className="text-sm font-medium text-background/60 mb-6">
               Follow Us
             </h4>
             <ul className="space-y-4 mb-8">
@@ -93,7 +93,7 @@ export default function FooterSection() {
                 <Link
                   href="https://x.com/uprevit"
                   target="_blank"
-                  className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-background/50 hover:text-background transition-colors"
                 >
                   <Icon icon={NewTwitterIcon} size={16} strokeWidth={2} />
                   <span>x.com</span>
@@ -103,7 +103,7 @@ export default function FooterSection() {
                 <Link
                   href="https://linkedin.com/company/uprevit"
                   target="_blank"
-                  className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-background/50 hover:text-background transition-colors"
                 >
                   <Icon icon={Linkedin02Icon} size={16} strokeWidth={2} />
                   <span>LinkedIn</span>
@@ -115,32 +115,32 @@ export default function FooterSection() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-gray-600">
+        <div className="pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-background/40">
           <p>© 2025 Uprevit. All rights reserved.</p>
           <div className="flex flex-wrap gap-6">
             <Link
               href="/cookies"
-              className="hover:text-gray-400 transition-colors"
+              className="hover:text-background/60 transition-colors"
             >
               Cookie Settings
             </Link>
             <Link
               href="/privacy-policy"
-              className="hover:text-gray-400 transition-colors"
+              className="hover:text-background/60 transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-service"
-              className="hover:text-gray-400 transition-colors"
+              className="hover:text-background/60 transition-colors"
             >
               Terms of Services
             </Link>
           </div>
         </div>
 
-        <div className="absolute top-0 left-0 w-px bottom-0 bg-black z-30" />
-        <div className="absolute top-0 right-0 w-px bottom-0 bg-black z-30" />
+        <div className="absolute top-0 left-0 w-px bottom-0 bg-foreground z-30" />
+        <div className="absolute top-0 right-0 w-px bottom-0 bg-foreground z-30" />
       </div>
     </footer>
   );

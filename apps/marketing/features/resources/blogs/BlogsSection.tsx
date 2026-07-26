@@ -1,8 +1,8 @@
 "use client";
 
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   Calendar03Icon,
@@ -75,26 +75,13 @@ const focusAreas = [
 ];
 
 export default function BlogsSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
   const featuredPost = blogPosts[0];
 
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
       <div className="max-w-6xl mx-auto mb-12 px-2 md:px-2 lg:px-0">
-        <Badge
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon
-            icon={News01Icon}
-            size={16}
-            strokeWidth={2}
-            className="text-foreground/60"
-          />
-          <span className="font-medium">Blogs</span>
-        </Badge>
+        <MarketingSectionBadge icon={News01Icon} label="Blogs" />
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Insights for labeling leaders who need clarity fast
@@ -130,11 +117,11 @@ export default function BlogsSection() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
-            <div className="p-2 bg-white dark:bg-neutral-800 border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
+            <div className="p-2 bg-card border-border border rounded-xl">
               <Link
                 href="/resources/blogs"
-                className="group relative block overflow-hidden rounded-[10px] border border-border bg-black text-white transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 hover:-translate-y-0.5"
+                className="group relative block overflow-hidden rounded-lg border border-border bg-foreground text-background transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 hover:-translate-y-0.5"
                 aria-label={`Read featured post: ${featuredPost.title}`}
               >
                 <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:120px_120px]" />
@@ -180,7 +167,7 @@ export default function BlogsSection() {
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/50">
                       <span>Updated weekly</span>
-                      <span className="h-1 w-1 rounded-full bg-white/40" />
+                      <span className="h-1 w-1 rounded-full bg-background/40" />
                       <span>Actionable summaries</span>
                     </div>
                   </div>
@@ -203,16 +190,16 @@ export default function BlogsSection() {
             positionClassName="-bottom-15 -right-15"
             rotation={180}
           />
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
               {newsUpdates.map((news) => (
                 <Link
                   key={news.title}
                   href="/resources/blogs"
-                  className="group overflow-hidden rounded-[10px] border border-border bg-background/80 transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                  className="group overflow-hidden rounded-lg border border-border bg-background/80 transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                   aria-label={`Read blog update: ${news.title}`}
                 >
-                  <div className="relative h-62 bg-black dark:bg-neutral-900 text-white">
+                  <div className="relative h-62 bg-foreground dark:bg-card text-background">
                     <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:120px_120px]" />
                     <div className="absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-white/5" />
                     <div className="relative flex h-full flex-col justify-between p-4">

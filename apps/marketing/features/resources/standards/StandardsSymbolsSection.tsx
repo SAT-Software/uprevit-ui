@@ -1,9 +1,8 @@
 "use client";
 
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { useTheme } from "next-themes";
 import { BookOpen02Icon, Link01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 
@@ -44,20 +43,11 @@ const isoDocuments = [
 ];
 
 export default function StandardsSymbolsSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
       <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-        <Badge
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon icon={BookOpen02Icon} size={16} strokeWidth={2} />
-          <span className="font-medium">Standards & Symbols</span>
-        </Badge>
+        <MarketingSectionBadge icon={BookOpen02Icon} label="Standards & Symbols" />
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Standards, symbols, and references for global compliance
@@ -85,9 +75,9 @@ export default function StandardsSymbolsSection() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
             <div className="flex flex-col gap-1">
-              <div className="flex flex-col lg:flex-row items-start justify-between gap-6 rounded-[10px] border border-border bg-background/80 p-4 md:p-6">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-6 rounded-lg border border-border bg-background/80 p-4 md:p-6">
                 <div>
                   <h2 className="text-base md:text-lg font-semibold">
                     Standards & symbol library
@@ -100,7 +90,7 @@ export default function StandardsSymbolsSection() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-                <div className="rounded-[10px] border border-border bg-background/90 p-4 md:p-6 w-full">
+                <div className="rounded-lg border border-border bg-background/90 p-4 md:p-6 w-full">
                   {symbols.map((symbol) => (
                     <div
                       key={symbol.title}
@@ -146,7 +136,7 @@ export default function StandardsSymbolsSection() {
                   ))}
                 </div>
 
-                <div className="rounded-[10px] flex flex-col gap-4 justify-between border border-border bg-background/90 p-4 md:p-6 w-full">
+                <div className="rounded-lg flex flex-col gap-4 justify-between border border-border bg-background/90 p-4 md:p-6 w-full">
                   <div>
                     <div>
                       <div className="flex items-center gap-2">

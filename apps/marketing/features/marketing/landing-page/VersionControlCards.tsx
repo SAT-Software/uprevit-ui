@@ -87,7 +87,7 @@ export function VersionControlCards() {
               className={cn(
                 "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 group-data-[active=true]:-mb-2 transition-all duration-300 ease-in-out delay-300",
                 isActive
-                  ? "shadow-md border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-neutral-800 group-hover:dark:bg-neutral-800 group-data-[active=true]:bg-neutral-800 group-data-[active=true]:dark:bg-neutral-200"
+                  ? "shadow-md border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-foreground group-hover:dark:bg-background/90 group-data-[active=true]:bg-foreground group-data-[active=true]:dark:bg-background/90"
                   : "shadow-sm bg-accent/60 z-40 group-hover:bg-accent group-data-[active=true]:bg-accent",
                 !isActive &&
                   dist === 1 &&

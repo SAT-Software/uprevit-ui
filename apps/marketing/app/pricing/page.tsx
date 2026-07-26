@@ -15,7 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
@@ -69,9 +69,6 @@ function PricingPageContent() {
   const scrollTo = useScrollTo();
   const pricingCalculatorRef = useScrollSection("pricing-calculator");
 
-  const pricingBadgeClassName =
-    "mb-6 z-60 border-border/70 bg-background/80 px-2 py-0.5 text-foreground shadow-none";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
@@ -81,10 +78,7 @@ function PricingPageContent() {
           <div className="relative w-full mt-10 mb-20 pointer-events-auto">
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-              <Badge variant="outline" className={pricingBadgeClassName}>
-                <Icon icon={Coins01Icon} size={16} strokeWidth={2} />
-                <span className="font-medium">Pricing</span>
-              </Badge>
+              <MarketingSectionBadge icon={Coins01Icon} label="Pricing" />
               <div className="w-full flex flex-col md:flex-row items-start gap-4">
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                   Pricing built for regulated teams
@@ -118,7 +112,7 @@ function PricingPageContent() {
                       />
                     ))}
                   </div>
-                  <Card className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl border-border/70 bg-background shadow-[0_10px_24px_-20px_rgba(15,15,15,0.45)]">
+                  <Card className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl border-border/70 bg-background shadow-lg">
                     <CardHeader className="pb-4 md:pb-5">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-base font-normal">
@@ -379,15 +373,11 @@ function PricingPageContent() {
                 className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0"
               >
                 <div className="flex flex-col items-center text-center mb-10">
-                  <Badge variant="outline" className={pricingBadgeClassName}>
-                    <Icon
-                      icon={HelpCircleIcon}
-                      size={16}
-                      strokeWidth={2}
-                      className="mr-1 text-foreground/60"
-                    />
-                    <span className="font-medium">FAQ</span>
-                  </Badge>
+                  <MarketingSectionBadge
+                    icon={HelpCircleIcon}
+                    label="FAQ"
+                    className="mb-6"
+                  />
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Pricing questions, answered
                   </h2>

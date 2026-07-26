@@ -219,7 +219,7 @@ function CalculatorCard({
   return (
     <Card
       className={cn(
-        "overflow-hidden rounded-2xl border-border/70 bg-background shadow-[0_12px_30px_-24px_rgba(15,15,15,0.22)]",
+        "overflow-hidden rounded-2xl border-border/70 bg-background shadow-lg",
         className,
       )}
     >
@@ -487,7 +487,7 @@ export function PricingCalculatorCards() {
                 aria-label="Licensed seats"
                 trackClassName="h-2 rounded-full bg-muted"
                 rangeClassName="bg-foreground"
-                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-[0_8px_18px_-10px_rgba(15,15,15,0.45)] before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
+                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-md before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>1</span>
@@ -574,7 +574,7 @@ export function PricingCalculatorCards() {
                 aria-label={`Uploads in gigabytes per ${currentCycleLabel}`}
                 trackClassName="h-2 rounded-full bg-muted"
                 rangeClassName="bg-foreground"
-                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-[0_8px_18px_-10px_rgba(15,15,15,0.45)] before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
+                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-md before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{includedUploadGb.toLocaleString()} GB</span>
@@ -683,7 +683,7 @@ export function PricingCalculatorCards() {
                 aria-label={`Exports per ${currentCycleLabel}`}
                 trackClassName="h-2 rounded-full bg-muted"
                 rangeClassName="bg-foreground"
-                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-[0_8px_18px_-10px_rgba(15,15,15,0.45)] before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
+                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-md before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>

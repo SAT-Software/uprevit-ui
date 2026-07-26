@@ -1,9 +1,8 @@
 "use client";
 
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   BookOpen02Icon,
@@ -85,25 +84,11 @@ const resources = [
 // ];
 
 export default function ResourcesHub() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
       <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-        <Badge
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon
-            icon={Layers01Icon}
-            size={16}
-            strokeWidth={2}
-            className="text-foreground/60"
-          />
-          <span className="font-medium">Resources</span>
-        </Badge>
+        <MarketingSectionBadge icon={Layers01Icon} label="Resources" />
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             The library built for labeling teams
@@ -159,12 +144,12 @@ export default function ResourcesHub() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
               {resources.map((resource) => (
                 <div
                   key={resource.id}
-                  className="flex h-full flex-col justify-between rounded-[10px] border border-border bg-background/80 p-4 md:p-6"
+                  className="flex h-full flex-col justify-between rounded-lg border border-border bg-background/80 p-4 md:p-6"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-4">

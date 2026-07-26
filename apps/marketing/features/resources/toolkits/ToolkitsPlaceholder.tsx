@@ -1,9 +1,9 @@
 "use client";
 
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { useTheme } from "next-themes";
 import {
   BinocularsIcon,
   HourglassIcon,
@@ -40,20 +40,11 @@ const toolkitBenefits = [
 ];
 
 export default function ToolkitsPlaceholder() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
       <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-        <Badge
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon icon={Wrench01Icon} size={16} strokeWidth={2} />
-          <span className="font-medium">Toolkits</span>
-        </Badge>
+        <MarketingSectionBadge icon={Wrench01Icon} label="Toolkits" />
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Free compliance tools, built with labeling teams
@@ -91,9 +82,9 @@ export default function ToolkitsPlaceholder() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
             <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-1">
-              <div className="rounded-[10px] border border-border bg-foreground dark:bg-background dark:text-foreground text-background p-4 md:p-6">
+              <div className="rounded-lg border border-border bg-foreground dark:bg-background dark:text-foreground text-background p-4 md:p-6">
                 <div className="flex items-center justify-between">
                   <Badge
                     variant="outline"
@@ -127,7 +118,7 @@ export default function ToolkitsPlaceholder() {
                   Notify me on launch
                 </Button>
               </div>
-              <div className="rounded-[10px] border border-border bg-background/80 p-4 md:p-5">
+              <div className="rounded-lg border border-border bg-background/80 p-4 md:p-5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-base font-semibold">
                     What&apos;s coming next
@@ -140,7 +131,7 @@ export default function ToolkitsPlaceholder() {
                   {upcomingTools.map((tool) => (
                     <div
                       key={tool.title}
-                      className="rounded-[10px] border border-border bg-background/90 p-3 transition-colors hover:bg-accent/40"
+                      className="rounded-lg border border-border bg-background/90 p-3 transition-colors hover:bg-accent/40"
                     >
                       <div className="flex items-center justify-between">
                         <h5 className="text-sm font-semibold">{tool.title}</h5>

@@ -1,30 +1,13 @@
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircle } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { Presentation01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { useTheme } from "next-themes";
 
 export default function ReportSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="w-full mt-40 mb-20">
       <div className="max-w-6xl flex flex-col items-center mx-auto mb-8 px-2 md:px-2 lg:px-0">
-        <Badge
-          suppressHydrationWarning
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon
-            icon={Presentation01Icon}
-            size={16}
-            strokeWidth={2}
-            className="mr-1 text-foreground/50"
-          />
-          <span className="font-medium">Report</span>
-        </Badge>
+        <MarketingSectionBadge icon={Presentation01Icon} label="Report" />
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
             Extract powerful reports
@@ -45,7 +28,7 @@ export default function ReportSection() {
           {/* Top-right corner */}
           <DecorativeCornerCircle position="top-right" rotation={90} />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px] max-w-6xl mx-auto">
+          <div className="p-1 bg-accent border-border border rounded-xl max-w-6xl mx-auto">
             <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
               <CardContent className="p-0 overflow-hidden dark:hidden">
                 <video

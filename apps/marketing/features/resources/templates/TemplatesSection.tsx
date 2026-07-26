@@ -1,9 +1,9 @@
 "use client";
 
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { useTheme } from "next-themes";
 import { useState } from "react";
 import {
   Download01Icon,
@@ -66,9 +66,7 @@ const toolkitSteps = [
 ];
 
 export default function TemplatesSection() {
-  const { resolvedTheme } = useTheme();
   const [activeTag, setActiveTag] = useState("All");
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
   const filteredTemplates =
     activeTag === "All"
       ? templateItems
@@ -78,13 +76,7 @@ export default function TemplatesSection() {
     <div className="w-full mt-16 mb-24 pointer-events-auto relative">
       <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
       <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-        <Badge
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon icon={File02Icon} size={16} strokeWidth={2} />
-          <span className="font-medium">Templates</span>
-        </Badge>
+        <MarketingSectionBadge icon={File02Icon} label="Templates" />
         <div className="w-full flex flex-col lg:flex-row items-start gap-8">
           <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
             Practical templates built for speed
@@ -121,9 +113,9 @@ export default function TemplatesSection() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
+          <div className="p-1 bg-accent border-border border rounded-xl">
             <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_2fr] gap-1">
-              <div className="rounded-[10px] flex flex-col gap-4 justify-between border border-border bg-background/80 p-4 md:p-6">
+              <div className="rounded-lg flex flex-col gap-4 justify-between border border-border bg-background/80 p-4 md:p-6">
                 <div>
                   <div>
                     <div className="flex items-center gap-2 text-sm md:text-base font-semibold">
@@ -167,7 +159,7 @@ export default function TemplatesSection() {
                 </div>
               </div>
 
-               <div className="rounded-[10px] border border-border bg-background/80 p-4 md:p-6">
+               <div className="rounded-lg border border-border bg-background/80 p-4 md:p-6">
                 <div className="flex flex-wrap items-center gap-2">
                   {tags.map((tag) => (
                     <Button

@@ -40,7 +40,7 @@ export default function HeroFeatureDemo({
           rotation={180}
         />
 
-        <div className="p-1 bg-accent border-border border rounded-[12px] backdrop-blur-sm">
+        <div className="p-1 bg-accent border-border border rounded-xl backdrop-blur-sm">
           <Card className="relative w-full aspect-video mx-auto border-border max-w-6xl overflow-hidden bg-background/50">
             <div className="absolute inset-0">
               {screenshots.map((src, idx) => (
