@@ -16,13 +16,13 @@ export function MarketingSectionBadge({
     <Badge
       variant="outline"
       className={cn(
-        "mb-8 z-60 gap-1 border-border/70 bg-background/80 px-2 py-0.5 shadow-xs",
+        "mb-8 z-60 gap-1 border-border/70 bg-background/80 px-2 py-0.5 shadow-md",
         className,
       )}
     >
       <Icon
         icon={icon}
-        size={16}
+        size={14}
         strokeWidth={2}
         className="text-muted-foreground"
       />

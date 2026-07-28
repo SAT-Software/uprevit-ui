@@ -20,12 +20,13 @@ export default function CTASection() {
             size="lg"
           />
 
-          <div className="p-1 bg-accent rounded-2xl max-w-6xl mx-auto border border-border">
-            <div className="w-full bg-foreground dark:bg-background rounded-xl h-120 text-background dark:text-foreground p-6 md:p-8 lg:p-10 gap-10 flex flex-col lg:flex-row items-center justify-between overflow-hidden">
-              <div className="w-full min-w-[30%] flex flex-col items-start justify-between">
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold">
-                  Master Your Labeling Compliance{" "}
-                  <span className="text-accent/60 dark:text-foreground/40">
+          <div className="p-1 bg-muted rounded-2xl max-w-6xl mx-auto border border-border shadow-bottom-lg">
+            <div className="w-full bg-foreground dark:bg-background rounded-xl h-120 text-background dark:text-foreground p-6 md:p-8 lg:p-10 gap-10 flex flex-col lg:flex-row items-center justify-between overflow-hidden shadow-none">
+              <div className="w-full min-w-[36%] max-w-md flex flex-col items-start justify-between shrink-0">
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-balance">
+                  Master Your{" "}
+                  <span className="whitespace-nowrap">Labeling Compliance</span>{" "}
+                  <span className="text-muted/60 dark:text-foreground/40">
                     Today
                   </span>
                 </h2>

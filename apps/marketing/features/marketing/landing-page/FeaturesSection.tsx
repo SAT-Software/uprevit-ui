@@ -1,6 +1,6 @@
 import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { CubeIcon } from "@hugeicons/core-free-icons";
+import { StarSquareIcon } from "@hugeicons/core-free-icons";
 import { AutomatedRedliningCard } from "./AutomatedRedliningCard";
 import { VersionControlCards } from "./VersionControlCards";
 import { Worksteps } from "./Worksteps";
@@ -10,15 +10,15 @@ export default function FeaturesSection() {
   return (
     <div className="w-full mt-40 mb-20 pointer-events-auto">
       <div className="max-w-6xl mx-auto mb-8 px-2 md:px-2 lg:px-0">
-        <MarketingSectionBadge icon={CubeIcon} label="Features" />
+        <MarketingSectionBadge icon={StarSquareIcon} label="Features" />
         <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-1/2 font-medium mr-16 mb-4 md:mb-0">
+          <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-[55%] font-medium mr-12 mb-4 md:mb-0 text-balance">
             Turn raw data into Notified Body ready document
           </h2>
-          <div className="hidden lg:block mr-12 h-16 w-px bg-border" />
-          <p className="text-base md:text-lg lg:text-xl font-semibold text-muted-foreground/60 tracking-tighter leading-tight">
-            Unify your data, Uprevit your workflow. Stop managing scattered
-            source files and start managing results
+          <div className="hidden lg:block mr-10 h-16 w-px bg-border shrink-0" />
+          <p className="text-base md:text-lg lg:text-xl md:flex-1 font-normal text-muted-foreground/60 mr-4">
+            Unify your data, your workflow. Stop managing scattered documents
+            and start managing results
           </p>
         </div>
       </div>
@@ -45,7 +45,7 @@ export default function FeaturesSection() {
             rotation={270}
           />
 
-          <div className="p-1 bg-accent rounded-xl max-w-6xl mx-auto border border-border">
+          <div className="p-1 bg-muted rounded-2xl max-w-6xl mx-auto border border-border shadow-bottom-lg">
             <div className="flex flex-col gap-1">
               <div className="flex flex-col lg:flex-row w-full h-250 lg:h-130 gap-1">
                 <AutomatedRedliningCard />

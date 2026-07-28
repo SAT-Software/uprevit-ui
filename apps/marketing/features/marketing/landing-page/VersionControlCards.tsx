@@ -65,7 +65,7 @@ export function VersionControlCards() {
       onTouchEnd={scheduleTouchDeactivate}
       onTouchCancel={deactivateTouch}
       data-active={isTouchActive ? "true" : undefined}
-      className="w-full lg:w-1/3 h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col overflow-hidden"
+      className="w-full lg:w-1/3 h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col overflow-hidden"
     >
       <div className="mb-8 z-10 shrink-0">
         <h3 className="text-base md:text-base lg:text-lg font-semibold text-foreground">
@@ -87,8 +87,8 @@ export function VersionControlCards() {
               className={cn(
                 "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 group-data-[active=true]:-mb-2 transition-all duration-300 ease-in-out delay-300",
                 isActive
-                  ? "shadow-md border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-foreground group-hover:dark:bg-background/90 group-data-[active=true]:bg-foreground group-data-[active=true]:dark:bg-background/90"
-                  : "shadow-sm bg-accent/60 z-40 group-hover:bg-accent group-data-[active=true]:bg-accent",
+                  ? "shadow-bottom-lg border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-foreground group-hover:dark:bg-background/90 group-data-[active=true]:bg-foreground group-data-[active=true]:dark:bg-background/90"
+                  : "shadow-sm bg-muted/60 z-40 group-hover:bg-muted group-data-[active=true]:bg-muted",
                 !isActive &&
                   dist === 1 &&
                   "opacity-60 scale-[0.98] group-hover:opacity-70 group-data-[active=true]:opacity-70",

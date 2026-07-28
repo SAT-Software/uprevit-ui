@@ -1,18 +1,18 @@
 import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircle } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import { Presentation01Icon } from "@hugeicons/core-free-icons";
+import { Archive01Icon } from "@hugeicons/core-free-icons";
 
 export default function ReportSection() {
   return (
     <div className="w-full mt-40 mb-20">
       <div className="max-w-6xl flex flex-col items-center mx-auto mb-8 px-2 md:px-2 lg:px-0">
-        <MarketingSectionBadge icon={Presentation01Icon} label="Report" />
+        <MarketingSectionBadge icon={Archive01Icon} label="Report" />
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
             Extract powerful reports
           </h2>
-          <p className="text-base md:text-lg lg:text-xl font-semibold text-muted-foreground/60 w-full md:w-1/3 text-center tracking-tighter leading-tight">
+          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground/60 w-full md:w-1/3 text-center">
             Get insights into your data with our powerful reporting tools
           </p>
         </div>
@@ -28,8 +28,8 @@ export default function ReportSection() {
           {/* Top-right corner */}
           <DecorativeCornerCircle position="top-right" rotation={90} />
 
-          <div className="p-1 bg-accent border-border border rounded-xl max-w-6xl mx-auto">
-            <Card className="aspect-16/8 mx-auto border-border max-w-6xl">
+          <div className="p-1 bg-muted border-border border rounded-2xl shadow-bottom-lg max-w-6xl mx-auto">
+            <Card className="aspect-16/8 mx-auto border-border max-w-6xl overflow-hidden shadow-none">
               <CardContent className="p-0 overflow-hidden dark:hidden">
                 <video
                   src="/Report-Light-Demo.mp4"
