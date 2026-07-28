@@ -5,7 +5,6 @@ import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
-import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
+// import { Button } from "@uprevit/ui/components/ui/button";
 // import { Input } from "@uprevit/ui/components/ui/input";
 // import { Textarea } from "@uprevit/ui/components/ui/textarea";
 // import { Label } from "@uprevit/ui/components/ui/label";
@@ -23,7 +23,6 @@ import {
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
 import {
-  ArrowRight01Icon,
   Clock01Icon,
   HelpCircleIcon,
   Linkedin02Icon,
@@ -89,7 +88,7 @@ export default function ContactPage() {
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
                 <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3 md:gap-4 md:items-stretch">
-                    <Card className="flex h-full flex-col border-border/70">
+                    <Card className="flex h-full flex-col border-border shadow-bottom-lg">
                       <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
                         <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
@@ -124,7 +123,7 @@ export default function ContactPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="flex h-full flex-col border-border/70">
+                    <Card className="flex h-full flex-col border-border shadow-bottom-lg">
                       <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
                         <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
@@ -164,7 +163,7 @@ export default function ContactPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="flex h-full flex-col border-border/70">
+                    <Card className="flex h-full flex-col border-border shadow-bottom-lg">
                       <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
                         <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
@@ -302,28 +301,26 @@ export default function ContactPage() {
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
-                <div className="relative overflow-hidden rounded-2xl border bg-foreground dark:bg-background dark:text-foreground text-background">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_60%)]" />
-                  <div className="relative p-6 md:p-8 lg:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 h-80">
-                    <div className="max-w-2xl">
-                      <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
-                        Ready to talk compliance and labeling?
-                      </h2>
-                      <p className="mt-3 text-base md:text-lg dark:text-foreground/70 text-background/70">
-                        Book a demo to see how Uprevit streamlines labeling
-                        governance for regulated teams.
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button variant="secondary" className="text-foreground">
-                        Book a demo
-                        <Icon
-                          icon={ArrowRight01Icon}
-                          size={16}
-                          strokeWidth={2}
-                          className="ml-2"
-                        />
-                      </Button>
+                <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-foreground dark:bg-background dark:text-foreground text-background shadow-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_60%)]" />
+                    <div className="relative p-6 md:p-8 lg:p-12 flex flex-col items-start justify-center gap-4 min-h-80">
+                      <div className="max-w-2xl">
+                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
+                          Ready to talk compliance and labeling?
+                        </h2>
+                        <p className="mt-3 text-base md:text-lg dark:text-foreground/70 text-background/70">
+                          Contact us at{" "}
+                          <Link
+                            href="mailto:contact@uprevit.com"
+                            className="font-medium text-background dark:text-foreground underline underline-offset-4 hover:opacity-80"
+                          >
+                            contact@uprevit.com
+                          </Link>{" "}
+                          to book a demo and see how Uprevit streamlines
+                          labeling governance for regulated teams.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
