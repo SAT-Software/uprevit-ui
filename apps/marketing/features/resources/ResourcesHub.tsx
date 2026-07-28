@@ -3,7 +3,7 @@
 import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-import Link from "next/link";
+// import Link from "next/link";
 import {
   BookOpen02Icon,
   File02Icon,
@@ -94,13 +94,13 @@ export default function ResourcesHub() {
             The library built for labeling teams
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
+          <p className="text-base md:text-lg font-normal text-muted-foreground/60 max-w-md leading-relaxed">
             Templates, standards, and expert analysis organized into a single
             hub. Everything you need to move from draft to approved label with
             confidence.
           </p>
         </div>
-        <div className="mt-8 flex flex-wrap items-center gap-4">
+        {/* <div className="mt-8 flex flex-wrap items-center gap-4">
           <Button size="lg" variant="outline" asChild>
             <Link href="/resources/standards-symbols">
               <Icon icon={BookOpen02Icon} size={16} strokeWidth={2} /> Explore standards
@@ -112,7 +112,7 @@ export default function ResourcesHub() {
               Browse templates
             </Link>
           </Button>
-        </div>
+        </div> */}
         {/* <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
           {resourcePillars.map((pillar) => (
             <div
@@ -144,12 +144,12 @@ export default function ResourcesHub() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-xl">
+          <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
               {resources.map((resource) => (
                 <div
                   key={resource.id}
-                  className="flex h-full flex-col justify-between rounded-lg border border-border bg-background/80 p-4 md:p-6"
+                  className="flex h-full flex-col justify-between rounded-xl border border-border bg-background/80 p-4 md:p-6 shadow-none"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-4">
@@ -165,20 +165,20 @@ export default function ResourcesHub() {
                           <h3 className="text-lg md:text-xl font-semibold">
                             {resource.title}
                           </h3>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs font-normal text-muted-foreground/60">
                             {resource.meta}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <p className="mt-4 text-sm text-foreground leading-relaxed">
+                    <p className="mt-4 text-sm font-normal text-muted-foreground/60 leading-relaxed">
                       {resource.description}
                     </p>
                     <div className="mt-4 space-y-2">
                       {resource.highlights.map((highlight) => (
                         <div
                           key={highlight}
-                          className="flex items-center gap-2 text-sm text-muted-foreground"
+                          className="flex items-center gap-2 text-sm font-normal text-muted-foreground/60"
                         >
                           <span className="size-1.5 rounded-full bg-foreground/60" />
                           {highlight}
@@ -187,12 +187,13 @@ export default function ResourcesHub() {
                     </div>
                   </div>
                   <div className="mt-6 flex items-center justify-between">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs uppercase tracking-wide font-normal text-muted-foreground/60">
                       Updated regularly
                     </p>
-                    <Button variant="outline" asChild>
+                    {/* <Button variant="outline" asChild>
                       <Link href={resource.href}>{resource.cta}</Link>
-                    </Button>
+                    </Button> */}
+                    <Button variant="ghost">Coming soon</Button>
                   </div>
                 </div>
               ))}
