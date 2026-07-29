@@ -1,13 +1,11 @@
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
-import { HelpCircleIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { useTheme } from "next-themes";
+import { HelpSquareIcon } from "@hugeicons/core-free-icons";
 
 const faqs = [
   {
@@ -53,30 +51,15 @@ const faqs = [
 ];
 
 export default function FAQSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="relative w-full pt-20 mt-40 pb-20 mb-20 pointer-events-auto">
       <div className="max-w-6xl flex flex-col items-center mx-auto mb-8 px-2 md:px-2 lg:px-0">
-        <Badge
-          suppressHydrationWarning
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <Icon
-            icon={HelpCircleIcon}
-            size={16}
-            strokeWidth={2}
-            className="mr-1 text-foreground/50"
-          />
-          <span className="font-medium">FAQ</span>
-        </Badge>
+        <MarketingSectionBadge icon={HelpSquareIcon} label="FAQ" />
         <div className="w-full flex flex-col gap-4 items-center justify-center text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium text-center">
             Frequently Asked Questions
           </h2>
-          <p className="text-base md:text-lg lg:text-xl font-semibold text-muted-foreground/60 w-full md:w-1/3 text-center tracking-tighter leading-tight">
+          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground/60 w-full md:w-1/3 text-center">
             Find answers to common questions about our product
           </p>
         </div>

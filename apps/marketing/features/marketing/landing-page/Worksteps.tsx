@@ -99,7 +99,7 @@ export function Worksteps({ className }: WorkstepsProps) {
       onMouseEnter={updatedSteps}
       onMouseLeave={resetSteps}
       className={cn(
-        "w-full h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col items-start justify-start relative overflow-hidden",
+        "w-full h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col items-start justify-start relative overflow-hidden",
         className,
       )}
     >

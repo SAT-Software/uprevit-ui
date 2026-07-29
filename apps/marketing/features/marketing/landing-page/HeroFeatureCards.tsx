@@ -7,7 +7,7 @@ import {
 } from "@uprevit/ui/components/ui/card";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
-  AlertCircleIcon,
+  Album02Icon,
   BarcodeScanIcon,
   Certificate01Icon,
   CubeIcon,
@@ -36,30 +36,30 @@ export default function HeroFeatureCards({
   return (
     <div className="hidden md:grid group max-w-6xl mx-auto w-full">
       <div className="col-start-1 row-start-1 transform-none">
-        <div className="[--row-height:11.3px]">
+        <div className="[--row-height:12px]">
           <div className="relative grid grid-cols-[repeat(118,1fr)] grid-rows-[repeat(12,var(--row-height))] gap-y-[19px]">
             <Card
               onClick={() => onActiveChange(0)}
-              className={`relative flex flex-col rounded-[9.5px] border bg-background p-1 lg:rounded-lg lg:p-[11px] col-[span_27/span_27] row-span-6 xl:col-[span_22/span_22] transition-all duration-500 cursor-pointer ${
+              className={`relative flex flex-col rounded-lg border bg-background p-0 lg:rounded-xl col-[span_27/span_27] row-span-6 xl:col-[span_22/span_22] transition-all duration-500 cursor-pointer ${
                 activeIndex === 0
-                  ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.1)] scale-[1.02]"
-                  : "border-weak-stroke hover:border-amber-500/30"
+                  ? "border-amber-500/50 shadow-bottom-xl"
+                  : "border-border shadow-bottom-lg hover:border-amber-500/30"
               }`}
             >
-              <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
+              <CardHeader className="flex items-start justify-start border-separator-primary border-b p-3 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
                   <Icon
                     icon={Globe02Icon}
                     size={24}
                     strokeWidth={2}
-                    className="bg-amber-600 dark:bg-amber-700 text-white p-1 w-6 h-6 rounded"
+                    className="bg-amber-600 dark:bg-amber-700 text-white p-1 w-6 h-6 rounded-md"
                   />
                   <span>Labeling Standards</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={GavelIcon}
                       size={14}
@@ -70,7 +70,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">Regulation Type</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={Certificate01Icon}
                       size={14}
@@ -81,7 +81,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">Applicable Standards</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={Location01Icon}
                       size={14}
@@ -94,11 +94,10 @@ export default function HeroFeatureCards({
                   </li>
                 </ul>
               </CardContent>
-              <CardFooter className="py-0 px-0 place-content-start">
+              <CardFooter className="py-2 px-3 place-content-start">
                 <Badge
                   variant="outline"
                   className={cn(
-                    "mt-1.5",
                     activeIndex === 0 &&
                       "bg-amber-100/50 dark:bg-amber-900/50 text-amber-600 border-amber-600",
                   )}
@@ -110,26 +109,26 @@ export default function HeroFeatureCards({
 
             <Card
               onClick={() => onActiveChange(1)}
-              className={`relative flex flex-col rounded-[9.5px] border bg-background p-[7px] lg:rounded-xl lg:p-[11px] col-[span_27/span_27] col-start-92 row-span-6 xl:col-[span_22/span_22] xl:col-start-97 transition-all duration-500 cursor-pointer ${
+              className={`relative flex flex-col rounded-lg border bg-background p-0 lg:rounded-xl col-[span_27/span_27] col-start-92 row-span-6 xl:col-[span_22/span_22] xl:col-start-97 transition-all duration-500 cursor-pointer ${
                 activeIndex === 1
-                  ? "border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.1)] scale-[1.02]"
-                  : "border-weak-stroke hover:border-blue-500/30"
+                  ? "border-blue-500/50 shadow-bottom-xl"
+                  : "border-border shadow-bottom-lg hover:border-blue-500/30"
               }`}
             >
-              <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
+              <CardHeader className="flex items-start justify-start border-separator-primary border-b p-3 pb-2">
                 <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
                   <Icon
                     icon={FileDatabaseIcon}
                     size={24}
                     strokeWidth={2}
-                    className="bg-blue-600 dark:bg-blue-700 text-white p-1 w-6 h-6 rounded"
+                    className="bg-blue-600 dark:bg-blue-700 text-white p-1 w-6 h-6 rounded-md"
                   />
                   <span>Product Specifications</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={QrCodeIcon}
                       size={14}
@@ -140,7 +139,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">UDI DI + PI</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={CubeIcon}
                       size={14}
@@ -151,7 +150,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">Design Specifications</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={HashtagIcon}
                       size={14}
@@ -164,11 +163,10 @@ export default function HeroFeatureCards({
                   </li>
                 </ul>
               </CardContent>
-              <CardFooter className="py-0 px-0 place-content-start">
+              <CardFooter className="py-2 px-3 place-content-start">
                 <Badge
                   variant="outline"
                   className={cn(
-                    "mt-1.5",
                     activeIndex === 1 &&
                       "bg-blue-100/50 dark:bg-blue-900/50 text-blue-600 border-blue-600",
                   )}
@@ -180,26 +178,26 @@ export default function HeroFeatureCards({
 
             <Card
               onClick={() => onActiveChange(2)}
-              className={`relative flex flex-col rounded-[9.5px] border bg-background p-[7px] lg:rounded-xl lg:p-[11px] col-[span_27/span_27] col-start-11 row-span-5 row-start-8 xl:col-[span_22/span_22] xl:col-start-21 transition-all duration-500 cursor-pointer ${
+              className={`relative flex flex-col rounded-lg border bg-background p-0 lg:rounded-xl col-[span_27/span_27] col-start-11 row-span-5 row-start-8 xl:col-[span_22/span_22] xl:col-start-21 transition-all duration-500 cursor-pointer ${
                 activeIndex === 2
-                  ? "border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)] scale-[1.02]"
-                  : "border-weak-stroke hover:border-emerald-500/30"
+                  ? "border-emerald-500/50 shadow-bottom-xl"
+                  : "border-border shadow-bottom-lg hover:border-emerald-500/30"
               }`}
             >
-              <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
-                <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-[10.9px] text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
+              <CardHeader className="flex items-start justify-start border-separator-primary border-b p-3 pb-2">
+                <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
                   <Icon
                     icon={Folder02Icon}
                     size={24}
                     strokeWidth={2}
-                    className="bg-emerald-600 dark:bg-emerald-700 text-white p-1 w-6 h-6 rounded"
+                    className="bg-emerald-600 dark:bg-emerald-700 text-white p-1 w-6 h-6 rounded-md"
                   />
                   <span>Source Files</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={Pen01Icon}
                       size={14}
@@ -210,7 +208,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">Label Artworks, IFUs</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={Image01Icon}
                       size={14}
@@ -223,11 +221,10 @@ export default function HeroFeatureCards({
                   </li>
                 </ul>
               </CardContent>
-              <CardFooter className="py-0 px-0 place-content-start">
+              <CardFooter className="py-1.5 px-3 place-content-start">
                 <Badge
                   variant="outline"
                   className={cn(
-                    "mt-1.5",
                     activeIndex === 2 &&
                       "bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-600 border-emerald-600",
                   )}
@@ -239,26 +236,26 @@ export default function HeroFeatureCards({
 
             <Card
               onClick={() => onActiveChange(3)}
-              className={`relative flex flex-col rounded-[9.5px] border bg-background p-[7px] lg:rounded-xl lg:p-[11px] col-[span_27/span_27] col-start-47 row-span-5 row-start-8 xl:col-[span_22/span_22] xl:col-start-49 transition-all duration-500 cursor-pointer ${
+              className={`relative flex flex-col rounded-lg border bg-background p-0 lg:rounded-xl col-[span_27/span_27] col-start-47 row-span-5 row-start-8 xl:col-[span_22/span_22] xl:col-start-49 transition-all duration-500 cursor-pointer ${
                 activeIndex === 3
-                  ? "border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.1)] scale-[1.02]"
-                  : "border-weak-stroke hover:border-violet-500/30"
+                  ? "border-violet-500/50 shadow-bottom-xl"
+                  : "border-border shadow-bottom-lg hover:border-violet-500/30"
               }`}
             >
-              <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
-                <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-[10.9px] text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
+              <CardHeader className="flex items-start justify-start border-separator-primary border-b p-3 pb-2">
+                <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
                   <Icon
                     icon={Layers01Icon}
                     size={24}
                     strokeWidth={2}
-                    className="bg-violet-600 dark:bg-violet-700 text-white p-1 w-6 h-6 rounded"
+                    className="bg-violet-600 dark:bg-violet-700 text-white p-1 w-6 h-6 rounded-md"
                   />
                   <span>Label Components</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={Layers01Icon}
                       size={14}
@@ -269,7 +266,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">Label stocks</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={RulerIcon}
                       size={14}
@@ -282,11 +279,10 @@ export default function HeroFeatureCards({
                   </li>
                 </ul>
               </CardContent>
-              <CardFooter className="py-0 px-0 place-content-start">
+              <CardFooter className="py-1.5 px-3 place-content-start">
                 <Badge
                   variant="outline"
                   className={cn(
-                    "mt-1.5",
                     activeIndex === 3 &&
                       "bg-violet-100/50 dark:bg-violet-900/50 text-violet-600 border-violet-600",
                   )}
@@ -298,28 +294,28 @@ export default function HeroFeatureCards({
 
             <Card
               onClick={() => onActiveChange(4)}
-              className={`relative flex flex-col rounded-[9.5px] border bg-background p-[7px] lg:rounded-xl lg:p-[11px] col-[span_27/span_27] col-start-82 row-span-5 row-start-8 xl:col-[span_22/span_22] xl:col-start-77 transition-all duration-500 cursor-pointer ${
+              className={`relative flex flex-col rounded-lg border bg-background p-0 lg:rounded-xl col-[span_27/span_27] col-start-82 row-span-5 row-start-8 xl:col-[span_22/span_22] xl:col-start-77 transition-all duration-500 cursor-pointer ${
                 activeIndex === 4
-                  ? "border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.1)] scale-[1.02]"
-                  : "border-weak-stroke hover:border-orange-500/30"
+                  ? "border-orange-500/50 shadow-bottom-xl"
+                  : "border-border shadow-bottom-lg hover:border-orange-500/30"
               }`}
             >
-              <CardHeader className="flex items-start justify-start border-subtle-stroke border-b px-1 py-0 pb-2">
-                <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-[10.9px] text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
+              <CardHeader className="flex items-start justify-start border-separator-primary border-b p-3 pb-2">
+                <div className="-tracking-[0.22px] flex items-center gap-x-[4.5px] font-semibold text-md text-foreground leading-[15.5px] lg:gap-x-1.5 lg:text-sm">
                   <Icon
                     icon={ShapesIcon}
                     size={24}
                     strokeWidth={2}
-                    className="bg-orange-600 dark:bg-orange-700 text-white p-1 w-6 h-6 rounded"
+                    className="bg-orange-600 dark:bg-orange-700 text-white p-1 w-6 h-6 rounded-md"
                   />
                   <span>Symbols-Graphics</span>
                 </div>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <ul>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
-                      icon={AlertCircleIcon}
+                      icon={Album02Icon}
                       size={14}
                       strokeWidth={2}
                       className={`transition-colors duration-500 ${
@@ -328,7 +324,7 @@ export default function HeroFeatureCards({
                     />
                     <span className="truncate">Symbols, Schematics</span>
                   </li>
-                  <li className="flex w-full items-center gap-x-[4.5px] border-weak-stroke border-b px-[9.5px] pt-[4.5px] pb-[3.5px] text-[9.5px] text-tertiary-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-3 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
+                  <li className="flex w-full items-center gap-x-[4.5px] border-stroke-primary border-b px-0 pt-[4.5px] pb-[3.5px] text-[9.5px] text-muted-foreground max-lg:leading-[12.5px] lg:gap-x-1.5 lg:px-4 lg:pt-1.5 lg:pb-[5px] lg:text-xs">
                     <Icon
                       icon={BarcodeScanIcon}
                       size={14}
@@ -341,11 +337,10 @@ export default function HeroFeatureCards({
                   </li>
                 </ul>
               </CardContent>
-              <CardFooter className="py-0 px-0 place-content-start">
+              <CardFooter className="py-1.5 px-3 place-content-start">
                 <Badge
                   variant="outline"
                   className={cn(
-                    "mt-1.5",
                     activeIndex === 4 &&
                       "bg-orange-100/50 dark:bg-orange-900/50 text-orange-600 border-orange-600",
                   )}
@@ -375,7 +370,7 @@ export default function HeroFeatureCards({
               </svg>
               <div
                 className="w-2 h-2 rounded-full border absolute top-0 left-px bg-muted"
-                style={{ transform: "translate(-50%, -50%)" }}
+                style={{ transform: "translate(-60%, -50%)" }}
               ></div>
               <div
                 className="w-2 h-2 rounded-full border absolute bottom-0 right-0 bg-muted"
@@ -521,7 +516,7 @@ export default function HeroFeatureCards({
               </svg>
               <div
                 className="w-2 h-2 rounded-full border absolute top-px left-0 bg-muted"
-                style={{ transform: "translate(-50%, -50%)" }}
+                style={{ transform: "translate(-50%, -60%)" }}
               ></div>
             </div>
             <div className="absolute top-(--row-height) bottom-0 left-0 col-start-99 col-end-108 row-start-6 row-end-11 hidden h-[calc(100%-var(--row-height)*1.5)] w-full xl:block">
@@ -571,7 +566,7 @@ export default function HeroFeatureCards({
               </svg>
               <div
                 className="w-2 h-2 rounded-full border absolute top-px right-0 bg-muted"
-                style={{ transform: "translate(50%, -50%)" }}
+                style={{ transform: "translate(50%, -60%)" }}
               ></div>
             </div>
             <div className="absolute top-(--row-height) col-start-95 col-end-106 row-start-6 row-end-8 block h-[calc(100%+var(--row-height))] w-full xl:hidden">
@@ -698,32 +693,6 @@ export default function HeroFeatureCards({
                 style={{ transform: "translate(50%, -50%)" }}
               ></div>
             </div>
-            {/* <div className="absolute top-0 left-0 col-start-60 row-start-13">
-              <svg
-                className="-translate-x-px text-border"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                preserveAspectRatio="none"
-                width="2"
-                height="80"
-                viewBox="0 0 2 80"
-              >
-                <path
-                  d="M1 0v80"
-                  stroke="currentColor"
-                  pathLength="1"
-                  strokeDasharray="1px 1px"
-                ></path>
-              </svg>
-              <div
-                className="w-2 h-2 rounded-full border absolute top-0 left-px bg-muted"
-                style={{ transform: "translate(-50%, -50%)" }}
-              ></div>
-              <div
-                className="w-2 h-2 rounded-full border absolute bottom-0 left-px bg-muted z-55"
-                style={{ transform: "translate(-50%, 50%)" }}
-              ></div>
-            </div> */}
           </div>
         </div>
       </div>

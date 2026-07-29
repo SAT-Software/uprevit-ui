@@ -15,7 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Card,
@@ -69,9 +69,6 @@ function PricingPageContent() {
   const scrollTo = useScrollTo();
   const pricingCalculatorRef = useScrollSection("pricing-calculator");
 
-  const pricingBadgeClassName =
-    "mb-6 z-60 border-border/70 bg-background/80 px-2 py-0.5 text-foreground shadow-none";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
@@ -81,10 +78,7 @@ function PricingPageContent() {
           <div className="relative w-full mt-10 mb-20 pointer-events-auto">
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-              <Badge variant="outline" className={pricingBadgeClassName}>
-                <Icon icon={Coins01Icon} size={16} strokeWidth={2} />
-                <span className="font-medium">Pricing</span>
-              </Badge>
+              <MarketingSectionBadge icon={Coins01Icon} label="Pricing" />
               <div className="w-full flex flex-col md:flex-row items-start gap-4">
                 <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                   Pricing built for regulated teams
@@ -102,23 +96,25 @@ function PricingPageContent() {
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)]">
-                  <div className="hidden lg:flex min-w-0 self-stretch items-stretch justify-center gap-2 border-r border-dashed border-border relative overflow-hidden">
-                    <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
-                      {Array.from({ length: 60 }).map((_, index) => (
+                  <div className="hidden lg:block min-w-0 self-stretch border-r border-dashed border-muted-foreground/10 relative overflow-hidden">
+                    <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
+                      {Array.from({ length: 44 }).map((_, index) => (
                         <span
-                          key={index}
-                          className="w-full border-t border-dashed border-border"
+                          key={`h-left-${index}`}
+                          className="w-full border-t border-dashed border-muted-foreground/10"
                         />
                       ))}
                     </div>
-                    {Array.from({ length: 11 }).map((_, index) => (
-                      <span
-                        key={index}
-                        className="relative z-10 h-full w-px border-l border-dashed border-border"
-                      />
-                    ))}
+                    <div className="pointer-events-none absolute inset-0 flex justify-between">
+                      {Array.from({ length: 30 }).map((_, index) => (
+                        <span
+                          key={`v-left-${index}`}
+                          className="h-full w-px border-l border-dashed border-muted-foreground/10"
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <Card className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl border-border/70 bg-background shadow-[0_10px_24px_-20px_rgba(15,15,15,0.45)]">
+                  <Card className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl border-border bg-background shadow-bottom-lg">
                     <CardHeader className="pb-4 md:pb-5">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-base font-normal">
@@ -181,21 +177,23 @@ function PricingPageContent() {
                       </ul>
                     </CardContent>
                   </Card>
-                  <div className="hidden lg:flex min-w-0 self-stretch items-stretch justify-center gap-2 border-l border-dashed border-border relative overflow-hidden">
-                    <div className="pointer-events-none absolute inset-y-3 left-0 right-0 flex flex-col justify-between">
-                      {Array.from({ length: 60 }).map((_, index) => (
+                  <div className="hidden lg:block min-w-0 self-stretch border-l border-dashed border-muted-foreground/10 relative overflow-hidden">
+                    <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
+                      {Array.from({ length: 44 }).map((_, index) => (
                         <span
-                          key={index}
-                          className="w-full border-t border-dashed border-border"
+                          key={`h-right-${index}`}
+                          className="w-full border-t border-dashed border-muted-foreground/10"
                         />
                       ))}
                     </div>
-                    {Array.from({ length: 11 }).map((_, index) => (
-                      <span
-                        key={index}
-                        className="relative z-10 h-full w-px border-l border-dashed border-border"
-                      />
-                    ))}
+                    <div className="pointer-events-none absolute inset-0 flex justify-between">
+                      {Array.from({ length: 30 }).map((_, index) => (
+                        <span
+                          key={`v-right-${index}`}
+                          className="h-full w-px border-l border-dashed border-muted-foreground/10"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -379,15 +377,11 @@ function PricingPageContent() {
                 className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0"
               >
                 <div className="flex flex-col items-center text-center mb-10">
-                  <Badge variant="outline" className={pricingBadgeClassName}>
-                    <Icon
-                      icon={HelpCircleIcon}
-                      size={16}
-                      strokeWidth={2}
-                      className="mr-1 text-foreground/60"
-                    />
-                    <span className="font-medium">FAQ</span>
-                  </Badge>
+                  <MarketingSectionBadge
+                    icon={HelpCircleIcon}
+                    label="FAQ"
+                    className="mb-6"
+                  />
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Pricing questions, answered
                   </h2>
@@ -415,25 +409,28 @@ function PricingPageContent() {
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
-                <div className="relative overflow-hidden rounded-2xl border bg-foreground dark:bg-background dark:text-foreground text-background flex items-center h-80">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_60%)]" />
-                  <div className="relative w-full p-6 md:p-8 lg:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-                    <div className="max-w-2xl">
-                      <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
-                        Align every label with global compliance in weeks, not
-                        months
-                      </h2>
-                      <p className="mt-3 text-base md:text-lg text-background/70 dark:text-foreground/70 leading-relaxed">
-                        See how Uprevit compresses labeling timelines while
-                        keeping regulatory confidence high across departments
-                        and geographies.
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button variant="secondary" className="text-foreground">
-                        Book a demo
-                        <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} />
-                      </Button>
+                <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-foreground dark:bg-background dark:text-foreground text-background shadow-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_60%)]" />
+                    <div className="relative p-6 md:p-8 lg:p-12 flex flex-col items-start justify-center gap-4 min-h-80">
+                      <div className="max-w-2xl">
+                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
+                          Align every label with global compliance in weeks, not
+                          months
+                        </h2>
+                        <p className="mt-3 text-base md:text-lg text-background/70 dark:text-foreground/70 leading-relaxed">
+                          Contact us at{" "}
+                          <Link
+                            href="mailto:contact@uprevit.com"
+                            className="font-medium text-background dark:text-foreground underline underline-offset-4 hover:opacity-80"
+                          >
+                            contact@uprevit.com
+                          </Link>{" "}
+                          to book a demo and see how Uprevit compresses labeling
+                          timelines while keeping regulatory confidence high
+                          across departments and geographies.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

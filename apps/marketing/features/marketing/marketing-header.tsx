@@ -14,6 +14,7 @@ import {
   Wrench01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Button } from "@uprevit/ui/components/ui/button";
 
@@ -104,7 +105,7 @@ export default function MarketingHeader() {
       <div className="fixed top-0 left-0 z-60 w-full">
         <div
           className={cn(
-            "mx-auto flex h-14 md:h-18 w-full items-center justify-between transition-all delay-150 ease-in-out duration-300",
+            "mx-auto flex h-14 md:h-16 w-full items-center justify-between transition-all delay-150 ease-in-out duration-300",
             !isAtTop ? "bg-accent/80 border-b" : "bg-transparent",
             isDecoratedMarketingPage &&
               "border-b border-dashed border-border/80",
@@ -116,7 +117,7 @@ export default function MarketingHeader() {
         >
           <div
             className={
-              "flex items-center justify-between max-w-6xl w-full mx-auto px-4 sm:px-6"
+              "flex items-center justify-between max-w-6xl w-full mx-auto px-2 sm:px-0"
             }
           >
             <div>
@@ -124,7 +125,7 @@ export default function MarketingHeader() {
                 href="/"
                 className="flex items-center gap-2 p-1 rounded  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="relative dark:hidden flex aspect-square mb-1 size-7 items-center justify-center">
+                <div className="relative dark:hidden flex aspect-square mb-1 size-5 md:size-7 items-center justify-center">
                   <Image
                     src="/uprevit-logo-black.svg"
                     alt="Uprevit logo"
@@ -132,7 +133,7 @@ export default function MarketingHeader() {
                     className=""
                   />
                 </div>
-                <div className="relative hidden dark:flex aspect-square mb-1 size-7 items-center justify-center">
+                <div className="relative hidden dark:flex aspect-square mb-1 size-5 md:size-7 items-center justify-center">
                   <Image
                     src="/uprevit-logo-white.svg"
                     alt="Uprevit logo"
@@ -142,17 +143,14 @@ export default function MarketingHeader() {
                 </div>
                 <div className="grid flex-1 text-left leading-tight">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-lg text-foreground font-extrabold mt-0.5">
+                    <span className="truncate text-base md:text-lg text-foreground font-bold ">
                       UPREVIT
                     </span>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span
-                          aria-label="Alpha release"
-                          className="rounded-full border border-border bg-accent px-2 py-0.5 text-xs font-semibold text-muted-foreground"
-                        >
+                        <Badge variant="secondary" className="text-xs">
                           α
-                        </span>
+                        </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
                         Early preview. Active updates are in progress.
@@ -168,42 +166,51 @@ export default function MarketingHeader() {
                   <NavigationMenuList className="flex-wrap">
                     <NavigationMenuItem>
                       <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-                      <NavigationMenuContent className="md:left-auto md:right-0">
-                        <ul className="grid gap-2 md:w-[400px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
-                          <li className="row-span-4">
-                            <NavigationMenuLink asChild>
-                              <Link
-                                className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
-                                href="/resources"
-                              >
-                                <div className="mb-3 flex size-10 items-center justify-center rounded-lg border border-border bg-background/80">
-                                  <Icon
-                                    icon={Layers01Icon}
-                                    size={20}
-                                    strokeWidth={2}
-                                    className="text-foreground"
+                      <NavigationMenuContent className="md:left-auto md:right-0 border-0 bg-transparent p-0 shadow-none">
+                        <div className="rounded-2xl bg-border/20 p-1">
+                          <div className="overflow-hidden rounded-xl border border-border bg-popover">
+                            <div className="grid w-[min(92vw,36.5rem)] grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+                              <div className="border-r border-dashed border-border p-1">
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    href="/resources"
+                                    className="group/hub flex h-full w-full flex-col justify-end gap-3 rounded-lg border border-border/60 bg-linear-to-b from-background/40 to-muted/70 p-4 no-underline outline-hidden transition-colors delay-100 duration-200 ease-in-out hover:bg-transparent hover:from-background/40 hover:to-muted/80 focus:bg-transparent focus-visible:from-background/40 focus-visible:to-muted/80"
+                                  >
+                                    <div className="">
+                                      <Icon
+                                        icon={Layers01Icon}
+                                        size={22}
+                                        strokeWidth={2}
+                                        className="text-muted-foreground transition-colors delay-100 duration-200 ease-in-out group-hover/hub:text-foreground group-focus-visible/hub:text-foreground"
+                                      />
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                      <div className="text-base font-medium text-foreground">
+                                        Resources Hub
+                                      </div>
+                                      <p className="text-sm leading-snug text-muted-foreground">
+                                        Compliance resources, templates, and
+                                        tools.
+                                      </p>
+                                    </div>
+                                  </Link>
+                                </NavigationMenuLink>
+                              </div>
+
+                              <div className="flex h-full flex-col my-1 border-y border-dashed border-border">
+                                {resourceLinks.map((link) => (
+                                  <ResourceMenuItem
+                                    key={link.title}
+                                    href={link.href}
+                                    title={link.title}
+                                    description={link.description}
+                                    icon={link.icon}
                                   />
-                                </div>
-                                <div className="mb-2 text-lg font-medium">
-                                  Resources Hub
-                                </div>
-                                <p className="text-muted-foreground text-sm leading-tight">
-                                  Compliance resources, templates, and tools.
-                                </p>
-                              </Link>
-                            </NavigationMenuLink>
-                          </li>
-                          {resourceLinks.map((link) => (
-                            <ListItem
-                              key={link.title}
-                              href={link.href}
-                              title={link.title}
-                              icon={link.icon}
-                            >
-                              {link.description}
-                            </ListItem>
-                          ))}
-                        </ul>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </NavigationMenuContent>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
@@ -387,38 +394,43 @@ export default function MarketingHeader() {
   );
 }
 
-function ListItem({
+function ResourceMenuItem({
   title,
-  children,
+  description,
   href,
   icon: svgIcon,
-  ...props
-}: React.ComponentPropsWithoutRef<"li"> & {
+}: {
+  title: string;
+  description: string;
   href: string;
-  icon?: IconSvgElement;
+  icon: IconSvgElement;
 }) {
   return (
-    <li {...props}>
-      <NavigationMenuLink asChild>
-        <Link href={href} className="flex flex-row items-center gap-3">
-          {svgIcon && (
-            <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-accent mt-0.5">
-              <Icon
-                icon={svgIcon}
-                size={20}
-                strokeWidth={2}
-                className="text-foreground"
-              />
-            </div>
-          )}
-          <div className="flex flex-col">
-            <div className="text-sm leading-none font-medium">{title}</div>
-            <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-              {children}
-            </p>
-          </div>
-        </Link>
-      </NavigationMenuLink>
-    </li>
+    <NavigationMenuLink
+      asChild
+      className="gap-0 rounded-none p-0 hover:bg-transparent focus:bg-transparent data-[active=true]:bg-transparent data-[active=true]:hover:bg-transparent"
+    >
+      <Link
+        href={href}
+        className="group/resource flex flex-row items-stretch border-b border-dashed border-border"
+      >
+        <span className="flex shrink-0 items-stretch justify-center border-r border-dashed border-border p-1">
+          <span className="flex aspect-square h-full items-center justify-center rounded-lg transition-colors delay-100 duration-200 ease-in-out group-hover/resource:bg-accent group-focus-visible/resource:bg-accent">
+            <Icon
+              icon={svgIcon}
+              size={28}
+              strokeWidth={2}
+              className="size-6 text-muted-foreground transition-colors delay-100 duration-200 ease-in-out group-hover/resource:text-foreground group-focus-visible/resource:text-foreground"
+            />
+          </span>
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 rounded-lg p-2 m-1 transition-colors delay-100 duration-200 ease-in-out group-hover/resource:bg-accent group-focus-visible/resource:bg-accent">
+          <span className="text-sm font-medium text-foreground">{title}</span>
+          <span className="line-clamp-1 text-sm leading-snug text-muted-foreground">
+            {description}
+          </span>
+        </span>
+      </Link>
+    </NavigationMenuLink>
   );
 }

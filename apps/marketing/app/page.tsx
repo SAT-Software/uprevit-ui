@@ -19,7 +19,7 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/CE.png"
           alt="CE Symbol"
@@ -34,7 +34,7 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/MD.png"
           alt="MD Symbol"
@@ -50,7 +50,7 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/DMGPKG.png"
           alt="UDI Symbol"
@@ -65,7 +65,7 @@ const items = [
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/2DBarcode.png"
           alt="Barcode Graphic"
@@ -81,7 +81,7 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/FDA.png"
           alt="Barcode Graphic"
@@ -97,7 +97,7 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/DoNotReuse.png"
           alt="Barcode Graphic"
@@ -112,7 +112,7 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/UKCA.png"
           alt="Barcode Graphic"
@@ -128,7 +128,7 @@ const items = [
   {
     circleIndex: 3,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/ISO.png"
           alt="Barcode Graphic"
@@ -144,7 +144,7 @@ const items = [
   {
     circleIndex: 4,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/WEEE-symbol.webp"
           alt="Barcode Graphic"
@@ -159,7 +159,7 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/Sterile.png"
           alt="CAS Symbol"
@@ -174,7 +174,7 @@ const items = [
   {
     circleIndex: 0,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/IFU1.png"
           alt="DNR Symbol"
@@ -190,7 +190,7 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/Importer.png"
           alt="EC-REP Symbol"
@@ -205,7 +205,7 @@ const items = [
   {
     circleIndex: 1,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/ISO.png"
           alt="IFU Symbol"
@@ -221,7 +221,7 @@ const items = [
   {
     circleIndex: 2,
     content: (
-      <div className="relative h-12 w-12 rounded-full border border-dashed bg-neutral-100 dark:bg-neutral-500 border-foreground flex items-center justify-center">
+      <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/MFR.png"
           alt="Manufacturer Symbol"

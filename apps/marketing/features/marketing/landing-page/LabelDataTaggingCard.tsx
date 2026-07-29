@@ -34,7 +34,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
       onTouchCancel={deactivateTouch}
       data-active={isTouchActive ? "true" : undefined}
       className={cn(
-        "h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col relative overflow-hidden",
+        "h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col relative overflow-hidden",
         className,
       )}
     >
@@ -48,8 +48,8 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
         </p>
       </div>
 
-      <div className="p-1 bg-accent w-full lg:w-[90%] rounded-2xl border border-border ml-0 lg:ml-20">
-        <div className="flex-1 w-full bg-background rounded-[15px] border border-border relative overflow-hidden p-3 md:p-4 lg:p-6 flex items-center justify-center">
+      <div className="p-1 bg-muted w-full lg:w-[90%] rounded-2xl border border-border shadow-bottom-lg ml-0 lg:ml-20">
+        <div className="flex-1 w-full bg-background rounded-2xl border border-border shadow-none relative overflow-hidden p-3 md:p-4 lg:p-6 flex items-center justify-center">
           <div
             className="absolute inset-0 text-border/50"
             style={{
@@ -82,19 +82,19 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
 
             <div className="absolute top-1.5 right-1.5 lg:top-2 lg:right-2 bg-accent/40 backdrop-blur-sm border border-border p-1.5 lg:p-2 rounded-lg text-xs shadow-sm flex flex-col gap-1.5 lg:gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-[0.2rem] border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">
                   Variable Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-[0.2rem] border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">
                   Constant Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-[0.2rem] border border-border bg-accent group-hover:border-yellow-500 group-hover:bg-yellow-500/20 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-yellow-500 group-hover:bg-yellow-500/20 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/20 transition-all ease-in-out duration-300 delay-75" />
                 <span className="text-foreground text-[10px]">UDI Barcode</span>
               </div>
             </div>

@@ -20,12 +20,13 @@ export default function CTASection() {
             size="lg"
           />
 
-          <div className="p-1 bg-accent rounded-2xl max-w-6xl mx-auto border border-border">
-            <div className="w-full bg-foreground dark:bg-background rounded-[14px] h-120 text-background dark:text-foreground p-6 md:p-8 lg:p-10 gap-10 flex flex-col lg:flex-row items-center justify-between overflow-hidden">
-              <div className="w-full min-w-[30%] flex flex-col items-start justify-between">
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold">
-                  Master Your Labeling Compliance{" "}
-                  <span className="text-accent/60 dark:text-foreground/40">
+          <div className="p-1 bg-muted rounded-2xl max-w-6xl mx-auto border border-border shadow-bottom-lg">
+            <div className="w-full bg-foreground dark:bg-background rounded-xl h-120 text-background dark:text-foreground p-6 md:p-8 lg:p-10 gap-10 flex flex-col lg:flex-row items-center justify-between overflow-hidden shadow-none">
+              <div className="w-full min-w-[36%] max-w-md flex flex-col items-start justify-between shrink-0">
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-balance">
+                  Master Your{" "}
+                  <span className="whitespace-nowrap">Labeling Compliance</span>{" "}
+                  <span className="text-muted/60 dark:text-foreground/40">
                     Today
                   </span>
                 </h2>
@@ -44,7 +45,7 @@ export default function CTASection() {
                       transformOrigin: "center right",
                     }}
                   >
-                    <div className="absolute -left-25 -top-25 overflow-hidden rounded-2xl border border-neutral-800/40 bg-background/5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.45)]">
+                    <div className="absolute -left-25 -top-25 overflow-hidden rounded-2xl border border-border/40 bg-background/5 shadow-xl">
                       <Image
                         src="/uprevit-demo2.png"
                         alt="Uprevit compliance workspace preview"
@@ -61,7 +62,7 @@ export default function CTASection() {
                       <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(255,255,255,0.08),_transparent_55%)]" />
                       <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(255,255,255,0.05),_transparent_55%)]" />
                     </div>
-                    <div className="relative z-10 overflow-hidden rounded-2xl border border-neutral-800/50 bg-background/5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]">
+                    <div className="relative z-10 overflow-hidden rounded-2xl border border-border/50 bg-background/5 shadow-2xl">
                       <Image
                         src="/Dashboard-Dark.png"
                         alt="Uprevit compliance workspace preview"
