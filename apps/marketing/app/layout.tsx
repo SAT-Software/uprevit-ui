@@ -6,7 +6,7 @@ import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 import { TooltipProvider } from "@uprevit/ui/components/ui/tooltip";
 
 const outfit = Outfit({
-  variable: "--font-geist",
+  variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
 });

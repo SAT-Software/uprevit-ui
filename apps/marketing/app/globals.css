@@ -41,7 +41,7 @@
   --sidebar-border: rgb(23 23 23 / 0.1);
   --sidebar-ring: rgb(43, 127, 255);
   --font-sans:
-    "Outfit", "Geist Variable", Geist, ui-sans-serif, sans-serif, system-ui;
+    var(--font-outfit), ui-sans-serif, sans-serif, system-ui;
   --font-serif: Source Serif 4, serif;
   --font-mono: "Fragment Mono", Geist Mono, ui-monospace, monospace;
   --radius: 0.625rem;
@@ -174,7 +174,7 @@
   --badge-feature: rgb(152 16 250 / 0.18);
   --badge-feature-foreground: rgb(199, 148, 255);
   --font-sans:
-    "Outfit", "Geist Variable", Geist, ui-sans-serif, sans-serif, system-ui;
+    var(--font-outfit), ui-sans-serif, sans-serif, system-ui;
   --font-serif: Source Serif 4, serif;
   --font-mono: "Fragment Mono", Geist Mono, ui-monospace, monospace;
   --radius: 0.625rem;
