@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-29
+
+### Added
+
+- Added a full application UI revamp with refreshed layouts, loading states, tooltips, and tab navigation across dashboard, departments, projects, products, archive, bookmarks, source files, reports, analytics, settings, and platform admin.
+- Added product progress hover cards and an exports sheet for clearer product workflow status and export job handling.
+- Added a bookmarked products tab on product listings and improved bookmark folder management UX.
+- Added marketing site redesign for landing, pricing, contact, and resources pages, including refreshed design tokens, Outfit font, and section badges.
+- Added shared `Icon` wrapper usage with `@hugeicons/core-free-icons` across the application.
+
+### Updated
+
+- Updated dialogs across the app to use shared `AppDialogContent` patterns for consistent layouts, actions, and loading states.
+- Updated global design system styles and page header treatments for visual consistency.
+- Updated source file folder management with improved pagination, sorting, and data-fetching hooks.
+- Updated monorepo package versions to `0.6.0`.
+
+### Fixed
+
+- Fixed settings theme icon, sort controls, and user type badge display issues.
+- Fixed admin-tab privilege toast spam for non-admin users.
+- Fixed a production build break from a stale dashboard `DepartmentsCard` import.
+- Fixed marketing Outfit font wiring into `--font-sans`.
+
 ## [0.5.2] - 2026-06-30
 
 ### HOTFIX
