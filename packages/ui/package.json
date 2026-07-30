@@ -1,6 +1,6 @@
 {
   "name": "@uprevit/ui",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "scripts": {
     "build": "tsc --noEmit",
@@ -8,6 +8,7 @@
   },
   "exports": {
     "./components/ui/*": "./src/components/ui/*.tsx",
+    "./components/common/*": "./src/components/common/*.tsx",
     "./components/common/ThemeToggle": "./src/components/common/ThemeToggle.tsx",
     "./components/common/SlidingNumber": "./src/components/common/SlidingNumber.tsx",
     "./components/common/Icon": "./src/components/common/Icon.tsx",
