@@ -18,10 +18,12 @@ export function getBillingStatusLabel(
 export function billingAccountStatusVariant(
   status: BillingAccountStatus | "not_set",
   pastDue?: boolean | null,
-): "default" | "secondary" | "destructive" | "outline" {
-  if (pastDue || status === "past_due") return "destructive";
-  if (status === "active") return "default";
-  if (status === "cancelled") return "secondary";
+): "default" | "secondary" | "destructive" | "outline" | "green" | "blue" | "yellow" | "gray" | "red" | "orange" {
+  if (pastDue || status === "past_due") return "red";
+  if (status === "active") return "green";
+  if (status === "pilot") return "blue";
+  if (status === "draft") return "yellow";
+  if (status === "cancelled") return "gray";
   if (status === "not_set") return "outline";
   return "secondary";
 }

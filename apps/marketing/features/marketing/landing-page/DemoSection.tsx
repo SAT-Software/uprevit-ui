@@ -1,38 +1,28 @@
 "use client";
 
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useScrollSection } from "@/lib/scroll-context";
-import { useTheme } from "next-themes";
-import { PiImageDuotone } from "react-icons/pi";
+import { ModernTvIcon } from "@hugeicons/core-free-icons";
 import Lottie from "lottie-react";
 import uprevitMarketingVideo from "@/public/Uprevit-Marketing-Video.json";
 
 export default function DemoSection() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
   const demoRef = useScrollSection("demo");
 
   return (
     <div ref={demoRef} className="w-full mt-40 mb-20">
       <div className="max-w-6xl mx-auto mb-8 relative px-2 md:px-2 lg:px-0">
-        <Badge
-          suppressHydrationWarning
-          variant={badgeVariant}
-          className="mb-8 z-60 dark:px-2 dark:py-0.5"
-        >
-          <PiImageDuotone className="mr-1 text-foreground/50" />
-          <span className="font-medium">Uprevit Demo</span>
-        </Badge>
+        <MarketingSectionBadge icon={ModernTvIcon} label="Uprevit Demo" />
 
         <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-1/2 font-medium mr-16 mb-4 md:mb-0">
             The FastTrack way to Global labeling compliance
           </h2>
           <div className="hidden lg:block mr-12 h-16 w-px bg-border" />
-          <p className="text-base md:text-lg lg:text-xl font-semibold text-muted-foreground/60">
-            Command Your Labels. <br /> Command Your Compliance.
+          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground/60">
+            Command Your Labels <br /> Command Your Compliance
           </p>
         </div>
       </div>
@@ -56,16 +46,9 @@ export default function DemoSection() {
             rotation={90}
           />
 
-          <div className="p-1 bg-accent border-border border rounded-[12px]">
-            <Card className="aspect-auto mx-auto border-border overflow-hidden">
+          <div className="p-1 bg-muted border-border border rounded-2xl shadow-bottom-lg">
+            <Card className="aspect-auto mx-auto border-border overflow-hidden shadow-none">
               <CardContent className="p-0 overflow-hidden dark:hidden">
-                {/* <video
-                  src="/Uprevit-ComingSoon-Intro-Light.mp4"
-                  className="overflow-hidden rounded-xl"
-                  autoPlay
-                  loop
-                  muted
-                /> */}
                 <Lottie
                   animationData={uprevitMarketingVideo}
                   loop={true}
@@ -73,13 +56,6 @@ export default function DemoSection() {
                 />
               </CardContent>
               <CardContent className="p-0 overflow-hidden dark:block hidden">
-                {/* <video
-                  src="/Uprevit-ComingSoon-Intro-Dark.mp4"
-                  className="overflow-hidden rounded-xl"
-                  autoPlay
-                  loop
-                  muted
-                /> */}
                 <Lottie
                   animationData={uprevitMarketingVideo}
                   loop={true}

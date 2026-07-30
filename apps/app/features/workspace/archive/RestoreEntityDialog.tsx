@@ -1,19 +1,11 @@
+"use client";
+
+import { Dialog } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@uprevit/ui/components/ui/alert-dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import {
-  PiArrowCounterClockwiseDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
+  ArchiveRestoreIcon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons";
 
 interface RestoreEntityDialogProps {
   open: boolean;
@@ -31,25 +23,36 @@ export function RestoreEntityDialog({
   isPending,
 }: RestoreEntityDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Restore {entityName}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will restore <strong>{entityName}</strong> and make it active
-            again.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>
-            <PiXCircleDuotone /> Cancel
-          </AlertDialogCancel>
-          <Button onClick={onConfirm} disabled={isPending}>
-            {isPending ? <Spinner /> : <PiArrowCounterClockwiseDuotone />}
-            {isPending ? "Restoring..." : "Restore"}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <AppDialogContent
+        title="Restore"
+        description={`Restore ${entityName} and make it active again.`}
+        variant="confirm"
+        size="md"
+        confirmContent={{
+          heading: `Restore ${entityName}?`,
+          message: (
+            <>
+              This will restore <strong>{entityName}</strong> and make it active
+              again.
+            </>
+          ),
+          icon: ArchiveRestoreIcon,
+        }}
+        primaryAction={{
+          label: "Restore",
+          loadingLabel: "Restoring...",
+          onClick: onConfirm,
+          loading: isPending,
+          disabled: isPending,
+          icon: ArchiveRestoreIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      />
+    </Dialog>
   );
 }

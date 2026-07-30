@@ -1,242 +1,394 @@
 "use client";
 
+import { UIEvent, useMemo, useState } from "react";
 import { useAuth } from "react-oidc-context";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
-import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
+import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
+import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
+import { useGetSourceFileFoldersInfinite } from "@/hooks/source-files/useGetSourceFileFoldersInfinite";
 import { SourceFilesFolder } from "@/types/source-files";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Card, CardContent } from "@uprevit/ui/components/ui/card";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { isRootSourceFolder } from "@/utils/source-files-list-response";
 import {
-  PiBookmarkSimpleDuotone,
-  PiFolderSimpleDuotone,
-  PiWarningCircleDuotone,
-  PiClockCounterClockwiseDuotone,
-} from "react-icons/pi";
+  ListFilter,
+  ListFilterColumn,
+  ListOrder,
+} from "@/lib/workspace-list-query";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
+
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { useState } from "react";
-import { ActivityLogsPanel } from "@/features/workspace/logs/ActivityLogsPanel";
+
+import {
+  Folder01Icon,
+  FolderAddIcon,
+  ProfileIcon,
+  SortingAZ01Icon,
+  SortingAZ02Icon,
+  SortingZA01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface BookmarkedSourceFilesFolder extends SourceFilesFolder {
   isBookmarked?: boolean;
-  parentId?: string;
+  parentId?: string | null;
 }
 
-function FolderLoadingCard() {
-  return (
-    <div className="relative flex flex-col w-full max-w-xs rounded-2xl">
-      <Card className="shadow-none border-border w-full">
-        <CardContent className="p-4 flex flex-row items-center gap-3">
-          <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center animate-pulse">
-            <PiFolderSimpleDuotone className="w-10 h-10 text-muted-foreground/30" />
-          </div>
-          <div className="min-w-0 flex-1 space-y-2">
-            <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
-            <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+const SOURCE_FILES_TABS = ["bookmarked", "all-folders"];
+type SourceFilesTab = (typeof SOURCE_FILES_TABS)[number];
+const DEFAULT_SOURCE_FILES_TAB: SourceFilesTab = "bookmarked";
+
+const SOURCE_FILES_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "name", label: "Folder Name", type: "text" },
+];
+
+const SOURCE_FILES_SORT_OPTIONS = [
+  { value: "name", label: "Folder Name" },
+  { value: "_id", label: "Date Created" },
+];
+
+function isSourceFilesTab(value: string | null): value is SourceFilesTab {
+  return SOURCE_FILES_TABS.includes(value as SourceFilesTab);
 }
 
-function FolderErrorState({ onRetry }: { onRetry: () => void }) {
+function SourceFilesFoldersGridSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-destructive/20 rounded-xl bg-destructive/5">
-      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-destructive/20">
-        <PiWarningCircleDuotone className="w-8 h-8 text-destructive" />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-destructive">
-          Failed to load source files folders
-        </p>
-        <p className="text-xs text-muted-foreground">Please try again later</p>
-      </div>
-      <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
-        Try Again
-      </Button>
+    <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="flex flex-col items-center px-3 pt-4">
+          <Skeleton className="h-[78px] w-[92px] rounded-xl" />
+          <Skeleton className="mt-3 h-4 w-20" />
+          <Skeleton className="mt-1.5 h-3 w-14" />
+        </div>
+      ))}
     </div>
   );
 }
 
 function SourceFilesPage() {
-  const [showLogs, setShowLogs] = useState(false);
-  const {
-    data: foldersData,
-    isLoading: foldersLoading,
-    error: foldersError,
-    refetch: refetchFolders,
-  } = useGetAllSourceFileFolders();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab");
+  const activeTab: SourceFilesTab = isSourceFilesTab(tabParam)
+    ? tabParam
+    : DEFAULT_SOURCE_FILES_TAB;
 
-  const sourceFilesFolders = foldersData?.result ?? [];
+  const [sort, setSort] = useState("name");
+  const [order, setOrder] = useState<ListOrder>("asc");
+  const [filters, setFilters] = useState<ListFilter[]>([]);
+
+  const handleTabChange = (value: string) => {
+    if (!isSourceFilesTab(value)) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set("tab", value);
+
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+  };
 
   const auth = useAuth();
-  const userId = auth?.user?.profile?.userId;
+  const isAdmin = isAdminProfile(auth.user?.profile);
+  const userId = auth?.user?.profile?.userId as string | undefined;
+  const workspaceId = auth?.user?.profile?.workspaceId as string | undefined;
+
   const {
     data: bookmarkedData,
     isLoading: bookmarkedLoading,
     isError: bookmarkedError,
   } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
 
-  const bookmarkedFolders = (bookmarkedData?.result ?? []).filter(
-    (folder: BookmarkedSourceFilesFolder) => folder.parentId === null,
+  const bookmarkedFolders = (
+    (bookmarkedData?.result ?? []) as BookmarkedSourceFilesFolder[]
+  ).filter(isRootSourceFolder);
+
+  const {
+    data: infiniteData,
+    isLoading: foldersLoading,
+    isError: foldersError,
+    refetch: refetchFolders,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetSourceFileFoldersInfinite({
+    sort,
+    order,
+    filters,
+    enabled: activeTab === "all-folders",
+  });
+
+  const allFolders = useMemo(
+    () =>
+      infiniteData?.pages.flatMap((page) => page?.result?.folders ?? []) ?? [],
+    [infiniteData],
   );
 
-  const workspaceId = auth?.user?.profile?.workspaceId as string | undefined;
+  const hasBookmarks = bookmarkedFolders.length > 0;
 
-  if (foldersLoading) {
-    return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full">
-          {/* Main Header */}
-          <div className="flex items-center justify-between w-full p-4">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold">Source Files</h1>
-              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-                Manage and view all source files and folders
-              </p>
-            </div>
-            <div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
-          </div>
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (activeTab !== "all-folders") return;
 
-          {/* All Folders Section */}
-          <div className="flex flex-col gap-4 p-4 w-full">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-muted-foreground">
-                All Folders
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
-              {[...Array(5)].map((_, index) => (
-                <FolderLoadingCard key={index} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    const target = event.currentTarget;
+    const nearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
 
-  if (foldersError) {
-    return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full">
-          {/* Main Header */}
-          <div className="flex items-center justify-between w-full p-4">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold">Source Files</h1>
-              <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-              <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-                Manage and view all source files and folders
-              </p>
-            </div>
-            <DialogAddProductFolder />
-          </div>
-
-          {/* Error State */}
-          <div className="flex flex-col gap-4 p-4 w-full">
-            <FolderErrorState onRetry={() => refetchFolders()} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+    if (nearBottom && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start justify-start border border-border bg-background rounded-xl w-full h-full overflow-hidden">
-        <div className="flex items-center justify-between w-full p-4">
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-semibold">Source Files</h1>
-            <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-            <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-              Manage and view all source files and folders
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant={showLogs ? "secondary" : "outline"}
-                  size="sm"
-                  onClick={() => setShowLogs((current) => !current)}
-                  aria-label={showLogs ? "Show folders" : "Show source file logs"}
-                >
-                  <PiClockCounterClockwiseDuotone className="h-4 w-4" />
-                  Logs
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{showLogs ? "Show Folders" : "Show Logs"}</TooltipContent>
-            </Tooltip>
-            <DialogAddProductFolder />
-          </div>
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Source Files</p>
+          <InfoTooltip content="Source file folders let you organize reference documents, images, and assets used across your products." />
         </div>
 
-        {showLogs ? (
-          <div className="w-full h-full px-4 pb-4 pt-4 border-t border-border">
-            <ActivityLogsPanel
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <ActivityLogsSheet
               scopeType="source-files"
-              scopeId={workspaceId}
+              scopeId={workspaceId ?? ""}
               title="Source Files Logs"
-              description="Track source file and folder actions across the workspace."
-              showHeader={false}
+              tooltip="All the timeline logs for source files. When folders or files were created or updated. What was updated/created/deleted. The user/admin who took the action. Date and time"
+              trigger={
+                <Button type="button" variant="outline" size="sm">
+                  <Icon
+                    className="transition-colors delay-100 duration-200 ease-in-out"
+                    icon={ProfileIcon}
+                    size={16}
+                    strokeWidth={2}
+                  />
+                  Logs
+                </Button>
+              }
             />
-          </div>
-        ) : (
-          <div className="flex flex-col w-full">
-            {(bookmarkedLoading ||
-              (bookmarkedFolders && bookmarkedFolders.length > 0)) && (
-              <div className="flex flex-col gap-4 px-4 pb-4 border-b border-border">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-muted-foreground">
-                    Bookmarked Folders
-                  </h2>
-                </div>
-                {bookmarkedLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-max">
-                    {[...Array(3)].map((_, index) => (
-                      <FolderLoadingCard key={index} />
+          )}
+
+          <DialogAddProductFolder />
+        </div>
+      </div>
+
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
+      >
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border px-2">
+          <TabsList variant="line">
+            <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
+            <TabsTrigger value="all-folders">All Folders</TabsTrigger>
+          </TabsList>
+
+          {activeTab === "all-folders" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <WorkspaceListControls
+                filters={filters}
+                filterColumns={SOURCE_FILES_FILTER_COLUMNS}
+                onApplyFilters={setFilters}
+                onClearFilters={() => setFilters([])}
+              />
+              <div className="flex items-center gap-2">
+                <Select
+                  value={sort}
+                  onValueChange={(nextSort) => setSort(nextSort)}
+                >
+                  <SelectTrigger className="group w-auto truncate">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2">
+                          <Icon
+                            icon={SortingAZ01Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
+                          />
+                          <SelectValue />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>Sort by different fields</TooltipContent>
+                    </Tooltip>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SOURCE_FILES_SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <span className="text-muted-foreground/60">
+                          Sort by:
+                        </span>{" "}
+                        {option.label}
+                      </SelectItem>
                     ))}
-                  </div>
-                ) : bookmarkedError ? (
-                  <div className="flex items-center justify-center h-[100px] gap-2">
-                    <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
-                    <p className="text-sm text-destructive">
-                      Failed to load bookmarked folders.
-                    </p>
-                  </div>
-                ) : (
-                  <SourceFilesFoldersCard folders={bookmarkedFolders} />
-                )}
+                  </SelectContent>
+                </Select>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon-xs"
+                      className="h-7 px-2 text-xs text-muted-foreground/60 hover:text-muted-foreground"
+                      onClick={() =>
+                        setOrder((current) =>
+                          current === "asc" ? "desc" : "asc",
+                        )
+                      }
+                    >
+                      {order === "asc" ? (
+                        <Icon
+                          icon={SortingAZ02Icon}
+                          size={16}
+                          strokeWidth={2}
+                        />
+                      ) : (
+                        <Icon
+                          icon={SortingZA01Icon}
+                          size={16}
+                          strokeWidth={2}
+                        />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Toggle sort order</TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div
+          className="min-h-0 flex-1 overflow-y-auto p-2"
+          onScroll={handleScroll}
+        >
+          <TabsContent value="bookmarked" className="mt-0">
+            {bookmarkedLoading ? (
+              <SourceFilesFoldersGridSkeleton />
+            ) : bookmarkedError ? (
+              <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
+                <span>Failed to load bookmarked folders.</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-destructive hover:text-destructive"
+                  onClick={() => window.location.reload()}
+                >
+                  Retry
+                </Button>
+              </div>
+            ) : hasBookmarks ? (
+              <SourceFilesFoldersCard
+                folders={bookmarkedFolders}
+                variant="large"
+                showAsBookmarked
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
+                  <Icon
+                    icon={FolderAddIcon}
+                    size={28}
+                    strokeWidth={1.75}
+                    className="text-muted-foreground/70"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">No bookmarked folders</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Bookmark folders from the All Folders tab for quick access.
+                  </p>
+                </div>
               </div>
             )}
+          </TabsContent>
 
-            <div className="flex flex-col gap-4 p-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-muted-foreground">
-                  All Folders
-                </h2>
-              </div>
-              {sourceFilesFolders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[200px] gap-4 text-muted-foreground">
-                  <PiBookmarkSimpleDuotone className="w-16 h-16" />
-                  <p className="text-lg">No folders created yet.</p>
-                  <p className="text-sm">Create a new folder to get started.</p>
+          <TabsContent value="all-folders" className="mt-0">
+            {foldersLoading ? (
+              <SourceFilesFoldersGridSkeleton />
+            ) : foldersError ? (
+              <>
+                <DashboardErrorState
+                  variant="panel"
+                  icon={Folder01Icon}
+                  title="Failed to load source files folders"
+                  description="Please try again later"
+                  className="min-h-[320px]"
+                />
+                <div className="mt-3 flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchFolders()}
+                  >
+                    Try again
+                  </Button>
                 </div>
-              ) : (
-                <SourceFilesFoldersCard folders={sourceFilesFolders} />
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+              </>
+            ) : allFolders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
+                  <Icon
+                    icon={FolderAddIcon}
+                    size={28}
+                    strokeWidth={1.75}
+                    className="text-muted-foreground/70"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">No folders yet</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Create your first folder to start organizing source files.
+                  </p>
+                </div>
+                <div className="pt-1">
+                  <DialogAddProductFolder />
+                </div>
+              </div>
+            ) : (
+              <>
+                <SourceFilesFoldersCard
+                  folders={allFolders}
+                  variant="large"
+                  bookmarkedFolderIds={
+                    new Set(bookmarkedFolders.map((folder) => folder._id))
+                  }
+                />
+                {isFetchingNextPage ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Spinner className="size-5" />
+                  </div>
+                ) : null}
+              </>
+            )}
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

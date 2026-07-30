@@ -292,3 +292,16 @@ function sanitizeValue(value: unknown): unknown {
   }
   return value;
 }
+
+export function createSyntheticDiff(
+  path: string,
+  status: "added" | "removed",
+  value: unknown,
+): DiffItem {
+  return {
+    path,
+    status,
+    old_value: status === "removed" ? value : null,
+    new_value: status === "added" ? value : null,
+  };
+}

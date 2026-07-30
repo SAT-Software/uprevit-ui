@@ -1,76 +1,933 @@
 "use client";
 
-import ProductsPageProductTable from "@/features/workspace/products/ProductsPageProductTable";
+import {
+  type Column,
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  SortingState,
+  useReactTable,
+  VisibilityState,
+} from "@tanstack/react-table";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
+import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceListPaginationSkeleton";
+import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
+import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
+import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
 import CreateProductDialog from "@/features/workspace/products/CreateProductDialog";
+import DialogArchiveProduct from "@/features/workspace/products/DialogArchiveProduct";
+import DialogBookmarkProduct from "@/features/workspace/products/DialogBookmarkProduct";
+import DialogCreateVersion from "@/features/workspace/products/DialogCreateVersion";
+import DialogExportProductPDF from "@/features/workspace/products/DialogExportProductPDF";
+import DialogShareProduct from "@/features/workspace/products/DialogShareProduct";
+import { ProductBookmarkMenuItem } from "@/features/workspace/products/ProductBookmarkMenuItem";
+import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
+import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
+import { ProductListItem } from "@/features/workspace/products/productListItem";
+import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
+import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
+import { useGetAllBookmarkedProducts } from "@/hooks/product/useGetAllBookmarkedProducts";
+import {
+  ListFilterColumn,
+  useWorkspaceListQuery,
+} from "@/lib/workspace-list-query";
+import { AuditLog } from "@/types/product";
+import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
+import {
+  ArchiveIcon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  Blockchain03Icon,
+  MoreVerticalSquare01Icon,
+  Pdf01Icon,
+  PropertyAddIcon,
+  PropertyEditIcon,
+  Share08Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
-import { ExportJobStatus } from "@/types/export-job";
-import Link from "next/link";
-import { PiClockDuotone } from "react-icons/pi";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@uprevit/ui/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@uprevit/ui/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import { cn } from "@uprevit/ui/lib/utils";
 
-const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
+const PRODUCTS_TABS = ["all", "bookmarked"] as const;
+type ProductsTab = (typeof PRODUCTS_TABS)[number];
+const DEFAULT_PRODUCTS_TAB: ProductsTab = "all";
 
-function ProductsPage() {
-  const { data: exportJobsData } = useGetProductExportJobs(
-    { page: 1 },
-    { enabled: true, pollWhenActive: true },
-  );
+function isProductsTab(value: string | null): value is ProductsTab {
+  return PRODUCTS_TABS.includes(value as ProductsTab);
+}
 
-  const productExportJobs = exportJobsData?.result.jobs ?? [];
-  const activeProductExportCount =
-    typeof exportJobsData?.result.activeJobsCount === "number"
-      ? exportJobsData.result.activeJobsCount
-      : productExportJobs.filter((job) =>
-          ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
-        ).length;
-  const latestProductExportJob = productExportJobs[0];
+const PRODUCT_LIST_CONTENT_MIN_HEIGHT = "min-h-[55rem] md:min-h-[42rem]";
 
-  const renderProductExportIndicator = () => {
-    if (activeProductExportCount > 0) {
-      return (
-        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-          {activeProductExportCount}
-        </span>
-      );
-    }
+const DEFAULT_COLUMN_VISIBILITY: VisibilityState = {
+  createdOn: false,
+  modifiedOn: false,
+};
 
-    if (latestProductExportJob?.status === "failed") {
-      return <span className="h-2 w-2 rounded-full bg-destructive" />;
-    }
+const getAuditActionBy = (
+  auditLogs: Array<AuditLog> | undefined,
+  action: string,
+) =>
+  auditLogs
+    ?.filter((log) => log.action === action)
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
+    )[0]?.actionBy ?? "";
 
-    if (latestProductExportJob?.status === "completed") {
-      return <span className="h-2 w-2 rounded-full bg-emerald-500" />;
-    }
+const getAuditActionAt = (
+  auditLogs: Array<AuditLog> | undefined,
+  action: string,
+) => {
+  const actionAt = auditLogs
+    ?.filter((log) => log.action === action)
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
+    )[0]?.actionAt;
 
-    return null;
-  };
+  if (!actionAt) return "";
+
+  return typeof actionAt === "string" ? actionAt : actionAt.toISOString();
+};
+
+function AuditMetaCell({ name, date }: { name: string; date?: string | null }) {
+  const formattedDate = formatToLocalDateTime(date);
 
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      <div className="flex flex-col items-start gap-4 justify-start border border-border bg-background rounded-xl p-4 w-full h-full">
-        <div className="flex flex-wrap gap-2 items-center w-full justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-semibold">All Products</h1>
-            <div className="w-1 h-1 bg-border border border-border rounded-full hidden sm:block" />
-            <p className="text-xs text-muted-foreground font-medium hidden sm:block">
-              Manage and view all products in your workspace
-            </p>
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <span className="truncate text-sm font-medium">{name || "—"}</span>
+      {formattedDate ? (
+        <span className="truncate text-xs text-muted-foreground/60">
+          {formattedDate}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "product_name", label: "Product Name", type: "text" },
+  { name: "product_plan_number", label: "Product Plan Number", type: "text" },
+  { name: "project_name", label: "Project", type: "text" },
+  { name: "department_name", label: "Department", type: "text" },
+  { name: "status", label: "Status", type: "text" },
+  { name: "version", label: "Version", type: "number" },
+  { name: "complete_count", label: "Progress", type: "number" },
+  { name: "createdBy", label: "Created By", type: "text" },
+  { name: "createdOn", label: "Created On", type: "date" },
+  { name: "modifiedBy", label: "Modified By", type: "text" },
+  { name: "modifiedOn", label: "Modified On", type: "date" },
+];
+
+const PRODUCT_SORT_FIELDS = PRODUCT_FILTER_COLUMNS.map((column) => column.name);
+
+const PRODUCT_TABLE_COLUMN_COUNT = 8;
+
+const columnHeaderMap = [
+  {
+    title: "PPN",
+    info: "Product Plan Number - Unique identifier for the product plan",
+  },
+  { title: "Product Name", info: "Name of the product" },
+  { title: "Project", info: "Name of the project this product belongs to" },
+  {
+    title: "Department",
+    info: "Name of the department this product belongs to",
+  },
+  {
+    title: "Status",
+    info: "Current status of the product. Draft, Submitted or Archived",
+  },
+  { title: "Version", info: "Latest version number of the product" },
+  {
+    title: "Progress",
+    info: "Completion progress in percentage of the product. How many tabs are completed out of 7",
+  },
+  {
+    title: "Created",
+    info: "User who created the product and when it was created",
+  },
+  {
+    title: "Modified",
+    info: "User who last modified the product and when it was last modified",
+  },
+];
+
+const SortableHeader = ({
+  column,
+  title,
+}: {
+  column: Column<ProductListItem, unknown>;
+  title: string;
+}) => {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-10 group data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+        >
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex items-center text-muted-foreground/60 group-hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out">
+              <span>{title}</span>
+            </div>
+            <div className="opacity-50 group-hover:opacity-100 transition-all delay-100 duration-200 ease-in-out">
+              {column.getIsSorted() === "desc" ? (
+                <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
+              ) : column.getIsSorted() === "asc" ? (
+                <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+              ) : (
+                <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" asChild>
-              <Link href="/products/exports" className="gap-1.5">
-                <PiClockDuotone />
-                Product Exports
-                {renderProductExportIndicator()}
-              </Link>
-            </Button>
-            <CreateProductDialog />
-          </div>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {columnHeaderMap.find((col) => col.title === title)?.info}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+const columns: ColumnDef<ProductListItem>[] = [
+  {
+    accessorKey: "product_plan_number",
+    enableHiding: false,
+    size: 100,
+    header: ({ column }) => <SortableHeader column={column} title="PPN" />,
+    cell: ({ row }) => (
+      <div className="text-sm font-medium truncate">
+        {row.getValue("product_plan_number")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "product_name",
+    enableHiding: false,
+    size: 220,
+    minSize: 150,
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Product Name" />
+    ),
+    cell: ({ row }) => (
+      <div className="text-sm font-medium truncate">
+        {row.getValue("product_name")}
+      </div>
+    ),
+  },
+  {
+    id: "project_name",
+    accessorFn: (row) => row?.project?.[0]?.project_name ?? "",
+    size: 150,
+    header: ({ column }) => <SortableHeader column={column} title="Project" />,
+    cell: ({ row }) => (
+      <div className="text-sm font-medium truncate">
+        {row.original?.project?.[0]?.project_name}
+      </div>
+    ),
+  },
+  {
+    id: "department_name",
+    accessorFn: (row) => row?.department?.[0]?.department_name ?? "",
+    size: 150,
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Department" />
+    ),
+    cell: ({ row }) => (
+      <div className="text-sm font-medium truncate">
+        {row.original?.department?.[0]?.department_name}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    size: 90,
+    minSize: 80,
+    maxSize: 100,
+    header: ({ column }) => <SortableHeader column={column} title="Status" />,
+    cell: ({ row }) => (
+      <Badge
+        variant={
+          row.original?.status === "submitted"
+            ? "green"
+            : row.original?.status === "draft"
+              ? "blue"
+              : "gray"
+        }
+        className="font-normal capitalize"
+      >
+        <div
+          className={cn("w-2 h-2 rounded-full", {
+            "bg-green-500 dark:bg-green-400":
+              row.original?.status === "submitted",
+            "bg-blue-500 dark:bg-blue-400": row.original?.status === "draft",
+            "bg-gray-500 dark:bg-gray-400": row.original?.status === "archived",
+          })}
+        />
+        {row.getValue("status")}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "version",
+    size: 80,
+    minSize: 80,
+    maxSize: 90,
+    header: ({ column }) => <SortableHeader column={column} title="Version" />,
+    cell: ({ row }) => (
+      <Badge variant="secondary" className="font-mono text-xs">
+        v{row.getValue("version")}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "complete_count",
+    size: 90,
+    minSize: 90,
+    maxSize: 90,
+    header: ({ column }) => <SortableHeader column={column} title="Progress" />,
+    cell: ({ row }) => {
+      const progress = (row.getValue("complete_count") as number) || 0;
+      const tabsCompleted: string[] = [];
+
+      if (row.original) {
+        if (row.original.product_information?.tab_completed)
+          tabsCompleted.push("product-information");
+        if (row.original.compliance_information?.tab_completed)
+          tabsCompleted.push("compliance-information");
+        if (row.original.label_components?.tab_completed)
+          tabsCompleted.push("label-components");
+        if (row.original.symbols_graphics?.tab_completed)
+          tabsCompleted.push("symbols-graphics");
+        if (row.original.product_data?.tab_completed)
+          tabsCompleted.push("product-specifications");
+        if (row.original.operational_parameters?.tab_completed)
+          tabsCompleted.push("operational-parameters");
+        if (row.original.label_tags?.tab_completed)
+          tabsCompleted.push("label-tags");
+      }
+
+      const PROGRESS_STATES = [
+        {
+          min: 100,
+          label: "Ready to submit",
+          dot: "bg-emerald-500",
+          text: "text-emerald-600 dark:text-emerald-300",
+          bar: "from-emerald-400 via-emerald-500 to-emerald-600",
+        },
+        {
+          min: 70,
+          label: "On track",
+          dot: "bg-sky-500",
+          text: "text-sky-600 dark:text-sky-300",
+          bar: "from-sky-400 via-sky-500 to-sky-600",
+        },
+        {
+          min: 40,
+          label: "In progress",
+          dot: "bg-amber-500",
+          text: "text-amber-600 dark:text-amber-300",
+          bar: "from-amber-400 via-amber-500 to-amber-600",
+        },
+        {
+          min: 0,
+          label: "Getting started",
+          dot: "bg-slate-400",
+          text: "text-slate-600 dark:text-slate-300",
+          bar: "from-slate-400 via-slate-500 to-slate-600",
+        },
+      ] as const;
+
+      const SUBMITTED_STATE = {
+        min: 100,
+        label: "Submitted",
+        dot: "bg-violet-500",
+        text: "text-violet-600 dark:text-violet-300",
+        bar: "from-violet-400 via-violet-500 to-violet-600",
+      } as const;
+
+      const getProgressState = (value: number) => {
+        for (const state of PROGRESS_STATES) {
+          if (value >= state.min) return state;
+        }
+        return PROGRESS_STATES[PROGRESS_STATES.length - 1];
+      };
+
+      const clampedPercentage = Math.max(
+        0,
+        Math.min(100, Math.round(progress || 0)),
+      );
+
+      const progressState =
+        row.original.status === "submitted"
+          ? SUBMITTED_STATE
+          : getProgressState(clampedPercentage);
+
+      return (
+        <ProductProgressHoverCard
+          percentage={clampedPercentage}
+          colorClass={progressState.bar}
+          size={18}
+          strokeWidth={2}
+          progress={progress}
+          product_name={row.original?.product_name}
+          tabsCompleted={tabsCompleted.length}
+          totalTabs={7}
+        />
+      );
+    },
+  },
+  {
+    id: "createdOn",
+    accessorFn: (row) =>
+      row.createdOn ?? getAuditActionAt(row.auditLogs, "create"),
+    size: 160,
+    enableHiding: true,
+    meta: { label: "Created" },
+    header: ({ column }) => <SortableHeader column={column} title="Created" />,
+    cell: ({ row }) => (
+      <AuditMetaCell
+        name={
+          row.original.createdBy ??
+          getAuditActionBy(row.original.auditLogs, "create")
+        }
+        date={
+          row.original.createdOn ??
+          getAuditActionAt(row.original.auditLogs, "create")
+        }
+      />
+    ),
+  },
+  {
+    id: "modifiedOn",
+    accessorFn: (row) =>
+      row.modifiedOn ?? getAuditActionAt(row.auditLogs, "update"),
+    size: 160,
+    enableHiding: true,
+    meta: { label: "Modified" },
+    header: ({ column }) => <SortableHeader column={column} title="Modified" />,
+    cell: ({ row }) => (
+      <AuditMetaCell
+        name={
+          row.original.modifiedBy ??
+          getAuditActionBy(row.original.auditLogs, "update")
+        }
+        date={
+          row.original.modifiedOn ??
+          getAuditActionAt(row.original.auditLogs, "update")
+        }
+      />
+    ),
+  },
+  {
+    id: "actions",
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <RowActions row={row} />,
+    size: 40,
+    enableHiding: false,
+  },
+];
+
+export default function ProductsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab: ProductsTab = isProductsTab(tabParam)
+    ? tabParam
+    : DEFAULT_PRODUCTS_TAB;
+  const isBookmarkedTab = activeTab === "bookmarked";
+
+  const handleTabChange = (value: string) => {
+    if (!isProductsTab(value)) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    params.set("page", "1");
+
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+  };
+
+  const listState = useWorkspaceListQuery({
+    defaultSort: "product_name",
+    allowedSortFields: PRODUCT_SORT_FIELDS,
+    filterColumns: PRODUCT_FILTER_COLUMNS,
+  });
+  const {
+    data: allProductsData,
+    isFetching: isAllProductsFetching,
+    isPending: isAllProductsPending,
+    isError: isAllProductsError,
+  } = useGetAllProducts(listState.query, !isBookmarkedTab);
+  const {
+    data: bookmarkedProductsData,
+    isFetching: isBookmarkedProductsFetching,
+    isPending: isBookmarkedProductsPending,
+    isError: isBookmarkedProductsError,
+  } = useGetAllBookmarkedProducts(listState.query, isBookmarkedTab);
+
+  const data = isBookmarkedTab ? bookmarkedProductsData : allProductsData;
+  const isFetching = isBookmarkedTab
+    ? isBookmarkedProductsFetching
+    : isAllProductsFetching;
+  const isPending = isBookmarkedTab
+    ? isBookmarkedProductsPending
+    : isAllProductsPending;
+  const isError = isBookmarkedTab
+    ? isBookmarkedProductsError
+    : isAllProductsError;
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    DEFAULT_COLUMN_VISIBILITY,
+  );
+
+  const paginationInfo = data?.result?.pagination;
+  const isListBusy = isPending || isFetching;
+  const hasProductsToList =
+    isListBusy ||
+    isError ||
+    (paginationInfo?.totalCount ?? 0) > 0 ||
+    listState.query.filters.length > 0;
+
+  const sorting = useMemo<SortingState>(
+    () => [
+      { id: listState.query.sort, desc: listState.query.order === "desc" },
+    ],
+    [listState.query.order, listState.query.sort],
+  );
+
+  useEffect(() => {
+    if (!paginationInfo) return;
+    if (paginationInfo.totalPages === 0) {
+      if (listState.query.page !== 1) listState.setPage(1);
+      return;
+    }
+    if (listState.query.page > paginationInfo.totalPages) {
+      listState.setPage(1);
+    }
+  }, [listState.query.page, listState, paginationInfo]);
+
+  const table = useReactTable({
+    data: data?.result.products ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualSorting: true,
+    manualPagination: true,
+    pageCount: paginationInfo?.totalPages ?? 1,
+    initialState: {
+      columnVisibility: DEFAULT_COLUMN_VISIBILITY,
+    },
+    onSortingChange: (updater) => {
+      const nextSorting =
+        typeof updater === "function" ? updater(sorting) : updater;
+      const next = nextSorting[0];
+      if (!next) return;
+      listState.setSort(next.id, next.desc ? "desc" : "asc");
+    },
+    enableSortingRemoval: false,
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      sorting,
+      columnVisibility,
+    },
+  });
+
+  const showAuditColumns =
+    columnVisibility.createdOn !== false ||
+    columnVisibility.modifiedOn !== false;
+
+  return (
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Products</p>
+          <InfoTooltip content="Manage and view all products in your workspace. Products are labeling documentation records with metadata, seven structured tabs, versions, and redlines." />
         </div>
-        <ProductsPageProductTable />
+        <div className="flex items-center gap-2">
+          {isListBusy ? (
+            <WorkspaceListToolbarSkeleton />
+          ) : !isError ? (
+            <>
+              <ShowOrHideTableColumnsDropdown table={table} />
+              <WorkspaceListControls
+                filters={listState.query.filters}
+                filterColumns={PRODUCT_FILTER_COLUMNS}
+                onApplyFilters={listState.setFilters}
+                onClearFilters={listState.clearFilters}
+              />
+            </>
+          ) : null}
+          <ProductExportsSheet />
+          <CreateProductDialog />
+        </div>
+      </div>
+
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden gap-0"
+      >
+        <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+          <TabsList variant="line">
+            <TabsTrigger value="all">All Products</TabsTrigger>
+            <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {isError ? (
+            <DashboardErrorState
+              variant="panel"
+              icon={Blockchain03Icon}
+              title={
+                isBookmarkedTab
+                  ? "Failed to load bookmarked products"
+                  : "Failed to load products"
+              }
+              className={PRODUCT_LIST_CONTENT_MIN_HEIGHT}
+            />
+          ) : hasProductsToList ? (
+            <div className="flex flex-col items-end">
+              <div className="w-full">
+                <div className="w-full border-b border-border overflow-hidden">
+                  <Table
+                    className={cn(
+                      showAuditColumns
+                        ? "table-auto w-max min-w-full"
+                        : "table-fixed",
+                    )}
+                  >
+                    {!showAuditColumns ? (
+                      <colgroup>
+                        {table.getHeaderGroups()[0]?.headers.map((header) => (
+                          <col
+                            key={header.id}
+                            style={{ width: `${header.getSize()}px` }}
+                          />
+                        ))}
+                      </colgroup>
+                    ) : null}
+                    <TableHeader className="bg-muted">
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow
+                          key={headerGroup.id}
+                          className="hover:bg-transparent"
+                        >
+                          {headerGroup.headers.map((header) => (
+                            <TableHead
+                              key={header.id}
+                              className="border-r border-border last:border-r-0"
+                              style={
+                                showAuditColumns
+                                  ? {
+                                      width: `${header.getSize()}px`,
+                                      ...(typeof header.column.columnDef
+                                        .minSize === "number"
+                                        ? {
+                                            minWidth: `${header.column.columnDef.minSize}px`,
+                                          }
+                                        : {}),
+                                    }
+                                  : undefined
+                              }
+                            >
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                  )}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {isListBusy ? (
+                        <TableBodySkeleton
+                          columnCount={PRODUCT_TABLE_COLUMN_COUNT}
+                        />
+                      ) : table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => {
+                              router.push(
+                                `/products/${row.original._id}/product-information`,
+                              );
+                            }}
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell
+                                key={cell.id}
+                                className={cn(
+                                  cell.column.id === "actions" && "last:py-0",
+                                )}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columns.length}
+                            className="h-24 text-center"
+                          >
+                            {isBookmarkedTab ? (
+                              <BookmarkedProductsEmptyState />
+                            ) : (
+                              <ProductsEmptyState />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              <div className="flex h-10 w-full items-center border-b">
+                {isListBusy ? (
+                  <WorkspaceListPaginationSkeleton />
+                ) : (
+                  <WorkspaceListPagination
+                    pagination={paginationInfo}
+                    onPageChange={listState.setPage}
+                  />
+                )}
+              </div>
+            </div>
+          ) : isBookmarkedTab ? (
+            <BookmarkedProductsEmptyState className="m-4" />
+          ) : (
+            <ProductsEmptyState className="m-4" />
+          )}
+        </div>
+      </Tabs>
+    </div>
+  );
+}
+
+function BookmarkedProductsEmptyState({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+        <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
+      </div>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-foreground">
+          No bookmarked products
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Bookmark products from the All Products tab to see them here
+        </p>
       </div>
     </div>
   );
 }
 
-export default ProductsPage;
+function ProductsEmptyState({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
+        <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
+      </div>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-foreground">No products found</p>
+        <p className="text-xs text-muted-foreground">
+          Get started by creating a new product
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function RowActions({ row }: { row: { original: ProductListItem } }) {
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
+  const [showRemoveBookmarkDialog, setShowRemoveBookmarkDialog] =
+    useState(false);
+  const [removeBookmarkFolderId, setRemoveBookmarkFolderId] = useState<
+    string | null
+  >(null);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [showVersionDialog, setShowVersionDialog] = useState(false);
+  const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
+
+  const canCreateVersion = row.original.status === "submitted";
+
+  return (
+    <div
+      className="flex items-center justify-end gap-2"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            className="shadow-none text-muted-foreground/60 hover:text-foreground"
+            aria-label="More actions"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Icon icon={MoreVerticalSquare01Icon} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowUpdateDialog(true), 100);
+              }}
+            >
+              <Icon icon={PropertyEditIcon} />
+              <span>Edit</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowVersionDialog(true), 100);
+              }}
+              disabled={!canCreateVersion}
+              className={cn(
+                !canCreateVersion && "opacity-50 cursor-not-allowed",
+              )}
+            >
+              <Icon icon={PropertyAddIcon} />
+              New version
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowExportPDFDialog(true), 100);
+              }}
+            >
+              <Icon icon={Pdf01Icon} />
+              <span>Export to PDF</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowArchiveDialog(true), 100);
+              }}
+            >
+              <Icon icon={ArchiveIcon} />
+              <span>Archive</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => {
+                setTimeout(() => setShowShareDialog(true), 100);
+              }}
+            >
+              <Icon icon={Share08Icon} />
+              <span>Share</span>
+            </DropdownMenuItem>
+            <ProductBookmarkMenuItem
+              productId={row.original._id}
+              onAddBookmark={() => setShowBookmarkDialog(true)}
+              onRemoveBookmark={(folderId) => {
+                setRemoveBookmarkFolderId(folderId);
+                setShowRemoveBookmarkDialog(true);
+              }}
+            />
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <UpdateProductDialog
+        open={showUpdateDialog}
+        onOpenChange={setShowUpdateDialog}
+        product={row.original}
+      />
+      <DialogArchiveProduct
+        open={showArchiveDialog}
+        onOpenChange={setShowArchiveDialog}
+        product={row.original}
+      />
+      <DialogShareProduct
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        product={row.original}
+      />
+      <DialogBookmarkProduct
+        open={showBookmarkDialog}
+        onOpenChange={setShowBookmarkDialog}
+        product={row.original}
+      />
+      {removeBookmarkFolderId && (
+        <DialogRemoveProductBookmark
+          open={showRemoveBookmarkDialog}
+          onOpenChange={setShowRemoveBookmarkDialog}
+          productId={row.original._id}
+          productName={row.original.product_name}
+          folderId={removeBookmarkFolderId}
+        />
+      )}
+      <DialogCreateVersion
+        open={showVersionDialog}
+        onOpenChange={setShowVersionDialog}
+        product={row.original}
+      />
+      <DialogExportProductPDF
+        open={showExportPDFDialog}
+        onOpenChange={setShowExportPDFDialog}
+        product={row.original}
+      />
+    </div>
+  );
+}

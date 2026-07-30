@@ -53,6 +53,9 @@ export function useToggleBookmarkSourceFilesFolder() {
       queryClient.invalidateQueries({
         queryKey: ["source-files-folders"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["source-files-folders-infinite"],
+      });
     },
     onError: (error) => {
       const message = getErrorMessage(

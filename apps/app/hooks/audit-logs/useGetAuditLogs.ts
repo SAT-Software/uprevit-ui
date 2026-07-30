@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { AuditScopeType, GetAuditLogsResponse } from "@/types/audit-log";
 
@@ -60,16 +60,37 @@ async function getAuditLogs(
   return response.json();
 }
 
+const auditLogsEnabled = (filters: GetAuditLogsFilters, isAuthenticated: boolean) =>
+  isAuthenticated &&
+  Boolean(filters.workspaceId) &&
+  Boolean(filters.scopeType) &&
+  (filters.scopeType === "archive" || Boolean(filters.scopeId));
+
 export function useGetAuditLogs(filters: GetAuditLogsFilters) {
   const auth = useAuth();
 
   return useQuery({
     queryKey: ["audit-logs", filters],
     queryFn: ({ signal }) => getAuditLogs(filters, { signal, auth }),
-    enabled:
-      auth.isAuthenticated &&
-      Boolean(filters.workspaceId) &&
-      Boolean(filters.scopeType) &&
-      (filters.scopeType === "archive" || Boolean(filters.scopeId)),
+    enabled: auditLogsEnabled(filters, auth.isAuthenticated),
+  });
+}
+
+export function useGetAuditLogsInfinite(
+  filters: Omit<GetAuditLogsFilters, "page">,
+) {
+  const auth = useAuth();
+
+  return useInfiniteQuery({
+    queryKey: ["audit-logs-infinite", filters],
+    queryFn: ({ pageParam, signal }) =>
+      getAuditLogs({ ...filters, page: pageParam }, { signal, auth }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const pagination = lastPage?.result?.pagination;
+      if (!pagination?.hasNextPage) return undefined;
+      return pagination.page + 1;
+    },
+    enabled: auditLogsEnabled(filters, auth.isAuthenticated),
   });
 }

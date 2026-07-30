@@ -1,12 +1,17 @@
-import { PiHouseDuotone, PiSquaresFourDuotone, PiPackageDuotone } from "react-icons/pi";
+import {
+  Blockchain03Icon,
+  GridIcon,
+  Home04Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
-import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@uprevit/ui/components/ui/tabs"
+} from "@uprevit/ui/components/ui/tabs";
 
 export default function Component() {
   return (
@@ -17,9 +22,11 @@ export default function Component() {
             value="tab-1"
             className="data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
           >
-            <PiHouseDuotone
-              className="-ms-0.5 me-1.5 opacity-60"
+            <Icon
+              icon={Home04Icon}
               size={16}
+              strokeWidth={2}
+              className="-ms-0.5 me-1.5 opacity-60"
               aria-hidden="true"
             />
             Overview
@@ -28,9 +35,11 @@ export default function Component() {
             value="tab-2"
             className="data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
           >
-            <PiSquaresFourDuotone
-              className="-ms-0.5 me-1.5 opacity-60"
+            <Icon
+              icon={GridIcon}
               size={16}
+              strokeWidth={2}
+              className="-ms-0.5 me-1.5 opacity-60"
               aria-hidden="true"
             />
             Projects
@@ -39,9 +48,11 @@ export default function Component() {
             value="tab-3"
             className="data-[state=active]:bg-muted data-[state=active]:after:bg-primary relative overflow-hidden rounded-none border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e"
           >
-            <PiPackageDuotone
-              className="-ms-0.5 me-1.5 opacity-60"
+            <Icon
+              icon={Blockchain03Icon}
               size={16}
+              strokeWidth={2}
+              className="-ms-0.5 me-1.5 opacity-60"
               aria-hidden="true"
             />
             Packages
@@ -65,5 +76,5 @@ export default function Component() {
         </p>
       </TabsContent>
     </Tabs>
-  )
+  );
 }

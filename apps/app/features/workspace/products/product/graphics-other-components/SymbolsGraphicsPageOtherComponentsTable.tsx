@@ -16,9 +16,10 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Fragment, useState, type ElementType } from "react";
+import { Fragment, useState } from "react";
 import { usePathname } from "next/navigation";
 
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -30,11 +31,6 @@ import {
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@uprevit/ui/components/ui/pagination";
-import {
   Table,
   TableBody,
   TableCell,
@@ -42,36 +38,37 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import TableControls from "@/components/table/TableControls";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
+import type { ListFilter, ListFilterColumn } from "@/lib/workspace-list-query";
 import { advancedFilterFn } from "@/lib/table-filters";
 import { ProductImageFrame } from "../ProductImageFrame";
 import {
-  PiPencilSimpleDuotone,
-  PiTrashDuotone,
-  PiImageDuotone,
-  PiTextAlignLeftDuotone,
-  PiTagDuotone,
-  PiCaretDownDuotone,
-  PiCaretUpDuotone,
-  PiCaretUpDownDuotone,
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleDownDuotone,
-  PiDotsThreeCircleDuotone,
-  PiCubeDuotone,
-} from "react-icons/pi";
+  ArrowDown01Icon,
+  ArrowRight01Icon,
+  ArrowUp01Icon,
+  Delete02Icon,
+  MoreVerticalSquare01Icon,
+  PropertyEditIcon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import AddOtherCompsDialog from "./AddOtherCompsDialog";
 import EditOtherComponentsDialog from "./EditOtherComponentsDialog";
 import DeleteSymbolsSchematicsDialog from "./DeleteSymbolsSchematicsDialog";
 import type { DiffItem } from "@/utils/deepDiff";
 import { cn } from "@uprevit/ui/lib/utils";
+import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
+import { RedlineCell } from "@/components/common/RedlineCell";
 import {
-  cnRedlineBadge,
   redlineChipAdded,
   redlineChipRemoved,
-  redlineNewValueCompact,
-  redlineOldValueCompact,
 } from "@/utils/redlineStyles";
 
 type Item = {
@@ -94,6 +91,12 @@ type TableMeta = {
   getFieldDiff?: (row: Item, field: string, value?: unknown) => DiffItem | null;
   getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
 };
+
+const FILTER_COLUMNS: ListFilterColumn[] = [
+  { name: "componentName", label: "Component Name", type: "text" },
+  { name: "componentDescription", label: "Description", type: "text" },
+  { name: "presentOnLabels", label: "Presence on Labels", type: "text" },
+];
 
 const getPersistentItemId = (item: Item): string =>
   item._redlineId || item.id || item.componentName;
@@ -167,81 +170,46 @@ const getRedlineImagePresentation = (row: Item, meta?: TableMeta) => {
   };
 };
 
-// Helper component for displaying redline values
-const RedlineCell = ({
-  value,
-  diff,
-  formatFn,
-}: {
-  value: unknown;
-  diff: DiffItem | null;
-  formatFn?: (v: unknown, isOld?: boolean, isNew?: boolean) => React.ReactNode;
-}) => {
-  const format =
-    formatFn ||
-    ((v: unknown) => (typeof v === "string" ? v : v != null ? String(v) : "-"));
-  if (!diff) return <>{format(value)}</>;
-
-  const isAdded = diff.status === "added";
-  const isRemoved = diff.status === "removed";
-  const isModified = diff.status === "modified";
-
-  return (
-    <div className="flex flex-col gap-1">
-      {(isModified || isRemoved) && diff.old_value !== null && (
-        <div
-          className={cn(redlineOldValueCompact, "px-1.5 py-0.5")}
-        >
-          {format(diff.old_value, true, false)}
-        </div>
-      )}
-      {(isModified || isAdded) && !isRemoved && (
-        <div
-          className={cn(redlineNewValueCompact, "px-1.5 py-0.5")}
-        >
-          {format(diff.new_value, false, true)}
-        </div>
-      )}
-    </div>
-  );
-};
-
 const SortableHeader = ({
   column,
   title,
-  icon: Icon,
 }: {
   column?: Column<Item, unknown>;
   title: string;
-  icon: ElementType;
 }) => {
   if (!column) {
     return (
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center text-muted-foreground/60">
         <span>{title}</span>
       </div>
     );
   }
+
   return (
-    <button
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      className="h-8 data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
-    >
-      <div className="flex items-center justify-between w-full gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{title}</span>
-        </div>
-        {column.getIsSorted() === "desc" ? (
-          <PiCaretDownDuotone className="ml-1 h-3 w-3" />
-        ) : column.getIsSorted() === "asc" ? (
-          <PiCaretUpDuotone className="ml-1 h-3 w-3" />
-        ) : (
-          <PiCaretUpDownDuotone className="ml-1 h-3 w-3 opacity-50" />
-        )}
-      </div>
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-10 group data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+        >
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex items-center text-muted-foreground/60 group-hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out">
+              <span>{title}</span>
+            </div>
+            <div className="opacity-50 group-hover:opacity-100 transition-all delay-100 duration-200 ease-in-out">
+              {column.getIsSorted() === "desc" ? (
+                <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
+              ) : column.getIsSorted() === "asc" ? (
+                <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+              ) : (
+                <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+              )}
+            </div>
+          </div>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Sort by {title}</TooltipContent>
+    </Tooltip>
   );
 };
 
@@ -249,29 +217,31 @@ const columns: ColumnDef<Item>[] = [
   {
     id: "expander",
     enableHiding: false,
+    meta: { label: "Expand" },
     header: () => null,
     cell: ({ row }) => {
       return row.getCanExpand() ? (
         <Button
-          className="size-7 shadow-none text-muted-foreground"
+          className="size-7 shadow-none text-muted-foreground/60 hover:text-foreground"
           onClick={row.getToggleExpandedHandler()}
           aria-expanded={row.getIsExpanded()}
           size="icon"
           variant="ghost"
         >
-          {row.getIsExpanded() ? (
-            <PiCaretCircleDownDuotone className="opacity-60" size={16} />
-          ) : (
-            <PiCaretCircleRightDuotone className="opacity-60" size={16} />
-          )}
+          <Icon
+            icon={row.getIsExpanded() ? ArrowDown01Icon : ArrowRight01Icon}
+            size={16}
+            className="opacity-60"
+          />
         </Button>
       ) : undefined;
     },
-    size: 30,
+    size: 40,
   },
   {
     accessorKey: "componentImage",
-    header: () => <SortableHeader title="Image" icon={PiImageDuotone} />,
+    meta: { label: "Image" },
+    header: () => <SortableHeader title="Image" />,
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
       const imagePresentation = getRedlineImagePresentation(row.original, meta);
@@ -316,12 +286,9 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentName",
     enableSorting: true,
+    meta: { label: "Component Name" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Component Name"
-        icon={PiCubeDuotone}
-      />
+      <SortableHeader column={column} title="Component Name" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -350,12 +317,9 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "componentDescription",
     enableSorting: true,
+    meta: { label: "Description" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Description"
-        icon={PiTextAlignLeftDuotone}
-      />
+      <SortableHeader column={column} title="Description" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -386,12 +350,9 @@ const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "presentOnLabels",
     enableSorting: true,
+    meta: { label: "Presence on Labels" },
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        title="Presence on Labels"
-        icon={PiTagDuotone}
-      />
+      <SortableHeader column={column} title="Presence on Labels" />
     ),
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta | undefined;
@@ -466,6 +427,7 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     id: "actions",
+    meta: { label: "Actions" },
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row, table }) => (
       <RowActions
@@ -482,10 +444,12 @@ const columns: ColumnDef<Item>[] = [
 
 export default function SymbolsGraphicsPageOtherComponentsTable({
   data: dataProp,
+  productId,
   isSubmitted = false,
   isRedlineView = false,
 }: {
   data?: Item[];
+  productId: string;
   isSubmitted?: boolean;
   isRedlineView?: boolean;
 }) {
@@ -497,6 +461,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     { id: "componentName", desc: false },
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [filters, setFilters] = useState<ListFilter[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const getRowStatus = (row: Item) => {
@@ -549,50 +514,81 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
   });
 
+  const handleApplyFilters = (nextFilters: ListFilter[]) => {
+    setFilters(nextFilters);
+    setColumnFilters(
+      nextFilters.map((filter) => ({
+        id: filter.field,
+        value: {
+          operator: filter.operator,
+          value: filter.value ?? "",
+        },
+      })),
+    );
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters([]);
+    setColumnFilters([]);
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  };
+
+  const filteredRowCount = table.getFilteredRowModel().rows.length;
+  const pageCount = Math.max(1, table.getPageCount());
+  const currentPage = pagination.pageIndex + 1;
+
   return (
-    <div className="mt-2 flex flex-1 min-h-0 w-full flex-col gap-2">
-      <div className="shrink-0">
-        <TableControls
-          table={table}
-          filterColumns={[
-            { name: "componentName", label: "Component Name", type: "text" },
-            {
-              name: "componentDescription",
-              label: "Description",
-              type: "text",
-            },
-            {
-              name: "presentOnLabels",
-              label: "Presence on Labels",
-              type: "array",
-            },
-          ]}
-        />
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Other Components</p>
+          <InfoTooltip content="Add and manage other graphical components used on product labels." />
+        </div>
+        <div className="flex items-center gap-2">
+          <ShowOrHideTableColumnsDropdown table={table} />
+          <WorkspaceListControls
+            filters={filters}
+            filterColumns={FILTER_COLUMNS}
+            onApplyFilters={handleApplyFilters}
+            onClearFilters={handleClearFilters}
+          />
+          <AddOtherCompsDialog
+            productId={productId}
+            isSubmitted={isSubmitted}
+          />
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto rounded-xl border bg-background">
-        <Table>
-          <TableHeader className="bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={{ width: `${header.getSize()}px` }}
-                    className="h-11 border-r border-border last:border-r-0"
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex flex-col items-end">
+          <div className="w-full overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow
+                    key={headerGroup.id}
+                    className="h-10 hover:bg-transparent"
                   >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{ width: `${header.getSize()}px` }}
+                        className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="[&_tr:last-child]:border-b">
+              </TableHeader>
+              <TableBody className="[&_tr:last-child]:border-b">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const rowStatus = getRowStatus(row.original);
@@ -615,20 +611,15 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                       {row.getVisibleCells().map((cell, cellIdx) => (
                         <TableCell
                           key={cell.id}
-                          className="last:py-0 whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                          className="last:py-0 [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
                         >
                           <div className="flex items-center gap-2">
-                            {cellIdx === 0 && isRedlineView && rowStatus && (
-                              <span
-                                className={cn(
-                                  "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px]",
-                                  isAdded && cnRedlineBadge("added"),
-                                  isRemoved && cnRedlineBadge("removed"),
-                                  isModified && cnRedlineBadge("modified"),
-                                )}
-                              >
-                                {isAdded ? "NEW" : isRemoved ? "DEL" : "MOD"}
-                              </span>
+                            {cellIdx === 0 && (
+                              <RedlineStatusBadge
+                                status={rowStatus}
+                                inline
+                                className="rounded-full"
+                              />
                             )}
                             {flexRender(
                               cell.column.columnDef.cell,
@@ -649,7 +640,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
                               );
 
                             return (
-                              <div className="flex flex-col items-center py-4">
+                              <div className="flex flex-col items-center py-2">
                                 {imagePresentation.src ? (
                                   <ProductImageFrame
                                     src={imagePresentation.src}
@@ -682,61 +673,29 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-sm text-muted-foreground"
                 >
-                  No results.
+                  No other components found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
-        </Table>
-      </div>
-      <div className="flex shrink-0 items-center justify-end gap-8">
-        <div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => table.firstPage()}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <PiCaretCircleDoubleLeftDuotone />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <PiCaretCircleLeftDuotone />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <PiCaretCircleRightDuotone />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => table.lastPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <PiCaretCircleDoubleRightDuotone />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+            </Table>
+          </div>
+
+          <div className="flex h-10 w-full items-center border-b">
+            <WorkspaceListPagination
+              pagination={{
+                currentPage,
+                totalPages: pageCount,
+                totalCount: filteredRowCount,
+                limit: pagination.pageSize,
+                hasNextPage: table.getCanNextPage(),
+                hasPrevPage: table.getCanPreviousPage(),
+              }}
+              onPageChange={(page) => table.setPageIndex(page - 1)}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -776,12 +735,13 @@ function RowActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            size="icon"
+            size="icon-sm"
             variant="ghost"
-            className="shadow-none"
+            className="shadow-none text-muted-foreground/60 hover:text-foreground"
+            aria-label="More actions"
             disabled={actionsDisabled}
           >
-            <PiDotsThreeCircleDuotone size={18} />
+            <Icon icon={MoreVerticalSquare01Icon} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -790,7 +750,7 @@ function RowActions({
               disabled={actionsDisabled}
               onSelect={() => setTimeout(() => setShowEditDialog(true), 100)}
             >
-              <PiPencilSimpleDuotone className="h-4 w-4" />
+              <Icon icon={PropertyEditIcon} />
               <span>Edit</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -800,7 +760,7 @@ function RowActions({
             onSelect={() => setTimeout(() => setShowDeleteDialog(true), 100)}
             className="text-destructive focus:text-destructive"
           >
-            <PiTrashDuotone className="text-destructive h-4 w-4" />
+            <Icon icon={Delete02Icon} className="text-destructive" />
             <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

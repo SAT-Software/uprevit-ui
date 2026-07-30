@@ -3,17 +3,10 @@
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@uprevit/ui/components/ui/card";
+import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
+import { AreaChartLoadingSkeleton } from "@/features/workspace/analytics/ChartLoadingSkeleton";
 import {
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
@@ -25,9 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 interface TimeData {
-  date: string; // Format: YYYY-MM-DD
+  date: string;
   products: number;
 }
 
@@ -55,7 +49,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-// Time range options
 const TIME_RANGE_OPTIONS = [
   { value: "7d", label: "Last 7 days" },
   { value: "15d", label: "Last 15 days" },
@@ -66,6 +59,36 @@ const TIME_RANGE_OPTIONS = [
   { value: "270d", label: "Last 9 months" },
   { value: "365d", label: "Last 1 year" },
 ];
+
+function TimeRangeSelect({
+  timeRange,
+  onTimeRangeChange,
+}: {
+  timeRange: string;
+  onTimeRangeChange: (value: string) => void;
+}) {
+  return (
+    <Select value={timeRange} onValueChange={onTimeRangeChange}>
+      <SelectTrigger
+        className="h-7 w-[160px] shrink-0 rounded-lg"
+        aria-label="Select time range"
+      >
+        <SelectValue placeholder="Last 1 month" />
+      </SelectTrigger>
+      <SelectContent className="rounded-xl">
+        {TIME_RANGE_OPTIONS.map((option) => (
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            className="rounded-lg"
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 export function ProductsOverTimeChart({
   data,
@@ -109,139 +132,49 @@ export function ProductsOverTimeChart({
     });
   };
 
+  const headerActions = isLoading ? (
+    <Skeleton className="h-7 w-[160px] shrink-0 rounded-lg" />
+  ) : (
+    <TimeRangeSelect timeRange={timeRange} onTimeRangeChange={setTimeRange} />
+  );
+
   if (isLoading) {
     return (
-      <Card className="pt-0">
-        <CardHeader className="flex items-center gap-2 space-y-0 border-b p-4 sm:flex-row">
-          <div className="grid flex-1 gap-0">
-            <CardTitle className="text-base">Products Over Time</CardTitle>
-            <CardDescription>
-              Track product creation trends over time
-            </CardDescription>
-          </div>
-          <div className="h-9 w-[160px] bg-muted animate-pulse rounded-lg" />
-        </CardHeader>
-        <CardContent className="px-2 pt-2 pb-0">
-          <div className="h-[250px] relative overflow-hidden">
-            {/* Area chart skeleton with wavy gradient */}
-            <svg
-              className="w-full h-full animate-pulse"
-              viewBox="0 0 400 200"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <linearGradient
-                  id="skeletonGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="0%"
-                    stopColor="hsl(var(--muted))"
-                    stopOpacity="0.8"
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="hsl(var(--muted))"
-                    stopOpacity="0.1"
-                  />
-                </linearGradient>
-              </defs>
-              <path
-                d="M0,180 L0,120 C40,100 60,140 100,110 C140,80 160,130 200,90 C240,50 260,100 300,70 C340,40 360,80 400,60 L400,180 Z"
-                fill="url(#skeletonGradient)"
-              />
-              <path
-                d="M0,120 C40,100 60,140 100,110 C140,80 160,130 200,90 C240,50 260,100 300,70 C340,40 360,80 400,60"
-                fill="none"
-                stroke="hsl(var(--muted))"
-                strokeWidth="3"
-              />
-            </svg>
-            {/* X-axis labels skeleton */}
-            <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-3 w-10 bg-muted animate-pulse rounded"
-                />
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <AnalyticsChartPanel
+        title="Products Over Time"
+        info="Track product creation trends over time"
+        headerActions={headerActions}
+      >
+        <div className="px-2 pb-4 pt-2">
+          <AreaChartLoadingSkeleton />
+        </div>
+      </AnalyticsChartPanel>
     );
   }
 
   if (filteredData.length === 0) {
     return (
-      <Card className="pt-0">
-        <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-          <div className="grid flex-1 gap-1">
-            <CardTitle className="text-base">Products Over Time</CardTitle>
-            <CardDescription>Track product creation trends</CardDescription>
-          </div>
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger
-              className="w-[160px] rounded-lg"
-              aria-label="Select time range"
-            >
-              <SelectValue placeholder="Last 1 month" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              {TIME_RANGE_OPTIONS.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className="rounded-lg"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center min-h-[250px]">
+      <AnalyticsChartPanel
+        title="Products Over Time"
+        info="Track product creation trends over time"
+        headerActions={headerActions}
+      >
+        <div className="flex min-h-[250px] items-center justify-center px-4 pb-4">
           <p className="text-sm text-muted-foreground">
             No data available for this period
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </AnalyticsChartPanel>
     );
   }
 
   return (
-    <Card className="pt-0">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b p-4 sm:flex-row">
-        <div className="grid flex-1 gap-0">
-          <CardTitle className="text-base">Products Over Time</CardTitle>
-          <CardDescription>
-            Track product creation trends over time
-          </CardDescription>
-        </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="w-[160px] rounded-lg"
-            aria-label="Select time range"
-          >
-            <SelectValue placeholder="Last 1 month" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {TIME_RANGE_OPTIONS.map((option) => (
-              <SelectItem
-                key={option.value}
-                value={option.value}
-                className="rounded-lg"
-              >
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardHeader>
-      <CardContent className="px-2 pt-2 pb-0">
+    <AnalyticsChartPanel
+      title="Products Over Time"
+      info="Track product creation trends over time"
+      headerActions={headerActions}
+    >
+      <div className="px-2 pb-4 pt-2">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] -ml-10 w-[calc(100%+40px)]"
@@ -301,7 +234,7 @@ export function ProductsOverTimeChart({
             />
           </AreaChart>
         </ChartContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </AnalyticsChartPanel>
   );
 }

@@ -5,52 +5,80 @@ import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
-import { PiMoonDuotone, PiSunDuotone } from "react-icons/pi";
+import {
+  ComputerIcon,
+  Moon02Icon,
+  Sun01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 
+const darkSurfaceTrigger =
+  "bg-neutral-900 text-neutral-100 border-neutral-700 hover:bg-neutral-800 hover:text-neutral-50 [&_svg]:!text-neutral-100";
+
+const darkSurfaceContent =
+  "bg-neutral-950 text-neutral-100 border-neutral-700";
+
+const darkSurfaceItem =
+  "text-neutral-100 focus:bg-neutral-800 focus:text-neutral-50 hover:bg-neutral-800 hover:text-neutral-50 [&_svg]:!text-neutral-400 focus:[&_svg]:!text-neutral-100 hover:[&_svg]:!text-neutral-100";
+
 export function ThemeToggle({ background }: { background?: string }) {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const onDarkSurface = background === "dark";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(
-          background === "dark" &&
-            "bg-foreground text-background dark:text-foreground border-muted-foreground hover:bg-neutral-950 hover:text-neutral-100"
-        )}
+        className={cn(onDarkSurface && darkSurfaceTrigger)}
         asChild
       >
-        <Button variant="outline" className="size-8" size="icon">
-          <PiSunDuotone className="h-3 w-3 dark:hidden" />
-          <PiMoonDuotone className="h-3 w-3 hidden dark:block" />
+        <Button variant="outline" size="icon-xs">
+          <Icon
+            icon={Sun01Icon}
+            size={14}
+            strokeWidth={2}
+            className="dark:hidden"
+          />
+          <Icon
+            icon={Moon02Icon}
+            size={14}
+            strokeWidth={2}
+            className="hidden dark:block"
+          />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className={cn(
-          background === "dark" &&
-            "bg-foreground dark:bg-background text-background dark:text-foreground border-neutral-700 hover:bg-neutral-950 hover:text-neutral-100"
-        )}
+        className={cn(onDarkSurface && darkSurfaceContent)}
         align="end"
       >
-        <DropdownMenuItem
-          className={cn(
-            background === "dark" &&
-              "hover:bg-neutral-700 hover:text-neutral-100"
-          )}
-          onClick={() => setTheme("light")}
-        >
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
+        <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+          <DropdownMenuRadioItem
+            className={cn(onDarkSurface && darkSurfaceItem)}
+            value="light"
+          >
+            <Icon icon={Sun01Icon} size={16} strokeWidth={2} />
+            Light
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem
+            className={cn(onDarkSurface && darkSurfaceItem)}
+            value="dark"
+          >
+            <Icon icon={Moon02Icon} size={16} strokeWidth={2} />
+            Dark
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem
+            className={cn(onDarkSurface && darkSurfaceItem)}
+            value="system"
+          >
+            <Icon icon={ComputerIcon} size={16} strokeWidth={2} />
+            System
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

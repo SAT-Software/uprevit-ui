@@ -3,13 +3,6 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { format } from "date-fns";
-import {
-  PiCalendarBlankDuotone,
-  PiFunnelDuotone,
-  PiPlusCircleDuotone,
-  PiSlidersDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Calendar } from "@uprevit/ui/components/ui/calendar";
@@ -37,6 +30,21 @@ import type {
   ListFilterColumn,
   ListFilterOperator,
 } from "@/lib/workspace-list-query";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Calendar03Icon,
+  CancelSquareIcon,
+  FilterAddIcon,
+  FilterEditIcon,
+  FilterIcon,
+  FilterRemoveIcon,
+  FilterResetIcon,
+} from "@hugeicons/core-free-icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 
 type DraftFilter = {
   id: string;
@@ -144,13 +152,13 @@ function DateFilterInput({
           data-empty={!selectedDate}
           className="h-8 w-[150px] justify-start text-left text-sm font-normal data-[empty=true]:text-muted-foreground"
         >
-          <PiCalendarBlankDuotone />
+          <Icon icon={Calendar03Icon} size={16} strokeWidth={2} />
           <span className="truncate">
             {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[1000] w-auto p-0" align="start">
+      <PopoverContent className="z-1000 w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -225,8 +233,7 @@ export function WorkspaceListControls({
         return {
           field: filter.field,
           operator: filter.operator as ListFilterOperator,
-          ...(filter.operator === "is_null" ||
-          filter.operator === "is_not_null"
+          ...(filter.operator === "is_null" || filter.operator === "is_not_null"
             ? {}
             : { value }),
         };
@@ -241,23 +248,37 @@ export function WorkspaceListControls({
   };
 
   const getColumnByName = (name: string) =>
-    filterColumns.find((column) => column.name === name) ?? DEFAULT_FILTER_COLUMN;
+    filterColumns.find((column) => column.name === name) ??
+    DEFAULT_FILTER_COLUMN;
 
   const hasActiveFilters = filters.length > 0;
 
   return (
     <div className="flex flex-wrap items-center gap-3">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="sm">
-            <PiFunnelDuotone />
-            Filter
-            {hasActiveFilters && (
-              <span className="ml-1.5 rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">
-                {filters.length}
-              </span>
-            )}
-          </Button>
+        <DropdownMenuTrigger>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="outline"
+                size={hasActiveFilters ? "sm" : "icon-xs"}
+                className="text-muted-foreground/60 hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out"
+              >
+                <Icon
+                  icon={FilterEditIcon}
+                  size={12}
+                  strokeWidth={2}
+                  className="transition-colors delay-100 duration-200 ease-in-out"
+                />
+                {hasActiveFilters && (
+                  <span className=" rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">
+                    {filters.length}
+                  </span>
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Filter the view</TooltipContent>
+          </Tooltip>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-full"
@@ -340,7 +361,9 @@ export function WorkspaceListControls({
                       />
                     ) : showValueInput ? (
                       <Input
-                        type={selectedColumn.type === "number" ? "number" : "text"}
+                        type={
+                          selectedColumn.type === "number" ? "number" : "text"
+                        }
                         placeholder="Enter value"
                         value={filter.value}
                         onChange={(event) =>
@@ -358,9 +381,9 @@ export function WorkspaceListControls({
                       variant="ghost"
                       size="icon"
                       onClick={() => handleRemoveFilter(filter.id)}
-                      className="p-0"
+                      className="p-0 text-muted-foreground/60 hover:text-foreground"
                     >
-                      <PiXCircleDuotone />
+                      <Icon icon={CancelSquareIcon} size={16} strokeWidth={2} />
                       <span className="sr-only">Remove filter</span>
                     </Button>
                   </div>
@@ -375,19 +398,29 @@ export function WorkspaceListControls({
             <Button
               variant="outline"
               size="sm"
-              className="text-sm"
+              className="text-sm group"
               onClick={handleAddFilter}
             >
-              <PiPlusCircleDuotone />
+              <Icon
+                icon={FilterAddIcon}
+                size={12}
+                strokeWidth={2}
+                className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+              />
               Add filter
             </Button>
             <Button
               size="sm"
-              className="text-sm"
+              className="text-sm group"
               variant="secondary"
               onClick={handleApplyFilters}
             >
-              <PiSlidersDuotone />
+              <Icon
+                icon={FilterResetIcon}
+                size={12}
+                strokeWidth={2}
+                className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+              />
               Apply filter
             </Button>
           </div>
@@ -395,8 +428,18 @@ export function WorkspaceListControls({
       </DropdownMenu>
 
       {hasActiveFilters && (
-        <Button variant="outline" size="sm" onClick={handleClearFilters}>
-          <PiXCircleDuotone />
+        <Button
+          variant="destructive"
+          size="sm"
+          className="group"
+          onClick={handleClearFilters}
+        >
+          <Icon
+            icon={FilterRemoveIcon}
+            size={16}
+            strokeWidth={2}
+            className="text-destructive/70 group-hover:text-destructive dark:text-foreground/70 dark:group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+          />
           Clear filters
         </Button>
       )}

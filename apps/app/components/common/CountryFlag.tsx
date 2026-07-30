@@ -1,7 +1,8 @@
 "use client";
 
 import * as Flags from "country-flag-icons/react/3x2";
-import { PiGlobeDuotone } from "react-icons/pi";
+import { GlobalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { COUNTRIES } from "@/data/countries";
 import { cn } from "@uprevit/ui/lib/utils";
@@ -13,7 +14,7 @@ type CountryFlagProps = {
 };
 
 const COUNTRY_CODE_BY_NAME = new Map(
-  COUNTRIES.map(({ name, code }) => [name.trim().toLowerCase(), code])
+  COUNTRIES.map(({ name, code }) => [name.trim().toLowerCase(), code]),
 );
 
 export function CountryFlag({
@@ -32,15 +33,18 @@ export function CountryFlag({
     <span
       aria-hidden="true"
       className={cn(
-        "flex h-4 w-5 shrink-0 items-center justify-center overflow-hidden rounded-[2px] border border-border/70 bg-muted/40",
-        className
+        "flex h-4 w-5 shrink-0 items-center justify-center overflow-hidden",
+        className,
       )}
     >
       {FlagComponent ? (
         <FlagComponent className="h-full w-full" />
       ) : (
-        <PiGlobeDuotone
-          className={cn("h-3 w-3 text-muted-foreground", iconClassName)}
+        <Icon
+          icon={GlobalIcon}
+          size={12}
+          strokeWidth={2}
+          className={cn("text-muted-foreground", iconClassName)}
         />
       )}
     </span>

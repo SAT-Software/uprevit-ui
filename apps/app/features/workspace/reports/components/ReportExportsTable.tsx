@@ -9,22 +9,23 @@ import {
   PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
-import type { IconType } from "react-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import {
-  PiArrowClockwiseDuotone,
-  PiCalendarDuotone,
-  PiCaretCircleDoubleLeftDuotone,
-  PiCaretCircleDoubleRightDuotone,
-  PiCaretCircleLeftDuotone,
-  PiCaretCircleRightDuotone,
-  PiCheckCircleDuotone,
-  PiClockDuotone,
-  PiDownloadDuotone,
-  PiFilePdfDuotone,
-  PiFileXlsDuotone,
-  PiHashDuotone,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
+  Alert01Icon,
+  Calendar03Icon,
+  CheckmarkCircle01Icon,
+  CircleArrowLeftDoubleIcon,
+  CircleArrowRightDoubleIcon,
+  CircleChevronLeftIcon,
+  CircleChevronRightIcon,
+  Clock01Icon,
+  Download01Icon,
+  HashtagIcon,
+  Pdf01Icon,
+  Refresh04Icon,
+  Xls01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
@@ -78,14 +79,14 @@ const formatDateTime = (value: string): string => {
 
 function StaticHeader({
   title,
-  icon: Icon,
+  icon,
 }: {
   title: string;
-  icon: IconType;
+  icon: IconSvgElement;
 }) {
   return (
     <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-      <Icon className="h-4 w-4 text-muted-foreground" />
+      <Icon icon={icon} size={16} strokeWidth={2} className="text-muted-foreground" />
       <span>{title}</span>
     </div>
   );
@@ -175,13 +176,13 @@ export function ReportExportsTable() {
     () => [
       {
         accessorKey: "format",
-        header: () => <StaticHeader title="Format" icon={PiFilePdfDuotone} />,
+        header: () => <StaticHeader title="Format" icon={Pdf01Icon} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-2 text-sm font-medium">
             {row.original.format === "pdf" ? (
-              <PiFilePdfDuotone className="size-4 text-red-500" />
+              <Icon icon={Pdf01Icon} size={16} strokeWidth={2} className="text-red-500" />
             ) : (
-              <PiFileXlsDuotone className="size-4 text-green-600" />
+              <Icon icon={Xls01Icon} size={16} strokeWidth={2} className="text-green-600" />
             )}
             {row.original.format.toUpperCase()}
           </div>
@@ -190,16 +191,16 @@ export function ReportExportsTable() {
       },
       {
         accessorKey: "status",
-        header: () => <StaticHeader title="Status" icon={PiClockDuotone} />,
+        header: () => <StaticHeader title="Status" icon={Clock01Icon} />,
         cell: ({ row }) => (
           <Badge variant={getStatusBadgeVariant(row.original.status)}>
             <span className="flex items-center gap-1.5 capitalize">
               {row.original.status === "completed" ? (
-                <PiCheckCircleDuotone className="size-3" />
+                <Icon icon={CheckmarkCircle01Icon} size={12} strokeWidth={2} />
               ) : row.original.status === "failed" ? (
-                <PiWarningCircleDuotone className="size-3" />
+                <Icon icon={Alert01Icon} size={12} strokeWidth={2} />
               ) : (
-                <PiClockDuotone className="size-3" />
+                <Icon icon={Clock01Icon} size={12} strokeWidth={2} />
               )}
               {row.original.status}
             </span>
@@ -209,7 +210,7 @@ export function ReportExportsTable() {
       },
       {
         accessorKey: "createdAt",
-        header: () => <StaticHeader title="Created" icon={PiCalendarDuotone} />,
+        header: () => <StaticHeader title="Created" icon={Calendar03Icon} />,
         cell: ({ row }) => (
           <span className="text-sm text-muted-foreground">
             {formatDateTime(row.original.createdAt)}
@@ -219,14 +220,14 @@ export function ReportExportsTable() {
       },
       {
         accessorKey: "attempts",
-        header: () => <StaticHeader title="Attempts" icon={PiHashDuotone} />,
+        header: () => <StaticHeader title="Attempts" icon={HashtagIcon} />,
         cell: ({ row }) => <span className="text-sm">{row.original.attempts}</span>,
         size: 110,
       },
       {
         accessorKey: "errorMessage",
         header: () => (
-          <StaticHeader title="Error" icon={PiWarningCircleDuotone} />
+          <StaticHeader title="Error" icon={Alert01Icon} />
         ),
         cell: ({ row }) => (
           <div title={row.original.errorMessage || undefined}>
@@ -239,7 +240,7 @@ export function ReportExportsTable() {
       },
       {
         id: "actions",
-        header: () => <StaticHeader title="Action" icon={PiDownloadDuotone} />,
+        header: () => <StaticHeader title="Action" icon={Download01Icon} />,
         cell: ({ row }) => (
           <Button
             variant="secondary"
@@ -253,7 +254,7 @@ export function ReportExportsTable() {
             {downloadingJobIds.has(row.original.jobId) ? (
               <Spinner className="size-3" />
             ) : (
-              <PiDownloadDuotone />
+              <Icon icon={Download01Icon} size={16} strokeWidth={2} />
             )}
             Download
           </Button>
@@ -313,7 +314,7 @@ export function ReportExportsTable() {
             {isFetching ? (
               <Spinner className="size-3" />
             ) : (
-              <PiArrowClockwiseDuotone />
+              <Icon icon={Refresh04Icon} size={16} strokeWidth={2} />
             )}
             Refresh
           </Button>
@@ -419,7 +420,7 @@ export function ReportExportsTable() {
                     disabled={!table.getCanPreviousPage()}
                     aria-label="Go to first page"
                   >
-                    <PiCaretCircleDoubleLeftDuotone aria-hidden="true" />
+                    <Icon icon={CircleArrowLeftDoubleIcon} size={16} strokeWidth={2} aria-hidden="true" />
                   </Button>
                 </PaginationItem>
                 <PaginationItem>
@@ -431,7 +432,7 @@ export function ReportExportsTable() {
                     disabled={!table.getCanPreviousPage()}
                     aria-label="Go to previous page"
                   >
-                    <PiCaretCircleLeftDuotone aria-hidden="true" />
+                    <Icon icon={CircleChevronLeftIcon} size={16} strokeWidth={2} aria-hidden="true" />
                   </Button>
                 </PaginationItem>
                 <PaginationItem>
@@ -443,7 +444,7 @@ export function ReportExportsTable() {
                     disabled={!table.getCanNextPage()}
                     aria-label="Go to next page"
                   >
-                    <PiCaretCircleRightDuotone aria-hidden="true" />
+                    <Icon icon={CircleChevronRightIcon} size={16} strokeWidth={2} aria-hidden="true" />
                   </Button>
                 </PaginationItem>
                 <PaginationItem>
@@ -455,7 +456,7 @@ export function ReportExportsTable() {
                     disabled={!table.getCanNextPage()}
                     aria-label="Go to last page"
                   >
-                    <PiCaretCircleDoubleRightDuotone aria-hidden="true" />
+                    <Icon icon={CircleArrowRightDoubleIcon} size={16} strokeWidth={2} aria-hidden="true" />
                   </Button>
                 </PaginationItem>
               </PaginationContent>

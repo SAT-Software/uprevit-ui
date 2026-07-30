@@ -1,7 +1,8 @@
+import { KanbanIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { PiKanbanDuotone } from "react-icons/pi";
 
 // Place this at the top of ProjectsCard.tsx, outside the component
 
@@ -39,7 +40,12 @@ function ProjectsCard({ projects }: { projects: Project[] }) {
                 />
               ) : (
                 <div className="flex items-center justify-center w-full h-full bg-muted rounded-md border border-input">
-                  <PiKanbanDuotone className="w-8 h-8 text-muted-foreground/60" />
+                  <Icon
+                    icon={KanbanIcon}
+                    size={32}
+                    strokeWidth={2}
+                    className="text-muted-foreground/60"
+                  />
                 </div>
               )}
             </div>

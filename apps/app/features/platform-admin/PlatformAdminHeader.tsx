@@ -1,37 +1,28 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 
 type PlatformAdminHeaderProps = {
   title: string;
-  subtitle: string;
+  tooltip?: string;
   actions?: ReactNode;
-  children?: ReactNode;
 };
 
 export function PlatformAdminHeader({
   title,
-  subtitle,
+  tooltip,
   actions,
-  children,
 }: PlatformAdminHeaderProps) {
   return (
-    <div className="rounded-xl border border-border bg-background p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-semibold">{title}</h1>
-            <div className="hidden h-1 w-1 rounded-full border border-border bg-border sm:block" />
-            <p className="hidden text-xs font-medium text-muted-foreground sm:block">
-              {subtitle}
-            </p>
-          </div>
-        </div>
-        <div className="flex min-h-8 shrink-0 flex-wrap items-center gap-2">
-          {actions ?? <span className="hidden sm:block" aria-hidden="true" />}
-        </div>
+    <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+      <div className="flex min-w-0 items-center gap-2">
+        <p className="truncate text-sm font-medium">{title}</p>
+        {tooltip ? <InfoTooltip content={tooltip} /> : null}
       </div>
-      {children ? <div className="mt-4">{children}</div> : null}
+      {actions ? (
+        <div className="flex shrink-0 items-center gap-1.5">{actions}</div>
+      ) : null}
     </div>
   );
 }

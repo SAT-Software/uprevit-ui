@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductHeader } from "@/features/workspace/products/product/ProductHeader";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
 import { ExportJobStatus } from "@/types/export-job";
-import { useParams } from "next/navigation";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
 
 const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
 
@@ -15,6 +16,7 @@ export default function ProductLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [exportsOpen, setExportsOpen] = useState(false);
   const params = useParams();
   const productId =
     typeof params.productId === "string"
@@ -46,7 +48,12 @@ export default function ProductLayout({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <ProductHeader isExportLocked={hasActiveExport} />
-      <div className="relative flex flex-1 flex-col min-h-0 bg-accent/60">
+      <ProductExportsSheet
+        open={exportsOpen}
+        onOpenChange={setExportsOpen}
+        showTrigger={false}
+      />
+      <div className="relative flex flex-1 flex-col min-h-0 bg-background">
         {children}
         {hasActiveExport ? (
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-accent/80 backdrop-blur-[2px]">
@@ -60,8 +67,14 @@ export default function ProductLayout({
                   Editing is temporarily disabled for this product until export
                   completes. You can switch to another product.
                 </p>
-                <Button asChild size="sm" variant="secondary" className="mt-3">
-                  <Link href="/products/exports">View Export Jobs</Link>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="mt-3"
+                  onClick={() => setExportsOpen(true)}
+                >
+                  View Exports
                 </Button>
               </div>
             </div>

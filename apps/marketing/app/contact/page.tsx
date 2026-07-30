@@ -4,8 +4,7 @@ import Link from "next/link";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
-import { Badge } from "@uprevit/ui/components/ui/badge";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import {
   Card,
   CardContent,
@@ -13,32 +12,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@uprevit/ui/components/ui/card";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
-import { Label } from "@uprevit/ui/components/ui/label";
+// import { Button } from "@uprevit/ui/components/ui/button";
+// import { Input } from "@uprevit/ui/components/ui/input";
+// import { Textarea } from "@uprevit/ui/components/ui/textarea";
+// import { Label } from "@uprevit/ui/components/ui/label";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@uprevit/ui/components/ui/accordion";
-import { useTheme } from "next-themes";
-import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
 import {
-  PiEnvelopeSimpleDuotone,
-  PiClockClockwiseDuotone,
-  PiMapPinDuotone,
-  PiQuestionDuotone,
-  PiChatTextDuotone,
-  PiArrowRightDuotone,
-  PiEnvelopeOpenDuotone,
-} from "react-icons/pi";
+  Clock01Icon,
+  HelpCircleIcon,
+  Linkedin02Icon,
+  Location01Icon,
+  Mail01Icon,
+  MailOpen01Icon,
+  Message01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 const contactFAQs = [
   {
     question: "How quickly will we hear back?",
     answer:
-      "We respond within 1 business day. Enterprise and urgent requests are prioritized based on scope.",
+      "We respond within 72 hours. Enterprise and urgent requests are prioritized based on scope.",
   },
   {
     question: "Can you help with compliance assessments?",
@@ -58,9 +57,6 @@ const contactFAQs = [
 ];
 
 export default function ContactPage() {
-  const { resolvedTheme } = useTheme();
-  const badgeVariant = resolvedTheme === "dark" ? "outline" : "white";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />
@@ -74,13 +70,7 @@ export default function ContactPage() {
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-                <Badge
-                  variant={badgeVariant}
-                  className="mb-8 z-60 dark:px-2 dark:py-0.5"
-                >
-                  <PiEnvelopeOpenDuotone />
-                  <span className="font-medium">Contact</span>
-                </Badge>
+                <MarketingSectionBadge icon={MailOpen01Icon} label="Contact" />
                 <div className="w-full flex flex-col md:flex-row items-start gap-4">
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Let&apos;s connect your labeling team with clarity
@@ -97,13 +87,17 @@ export default function ContactPage() {
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
-                <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-                  <div className="flex w-full flex-col gap-6 md:max-w-sm lg:max-w-md">
-                    <Card className="border-border/70">
-                      <CardHeader className="p-4 pb-3 md:p-6 md:pb-4">
-                        <div className="flex flex-row items-start gap-2 md:items-center">
+                <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3 md:gap-4 md:items-stretch">
+                    <Card className="flex h-full flex-col border-border shadow-bottom-lg">
+                      <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
+                        <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
-                            <PiEnvelopeSimpleDuotone className="h-4 w-4 md:h-5 md:w-5" />
+                            <Icon
+                              icon={Mail01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="md:h-5 md:w-5"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -116,24 +110,29 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0 md:px-6 md:pb-6">
+                      <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
                         <Link
                           href="mailto:contact@uprevit.com"
-                          className="text-sm md:text-base font-medium text-foreground hover:underline"
+                          className="text-sm font-medium text-foreground hover:underline"
                         >
                           contact@uprevit.com
                         </Link>
-                        <p className="mt-3 text-xs md:text-sm text-muted-foreground">
-                          Typical response time: within 1 business day.
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          Typical response time: within 72 hours.
                         </p>
                       </CardContent>
                     </Card>
 
-                    <Card className="border-border/70">
-                      <CardHeader className="p-4 pb-3 md:p-6 md:pb-4">
-                        <div className="flex flex-row items-start gap-2 md:items-center">
+                    <Card className="flex h-full flex-col border-border shadow-bottom-lg">
+                      <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
+                        <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
-                            <PiChatTextDuotone className="h-4 w-4 md:h-5 md:w-5" />
+                            <Icon
+                              icon={Message01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="md:h-5 md:w-5"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -146,35 +145,34 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0 md:px-6 md:pb-6">
-                        <div className="flex flex-col gap-4">
-                          <Link
-                            href="https://x.com/uprevit"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-2.5 text-sm md:text-base text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <FaXTwitter className="h-4 w-4 md:h-5 md:w-5" />
-                            <span>x.com/uprevit</span>
-                          </Link>
-                          <Link
-                            href="https://linkedin.com/company/uprevit"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-2.5 text-sm md:text-base text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <FaLinkedin className="h-4 w-4 md:h-5 md:w-5" />
-                            <span>linkedin.com/company/uprevit</span>
-                          </Link>
-                        </div>
+                      <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
+                        <Link
+                          href="https://linkedin.com/company/uprevit"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Icon
+                            icon={Linkedin02Icon}
+                            size={16}
+                            strokeWidth={2}
+                            className="shrink-0"
+                          />
+                          <span>linkedin.com/company/uprevit</span>
+                        </Link>
                       </CardContent>
                     </Card>
 
-                    <Card className="border-border/70">
-                      <CardHeader className="p-4 pb-3 md:p-6 md:pb-4">
-                        <div className="flex flex-row items-start gap-2 md:items-center">
+                    <Card className="flex h-full flex-col border-border shadow-bottom-lg">
+                      <CardHeader className="p-4 pb-3 md:p-5 md:pb-3">
+                        <div className="flex flex-row items-start gap-2.5">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background md:size-11 md:rounded-xl">
-                            <PiClockClockwiseDuotone className="h-4 w-4 md:h-5 md:w-5" />
+                            <Icon
+                              icon={Clock01Icon}
+                              size={20}
+                              strokeWidth={2}
+                              className="md:h-5 md:w-5"
+                            />
                           </div>
                           <div className="flex flex-col">
                             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -186,9 +184,14 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0 md:px-6 md:pb-6">
-                        <div className="flex items-start gap-2 text-xs md:text-sm text-muted-foreground">
-                          <PiMapPinDuotone className="mt-0.5 h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+                      <CardContent className="mt-auto px-4 pb-4 pt-0 md:px-5 md:pb-5">
+                        <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <Icon
+                            icon={Location01Icon}
+                            size={14}
+                            strokeWidth={2}
+                            className="mt-0.5 shrink-0"
+                          />
                           <span>
                             Serving medical device teams across North America,
                             EU, and APAC.
@@ -196,7 +199,7 @@ export default function ContactPage() {
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
+                  {/* Contact form temporarily disabled until backend integration is ready.
                   <div className="hidden md:block border-dashed border-r border-border" />
                   <Card className="w-full border-border/70 shadow-sm">
                     <CardHeader>
@@ -257,6 +260,7 @@ export default function ContactPage() {
                       </form>
                     </CardContent>
                   </Card>
+                  */}
                 </div>
               </div>
             </div>
@@ -266,13 +270,11 @@ export default function ContactPage() {
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
                 <div className="flex flex-col items-center text-center mb-10">
-                  <Badge
-                    variant={badgeVariant}
-                    className="mb-6 z-60 dark:px-2 dark:py-0.5"
-                  >
-                    <PiQuestionDuotone className="mr-1 text-foreground/50" />
-                    <span className="font-medium">FAQ</span>
-                  </Badge>
+                  <MarketingSectionBadge
+                    icon={HelpCircleIcon}
+                    label="FAQ"
+                    className="mb-6"
+                  />
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
                     Contact FAQ
                   </h2>
@@ -299,23 +301,26 @@ export default function ContactPage() {
               <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
               <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
-                <div className="relative overflow-hidden rounded-2xl border bg-foreground dark:bg-background dark:text-foreground text-background">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_60%)]" />
-                  <div className="relative p-6 md:p-8 lg:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 h-80">
-                    <div className="max-w-2xl">
-                      <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
-                        Ready to talk compliance and labeling?
-                      </h2>
-                      <p className="mt-3 text-base md:text-lg dark:text-foreground/70 text-background/70">
-                        Book a demo to see how Uprevit streamlines labeling
-                        governance for regulated teams.
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button variant="secondary" className="text-foreground">
-                        Book a demo
-                        <PiArrowRightDuotone className="ml-2 h-4 w-4" />
-                      </Button>
+                <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-foreground dark:bg-background dark:text-foreground text-background shadow-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_60%)]" />
+                    <div className="relative p-6 md:p-8 lg:p-12 flex flex-col items-start justify-center gap-4 min-h-80">
+                      <div className="max-w-2xl">
+                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
+                          Ready to talk compliance and labeling?
+                        </h2>
+                        <p className="mt-3 text-base md:text-lg dark:text-foreground/70 text-background/70">
+                          Contact us at{" "}
+                          <Link
+                            href="mailto:contact@uprevit.com"
+                            className="font-medium text-background dark:text-foreground underline underline-offset-4 hover:opacity-80"
+                          >
+                            contact@uprevit.com
+                          </Link>{" "}
+                          to book a demo and see how Uprevit streamlines
+                          labeling governance for regulated teams.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

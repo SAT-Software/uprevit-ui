@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { PiArrowLeft, PiCircleNotchDuotone } from "react-icons/pi";
+import { ArrowLeft02Icon, Loading03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useAuth } from "react-oidc-context";
 import { Input } from "@uprevit/ui/components/ui/input";
 import {
@@ -91,7 +92,7 @@ export function ActivityLogsPanel({
                 href={`/products/${scopeId}/product-information`}
                 className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
               >
-                <PiArrowLeft className="h-3.5 w-3.5" />
+                <Icon icon={ArrowLeft02Icon} size={14} strokeWidth={2} />
                 Go Back
               </Link>
             ) : null}
@@ -102,7 +103,12 @@ export function ActivityLogsPanel({
         <div className="flex items-center gap-2">
           {isFetching && !isLoading ? (
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <PiCircleNotchDuotone className="h-3.5 w-3.5 animate-spin" />
+              <Icon
+                icon={Loading03Icon}
+                size={14}
+                strokeWidth={2}
+                className="animate-spin"
+              />
               Loading...
             </span>
           ) : null}

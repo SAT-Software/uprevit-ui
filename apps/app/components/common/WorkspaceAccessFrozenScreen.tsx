@@ -1,8 +1,9 @@
 "use client";
 
+import { CloudSnowIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useAuth } from "react-oidc-context";
-import { PiSnowflakeDuotone } from "react-icons/pi";
 
 export function WorkspaceAccessFrozenScreen() {
   const auth = useAuth();
@@ -11,7 +12,7 @@ export function WorkspaceAccessFrozenScreen() {
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-6">
       <div className="w-full max-w-md rounded-xl border border-amber-200 bg-amber-50/80 p-6 text-center shadow-sm dark:border-amber-900/50 dark:bg-amber-950/30">
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
-          <PiSnowflakeDuotone className="size-6" />
+          <Icon icon={CloudSnowIcon} size={24} strokeWidth={2} />
         </div>
         <h1 className="text-lg font-semibold text-amber-950 dark:text-amber-100">
           Workspace access is frozen

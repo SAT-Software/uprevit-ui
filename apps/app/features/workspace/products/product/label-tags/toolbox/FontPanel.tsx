@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { PiTextAaDuotone } from "react-icons/pi";
+import { TextFontIcon } from "@hugeicons/core-free-icons";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 import { Label } from "@uprevit/ui/components/ui/label";
 import ColorPicker from "../ui/ColorPicker";
@@ -63,7 +63,7 @@ const FontPanelBody = ({ markerEditor, variant = "secondary" }: Props) => {
   };
 
   return (
-    <ToolboxPanel title="Font" icon={PiTextAaDuotone} variant={variant}>
+    <ToolboxPanel title="Font" icon={TextFontIcon} variant={variant}>
       <div className="flex justify-between items-center space-x-2">
         <Select value={fontFamily} onValueChange={handleFontFamilyChange}>
           <SelectTrigger className="w-full">

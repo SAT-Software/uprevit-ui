@@ -1,36 +1,26 @@
 "use client";
 
-import { Badge } from "@uprevit/ui/components/ui/badge";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@uprevit/ui/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@uprevit/ui/components/ui/tooltip";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
+import { RedlineValue } from "@/components/common/RedlineValue";
+import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
 import ProductInformationCustomFieldEditDialog from "@/features/workspace/products/product/product-information/ProductInfoCustomFieldEditDialog";
+import ProductInfoEditMetadataDialog from "@/features/workspace/products/product/product-information/ProductInfoEditMetadataDialog";
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
-import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import { useGetAllSourceFileFolders } from "@/hooks/source-files/useGetAllSourceFileFolders";
-import { cn } from "@uprevit/ui/lib/utils";
+import { useGetProductLinkedSourceFileFolders } from "@/hooks/source-files/useGetProductLinkedSourceFileFolders";
 import { AuditLog } from "@/types/audit-log";
 import type { ProductMetadata } from "@/types/product";
-import { SourceFilesFolder } from "@/types/source-files";
 import {
   formatToLocalDate,
   formatToLocalDateTime,
 } from "@/utils/formatDateAndTimeLocal";
 import type { DiffItem } from "@/utils/deepDiff";
+import { isAdminProfile } from "@/utils/isAdmin";
 import { hasChangedRedlineStatus } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import {
-  cnRedlineBadge,
   redlineBannerText,
   redlineCardAdded,
   redlineCardModified,
@@ -38,27 +28,43 @@ import {
   redlineFieldHighlightAdded,
   redlineFieldHighlightModified,
   redlineFieldHighlightRemoved,
-  redlineNewValue,
-  redlineOldValue,
 } from "@/utils/redlineStyles";
-import Link from "next/link";
-import { notFound, useParams, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
-import type { IconType } from "react-icons";
 import {
-  PiArrowRightBold,
-  PiBuildingsDuotone,
-  PiCalendarDuotone,
-  PiClockCounterClockwiseDuotone,
-  PiFlagDuotone,
-  PiFlaskDuotone,
-  PiFolderSimpleDuotone,
-  PiGlobeDuotone,
-  PiIdentificationCardDuotone,
-  PiMapPinDuotone,
-  PiShieldCheckDuotone,
-  PiTagDuotone,
-} from "react-icons/pi";
+  Building03Icon,
+  CalendarDownload01Icon,
+  CalendarUpload01Icon,
+  Factory01Icon,
+  MapPinHouseIcon,
+  Folder01Icon,
+  FolderOpenIcon,
+  GlobalIcon,
+  BarcodeScanIcon,
+  ProfileIcon,
+  ShieldBlockchainIcon,
+  CustomFieldIcon,
+  MedicalFileIcon,
+  CalendarUserIcon,
+  Flag03Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon, type IconProps } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
+import { File, Folder, Tree } from "@uprevit/ui/components/ui/file-tree";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@uprevit/ui/components/ui/hover-card";
+import { Separator } from "@uprevit/ui/components/ui/separator";
+import { cn } from "@uprevit/ui/lib/utils";
+import {
+  notFound,
+  useParams,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { useMemo } from "react";
+import { useAuth } from "react-oidc-context";
 
 type ProductEditData = {
   id?: string;
@@ -113,74 +119,23 @@ type ProductInformationTabResponse = {
   result?: { data?: ProductInformationTabPayload };
 };
 
-type RedlineValueProps = {
-  value: string;
-  diff?: DiffItem | null;
-  formatFn?: (v: unknown) => string;
-  isRedlineView: boolean;
-  oldValueClassName?: string;
-  newValueClassName?: string;
-};
-
-function RedlineValue({
-  value,
-  diff,
-  formatFn,
-  isRedlineView,
-  oldValueClassName,
-  newValueClassName,
-}: RedlineValueProps) {
-  if (!isRedlineView || !diff) return <>{value}</>;
-  const format =
-    formatFn ||
-    ((v: unknown) => {
-      if (v && typeof v === "object" && "value" in v) {
-        const objectValue = (v as { value?: unknown }).value;
-        return typeof objectValue === "string"
-          ? objectValue
-          : objectValue != null
-            ? String(objectValue)
-            : "";
-      }
-      return typeof v === "string" ? v : v != null ? String(v) : "";
-    });
-
-  const isRemoved = diff.status === "removed";
-  const isAdded = diff.status === "added";
-
-  return (
-    <span className="inline-flex flex-wrap items-center gap-2">
-      {(diff.old_value !== null || isRemoved) && (
-        <span className={cn(redlineOldValue, oldValueClassName)}>
-          {format(diff.old_value) || ""}
-        </span>
-      )}
-
-      {diff.old_value !== null &&
-        diff.new_value !== null &&
-        !isRemoved &&
-        !isAdded && (
-          <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
-        )}
-
-      {(diff.new_value !== null || isAdded) && !isRemoved && (
-        <span className={cn(redlineNewValue, newValueClassName)}>
-          {format(diff.new_value) || ""}
-        </span>
-      )}
-    </span>
-  );
-}
-
 type ProductInfoField = {
   label: string;
   value: string;
-  icon: IconType;
+  icon: IconProps["icon"];
   diffKey?: ProductInfoDiffKey;
   isCustomField?: boolean;
   redlineStatus?: RedlineStatus;
   redlineDiffs?: DiffItem[];
 };
+
+function statusBadgeVariant(
+  status?: "draft" | "submitted" | "archived",
+): "blue" | "green" | "gray" {
+  if (status === "submitted") return "green";
+  if (status === "archived") return "gray";
+  return "blue";
+}
 
 const PRODUCT_INFO_DIFF_PATHS = {
   productName: ["product_information.product_data.data.product_name"],
@@ -233,6 +188,9 @@ const normalizeCustomField = (
 export default function Page() {
   const params = useParams<{ productId: string }>();
   const productId = params?.productId;
+  const auth = useAuth();
+  const router = useRouter();
+  const isAdmin = isAdminProfile(auth.user?.profile);
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
@@ -245,11 +203,8 @@ export default function Page() {
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
 
-  const { data: linkedFoldersData, isLoading: linkedFoldersLoading } =
-    useGetAllSourceFileFolders(productId);
-
-  const linkedFolders = (linkedFoldersData?.result ||
-    []) as SourceFilesFolder[];
+  const { folders: linkedFolders, isLoading: linkedFoldersLoading } =
+    useGetProductLinkedSourceFileFolders(productId);
 
   const redlineDiffs = diffRedlineData?.result?.diffs;
   const productInfoDiffLookup = useMemo(() => {
@@ -377,18 +332,20 @@ export default function Page() {
     .sort(
       (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
     )[0];
-  const creationLog = productTabData?.createdBy && productTabData?.createdAt
-    ? {
-        actionAt: productTabData.createdAt,
-        actionBy: productTabData.createdBy,
-      }
-    : legacyCreationLog;
-  const latestUpdateLog = productTabData?.modifiedBy && productTabData?.modifiedAt
-    ? {
-        actionAt: productTabData.modifiedAt,
-        actionBy: productTabData.modifiedBy,
-      }
-    : legacyUpdateLog;
+  const creationLog =
+    productTabData?.createdBy && productTabData?.createdAt
+      ? {
+          actionAt: productTabData.createdAt,
+          actionBy: productTabData.createdBy,
+        }
+      : legacyCreationLog;
+  const latestUpdateLog =
+    productTabData?.modifiedBy && productTabData?.modifiedAt
+      ? {
+          actionAt: productTabData.modifiedAt,
+          actionBy: productTabData.modifiedBy,
+        }
+      : legacyUpdateLog;
   const productInfoChangeCount =
     PRODUCT_INFO_COUNTED_DIFF_KEYS.filter((key) =>
       productInfoDiffLookup.has(key),
@@ -403,43 +360,43 @@ export default function Page() {
       {
         label: "Market / Geography",
         value: productData.market_geography || "N/A",
-        icon: PiGlobeDuotone,
+        icon: GlobalIcon,
         diffKey: "marketGeography",
       },
       {
         label: "Country of Origin",
         value: productData.country_of_origin || "N/A",
-        icon: PiFlagDuotone,
+        icon: MapPinHouseIcon,
         diffKey: "countryOfOrigin",
       },
       {
         label: "OEM / Contract manufactured",
         value: productData.oem_contract_manufacturer || "N/A",
-        icon: PiBuildingsDuotone,
+        icon: Building03Icon,
         diffKey: "oemContractManufacturer",
       },
       {
         label: "Commercial / Clinical",
         value: productData.commercial_clinical || "N/A",
-        icon: PiFlaskDuotone,
+        icon: MedicalFileIcon,
         diffKey: "commercialClinical",
       },
       {
         label: "Manufacturing Location",
         value: productData.manufacturing_location || "N/A",
-        icon: PiMapPinDuotone,
+        icon: Factory01Icon,
         diffKey: "manufacturingLocation",
       },
       {
         label: "Class of Device",
         value: productData.class_of_device || "N/A",
-        icon: PiShieldCheckDuotone,
+        icon: ShieldBlockchainIcon,
         diffKey: "classOfDevice",
       },
       {
         label: "Basic UDI-DI",
         value: productData.basic_udi_di || "N/A",
-        icon: PiIdentificationCardDuotone,
+        icon: BarcodeScanIcon,
         diffKey: "basicUdiDi",
       },
     ];
@@ -449,7 +406,7 @@ export default function Page() {
         (field) => ({
           label: field.label || "Custom Field",
           value: field.value || "N/A",
-          icon: PiTagDuotone,
+          icon: CustomFieldIcon,
           isCustomField: true,
           redlineStatus: field._redlineStatus,
           redlineDiffs: field._redlineDiffs,
@@ -461,36 +418,151 @@ export default function Page() {
     return baseFields;
   }, [customFieldsView, productData]);
 
+  const fieldRows = useMemo(() => {
+    const rows: [ProductInfoField | null, ProductInfoField | null][] = [];
+    for (let i = 0; i < fields.length; i += 2) {
+      rows.push([fields[i], fields[i + 1] ?? null]);
+    }
+    return rows;
+  }, [fields]);
+
+  const renderProductInfoField = (
+    field: ProductInfoField,
+    fieldKey: string,
+  ) => {
+    const isCustomField = Boolean(field.isCustomField);
+
+    const fieldStatus = isCustomField
+      ? field.redlineStatus && field.redlineStatus !== "unchanged"
+        ? field.redlineStatus
+        : null
+      : field.diffKey
+        ? getProductInfoDiff(field.diffKey)?.status || null
+        : null;
+
+    const valueDiff = isCustomField
+      ? getCustomFieldDiff(field, "value")
+      : field.diffKey
+        ? getProductInfoDiff(field.diffKey)
+        : null;
+
+    const labelDiff = isCustomField ? getCustomFieldDiff(field, "label") : null;
+
+    const isRemoved = fieldStatus === "removed";
+    const isAdded = fieldStatus === "added";
+    const isModified = fieldStatus === "modified";
+    const showBadge = isRedlineView && hasChangedRedlineStatus(fieldStatus);
+
+    return (
+      <div
+        key={fieldKey}
+        className={cn(
+          "group relative flex min-h-22 items-start gap-3.5 px-4 py-4 transition-colors hover:bg-accent/40",
+          isRedlineView && isRemoved && redlineCardRemoved,
+          isRedlineView && isAdded && redlineCardAdded,
+          isRedlineView && isModified && redlineCardModified,
+        )}
+      >
+        {showBadge && <RedlineStatusBadge status={fieldStatus} />}
+
+        <Icon
+          icon={field.icon}
+          size={20}
+          strokeWidth={2}
+          className={cn(
+            "mt-0.5 shrink-0 text-muted-foreground/70",
+            isRedlineView && isRemoved && redlineFieldHighlightRemoved,
+            isRedlineView && isAdded && redlineFieldHighlightAdded,
+            isRedlineView && isModified && redlineFieldHighlightModified,
+          )}
+        />
+
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <p
+            className={cn(
+              "text-sm font-medium text-muted-foreground",
+              isRedlineView &&
+                isRemoved &&
+                "line-through text-red-500/70 dark:text-red-400/80",
+            )}
+          >
+            {labelDiff ? (
+              <RedlineValue
+                value={field.label}
+                diff={labelDiff}
+                isRedlineView={isRedlineView}
+              />
+            ) : (
+              field.label
+            )}
+          </p>
+          <p
+            className={cn(
+              "text-base font-semibold leading-snug wrap-break-word text-foreground",
+              isRedlineView &&
+                isRemoved &&
+                "line-through text-red-500/70 dark:text-red-400/80",
+            )}
+            title={field.value}
+          >
+            <RedlineValue
+              value={field.value}
+              diff={valueDiff}
+              isRedlineView={isRedlineView}
+            />
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 p-2 h-full">
-        <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-          {/* Header Section Skeleton */}
-          <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b px-3 py-2 border-border">
-            <div className="flex flex-col gap-3 w-full min-w-0">
-              <div className="flex flex-col gap-1">
-                <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
-                <div className="h-4 w-1/4 bg-muted rounded animate-pulse" />
-              </div>
-              <div className="h-12 w-full max-w-2xl bg-muted rounded animate-pulse" />
-            </div>
-
-            {/* Actions & Meta Skeleton */}
-            <div className="flex flex-col items-start md:items-end gap-4 shrink-0 w-full md:w-auto">
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <div className="h-9 w-24 bg-muted rounded-md animate-pulse" />
-                <div className="h-9 w-24 bg-muted rounded-md animate-pulse" />
-              </div>
-              <div className="flex flex-col items-start md:items-end gap-2 w-full">
-                <div className="h-7 w-48 bg-muted rounded-lg animate-pulse" />
-                <div className="h-7 w-52 bg-muted rounded-lg animate-pulse" />
-              </div>
-            </div>
+      <div className="flex h-full flex-col gap-2">
+        <div className="flex flex-col gap-2 border-b border-border px-2 pb-2">
+          <div className="flex flex-col gap-0.5 pt-2">
+            <div className="h-7 w-1/3 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-2/3 max-w-2xl animate-pulse rounded bg-muted" />
           </div>
-
-          {/* Content Skeleton */}
-          <div className="p-2">
-            <div className="h-64 w-full bg-muted rounded-xl animate-pulse" />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+              <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+              <div className="h-8 w-36 animate-pulse rounded-md bg-muted" />
+            </div>
+            <div className="h-8 w-64 animate-pulse rounded-md bg-muted" />
+          </div>
+        </div>
+        <div className="px-2 py-2">
+          <div className="overflow-hidden rounded-2xl border border-border">
+            <div className="flex h-10 items-center justify-between border-b border-border bg-muted/60 px-3">
+              <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+                <div className="h-8 w-36 animate-pulse rounded-md bg-muted" />
+              </div>
+            </div>
+            <div className="flex flex-col divide-y divide-border">
+              {Array.from({ length: 4 }).map((_, row) => (
+                <div
+                  key={row}
+                  className="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-border"
+                >
+                  {Array.from({ length: 2 }).map((_, col) => (
+                    <div
+                      key={col}
+                      className="flex min-h-22 items-start gap-3.5 px-4 py-4"
+                    >
+                      <div className="mt-0.5 size-5 shrink-0 animate-pulse rounded bg-muted" />
+                      <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                        <div className="h-5 w-44 max-w-full animate-pulse rounded bg-muted" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -499,48 +571,39 @@ export default function Page() {
 
   if (isError || !productData) return notFound();
 
+  const productStatus = productMetadata?.status;
+  const targetDateLabel = productMetadata?.target_date
+    ? formatToLocalDate(productMetadata.target_date)
+    : "N/A";
+  const actualDateLabel =
+    formatToLocalDate(productMetadata?.actual_completion_date) || "N/A";
+
   return (
-    <div className="flex flex-col gap-2 p-2 h-full">
-      {/* Redline Mode Banner */}
+    <div className="flex h-full flex-col">
       {isRedlineView && (
-        <div className=" px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
           <span className={cn("font-medium", redlineBannerText)}>
             {diffRedlineLoading
               ? "Loading changes..."
               : `Redline View: ${productInfoChangeCount} changes in Product Information`}
           </span>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-muted-foreground">
             (comparing with previous version)
           </span>
         </div>
       )}
 
-      <div className="flex flex-col gap-2 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row gap-2 justify-between border-b p-2 border-border">
-          <div className="flex flex-col gap-3 w-full min-w-0">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                  <RedlineValue
-                    value={productMetadata?.product_name || "N/A"}
-                    diff={getProductInfoDiff("productName")}
-                    isRedlineView={isRedlineView}
-                  />
-                </h1>
-                <Badge variant="outline" className="font-normal">
-                  <div
-                    className={cn("w-2 h-2 rounded-full mr-1", {
-                      "bg-green-500": productMetadata?.status === "submitted",
-                      "bg-blue-500": productMetadata?.status === "draft",
-                      "bg-gray-500": productMetadata?.status === "archived",
-                    })}
-                  />
-                  {productMetadata?.status || "N/A"}
-                </Badge>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed line-clamp-3 md:line-clamp-none">
+      <div className="flex h-full w-full flex-col overflow-y-auto">
+        <div className="flex flex-col border-b border-border">
+          <div className="flex flex-col gap-0.5 p-2">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              <RedlineValue
+                value={productMetadata?.product_name || "N/A"}
+                diff={getProductInfoDiff("productName")}
+                isRedlineView={isRedlineView}
+              />
+            </h1>
+            <p className="max-w-2xl text-sm leading-snug text-muted-foreground line-clamp-3 md:line-clamp-none">
               <RedlineValue
                 value={
                   productMetadata?.product_description ||
@@ -552,144 +615,297 @@ export default function Page() {
                 newValueClassName="font-medium"
               />
             </p>
-            <div className="flex flex-col items-start gap-2 text-xs text-muted-foreground w-full mt-auto">
-              <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start ">
-                <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">
-                  Target:{" "}
-                  <span className="font-semibold">
-                    <RedlineValue
-                      value={
-                        productMetadata?.target_date
-                          ? formatToLocalDate(productMetadata.target_date)
-                          : "N/A"
-                      }
-                      diff={getProductInfoDiff("targetDate")}
-                      formatFn={(v) =>
-                        typeof v === "string" && v
-                          ? formatToLocalDate(v)
-                          : "N/A"
-                      }
-                      isRedlineView={isRedlineView}
-                      oldValueClassName="text-xs"
-                      newValueClassName="text-xs"
-                    />
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start ">
-                <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">
-                  Actual:{" "}
-                  <span className="font-semibold">
-                    <RedlineValue
-                      value={
-                        formatToLocalDate(
-                          productMetadata?.actual_completion_date,
-                        ) || "N/A"
-                      }
-                      diff={getProductInfoDiff("actualCompletionDate")}
-                      formatFn={(v) =>
-                        typeof v === "string" && v
-                          ? formatToLocalDate(v)
-                          : "N/A"
-                      }
-                      isRedlineView={isRedlineView}
-                      oldValueClassName="text-xs"
-                      newValueClassName="text-xs"
-                    />
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start">
-                <span className="text-[11px] font-semibold text-muted-foreground">
-                  Source files
-                </span>
-                {linkedFoldersLoading ? (
-                  <span className="text-[11px] text-muted-foreground">
-                    Loading...
-                  </span>
-                ) : linkedFolders.length === 0 ? (
-                  <span className="text-[11px] text-muted-foreground">
-                    None linked
-                  </span>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {linkedFolders.slice(0, 3).map((folder) => (
-                      <Link
-                        key={folder._id}
-                        href={`/source-files/view/${folder._id}`}
-                        className="group"
-                      >
-                        <Badge
-                          variant="outline"
-                          className="px-1.5 py-0.5 text-[11px] font-medium flex items-center gap-1 hover:bg-muted/40"
-                          title={folder.name}
-                        >
-                          <PiFolderSimpleDuotone className="w-3 h-3 text-muted-foreground" />
-                          <span className="max-w-[120px] truncate">
-                            {folder.name}
-                          </span>
-                        </Badge>
-                      </Link>
-                    ))}
-                    {linkedFolders.length > 3 && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Badge
-                            variant="secondary"
-                            className="px-1.5 py-0.5 text-[11px] font-medium cursor-pointer"
-                            title="View all linked folders"
-                          >
-                            +{linkedFolders.length - 3}
-                          </Badge>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          side="right"
-                          align="start"
-                          className="p-2 w-56"
-                        >
-                          <div className="flex flex-col gap-1">
-                            {linkedFolders.slice(3).map((folder) => (
-                              <Link
-                                key={folder._id}
-                                href={`/source-files/view/${folder._id}`}
-                                className="flex items-center gap-2 rounded-md px-2 py-1 text-xs hover:bg-muted/50"
-                              >
-                                <PiFolderSimpleDuotone className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="truncate">{folder.name}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
 
-          {/* Actions & Meta */}
-          <div className="flex flex-col items-start md:items-end gap-2 shrink-0 w-full md:w-auto">
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              {productId ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/products/${productId}/logs`}>
-                        <PiClockCounterClockwiseDuotone className="h-4 w-4" />
-                        Logs
-                      </Link>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border h-10 px-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {isAdmin && productId && (
+                <ActivityLogsSheet
+                  scopeType="product"
+                  scopeId={productId}
+                  title="Product Logs"
+                  tooltip="All the timeline logs for this product. When it was created or updated. What was updated/created/deleted. The user/admin who took the action. Date and time"
+                  trigger={
+                    <Button type="button" variant="outline" size="sm">
+                      <Icon
+                        className="transition-colors delay-100 duration-200 ease-in-out"
+                        icon={ProfileIcon}
+                        size={16}
+                        strokeWidth={2}
+                      />
+                      Logs
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Show Product Logs</TooltipContent>
-                </Tooltip>
-              ) : null}
-              {productData && productMetadataForDialog && (
-                <>
+                  }
+                />
+              )}
+              {productId && productMetadataForDialog && (
+                <ProductInfoEditMetadataDialog
+                  productId={productId}
+                  productMetadata={productMetadataForDialog}
+                />
+              )}
+            </div>
+
+            <HoverCard openDelay={200} closeDelay={100}>
+              <HoverCardTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="group text-xs font-normal text-muted-foreground hover:text-foreground"
+                >
+                  <Badge
+                    variant={statusBadgeVariant(productStatus)}
+                    className="capitalize -ml-1"
+                  >
+                    {productStatus || "N/A"}
+                  </Badge>
+                  <span className="inline-flex items-center gap-1">
+                    <Icon
+                      icon={CalendarDownload01Icon}
+                      size={12}
+                      strokeWidth={2}
+                      className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                    />
+                    Target{" "}
+                    <span className="font-medium text-foreground">
+                      <RedlineValue
+                        value={targetDateLabel}
+                        diff={getProductInfoDiff("targetDate")}
+                        formatFn={(v) =>
+                          typeof v === "string" && v
+                            ? formatToLocalDate(v)
+                            : "N/A"
+                        }
+                        isRedlineView={isRedlineView}
+                        oldValueClassName="text-xs"
+                        newValueClassName="text-xs"
+                      />
+                    </span>
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Icon
+                      icon={CalendarUpload01Icon}
+                      size={12}
+                      strokeWidth={2}
+                      className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                    />
+                    Actual{" "}
+                    <span className="font-medium text-foreground">
+                      <RedlineValue
+                        value={actualDateLabel}
+                        diff={getProductInfoDiff("actualCompletionDate")}
+                        formatFn={(v) =>
+                          typeof v === "string" && v
+                            ? formatToLocalDate(v)
+                            : "N/A"
+                        }
+                        isRedlineView={isRedlineView}
+                        oldValueClassName="text-xs"
+                        newValueClassName="text-xs"
+                      />
+                    </span>
+                  </span>
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80 gap-0 p-0" align="end">
+                <div className="flex flex-col">
+                  <div className="flex flex-col gap-2 px-4 py-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Icon
+                          icon={Flag03Icon}
+                          size={12}
+                          strokeWidth={2}
+                          className="shrink-0 text-muted-foreground/60"
+                        />
+                        <p className="text-xs text-muted-foreground">Status</p>
+                      </div>
+                      <Badge
+                        variant={statusBadgeVariant(productStatus)}
+                        className="capitalize"
+                      >
+                        {productStatus || "N/A"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Icon
+                          icon={CalendarDownload01Icon}
+                          size={12}
+                          strokeWidth={2}
+                          className="shrink-0 text-muted-foreground/60"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Target date
+                        </p>
+                      </div>
+                      <p className="text-xs font-medium text-foreground">
+                        {targetDateLabel}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Icon
+                          icon={CalendarUpload01Icon}
+                          size={12}
+                          strokeWidth={2}
+                          className="shrink-0 text-muted-foreground/60"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Actual date
+                        </p>
+                      </div>
+                      <p className="text-xs font-medium text-foreground">
+                        {actualDateLabel}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex flex-col gap-2 px-4 py-3">
+                    {creationLog ? (
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-1.5">
+                          <Icon
+                            icon={CalendarUserIcon}
+                            size={12}
+                            strokeWidth={2}
+                            className="mt-0.5 shrink-0 text-muted-foreground/60"
+                          />
+                          <div>
+                            <p className="text-xs text-muted-foreground">
+                              Created by
+                            </p>
+                            <p className="text-[11px] text-muted-foreground/80">
+                              Created at
+                            </p>
+                          </div>
+                        </div>
+                        <div className="min-w-0 text-right">
+                          <p className="truncate text-xs font-medium text-foreground">
+                            {creationLog.actionBy}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {formatToLocalDateTime(creationLog.actionAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+                    {latestUpdateLog ? (
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-1.5">
+                          <Icon
+                            icon={CalendarUserIcon}
+                            size={12}
+                            strokeWidth={2}
+                            className="mt-0.5 shrink-0 text-muted-foreground/60"
+                          />
+                          <div>
+                            <p className="text-xs text-muted-foreground">
+                              Updated by
+                            </p>
+                            <p className="text-[11px] text-muted-foreground/80">
+                              Updated at
+                            </p>
+                          </div>
+                        </div>
+                        <div className="min-w-0 text-right">
+                          <p className="truncate text-xs font-medium text-foreground">
+                            {latestUpdateLog.actionBy}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {formatToLocalDateTime(latestUpdateLog.actionAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+                    {!creationLog && !latestUpdateLog ? (
+                      <p className="text-xs text-muted-foreground">
+                        No audit information available
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <Separator />
+
+                  <div className="p-2">
+                    {linkedFoldersLoading ? (
+                      <p className="text-xs text-muted-foreground">
+                        Loading...
+                      </p>
+                    ) : linkedFolders.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        None linked
+                      </p>
+                    ) : (
+                      <Tree
+                        className="h-auto max-h-36 group"
+                        initialExpandedItems={["source-files"]}
+                        openIcon={
+                          <Icon
+                            icon={FolderOpenIcon}
+                            size={12}
+                            strokeWidth={2}
+                            className="shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                          />
+                        }
+                        closeIcon={
+                          <Icon
+                            icon={Folder01Icon}
+                            size={12}
+                            strokeWidth={2}
+                            className="shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                          />
+                        }
+                      >
+                        <Folder
+                          element="Source files"
+                          value="source-files"
+                          className="text-xs font-medium text-muted-foreground"
+                        >
+                          {linkedFolders.map((folder) => (
+                            <File
+                              key={folder._id}
+                              value={folder._id}
+                              className="w-full max-w-full text-xs text-foreground"
+                              fileIcon={
+                                <Icon
+                                  icon={Folder01Icon}
+                                  size={12}
+                                  strokeWidth={2}
+                                  className="shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                                />
+                              }
+                              onClick={() => {
+                                router.push(`/source-files/view/${folder._id}`);
+                              }}
+                            >
+                              <span className="truncate">{folder.name}</span>
+                            </File>
+                          ))}
+                        </Folder>
+                      </Tree>
+                    )}
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+        </div>
+
+        <div className="px-2 py-2">
+          <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
+            <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium">Product Information</p>
+                <InfoTooltip
+                  content="View and edit core product information and custom fields for this product."
+                  className="mt-0.5"
+                />
+              </div>
+              {productData && productMetadataForDialog ? (
+                <div className="flex items-center gap-2">
                   <EditProductDialog
                     product={productData}
                     productMetadata={productMetadataForDialog}
@@ -699,174 +915,33 @@ export default function Page() {
                     productMetadata={productMetadataForDialog}
                     customFieldsData={customFieldsForDialog}
                   />
-                </>
-              )}
-            </div>
-
-            {/* Audit Badges */}
-            <div className="flex flex-col items-start md:items-end gap-2 text-xs text-muted-foreground w-full mt-auto">
-              {creationLog && (
-                <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
-                  <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">
-                    Created {formatToLocalDateTime(creationLog.actionAt)} -{" "}
-                    <span className="font-semibold">
-                      {creationLog.actionBy}
-                    </span>
-                  </span>
                 </div>
-              )}
-              {latestUpdateLog && (
-                <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg border border-border/50 w-full md:w-auto justify-start md:justify-end">
-                  <PiCalendarDuotone className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">
-                    Updated {formatToLocalDateTime(latestUpdateLog.actionAt)} -{" "}
-                    <span className="font-semibold">
-                      {latestUpdateLog.actionBy}
-                    </span>
-                  </span>
-                </div>
-              )}
+              ) : null}
             </div>
-          </div>
-        </div>
 
-        {/* Product Information Section */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between border-b border-border pb-2 px-2">
-            <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Product Information</p>
-              <div className="w-1 h-1 bg-border border border-border rounded-full" />
-              <p className="text-xs text-muted-foreground font-medium">
-                Key product details and custom fields
-              </p>
-              <PageInfoDialog
-                title="Product Information"
-                content="View and edit core product information and custom fields for this product."
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mx-2">
-            {fields.map((field, idx) => {
-              const isCustomField = Boolean(field.isCustomField);
-
-              const fieldStatus = isCustomField
-                ? field.redlineStatus && field.redlineStatus !== "unchanged"
-                  ? field.redlineStatus
-                  : null
-                : field.diffKey
-                  ? getProductInfoDiff(field.diffKey)?.status || null
-                  : null;
-
-              const valueDiff = isCustomField
-                ? getCustomFieldDiff(field, "value")
-                : field.diffKey
-                  ? getProductInfoDiff(field.diffKey)
-                  : null;
-
-              const labelDiff = isCustomField
-                ? getCustomFieldDiff(field, "label")
-                : null;
-
-              const isRemoved = fieldStatus === "removed";
-              const isAdded = fieldStatus === "added";
-              const isModified = fieldStatus === "modified";
-
-              return (
+            <div className="flex flex-col divide-y divide-border">
+              {fieldRows.map((row, rowIdx) => (
                 <div
-                  key={idx}
-                  className={cn(
-                    "relative flex flex-col gap-3 p-4 border rounded-xl bg-card hover:bg-accent/5 transition-all duration-200 group",
-                    isRedlineView && isRemoved && redlineCardRemoved,
-                    isRedlineView && isAdded && redlineCardAdded,
-                    isRedlineView && isModified && redlineCardModified,
-                    !isRedlineView || !fieldStatus ? "border-border" : "",
-                  )}
+                  key={rowIdx}
+                  className="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-border"
                 >
-                  {isRedlineView && isAdded && (
-                    <span
-                      className={cn(
-                        "absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[10px]",
-                        cnRedlineBadge("added"),
-                      )}
-                    >
-                      NEW
-                    </span>
+                  {row.map((field, colIdx) =>
+                    field ? (
+                      renderProductInfoField(
+                        field,
+                        `${field.label}-${rowIdx}-${colIdx}`,
+                      )
+                    ) : (
+                      <div
+                        key={`empty-${rowIdx}-${colIdx}`}
+                        className="hidden min-h-22 md:block"
+                        aria-hidden
+                      />
+                    ),
                   )}
-                  {isRedlineView && isRemoved && (
-                    <span
-                      className={cn(
-                        "absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[10px]",
-                        cnRedlineBadge("removed"),
-                      )}
-                    >
-                      DEL
-                    </span>
-                  )}
-                  {isRedlineView && isModified && (
-                    <span
-                      className={cn(
-                        "absolute -top-1 -right-1 rounded-full px-2 py-0.5 text-[10px]",
-                        cnRedlineBadge("modified"),
-                      )}
-                    >
-                      MOD
-                    </span>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={cn(
-                        "p-2 rounded-lg bg-accent text-foreground group-hover:bg-accent/60 transition-colors",
-                        isRedlineView &&
-                          isRemoved &&
-                          redlineFieldHighlightRemoved,
-                        isRedlineView && isAdded && redlineFieldHighlightAdded,
-                        isRedlineView &&
-                          isModified &&
-                          redlineFieldHighlightModified,
-                        !isRedlineView || !fieldStatus ? "border-border" : "",
-                      )}
-                    >
-                      <field.icon className="w-4 h-4" />
-                    </div>
-                    <span
-                      className={cn(
-                        "text-sm font-medium text-muted-foreground truncate",
-                        isRedlineView &&
-                          isRemoved &&
-                          "line-through text-red-500/70 dark:text-red-400/80",
-                      )}
-                    >
-                      {labelDiff ? (
-                        <RedlineValue
-                          value={field.label}
-                          diff={labelDiff}
-                          isRedlineView={isRedlineView}
-                        />
-                      ) : (
-                        field.label
-                      )}
-                    </span>
-                  </div>
-                  <div
-                    className={cn(
-                      "font-semibold text-lg text-foreground pl-1",
-                      isRedlineView &&
-                        isRemoved &&
-                        "line-through text-red-500/70 dark:text-red-400/80",
-                    )}
-                    title={field.value}
-                  >
-                    <RedlineValue
-                      value={field.value}
-                      diff={valueDiff}
-                      isRedlineView={isRedlineView}
-                    />
-                  </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </div>
       </div>

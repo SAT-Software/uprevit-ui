@@ -1,8 +1,10 @@
 "use client";
 
-import { ReactNode, useState, type ElementType } from "react";
+import { ReactNode, useState } from "react";
+import type { IconSvgElement } from "@hugeicons/react";
 
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Popover,
   PopoverContent,
@@ -18,7 +20,7 @@ import {
 
 type Props = {
   title: string;
-  icon: ElementType;
+  icon: IconSvgElement;
   variant?: "ghost" | "outline" | "secondary";
   children: ReactNode;
 } & React.ComponentProps<"div">;
@@ -30,8 +32,8 @@ export type PanelProps = {
 
 const ToolboxPanel = ({
   title,
-  icon: Icon,
-  variant = "secondary",
+  icon,
+  variant = "ghost",
   children,
   className,
   ...props
@@ -46,13 +48,15 @@ const ToolboxPanel = ({
             <PopoverTrigger asChild>
               <Button
                 variant={variant}
+                size="icon-sm"
+                className="size-7"
                 onClick={() => setPopoverOpen(!popoverOpen)}
               >
-                <Icon />
+                <Icon icon={icon} size={14} strokeWidth={2} />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <PopoverContent className="min-w-48 w-auto p-4">
+          <PopoverContent className="w-auto min-w-48 p-4">
             <div
               className={cn("flex flex-col space-y-6", className)}
               {...props}

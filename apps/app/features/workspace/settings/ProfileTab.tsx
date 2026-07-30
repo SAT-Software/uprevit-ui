@@ -1,21 +1,63 @@
 "use client";
 
 import { useGetUser } from "@/hooks/user/useGetUser";
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
-import { Badge } from "@uprevit/ui/components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
+
 import { DialogUpdateProfile } from "./DialogUpdateProfile";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useAuth } from "react-oidc-context";
 import { useSignOut } from "@/hooks/auth/useSignOut";
 import {
-  PiEnvelopeDuotone,
-  PiBriefcaseDuotone,
-  PiMapPinDuotone,
-  PiPhoneDuotone,
-  PiSignOutDuotone,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
+  AlertCircleIcon,
+  Briefcase01Icon,
+  CallIcon,
+  Location01Icon,
+  Logout02Icon,
+  Mail01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { cn } from "@uprevit/ui/lib/utils";
+import { UserTypeBadge } from "./UserTypeBadge";
+
+const PROFILE_FIELDS = [
+  {
+    id: "designation",
+    label: "Role / Designation",
+    icon: Briefcase01Icon,
+    key: "designation" as const,
+  },
+  {
+    id: "email",
+    label: "Email Address",
+    icon: Mail01Icon,
+    key: "email" as const,
+  },
+  {
+    id: "location",
+    label: "Location",
+    icon: Location01Icon,
+    key: "location" as const,
+  },
+  {
+    id: "phone",
+    label: "Phone Number",
+    icon: CallIcon,
+    key: "phone" as const,
+  },
+];
+
+const profileFieldCellClassName = (index: number) =>
+  cn(
+    "group flex items-center gap-4 p-4",
+    "border-b border-border md:[&:nth-last-child(-n+2)]:border-b-0 [&:last-child]:border-b-0",
+    index % 2 === 0 && "md:border-r",
+  );
 
 function ProfileTab() {
   const auth = useAuth();
@@ -25,50 +67,47 @@ function ProfileTab() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-2">
         {/* Profile Header Skeleton */}
-        <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
-          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-background p-4">
+          <Skeleton className="size-16 shrink-0 rounded-full" />
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-3">
-              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-5 w-40" />
               <Skeleton className="h-5 w-16 rounded-full" />
             </div>
-            <Skeleton className="h-4 w-72" />
+            <Skeleton className="h-4 w-64" />
           </div>
-          <Skeleton className="h-9 w-24 rounded-md" />
+          <Skeleton className="h-8 w-28 rounded-md" />
         </div>
 
         {/* Personal Information Skeleton */}
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-44" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4 p-4 border rounded-xl bg-background/50"
-              >
-                <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-3.5 w-24" />
-                  <Skeleton className="h-4 w-32" />
+        <div className="overflow-hidden rounded-2xl border border-border bg-background">
+          <div className="flex h-10 items-center justify-between border-b border-border bg-muted/60 pl-3 pr-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-7 w-24 rounded-md" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {PROFILE_FIELDS.map((field, index) => (
+              <div key={field.id} className={profileFieldCellClassName(index)}>
+                <Skeleton className="size-10 shrink-0 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3.5 w-28" />
+                  <Skeleton className="h-4 w-36" />
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Sign Out Button Skeleton */}
-        <Skeleton className="h-9 w-28 rounded-md" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center gap-4 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
-        <div className="p-2.5 bg-destructive/10 rounded-lg shrink-0">
-          <PiWarningCircleDuotone className="w-5 h-5 text-destructive" />
+      <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
+          <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
         </div>
         <div className="space-y-0.5">
           <div className="text-sm font-medium">Failed to load profile</div>
@@ -81,105 +120,68 @@ function ProfileTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-2">
       {/* Profile Header */}
-      <div className="flex items-center gap-6 p-6 bg-accent rounded-lg border">
-        <div className="relative">
-          <Avatar className="w-20 h-20">
-            <AvatarImage
-              src={userProfile?.profileAvatar}
-              alt={userProfile?.name}
-            />
-            <AvatarFallback className="text-lg bg-background border border-border">{`${userProfile?.name
-              ?.split(" ")[0]
-              ?.slice(0, 1)}${
-              userProfile?.name?.split(" ")[1]
-                ? userProfile?.name?.split(" ")[1]?.slice(0, 1)?.toUpperCase()
-                : ""
-            }`}</AvatarFallback>
-          </Avatar>
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold">{userProfile?.name}</h2>
-            <Badge variant="default">{userProfile?.userType}</Badge>
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-background p-4">
+        <Avatar className="size-16">
+          <AvatarImage
+            src={userProfile?.profileAvatar}
+            alt={userProfile?.name}
+          />
+          <AvatarFallback className="border border-border bg-accent text-base">{`${userProfile?.name
+            ?.split(" ")[0]
+            ?.slice(0, 1)}${
+            userProfile?.name?.split(" ")[1]
+              ? userProfile?.name?.split(" ")[1]?.slice(0, 1)?.toUpperCase()
+              : ""
+          }`}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <h2 className="truncate text-base font-semibold">
+              {userProfile?.name}
+            </h2>
+            <UserTypeBadge userType={userProfile?.userType} />
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Manage your personal information and account settings.
           </p>
         </div>
-        <div>
-          <DialogUpdateProfile userProfile={userProfile} />
-        </div>
+        <DialogUpdateProfile userProfile={userProfile} />
       </div>
 
-      {/* Personal Information Read-Only View */}
-      <div className="space-y-4">
-        <div className="font-medium text-lg">Personal Information</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiBriefcaseDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Role / Designation
-              </div>
-              <div className="text-sm font-medium">
-                {userProfile?.designation || "-"}
-              </div>
-            </div>
+      {/* Personal Information */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-background">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">Personal Information</p>
+            <InfoTooltip content="Your personal details visible to other members of the workspace." />
           </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiEnvelopeDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Email Address
+          {auth.isAuthenticated ? (
+            <Button onClick={signOut} variant="destructive" size="sm">
+              <Icon icon={Logout02Icon} size={14} strokeWidth={2} />
+              Sign Out
+            </Button>
+          ) : null}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {PROFILE_FIELDS.map((field, index) => (
+            <div key={field.id} className={profileFieldCellClassName(index)}>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
+                <Icon icon={field.icon} size={18} strokeWidth={2} />
               </div>
-              <div className="text-sm font-medium">
-                {userProfile?.email || "-"}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiMapPinDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Location
-              </div>
-              <div className="text-sm font-medium">
-                {userProfile?.location || "-"}
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-normal text-muted-foreground/60">
+                  {field.label}
+                </p>
+                <p className="truncate text-sm font-medium">
+                  {userProfile?.[field.key] || "-"}
+                </p>
               </div>
             </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 border rounded-xl bg-background/50 hover:bg-muted/20 transition-colors">
-            <div className="p-2.5 bg-muted rounded-lg shrink-0">
-              <PiPhoneDuotone className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">
-                Phone Number
-              </div>
-              <div className="text-sm font-medium">
-                {userProfile?.phone || "-"}
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
-      {auth.isAuthenticated && (
-        <Button onClick={signOut} variant="destructive">
-          <PiSignOutDuotone />
-          Sign Out
-        </Button>
-      )}
     </div>
   );
 }

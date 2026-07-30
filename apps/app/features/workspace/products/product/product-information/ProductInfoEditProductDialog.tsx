@@ -1,36 +1,23 @@
 "use client";
 
 import { useId, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import {
-  PiPencilCircleDuotone,
-  PiCheckCircleDuotone,
-  PiXCircleDuotone,
-  PiCalendarBlankDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
-import { Calendar } from "@uprevit/ui/components/ui/calendar";
-import { ProductMetadata } from "@/types/product";
+import type { ProductMetadata } from "@/types/product";
 import {
   DEVICE_CLASS_GROUPS,
   findDeviceClassOption,
@@ -45,17 +32,24 @@ import {
   CommandList,
 } from "@uprevit/ui/components/ui/command";
 import { cn } from "@uprevit/ui/lib/utils";
-import { PiCheck, PiCaretUpDown } from "react-icons/pi";
 import { COUNTRIES } from "@/data/countries";
 import * as Flags from "country-flag-icons/react/3x2";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  TaskEdit01Icon,
+  Tick01Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 
-// Interface that matches the actual API response structure
 interface ProductData {
   id?: string;
-  product_name?: string;
-  product_description?: string;
-  target_date?: string;
-  completion_date?: string;
   market_geography?: string;
   country_of_origin?: string;
   oem_contract_manufacturer?: string;
@@ -63,21 +57,9 @@ interface ProductData {
   manufacturing_location?: string;
   class_of_device?: string;
   basic_udi_di?: string;
-  product_information?: {
-    market_geography?: string;
-    country_of_origin?: string;
-    oem_contract_manufacturer?: string;
-    commercial_clinical?: string;
-    manufacturing_location?: string;
-    class_of_device?: string;
-    basic_udi_di?: string;
-  };
 }
 
 interface FormValues {
-  productName: string;
-  productDescription: string;
-  targetDate: string;
   marketGeographySelect: string;
   marketGeographyInput: string;
   countryOfOriginSelect: string;
@@ -88,18 +70,6 @@ interface FormValues {
   classOfDeviceSelect: string;
   classOfDeviceInput: string;
   basicUdiDi: string;
-}
-
-function formatDateToLocal(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function parseDateStringAsLocal(dateString: string): Date {
-  const [year, month, day] = dateString.split("-").map(Number);
-  return new Date(year, month - 1, day);
 }
 
 export default function EditProductDialog({
@@ -115,16 +85,9 @@ export default function EditProductDialog({
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const [classComboboxOpen, setClassComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const [openTargetDate, setOpenTargetDate] = useState(false);
   const isSubmitted = productMetadata?.status === "submitted";
 
-  // Get current product information data - handle both possible data structures
-  const initialValues = {
-    productName: productMetadata?.product_name || "",
-    productDescription: productMetadata?.product_description || "",
-    targetDate: productMetadata?.target_date
-      ? formatDateToLocal(new Date(productMetadata.target_date))
-      : "",
+  const initialValues: FormValues = {
     marketGeographySelect:
       product?.market_geography &&
       GEO_MARKETS.some((m) => m.regionAcronym === product.market_geography)
@@ -173,7 +136,6 @@ export default function EditProductDialog({
     mode: "onSubmit",
   });
 
-  const targetDateValue = watch("targetDate");
   const marketGeographySelect = watch("marketGeographySelect");
   const marketGeographyInput = watch("marketGeographyInput");
   const countryOfOriginSelect = watch("countryOfOriginSelect");
@@ -183,9 +145,7 @@ export default function EditProductDialog({
   const selectedDeviceClass = findDeviceClassOption(classOfDeviceSelect);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (isSubmitted) {
-      return;
-    }
+    if (isSubmitted) return;
 
     if (!product?.id) {
       console.error("Product ID is missing");
@@ -197,11 +157,6 @@ export default function EditProductDialog({
       action: "update_product_information",
       tab: "product-information",
       data: {
-        product_name: data.productName,
-        product_description: data.productDescription,
-        target_date: data.targetDate
-          ? new Date(data.targetDate).toISOString()
-          : null,
         market_geography:
           data.marketGeographySelect || data.marketGeographyInput,
         country_of_origin:
@@ -229,155 +184,70 @@ export default function EditProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={isSubmitted}
-          className="flex items-center gap-2"
-        >
-          <PiPencilCircleDuotone className="w-4 h-4" />
-          Update
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-4xl max-h-[90vh] [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Edit Product Information</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Edit product details and information fields.
-        </DialogDescription>
+      <Tooltip>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="outline" disabled={isSubmitted}>
+              <Icon icon={TaskEdit01Icon} /> Update Product Info
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
+        <TooltipContent side="bottom">
+          {isSubmitted
+            ? "Submitted products can't be edited"
+            : "Edit product information fields"}
+        </TooltipContent>
+      </Tooltip>
+      <AppDialogContent
+        title="Edit Product Information"
+        description="Edit product information fields."
+        variant="form"
+        size="xl"
+        primaryAction={{
+          label: "Save Changes",
+          loadingLabel: "Saving...",
+          form: `edit-product-info-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending,
+          icon: CheckmarkCircle01Icon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`edit-product-info-form-${id}`}
-          className="overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="p-4">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {/* Left Column: Basic Info */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-product-name`} className="text-sm">
-                    Product Name
-                  </Label>
-                  <Input
-                    id={`${id}-product-name`}
-                    placeholder="Enter product name"
-                    type="text"
-                    aria-invalid={errors.productName ? "true" : "false"}
-                    {...register("productName", {
-                      required: "Product Name is required",
-                    })}
+          <FieldGroup className="gap-6 p-4">
+            <div
+              className="space-y-3 rounded-lg border bg-muted/30 p-4"
+              data-invalid={
+                !!(errors.marketGeographySelect || errors.marketGeographyInput)
+              }
+            >
+              <FormFieldLabel
+                label="Market / Geography"
+                tooltip="Target market or geographic region for this product. Choose one option: select from the list or enter a custom value."
+              />
+              <div className="space-y-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-market-geography`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
                   />
-                  {errors.productName && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.productName.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-description`} className="text-sm">
-                    Description
-                  </Label>
-                  <Textarea
-                    id={`${id}-description`}
-                    placeholder="Enter product description"
-                    className="min-h-[100px]"
-                    aria-invalid={errors.productDescription ? "true" : "false"}
-                    {...register("productDescription")}
-                  />
-                  {errors.productDescription && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.productDescription.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-target-date`} className="text-sm">
-                    Target Date
-                  </Label>
-                  <Popover
-                    open={openTargetDate}
-                    onOpenChange={setOpenTargetDate}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        id={`${id}-target-date`}
-                        className="h-9 w-full justify-between font-normal"
-                        aria-invalid={errors.targetDate ? "true" : "false"}
-                      >
-                        {targetDateValue
-                          ? parseDateStringAsLocal(
-                              targetDateValue,
-                            ).toLocaleDateString("en-US", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })
-                          : "Select target date"}
-                        <PiCalendarBlankDuotone />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-60 overflow-hidden p-0 rounded-lg"
-                      align="start"
-                    >
-                      <Calendar
-                        mode="single"
-                        selected={
-                          targetDateValue
-                            ? parseDateStringAsLocal(targetDateValue)
-                            : undefined
-                        }
-                        captionLayout="dropdown"
-                        startMonth={new Date(new Date().getFullYear() - 50, 0)}
-                        endMonth={new Date(new Date().getFullYear() + 50, 11)}
-                        onSelect={(selectedDate) => {
-                          if (selectedDate) {
-                            setValue(
-                              "targetDate",
-                              formatDateToLocal(selectedDate),
-                            );
-                          }
-                          setOpenTargetDate(false);
-                        }}
-                        className="w-full"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {errors.targetDate && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.targetDate.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Column: Additional Info */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-market-geography`} className="text-sm">
-                    Market / Geography
-                  </Label>
                   <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         role="combobox"
                         aria-expanded={comboboxOpen}
-                        className="w-full justify-between text-foreground/80 font-normal h-9"
+                        className="w-full justify-between font-normal text-foreground/80"
                         disabled={!!marketGeographyInput}
                       >
                         {marketGeographySelect
@@ -386,7 +256,11 @@ export default function EditProductDialog({
                                 market.regionAcronym === marketGeographySelect,
                             )?.regionAcronym
                           : "Select market..."}
-                        <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
@@ -403,7 +277,6 @@ export default function EditProductDialog({
                                 key={market.regionAcronym}
                                 value={market.regionAcronym}
                                 onSelect={(currentValue) => {
-                                  // The value comes lowercased from CommandItem, so we need to find the original casing
                                   const originalValue = GEO_MARKETS.find(
                                     (m) =>
                                       m.regionAcronym.toLowerCase() ===
@@ -422,11 +295,12 @@ export default function EditProductDialog({
                                   }
                                 }}
                               >
-                                <PiCheck
+                                <Icon
+                                  icon={Tick01Icon}
+                                  size={16}
                                   className={cn(
-                                    "mr-2 h-4 w-4",
-                                    marketGeographySelect ===
-                                      market.regionAcronym
+                                    "mr-2",
+                                    marketGeographySelect === market.regionAcronym
                                       ? "opacity-100"
                                       : "opacity-0",
                                   )}
@@ -439,23 +313,24 @@ export default function EditProductDialog({
                       </Command>
                     </PopoverContent>
                   </Popover>
+                </Field>
 
-                  <div className="flex items-center gap-2 py-1">
-                    <div className="h-0 w-full border-t border-dashed" />
-                    <p className="text-[10px] font-light text-muted-foreground uppercase">
-                      OR
-                    </p>
-                    <div className="h-0 w-full border-t border-dashed" />
-                  </div>
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor={`${id}-market-geography-custom`}
-                      className="text-sm"
-                    >
-                      Enter Custom Market
-                    </Label>
-                    <Input
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-market-geography-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
                       id={`${id}-market-geography-custom`}
                       placeholder="Enter custom market/geography"
                       type="text"
@@ -470,19 +345,35 @@ export default function EditProductDialog({
                         },
                       })}
                     />
-                    {(errors.marketGeographySelect ||
-                      errors.marketGeographyInput) && (
-                      <p role="alert" className="text-xs text-destructive">
-                        Market/Geography is required
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  </InputGroup>
+                </Field>
+              </div>
+              <FieldError
+                errors={[
+                  errors.marketGeographySelect || errors.marketGeographyInput
+                    ? { message: "Market/Geography is required" }
+                    : undefined,
+                ]}
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-country-origin`} className="text-sm">
-                    Country of Origin
-                  </Label>
+            <div
+              className="space-y-3 rounded-lg border bg-muted/30 p-4"
+              data-invalid={
+                !!(errors.countryOfOriginSelect || errors.countryOfOriginInput)
+              }
+            >
+              <FormFieldLabel
+                label="Country of Origin"
+                tooltip="Country where the product is manufactured or originates. Choose one option: select from the list or enter a custom value."
+              />
+              <div className="space-y-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-country-origin`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
+                  />
                   <Popover
                     open={countryComboboxOpen}
                     onOpenChange={setCountryComboboxOpen}
@@ -490,10 +381,10 @@ export default function EditProductDialog({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         role="combobox"
                         aria-expanded={countryComboboxOpen}
-                        className="w-full justify-between text-foreground/80 font-normal h-9"
+                        className="w-full justify-between font-normal text-foreground/80"
                         disabled={!!countryOfOriginInput}
                       >
                         {countryOfOriginSelect ? (
@@ -516,7 +407,11 @@ export default function EditProductDialog({
                         ) : (
                           "Select country..."
                         )}
-                        <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
@@ -554,9 +449,11 @@ export default function EditProductDialog({
                                     }
                                   }}
                                 >
-                                  <PiCheck
+                                  <Icon
+                                    icon={Tick01Icon}
+                                    size={16}
                                     className={cn(
-                                      "mr-2 h-4 w-4",
+                                      "mr-2",
                                       countryOfOriginSelect === country.name
                                         ? "opacity-100"
                                         : "opacity-0",
@@ -574,23 +471,24 @@ export default function EditProductDialog({
                       </Command>
                     </PopoverContent>
                   </Popover>
+                </Field>
 
-                  <div className="flex items-center gap-2 py-1">
-                    <div className="h-0 w-full border-t border-dashed" />
-                    <p className="text-[10px] font-light text-muted-foreground uppercase">
-                      OR
-                    </p>
-                    <div className="h-0 w-full border-t border-dashed" />
-                  </div>
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor={`${id}-country-origin-custom`}
-                      className="text-sm"
-                    >
-                      Enter Custom Country
-                    </Label>
-                    <Input
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-country-origin-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
                       id={`${id}-country-origin-custom`}
                       placeholder="Enter custom country of origin"
                       type="text"
@@ -605,87 +503,90 @@ export default function EditProductDialog({
                         },
                       })}
                     />
-                    {(errors.countryOfOriginSelect ||
-                      errors.countryOfOriginInput) && (
-                      <p role="alert" className="text-xs text-destructive">
-                        Country of Origin is required
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  </InputGroup>
+                </Field>
+              </div>
+              <FieldError
+                errors={[
+                  errors.countryOfOriginSelect || errors.countryOfOriginInput
+                    ? { message: "Country of Origin is required" }
+                    : undefined,
+                ]}
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-oem-contract`} className="text-sm">
-                    OEM / Contract manufacturer
-                  </Label>
-                  <Input
-                    id={`${id}-oem-contract`}
-                    placeholder="Enter OEM/contract manufacturer"
-                    type="text"
-                    aria-invalid={
-                      errors.oemContractManufacturer ? "true" : "false"
-                    }
-                    {...register("oemContractManufacturer", {
-                      required: "OEM/Contract manufacturer is required",
-                    })}
+            <Field data-invalid={!!errors.oemContractManufacturer}>
+              <FormFieldLabel
+                htmlFor={`${id}-oem-contract`}
+                label="OEM / Contract manufacturer"
+                tooltip="Original equipment manufacturer or contract manufacturer responsible for production."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-oem-contract`}
+                  placeholder="Enter OEM/contract manufacturer"
+                  type="text"
+                  aria-invalid={errors.oemContractManufacturer ? "true" : "false"}
+                  {...register("oemContractManufacturer", {
+                    required: "OEM/Contract manufacturer is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.oemContractManufacturer]} />
+            </Field>
+
+            <Field data-invalid={!!errors.commercialClinical}>
+              <FormFieldLabel
+                htmlFor={`${id}-commercial-clinical`}
+                label="Commercial / Clinical"
+                tooltip="Whether the device is intended for commercial or clinical use."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-commercial-clinical`}
+                  placeholder="Enter commercial/clinical"
+                  type="text"
+                  aria-invalid={errors.commercialClinical ? "true" : "false"}
+                  {...register("commercialClinical", {
+                    required: "Commercial/Clinical is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.commercialClinical]} />
+            </Field>
+
+            <Field data-invalid={!!errors.manufacturingLocation}>
+              <FormFieldLabel
+                htmlFor={`${id}-manufacturing-location`}
+                label="Manufacturing Location"
+                optional
+                tooltip="Physical location where the product is manufactured."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-manufacturing-location`}
+                  placeholder="Enter manufacturing location"
+                  type="text"
+                  aria-invalid={errors.manufacturingLocation ? "true" : "false"}
+                  {...register("manufacturingLocation")}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.manufacturingLocation]} />
+            </Field>
+
+            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+              <FormFieldLabel
+                label="Class of Device"
+                optional
+                tooltip="Regulatory device classification (e.g., EU MDR, FDA). Choose one option: select from the list or enter a custom value."
+              />
+              <div className="space-y-2">
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-class-device`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
                   />
-                  {errors.oemContractManufacturer && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.oemContractManufacturer.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor={`${id}-commercial-clinical`}
-                    className="text-sm"
-                  >
-                    Commercial / Clinical
-                  </Label>
-                  <Input
-                    id={`${id}-commercial-clinical`}
-                    placeholder="Enter commercial/clinical"
-                    type="text"
-                    aria-invalid={errors.commercialClinical ? "true" : "false"}
-                    {...register("commercialClinical", {
-                      required: "Commercial/Clinical is required",
-                    })}
-                  />
-                  {errors.commercialClinical && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.commercialClinical.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor={`${id}-manufacturing-location`}
-                    className="text-sm"
-                  >
-                    Manufacturing Location
-                  </Label>
-                  <Input
-                    id={`${id}-manufacturing-location`}
-                    placeholder="Enter manufacturing location"
-                    type="text"
-                    aria-invalid={
-                      errors.manufacturingLocation ? "true" : "false"
-                    }
-                    {...register("manufacturingLocation")}
-                  />
-                  {errors.manufacturingLocation && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.manufacturingLocation.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-class-device`} className="text-sm">
-                    Class of Device
-                  </Label>
                   <Popover
                     open={classComboboxOpen}
                     onOpenChange={setClassComboboxOpen}
@@ -693,10 +594,10 @@ export default function EditProductDialog({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="default"
                         role="combobox"
                         aria-expanded={classComboboxOpen}
-                        className="w-full justify-between text-foreground/80 font-normal h-9"
+                        className="w-full justify-between font-normal text-foreground/80"
                         disabled={!!classOfDeviceInput}
                       >
                         {selectedDeviceClass ? (
@@ -705,13 +606,17 @@ export default function EditProductDialog({
                               {selectedDeviceClass.className}
                             </span>
                             <span className="shrink-0 text-xs text-muted-foreground">
-                              {selectedDeviceClass.regulation}
+                              ({selectedDeviceClass.regulation})
                             </span>
                           </span>
                         ) : (
                           "Select device class..."
                         )}
-                        <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
@@ -719,7 +624,7 @@ export default function EditProductDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search class or regulation..." />
+                        <CommandInput placeholder="Search device class..." />
                         <CommandList className="max-h-72 overflow-y-auto">
                           <CommandEmpty>No device class found.</CommandEmpty>
                           {DEVICE_CLASS_GROUPS.map((group) => (
@@ -731,6 +636,7 @@ export default function EditProductDialog({
                                 <CommandItem
                                   key={deviceClass.value}
                                   value={`${deviceClass.value} ${deviceClass.description || ""}`}
+                                  className="items-start py-2"
                                   onSelect={() => {
                                     setValue(
                                       "classOfDeviceSelect",
@@ -742,27 +648,26 @@ export default function EditProductDialog({
                                     setClassComboboxOpen(false);
                                   }}
                                 >
-                                  <PiCheck
+                                  <Icon
+                                    icon={Tick01Icon}
+                                    size={16}
                                     className={cn(
-                                      "mr-2 h-4 w-4 shrink-0",
+                                      "mt-0.5 shrink-0",
                                       classOfDeviceSelect === deviceClass.value
                                         ? "opacity-100"
                                         : "opacity-0",
                                     )}
                                   />
-                                  <span className="flex min-w-0 flex-1 items-center gap-2">
-                                    <span className="truncate">
+                                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                    <span className="text-sm font-medium leading-snug">
                                       {deviceClass.className}
                                     </span>
-                                    <span className="shrink-0 text-xs text-muted-foreground">
-                                      {deviceClass.regulation}
-                                    </span>
-                                  </span>
-                                  {deviceClass.description && (
-                                    <span className="ml-auto truncate text-xs text-muted-foreground/70">
-                                      {deviceClass.description}
-                                    </span>
-                                  )}
+                                    {deviceClass.description ? (
+                                      <span className="text-xs leading-snug text-muted-foreground">
+                                        {deviceClass.description}
+                                      </span>
+                                    ) : null}
+                                  </div>
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -771,72 +676,56 @@ export default function EditProductDialog({
                       </Command>
                     </PopoverContent>
                   </Popover>
+                </Field>
 
-                  <div className="flex items-center gap-2 py-1">
-                    <div className="h-0 w-full border-t border-dashed" />
-                    <p className="text-[10px] font-light text-muted-foreground uppercase">
-                      OR
-                    </p>
-                    <div className="h-0 w-full border-t border-dashed" />
-                  </div>
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor={`${id}-class-device-custom`}
-                      className="text-sm"
-                    >
-                      Enter Custom Class
-                    </Label>
-                    <Input
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-class-device-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
                       id={`${id}-class-device-custom`}
                       placeholder="Enter custom device class"
                       type="text"
                       disabled={!!classOfDeviceSelect}
                       {...register("classOfDeviceInput")}
                     />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${id}-basic-udi-di`} className="text-sm">
-                    Basic UDI-DI
-                  </Label>
-                  <Input
-                    id={`${id}-basic-udi-di`}
-                    placeholder="Enter Basic UDI-DI"
-                    type="text"
-                    aria-invalid={errors.basicUdiDi ? "true" : "false"}
-                    {...register("basicUdiDi")}
-                  />
-                  {errors.basicUdiDi && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.basicUdiDi.message}
-                    </p>
-                  )}
-                </div>
+                  </InputGroup>
+                </Field>
               </div>
             </div>
-          </div>
+
+            <Field data-invalid={!!errors.basicUdiDi}>
+              <FormFieldLabel
+                htmlFor={`${id}-basic-udi-di`}
+                label="Basic UDI-DI"
+                optional
+                tooltip="Basic Unique Device Identification — device identifier used for regulatory tracking when applicable."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-basic-udi-di`}
+                  placeholder="Enter Basic UDI-DI"
+                  type="text"
+                  aria-invalid={errors.basicUdiDi ? "true" : "false"}
+                  {...register("basicUdiDi")}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.basicUdiDi]} />
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            form={`edit-product-info-form-${id}`}
-            disabled={isPending}
-            aria-busy={isPending}
-            size="sm"
-          >
-            {isPending ? <Spinner /> : <PiCheckCircleDuotone />}
-            {isPending ? "Saving..." : "Save Changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

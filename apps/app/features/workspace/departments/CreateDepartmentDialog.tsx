@@ -3,36 +3,46 @@
 import { toast } from "sonner";
 import { useEffect, useId, useMemo, useState, type UIEvent } from "react";
 import { useForm } from "react-hook-form";
-import { PiPlusSquareDuotone, PiXDuotone } from "react-icons/pi";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { useFileUpload } from "@/hooks/general/use-file-upload";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  PiBuildingsDuotone,
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
 import Image from "next/image";
 import { useCreateDepartment } from "@/hooks/department/useCreateDepartment";
 import type { FileMetadata } from "@/hooks/general/use-file-upload";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import AddUsersDropdown from "@/features/workspace/AddUsersDropdown";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Cancel01Icon,
+  Delete02Icon,
+  NewOfficeIcon,
+  PlusSignSquareIcon,
+  UploadSquare01Icon,
+} from "@hugeicons/core-free-icons";
+
+const DEPARTMENT_IMAGE_ACCEPT =
+  "image/png,image/jpg,image/jpeg,image/gif,image/webp";
+const DEPARTMENT_IMAGE_MAX_SIZE = 500 * 1024;
+const DEPARTMENT_IMAGE_HELPER_TEXT =
+  "Supports PNG, JPEG, JPG, GIF, WEBP (under 500KB)";
 
 interface User {
   _id: string;
@@ -87,8 +97,7 @@ export default function CreateDepartmentDialog() {
   const isAdmin = isAdminProfile(auth.user?.profile);
 
   const users = useMemo(
-    () =>
-      usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
+    () => usersData?.pages.flatMap((page) => page.result?.users ?? []) ?? [],
     [usersData],
   );
 
@@ -116,6 +125,8 @@ export default function CreateDepartmentDialog() {
     },
     mode: "onSubmit",
   });
+
+  const descriptionLength = (watch("department_description") || "").length;
 
   const handleAddUser = (user: User) => {
     if (!selectedUsers.some((u) => u._id === user._id)) {
@@ -163,7 +174,7 @@ export default function CreateDepartmentDialog() {
             setSelectedUsers([]);
             console.error("Error creating department:", error);
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Error uploading department image:", error);
@@ -174,126 +185,144 @@ export default function CreateDepartmentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="default"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
-        >
-          <PiPlusCircleDuotone className="w-5 h-5" />
-          Create Department
-        </Button>
+      <DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                if (!isAdmin) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.warning("Insufficient privileges, contact Admin");
+                  return;
+                }
+              }}
+            >
+              <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
+              Create Department
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Create a new department</TooltipContent>
+        </Tooltip>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <p>Create New Department</p>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Create a new department by providing details and adding members.
-        </DialogDescription>
+      <AppDialogContent
+        title="Create New Department"
+        // titleTooltip="Create a department to organize projects and assign workspace members."
+        description="Create a new department by providing details and adding members."
+        variant="form"
+        size="lg"
+        primaryAction={{
+          label: "Create Department",
+          loadingLabel: uploadingImage ? "Uploading..." : "Creating...",
+          form: `mutate-department-form-${id}`,
+          type: "submit",
+          loading: uploadingImage || isPending,
+          disabled: uploadingImage || isPending,
+          icon: PlusSignSquareIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+        }}
+      >
         <form
           id={`mutate-department-form-${id}`}
-          className="overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="flex gap-4 p-4">
-            <div className="w-1/3">
-              <ProfileBg setDepartmentImage={setDepartmentImage} />
-            </div>
-            <div className="flex-1 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-department-name`}>Department Name</Label>
-                <div className="flex flex-col gap-2">
-                  <Input
-                    id={`${id}-department-name`}
-                    placeholder="Enter department name"
-                    type="text"
-                    aria-invalid={errors.department_name ? "true" : "false"}
-                    {...register("department_name", {
-                      required: "Department name is required",
-                    })}
-                  />
-                  {errors.department_name && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {errors.department_name.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-manager-name`}>Department Manager</Label>
-                <Input
+          <FieldGroup className="gap-4 p-4">
+            <Field>
+              <DepartmentImageUpload setDepartmentImage={setDepartmentImage} />
+            </Field>
+
+            <Field data-invalid={!!errors.department_name}>
+              <FormFieldLabel
+                htmlFor={`${id}-department-name`}
+                label="Department Name"
+                tooltip="The display name shown across the workspace for this department."
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-department-name`}
+                  placeholder="Enter department name"
+                  type="text"
+                  aria-invalid={errors.department_name ? "true" : "false"}
+                  {...register("department_name", {
+                    required: "Department name is required",
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.department_name]} />
+            </Field>
+
+            <Field data-invalid={!!errors.manager}>
+              <FormFieldLabel
+                htmlFor={`${id}-manager-name`}
+                label="Department Manager"
+                tooltip="Name of the person responsible for managing this department."
+                optional
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
                   id={`${id}-manager-name`}
                   placeholder="Enter manager's name"
                   type="text"
                   aria-invalid={errors.manager ? "true" : "false"}
                   {...register("manager")}
                 />
-              </div>
-            </div>
-          </div>
+              </InputGroup>
+            </Field>
 
-          <div className="px-4 pb-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-description`}>
-                Department Description
-              </Label>
-              <Textarea
-                id={`${id}-description`}
-                placeholder="Describe the department's purpose and responsibilities"
-                maxLength={220}
-                aria-describedby={`${id}-description`}
-                className="h-24 resize-none"
-                aria-invalid={errors.department_description ? "true" : "false"}
-                {...register("department_description", {
-                  required: "Description is required",
-                  maxLength: {
-                    value: 220,
-                    message: `Description must be at most 220 characters`,
-                  },
-                })}
+            <Field data-invalid={!!errors.department_description}>
+              <FormFieldLabel
+                htmlFor={`${id}-description`}
+                label="Department Description"
+                tooltip="A short summary of the department's purpose and responsibilities."
               />
-              <div className="flex justify-between items-center">
-                {errors.department_description ? (
-                  <p role="alert" className="text-xs text-destructive">
-                    {errors.department_description.message}
-                  </p>
-                ) : (
-                  <span />
-                )}
-                <p
+              <InputGroup size="md" className="bg-background">
+                <InputGroupTextarea
                   id={`${id}-description`}
-                  className="text-muted-foreground text-xs"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <span className="tabular-nums">
-                    {220 - (watch("department_description") || "").length}
-                  </span>{" "}
-                  characters left
-                </p>
-              </div>
-            </div>
+                  placeholder="Describe the department's purpose and responsibilities"
+                  maxLength={220}
+                  className="min-h-24 resize-none"
+                  aria-invalid={
+                    errors.department_description ? "true" : "false"
+                  }
+                  {...register("department_description", {
+                    required: "Description is required",
+                    maxLength: {
+                      value: 220,
+                      message: "Description must be at most 220 characters",
+                    },
+                  })}
+                />
+                <InputGroupAddon align="block-end">
+                  <div className="flex w-full items-center justify-between gap-2">
+                    {errors.department_description ? (
+                      <FieldError errors={[errors.department_description]} />
+                    ) : (
+                      <span />
+                    )}
+                    <InputGroupText className="text-xs text-muted-foreground/60">
+                      <span className="tabular-nums">
+                        {220 - descriptionLength}
+                      </span>
+                      characters left
+                    </InputGroupText>
+                  </div>
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
 
-            <div className="space-y-2">
-              <Label>Members</Label>
-              <div className="flex items-center gap-4 justify-between w-full p-4 border border-border rounded-lg bg-muted/5">
+            <Field>
+              <FormFieldLabel
+                label="Members"
+                tooltip="Add workspace users who should have access to this department."
+                optional
+              />
+              <div className="flex w-full items-center justify-between gap-4 rounded-lg border border-border bg-muted/5 p-4">
                 <AddUsersDropdown
                   users={users.map((user) => ({
                     _id: user._id as string,
@@ -310,9 +339,9 @@ export default function CreateDepartmentDialog() {
                   isError={isUsersError}
                   isFetchingNextPage={isUsersFetchingNextPage}
                 />
-                <div className="flex items-center justify-end flex-1">
+                <div className="flex flex-1 items-center justify-end">
                   {selectedUsers.length > 0 && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <div className="flex items-center -space-x-2">
                         {selectedUsers.slice(0, 4).map((user) => {
                           if (user.profileAvatar)
@@ -321,127 +350,144 @@ export default function CreateDepartmentDialog() {
                                 key={user._id}
                                 className="ring-background rounded-full ring-2"
                                 src={user.profileAvatar}
-                                width={32}
-                                height={32}
+                                width={24}
+                                height={24}
                                 alt={user.name}
                               />
                             );
                           return (
                             <div
                               key={user._id}
-                              className="flex h-8 w-8 items-center justify-center border border-border rounded-full bg-muted text-xs font-medium ring-background ring-2"
+                              className="flex h-6 w-6 items-center justify-center rounded-full border border-border bg-muted text-xs font-medium ring-2 ring-background"
                             >
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                           );
                         })}
                       </div>
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {selectedUsers.length} Users
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {selectedUsers.length}{" "}
+                        {selectedUsers.length > 1 ? "Users" : "User"}
                       </p>
                     </div>
                   )}
                 </div>
               </div>
-            </div>
-          </div>
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            size="sm"
-            variant="default"
-            form={`mutate-department-form-${id}`}
-            disabled={uploadingImage || isPending}
-            aria-busy={uploadingImage || isPending}
-          >
-            {uploadingImage || isPending ? (
-              <Spinner />
-            ) : (
-              <PiPlusCircleDuotone />
-            )}
-            {uploadingImage
-              ? "Uploading..."
-              : isPending
-              ? "Creating..."
-              : "Create Department"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }
 
-function ProfileBg({
+function DepartmentImageUpload({
   setDepartmentImage,
 }: {
-  setDepartmentImage: (file: File | FileMetadata) => void;
+  setDepartmentImage: (file: File | FileMetadata | null) => void;
 }) {
-  const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-	useFileUpload({
-		accept: "image/png,image/jpg,image/jpeg,image/gif,image/webp",
-	});
+  const uploadId = useId();
 
-  const ImageFile = files[0]?.file;
+  const [
+    { files, errors },
+    { removeFile, openFileDialog, clearErrors, getInputProps },
+  ] = useFileUpload({
+    accept: DEPARTMENT_IMAGE_ACCEPT,
+    maxSize: DEPARTMENT_IMAGE_MAX_SIZE,
+  });
+
+  const imageFile = files[0]?.file;
 
   const currentImage =
     files[0]?.preview ||
-    (ImageFile && !(ImageFile instanceof File) ? ImageFile.url : null);
+    (imageFile && !(imageFile instanceof File) ? imageFile.url : null);
 
-  setDepartmentImage(ImageFile);
+  useEffect(() => {
+    const file = files[0]?.file;
+    if (file instanceof File) {
+      setDepartmentImage(file);
+      return;
+    }
+
+    setDepartmentImage(null);
+  }, [files, setDepartmentImage]);
+
+  useEffect(() => {
+    if (errors.length === 0) return;
+
+    toast.error(errors[0]);
+    clearErrors();
+  }, [errors, clearErrors]);
+
+  const handleRemove = () => {
+    if (files[0]?.id) {
+      removeFile(files[0].id);
+    }
+  };
 
   return (
-    <div className="h-40 w-full">
-      <div className="bg-muted/30 border border-border relative flex size-full rounded-xl items-center justify-center overflow-hidden group transition-colors hover:bg-muted/50">
+    <div className="flex items-start gap-4">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted/30">
         {currentImage ? (
           <Image
-            className="size-full object-cover rounded-xl"
+            className="size-full object-cover"
             src={currentImage}
             alt={
               files[0]?.preview
-                ? "Preview of uploaded image"
-                : "Profile background"
+                ? "Preview of uploaded department image"
+                : "Department image"
             }
-            width={512}
-            height={96}
+            width={80}
+            height={80}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-            <PiBuildingsDuotone className="w-12 h-12" />
-            <span className="text-xs font-medium">Upload Image</span>
+          <div className="flex size-full items-center justify-center text-muted-foreground/50">
+            <Icon icon={NewOfficeIcon} size={28} strokeWidth={1.5} />
           </div>
         )}
-        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
-          <button
-            type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-background text-foreground transition-[color,box-shadow] outline-none hover:bg-accent focus-visible:ring-[3px]"
-            onClick={openFileDialog}
-            aria-label={currentImage ? "Change image" : "Upload image"}
-          >
-            <PiPlusSquareDuotone size={16} aria-hidden="true" />
-          </button>
-          {currentImage && (
-            <button
-              type="button"
-              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-9 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[color,box-shadow] outline-none hover:bg-destructive/90 focus-visible:ring-[3px]"
-              onClick={() => removeFile(files[0]?.id)}
-              aria-label="Remove image"
-            >
-              <PiXDuotone size={16} aria-hidden="true" />
-            </button>
-          )}
-        </div>
       </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <FormFieldLabel
+          htmlFor={uploadId}
+          label="Department Image"
+          tooltip="Upload an image to identify this department in lists and cards."
+          optional
+        />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={openFileDialog}
+          >
+            <Icon icon={UploadSquare01Icon} size={14} strokeWidth={2} />
+            Upload Image
+          </Button>
+
+          {currentImage ? (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleRemove}
+            >
+              <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+              Remove
+            </Button>
+          ) : null}
+        </div>
+
+        <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+          {DEPARTMENT_IMAGE_HELPER_TEXT}
+        </p>
+      </div>
+
       <input
-        {...getInputProps()}
+        {...getInputProps({ id: uploadId })}
         className="sr-only"
-        aria-label="Upload image file"
+        aria-label="Upload department image"
       />
     </div>
   );

@@ -1,10 +1,11 @@
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
-  PiCubeDuotone,
-  PiCalendarBlankDuotone,
-  PiGitCommitDuotone,
-} from "react-icons/pi";
+  Calendar03Icon,
+  CubeIcon,
+  GitCommitIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useTouchCardActivation } from "./useTouchCardActivation";
 
 export function VersionControlCards() {
@@ -64,7 +65,7 @@ export function VersionControlCards() {
       onTouchEnd={scheduleTouchDeactivate}
       onTouchCancel={deactivateTouch}
       data-active={isTouchActive ? "true" : undefined}
-      className="w-full lg:w-1/3 h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col overflow-hidden"
+      className="w-full lg:w-1/3 h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col overflow-hidden"
     >
       <div className="mb-8 z-10 shrink-0">
         <h3 className="text-base md:text-base lg:text-lg font-semibold text-foreground">
@@ -77,21 +78,8 @@ export function VersionControlCards() {
 
       <div className="flex-1 relative flex flex-col items-center justify-center">
         {cards.map((card, index) => {
-          // Distance from active card (index 2)
           const dist = Math.abs(index - 2);
           const isActive = index === 2;
-
-          // Styling based on position
-          let opacity = "opacity-100";
-          let scale = "scale-100";
-
-          if (dist === 1) {
-            opacity = "opacity-60";
-            scale = "scale-[0.98]";
-          } else if (dist === 2) {
-            opacity = "opacity-30";
-            scale = "scale-[0.95]";
-          }
 
           return (
             <div
@@ -99,16 +87,14 @@ export function VersionControlCards() {
               className={cn(
                 "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 group-data-[active=true]:-mb-2 transition-all duration-300 ease-in-out delay-300",
                 isActive
-                  ? "shadow-md border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-neutral-800 group-hover:dark:bg-neutral-800 group-data-[active=true]:bg-neutral-800 group-data-[active=true]:dark:bg-neutral-200"
-                  : "shadow-sm bg-accent/60 z-40 group-hover:bg-accent group-data-[active=true]:bg-accent",
+                  ? "shadow-bottom-lg border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-foreground group-hover:dark:bg-background/90 group-data-[active=true]:bg-foreground group-data-[active=true]:dark:bg-background/90"
+                  : "shadow-sm bg-muted/60 z-40 group-hover:bg-muted group-data-[active=true]:bg-muted",
                 !isActive &&
                   dist === 1 &&
                   "opacity-60 scale-[0.98] group-hover:opacity-70 group-data-[active=true]:opacity-70",
                 !isActive &&
                   dist === 2 &&
                   "opacity-30 scale-[0.95] group-hover:opacity-50 group-data-[active=true]:opacity-50 z-35",
-                // opacity,
-                // scale
               )}
             >
               <div className="flex items-start justify-between mb-1.5">
@@ -121,13 +107,15 @@ export function VersionControlCards() {
                         : "bg-accent/50 text-muted-foreground",
                     )}
                   >
-                    <PiCubeDuotone className="w-3.5 h-3.5" />
+                    <Icon icon={CubeIcon} size={14} strokeWidth={2} />
                   </div>
                   <div>
                     <div
                       className={cn(
                         "text-sm font-medium text-background leading-none",
-                        isActive ? "text-background dark:text-foreground" : "text-muted-foreground",
+                        isActive
+                          ? "text-background dark:text-foreground"
+                          : "text-muted-foreground",
                       )}
                     >
                       {card.name}
@@ -171,16 +159,18 @@ export function VersionControlCards() {
                       : "text-muted-foreground",
                   )}
                 >
-                  <PiGitCommitDuotone className="w-3 h-3" />
+                  <Icon icon={GitCommitIcon} size={12} strokeWidth={2} />
                   <span>{card.version}</span>
                 </div>
                 <div
                   className={cn(
                     "flex items-center gap-1.5 text-[10px] text-muted-foreground",
-                    isActive ? "text-background/70 dark:text-foreground/70" : "text-muted-foreground",
+                    isActive
+                      ? "text-background/70 dark:text-foreground/70"
+                      : "text-muted-foreground",
                   )}
                 >
-                  <PiCalendarBlankDuotone className="w-3 h-3" />
+                  <Icon icon={Calendar03Icon} size={12} strokeWidth={2} />
                   <span>{card.date}</span>
                 </div>
               </div>

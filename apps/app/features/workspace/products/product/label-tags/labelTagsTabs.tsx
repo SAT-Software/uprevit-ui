@@ -1,6 +1,6 @@
 "use client";
 
-import { ScrollArea, ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import {
   Tabs,
   TabsContent,
@@ -12,16 +12,19 @@ import { AnnotationState } from "@markerjs/markerjs3";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  PiArrowRightBold,
-  PiCloudCheckDuotone,
-  PiImageDuotone,
-  PiTagDuotone,
-} from "react-icons/pi";
+  ArrowRight01Icon,
+  CloudAlertIcon,
+  CloudSavingDone01Icon,
+  Image01Icon,
+  SaveIcon,
+  Tag01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import DialogAddLabelTag from "./DialogAddLabelTag";
 import DialogDeleteLabelTag from "./DialogDeleteLabelTag";
 import DialogEditLabelTag from "./DialogEditLabelTag";
-import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import Editor from "./Editor";
 import Render from "./Renderer";
 import SaveTaggedImageDialog from "./SaveTaggedImageDialog";
@@ -142,22 +145,19 @@ export default function LabelTagsTabs({
     });
   };
 
-  const completePendingSaveFlow = useCallback(
-    (error?: unknown) => {
-      const completion = pendingSaveFlowRef.current;
-      if (!completion) return;
+  const completePendingSaveFlow = useCallback((error?: unknown) => {
+    const completion = pendingSaveFlowRef.current;
+    if (!completion) return;
 
-      pendingSaveFlowRef.current = null;
-      if (error) {
-        completion.reject(
-          error instanceof Error ? error : new Error("Failed to save annotation"),
-        );
-      } else {
-        completion.resolve();
-      }
-    },
-    [],
-  );
+    pendingSaveFlowRef.current = null;
+    if (error) {
+      completion.reject(
+        error instanceof Error ? error : new Error("Failed to save annotation"),
+      );
+    } else {
+      completion.resolve();
+    }
+  }, []);
 
   const handleRendered = useCallback(
     async (dataUrl: string) => {
@@ -335,7 +335,9 @@ export default function LabelTagsTabs({
       const item = labelTagsData.find((labelTag) => labelTag._id === itemId);
       const itemImage = item?.image;
       if (!itemImage) {
-        return Promise.reject(new Error("No image available for this label tag"));
+        return Promise.reject(
+          new Error("No image available for this label tag"),
+        );
       }
 
       return new Promise((resolve, reject) => {
@@ -486,12 +488,7 @@ export default function LabelTagsTabs({
       setActiveTab(pendingTabChange);
       setPendingTabChange(null);
     }
-  }, [
-    effectiveActiveTab,
-    labelTagsData,
-    pendingTabChange,
-    saveDirtyItemIds,
-  ]);
+  }, [effectiveActiveTab, labelTagsData, pendingTabChange, saveDirtyItemIds]);
 
   const handleUnsavedDiscard = useCallback(() => {
     discardDirtyInTab(effectiveActiveTab);
@@ -514,11 +511,7 @@ export default function LabelTagsTabs({
       save: saveAllDirtyAndContinue,
       discard: discardAllDirty,
     }),
-    [
-      discardAllDirty,
-      hasEditableDirtyItems,
-      saveAllDirtyAndContinue,
-    ],
+    [discardAllDirty, hasEditableDirtyItems, saveAllDirtyAndContinue],
   );
 
   useRegisterProductWorkbookGuard(
@@ -596,7 +589,12 @@ export default function LabelTagsTabs({
       item.image ??
       (typeof diff.new_value === "string" ? diff.new_value : null);
 
-    if (diff === keyDiff && resolvedOld && resolvedNew && resolvedOld === resolvedNew) {
+    if (
+      diff === keyDiff &&
+      resolvedOld &&
+      resolvedNew &&
+      resolvedOld === resolvedNew
+    ) {
       return undefined;
     }
 
@@ -655,8 +653,13 @@ export default function LabelTagsTabs({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-red-50/30 rounded-lg border-2 border-red-300 border-dashed opacity-60 dark:border-red-700/50 dark:bg-red-950/20">
-                  <PiImageDuotone className="w-8 h-8 mb-2 opacity-50" />
+                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-red-300 bg-red-50/30 p-6 text-muted-foreground opacity-60 dark:border-red-700/50 dark:bg-red-950/20">
+                  <Icon
+                    icon={Image01Icon}
+                    size={32}
+                    strokeWidth={1.5}
+                    className="mb-2 opacity-50"
+                  />
                   <p className="text-xs">No image</p>
                 </div>
               )}
@@ -664,7 +667,12 @@ export default function LabelTagsTabs({
           )}
           {oldValue && newValue && !isRemoved && !isAdded && (
             <div className="flex items-center justify-center">
-              <PiArrowRightBold className="text-muted-foreground/50 rotate-90" />
+              <Icon
+                icon={ArrowRight01Icon}
+                size={14}
+                strokeWidth={2}
+                className="rotate-90 text-muted-foreground/50"
+              />
             </div>
           )}
           {(newValue || isAdded) && !isRemoved && (
@@ -688,8 +696,13 @@ export default function LabelTagsTabs({
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground bg-blue-50/30 rounded-lg border-2 border-blue-300 border-dashed dark:border-blue-700/50 dark:bg-blue-950/20">
-                  <PiImageDuotone className="w-8 h-8 mb-2 opacity-50" />
+                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-blue-300 bg-blue-50/30 p-6 text-muted-foreground dark:border-blue-700/50 dark:bg-blue-950/20">
+                  <Icon
+                    icon={Image01Icon}
+                    size={32}
+                    strokeWidth={1.5}
+                    className="mb-2 opacity-50"
+                  />
                   <p className="text-xs">No image</p>
                 </div>
               )}
@@ -716,7 +729,12 @@ export default function LabelTagsTabs({
           diff.new_value != null &&
           !isRemoved &&
           !isAdded && (
-            <PiArrowRightBold className="text-muted-foreground/50 text-xs" />
+            <Icon
+              icon={ArrowRight01Icon}
+              size={12}
+              strokeWidth={2}
+              className="text-muted-foreground/50"
+            />
           )}
 
         {(diff.new_value != null || isAdded) && !isRemoved && (
@@ -742,145 +760,149 @@ export default function LabelTagsTabs({
 
   if (!labelTagsData || labelTagsData.length === 0) {
     return (
-      <>
-        <div className="flex items-center justify-between border-b border-border p-2">
+      <div className="flex h-full w-full flex-col overflow-y-auto">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 px-3 pr-2">
           <div className="flex items-center gap-2">
-            <p className="text-base font-semibold">Label Tags</p>
-            <div className="w-1 h-1 bg-border border border-border rounded-full" />
-            <p className="text-xs text-muted-foreground font-medium">
-              Manage label tags and their images for this product
-            </p>
-            <PageInfoDialog
-              title="Label Tags"
-              content="Add and organize label tags with annotations to highlight specific areas on label images."
-            />
+            <p className="text-sm font-medium">Label Tags</p>
+            <InfoTooltip content="Add and organize label tags with annotations to highlight specific areas on label images." />
           </div>
           <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
         </div>
-        <div className="flex flex-col items-center justify-center py-16 gap-4 p-4">
-          <div className="p-4 rounded-full bg-muted">
-            <PiTagDuotone className="w-10 h-10 text-muted-foreground" />
-          </div>
-          <div className="text-center space-y-1">
-            <h3 className="text-lg font-semibold text-foreground">
+
+        <div className="flex flex-col items-center justify-center gap-4 px-4 py-16">
+          <Icon
+            icon={Tag01Icon}
+            size={40}
+            strokeWidth={1.5}
+            className="text-muted-foreground/50"
+          />
+          <div className="space-y-1 text-center">
+            <h3 className="text-sm font-medium text-foreground">
               No Label Tags Added
             </h3>
-            <p className="text-sm text-muted-foreground max-w-md">
+            <p className="max-w-md text-sm text-muted-foreground">
               Add label tags to organize and visualize different labels for this
               product.
             </p>
           </div>
           <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <div className="flex items-center justify-between border-b border-border p-2">
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 px-3 pr-2">
         <div className="flex items-center gap-2">
-          <p className="text-base font-semibold">Label Tags</p>
-          <div className="w-1 h-1 bg-border border border-border rounded-full" />
-          <p className="text-xs text-muted-foreground font-medium">
-            Manage label tags and their images for this product
-          </p>
-          <PageInfoDialog
-            title="Label Tags"
-            content="Add and organize label tags with annotations to highlight specific areas on label images."
-          />
+          <p className="text-sm font-medium">Label Tags</p>
+          <InfoTooltip content="Add and organize label tags with annotations to highlight specific areas on label images." />
         </div>
         <div className="flex items-center gap-3">
           {showEditStatus &&
             (isPersisting ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Spinner className="w-4 h-4" />
+                <Spinner className="size-4" />
                 <span className="text-xs">Saving</span>
               </div>
             ) : hasEditableDirtyItems ? (
-              <span className="text-xs text-amber-600">Unsaved changes</span>
+              <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                <Icon
+                  icon={CloudAlertIcon}
+                  size={16}
+                  strokeWidth={2}
+                  className="text-amber-600 dark:text-amber-400"
+                />
+                Unsaved changes
+              </span>
             ) : lastSavedAt ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
-                <PiCloudCheckDuotone className="w-4 h-4 text-green-600" />
-                <span className="text-xs">Saved</span>
+                <Icon
+                  icon={CloudSavingDone01Icon}
+                  size={16}
+                  strokeWidth={2}
+                  className="text-green-600"
+                />
+                <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                  Saved
+                </span>
               </div>
             ) : null)}
           <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
         </div>
       </div>
 
-      <div className="p-2">
-        <Tabs
-          defaultValue="tab-1"
-          value={effectiveActiveTab}
-          onValueChange={handleTabChange}
-        >
-          <ScrollArea className="flex-1 pb-2">
-            <TabsList>
-              {filteredLabelTypesForTabs?.map((type, i) => {
-                const typeStatus = typeStatusMap[type]?.status;
-                const typeDiff = typeStatusMap[type]?.typeDiff;
-                const isTypeAdded = isRedlineView && typeStatus === "added";
-                const isTypeRemoved = isRedlineView && typeStatus === "removed";
-                const isTypeModified =
-                  isRedlineView && typeStatus === "modified";
-                return (
-                  <TabsTrigger
-                    key={`${i}-${type}`}
-                    value={type}
-                    className={cn(
-                      "gap-2",
-                      isTypeAdded &&
-                        "text-blue-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-800 dark:text-blue-400 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:text-blue-300",
-                      isTypeRemoved &&
-                        "text-red-700 data-[state=active]:bg-red-50 data-[state=active]:text-red-800 dark:text-red-400 dark:data-[state=active]:bg-red-950/30 dark:data-[state=active]:text-red-300",
-                      isTypeModified &&
-                        "text-amber-700 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800 dark:text-amber-400 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:text-amber-300",
-                    )}
-                  >
-                    {isTypeModified && typeDiff ? (
-                      <RedlineValue value={type} diff={typeDiff} />
-                    ) : (
-                      <span>{type}</span>
-                    )}
-                    {isTypeAdded && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[9px]",
-                          cnRedlineBadge("added"),
-                        )}
-                      >
-                        NEW
-                      </span>
-                    )}
-                    {isTypeRemoved && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[9px]",
-                          cnRedlineBadge("removed"),
-                        )}
-                      >
-                        DEL
-                      </span>
-                    )}
-                    {isTypeModified && (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[9px]",
-                          cnRedlineBadge("modified"),
-                        )}
-                      >
-                        MOD
-                      </span>
-                    )}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+      <Tabs
+        defaultValue="tab-1"
+        value={effectiveActiveTab}
+        onValueChange={handleTabChange}
+        className="flex min-h-0 flex-1 flex-col gap-0 overflow-hidden"
+      >
+        <div className="flex h-10 shrink-0 items-center overflow-x-auto border-b border-border px-2">
+          <TabsList variant="line">
+            {filteredLabelTypesForTabs?.map((type, i) => {
+              const typeStatus = typeStatusMap[type]?.status;
+              const typeDiff = typeStatusMap[type]?.typeDiff;
+              const isTypeAdded = isRedlineView && typeStatus === "added";
+              const isTypeRemoved = isRedlineView && typeStatus === "removed";
+              const isTypeModified = isRedlineView && typeStatus === "modified";
+              return (
+                <TabsTrigger
+                  key={`${i}-${type}`}
+                  value={type}
+                  className={cn(
+                    "gap-2",
+                    isTypeAdded &&
+                      "text-blue-700 data-[state=active]:!bg-blue-50 data-[state=active]:!text-blue-800 dark:text-blue-400 dark:data-[state=active]:!bg-blue-950/30 dark:data-[state=active]:!text-blue-300",
+                    isTypeRemoved &&
+                      "text-red-700 data-[state=active]:!bg-red-50 data-[state=active]:!text-red-800 dark:text-red-400 dark:data-[state=active]:!bg-red-950/30 dark:data-[state=active]:!text-red-300",
+                    isTypeModified &&
+                      "text-amber-700 data-[state=active]:!bg-amber-50 data-[state=active]:!text-amber-800 dark:text-amber-400 dark:data-[state=active]:!bg-amber-950/30 dark:data-[state=active]:!text-amber-300",
+                  )}
+                >
+                  {isTypeModified && typeDiff ? (
+                    <RedlineValue value={type} diff={typeDiff} />
+                  ) : (
+                    <span>{type}</span>
+                  )}
+                  {isTypeAdded && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[9px]",
+                        cnRedlineBadge("added"),
+                      )}
+                    >
+                      NEW
+                    </span>
+                  )}
+                  {isTypeRemoved && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[9px]",
+                        cnRedlineBadge("removed"),
+                      )}
+                    >
+                      DEL
+                    </span>
+                  )}
+                  {isTypeModified && (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[9px]",
+                        cnRedlineBadge("modified"),
+                      )}
+                    >
+                      MOD
+                    </span>
+                  )}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
 
-          <div className="flex flex-col gap-10">
+        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          <div className="flex flex-col gap-2">
             {filteredLabelTypesForTabs.map((type) => {
               const currentTabData = labelTagsData.filter(
                 (item: LabelTagItem) => item.type === type,
@@ -896,174 +918,200 @@ export default function LabelTagsTabs({
                 const imageDiff = getImageDiff(item);
 
                 return (
-                  <TabsContent key={`${i}-${type}`} value={type}>
+                  <TabsContent
+                    key={`${i}-${type}`}
+                    value={type}
+                    className="mt-0"
+                  >
                     <div
                       className={cn(
-                        "w-full shadow-none transition-all duration-200 mb-4 last:mb-0",
-                        isRedlineView &&
-                          isRemoved &&
-                          redlineCardRemoved,
-                        isRedlineView &&
-                          isAdded &&
-                          redlineCardAdded,
-                        isRedlineView &&
-                          isModified &&
-                          redlineCardModified,
-                        !isRedlineView || !itemStatus ? "border-border" : "",
+                        "flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-all duration-200",
+                        isRedlineView && isRemoved && redlineCardRemoved,
+                        isRedlineView && isAdded && redlineCardAdded,
+                        isRedlineView && isModified && redlineCardModified,
                       )}
                     >
-                      <div className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              {isRedlineView && isAdded && (
-                                <span
-                                  className={cn(
-                                    "rounded-full px-2 py-0.5 text-[10px]",
-                                    cnRedlineBadge("added"),
-                                  )}
-                                >
-                                  NEW
-                                </span>
-                              )}
-                              {isRedlineView && isRemoved && (
-                                <span
-                                  className={cn(
-                                    "rounded-full px-2 py-0.5 text-[10px]",
-                                    cnRedlineBadge("removed"),
-                                  )}
-                                >
-                                  DEL
-                                </span>
-                              )}
-                              {isRedlineView && isModified && (
-                                <span
-                                  className={cn(
-                                    "rounded-full px-2 py-0.5 text-[10px]",
-                                    cnRedlineBadge("modified"),
-                                  )}
-                                >
-                                  MOD
-                                </span>
-                              )}
-                            </div>
-                            <div
+                      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          {isRedlineView && isAdded && (
+                            <span
                               className={cn(
-                                "text-sm font-semibold flex items-center gap-2",
-                                isRedlineView &&
-                                  isRemoved &&
-                                  "line-through text-red-500/70 dark:text-red-400/80",
+                                "rounded-full px-2 py-0.5 text-[10px]",
+                                cnRedlineBadge("added"),
                               )}
                             >
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground bg-muted/60 border border-border/60 px-2 py-0.5 rounded-full">
-                                Label {i + 1}
-                              </span>
-                              {isRedlineView && nameDiff ? (
-                                <RedlineValue
-                                  value={item.name || "Untitled Label"}
-                                  diff={nameDiff}
-                                />
-                              ) : (
-                                item.name || "Untitled Label"
+                              NEW
+                            </span>
+                          )}
+                          {isRedlineView && isRemoved && (
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-[10px]",
+                                cnRedlineBadge("removed"),
                               )}
-                              {item.description && (
-                                <span className="text-sm font-normal text-muted-foreground">
-                                  -
+                            >
+                              DEL
+                            </span>
+                          )}
+                          {isRedlineView && isModified && (
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-[10px]",
+                                cnRedlineBadge("modified"),
+                              )}
+                            >
+                              MOD
+                            </span>
+                          )}
+                          <span className="shrink-0 rounded-full border border-border/60 bg-muted/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            Label {i + 1}
+                          </span>
+                          <div
+                            className={cn(
+                              "flex min-w-0 items-center gap-2 text-sm font-medium",
+                              isRedlineView &&
+                                isRemoved &&
+                                "line-through text-red-500/70 dark:text-red-400/80",
+                            )}
+                          >
+                            {isRedlineView && nameDiff ? (
+                              <RedlineValue
+                                value={item.name || "Untitled Label"}
+                                diff={nameDiff}
+                              />
+                            ) : (
+                              <span className="truncate">
+                                {item.name || "Untitled Label"}
+                              </span>
+                            )}
+                            {(item.description ||
+                              (isRedlineView && descriptionDiff)) && (
+                              <>
+                                <span className="text-muted-foreground">·</span>
+                                <span
+                                  className={cn(
+                                    "truncate text-sm font-normal text-muted-foreground",
+                                    isRedlineView &&
+                                      isRemoved &&
+                                      "line-through text-red-500/70 dark:text-red-400/80",
+                                  )}
+                                >
+                                  {isRedlineView && descriptionDiff ? (
+                                    <RedlineValue
+                                      value={item.description || ""}
+                                      diff={descriptionDiff}
+                                      emptyLabel="Blank"
+                                    />
+                                  ) : (
+                                    item.description
+                                  )}
                                 </span>
-                              )}
-                              <span
-                                className={cn(
-                                  "text-sm font-normal text-muted-foreground",
-                                  isRedlineView &&
-                                    isRemoved &&
-                                    "line-through text-red-500/70 dark:text-red-400/80",
-                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <DialogEditLabelTag
+                            productId={productId}
+                            labelTag={item}
+                            isSubmitted={isSubmitted}
+                          />
+                          <DialogDeleteLabelTag
+                            productId={productId}
+                            labelTag={item}
+                            isSubmitted={isSubmitted}
+                          />
+                          {!isSubmitted &&
+                            !isRedlineView &&
+                            item.image &&
+                            !isRemoved && (
+                              <Button
+                                size="sm"
+                                variant={
+                                  isDirty(item._id) ? "default" : "secondary"
+                                }
+                                disabled={!isDirty(item._id) || isPersisting}
+                                aria-busy={
+                                  isPersisting &&
+                                  pendingSave?.itemId === item._id
+                                }
+                                onClick={() => {
+                                  const annotation =
+                                    currentEditorState[item._id];
+                                  if (!annotation || !item.image) return;
+                                  handleSave(item._id, item.image, annotation);
+                                }}
                               >
-                                {isRedlineView && descriptionDiff ? (
-                                  <RedlineValue
-                                    value={item.description || ""}
-                                    diff={descriptionDiff}
-                                    emptyLabel="Blank"
-                                  />
+                                {isPersisting &&
+                                pendingSave?.itemId === item._id ? (
+                                  <Spinner className="size-3.5" />
                                 ) : (
-                                  item.description
+                                  <Icon
+                                    icon={SaveIcon}
+                                    size={14}
+                                    strokeWidth={2}
+                                  />
                                 )}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <DialogEditLabelTag
-                              productId={productId}
-                              labelTag={item}
-                              isSubmitted={isSubmitted}
-                            />
-                            <DialogDeleteLabelTag
-                              productId={productId}
-                              labelTag={item}
-                              isSubmitted={isSubmitted}
-                            />
-                          </div>
+                                Save
+                              </Button>
+                            )}
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-                          <div className="flex-1 min-w-0">
-                            {isRedlineView && imageDiff ? (
-                              <div className="relative w-full max-w-md">
-                                <RedlineValue
-                                  value={item.image || ""}
-                                  diff={imageDiff}
-                                  isImage={true}
-                                />
-                              </div>
-                            ) : item.image ? (
-                              <Editor
-                                targetImageSrc={item.image}
-                                annotation={
-                                  currentEditorState[item._id] ??
-                                  savedAnnotations[item._id] ??
-                                  item.annotation_state ??
-                                  annotations[item._id] ??
-                                  null
-                                }
-                                legendItems={item.legend_items ?? []}
-                                showLegendOverlay={
-                                  !!legendOverlayById[item._id]
-                                }
-                                onSave={(newAnnotation) => {
-                                  handleSave(
-                                    item._id,
-                                    item.image!,
-                                    newAnnotation,
-                                  );
-                                }}
-                                onStateChange={(newAnnotation) => {
-                                  handleStateChange(item._id, newAnnotation);
-                                }}
+                      <div className="relative min-h-0">
+                        <div className="min-w-0 lg:pr-[280px] xl:pr-[300px]">
+                          {isRedlineView && imageDiff ? (
+                            <div className="relative w-full max-w-md">
+                              <RedlineValue
+                                value={item.image || ""}
+                                diff={imageDiff}
+                                isImage={true}
                               />
-                            ) : (
-                              <div
-                                className={cn(
-                                  "flex flex-col items-center justify-center p-12 text-muted-foreground rounded-lg border border-dashed w-full max-w-md",
-                                  isRedlineView && isRemoved
-                                    ? "border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20"
-                                    : isRedlineView && isAdded
-                                      ? "border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
-                                      : "bg-muted/50 border-border",
-                                )}
-                              >
-                                <PiImageDuotone className="w-12 h-12 mb-3 opacity-50" />
-                                <p className="text-sm font-medium">
-                                  No Image Available
-                                </p>
-                                <p className="text-xs text-center mt-1">
-                                  Add an image to better visualize this label
-                                </p>
-                              </div>
-                            )}
-                          </div>
+                            </div>
+                          ) : item.image ? (
+                            <Editor
+                              targetImageSrc={item.image}
+                              annotation={
+                                currentEditorState[item._id] ??
+                                savedAnnotations[item._id] ??
+                                item.annotation_state ??
+                                annotations[item._id] ??
+                                null
+                              }
+                              legendItems={item.legend_items ?? []}
+                              showLegendOverlay={!!legendOverlayById[item._id]}
+                              onStateChange={(newAnnotation) => {
+                                handleStateChange(item._id, newAnnotation);
+                              }}
+                            />
+                          ) : (
+                            <div
+                              className={cn(
+                                "flex min-h-[360px] w-full flex-col items-center justify-center rounded-lg border border-dashed p-12 text-muted-foreground",
+                                isRedlineView && isRemoved
+                                  ? "border-red-300 bg-red-50/30 opacity-60 dark:border-red-700/50 dark:bg-red-950/20"
+                                  : isRedlineView && isAdded
+                                    ? "border-blue-300 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
+                                    : "border-border bg-muted/30",
+                              )}
+                            >
+                              <Icon
+                                icon={Image01Icon}
+                                size={40}
+                                strokeWidth={1.5}
+                                className="mb-3 opacity-50"
+                              />
+                              <p className="text-sm font-medium">
+                                No Image Available
+                              </p>
+                              <p className="mt-1 text-center text-xs">
+                                Add an image to better visualize this label
+                              </p>
+                            </div>
+                          )}
+                        </div>
 
+                        <div className="flex min-h-0 w-full flex-col overflow-hidden border-t border-border lg:absolute lg:inset-y-0 lg:right-0 lg:w-[280px] lg:border-l lg:border-t-0 xl:w-[300px]">
                           <LegendPanel
                             productId={productId}
                             labelTagId={item._id}
@@ -1082,49 +1130,50 @@ export default function LabelTagsTabs({
               });
             })}
           </div>
-          {renderItem && annotations[renderItem.id] && (
-            <Render
-              targetImage={renderItem.image}
-              annotation={annotations[renderItem.id]}
-              mode="upload"
-              onRendered={handleRendered}
-              onComplete={() => {
-                setRenderItem(null);
-                if (!isRenderingRef.current) {
-                  setIsSaving(false);
-                }
-              }}
-            />
-          )}
+        </div>
 
-          <SaveTaggedImageDialog
-            open={saveDialogOpen}
-            onOpenChange={(open) => {
-              if ((isSaving || isUpdating) && !open) {
-                return;
-              }
-              setSaveDialogOpen(open);
-              if (!open) {
-                setPendingSave(null);
+        {renderItem && annotations[renderItem.id] && (
+          <Render
+            targetImage={renderItem.image}
+            annotation={annotations[renderItem.id]}
+            mode="upload"
+            onRendered={handleRendered}
+            onComplete={() => {
+              setRenderItem(null);
+              if (!isRenderingRef.current) {
+                setIsSaving(false);
               }
             }}
-            onConfirm={handleConfirmSave}
-            isPending={isSaving || isUpdating}
           />
+        )}
 
-          <UnsavedWorkbookChangesDialog
-            open={unsavedDialogOpen}
-            tabLabel="Label Tags"
-            onOpenChange={(open) => {
-              if (!open) handleUnsavedCancel();
-            }}
-            onSave={handleUnsavedSave}
-            onDiscard={handleUnsavedDiscard}
-            onCancel={handleUnsavedCancel}
-            isSaving={isPersisting}
-          />
-        </Tabs>
-      </div>
-    </>
+        <SaveTaggedImageDialog
+          open={saveDialogOpen}
+          onOpenChange={(open) => {
+            if ((isSaving || isUpdating) && !open) {
+              return;
+            }
+            setSaveDialogOpen(open);
+            if (!open) {
+              setPendingSave(null);
+            }
+          }}
+          onConfirm={handleConfirmSave}
+          isPending={isSaving || isUpdating}
+        />
+
+        <UnsavedWorkbookChangesDialog
+          open={unsavedDialogOpen}
+          tabLabel="Label Tags"
+          onOpenChange={(open) => {
+            if (!open) handleUnsavedCancel();
+          }}
+          onSave={handleUnsavedSave}
+          onDiscard={handleUnsavedDiscard}
+          onCancel={handleUnsavedCancel}
+          isSaving={isPersisting}
+        />
+      </Tabs>
+    </div>
   );
 }

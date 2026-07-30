@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { PiFunnelDuotone, PiPlusDuotone, PiXDuotone } from "react-icons/pi";
+import {
+  Add01Icon,
+  Cancel01Icon,
+  FilterIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Input } from "@uprevit/ui/components/ui/input";
@@ -178,12 +183,15 @@ export default function SourceFilesTableFilter({
           size="sm"
           className="text-xs"
         >
-          <PiFunnelDuotone
+          <Icon
+            icon={FilterIcon}
+            size={8}
+            strokeWidth={2}
             className={cn(
-              "h-2 w-2 mr-1",
+              "mr-1",
               table.getState().columnFilters.length > 0
                 ? "text-background"
-                : "text-muted-foreground"
+                : "text-muted-foreground",
             )}
           />
           Filter
@@ -288,7 +296,7 @@ export default function SourceFilesTableFilter({
                     onClick={() => handleRemoveFilter(filter.id)}
                     className="p-0"
                   >
-                    <PiXDuotone className="h-4 w-4" />
+                    <Icon icon={Cancel01Icon} size={16} strokeWidth={2} />
                     <span className="sr-only">Remove filter</span>
                   </Button>
                 </div>
@@ -306,7 +314,7 @@ export default function SourceFilesTableFilter({
             className="text-xs"
             onClick={handleAddFilter}
           >
-            <PiPlusDuotone className="h-4 w-4" />
+            <Icon icon={Add01Icon} size={16} strokeWidth={2} />
             Add filter
           </Button>
           <Button

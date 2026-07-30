@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { PiImageDuotone } from "react-icons/pi";
+import { Image01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 import { cn } from "@uprevit/ui/lib/utils";
 import { getNextImageSrc } from "@/utils/isNextImageSrc";
@@ -66,7 +67,9 @@ export function ProductImageFrame({
           priority={priority}
         />
       ) : (
-        <PiImageDuotone
+        <Icon
+          icon={Image01Icon}
+          strokeWidth={2}
           className={cn(fallbackVariants[variant], fallbackClassName)}
         />
       )}

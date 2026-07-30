@@ -15,14 +15,15 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import {
-  PiCaretDownDuotone,
-  PiCaretDoubleLeftDuotone,
-  PiCaretDoubleRightDuotone,
-  PiCaretLeftDuotone,
-  PiCaretRightDuotone,
-  PiCaretUpDuotone,
-  PiDotsThreeDuotone,
-} from "react-icons/pi";
+  ArrowDown01Icon,
+  ArrowLeft01Icon,
+  ArrowLeftDoubleIcon,
+  ArrowRight01Icon,
+  ArrowRightDoubleIcon,
+  ArrowUp01Icon,
+  MoreVerticalSquare01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -285,16 +286,20 @@ export default function SourceFilesTable({
                           )}
                           {{
                             asc: (
-                              <PiCaretUpDuotone
-                                className="shrink-0 opacity-60"
+                              <Icon
+                                icon={ArrowUp01Icon}
                                 size={16}
+                                strokeWidth={2}
+                                className="shrink-0 opacity-60"
                                 aria-hidden="true"
                               />
                             ),
                             desc: (
-                              <PiCaretDownDuotone
-                                className="shrink-0 opacity-60"
+                              <Icon
+                                icon={ArrowDown01Icon}
                                 size={16}
+                                strokeWidth={2}
+                                className="shrink-0 opacity-60"
                                 aria-hidden="true"
                               />
                             ),
@@ -416,7 +421,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to first page"
                 >
-                  <PiCaretDoubleLeftDuotone size={16} aria-hidden="true" />
+                  <Icon icon={ArrowLeftDoubleIcon} size={16} strokeWidth={2} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Previous page button */}
@@ -429,7 +434,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanPreviousPage()}
                   aria-label="Go to previous page"
                 >
-                  <PiCaretLeftDuotone size={16} aria-hidden="true" />
+                  <Icon icon={ArrowLeft01Icon} size={16} strokeWidth={2} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Next page button */}
@@ -442,7 +447,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to next page"
                 >
-                  <PiCaretRightDuotone size={16} aria-hidden="true" />
+                  <Icon icon={ArrowRight01Icon} size={16} strokeWidth={2} aria-hidden="true" />
                 </Button>
               </PaginationItem>
               {/* Last page button */}
@@ -455,7 +460,7 @@ export default function SourceFilesTable({
                   disabled={!table.getCanNextPage()}
                   aria-label="Go to last page"
                 >
-                  <PiCaretDoubleRightDuotone size={16} aria-hidden="true" />
+                  <Icon icon={ArrowRightDoubleIcon} size={16} strokeWidth={2} aria-hidden="true" />
                 </Button>
               </PaginationItem>
             </PaginationContent>
@@ -479,7 +484,7 @@ function RowActions() {
             aria-label="Edit item"
             onClick={(e) => e.stopPropagation()}
           >
-            <PiDotsThreeDuotone size={16} aria-hidden="true" />
+            <Icon icon={MoreVerticalSquare01Icon} size={16} strokeWidth={2} aria-hidden="true" />
           </Button>
         </div>
       </DropdownMenuTrigger>

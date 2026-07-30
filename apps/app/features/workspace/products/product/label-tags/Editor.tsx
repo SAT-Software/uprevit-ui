@@ -25,22 +25,22 @@ import {
 } from "@markerjs/markerjs3";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  PiArrowUpRightDuotone,
-  PiBezierCurveDuotone,
-  PiChatTeardropDuotone,
-  PiCircle,
-  PiCircleFill,
-  PiFrameCornersDuotone,
-  PiHighlighterCircleDuotone,
-  PiLineSegmentDuotone,
-  PiPolygonDuotone,
-  PiRulerDuotone,
-  PiScribbleLoopDuotone,
-  PiSquare,
-  PiSquareDuotone,
-  PiSquareFill,
-  PiTextTDuotone,
-} from "react-icons/pi";
+  ArrowUpRight01Icon,
+  CaptionsIcon,
+  Chat01Icon,
+  CircleIcon,
+  EllipseIcon,
+  HighlighterIcon,
+  LinerIcon,
+  Pen01Icon,
+  BendToolIcon,
+  PolygonIcon,
+  RulerIcon,
+  SquareIcon,
+  TextFontIcon,
+  BackgroundIcon,
+  FlipBottomIcon,
+} from "@hugeicons/core-free-icons";
 import EditorToolbar from "./EditorToolbar";
 import EditorToolbox from "./EditorToolbox";
 import { LegendOverlay } from "./LegendOverlay";
@@ -51,27 +51,27 @@ const markerTypes: MarkerTypeList = [
     name: "Basic shapes",
     markerTypes: [
       {
-        icon: PiSquare,
+        icon: SquareIcon,
         name: "Rectangle",
         markerType: FrameMarker,
       },
       {
-        icon: PiSquareFill,
+        icon: BackgroundIcon,
         name: "Cover (filled rectangle)",
         markerType: CoverMarker,
       },
       {
-        icon: PiSquareDuotone,
+        icon: FlipBottomIcon,
         name: "Highlight",
         markerType: HighlightMarker,
       },
       {
-        icon: PiCircle,
+        icon: EllipseIcon,
         name: "Ellipse",
         markerType: EllipseFrameMarker,
       },
       {
-        icon: PiCircleFill,
+        icon: CircleIcon,
         name: "Ellipse (filled)",
         markerType: EllipseMarker,
       },
@@ -81,22 +81,22 @@ const markerTypes: MarkerTypeList = [
     name: "Lines",
     markerTypes: [
       {
-        icon: PiArrowUpRightDuotone,
+        icon: ArrowUpRight01Icon,
         name: "Arrow",
         markerType: ArrowMarker,
       },
       {
-        icon: PiLineSegmentDuotone,
+        icon: LinerIcon,
         name: "Line",
         markerType: LineMarker,
       },
       {
-        icon: PiRulerDuotone,
+        icon: RulerIcon,
         name: "Measure",
         markerType: MeasurementMarker,
       },
       {
-        icon: PiBezierCurveDuotone,
+        icon: BendToolIcon,
         name: "Curve",
         markerType: CurveMarker,
       },
@@ -106,17 +106,17 @@ const markerTypes: MarkerTypeList = [
     name: "Text",
     markerTypes: [
       {
-        icon: PiTextTDuotone,
+        icon: TextFontIcon,
         name: "Text",
         markerType: TextMarker,
       },
       {
-        icon: PiChatTeardropDuotone,
+        icon: Chat01Icon,
         name: "Callout",
         markerType: CalloutMarker,
       },
       {
-        icon: PiFrameCornersDuotone,
+        icon: CaptionsIcon,
         name: "Captioned frame",
         markerType: CaptionFrameMarker,
       },
@@ -126,17 +126,17 @@ const markerTypes: MarkerTypeList = [
     name: "Advanced shapes",
     markerTypes: [
       {
-        icon: PiScribbleLoopDuotone,
+        icon: Pen01Icon,
         name: "Freehand",
         markerType: FreehandMarker,
       },
       {
-        icon: PiHighlighterCircleDuotone,
+        icon: HighlighterIcon,
         name: "Highlighter",
         markerType: HighlighterMarker,
       },
       {
-        icon: PiPolygonDuotone,
+        icon: PolygonIcon,
         name: "Polygon",
         markerType: PolygonMarker,
       },
@@ -156,7 +156,7 @@ type Props = {
 
 const Editor = ({
   targetImageSrc,
-  variant = "secondary",
+  variant = "outline",
   annotation,
   legendItems = [],
   showLegendOverlay = false,
@@ -368,7 +368,11 @@ const Editor = ({
     const containerRef = editorContainer.current;
     if (!containerRef) return;
 
-    if (imageChanged && editor.current && containerRef.contains(editor.current)) {
+    if (
+      imageChanged &&
+      editor.current &&
+      containerRef.contains(editor.current)
+    ) {
       containerRef.removeChild(editor.current);
       editor.current = null;
     }
@@ -449,7 +453,8 @@ const Editor = ({
 
       if (
         annotationRef.current &&
-        JSON.stringify(annotationRef.current) !== JSON.stringify(newEditor.getState())
+        JSON.stringify(annotationRef.current) !==
+          JSON.stringify(newEditor.getState())
       ) {
         newEditor.restoreState(annotationRef.current);
       }
@@ -487,35 +492,30 @@ const Editor = ({
   }, [handleKeyboardShortcuts]);
 
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] w-full h-full border border-border rounded-xl">
-      <div>
-        <EditorToolbar
-          variant={variant}
-          markerTypes={markerTypes}
-          currentMarkerType={currentMarkerType}
-          editorState={editorState}
-          saveVisible={!!onSave}
-          onAction={handleToolbarAction}
-          onNewMarker={handleNewMarker}
-        />
-      </div>
-      <div className="relative">
+    <div className="grid h-full min-h-[360px] w-full grid-rows-[auto_1fr_auto] overflow-hidden bg-background">
+      <EditorToolbar
+        variant={variant}
+        markerTypes={markerTypes}
+        currentMarkerType={currentMarkerType}
+        editorState={editorState}
+        onAction={handleToolbarAction}
+        onNewMarker={handleNewMarker}
+      />
+      <div className="relative min-h-0">
         <div
           ref={editorContainer}
-          className="flex overflow-hidden bg-slate-50 border-y border-border rounded-none **:bg-no-repeat"
+          className="flex h-full min-h-[280px] overflow-hidden bg-muted/20 **:bg-no-repeat"
         ></div>
         {showLegendOverlay && legendItems.length > 0 && (
           <LegendOverlay items={legendItems} />
         )}
       </div>
-      <div>
-        <EditorToolbox
-          variant={variant}
-          editorState={editorState}
-          markerEditor={currentMarkerEditor}
-          onAction={handleToolbarAction}
-        />
-      </div>
+      <EditorToolbox
+        variant={variant}
+        editorState={editorState}
+        markerEditor={currentMarkerEditor}
+        onAction={handleToolbarAction}
+      />
     </div>
   );
 };

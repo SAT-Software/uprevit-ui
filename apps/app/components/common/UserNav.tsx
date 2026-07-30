@@ -1,5 +1,16 @@
 "use client";
 
+import { GuardedLink } from "@/components/common/GuardedLink";
+import { useSignOut } from "@/hooks/auth/useSignOut";
+import { useGetUser } from "@/hooks/user/useGetUser";
+import { isPlatformOperatorProfile } from "@/utils/isPlatformOperator";
+import {
+  AccountSetting02Icon,
+  Logout02Icon,
+  MenuSquareIcon,
+  User03Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Avatar,
   AvatarFallback,
@@ -14,20 +25,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@uprevit/ui/components/ui/dropdown-menu";
-import { SidebarMenuButton } from "@uprevit/ui/components/ui/sidebar";
-import { useSignOut } from "@/hooks/auth/useSignOut";
-import { useGetUser } from "@/hooks/user/useGetUser";
-import { GuardedLink } from "@/components/common/GuardedLink";
-import { useAuth } from "react-oidc-context";
-import { isPlatformOperatorProfile } from "@/utils/isPlatformOperator";
-import {
-  PiSignOutDuotone,
-  PiSquaresFourDuotone,
-  PiShieldCheckDuotone,
-  PiUserCircleGearDuotone,
-  PiUserDuotone,
-} from "react-icons/pi";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { useAuth } from "react-oidc-context";
 
 export function UserNav() {
   const auth = useAuth();
@@ -37,30 +36,25 @@ export function UserNav() {
   const isPlatformOperator = isPlatformOperatorProfile(auth.user?.profile);
 
   if (isLoading)
-    return <Skeleton className="h-7 w-7 rounded-full bg-border/80" />;
+    return <Skeleton className="h-6 w-6 rounded-full bg-border/80" />;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="w-auto p-0 hover:bg-transparent" asChild>
-        <SidebarMenuButton
-          size="lg"
-          className="data-[state=open]:text-sidebar-accent-foreground"
-        >
-          <div className="relative mr-1">
-            <Avatar className="h-8 w-8 rounded-full">
-              <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-full border border-border bg-background text-foreground dark:bg-accent dark:text-accent-foreground">
-                {user?.name?.charAt(0) ?? "U"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="end-0 -top-0.5 absolute size-3 rounded-full border-2 border-background bg-emerald-500">
-              <span className="sr-only">Online</span>
-            </span>
-          </div>
-        </SidebarMenuButton>
+        <div className="relative mr-1">
+          <Avatar className="cursor-pointer">
+            <AvatarImage src={user?.profileAvatar} alt={user?.name} />
+            <AvatarFallback className=" border border-border bg-background text-foreground dark:bg-accent dark:text-accent-foreground">
+              {user?.name?.charAt(0) ?? "U"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="-end-0.5 -top-0.5 absolute size-3 rounded-full border-2 border-background bg-emerald-500">
+            <span className="sr-only">Online</span>
+          </span>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
         side="bottom"
         align="end"
         sideOffset={8}
@@ -68,10 +62,10 @@ export function UserNav() {
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="h-8 w-8 rounded-full">
+            <Avatar>
               <AvatarImage src={user?.profileAvatar} alt={user?.name} />
-              <AvatarFallback className="rounded-full border border-border bg-background text-foreground dark:bg-accent dark:text-accent-foreground">
-                <PiUserCircleGearDuotone size={20} />
+              <AvatarFallback className=" border border-border bg-background text-foreground dark:bg-accent dark:text-accent-foreground">
+                {user?.name?.charAt(0) ?? "U"}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -86,27 +80,27 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <GuardedLink href={`/settings?tab=profile`}>
-              <PiUserDuotone />
+              <Icon icon={User03Icon} size={16} strokeWidth={2} />
               Profile
             </GuardedLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <GuardedLink href={`/settings?tab=workspace`}>
-              <PiSquaresFourDuotone />
+              <Icon icon={MenuSquareIcon} size={16} strokeWidth={2} />
               Workspace
             </GuardedLink>
           </DropdownMenuItem>
           {isPlatformOperator ? (
             <DropdownMenuItem asChild>
               <GuardedLink href="/platform-admin">
-                <PiShieldCheckDuotone />
+                <Icon icon={AccountSetting02Icon} size={16} strokeWidth={2} />
                 Platform admin
               </GuardedLink>
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={signOut}>
-            <PiSignOutDuotone />
+          <DropdownMenuItem variant="destructive" onClick={signOut}>
+            <Icon icon={Logout02Icon} size={16} strokeWidth={2} />
             Log out
           </DropdownMenuItem>
         </DropdownMenuGroup>

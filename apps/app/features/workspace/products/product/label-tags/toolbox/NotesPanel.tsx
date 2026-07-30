@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { PiNoteDuotone } from "react-icons/pi";
+import { NoteIcon } from "@hugeicons/core-free-icons";
 import ToolboxPanel, { PanelProps } from "../ui/ToolboxPanel";
 import { Textarea } from "@uprevit/ui/components/ui/textarea";
 
@@ -34,7 +34,7 @@ const NotesPanelBody = ({ markerEditor, variant = "ghost" }: PanelProps) => {
   return (
     <ToolboxPanel
       title="Notes"
-      icon={PiNoteDuotone}
+      icon={NoteIcon}
       variant={variant}
       className="w-80"
     >

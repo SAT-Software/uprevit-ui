@@ -22,11 +22,14 @@ export function useDeleteBookmarkFolder() {
             Authorization: `Bearer ${auth.user.access_token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       if (!res.ok) {
         throw new Error(
-          await getResponseErrorMessage(res, "Failed to delete bookmark folder"),
+          await getResponseErrorMessage(
+            res,
+            "Failed to delete bookmark folder",
+          ),
         );
       }
       return res.json().catch(() => null);
@@ -41,7 +44,10 @@ export function useDeleteBookmarkFolder() {
       });
     },
     onError: (error) => {
-      const message = getErrorMessage(error, "Failed to delete bookmark folder");
+      const message = getErrorMessage(
+        error,
+        "Failed to delete bookmark folder",
+      );
       console.error(message);
       toast.error(message);
     },

@@ -14,14 +14,14 @@ import { TextScramble } from "@uprevit/ui/components/ui/text-scramble";
 import { cn } from "@uprevit/ui/lib/utils";
 import { useState } from "react";
 import {
-  PiCaretCircleDownDuotone,
-  PiHashDuotone,
-  PiPackageDuotone,
-  PiPlusCircleDuotone,
-  PiRulerDuotone,
-  PiTagDuotone,
-  PiTextAlignLeftDuotone,
-} from "react-icons/pi";
+  AddCircleIcon,
+  ArrowDown01Icon,
+  Blockchain03Icon,
+  HashtagIcon,
+  RulerIcon,
+  TextAlignLeftIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useTouchCardActivation } from "./useTouchCardActivation";
 
 type RowData = {
@@ -289,7 +289,7 @@ export function AutomatedRedliningCard() {
         setTextScrambleTrigger(false);
       }}
       data-active={isTouchActive ? "true" : undefined}
-      className="lg:relative group w-full lg:w-2/3 h-125 lg:h-full bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col overflow-hidden group transition-all duration-300 ease-in-out delay-300"
+      className="lg:relative group w-full lg:w-2/3 h-125 lg:h-full bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col overflow-hidden group transition-all duration-300 ease-in-out delay-300"
     >
       <div className="z-10 flex flex-col h-full">
         <div className="mb-6">
@@ -303,19 +303,29 @@ export function AutomatedRedliningCard() {
         </div>
 
         <div className="lg:absolute -bottom-16 lg:-right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out delay-300">
-          <div className="p-1 bg-accent border border-border rounded-2xl">
-            <div className="relative h-full bg-background rounded-t-[15px] border border-border shadow-md overflow-hidden flex flex-col">
+          <div className="p-1 bg-muted border border-border rounded-2xl shadow-bottom-lg">
+            <div className="relative h-full bg-background rounded-t-2xl border border-border shadow-none overflow-hidden flex flex-col">
               <div className="flex flex-col items-start gap-2 px-2 py-2 sm:flex-row sm:items-center sm:justify-start sm:gap-4 border-b bg-muted/30">
                 <div className="text-xs font-bold text-foreground">
                   Label Components
                 </div>
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
-                    <PiPlusCircleDuotone className="h-2.5 w-2.5 text-muted-foreground" />
+                    <Icon
+                      icon={AddCircleIcon}
+                      size={10}
+                      strokeWidth={2}
+                      className="text-muted-foreground"
+                    />
                     Version 2
                   </button>
                   <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 group-data-[active=true]:bg-purple-100/50 group-data-[active=true]:dark:bg-purple-900/50 group-data-[active=true]:border-purple-500 transition-all duration-300 ease-in-out delay-100">
-                    <PiCaretCircleDownDuotone className="h-2.5 w-2.5 text-muted-foreground group-hover:text-primary group-data-[active=true]:text-primary" />
+                    <Icon
+                      icon={ArrowDown01Icon}
+                      size={10}
+                      strokeWidth={2}
+                      className="text-muted-foreground group-hover:text-primary group-data-[active=true]:text-primary"
+                    />
                     View Redline
                   </button>
                 </div>
@@ -326,25 +336,45 @@ export function AutomatedRedliningCard() {
                     <TableRow className="bg-accent/60 border-border">
                       <TableHead className="w-[60px] h-8 border-r border-border last:border-r-0">
                         <div className="flex items-center gap-1 text-[10px] xl:text-[10px]">
-                          <PiHashDuotone className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Icon
+                            icon={HashtagIcon}
+                            size={14}
+                            strokeWidth={2}
+                            className="text-muted-foreground"
+                          />
                           No
                         </div>
                       </TableHead>
                       <TableHead className="h-8 w-[160px] border-r border-border last:border-r-0">
                         <div className="flex items-center gap-1 text-[10px] xl:text-[10px]">
-                          <PiPackageDuotone className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Icon
+                            icon={Blockchain03Icon}
+                            size={14}
+                            strokeWidth={2}
+                            className="text-muted-foreground"
+                          />
                           Name
                         </div>
                       </TableHead>
                       <TableHead className="h-8 w-[250px] border-r border-border last:border-r-0">
                         <div className="flex items-center gap-1 text-[10px] xl:text-[10px]">
-                          <PiTextAlignLeftDuotone className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Icon
+                            icon={TextAlignLeftIcon}
+                            size={14}
+                            strokeWidth={2}
+                            className="text-muted-foreground"
+                          />
                           Description
                         </div>
                       </TableHead>
                       <TableHead className="h-8 w-[150px] border-r border-border last:border-r-0">
                         <div className="flex items-center gap-1 text-[10px] xl:text-[10px]">
-                          <PiRulerDuotone className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Icon
+                            icon={RulerIcon}
+                            size={14}
+                            strokeWidth={2}
+                            className="text-muted-foreground"
+                          />
                           Dimension
                         </div>
                       </TableHead>

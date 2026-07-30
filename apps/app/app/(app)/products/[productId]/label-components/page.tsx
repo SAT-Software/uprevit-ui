@@ -1,14 +1,14 @@
 "use client";
 
 import ProductComponentDetailsTable from "@/features/workspace/products/product/component-details/ProductComponentDetailsTable";
-import AddComponentDialog from "@/features/workspace/products/product/component-details/AddComponentDialog";
-import { PageInfoDialog } from "@/features/workspace/products/product/PageInfoDialog";
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import type { DiffItem } from "@/utils/deepDiff";
 import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
+import { redlineBannerText } from "@/utils/redlineStyles";
+import { cn } from "@uprevit/ui/lib/utils";
 
 interface ComponentItem {
   _id: string;
@@ -58,7 +58,6 @@ export default function Page() {
     error: componentsError,
   } = useGetProductTabData(productId as string, "label-components");
 
-  // Only fetch redline data when compareVersion is in URL
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId as string,
     compareVersionId,
@@ -69,11 +68,13 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-2 p-2 min-h-0">
-        <div className="flex w-full flex-1 min-h-0 flex-col gap-6 overflow-auto rounded-xl border border-border bg-background">
-          <div className="p-6">
-            <div className="h-64 w-full bg-muted rounded-xl animate-pulse" />
-          </div>
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+          <div className="h-4 w-36 animate-pulse rounded bg-muted" />
+          <div className="h-7 w-36 animate-pulse rounded-md bg-muted" />
+        </div>
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <div className="h-64 w-full animate-pulse bg-muted/40" />
         </div>
       </div>
     );
@@ -81,7 +82,7 @@ export default function Page() {
 
   if (componentsError) {
     return (
-      <div className="flex flex-col gap-4 p-4 text-destructive">
+      <div className="flex flex-1 items-center justify-center p-8 text-sm text-destructive">
         Error loading label components: {componentsError.message}
       </div>
     );
@@ -113,7 +114,8 @@ export default function Page() {
             `${item.component_number}-${item.component_type}`,
         })
       : [];
-  const labelComponentChangeCount = countChangedRedlineItems(componentRedlineItems);
+  const labelComponentChangeCount =
+    countChangedRedlineItems(componentRedlineItems);
 
   const components = (() => {
     if (!isRedlineView || !hasDiffVersions) return currentComponents;
@@ -133,44 +135,26 @@ export default function Page() {
   })();
 
   return (
-    <div className="flex flex-1 flex-col gap-2 p-2 min-h-0 overflow-hidden">
-      {/* Redline Mode Banner */}
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
       {isRedlineView && (
-        <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
-          <span className="text-amber-600 dark:text-amber-400 font-medium">
+        <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
+          <span className={cn("font-medium", redlineBannerText)}>
             {isLoadingDiff
               ? "Loading changes..."
               : `Redline View: ${labelComponentChangeCount} changes in Label Components`}
           </span>
+          <span className="text-xs text-muted-foreground">
+            (comparing with previous version)
+          </span>
         </div>
       )}
 
-      <div className="flex w-full flex-1 min-h-0 flex-col gap-2 overflow-hidden rounded-xl border border-border bg-background">
-        <div className="flex flex-1 min-h-0 flex-col gap-0">
-          <div className="flex shrink-0 items-center justify-between border-b border-border p-2">
-            <div className="flex items-center gap-2">
-              <p className="text-base font-semibold">Label Components</p>
-              <div className="w-1 h-1 bg-border border border-border rounded-full" />
-              <p className="text-xs text-muted-foreground font-medium">
-                Manage label components for this product
-              </p>
-              <PageInfoDialog
-                title="Label Components"
-                content="Add and organize label components such as labels, tags, stickers, and packaging materials for your product."
-              />
-            </div>
-            <AddComponentDialog
-              productId={productId as string}
-              isSubmitted={isSubmitted}
-            />
-          </div>
-          <ProductComponentDetailsTable
-            data={components}
-            isSubmitted={isSubmitted}
-            isRedlineView={isRedlineView}
-          />
-        </div>
-      </div>
+      <ProductComponentDetailsTable
+        data={components}
+        productId={productId as string}
+        isSubmitted={isSubmitted}
+        isRedlineView={isRedlineView}
+      />
     </div>
   );
 }

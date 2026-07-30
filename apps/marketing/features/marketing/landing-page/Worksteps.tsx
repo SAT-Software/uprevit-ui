@@ -1,22 +1,23 @@
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { cn } from "@uprevit/ui/lib/utils";
 import { useState, useRef, useEffect } from "react";
+import type { IconSvgElement } from "@hugeicons/react";
 import {
-  PiCheckCircleDuotone,
-  PiCircleDuotone,
-  PiSpinnerGapDuotone,
-  PiFileCloudDuotone,
-  PiDatabaseDuotone,
-  PiTagDuotone,
-  PiShieldCheckDuotone,
-  PiCircuitryDuotone,
-} from "react-icons/pi";
+  CheckmarkCircle01Icon,
+  CircuitBoardIcon,
+  CloudUploadIcon,
+  FileDatabaseIcon,
+  Loading03Icon,
+  Tag01Icon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 
 interface Step {
   title: string;
   description: string;
   status: "Completed" | "In Progress" | "Pending";
-  icon: React.ElementType;
+  icon: IconSvgElement;
 }
 
 interface WorkstepsProps {
@@ -29,31 +30,31 @@ export function Worksteps({ className }: WorkstepsProps) {
       title: "Upload Source Files",
       description: "Syncing all source files to the secure vault",
       status: "Pending",
-      icon: PiFileCloudDuotone,
+      icon: CloudUploadIcon,
     },
     {
       title: "Import Technical Data",
       description: "Processing specs and technical parameters",
       status: "Pending",
-      icon: PiDatabaseDuotone,
+      icon: FileDatabaseIcon,
     },
     {
       title: "Upload Labels",
       description: "Verifying label compliance and formats",
       status: "Pending",
-      icon: PiTagDuotone,
+      icon: Tag01Icon,
     },
     {
       title: "Add Compliance Info",
       description: "Updating regulatory standards databases",
       status: "Pending",
-      icon: PiShieldCheckDuotone,
+      icon: UserShield01Icon,
     },
     {
       title: "Upload Symbols",
       description: "Finalizing schematic diagrams and symbols",
       status: "Pending",
-      icon: PiCircuitryDuotone,
+      icon: CircuitBoardIcon,
     },
   ];
 
@@ -98,8 +99,8 @@ export function Worksteps({ className }: WorkstepsProps) {
       onMouseEnter={updatedSteps}
       onMouseLeave={resetSteps}
       className={cn(
-        "w-full h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border flex flex-col items-start justify-start relative overflow-hidden",
-        className
+        "w-full h-125 lg:h-full group bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col items-start justify-start relative overflow-hidden",
+        className,
       )}
     >
       <div className="mb-8 z-10 relative">
@@ -135,21 +136,25 @@ export function Worksteps({ className }: WorkstepsProps) {
                     isCompleted
                       ? "group-hover:bg-purple-50 group-hover:dark:bg-purple-950 text-muted-foreground border-border group-hover:text-primary group-hover:dark:text-foreground transition-all duration-300 delay-100 ease-in-out"
                       : isInProgress
-                      ? "bg-accent border-border text-blue-500"
-                      : "bg-background border-border text-muted-foreground"
-                    // index === 0 &&
-                    //   "group-hover:bg-purple-50 text-muted-foreground border-border group-hover:text-primary transition-all duration-100 delay-100 ease-in-out",
-                    // index === 1 &&
-                    //   "group-hover:bg-purple-50 text-muted-foreground border-border group-hover:text-primary transition-all duration-200 delay-150 ease-in-out",
-                    // index === 2 &&
-                    //   "group-hover:bg-purple-50 text-muted-foreground border-border group-hover:text-primary transition-all duration-200 delay-200 ease-in-out"
+                        ? "bg-accent border-border text-blue-500"
+                        : "bg-background border-border text-muted-foreground",
                   )}
                 >
                   {isCompleted && (
-                    <PiCheckCircleDuotone className="w-5 h-5 transition-all delay-100 ease-in-out duration-300" />
+                    <Icon
+                      icon={CheckmarkCircle01Icon}
+                      size={20}
+                      strokeWidth={2}
+                      className="transition-all delay-100 ease-in-out duration-300"
+                    />
                   )}
                   {isInProgress && (
-                    <PiSpinnerGapDuotone className="w-5 h-5 animate-spin" />
+                    <Icon
+                      icon={Loading03Icon}
+                      size={20}
+                      strokeWidth={2}
+                      className="animate-spin"
+                    />
                   )}
                   {isPending && (
                     <div className="w-2.5 h-2.5 rounded-full bg-border" />
@@ -159,7 +164,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                 <div
                   className={cn(
                     "flex-1 pt-1 transition-all duration-300",
-                    isPending ? "opacity-60" : "opacity-100"
+                    isPending ? "opacity-60" : "opacity-100",
                   )}
                 >
                   <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 mb-0">
@@ -168,7 +173,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                         "text-sm font-semibold transition-colors",
                         isCompleted || isInProgress
                           ? "text-foreground"
-                          : "text-muted-foreground"
+                          : "text-muted-foreground",
                       )}
                     >
                       {step.title}
@@ -180,17 +185,17 @@ export function Worksteps({ className }: WorkstepsProps) {
                         isCompleted
                           ? "bg-primary/10 text-primary border-primary/20"
                           : isInProgress
-                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                          : "bg-muted text-muted-foreground border-border"
+                            ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                            : "bg-muted text-muted-foreground border-border",
                       )}
                     >
                       {step.status}
                     </Badge>
                   </div>
-                   <p className="text-xs text-muted-foreground leading-relaxed max-w-full lg:max-w-[90%]">
-                     {step.description}
-                   </p>
-                 </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed max-w-full lg:max-w-[90%]">
+                    {step.description}
+                  </p>
+                </div>
               </div>
             );
           })}

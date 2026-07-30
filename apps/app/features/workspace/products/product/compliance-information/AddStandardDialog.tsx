@@ -3,28 +3,28 @@
 import { useId, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldError, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import { Textarea } from "@uprevit/ui/components/ui/textarea";
+  InputGroup,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@uprevit/ui/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
-  PiPlusCircleDuotone,
-  PiXCircleDuotone,
-  PiShieldCheckDuotone,
-  PiCheck,
-  PiCaretUpDown,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+  Cancel01Icon,
+  PlusSignSquareIcon,
+  Tick01Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
 import {
   Popover,
   PopoverContent,
@@ -79,15 +79,13 @@ export default function AddStandardDialog({
   const standardSelect = watch("standardSelect");
   const standardInput = watch("standardInput");
 
-  // Get the selected standard's description from COMPLIANCE_STANDARDS
   const selectedStandardData = COMPLIANCE_STANDARDS.find(
-    (s) => s.id === standardSelect
+    (s) => s.id === standardSelect,
   );
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       const standardName = data.standardSelect || data.standardInput;
-      // Use description from selected standard if available, otherwise use manual input
       const standardDescription =
         data.standardSelect && selectedStandardData
           ? selectedStandardData.description
@@ -121,173 +119,209 @@ export default function AddStandardDialog({
     }
   };
 
+  const handleCancel = () => {
+    reset();
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="flex items-center gap-2"
-          disabled={isSubmitted}
-        >
-          <PiPlusCircleDuotone className="w-4 h-4" />
-          Add Standard
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-xl [&>button:last-child]:hidden">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-            <div className="flex items-center gap-2">
-              <PiShieldCheckDuotone className="w-4 h-4" />
-              <span>Add New Standard</span>
-            </div>
-            <DialogClose asChild>
-              <button type="button" className="cursor-pointer">
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Add a new compliance standard by providing standard details.
-        </DialogDescription>
+      <Tooltip>
+        <DialogTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="secondary" disabled={isSubmitted}>
+              <Icon icon={PlusSignSquareIcon} />
+              Add Standard
+            </Button>
+          </TooltipTrigger>
+        </DialogTrigger>
+        <TooltipContent side="bottom">
+          {isSubmitted
+            ? "Submitted products can't be edited"
+            : "Add a new compliance standard"}
+        </TooltipContent>
+      </Tooltip>
+      <AppDialogContent
+        title="Add New Standard"
+        description="Add a new compliance standard by providing standard details."
+        variant="form"
+        size="lg"
+        primaryAction={{
+          label: "Add Standard",
+          loadingLabel: "Adding...",
+          form: `add-standard-form-${id}`,
+          type: "submit",
+          loading: isPending,
+          disabled: isPending || isSubmitted,
+          icon: PlusSignSquareIcon,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          icon: Cancel01Icon,
+          onClick: handleCancel,
+        }}
+      >
         <form
           id={`add-standard-form-${id}`}
-          className="overflow-y-auto"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="p-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-standard-select`}>
-                Standard Number / Regulation
-              </Label>
-
-              {/* Standard Selection Combobox */}
-              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    role="combobox"
-                    aria-expanded={comboboxOpen}
-                    className="w-full justify-between text-foreground/80 font-normal h-9"
-                    disabled={!!standardInput}
-                  >
-                    {standardSelect
-                      ? COMPLIANCE_STANDARDS.find(
-                          (s) => s.id === standardSelect
-                        )?.id
-                      : "Select standard or regulation..."}
-                    <PiCaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0"
-                  onWheel={(e) => e.stopPropagation()}
-                >
-                  <Command>
-                    <CommandInput placeholder="Search standard or regulation..." />
-                    <CommandList className="max-h-64 overflow-y-auto">
-                      <CommandEmpty>No standard found.</CommandEmpty>
-                      <CommandGroup>
-                        {COMPLIANCE_STANDARDS.map((standard) => (
-                          <CommandItem
-                            key={standard.id}
-                            value={standard.id}
-                            onSelect={(currentValue) => {
-                              const selectedStandard =
-                                COMPLIANCE_STANDARDS.find(
-                                  (s) =>
-                                    s.id.toLowerCase() ===
-                                    currentValue.toLowerCase()
-                                );
-
-                              if (selectedStandard) {
-                                const isDeselecting =
-                                  selectedStandard.id === standardSelect;
-                                setValue(
-                                  "standardSelect",
-                                  isDeselecting ? "" : selectedStandard.id,
-                                  { shouldValidate: true }
-                                );
-                                clearErrors("standardInput");
-                                setValue(
-                                  "description",
-                                  isDeselecting
-                                    ? ""
-                                    : selectedStandard.description
-                                );
-                                setComboboxOpen(false);
-                              }
-                            }}
-                          >
-                            <PiCheck
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                standardSelect === standard.id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            <div className="flex flex-col">
-                              <span className="font-medium">{standard.id}</span>
-                              <span className="text-[10px] text-muted-foreground uppercase tracking-tight">
-                                {standard.type} • {standard.category} •{" "}
-                                {standard.scope}
-                              </span>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-
-              {/* OR Separator */}
-              <div className="flex items-center gap-2 py-1">
-                <div className="h-0 w-full border-t border-dashed" />
-                <p className="text-[10px] font-light text-muted-foreground uppercase">
-                  OR
-                </p>
-                <div className="h-0 w-full border-t border-dashed" />
-              </div>
-
-              {/* Custom Standard Input */}
+          <FieldGroup className="gap-4 p-4">
+            <div
+              className="space-y-3 rounded-lg border bg-muted/30 p-4"
+              data-invalid={
+                !!(errors.standardSelect || errors.standardInput)
+              }
+            >
+              <FormFieldLabel
+                label="Standard Number / Regulation"
+                tooltip="Regulatory standard or certification for this product. Choose one option: select from the catalog or enter a custom designation."
+              />
               <div className="space-y-2">
-                <Label htmlFor={`${id}-standard-custom`} className="text-sm">
-                  Enter Custom Standard / Regulation
-                </Label>
-                <Input
-                  id={`${id}-standard-custom`}
-                  placeholder="Enter (e.g., ISO 9001)"
-                  type="text"
-                  disabled={!!standardSelect}
-                  aria-invalid={errors.standardInput ? "true" : "false"}
-                  {...register("standardInput", {
-                    validate: (value) => {
-                      const selectValue = watch("standardSelect");
-                      if (!value && !selectValue) {
-                        return "Standard is required";
-                      }
-                      if (value && value.length < 3) {
-                        return "Standard must be at least 3 characters";
-                      }
-                      return true;
-                    },
-                  })}
-                />
-                {(errors.standardSelect || errors.standardInput) && (
-                  <p role="alert" className="text-xs text-destructive">
-                    Standard or Regulation is required
-                  </p>
-                )}
-              </div>
+                <Field>
+                  <FormFieldLabel
+                    htmlFor={`${id}-standard-select`}
+                    label="Select from list"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id={`${id}-standard-select`}
+                        type="button"
+                        variant="outline"
+                        size="default"
+                        role="combobox"
+                        aria-expanded={comboboxOpen}
+                        className="w-full justify-between font-normal text-foreground/80"
+                        disabled={!!standardInput}
+                      >
+                        {standardSelect
+                          ? COMPLIANCE_STANDARDS.find(
+                              (s) => s.id === standardSelect,
+                            )?.id
+                          : "Select standard..."}
+                        <Icon
+                          icon={UnfoldMoreIcon}
+                          size={16}
+                          className="ml-2 shrink-0 opacity-50"
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] p-0"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search standard or regulation..." />
+                        <CommandList className="max-h-64 overflow-y-auto">
+                          <CommandEmpty>No standard found.</CommandEmpty>
+                          <CommandGroup>
+                            {COMPLIANCE_STANDARDS.map((standard) => (
+                              <CommandItem
+                                key={standard.id}
+                                value={standard.id}
+                                onSelect={(currentValue) => {
+                                  const selectedStandard =
+                                    COMPLIANCE_STANDARDS.find(
+                                      (s) =>
+                                        s.id.toLowerCase() ===
+                                        currentValue.toLowerCase(),
+                                    );
 
-              {/* Show selected standard details if selected from dropdown */}
+                                  if (selectedStandard) {
+                                    const isDeselecting =
+                                      selectedStandard.id === standardSelect;
+                                    setValue(
+                                      "standardSelect",
+                                      isDeselecting ? "" : selectedStandard.id,
+                                      { shouldValidate: true },
+                                    );
+                                    clearErrors("standardInput");
+                                    setValue(
+                                      "description",
+                                      isDeselecting
+                                        ? ""
+                                        : selectedStandard.description,
+                                    );
+                                    setComboboxOpen(false);
+                                  }
+                                }}
+                              >
+                                <Icon
+                                  icon={Tick01Icon}
+                                  size={16}
+                                  className={cn(
+                                    "mr-2",
+                                    standardSelect === standard.id
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    {standard.id}
+                                  </span>
+                                  <span className="text-[10px] uppercase tracking-tight text-muted-foreground">
+                                    {standard.type} • {standard.category} •{" "}
+                                    {standard.scope}
+                                  </span>
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+
+                <div className="flex items-center gap-2 py-1">
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                  <p className="shrink-0 px-2 text-[10px] font-light uppercase text-muted-foreground">
+                    OR
+                  </p>
+                  <div className="h-0 w-full border-t border-dashed border-border" />
+                </div>
+
+                <Field data-invalid={!!errors.standardInput}>
+                  <FormFieldLabel
+                    htmlFor={`${id}-standard-custom`}
+                    label="Enter custom"
+                    className="text-xs text-muted-foreground"
+                  />
+                  <InputGroup size="md" className="bg-background">
+                    <InputGroupInput
+                      id={`${id}-standard-custom`}
+                      placeholder="Enter (e.g., ISO 9001)"
+                      type="text"
+                      disabled={!!standardSelect}
+                      aria-invalid={errors.standardInput ? "true" : "false"}
+                      {...register("standardInput", {
+                        validate: (value) => {
+                          const selectValue = watch("standardSelect");
+                          if (!value && !selectValue) {
+                            return "Standard is required";
+                          }
+                          if (value && value.length < 3) {
+                            return "Standard must be at least 3 characters";
+                          }
+                          return true;
+                        },
+                      })}
+                    />
+                  </InputGroup>
+                </Field>
+              </div>
+              <FieldError
+                errors={[
+                  errors.standardSelect || errors.standardInput
+                    ? { message: "Standard or Regulation is required" }
+                    : undefined,
+                ]}
+              />
+
               {standardSelect && selectedStandardData && (
-                <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/30 p-3 text-xs">
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs dark:border-blue-800/30 dark:bg-blue-950/30">
                   <h4 className="mb-2 font-medium text-blue-900 dark:text-blue-200">
                     Selected Details
                   </h4>
@@ -304,16 +338,15 @@ export default function AddStandardDialog({
                       <span className="font-medium">Scope:</span>{" "}
                       {selectedStandardData.scope}
                     </p>
-                    <p className="mt-2 text-foreground/80 leading-relaxed italic">
+                    <p className="mt-2 italic leading-relaxed text-foreground/80">
                       {selectedStandardData.description}
                     </p>
                   </div>
                 </div>
               )}
 
-              {/* Guidelines for custom input */}
               {!standardSelect && (
-                <div className="rounded-lg bg-muted/50 border border-border p-3 text-xs">
+                <div className="rounded-lg border border-border bg-muted/50 p-3 text-xs">
                   <h4 className="mb-2 font-medium text-foreground">
                     Guidelines
                   </h4>
@@ -330,49 +363,31 @@ export default function AddStandardDialog({
               )}
             </div>
 
-            {/* Description field - always visible for editing */}
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-description`}>Description</Label>
-              <Textarea
-                id={`${id}-description`}
-                placeholder="Describe the standard's purpose, scope, and requirements"
-                className="h-24 resize-none"
-                aria-invalid={errors.description ? "true" : "false"}
-                {...register("description", {
-                  maxLength: {
-                    value: 500,
-                    message: "Description must not exceed 500 characters",
-                  },
-                })}
+            <Field data-invalid={!!errors.description}>
+              <FormFieldLabel
+                htmlFor={`${id}-description`}
+                label="Description"
+                tooltip="Describe the standard's purpose, scope, and requirements."
               />
-              {errors.description && (
-                <p role="alert" className="text-xs text-destructive">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-          </div>
+              <InputGroup size="md" className="bg-background">
+                <InputGroupTextarea
+                  id={`${id}-description`}
+                  placeholder="Describe the standard's purpose, scope, and requirements"
+                  className="min-h-24 resize-none"
+                  aria-invalid={errors.description ? "true" : "false"}
+                  {...register("description", {
+                    maxLength: {
+                      value: 500,
+                      message: "Description must not exceed 500 characters",
+                    },
+                  })}
+                />
+              </InputGroup>
+              <FieldError errors={[errors.description]} />
+            </Field>
+          </FieldGroup>
         </form>
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            size="sm"
-            variant="default"
-            form={`add-standard-form-${id}`}
-            disabled={isPending}
-            aria-busy={isPending}
-          >
-            {isPending ? <Spinner /> : <PiPlusCircleDuotone />}
-            {isPending ? "Adding..." : "Add Standard"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

@@ -1,22 +1,9 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@uprevit/ui/components/ui/alert-dialog";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@uprevit/ui/components/ui/collapsible";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import { Label } from "@uprevit/ui/components/ui/label";
 import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
   Tooltip,
@@ -24,14 +11,17 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
-import { cn } from "@uprevit/ui/lib/utils";
-import { useMemo, useState } from "react";
 import {
-  PiCaretRightDuotone,
-  PiPencilSimpleDuotone,
-  PiPlusCircleDuotone,
-  PiTrashDuotone,
-} from "react-icons/pi";
+  Add01Icon,
+  Alert01Icon,
+  Cancel01Icon,
+  Delete02Icon,
+  Layers01Icon,
+  PropertyEditIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
+import { useMemo, useState } from "react";
 import { LegendDialog } from "./LegendDialog";
 import { LegendSwatch } from "./LegendSwatch";
 import { LegendFormValues, LegendItem } from "./legendTypes";
@@ -53,7 +43,6 @@ export function LegendPanel({
   overlayEnabled,
   onOverlayToggle,
 }: LegendPanelProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
   const [editingItem, setEditingItem] = useState<LegendItem | null>(null);
@@ -116,7 +105,7 @@ export function LegendPanel({
 
   const currentDefaults = useMemo(() => {
     if (!editingItem) return null;
-    const { id, ...rest } = editingItem;
+    const { id: _id, ...rest } = editingItem;
     return rest;
   }, [editingItem]);
 
@@ -125,12 +114,7 @@ export function LegendPanel({
   }`;
 
   return (
-    <div
-      className={cn(
-        "w-full lg:shrink-0 transition-all",
-        isCollapsed ? "lg:w-12" : "lg:w-[260px] xl:w-[280px]",
-      )}
-    >
+    <div className="flex h-full min-h-0 flex-col bg-muted/10">
       <LegendDialog
         key={dialogKey}
         open={dialogOpen}
@@ -141,194 +125,174 @@ export function LegendPanel({
         disabled={!canEdit}
       />
 
-      <div className="rounded-xl border border-border bg-muted/20">
-        <Collapsible
-          open={!isCollapsed}
-          onOpenChange={(open) => setIsCollapsed(!open)}
-        >
-          <div
-            className={cn(
-              "flex items-center border-b border-border px-3 py-2",
-              isCollapsed ? "justify-center" : "justify-between",
-            )}
-          >
-            <div className="flex items-center gap-2">
-              {/* <PiListDuotone className="text-muted-foreground" /> */}
-              {!isCollapsed && (
-                <span className="text-sm font-semibold">Legend</span>
-              )}
-            </div>
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 px-3">
+        <div className="flex items-center gap-2">
+          <Icon
+            icon={Layers01Icon}
+            size={14}
+            strokeWidth={2}
+            className="text-muted-foreground"
+          />
+          <span className="text-sm font-medium">Legend</span>
+        </div>
 
-            <div className="flex items-center gap-2">
-              {!isCollapsed && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={overlayEnabled}
-                      onCheckedChange={onOverlayToggle}
-                    />
-                    <span className="text-[11px] text-muted-foreground">
-                      Overlay
-                    </span>
-                  </div>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="default"
-                        size="icon-sm"
-                        className="p-1 h-6 w-6"
-                        onClick={openAddDialog}
-                        disabled={!canEdit}
-                      >
-                        <PiPlusCircleDuotone />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Add legend item</TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
-
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  className="p-1 h-6 w-6"
-                >
-                  <PiCaretRightDuotone
-                    className={cn(
-                      "transition-transform",
-                      !isCollapsed && "rotate-90",
-                    )}
-                  />
-                </Button>
-              </CollapsibleTrigger>
-            </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Switch
+              id={`legend-overlay-${labelTagId}`}
+              checked={overlayEnabled}
+              onCheckedChange={onOverlayToggle}
+              className="scale-90"
+            />
+            <Label
+              htmlFor={`legend-overlay-${labelTagId}`}
+              className="text-[11px] font-normal text-muted-foreground"
+            >
+              Overlay
+            </Label>
           </div>
 
-          <CollapsibleContent>
-            <div className="p-3">
-              {legendItems.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border bg-background/60 p-2 text-center">
-                  <p className="text-xs font-medium text-foreground">
-                    No legend items yet
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Add shapes and notes to explain annotations.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {legendItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group flex items-center gap-2 rounded-lg border border-transparent px-2 py-2 w-full hover:border-border hover:bg-muted/40"
-                    >
-                          <LegendSwatch item={item} size={20} />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium text-foreground">
-                              {item.text}
-                            </p>
-                            <p className="truncate text-[10px] text-muted-foreground capitalize">
-                              {item.shape}
-                            </p>
-                          </div>
-                          {isEditable && (
-                            <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={() => openEditDialog(item)}
-                                disabled={!canEdit}
-                              >
-                                <PiPencilSimpleDuotone />
-                              </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon-2xs"
+                onClick={openAddDialog}
+                disabled={!canEdit}
+                aria-label="Add legend item"
+              >
+                <Icon icon={Add01Icon} size={14} strokeWidth={2} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Add legend item</TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
 
-                              <AlertDialog
-                                open={deleteDialogId === item.id}
-                                onOpenChange={(open) => {
-                                  if (isDeleting) return;
-                                  setDeleteDialogId(open ? item.id : null);
-                                }}
-                              >
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    disabled={!canEdit}
-                                    className="text-destructive hover:text-destructive"
-                                  >
-                                    <PiTrashDuotone />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-sm">
-                                  <AlertDialogHeader className="contents space-y-0 text-left">
-                                    <AlertDialogTitle className="border-b px-4 py-4 text-sm bg-destructive/10">
-                                      <span className="text-destructive font-semibold">
-                                        Delete legend item
-                                      </span>
-                                    </AlertDialogTitle>
-                                  </AlertDialogHeader>
-                                  <div className="p-4">
-                                    <AlertDialogDescription className="text-sm text-muted-foreground">
-                                      You are about to permanently delete
-                                      <span className="font-semibold text-foreground">
-                                        {" "}
-                                        &quot;{item.text}&quot;{" "}
-                                      </span>
-                                      from this legend. This action cannot be
-                                      undone.
-                                    </AlertDialogDescription>
-                                  </div>
-                                  <AlertDialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-                                    <AlertDialogCancel asChild>
-                                      <Button
-                                        type="button"
-                                        variant="secondary"
-                                        size="sm"
-                                        disabled={isDeleting}
-                                      >
-                                        Cancel
-                                      </Button>
-                                    </AlertDialogCancel>
-                                    <Button
-                                      type="button"
-                                      variant="destructive"
-                                      size="sm"
-                                      disabled={isDeleting}
-                                      aria-busy={isDeleting}
-                                      onClick={async () => {
-                                        setIsDeleting(true);
-                                        const success = await handleDelete(
-                                          item.id,
-                                        );
-                                        if (success) {
-                                          setDeleteDialogId(null);
-                                        }
-                                        setIsDeleting(false);
-                                      }}
-                                    >
-                                      {isDeleting ? (
-                                        <Spinner />
-                                      ) : (
-                                        <PiTrashDuotone />
-                                      )}
-                                      {isDeleting
-                                        ? "Deleting..."
-                                        : "Delete Legend"}
-                                    </Button>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          )}
-                    </div>
-                  ))}
-                </div>
-              )}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <ScrollArea className="size-full" scrollFade={10}>
+          <div className="p-2">
+          {legendItems.length === 0 ? (
+            <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background/60 px-4 py-8 text-center">
+              <Icon
+                icon={Layers01Icon}
+                size={24}
+                strokeWidth={1.5}
+                className="text-muted-foreground/40"
+              />
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-foreground">
+                  No legend items yet
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Add shapes and notes to explain annotations.
+                </p>
+              </div>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+          ) : (
+            <div className="space-y-1.5">
+              {legendItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="group flex items-center gap-2.5 rounded-lg border border-border/60 bg-background px-2.5 py-2 transition-colors hover:border-border hover:bg-muted/30"
+                >
+                  <LegendSwatch item={item} size={18} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium text-foreground">
+                      {item.text}
+                    </p>
+                    <p className="truncate text-[10px] capitalize text-muted-foreground">
+                      {item.shape}
+                    </p>
+                  </div>
+                  {isEditable && (
+                    <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => openEditDialog(item)}
+                        disabled={!canEdit}
+                        aria-label={`Edit ${item.text}`}
+                      >
+                        <Icon
+                          icon={PropertyEditIcon}
+                          size={14}
+                          strokeWidth={2}
+                        />
+                      </Button>
+
+                      <Dialog
+                        open={deleteDialogId === item.id}
+                        onOpenChange={(open) => {
+                          if (isDeleting) return;
+                          setDeleteDialogId(open ? item.id : null);
+                        }}
+                      >
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            disabled={!canEdit}
+                            className="text-destructive hover:text-destructive"
+                            aria-label={`Delete ${item.text}`}
+                          >
+                            <Icon
+                              icon={Delete02Icon}
+                              size={14}
+                              strokeWidth={2}
+                            />
+                          </Button>
+                        </DialogTrigger>
+                        <AppDialogContent
+                          title="Delete Legend Item"
+                          description="Delete this legend item. This action cannot be undone."
+                          variant="confirm-destructive"
+                          size="sm"
+                          confirmContent={{
+                            heading: "Are you sure?",
+                            message: (
+                              <>
+                                You are about to permanently delete
+                                <span className="font-semibold text-foreground">
+                                  {" "}
+                                  &quot;{item.text}&quot;{" "}
+                                </span>
+                                from this legend. This action cannot be undone.
+                              </>
+                            ),
+                            icon: Alert01Icon,
+                          }}
+                          primaryAction={{
+                            label: "Delete Legend",
+                            loadingLabel: "Deleting...",
+                            loading: isDeleting,
+                            disabled: isDeleting,
+                            icon: Delete02Icon,
+                            variant: "destructive",
+                            onClick: async () => {
+                              setIsDeleting(true);
+                              const success = await handleDelete(item.id);
+                              if (success) {
+                                setDeleteDialogId(null);
+                              }
+                              setIsDeleting(false);
+                            },
+                          }}
+                          secondaryAction={{
+                            label: "Cancel",
+                            disabled: isDeleting,
+                            icon: Cancel01Icon,
+                          }}
+                        />
+                      </Dialog>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );

@@ -1,18 +1,12 @@
+"use client";
+
+import { useId } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Button } from "@uprevit/ui/components/ui/button";
-import { Label } from "@uprevit/ui/components/ui/label";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -22,13 +16,13 @@ import {
 } from "@uprevit/ui/components/ui/select";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
 import { useBookmarkProduct } from "@/hooks/product/useBookmarkProduct";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
-  PiBookmarkSimpleDuotone,
-  PiFolderDuotone,
-  PiXCircleDuotone,
-  PiCheckCircleDuotone,
-} from "react-icons/pi";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Folder02Icon,
+} from "@hugeicons/core-free-icons";
 
 interface FormValues {
   folderId: string;
@@ -48,6 +42,7 @@ export default function DialogBookmarkProduct({
   };
   children?: React.ReactNode;
 }) {
+  const id = useId();
   const { data, isLoading, error } = useGetAllUserBookmarkFolders();
   const bookmarkFolders = data?.result?.bookmarked_product_folders ?? [];
   const bookmarkProduct = useBookmarkProduct();
@@ -67,6 +62,7 @@ export default function DialogBookmarkProduct({
     mode: "onSubmit",
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedFolderId = watch("folderId");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -77,64 +73,70 @@ export default function DialogBookmarkProduct({
         product_id: product._id,
         folder_id: data.folderId,
       });
-      // Reset form and close dialog on success
       reset();
       onOpenChange?.(false);
     } catch (error) {
-      // Error is handled by the mutation's onError callback
       console.error("Failed to bookmark product:", error);
     }
   };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // Reset form when dialog closes
       reset();
     }
     onOpenChange?.(open);
   };
 
   const dialogContent = (
-    <>
-      <DialogHeader className="contents space-y-0 text-left">
-        <DialogTitle className="border-b px-4 py-4 text-sm bg-accent flex w-full justify-between items-center">
-          <p>Add to Bookmarks</p>
-          <DialogClose asChild>
-            <button type="button" className="cursor-pointer">
-              <PiXCircleDuotone size={18} />
-            </button>
-          </DialogClose>
-        </DialogTitle>
-      </DialogHeader>
-      <DialogDescription className="sr-only">
-        Choose a folder to save this product to your bookmarks.
-      </DialogDescription>
-
+    <AppDialogContent
+      title="Add to Bookmarks"
+      description="Choose a folder to save this product to your bookmarks."
+      variant="form"
+      size="md"
+      primaryAction={{
+        label: "Add to Bookmarks",
+        loadingLabel: "Adding...",
+        form: `bookmark-product-form-${id}`,
+        type: "submit",
+        loading: bookmarkProduct.isPending,
+        disabled: !selectedFolderId || bookmarkProduct.isPending,
+        icon: CheckmarkCircle01Icon,
+      }}
+      secondaryAction={{
+        label: "Cancel",
+        icon: Cancel01Icon,
+      }}
+    >
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(onSubmit)(e);
-        }}
+        id={`bookmark-product-form-${id}`}
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
       >
-        <div className="p-4 space-y-4">
-          {product?.product_name && (
-            <div className="rounded-lg border p-3 bg-muted/50">
-              <h4 className="font-medium text-sm">{product.product_name}</h4>
-              <p className="text-xs text-muted-foreground mt-1">
+        <FieldGroup className="gap-4 p-4">
+          {product?.product_name ? (
+            <div className="rounded-lg border bg-muted/50 p-3">
+              <h4 className="text-sm font-medium">{product.product_name}</h4>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Product ID: {product._id}
               </p>
             </div>
-          )}
+          ) : null}
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              Select Bookmark Folder
-            </Label>
+          <Field data-invalid={!!errors.folderId}>
+            <FormFieldLabel
+              htmlFor={`${id}-folder`}
+              label="Select Bookmark Folder"
+              tooltip="Choose a folder to organize this bookmarked product."
+            />
             <Select
               value={selectedFolderId}
               onValueChange={(value) => setValue("folderId", value)}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger
+                id={`${id}-folder`}
+                size="md"
+                className="w-full bg-background"
+              >
                 <SelectValue placeholder="Choose a folder..." />
               </SelectTrigger>
               <SelectContent>
@@ -158,57 +160,41 @@ export default function DialogBookmarkProduct({
                       products: string[];
                     }) => (
                       <SelectItem key={folder._id} value={folder._id}>
-                        <div className="flex items-center gap-2 w-full">
-                          <PiFolderDuotone
+                        <div className="flex w-full items-center gap-2">
+                          <Icon
+                            icon={Folder02Icon}
                             size={16}
                             className="text-muted-foreground"
                           />
                           <span className="flex-1">{folder.folder_name}</span>
-                          <span className="text-xs text-muted-foreground ml-auto">
+                          <span className="ml-auto text-xs text-muted-foreground">
                             {folder.products.length || 0} items
                           </span>
                         </div>
                       </SelectItem>
-                    )
+                    ),
                   )
                 )}
               </SelectContent>
             </Select>
-            {errors.folderId && (
-              <p className="text-sm text-destructive">
-                {errors.folderId.message}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            size="sm"
-            variant="default"
-            disabled={!selectedFolderId || bookmarkProduct.isPending}
-          >
-            {bookmarkProduct.isPending ? <Spinner /> : <PiCheckCircleDuotone />}
-            {bookmarkProduct.isPending ? "Adding..." : "Add to Bookmarks"}
-          </Button>
-        </DialogFooter>
+          </Field>
+        </FieldGroup>
       </form>
-    </>
+    </AppDialogContent>
   );
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md [&>button:last-child]:top-3.5">
+  if (open !== undefined && onOpenChange !== undefined) {
+    return (
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         {dialogContent}
-      </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Dialog onOpenChange={handleOpenChange}>
+      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
+      {dialogContent}
     </Dialog>
   );
 }

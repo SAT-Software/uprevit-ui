@@ -1,26 +1,24 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Input } from "@uprevit/ui/components/ui/input";
-import { Label } from "@uprevit/ui/components/ui/label";
-import {
-  PiTrashDuotone,
-  PiXCircleDuotone,
-  PiWarningCircleDuotone,
-} from "react-icons/pi";
-import { useDeleteBookmarkFolder } from "@/hooks/bookmark/useDeleteBookmarkFolder";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@uprevit/ui/components/ui/spinner";
+
+import { Button } from "@uprevit/ui/components/ui/button";
+import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
+import {
+  InputGroup,
+  InputGroupInput,
+} from "@uprevit/ui/components/ui/input-group";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Alert01Icon,
+  Cancel01Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
+import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { useDeleteBookmarkFolder } from "@/hooks/bookmark/useDeleteBookmarkFolder";
 
 interface DialogDeleteBookmarkFolderProps {
   folderId: string;
@@ -40,7 +38,11 @@ export default function DialogDeleteBookmarkFolder({
 
   const { mutate: deleteFolder, isPending } = useDeleteBookmarkFolder();
 
+  const disabled = value !== folderName || isPending;
+
   function handleConfirm() {
+    if (disabled) return;
+
     deleteFolder(folderId, {
       onSuccess: () => {
         router.push("/bookmarked-products");
@@ -48,93 +50,74 @@ export default function DialogDeleteBookmarkFolder({
     });
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setValue("");
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="destructive" size="sm">
-            <PiTrashDuotone />
+            <Icon icon={Delete02Icon} />
             Delete
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-md">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-4 py-4 text-sm bg-accent/60 flex w-full justify-between items-center text-foreground">
-            <div className="flex items-center gap-2">
-              <PiTrashDuotone />
-              <p>Delete Bookmark Folder</p>
-            </div>
-            <DialogClose asChild>
-              <button
-                type="button"
-                className="cursor-pointer text-destructive/80 hover:text-destructive transition-colors"
-              >
-                <PiXCircleDuotone size={18} />
-              </button>
-            </DialogClose>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="p-4 space-y-4">
-          <div className="flex items-start gap-4 p-4 border border-border bg-accent rounded-lg text-sm">
-            <PiWarningCircleDuotone className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-muted-foreground">
-                You are about to delete the bookmark folder{" "}
-                <span className="font-semibold text-foreground/80">
-                  {folderName}
-                </span>
-                . This action cannot be undone and will remove all products from
-                this folder.
-              </p>
-            </div>
-          </div>
-
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <div className="space-y-2">
-              <Label htmlFor={inputId}>
-                Type &quot;
-                <span className="font-semibold text-foreground/80">
-                  {folderName}
-                </span>
-                &quot; to confirm
-              </Label>
-              <Input
+      <AppDialogContent
+        title="Delete Bookmark Folder"
+        description={`Delete the bookmark folder ${folderName}. This action cannot be undone.`}
+        variant="confirm-destructive"
+        size="md"
+        confirmContent={{
+          heading: "Delete bookmark folder",
+          message: (
+            <>
+              You are about to delete the bookmark folder{" "}
+              <strong>{folderName}</strong>. This action cannot be undone and
+              will remove all products from this folder.
+            </>
+          ),
+          icon: Alert01Icon,
+        }}
+        primaryAction={{
+          label: "Delete Folder",
+          loadingLabel: "Deleting...",
+          onClick: handleConfirm,
+          loading: isPending,
+          disabled,
+          icon: Delete02Icon,
+          variant: "destructive",
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          disabled: isPending,
+          icon: Cancel01Icon,
+        }}
+      >
+        <FieldGroup className="gap-4 px-4 pb-4">
+          <Field>
+            <FormFieldLabel
+              htmlFor={inputId}
+              label="Folder name"
+              tooltip={`Type "${folderName}" to confirm deletion.`}
+            />
+            <InputGroup size="md" className="bg-background">
+              <InputGroupInput
                 id={inputId}
                 type="text"
-                placeholder={folderName}
+                placeholder={`Type ${folderName} to confirm`}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                className=""
+                autoComplete="off"
               />
-            </div>
-          </form>
-        </div>
-
-        <DialogFooter className="border-t border-border bg-muted/10 px-4 py-4 sm:justify-end">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" size="sm">
-              <PiXCircleDuotone className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            disabled={isPending || value !== folderName}
-            onClick={handleConfirm}
-            variant="destructive"
-          >
-            {isPending ? (
-              <Spinner />
-            ) : (
-              <PiTrashDuotone className="w-4 h-4 mr-2" />
-            )}
-            {isPending ? "Deleting..." : "Delete Folder"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+            </InputGroup>
+          </Field>
+        </FieldGroup>
+      </AppDialogContent>
     </Dialog>
   );
 }

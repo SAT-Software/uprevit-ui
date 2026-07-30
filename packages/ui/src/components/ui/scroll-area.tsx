@@ -7,18 +7,40 @@ import { cn } from "@uprevit/ui/lib/utils";
 
 function ScrollArea({
   className,
+  viewportClassName,
+  scrollFade,
+  type = "hover",
   children,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
+}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
+  viewportClassName?: string;
+  scrollFade?: boolean | 6 | 8 | 10 | 12;
+}) {
+  const scrollFadeClassName =
+    scrollFade === false || scrollFade === undefined
+      ? undefined
+      : scrollFade === 6
+        ? "scroll-fade scroll-fade-6"
+        : scrollFade === 10
+          ? "scroll-fade scroll-fade-10"
+          : scrollFade === 12
+            ? "scroll-fade scroll-fade-12"
+            : "scroll-fade scroll-fade-8";
+
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
+      type={type}
       className={cn("relative overflow-hidden", className)}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit]"
+        className={cn(
+          "size-full rounded-[inherit] outline-none",
+          scrollFadeClassName,
+          viewportClassName,
+        )}
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
@@ -43,7 +65,7 @@ function ScrollBar({
           "h-full w-2.5 border-l border-l-transparent p-px",
         orientation === "horizontal" &&
           "h-2.5 flex-col border-t border-t-transparent p-px",
-        className
+        className,
       )}
       {...props}
     >

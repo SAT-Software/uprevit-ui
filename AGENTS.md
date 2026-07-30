@@ -81,7 +81,7 @@ onError: (error) => {
 - Use shadcn/ui components (configured in components.json, style: "new-york")
 - Prefix custom components with the function (e.g., `ArchiveProductDialog`)
 - Use Tailwind CSS with `cn()` utility for conditional classes
-- Icons from react-icons (prefer Pi prefix for Phosphor icons)
+- Icons from `@hugeicons/core-free-icons` via the shared `Icon` wrapper (`@uprevit/ui/components/common/Icon`)
 
 ### Authentication
 
@@ -131,3 +131,7 @@ Located at `../uprevit-backend`:
 - **`@/components/ui`**: shadcn/ui component library
 
 - Billing tab is hidden for the time being, Later on we will introduce a new user group called as manager who can who other stuff and billing, check and download invoices but can't do any other CRUD operation in the app
+
+## TODOs
+
+- **Dashboard activity stats historical attribution (backend):** `src/utils/dashboardActivityStats.ts` currently attributes product activity to the product's *current* department/project and drops archived products from those counts. For true 30-day history, denormalize parent IDs onto audit events at write time (or read historical parents from audit scope) so archive/move does not rewrite earlier activity. Deferred from release `0.6.0` (Greptile PR #161).

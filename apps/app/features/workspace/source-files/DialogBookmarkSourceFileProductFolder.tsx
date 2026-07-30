@@ -1,21 +1,20 @@
-import { PiBookmarkSimpleDuotone, PiCheckDuotone } from "react-icons/pi";
+"use client";
+
 import { useState } from "react";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
+import { Dialog, DialogClose, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { FieldLabel } from "@uprevit/ui/components/ui/field";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@uprevit/ui/components/ui/dialog";
-import { Label } from "@uprevit/ui/components/ui/label";
+  Bookmark01Icon,
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+} from "@hugeicons/core-free-icons";
 
-// Product type definition
 type Product = {
   productId: string;
   productName: string;
@@ -51,7 +50,7 @@ export default function DialogBookmarkSourceFileProductFolder({
   onBookmarkUpdate,
 }: DialogBookmarkSourceFileProductFolderProps) {
   const [selectedProducts, setSelectedProducts] = useState<string[]>(
-    currentBookmarkedProducts.map((p) => p.productId)
+    currentBookmarkedProducts.map((p) => p.productId),
   );
   const [internalOpen, setInternalOpen] = useState<boolean>(false);
 
@@ -61,7 +60,7 @@ export default function DialogBookmarkSourceFileProductFolder({
 
   const handleBookmarkProducts = () => {
     const bookmarkedProducts = allProducts.filter((product) =>
-      selectedProducts.includes(product.productId)
+      selectedProducts.includes(product.productId),
     );
     onBookmarkUpdate?.(bookmarkedProducts);
     onOpenChange?.(false);
@@ -72,7 +71,7 @@ export default function DialogBookmarkSourceFileProductFolder({
     setSelectedProducts((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+        : [...prev, productId],
     );
   };
 
@@ -80,25 +79,46 @@ export default function DialogBookmarkSourceFileProductFolder({
     return currentBookmarkedProducts.some((p) => p.productId === productId);
   };
 
+  const handleClose = () => {
+    onOpenChange?.(false);
+    setInternalOpen(false);
+    handleReset();
+  };
+
   const dialogContent = (
-    <DialogContent className="max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
-          <PiBookmarkSimpleDuotone size={20} />
-          Bookmark Product Folders
-        </DialogTitle>
-        <DialogDescription>
-          Select products to bookmark for quick access. Currently bookmarked
-          products are highlighted.
-        </DialogDescription>
-      </DialogHeader>
-
-      <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-        <Label className="text-sm font-medium">
+    <AppDialogContent
+      title="Bookmark Product Folders"
+      description="Select products to bookmark for quick access. Currently bookmarked products are highlighted."
+      variant="custom"
+      className="sm:max-w-2xl"
+      bodyClassName="overflow-hidden p-0 [&>[data-slot=scroll-area-viewport]]:overflow-hidden"
+      footer={
+        <>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleClose}
+            >
+              <Icon icon={Cancel01Icon} size={16} strokeWidth={2} />
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button type="button" size="sm" onClick={handleBookmarkProducts}>
+            <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
+            Update Bookmarks
+            {selectedProducts.length > 0 ? ` (${selectedProducts.length})` : ""}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex max-h-[400px] flex-col gap-4 overflow-hidden p-4">
+        <FieldLabel className="text-sm font-medium">
           All Products ({selectedProducts.length} selected)
-        </Label>
+        </FieldLabel>
 
-        <div className="flex-1 w-full overflow-y-scroll rounded-md border p-4 max-h-[400px]">
+        <div className="flex-1 overflow-y-auto rounded-md border p-4">
           <div className="space-y-2">
             {allProducts.map((product) => {
               const isBookmarked = isCurrentlyBookmarked(product.productId);
@@ -107,59 +127,60 @@ export default function DialogBookmarkSourceFileProductFolder({
               return (
                 <Card
                   key={product.productId}
-                  className={`cursor-pointer transition-colors h-20 ${
+                  className={`h-20 cursor-pointer transition-colors ${
                     isSelected
                       ? "border-primary bg-primary/10"
                       : isBookmarked
-                      ? "border-blue-300 bg-blue-50"
-                      : "hover:bg-muted/50"
+                        ? "border-blue-300 bg-blue-50"
+                        : "hover:bg-muted/50"
                   }`}
                   onClick={() => handleProductToggle(product.productId)}
                 >
-                  <CardContent className="p-3 h-full">
-                    <div className="flex items-center gap-3 h-full">
+                  <CardContent className="h-full p-3">
+                    <div className="flex h-full items-center gap-3">
                       <Checkbox
                         checked={isSelected}
                         onChange={() => handleProductToggle(product.productId)}
-                        className="flex-shrink-0"
+                        className="shrink-0"
                       />
-                      <div className="flex-1 min-w-0 flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
+                      <div className="flex min-w-0 flex-1 items-center justify-between">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm truncate">
+                            <h4 className="truncate text-sm font-medium">
                               {product.productName}
                             </h4>
-                            <span className="text-xs bg-muted px-2 py-1 rounded flex-shrink-0">
+                            <span className="shrink-0 rounded bg-muted px-2 py-1 text-xs">
                               v{product.version}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="mt-1 flex items-center gap-2">
                             <span
-                              className={`text-xs px-2 py-1 rounded ${
+                              className={`rounded px-2 py-1 text-xs ${
                                 product.status === "Draft"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : product.status === "Submitted"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : product.status === "Archived"
-                                  ? "bg-gray-100 text-gray-800"
-                                  : "bg-green-100 text-green-800"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : product.status === "Archived"
+                                      ? "bg-gray-100 text-gray-800"
+                                      : "bg-green-100 text-green-800"
                               }`}
                             >
                               {product.status}
                             </span>
-                            {isBookmarked && (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {isBookmarked ? (
+                              <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
                                 Currently Bookmarked
                               </span>
-                            )}
+                            ) : null}
                           </div>
                         </div>
-                        {isSelected && (
-                          <PiCheckDuotone
+                        {isSelected ? (
+                          <Icon
+                            icon={CheckmarkCircle01Icon}
                             size={16}
-                            className="text-primary flex-shrink-0 ml-2"
+                            className="ml-2 shrink-0 text-primary"
                           />
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </CardContent>
@@ -169,27 +190,9 @@ export default function DialogBookmarkSourceFileProductFolder({
           </div>
         </div>
       </div>
-
-      <DialogFooter>
-        <Button
-          variant="outline"
-          onClick={() => {
-            onOpenChange?.(false);
-            setInternalOpen(false);
-            handleReset();
-          }}
-        >
-          Cancel
-        </Button>
-        <Button onClick={handleBookmarkProducts}>
-          Update Bookmarks
-          {selectedProducts.length > 0 && ` (${selectedProducts.length})`}
-        </Button>
-      </DialogFooter>
-    </DialogContent>
+    </AppDialogContent>
   );
 
-  // If external state control is provided, use controlled mode
   if (open !== undefined && onOpenChange !== undefined) {
     return (
       <Dialog
@@ -204,7 +207,6 @@ export default function DialogBookmarkSourceFileProductFolder({
     );
   }
 
-  // Original trigger-based mode
   return (
     <Dialog
       open={internalOpen}
@@ -216,7 +218,7 @@ export default function DialogBookmarkSourceFileProductFolder({
       <DialogTrigger asChild>
         {children || (
           <Button variant="outline" className="flex items-center gap-2">
-            <PiBookmarkSimpleDuotone size={16} />
+            <Icon icon={Bookmark01Icon} />
             Bookmark Products
           </Button>
         )}

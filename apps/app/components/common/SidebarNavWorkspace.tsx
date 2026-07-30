@@ -1,6 +1,20 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@uprevit/ui/components/ui/avatar";
+import type { Workspace } from "@/types/workspace";
+import {
+  ArrowDown01Icon,
+  ComputerIcon,
+  MenuSquareIcon,
+  Moon02Icon,
+  Settings01Icon,
+  Sun01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@uprevit/ui/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,17 +35,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@uprevit/ui/components/ui/sidebar";
-import Link from "next/link";
 import { useTheme } from "next-themes";
-import {
-  PiDesktopDuotone,
-  PiDotsThreeOutlineVerticalDuotone,
-  PiGearDuotone,
-  PiMoonDuotone,
-  PiSquaresFourDuotone,
-  PiSunDuotone,
-} from "react-icons/pi";
-import type { Workspace } from "@/types/workspace";
+import Link from "next/link";
 
 export function SidebarNavWorkspace({
   workspace,
@@ -48,15 +53,15 @@ export function SidebarNavWorkspace({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="border border-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:border-sidebar-border data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8  grayscale">
                 <AvatarImage
                   src={workspace?.logo}
                   alt={workspace?.workspaceName}
                 />
-                <AvatarFallback className="rounded-lg">
-                  <PiSquaresFourDuotone size={20} />
+                <AvatarFallback>
+                  <Icon icon={MenuSquareIcon} size={16} strokeWidth={2} />
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -67,24 +72,29 @@ export function SidebarNavWorkspace({
                   {workspace?.companyName}
                 </span>
               </div>
-              <PiDotsThreeOutlineVerticalDuotone className="ml-auto size-4" />
+              <Icon
+                className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                icon={ArrowDown01Icon}
+                size={16}
+                strokeWidth={2}
+              />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-8 w-8 ">
                   <AvatarImage
                     src={workspace?.logo}
                     alt={workspace?.workspaceName}
                   />
-                  <AvatarFallback className="rounded-lg">
-                    <PiSquaresFourDuotone size={20} />
+                  <AvatarFallback className="">
+                    <Icon icon={MenuSquareIcon} size={16} strokeWidth={2} />
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -100,23 +110,36 @@ export function SidebarNavWorkspace({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-2 [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0">
-                  <PiSunDuotone className="dark:hidden" />
-                  <PiMoonDuotone className="hidden dark:block" />
+                <DropdownMenuSubTrigger className="gap-2">
+                  <Icon
+                    icon={Sun01Icon}
+                    size={16}
+                    strokeWidth={2}
+                    className="dark:hidden"
+                  />
+                  <Icon
+                    icon={Moon02Icon}
+                    size={16}
+                    strokeWidth={2}
+                    className="hidden dark:block"
+                  />
                   Theme
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                  <DropdownMenuRadioGroup
+                    value={theme}
+                    onValueChange={setTheme}
+                  >
                     <DropdownMenuRadioItem value="light">
-                      <PiSunDuotone />
+                      <Icon icon={Sun01Icon} size={16} strokeWidth={2} />
                       Light
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="dark">
-                      <PiMoonDuotone />
+                      <Icon icon={Moon02Icon} size={16} strokeWidth={2} />
                       Dark
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="system">
-                      <PiDesktopDuotone />
+                      <Icon icon={ComputerIcon} size={16} strokeWidth={2} />
                       System
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
@@ -124,7 +147,7 @@ export function SidebarNavWorkspace({
               </DropdownMenuSub>
               <DropdownMenuItem asChild>
                 <Link href={`/settings?tab=workspace`}>
-                  <PiGearDuotone />
+                  <Icon icon={Settings01Icon} size={16} strokeWidth={2} />
                   Settings
                 </Link>
               </DropdownMenuItem>
