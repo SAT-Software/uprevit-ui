@@ -9,6 +9,10 @@ applications:
             - curl -fsSL https://bun.sh/install | bash
             - export BUN_INSTALL="$HOME/.bun"
             - export PATH="$BUN_INSTALL/bin:$PATH"
+            # Drop cached node_modules so workspace packages (e.g. @uprevit/ui exports)
+            # are always re-linked from the current commit. Stale caches can omit new
+            # package exports like ./components/common/Icon and break Amplify builds.
+            - rm -rf node_modules apps/*/node_modules packages/*/node_modules
             - bun install --frozen-lockfile
         build:
           commands:
@@ -21,7 +25,7 @@ applications:
           - "**/*"
       cache:
         paths:
-          - node_modules/**/*
+          - .bun/install/cache/**/*
           - .turbo/**/*
           - apps/app/.next/cache/**/*
 
@@ -34,6 +38,7 @@ applications:
             - curl -fsSL https://bun.sh/install | bash
             - export BUN_INSTALL="$HOME/.bun"
             - export PATH="$BUN_INSTALL/bin:$PATH"
+            - rm -rf node_modules apps/*/node_modules packages/*/node_modules
             - bun install --frozen-lockfile
         build:
           commands:
@@ -46,6 +51,6 @@ applications:
           - "**/*"
       cache:
         paths:
-          - node_modules/**/*
+          - .bun/install/cache/**/*
           - .turbo/**/*
           - apps/marketing/.next/cache/**/*

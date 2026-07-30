@@ -14,7 +14,7 @@ import {
   Moon02Icon,
   Sun01Icon,
 } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Icon } from "./Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 
 const darkSurfaceTrigger =
