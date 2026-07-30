@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-07-30
+
+### Fixed
+
+- Fixed Amplify production builds failing to resolve `@uprevit/ui/components/common/Icon` by clearing stale `node_modules` before install and stopping Amplify from caching workspace `node_modules`.
+- Fixed `@uprevit/ui` package exports to include a `components/common/*` wildcard so shared common components resolve reliably.
+- Updated `ThemeToggle` to import `Icon` via a relative path inside the UI package.
+- Updated monorepo package versions to `0.6.1`.
+
 ## [0.6.0] - 2026-07-29
 
 ### Added
