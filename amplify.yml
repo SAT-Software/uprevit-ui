@@ -6,26 +6,28 @@ applications:
       phases:
         preBuild:
           commands:
-            - curl -fsSL https://bun.sh/install | bash
-            - export BUN_INSTALL="$HOME/.bun"
-            - export PATH="$BUN_INSTALL/bin:$PATH"
+            - nvm use 22
+            - curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=11.21.0 sh -
+            - export PNPM_HOME="$HOME/.local/share/pnpm"
+            - export PATH="$PNPM_HOME:$PATH"
             # Drop cached node_modules so workspace packages (e.g. @uprevit/ui exports)
             # are always re-linked from the current commit. Stale caches can omit new
             # package exports like ./components/common/Icon and break Amplify builds.
             - rm -rf node_modules apps/*/node_modules packages/*/node_modules
-            - bun install --frozen-lockfile
+            - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
           commands:
-            - export BUN_INSTALL="$HOME/.bun"
-            - export PATH="$BUN_INSTALL/bin:$PATH"
-            - bun run --cwd apps/app build
+            - nvm use 22
+            - export PNPM_HOME="$HOME/.local/share/pnpm"
+            - export PATH="$PNPM_HOME:$PATH"
+            - pnpm run build:app
       artifacts:
         baseDirectory: apps/app/.next
         files:
           - "**/*"
       cache:
         paths:
-          - .bun/install/cache/**/*
+          - .pnpm-store/**/*
           - .turbo/**/*
           - apps/app/.next/cache/**/*
 
@@ -35,22 +37,24 @@ applications:
       phases:
         preBuild:
           commands:
-            - curl -fsSL https://bun.sh/install | bash
-            - export BUN_INSTALL="$HOME/.bun"
-            - export PATH="$BUN_INSTALL/bin:$PATH"
+            - nvm use 22
+            - curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=11.21.0 sh -
+            - export PNPM_HOME="$HOME/.local/share/pnpm"
+            - export PATH="$PNPM_HOME:$PATH"
             - rm -rf node_modules apps/*/node_modules packages/*/node_modules
-            - bun install --frozen-lockfile
+            - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
           commands:
-            - export BUN_INSTALL="$HOME/.bun"
-            - export PATH="$BUN_INSTALL/bin:$PATH"
-            - bun run --cwd apps/marketing build
+            - nvm use 22
+            - export PNPM_HOME="$HOME/.local/share/pnpm"
+            - export PATH="$PNPM_HOME:$PATH"
+            - pnpm run build:marketing
       artifacts:
         baseDirectory: apps/marketing/.next
         files:
           - "**/*"
       cache:
         paths:
-          - .bun/install/cache/**/*
+          - .pnpm-store/**/*
           - .turbo/**/*
           - apps/marketing/.next/cache/**/*

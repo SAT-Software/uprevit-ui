@@ -2,7 +2,7 @@
 
 This guide provides instructions and conventions for agents operating in the uprevit-ui repository.
 
-- Use Bun not npm or npx
+- Use PNPM not npm or npx
 - Use git flow for branching strategis
 - While creating file and folders look at the similar exsisting ones on how we write thier name and where do we place them
 - Use shadcn/ui components
