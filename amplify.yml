@@ -7,7 +7,8 @@ applications:
         preBuild:
           commands:
             - nvm use 22
-            - npm install -g pnpm@11.21.0
+            - corepack enable pnpm
+            - corepack install
             # Drop cached node_modules so workspace packages (e.g. @uprevit/ui exports)
             # are always re-linked from the current commit. Stale caches can omit new
             # package exports like ./components/common/Icon and break Amplify builds.
@@ -34,7 +35,8 @@ applications:
         preBuild:
           commands:
             - nvm use 22
-            - npm install -g pnpm@11.21.0
+            - corepack enable pnpm
+            - corepack install
             - rm -rf node_modules apps/*/node_modules packages/*/node_modules
             - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
