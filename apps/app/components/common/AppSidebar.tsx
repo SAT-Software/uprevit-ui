@@ -418,7 +418,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <GuardedLink
                         href={item.url}
                         aria-current={
-                          pathname.startsWith(item.url) ? "page" : undefined
+                          pathname === item.url
+                            ? "page"
+                            : pathname.startsWith(item.url)
+                              ? "true"
+                              : undefined
                         }
                         className="flex items-center gap-2"
                       >

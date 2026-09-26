@@ -5,6 +5,7 @@ import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircle } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { Archive01Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 import { MediaPlayToggle } from "@/components/MediaPlayToggle";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
@@ -15,14 +16,20 @@ export default function ReportSection() {
   // null until the visitor toggles; defaults to their motion preference.
   const [userPlaying, setUserPlaying] = useState<boolean | null>(null);
   const playing = userPlaying ?? !reduceMotion;
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
-    for (const video of [lightRef.current, darkRef.current]) {
-      if (!video) continue;
-      if (playing) video.play().catch(() => setUserPlaying(false));
-      else video.pause();
-    }
-  }, [playing]);
+    if (!resolvedTheme) return;
+    // Only the video for the active theme is visible, so only it plays.
+    const isDark = resolvedTheme === "dark";
+    const active = isDark ? darkRef.current : lightRef.current;
+    const hidden = isDark ? lightRef.current : darkRef.current;
+
+    hidden?.pause();
+    if (!active) return;
+    if (playing) active.play().catch(() => setUserPlaying(false));
+    else active.pause();
+  }, [playing, resolvedTheme]);
 
   return (
     <div className="w-full mt-40 mb-20">

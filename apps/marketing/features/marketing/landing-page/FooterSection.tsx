@@ -114,7 +114,9 @@ export default function FooterSection() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-neutral-50/60">
-          <p>© {new Date().getFullYear()} Uprevit. All rights reserved.</p>
+          <p suppressHydrationWarning>
+            © {new Date().getFullYear()} Uprevit. All rights reserved.
+          </p>
           <div className="flex flex-wrap gap-6">
             <Link
               href="/privacy-policy"
