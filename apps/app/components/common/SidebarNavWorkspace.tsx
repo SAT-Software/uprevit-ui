@@ -73,7 +73,7 @@ export function SidebarNavWorkspace({
                 </span>
               </div>
               <Icon
-                className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                className="text-muted-foreground group-hover:text-foreground"
                 icon={ArrowDown01Icon}
                 size={16}
                 strokeWidth={2}

@@ -14,18 +14,14 @@ import FAQSection from "@/features/marketing/landing-page/FAQSection";
 import CTASection from "@/features/marketing/landing-page/CTASection";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { ScrollProvider } from "@/lib/scroll-context";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 const items = [
   {
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/CE.png"
-          alt="CE Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/CE.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 55,
@@ -35,12 +31,7 @@ const items = [
     circleIndex: 1,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/MD.png"
-          alt="MD Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/MD.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 35,
@@ -51,12 +42,7 @@ const items = [
     circleIndex: 2,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/DMGPKG.png"
-          alt="UDI Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/DMGPKG.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 35,
@@ -68,7 +54,7 @@ const items = [
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/2DBarcode.png"
-          alt="Barcode Graphic"
+          alt=""
           fill
           className="object-contain p-3"
         />
@@ -82,12 +68,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/FDA.png"
-          alt="Barcode Graphic"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/FDA.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 50,
@@ -100,7 +81,7 @@ const items = [
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/DoNotReuse.png"
-          alt="Barcode Graphic"
+          alt=""
           fill
           className="object-contain p-3"
         />
@@ -113,12 +94,7 @@ const items = [
     circleIndex: 2,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/UKCA.png"
-          alt="Barcode Graphic"
-          fill
-          className="object-contain p-3"
-        />
+        <Image src="/UKCA.png" alt="" fill className="object-contain p-3" />
       </div>
     ),
     speed: 45,
@@ -129,12 +105,7 @@ const items = [
     circleIndex: 3,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/ISO.png"
-          alt="Barcode Graphic"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/ISO.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 35,
@@ -147,7 +118,7 @@ const items = [
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
           src="/WEEE-symbol.webp"
-          alt="Barcode Graphic"
+          alt=""
           fill
           className="object-contain p-2"
         />
@@ -160,12 +131,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/Sterile.png"
-          alt="CAS Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/Sterile.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 45,
@@ -175,12 +141,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/IFU1.png"
-          alt="DNR Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/IFU1.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 45,
@@ -191,12 +152,7 @@ const items = [
     circleIndex: 1,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/Importer.png"
-          alt="EC-REP Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/Importer.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 50,
@@ -206,12 +162,7 @@ const items = [
     circleIndex: 1,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/ISO.png"
-          alt="IFU Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/ISO.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 45,
@@ -222,12 +173,7 @@ const items = [
     circleIndex: 2,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image
-          src="/MFR.png"
-          alt="Manufacturer Symbol"
-          fill
-          className="object-contain p-2"
-        />
+        <Image src="/MFR.png" alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 55,
@@ -237,51 +183,59 @@ const items = [
 
 export default function Home() {
   const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
+    if (!autoRotate || reduceMotion) return;
     const interval = setInterval(() => {
       setActiveFeatureIndex((prev) => (prev + 1) % 5);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [autoRotate, reduceMotion]);
 
   return (
     <ScrollProvider>
       <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
         <MarketingHeader />
-        <div className="relative w-full">
-          <Ripple items={items} />
-          <HeroSection />
-        </div>
-        <div className="relative pointer-events-none w-full mx-auto -mt-50 z-55">
-          <div className="absolute inset-0 w-full max-w-6xl mx-auto pointer-events-none">
-            <div className="absolute top-40 left-0 w-px h-10 bg-border/5 z-40" />
-            <div className="absolute top-40 right-0 w-px h-10 bg-border/5 z-40" />
-            <div className="absolute top-50 left-0 w-px h-10 bg-border/10 z-40" />
-            <div className="absolute top-50 right-0 w-px h-10 bg-border/10 z-40" />
-            <div className="absolute top-60 left-0 w-px h-10 bg-border/20 z-40" />
-            <div className="absolute top-60 right-0 w-px h-10 bg-border/20 z-40" />
-            <div className="absolute top-70 left-0 w-px h-10 bg-border/30 z-40" />
-            <div className="absolute top-70 right-0 w-px h-10 bg-border/30 z-40" />
-            <div className="absolute top-80 left-0 w-px h-10 bg-border/40 z-40" />
-            <div className="absolute top-80 right-0 w-px h-10 bg-border/40 z-40" />
-            <div className="absolute top-90 left-0 w-px h-10 bg-border/50 z-40" />
-            <div className="absolute top-90 right-0 w-px h-10 bg-border/50 z-40" />
-            <div className="absolute top-100 left-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
-            <div className="absolute top-100 right-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+        <main className="contents">
+          <div className="relative w-full">
+            <Ripple items={items} />
+            <HeroSection />
           </div>
-          <HeroFeatureCards
-            activeIndex={activeFeatureIndex}
-            onActiveChange={setActiveFeatureIndex}
-          />
-          {/* <HeroFeatureDemo activeIndex={activeFeatureIndex} /> */}
-          <DemoSection />
-          <ReportSection />
-          <FeaturesSection />
-          <CTASection />
-          <FAQSection />
-          <FooterSection />
-        </div>
+          <div className="relative pointer-events-none w-full mx-auto -mt-50 z-55">
+            <div className="absolute inset-0 w-full max-w-6xl mx-auto pointer-events-none">
+              <div className="absolute top-40 left-0 w-px h-10 bg-border/5 z-40" />
+              <div className="absolute top-40 right-0 w-px h-10 bg-border/5 z-40" />
+              <div className="absolute top-50 left-0 w-px h-10 bg-border/10 z-40" />
+              <div className="absolute top-50 right-0 w-px h-10 bg-border/10 z-40" />
+              <div className="absolute top-60 left-0 w-px h-10 bg-border/20 z-40" />
+              <div className="absolute top-60 right-0 w-px h-10 bg-border/20 z-40" />
+              <div className="absolute top-70 left-0 w-px h-10 bg-border/30 z-40" />
+              <div className="absolute top-70 right-0 w-px h-10 bg-border/30 z-40" />
+              <div className="absolute top-80 left-0 w-px h-10 bg-border/40 z-40" />
+              <div className="absolute top-80 right-0 w-px h-10 bg-border/40 z-40" />
+              <div className="absolute top-90 left-0 w-px h-10 bg-border/50 z-40" />
+              <div className="absolute top-90 right-0 w-px h-10 bg-border/50 z-40" />
+              <div className="absolute top-100 left-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+              <div className="absolute top-100 right-0 w-px bottom-0 bg-linear-to-b from-border/60 via-border/60 to-border/60 z-30" />
+            </div>
+            <HeroFeatureCards
+              activeIndex={activeFeatureIndex}
+              onActiveChange={(index) => {
+              setAutoRotate(false);
+              setActiveFeatureIndex(index);
+            }}
+            />
+            {/* <HeroFeatureDemo activeIndex={activeFeatureIndex} /> */}
+            <DemoSection />
+            <ReportSection />
+            <FeaturesSection />
+            <CTASection />
+            <FAQSection />
+            <FooterSection />
+          </div>
+        </main>
       </div>
     </ScrollProvider>
   );

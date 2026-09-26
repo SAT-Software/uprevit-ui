@@ -188,7 +188,7 @@ export default function EditOtherComponentsDialog({
         size="lg"
         primaryAction={{
           label: "Update Component",
-          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          loadingLabel: isPending ? "Updating…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,

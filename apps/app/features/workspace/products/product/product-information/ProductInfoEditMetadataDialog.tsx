@@ -139,7 +139,7 @@ export default function ProductInfoEditMetadataDialog({
         size="lg"
         primaryAction={{
           label: "Save Changes",
-          loadingLabel: "Saving...",
+          loadingLabel: "Saving…",
           form: `edit-product-metadata-form-${id}`,
           type: "submit",
           loading: isPending,

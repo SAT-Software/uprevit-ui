@@ -62,7 +62,7 @@ export default function ContactPage() {
       <MarketingHeader />
       <div className="relative w-full">
         <DottedVerticalLines />
-        <div className="relative z-10 w-full pt-20 md:pt-24">
+        <main className="relative z-10 w-full pt-20 md:pt-24">
           <div className="w-full mt-10 mb-20 pointer-events-auto relative">
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
@@ -327,7 +327,7 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
         <div className="relative z-35 w-full">
           <FooterSection />
         </div>

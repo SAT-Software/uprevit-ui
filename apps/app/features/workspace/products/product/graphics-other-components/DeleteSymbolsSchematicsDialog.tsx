@@ -80,7 +80,7 @@ export default function DeleteSymbolsSchematicsDialog({
         }}
         primaryAction={{
           label: "Delete Graphic",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: handleConfirm,
           loading: isPending,
           disabled: isPending,

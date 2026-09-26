@@ -13,10 +13,10 @@ export default function FeaturesSection() {
         <MarketingSectionBadge icon={StarSquareIcon} label="Features" />
         <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-[55%] font-medium mr-12 mb-4 md:mb-0 text-balance">
-            Turn raw data into Notified Body ready document
+            Turn raw data into Notified Body-ready documents
           </h2>
           <div className="hidden lg:block mr-10 h-16 w-px bg-border shrink-0" />
-          <p className="text-base md:text-lg lg:text-xl md:flex-1 font-normal text-muted-foreground/60 mr-4">
+          <p className="text-base md:text-lg lg:text-xl md:flex-1 font-normal text-muted-foreground mr-4">
             Unify your data, your workflow. Stop managing scattered documents
             and start managing results
           </p>

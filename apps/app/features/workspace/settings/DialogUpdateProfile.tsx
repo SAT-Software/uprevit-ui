@@ -188,7 +188,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
         size="xl"
         primaryAction={{
           label: "Save Changes",
-          loadingLabel: "Saving...",
+          loadingLabel: "Saving…",
           form: formId,
           type: "submit",
           loading: isPending,

@@ -584,7 +584,7 @@ export default function Page() {
         <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
           <span className={cn("font-medium", redlineBannerText)}>
             {diffRedlineLoading
-              ? "Loading changes..."
+              ? "Loading changes…"
               : `Redline View: ${productInfoChangeCount} changes in Product Information`}
           </span>
           <span className="text-xs text-muted-foreground">
@@ -596,13 +596,13 @@ export default function Page() {
       <div className="flex h-full w-full flex-col overflow-y-auto">
         <div className="flex flex-col border-b border-border">
           <div className="flex flex-col gap-0.5 p-2">
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
               <RedlineValue
                 value={productMetadata?.product_name || "N/A"}
                 diff={getProductInfoDiff("productName")}
                 isRedlineView={isRedlineView}
               />
-            </h1>
+            </h2>
             <p className="max-w-2xl text-sm leading-snug text-muted-foreground line-clamp-3 md:line-clamp-none">
               <RedlineValue
                 value={
@@ -664,7 +664,7 @@ export default function Page() {
                       icon={CalendarDownload01Icon}
                       size={12}
                       strokeWidth={2}
-                      className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                      className="text-muted-foreground group-hover:text-foreground"
                     />
                     Target{" "}
                     <span className="font-medium text-foreground">
@@ -687,7 +687,7 @@ export default function Page() {
                       icon={CalendarUpload01Icon}
                       size={12}
                       strokeWidth={2}
-                      className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                      className="text-muted-foreground group-hover:text-foreground"
                     />
                     Actual{" "}
                     <span className="font-medium text-foreground">
@@ -832,7 +832,7 @@ export default function Page() {
                   <div className="p-2">
                     {linkedFoldersLoading ? (
                       <p className="text-xs text-muted-foreground">
-                        Loading...
+                        Loading…
                       </p>
                     ) : linkedFolders.length === 0 ? (
                       <p className="text-xs text-muted-foreground">
@@ -847,7 +847,7 @@ export default function Page() {
                             icon={FolderOpenIcon}
                             size={12}
                             strokeWidth={2}
-                            className="shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                            className="shrink-0 text-muted-foreground group-hover:text-foreground"
                           />
                         }
                         closeIcon={
@@ -855,7 +855,7 @@ export default function Page() {
                             icon={Folder01Icon}
                             size={12}
                             strokeWidth={2}
-                            className="shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                            className="shrink-0 text-muted-foreground group-hover:text-foreground"
                           />
                         }
                       >
@@ -874,7 +874,7 @@ export default function Page() {
                                   icon={Folder01Icon}
                                   size={12}
                                   strokeWidth={2}
-                                  className="shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                                  className="shrink-0 text-muted-foreground group-hover:text-foreground"
                                 />
                               }
                               onClick={() => {

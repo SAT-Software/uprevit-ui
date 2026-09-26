@@ -299,8 +299,8 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
 
   const toggleButtonTitle = isSyncingStatus
     ? isCurrentTabCompleted
-      ? "Unmarking..."
-      : "Marking complete..."
+      ? "Unmarking…"
+      : "Marking complete…"
     : isExportLocked
       ? "Export in progress"
       : isReadOnly
@@ -463,9 +463,9 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         <SidebarTrigger className="bg-sidebar text-muted-foreground hover:text-muted-foreground" />
         <Tooltip>
           <TooltipTrigger asChild>
-            <p className="max-w-40 truncate text-sm font-semibold text-foreground">
+            <h1 className="max-w-40 truncate text-sm font-semibold text-foreground">
               {product?.productName}
-            </p>
+            </h1>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="start">
             {product?.productName}
@@ -477,6 +477,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
             <TooltipTrigger asChild>
               <span className="inline-flex">
                 <Button
+                  aria-label="Export product as PDF"
                   size="icon-xs"
                   variant="outline"
                   onClick={() => {
@@ -557,13 +558,13 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
             >
               <Command>
                 <CommandInput
-                  placeholder="Search versions..."
+                  placeholder="Search versions…"
                   className="h-9"
                 />
                 <CommandList onScroll={handleVersionListScroll}>
                   <CommandEmpty>
                     {isVersionsPending
-                      ? "Loading versions..."
+                      ? "Loading versions…"
                       : isVersionsError
                         ? "Failed to load versions."
                         : "No version found."}
@@ -721,32 +722,39 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         />
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
-            <ConfirmSubmitProductDialog
-              productName={product?.productName}
-              onConfirm={handleSubmit}
-              disabled={!isProductComplete || isEditLocked}
-            >
-              <Button
-                size="sm"
-                disabled={!isProductComplete || isEditLocked}
-                className={cn(
-                  (!isProductComplete || isEditLocked) &&
-                    "opacity-50 cursor-not-allowed",
-                )}
-                title={
-                  isExportLocked
-                    ? "Cannot submit while export is in progress"
-                    : isReadOnly
-                      ? "Product is already submitted"
-                      : !isProductComplete
-                        ? "Complete all tabs to enable submission"
-                        : "Submit product"
-                }
-              >
-                <Icon icon={SentIcon} size={14} />
-                {isReadOnly ? "Submitted" : "Submit"}
-              </Button>
-            </ConfirmSubmitProductDialog>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="inline-flex rounded-lg"
+                  tabIndex={
+                    !isProductComplete || isEditLocked ? 0 : undefined
+                  }
+                >
+                  <ConfirmSubmitProductDialog
+                    productName={product?.productName}
+                    onConfirm={handleSubmit}
+                    disabled={!isProductComplete || isEditLocked}
+                  >
+                    <Button
+                      size="sm"
+                      disabled={!isProductComplete || isEditLocked}
+                    >
+                      <Icon icon={SentIcon} size={14} />
+                      {isReadOnly ? "Submitted" : "Submit"}
+                    </Button>
+                  </ConfirmSubmitProductDialog>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end">
+                {isExportLocked
+                  ? "Cannot submit while an export is in progress"
+                  : isReadOnly
+                    ? "Product is already submitted"
+                    : !isProductComplete
+                      ? "Complete all tabs to enable submission"
+                      : "Submit product for review"}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

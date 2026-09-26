@@ -234,7 +234,7 @@ export default function OnboardUserPage() {
                             strokeWidth={2}
                             className="mr-2"
                           />
-                          {uploadingAvatar ? "Uploading..." : "Change Avatar"}
+                          {uploadingAvatar ? "Uploading…" : "Change Avatar"}
                         </span>
                       </Button>
                     </div>
@@ -386,9 +386,9 @@ export default function OnboardUserPage() {
                   className="gap-2 px-6"
                 >
                   {uploadingAvatar ? (
-                    "Uploading avatar..."
+                    "Uploading avatar…"
                   ) : isPending ? (
-                    "Creating profile..."
+                    "Creating profile…"
                   ) : (
                     <>
                       Create profile

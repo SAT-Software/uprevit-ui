@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Search02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
@@ -125,7 +126,13 @@ export function ResultsTable({
               {product.product_plan_number}
             </TableCell>
             <TableCell className="border-r border-border font-medium">
-              {product.product_name}
+              <Link
+                href={`/products/${product._id}/product-information`}
+                className="rounded-sm hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {product.product_name}
+              </Link>
             </TableCell>
             <TableCell className="border-r border-border text-muted-foreground">
               {product.project_name || "—"}

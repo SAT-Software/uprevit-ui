@@ -60,7 +60,7 @@ export default function SaveTaggedImageDialog({
         }}
         primaryAction={{
           label: "Yes, Save Image",
-          loadingLabel: "Saving...",
+          loadingLabel: "Saving…",
           onClick: handleConfirm,
           loading: isPending,
           disabled: isPending,

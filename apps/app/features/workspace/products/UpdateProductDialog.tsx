@@ -87,7 +87,7 @@ export default function UpdateProductDialog({
         size="lg"
         primaryAction={{
           label: "Update Product",
-          loadingLabel: "Updating...",
+          loadingLabel: "Updating…",
           form: `update-product-form-${id}`,
           type: "submit",
           loading: isPending,

@@ -88,9 +88,9 @@ export default function DialogArchiveEntity({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button
               variant="outline"
               size="sm"
@@ -111,25 +111,25 @@ export default function DialogArchiveEntity({
               />
               Archive
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div>
-              Archive the {entityType}. This action is reversible and you can
-              restore the {entityType} from
-              <Link
-                href="/archive"
-                className={cn(
-                  buttonVariants({ variant: "link" }),
-                  "text-xs -mx-1",
-                )}
-              >
-                Archive
-              </Link>
-              page.
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <div>
+            Archive the {entityType}. This action is reversible and you can
+            restore the {entityType} from
+            <Link
+              href="/archive"
+              className={cn(
+                buttonVariants({ variant: "link" }),
+                "text-xs -mx-1",
+              )}
+            >
+              Archive
+            </Link>
+            page.
+          </div>
+        </TooltipContent>
+      </Tooltip>
       <AppDialogContent
         title={`Archive ${entityLabel}`}
         description={`Archive ${entityName}. This action is reversible from the archive page.`}
@@ -155,7 +155,7 @@ export default function DialogArchiveEntity({
         }}
         primaryAction={{
           label: "Archive",
-          loadingLabel: "Archiving...",
+          loadingLabel: "Archiving…",
           onClick: handleConfirm,
           loading: isPending,
           disabled,

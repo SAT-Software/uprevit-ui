@@ -97,7 +97,7 @@ export function AccessEligibilityGuard({
   ) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p>Loading...</p>
+        <p>Loading…</p>
       </div>
     );
   }

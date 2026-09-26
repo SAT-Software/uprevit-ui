@@ -47,12 +47,12 @@ function MembersSearchBar({
       <InputGroupInput
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search..."
+        placeholder="Search…"
       />
       <InputGroupAddon>
         <Icon
           icon={Search02Icon}
-          className="text-muted-foreground/60 group-hover:text-muted-foreground"
+          className="text-muted-foreground group-hover:text-foreground"
         />
       </InputGroupAddon>
     </InputGroup>
@@ -180,7 +180,8 @@ export function MembersInlineTrigger({
         <TooltipTrigger asChild>
           <button
             type="button"
-            className={"flex cursor-pointer items-center gap-3"}
+            aria-label={`View ${location.toLowerCase()} members (${users?.length ?? 0})`}
+            className="flex cursor-pointer items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -209,7 +210,7 @@ export function MembersInlineTrigger({
               })}
 
               {extra > 0 ? (
-                <Avatar className="h-7 w-7 ring-2 ring-background">
+                <Avatar className="h-6 w-6 ring-2 ring-background">
                   <AvatarFallback className="border border-border bg-muted text-[10px] text-muted-foreground">
                     +{extra}
                   </AvatarFallback>
@@ -217,7 +218,7 @@ export function MembersInlineTrigger({
               ) : null}
 
               {users?.length === 0 ? (
-                <Avatar className="h-7 w-7 ring-2 ring-background">
+                <Avatar className="h-6 w-6 ring-2 ring-background">
                   <AvatarFallback className="border border-border bg-muted text-[10px] text-muted-foreground">
                     0
                   </AvatarFallback>
@@ -228,8 +229,8 @@ export function MembersInlineTrigger({
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            Users working in this {location}. Click to see complete list of
-            users.
+            Members of this {location.toLowerCase()}. Select to see the full
+            list.
           </p>
         </TooltipContent>
       </Tooltip>

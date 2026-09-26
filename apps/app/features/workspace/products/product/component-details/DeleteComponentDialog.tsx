@@ -79,7 +79,7 @@ export default function DeleteComponentDialog({
         }}
         primaryAction={{
           label: "Delete Component",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: handleDelete,
           loading: isPending,
           disabled: isPending,

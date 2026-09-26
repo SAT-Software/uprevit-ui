@@ -1,7 +1,7 @@
 "use client";
 
 import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 // import Link from "next/link";
 import {
@@ -94,7 +94,7 @@ export default function ResourcesHub() {
             The library built for labeling teams
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg font-normal text-muted-foreground/60 max-w-md leading-relaxed">
+          <p className="text-base md:text-lg font-normal text-muted-foreground max-w-md leading-relaxed">
             Templates, standards, and expert analysis organized into a single
             hub. Everything you need to move from draft to approved label with
             confidence.
@@ -162,23 +162,23 @@ export default function ResourcesHub() {
                           />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-semibold">
+                          <h2 className="text-lg md:text-xl font-semibold">
                             {resource.title}
-                          </h3>
-                          <p className="text-xs font-normal text-muted-foreground/60">
+                          </h2>
+                          <p className="text-xs font-normal text-muted-foreground">
                             {resource.meta}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <p className="mt-4 text-sm font-normal text-muted-foreground/60 leading-relaxed">
+                    <p className="mt-4 text-sm font-normal text-muted-foreground leading-relaxed">
                       {resource.description}
                     </p>
                     <div className="mt-4 space-y-2">
                       {resource.highlights.map((highlight) => (
                         <div
                           key={highlight}
-                          className="flex items-center gap-2 text-sm font-normal text-muted-foreground/60"
+                          className="flex items-center gap-2 text-sm font-normal text-muted-foreground"
                         >
                           <span className="size-1.5 rounded-full bg-foreground/60" />
                           {highlight}
@@ -187,13 +187,13 @@ export default function ResourcesHub() {
                     </div>
                   </div>
                   <div className="mt-6 flex items-center justify-between">
-                    <p className="text-xs uppercase tracking-wide font-normal text-muted-foreground/60">
+                    <p className="text-xs uppercase tracking-wide font-normal text-muted-foreground">
                       Updated regularly
                     </p>
                     {/* <Button variant="outline" asChild>
                       <Link href={resource.href}>{resource.cta}</Link>
                     </Button> */}
-                    <Button variant="ghost">Coming soon</Button>
+                    <Badge variant="outline">Coming soon</Badge>
                   </div>
                 </div>
               ))}

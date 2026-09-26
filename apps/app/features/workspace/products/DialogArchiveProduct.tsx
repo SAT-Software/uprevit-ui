@@ -77,7 +77,7 @@ export default function DialogArchiveProduct({
       }}
       primaryAction={{
         label: "Archive Product",
-        loadingLabel: "Archiving...",
+        loadingLabel: "Archiving…",
         onClick: handleArchiveProduct,
         loading: isPending,
         disabled: isPending,

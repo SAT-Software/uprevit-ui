@@ -74,7 +74,7 @@ function PricingPageContent() {
       <MarketingHeader />
       <div className="relative w-full">
         <DottedVerticalLines />
-        <div className="relative z-10 w-full pt-20 md:pt-24">
+        <main className="relative z-10 w-full pt-20 md:pt-24">
           <div className="relative w-full mt-10 mb-20 pointer-events-auto">
             <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
             <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
@@ -437,7 +437,7 @@ function PricingPageContent() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
         <div className="relative z-35 w-full">
           <FooterSection />
         </div>

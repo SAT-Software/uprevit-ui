@@ -175,7 +175,7 @@ export default function Page() {
         <div className="px-2 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2 text-sm">
           <span className="text-amber-600 font-medium">
             {isLoadingDiff
-              ? "Loading changes..."
+              ? "Loading changes…"
               : `Redline View: ${productDataDiffs.length} changes in Product Specifications`}
           </span>
           <span className="text-muted-foreground text-xs">
@@ -213,7 +213,7 @@ export default function Page() {
                     />
                   </div>
                   <p className="text-muted-foreground">
-                    Loading comparison data...
+                    Loading comparison data…
                   </p>
                 </div>
               </div>
@@ -286,7 +286,7 @@ export default function Page() {
             disabled={isSaving || isSubmitted}
           >
             <Icon icon={FloppyDiskIcon} size={16} strokeWidth={2} />
-            {isSaving ? "Saving..." : "Save Data"}
+            {isSaving ? "Saving…" : "Save Data"}
           </Button>
         </div>
 
@@ -308,7 +308,7 @@ export default function Page() {
                     className="text-muted-foreground"
                   />
                 </div>
-                <p className="text-muted-foreground">Loading spreadsheet...</p>
+                <p className="text-muted-foreground">Loading spreadsheet…</p>
               </div>
             </div>
           )}

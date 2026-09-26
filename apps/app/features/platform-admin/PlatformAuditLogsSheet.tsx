@@ -120,19 +120,19 @@ export function PlatformAuditLogsSheet({
 
   return (
     <Sheet>
-      <SheetTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SheetTrigger asChild>
             {trigger ?? (
               <Button type="button" variant="outline" size="sm">
                 <Icon icon={ProfileIcon} size={16} strokeWidth={2} />
                 Logs
               </Button>
             )}
-          </TooltipTrigger>
-          <TooltipContent>Show platform audit logs</TooltipContent>
-        </Tooltip>
-      </SheetTrigger>
+          </SheetTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Show platform audit logs</TooltipContent>
+      </Tooltip>
       <SheetContent
         className="flex flex-col gap-0 overflow-hidden p-0"
         onOpenAutoFocus={(event) => event.preventDefault()}
@@ -154,7 +154,7 @@ export function PlatformAuditLogsSheet({
               <InputGroupInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search logs..."
+                placeholder="Search logs…"
                 className="w-full text-sm"
               />
               <InputGroupAddon>

@@ -235,7 +235,7 @@ export default function OnboardingCreateWorkspacePage() {
                             strokeWidth={2}
                             className="mr-2"
                           />
-                          {uploadingLogo ? "Uploading..." : "Upload Logo"}
+                          {uploadingLogo ? "Uploading…" : "Upload Logo"}
                         </span>
                       </Button>
                     </div>
@@ -379,9 +379,9 @@ export default function OnboardingCreateWorkspacePage() {
                   className="gap-2 px-6"
                 >
                   {uploadingLogo ? (
-                    "Uploading logo..."
+                    "Uploading logo…"
                   ) : isPending ? (
-                    "Creating workspace..."
+                    "Creating workspace…"
                   ) : (
                     <>
                       Create workspace

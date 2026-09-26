@@ -97,22 +97,19 @@ export default function DialogAddProductFolder({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          variant="secondary"
-          className="[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground"
-        >
+        <Button>
           <Icon icon={FolderAddIcon} />
-          Add Folder
+          Create Folder
         </Button>
       </DialogTrigger>
       <AppDialogContent
-        title="Add New Folder"
+        title="Create Folder"
         description="Enter a name for the new folder in your source files."
         variant="form"
         size="md"
         primaryAction={{
-          label: "Add Folder",
-          loadingLabel: "Adding...",
+          label: "Create Folder",
+          loadingLabel: "Creating…",
           form: formId,
           type: "submit",
           loading: isPending,

@@ -55,7 +55,7 @@ export function ExportReportDialog({
         }}
         primaryAction={{
           label: `Start ${formatLabel} Export`,
-          loadingLabel: "Starting...",
+          loadingLabel: "Starting…",
           onClick: handleExport,
           loading: isExporting,
           disabled: isExporting,

@@ -109,7 +109,7 @@ export function ActivityLogsPanel({
                 strokeWidth={2}
                 className="animate-spin"
               />
-              Loading...
+              Loading…
             </span>
           ) : null}
           <Input
@@ -118,7 +118,7 @@ export function ActivityLogsPanel({
               setSearch(event.target.value);
               setPage(1);
             }}
-            placeholder="Search logs..."
+            placeholder="Search logs…"
             className="h-8 w-52 text-xs"
           />
           <Select

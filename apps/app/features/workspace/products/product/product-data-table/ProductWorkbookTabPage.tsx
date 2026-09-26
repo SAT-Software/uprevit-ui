@@ -155,7 +155,7 @@ export function ProductWorkbookTabPage({
       {isRedlineView && (
         <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
           <span className={cn("font-medium", redlineBannerText)}>
-            {isLoadingDiff ? "Loading changes..." : redlineBannerLabel}
+            {isLoadingDiff ? "Loading changes…" : redlineBannerLabel}
           </span>
           <span className="text-xs text-muted-foreground">
             (comparing with previous version)

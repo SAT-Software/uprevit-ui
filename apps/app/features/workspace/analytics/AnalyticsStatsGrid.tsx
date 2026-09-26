@@ -79,25 +79,25 @@ export function AnalyticsStatsGrid({ kpi, isLoading }: AnalyticsStatsGridProps) 
             <div
               className={cn(
                 "hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground sm:flex",
-                "text-muted-foreground/60 group-hover:text-muted-foreground transition-colors ease-in-out delay-100 duration-200",
+                "text-muted-foreground group-hover:text-foreground transition-colors ease-in-out delay-100 duration-200",
               )}
             >
               <Icon icon={stat.icon} size={16} strokeWidth={2} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-normal text-sm text-muted-foreground/60">
+                <p className="font-normal text-sm text-muted-foreground">
                   {stat.title}
                 </p>
                 <InfoTooltip content={stat.info} />
               </div>
-              <p className="mb-2 h-8 text-2xl font-semibold leading-8">
+              <div className="mb-2 h-8 text-2xl font-semibold leading-8 tabular-nums">
                 {isLoading ? (
-                  <Skeleton className="inline-block h-8 w-10 rounded" />
+                  <Skeleton className="h-8 w-10 rounded" />
                 ) : (
                   formatStatValue(kpi[stat.key])
                 )}
-              </p>
+              </div>
             </div>
           </div>
         </div>

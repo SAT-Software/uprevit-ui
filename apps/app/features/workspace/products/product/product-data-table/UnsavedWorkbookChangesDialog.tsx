@@ -106,7 +106,7 @@ export function UnsavedWorkbookChangesDialog({
               ) : (
                 <Icon icon={CloudUploadIcon} size={16} strokeWidth={2} />
               )}
-              {isBusy ? "Saving..." : "Save & Continue"}
+              {isBusy ? "Saving…" : "Save & Continue"}
             </Button>
           </>
         }

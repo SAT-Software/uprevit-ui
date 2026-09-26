@@ -86,7 +86,7 @@ export default function DialogUploadSourceFiles({
         className="sm:max-w-2xl"
         primaryAction={{
           label: "Upload Files",
-          loadingLabel: "Uploading...",
+          loadingLabel: "Uploading…",
           onClick: handleUploadClick,
           loading: isUploading,
           disabled: !selectedFiles.length || isUploading,

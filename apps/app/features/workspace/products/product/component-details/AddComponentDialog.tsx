@@ -158,7 +158,7 @@ export default function AddComponentDialog({
         size="lg"
         primaryAction={{
           label: "Add Component",
-          loadingLabel: isPending ? "Adding..." : "Uploading...",
+          loadingLabel: isPending ? "Adding…" : "Uploading…",
           form: `add-component-form-${id}`,
           type: "submit",
           loading: isSaving,

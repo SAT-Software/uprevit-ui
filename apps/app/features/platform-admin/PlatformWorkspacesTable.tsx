@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   type Column,
@@ -116,7 +117,13 @@ const columns: ColumnDef<PlatformWorkspaceListItem>[] = [
       <SortableHeader column={column} title="Workspace" />
     ),
     cell: ({ row }) => (
-      <p className="text-sm font-medium">{row.getValue("workspaceName")}</p>
+      <Link
+        href={`/platform-admin/workspaces/${row.original.id}`}
+        className="text-sm font-medium rounded-sm hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={(event) => event.stopPropagation()}
+      >
+        {row.getValue("workspaceName")}
+      </Link>
     ),
     size: 220,
   },

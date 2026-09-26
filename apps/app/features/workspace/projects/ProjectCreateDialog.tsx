@@ -263,9 +263,9 @@ export default function ProjectCreateDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button
               variant="default"
               size="sm"
@@ -281,10 +281,10 @@ export default function ProjectCreateDialog() {
               <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
               Create Project
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Create a new project</TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Create a new project</TooltipContent>
+      </Tooltip>
       <AppDialogContent
         title="Create New Project"
         description="Create a new project by providing details and adding members."
@@ -292,7 +292,7 @@ export default function ProjectCreateDialog() {
         size="lg"
         primaryAction={{
           label: "Create Project",
-          loadingLabel: uploadingImage ? "Uploading..." : "Creating...",
+          loadingLabel: uploadingImage ? "Uploading…" : "Creating…",
           form: `mutate-project-form-${id}`,
           type: "submit",
           loading: uploadingImage || isPending,
@@ -393,7 +393,7 @@ export default function ProjectCreateDialog() {
                 >
                   <Command shouldFilter={false}>
                     <CommandInput
-                      placeholder="Search departments..."
+                      placeholder="Search departments…"
                       className="h-9"
                       value={departmentSearch}
                       onValueChange={setDepartmentSearch}
@@ -401,7 +401,7 @@ export default function ProjectCreateDialog() {
                     <CommandList onScroll={handleDepartmentListScroll}>
                       <CommandEmpty>
                         {isDepartmentsPending
-                          ? "Loading departments..."
+                          ? "Loading departments…"
                           : isDepartmentsError
                             ? "Failed to load departments."
                             : "No department found."}

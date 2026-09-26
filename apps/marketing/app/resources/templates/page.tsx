@@ -11,9 +11,9 @@ export default function TemplatesPage() {
       <MarketingHeader />
       <div className="relative w-full">
         <DottedVerticalLines />
-        <div className="relative z-10 w-full pt-8 md:pt-24">
+        <main className="relative z-10 w-full pt-8 md:pt-24">
           <TemplatesSection />
-        </div>
+        </main>
         <div className="relative z-35 w-full">
           <FooterSection />
         </div>

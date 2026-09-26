@@ -65,12 +65,12 @@ export default function ConfirmSubmitProductDialog({
         }}
         primaryAction={{
           label: "Yes, Submit Product",
-          loadingLabel: "Submitting...",
+          loadingLabel: "Submitting…",
           onClick: handleConfirm,
           loading: isSubmitting,
           disabled: isSubmitting,
           icon: SentIcon,
-          className: "bg-emerald-600 hover:bg-emerald-700 text-white",
+          className: "bg-emerald-700 hover:bg-emerald-800 text-white",
         }}
         secondaryAction={{
           label: "Cancel",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { cn } from "@uprevit/ui/lib/utils";
 
@@ -15,14 +15,12 @@ interface BookmarkedProductsFoldersCardProps {
 }
 
 function formatProductCount(count: number) {
-  return count === 1 ? "1 Product" : `${count} Products`;
+  return count === 1 ? "1 product" : `${count} products`;
 }
 
 export function BookmarkedProductsFoldersCard({
   folders,
 }: BookmarkedProductsFoldersCardProps) {
-  const router = useRouter();
-
   if (!folders.length) {
     return null;
   }
@@ -30,13 +28,11 @@ export function BookmarkedProductsFoldersCard({
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {folders.map((folder) => (
-        <div
+        <Link
           key={folder._id}
-          className="group relative cursor-pointer rounded-2xl"
-          onClick={() => router.push(`/bookmarked-products/${folder._id}`)}
+          href={`/bookmarked-products/${folder._id}`}
+          className="group relative rounded-2xl transition-colors duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <div className="absolute inset-0 rounded-2xl bg-muted/0 transition-colors duration-200 group-hover:bg-muted/60" />
-
           <div className="relative flex flex-col items-center px-2 pb-4 pt-4 text-center">
             <div className="relative flex h-[78px] w-[92px] items-center justify-center">
               <img
@@ -53,14 +49,17 @@ export function BookmarkedProductsFoldersCard({
               />
             </div>
 
-            <p className="mt-3 w-full truncate text-sm font-medium text-foreground">
+            <p
+              className="mt-3 w-full truncate text-sm font-medium text-foreground"
+              title={folder.folder_name}
+            >
               {folder.folder_name}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {formatProductCount(folder.products.length)}
             </p>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

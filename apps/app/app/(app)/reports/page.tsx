@@ -169,6 +169,7 @@ export default function Page() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                aria-label="Load a saved query"
                 type="button"
                 variant="outline"
                 size="icon-xs"
@@ -183,6 +184,7 @@ export default function Page() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                aria-label="Save current query"
                 type="button"
                 variant="outline"
                 size="icon-xs"
@@ -198,6 +200,7 @@ export default function Page() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  aria-label="Clear all conditions"
                   type="button"
                   variant="destructive"
                   size="icon-xs"

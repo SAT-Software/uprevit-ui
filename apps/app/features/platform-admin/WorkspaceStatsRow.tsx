@@ -91,7 +91,7 @@ export function WorkspaceStatsRow({
               )}
             >
               <Icon
-                className="text-muted-foreground/60 group-hover:text-muted-foreground"
+                className="text-muted-foreground group-hover:text-foreground"
                 icon={item.icon}
                 size={16}
                 strokeWidth={2}

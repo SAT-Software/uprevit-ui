@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 
 type PlatformAdminHeaderProps = {
@@ -14,10 +15,15 @@ export function PlatformAdminHeader({
   tooltip,
   actions,
 }: PlatformAdminHeaderProps) {
+  // Nested workspace pages have no page title in the app header.
+  const Heading = usePathname().startsWith("/platform-admin/workspaces/")
+    ? "h1"
+    : "h2";
+
   return (
     <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
       <div className="flex min-w-0 items-center gap-2">
-        <p className="truncate text-sm font-medium">{title}</p>
+        <Heading className="truncate text-sm font-medium">{title}</Heading>
         {tooltip ? <InfoTooltip content={tooltip} /> : null}
       </div>
       {actions ? (

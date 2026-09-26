@@ -37,20 +37,20 @@ function DepartmentsCardHeader() {
   return (
     <div className="w-full flex items-center justify-between border-b h-10 pl-3 pr-2 bg-muted/60">
       <div className="flex items-center gap-2">
-        <p className="text-sm font-medium">Departments</p>
+        <h2 className="text-sm font-medium">Departments</h2>
         <InfoTooltip content="Departments group work inside your workspace, for example by function, site, or product line." />
       </div>
-      <Link href="/departments" className="shrink-0 group">
-        <Button size="sm" variant="secondary">
-          Show All
+      <Button asChild size="sm" variant="secondary" className="shrink-0 group">
+        <Link href="/departments" aria-label="Show all departments">
+          Show all
           <Icon
             icon={ArrowUpRight01Icon}
             size={16}
             strokeWidth={2}
             className="text-foreground/40 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
           />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

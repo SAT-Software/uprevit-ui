@@ -290,7 +290,7 @@ export default function ProductInformationCustomFieldEditDialog({
             activeTab === "add"
               ? {
                   label: "Add Field(s)",
-                  loadingLabel: "Adding...",
+                  loadingLabel: "Adding…",
                   form: `edit-custom-fields-form-${id}`,
                   type: "submit",
                   loading: isPending,
@@ -542,7 +542,7 @@ export default function ProductInformationCustomFieldEditDialog({
           }}
           primaryAction={{
             label: "Delete Field",
-            loadingLabel: "Deleting...",
+            loadingLabel: "Deleting…",
             onClick: () => {
               if (deleteFieldId) {
                 handleDeleteCustomField(deleteFieldId);

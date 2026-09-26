@@ -95,7 +95,7 @@ export function InviteMembersDialog() {
         size="xl"
         primaryAction={{
           label: "Send Invitations",
-          loadingLabel: "Sending...",
+          loadingLabel: "Sending…",
           form: `invite-users-form-${id}`,
           type: "submit",
           loading: isPending,

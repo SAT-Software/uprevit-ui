@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Column,
   ColumnDef,
@@ -156,9 +157,14 @@ const columns: ColumnDef<Project>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <p className="text-sm font-medium truncate">
+        <Link
+          href={`/projects/${row.original._id}`}
+          className="block truncate text-sm font-medium rounded-sm hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          title={row.getValue("project_name")}
+          onClick={(event) => event.stopPropagation()}
+        >
           {row.getValue("project_name")}
-        </p>
+        </Link>
       );
     },
   },

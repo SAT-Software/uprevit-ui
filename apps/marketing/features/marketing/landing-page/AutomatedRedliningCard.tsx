@@ -310,7 +310,7 @@ export function AutomatedRedliningCard() {
                   Label Components
                 </div>
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80">
+                  <span className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border">
                     <Icon
                       icon={AddCircleIcon}
                       size={10}
@@ -318,8 +318,8 @@ export function AutomatedRedliningCard() {
                       className="text-muted-foreground"
                     />
                     Version 2
-                  </button>
-                  <button className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 group-data-[active=true]:bg-purple-100/50 group-data-[active=true]:dark:bg-purple-900/50 group-data-[active=true]:border-purple-500 transition-all duration-300 ease-in-out delay-100">
+                  </span>
+                  <span className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 group-data-[active=true]:bg-purple-100/50 group-data-[active=true]:dark:bg-purple-900/50 group-data-[active=true]:border-purple-500 transition-all duration-300 ease-in-out delay-100">
                     <Icon
                       icon={ArrowDown01Icon}
                       size={10}
@@ -327,7 +327,7 @@ export function AutomatedRedliningCard() {
                       className="text-muted-foreground group-hover:text-primary group-data-[active=true]:text-primary"
                     />
                     View Redline
-                  </button>
+                  </span>
                 </div>
               </div>
               <div className="flex-1 overflow-auto bg-card">

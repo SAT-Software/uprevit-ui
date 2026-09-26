@@ -54,7 +54,7 @@ export default function DialogDeleteSourceFile({
         }}
         primaryAction={{
           label: "Delete File",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: onConfirm,
           loading: isPending,
           disabled: isPending,

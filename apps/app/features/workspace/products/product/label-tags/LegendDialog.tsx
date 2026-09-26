@@ -148,7 +148,7 @@ export function LegendDialog({
         }}
         primaryAction={{
           label: mode === "add" ? "Add Legend" : "Save Changes",
-          loadingLabel: mode === "add" ? "Adding..." : "Saving...",
+          loadingLabel: mode === "add" ? "Adding…" : "Saving…",
           onClick: handleSave,
           loading: isSaving,
           disabled: disabled || isSaving,

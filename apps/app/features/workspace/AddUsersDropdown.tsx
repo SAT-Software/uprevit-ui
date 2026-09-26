@@ -86,7 +86,7 @@ export default function AddUsersDropdown({
       >
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search users..."
+            placeholder="Search users…"
             className="h-9"
             value={userSearch}
             onValueChange={onUserSearchChange}
@@ -94,7 +94,7 @@ export default function AddUsersDropdown({
           <CommandList onScroll={onListScroll}>
             <CommandEmpty>
               {isPending
-                ? "Loading users..."
+                ? "Loading users…"
                 : isError
                   ? "Failed to load users."
                   : "No user found."}
