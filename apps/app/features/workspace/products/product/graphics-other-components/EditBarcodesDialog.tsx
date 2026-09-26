@@ -223,7 +223,7 @@ export default function EditBarcodesDialog({
         size="lg"
         primaryAction={{
           label: "Update Barcode",
-          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          loadingLabel: isPending ? "Updating…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,
@@ -277,7 +277,7 @@ export default function EditBarcodesDialog({
                         disabled={!!barcodeTypeInput}
                       >
                         <span className="truncate">
-                          {barcodeTypeSelect || "Select barcode type..."}
+                          {barcodeTypeSelect || "Select barcode type…"}
                         </span>
                         <Icon
                           icon={UnfoldMoreIcon}
@@ -292,7 +292,7 @@ export default function EditBarcodesDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search barcode type..." />
+                        <CommandInput placeholder="Search barcode type…" />
                         <CommandList>
                           <CommandEmpty>No barcode type found.</CommandEmpty>
                           <CommandGroup>

@@ -41,7 +41,7 @@ export function RestoreEntityDialog({
         }}
         primaryAction={{
           label: "Restore",
-          loadingLabel: "Restoring...",
+          loadingLabel: "Restoring…",
           onClick: onConfirm,
           loading: isPending,
           disabled: isPending,

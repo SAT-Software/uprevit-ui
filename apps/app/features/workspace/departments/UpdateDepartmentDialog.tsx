@@ -200,9 +200,9 @@ export default function UpdateDepartmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button
               variant="outline"
               size="sm"
@@ -219,13 +219,13 @@ export default function UpdateDepartmentDialog({
               <Icon icon={PropertyEditIcon} size={16} strokeWidth={2} />
               Update
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Update department name, manager, description, members or department
-            image.
-          </TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          Update department name, manager, description, members or department
+          image.
+        </TooltipContent>
+      </Tooltip>
       <AppDialogContent
         title="Update Department"
         description="Update this department's details and members."
@@ -233,7 +233,7 @@ export default function UpdateDepartmentDialog({
         size="lg"
         primaryAction={{
           label: "Update Department",
-          loadingLabel: uploadingImage ? "Uploading..." : "Updating...",
+          loadingLabel: uploadingImage ? "Uploading…" : "Updating…",
           form: `mutate-department-form-${id}`,
           type: "submit",
           loading: uploadingImage || isPending,

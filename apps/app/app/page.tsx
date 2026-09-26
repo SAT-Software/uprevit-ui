@@ -89,7 +89,7 @@ export default function AppEntryPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-accent/40">
         <p className="text-sm text-muted-foreground">
-          Preparing your workspace...
+          Preparing your workspace…
         </p>
       </div>
     );

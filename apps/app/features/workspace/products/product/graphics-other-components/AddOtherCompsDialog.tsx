@@ -139,7 +139,7 @@ export default function AddOtherCompsDialog({
         size="lg"
         primaryAction={{
           label: "Add Component",
-          loadingLabel: isPending ? "Adding..." : "Uploading...",
+          loadingLabel: isPending ? "Adding…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,

@@ -101,7 +101,7 @@ export function FindReplaceDialog({
           <InputGroup size="md">
             <InputGroupInput
               id={findId}
-              placeholder="Text to find..."
+              placeholder="Text to find…"
               value={findText}
               onChange={(e) => setFindText(e.target.value)}
               autoFocus
@@ -114,7 +114,7 @@ export function FindReplaceDialog({
           <InputGroup size="md">
             <InputGroupInput
               id={replaceId}
-              placeholder="Replacement text..."
+              placeholder="Replacement text…"
               value={replaceText}
               onChange={(e) => setReplaceText(e.target.value)}
             />

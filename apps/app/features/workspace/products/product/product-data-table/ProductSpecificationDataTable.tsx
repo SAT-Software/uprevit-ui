@@ -290,6 +290,7 @@ const EditableHeaderContent = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder={`Column ${colIndex + 1}`}
+        aria-label={`Column ${colIndex + 1} name`}
       />
       {showInlineDiff && diff && (
         <div className="absolute inset-0 pointer-events-none px-1 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
@@ -318,6 +319,13 @@ const EditableHeaderContent = ({
         <Button
           variant="ghost"
           size="icon-2xs"
+          aria-label={
+            column.getIsSorted() === "asc"
+              ? "Sorted ascending, sort descending"
+              : column.getIsSorted() === "desc"
+                ? "Sorted descending, sort ascending"
+                : "Sort column"
+          }
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="hover:bg-accent-foreground/10"
         >
@@ -407,6 +415,7 @@ const DraggableHeader = ({
         <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-500" />
       )}
       <Button
+        aria-label="Drag to reorder column"
         variant="ghost"
         size="icon-2xs"
         disabled={isReadOnly}
@@ -486,7 +495,10 @@ const DataTypeSelect = ({
     value={value ?? ""}
     onValueChange={(val) => onChange(colIndex, val as DataType)}
   >
-    <SelectTrigger className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2 [&_svg]:size-2.5!">
+    <SelectTrigger
+      aria-label={`Column ${colIndex + 1} data type`}
+      className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2 [&_svg]:size-2.5!"
+    >
       <SelectValue placeholder="" />
     </SelectTrigger>
     <SelectContent>
@@ -1508,6 +1520,7 @@ export function ProductSpecificationDataTable({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              aria-label="Undo"
               variant="outline"
               size="icon-xs"
               onClick={undo}
@@ -1523,6 +1536,7 @@ export function ProductSpecificationDataTable({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              aria-label="Redo"
               variant="outline"
               size="icon-xs"
               onClick={redo}
@@ -1539,7 +1553,8 @@ export function ProductSpecificationDataTable({
 
         <InputGroup className="max-w-48">
           <InputGroupInput
-            placeholder="Search..."
+            aria-label="Search table"
+            placeholder="Search…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className=" text-xs"
@@ -1550,10 +1565,11 @@ export function ProductSpecificationDataTable({
         </InputGroup>
 
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="outline"
               size="icon-xs"
+              aria-label="Find and replace"
               onClick={() => setShowFindReplace(true)}
               disabled={isReadOnly}
             >
@@ -1563,32 +1579,36 @@ export function ProductSpecificationDataTable({
           <TooltipContent>Find &amp; Replace</TooltipContent>
         </Tooltip>
 
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls,.numbers"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
         <Tooltip>
-          <TooltipTrigger>
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,.xlsx,.xls,.numbers"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                size="icon-xs"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isReadOnly}
-              >
-                <Icon icon={FileImportIcon} size={14} strokeWidth={2} />
-              </Button>
-            </>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon-xs"
+              aria-label="Import file"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isReadOnly}
+            >
+              <Icon icon={FileImportIcon} size={14} strokeWidth={2} />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>Import file</TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger>
-            <Button variant="outline" size="icon-xs" onClick={handleExport}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon-xs"
+              aria-label="Export this table"
+              onClick={handleExport}
+            >
               <Icon icon={FileExportIcon} size={14} strokeWidth={2} />
             </Button>
           </TooltipTrigger>
@@ -1832,6 +1852,7 @@ export function ProductSpecificationDataTable({
                       const input = (
                         <input
                           data-cell-key={cellKey}
+                          aria-label={`Row ${rowIndex + 1}, column ${originalColIndex + 1}`}
                           readOnly={isReadOnly}
                           className={cn(
                             "h-full w-full border border-border/60 outline-none px-2 text-sm",

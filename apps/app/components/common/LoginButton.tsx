@@ -6,7 +6,7 @@ export function ButtonLogin() {
   const auth = useAuth();
 
   if (auth.isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading…</div>;
   }
 
   if (auth.error) {

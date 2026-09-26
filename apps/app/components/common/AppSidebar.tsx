@@ -114,7 +114,7 @@ const data = {
       ],
     },
     {
-      title: "Supportive",
+      title: "Library",
       items: [
         {
           title: "Source Files",
@@ -417,6 +417,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <GuardedLink
                         href={item.url}
+                        aria-current={
+                          pathname.startsWith(item.url) ? "page" : undefined
+                        }
                         className="flex items-center gap-2"
                       >
                         <span>{item.icon}</span>
@@ -457,6 +460,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         ? `?compareVersion=${compareVersionId}`
                                         : ""
                                     }`}
+                                    aria-current={
+                                      pathname.includes(subItem.url)
+                                        ? "page"
+                                        : undefined
+                                    }
                                     className="flex w-full min-w-0 items-center gap-2"
                                   >
                                     {subItem.icon && (

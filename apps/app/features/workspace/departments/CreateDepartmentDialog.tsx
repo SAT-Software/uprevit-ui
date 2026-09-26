@@ -185,9 +185,9 @@ export default function CreateDepartmentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button
               variant="default"
               size="sm"
@@ -203,10 +203,10 @@ export default function CreateDepartmentDialog() {
               <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
               Create Department
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Create a new department</TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Create a new department</TooltipContent>
+      </Tooltip>
       <AppDialogContent
         title="Create New Department"
         // titleTooltip="Create a department to organize projects and assign workspace members."
@@ -215,7 +215,7 @@ export default function CreateDepartmentDialog() {
         size="lg"
         primaryAction={{
           label: "Create Department",
-          loadingLabel: uploadingImage ? "Uploading..." : "Creating...",
+          loadingLabel: uploadingImage ? "Uploading…" : "Creating…",
           form: `mutate-department-form-${id}`,
           type: "submit",
           loading: uploadingImage || isPending,

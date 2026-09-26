@@ -181,14 +181,14 @@ export function StatsGrid({ location }: { location: string }) {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="font-normal text-sm text-muted-foreground/60">
+                  <p className="font-normal text-sm text-muted-foreground">
                     {stat.title}
                   </p>
                   <InfoTooltip content={stat.info} />
                 </div>
-                <p className="h-8 text-2xl font-semibold leading-8">
-                  <Skeleton className="inline-block h-8 w-10 rounded" />
-                </p>
+                <div className="h-8">
+                  <Skeleton className="h-8 w-10 rounded" />
+                </div>
               </div>
             </div>
             <div className="absolute bottom-3 right-3 lg:bottom-4 lg:right-4">
@@ -231,19 +231,19 @@ export function StatsGrid({ location }: { location: string }) {
               <div
                 className={cn(
                   "hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground sm:flex",
-                  "text-muted-foreground/60 group-hover:text-muted-foreground transition-colors ease-in-out delay-100 duration-200",
+                  "text-muted-foreground group-hover:text-foreground transition-colors ease-in-out delay-100 duration-200",
                 )}
               >
                 {icon}
               </div>
               <div>
                 <div className="flex gap-2 items-center">
-                  <p className="font-normal text-sm text-muted-foreground/60">
+                  <p className="font-normal text-sm text-muted-foreground">
                     {title}
                   </p>
                   <InfoTooltip content={info} />
                 </div>
-                <p className="h-8 text-2xl font-semibold leading-8">
+                <p className="h-8 text-2xl font-semibold leading-8 tabular-nums">
                   {typeof value === "number" ? formatStatValue(value) : value}
                 </p>
               </div>

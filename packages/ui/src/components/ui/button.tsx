@@ -5,21 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@uprevit/ui/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center cursor-pointer gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive ",
+  "inline-flex items-center justify-center cursor-pointer gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive ",
   {
     variants: {
       variant: {
         default:
           "bg-primary text-primary-foreground hover:bg-primary/90 [&_svg]:text-primary-foreground/60 dark:[&_svg]:text-foreground/60 hover:[&_svg]:text-primary-foreground dark:hover:[&_svg]:text-foreground",
         destructive:
-          "bg-destructive/5 text-destructive dark:text-foreground border border-destructive/80 hover:bg-destructive/10 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 [&_svg]:text-destructive/60 dark:[&_svg]:text-foreground/60 hover:[&_svg]:text-destructive dark:hover:[&_svg]:text-foreground",
+          "bg-destructive/5 text-destructive dark:text-foreground border border-destructive/80 hover:bg-destructive/10 focus-visible:ring-destructive dark:focus-visible:ring-ring dark:bg-destructive/60 [&_svg]:text-destructive/60 dark:[&_svg]:text-foreground/60 hover:[&_svg]:text-destructive dark:hover:[&_svg]:text-foreground",
         outline:
           "border bg-background hover:bg-accent/60 hover:text-accent-foreground dark:bg-background dark:border-input dark:hover:bg-accent/60 [&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground",
         secondary:
           "bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 [&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-muted/60 underline-offset-4 hover:underline",
+        link: "text-foreground underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

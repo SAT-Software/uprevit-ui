@@ -151,7 +151,7 @@ export default function DialogAddLabelTag({
         size="lg"
         primaryAction={{
           label: "Add Label",
-          loadingLabel: isPending ? "Adding..." : "Uploading...",
+          loadingLabel: isPending ? "Adding…" : "Uploading…",
           form: `add-label-tag-form-${id}`,
           type: "submit",
           loading: isSaving,

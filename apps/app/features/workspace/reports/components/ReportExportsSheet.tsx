@@ -316,12 +316,12 @@ export function ReportExportsSheet({
   return (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
       {showTrigger ? (
-        <SheetTrigger>
-          <Tooltip>
-            <TooltipTrigger asChild>{trigger ?? defaultTrigger}</TooltipTrigger>
-            <TooltipContent>View report export jobs</TooltipContent>
-          </Tooltip>
-        </SheetTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
+          </TooltipTrigger>
+          <TooltipContent>View report export jobs</TooltipContent>
+        </Tooltip>
       ) : null}
       <SheetContent
         className="flex flex-col gap-0 overflow-hidden p-0"
@@ -390,7 +390,7 @@ export function ReportExportsSheet({
             {isLoading ? (
               <div className="flex h-32 items-center justify-center gap-2 text-sm text-muted-foreground">
                 <Spinner className="size-4" />
-                Loading exports...
+                Loading exports…
               </div>
             ) : error ? (
               <DashboardErrorState

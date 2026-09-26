@@ -14,7 +14,7 @@ import { Toaster } from "@uprevit/ui/components/ui/sonner";
 import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 
 const outfit = Outfit({
-  variable: "--font-geist",
+  variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
 });
@@ -31,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.variable} antialiased`}>
+    <html lang="en" className={outfit.variable} suppressHydrationWarning>
+      <body className="antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -129,7 +129,7 @@ export default function DialogAddProductsToFolder({
         size="md"
         primaryAction={{
           label: "Add Product",
-          loadingLabel: "Adding...",
+          loadingLabel: "Adding…",
           form: formId,
           type: "submit",
           loading: isPending,
@@ -181,7 +181,7 @@ export default function DialogAddProductsToFolder({
                           (product: { _id: string; product_name?: string }) =>
                             product._id === selectedProductId,
                         )?.product_name || "Unnamed Product"
-                      : "Choose a product..."}
+                      : "Choose a product…"}
                     <Icon
                       icon={UnfoldMoreIcon}
                       size={16}
@@ -192,13 +192,13 @@ export default function DialogAddProductsToFolder({
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                   <Command>
                     <CommandInput
-                      placeholder="Search products..."
+                      placeholder="Search products…"
                       className="h-9"
                     />
                     <CommandList>
                       <CommandEmpty>
                         {isLoading
-                          ? "Loading products..."
+                          ? "Loading products…"
                           : error
                             ? "Error loading products"
                             : "No product found."}

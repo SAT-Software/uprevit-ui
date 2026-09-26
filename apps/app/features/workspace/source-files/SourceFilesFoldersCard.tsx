@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
@@ -30,10 +30,10 @@ interface SourceFilesFoldersCardProps {
 
 function formatFileCount(count: number | undefined) {
   if (typeof count !== "number") {
-    return "— Files";
+    return "— files";
   }
 
-  return count === 1 ? "1 File" : `${count} Files`;
+  return count === 1 ? "1 file" : `${count} files`;
 }
 
 function SourceFilesFoldersCard({
@@ -42,7 +42,6 @@ function SourceFilesFoldersCard({
   showAsBookmarked = false,
   bookmarkedFolderIds,
 }: SourceFilesFoldersCardProps) {
-  const router = useRouter();
   const { mutate: toggleBookmark } = useToggleBookmarkSourceFilesFolder();
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
@@ -72,59 +71,54 @@ function SourceFilesFoldersCard({
           showAsBookmarked || bookmarkedFolderIds?.has(folder._id) === true;
 
         return (
-          <div
-            key={folder._id}
-            className="group relative cursor-pointer rounded-2xl"
-            onClick={() => router.push(`/source-files/view/${folder._id}`)}
-          >
-            <div className="absolute inset-0 rounded-2xl bg-muted/0 transition-colors duration-200 group-hover:bg-muted/60" />
+          <div key={folder._id} className="group relative rounded-2xl">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "absolute right-1 top-1 z-10 h-7 w-7 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100",
+                    isBookmarked
+                      ? "text-ring hover:text-ring/80 dark:text-ring"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  aria-label={
+                    isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
+                  }
+                  onClick={() => {
+                    if (userId) {
+                      setPendingFolderId(folder._id);
+                      toggleBookmark(
+                        { folderId: folder._id, userId: userId as string },
+                        { onSettled: () => setPendingFolderId(null) },
+                      );
+                    } else {
+                      toast.error("User ID not available. Please log in again.");
+                    }
+                  }}
+                  disabled={pendingFolderId === folder._id}
+                >
+                  {pendingFolderId === folder._id ? (
+                    <Spinner />
+                  ) : (
+                    <Icon
+                      icon={
+                        isBookmarked ? BookmarkMinus01Icon : BookmarkAdd01Icon
+                      }
+                    />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+              </TooltipContent>
+            </Tooltip>
 
-            <Button
-              variant="ghost"
-              size="icon"
+            <Link
+              href={`/source-files/view/${folder._id}`}
               className={cn(
-                "absolute right-1 top-1 z-10 h-7 w-7 opacity-0 transition-opacity duration-200 group-hover:opacity-100",
-                isBookmarked
-                  ? "text-ring hover:text-ring/80 dark:text-ring"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              aria-label="Toggle bookmark folder"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (userId) {
-                  setPendingFolderId(folder._id);
-                  toggleBookmark(
-                    { folderId: folder._id, userId: userId as string },
-                    { onSettled: () => setPendingFolderId(null) },
-                  );
-                } else {
-                  toast.error("User ID not available. Please log in again.");
-                }
-              }}
-              disabled={pendingFolderId === folder._id}
-            >
-              {pendingFolderId === folder._id ? (
-                <Spinner />
-              ) : isBookmarked ? (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Icon icon={BookmarkMinus01Icon} />
-                  </TooltipTrigger>
-                  <TooltipContent>Remove from bookmarks</TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Icon icon={BookmarkAdd01Icon} />
-                  </TooltipTrigger>
-                  <TooltipContent>Add to bookmarks</TooltipContent>
-                </Tooltip>
-              )}
-            </Button>
-
-            <div
-              className={cn(
-                "relative flex flex-col items-center text-center",
+                "relative flex flex-col items-center rounded-2xl text-center transition-colors duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 isLarge ? "px-2 pb-4 pt-4" : "px-2 pb-3 pt-3",
               )}
             >
@@ -159,6 +153,7 @@ function SourceFilesFoldersCard({
                   "mt-3 w-full truncate font-medium text-foreground",
                   isLarge ? "text-sm" : "text-xs",
                 )}
+                title={folder.name}
               >
                 {folder.name}
               </p>
@@ -170,7 +165,7 @@ function SourceFilesFoldersCard({
               >
                 {formatFileCount(folder.fileCount)}
               </p>
-            </div>
+            </Link>
           </div>
         );
       })}

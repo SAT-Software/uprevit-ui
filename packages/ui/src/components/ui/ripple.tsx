@@ -77,7 +77,7 @@ export const Ripple = React.memo(function Ripple({
                 return (
                   <div key={idx} className="absolute inset-0">
                     <div
-                      className={cn("absolute inset-0 animate-spin")}
+                      className="absolute inset-0 animate-spin motion-reduce:animate-none"
                       style={{
                         animationDuration: `${speed}s`,
                         animationDirection: reverse ? "reverse" : "normal",
@@ -89,7 +89,7 @@ export const Ripple = React.memo(function Ripple({
                         style={{ transform: "translate(-50%, -50%)" }}
                       >
                         <div
-                          className={cn("animate-spin")}
+                          className="animate-spin motion-reduce:animate-none"
                           style={{
                             animationDuration: `${speed}s`,
                             animationDirection: reverse ? "normal" : "reverse",

@@ -58,7 +58,7 @@ function BreakdownRow({
         className={cn(
           "tabular-nums",
           prominent
-            ? "text-sm font-semibold text-emerald-600 dark:text-emerald-400"
+            ? "text-sm font-semibold text-emerald-700 dark:text-emerald-400"
             : cn(
                 "text-xs font-semibold",
                 value > 0 ? "text-foreground" : "text-muted-foreground/60",
@@ -89,10 +89,11 @@ export function DashboardStatActivityBadge({
       <HoverCardTrigger asChild>
         <button
           type="button"
+          aria-label={`${meta.title}, ${meta.windowLabel}: ${total}`}
           className={cn(
-            "group inline-flex items-center gap-1 text-sm font-medium leading-none transition-colors cursor-pointer",
+            "group relative inline-flex items-center gap-1 text-sm font-medium leading-none tabular-nums transition-colors cursor-pointer rounded-sm after:absolute after:-inset-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             total > 0
-              ? "text-emerald-600 dark:text-emerald-400"
+              ? "text-emerald-700 dark:text-emerald-400"
               : "text-muted-foreground/60",
           )}
         >
@@ -100,9 +101,10 @@ export function DashboardStatActivityBadge({
             icon={icon}
             size={14}
             strokeWidth={2}
+            aria-hidden
             className={cn(
               total > 0
-                ? "text-emerald-600 dark:text-emerald-400"
+                ? "text-emerald-700 dark:text-emerald-400"
                 : "text-muted-foreground/60",
             )}
           />

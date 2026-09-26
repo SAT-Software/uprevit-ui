@@ -127,7 +127,7 @@ export default function DialogEditSourceFilesFolder({
         size="md"
         primaryAction={{
           label: "Update Folder",
-          loadingLabel: "Updating...",
+          loadingLabel: "Updating…",
           form: formId,
           type: "submit",
           loading: isPending,

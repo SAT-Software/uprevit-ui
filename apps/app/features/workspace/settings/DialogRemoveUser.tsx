@@ -74,7 +74,7 @@ export default function DialogRemoveUser({
         }}
         primaryAction={{
           label: "Remove",
-          loadingLabel: "Removing...",
+          loadingLabel: "Removing…",
           onClick: handleConfirm,
           loading: isPending,
           disabled,

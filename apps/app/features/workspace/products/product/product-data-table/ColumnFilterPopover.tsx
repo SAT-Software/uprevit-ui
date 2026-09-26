@@ -63,7 +63,12 @@ export function ColumnFilterPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon-2xs" className="hover:bg-accent-foreground/10">
+        <Button
+          variant="ghost"
+          size="icon-2xs"
+          aria-label={hasFilter ? "Edit column filter (active)" : "Filter column"}
+          className="hover:bg-accent-foreground/10"
+        >
           <Icon
             icon={FilterIcon}
             size={10}
@@ -94,7 +99,7 @@ export function ColumnFilterPopover({
 
           <Input
             placeholder={
-              dataType === "number" ? "Enter number..." : "Enter text..."
+              dataType === "number" ? "Enter number…" : "Enter text…"
             }
             value={value}
             onChange={(e) => setValue(e.target.value)}

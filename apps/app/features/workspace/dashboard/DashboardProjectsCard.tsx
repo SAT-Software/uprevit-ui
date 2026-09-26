@@ -38,20 +38,20 @@ function ProjectsCardHeader() {
   return (
     <div className="w-full flex items-center justify-between border-b h-10 pl-3 pr-2 bg-muted/60">
       <div className="flex items-center gap-2">
-        <p className="text-sm font-medium">Projects</p>
+        <h2 className="text-sm font-medium">Projects</h2>
         <InfoTooltip content="Projects sit between departments and products. Each project belongs to one department and holds multiple products." />
       </div>
-      <Link href="/projects" className="shrink-0 group">
-        <Button size="sm" variant="secondary">
-          Show All
+      <Button asChild size="sm" variant="secondary" className="shrink-0 group">
+        <Link href="/projects" aria-label="Show all projects">
+          Show all
           <Icon
             icon={ArrowUpRight01Icon}
             size={16}
             strokeWidth={2}
             className="text-foreground/40 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
           />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

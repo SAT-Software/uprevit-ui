@@ -96,7 +96,7 @@ export default function DialogEditBookmarkFolder({
         size="md"
         primaryAction={{
           label: "Save Changes",
-          loadingLabel: "Saving...",
+          loadingLabel: "Saving…",
           form: `edit-folder-form-${id}`,
           type: "submit",
           loading: isPending,
@@ -124,7 +124,7 @@ export default function DialogEditBookmarkFolder({
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
                   id={`${id}-folder-name`}
-                  placeholder="Enter folder name..."
+                  placeholder="Enter folder name…"
                   type="text"
                   aria-invalid={errors.folder_name ? "true" : "false"}
                   {...register("folder_name", {

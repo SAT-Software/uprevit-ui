@@ -174,7 +174,7 @@ export default function AddBarcodesDialog({
         size="lg"
         primaryAction={{
           label: "Add Barcode",
-          loadingLabel: isPending ? "Adding..." : "Uploading...",
+          loadingLabel: isPending ? "Adding…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,
@@ -226,7 +226,7 @@ export default function AddBarcodesDialog({
                         disabled={!!barcodeTypeInput}
                       >
                         <span className="truncate">
-                          {barcodeTypeSelect || "Select barcode type..."}
+                          {barcodeTypeSelect || "Select barcode type…"}
                         </span>
                         <Icon
                           icon={UnfoldMoreIcon}
@@ -241,7 +241,7 @@ export default function AddBarcodesDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search barcode type..." />
+                        <CommandInput placeholder="Search barcode type…" />
                         <CommandList>
                           <CommandEmpty>No barcode type found.</CommandEmpty>
                           <CommandGroup>

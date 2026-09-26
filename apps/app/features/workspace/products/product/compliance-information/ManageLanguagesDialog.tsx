@@ -246,7 +246,7 @@ export default function ManageLanguagesDialog({
               ) : (
                 <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
               )}
-              {isPending ? "Saving..." : "Save Languages"}
+              {isPending ? "Saving…" : "Save Languages"}
             </Button>
           </>
         }

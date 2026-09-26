@@ -191,7 +191,7 @@ export function ProductCombobox({
       >
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search products..."
+            placeholder="Search products…"
             className="h-9"
             value={search}
             onValueChange={setSearch}
@@ -200,7 +200,7 @@ export function ProductCombobox({
             {isLoadingProducts ? (
               <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
                 <Spinner className="size-4" />
-                Loading products...
+                Loading products…
               </div>
             ) : (
               <>

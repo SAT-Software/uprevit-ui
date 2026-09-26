@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -131,7 +132,15 @@ const columns: ColumnDef<Item>[] = [
     header: "Product Name",
     accessorKey: "productName",
     cell: ({ row }) => {
-      return <p className="text-xs ">{row.getValue("productName")}</p>;
+      return (
+        <Link
+          href={`/products/${row.original.productId}/product-information`}
+          className="text-xs rounded-sm hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {row.getValue("productName")}
+        </Link>
+      );
     },
     size: 200,
   },

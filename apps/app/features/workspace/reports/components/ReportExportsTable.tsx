@@ -352,7 +352,7 @@ export function ReportExportsTable() {
                 >
                   <div className="inline-flex items-center gap-2">
                     <Spinner className="size-4" />
-                    Loading export jobs...
+                    Loading export jobs…
                   </div>
                 </TableCell>
               </TableRow>

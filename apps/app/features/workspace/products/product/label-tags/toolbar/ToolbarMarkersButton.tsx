@@ -69,6 +69,7 @@ const ToolbarMarkersButton = ({
                           variant="ghost"
                           size="icon-sm"
                           className="size-7"
+                          aria-label={markerType.name}
                           onClick={() => handleMarkerSelection(markerType)}
                         >
                           <Icon

@@ -73,11 +73,7 @@ export default function DialogCreateFolder() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground"
-        >
+        <Button size="sm">
           <Icon icon={FolderAddIcon} />
           Create Folder
         </Button>
@@ -89,7 +85,7 @@ export default function DialogCreateFolder() {
         size="md"
         primaryAction={{
           label: "Create Folder",
-          loadingLabel: "Creating...",
+          loadingLabel: "Creating…",
           form: `create-folder-form-${id}`,
           type: "submit",
           loading: isPending,
@@ -117,7 +113,7 @@ export default function DialogCreateFolder() {
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
                   id={`${id}-folder-name`}
-                  placeholder="Enter folder name..."
+                  placeholder="Enter folder name…"
                   type="text"
                   aria-invalid={errors.folderName ? "true" : "false"}
                   {...register("folderName", {

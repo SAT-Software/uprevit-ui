@@ -53,7 +53,16 @@ export function BillingInvoicesTable({
               onClick={() => onInvoiceClick(invoice.id)}
             >
               <TableCell className="py-3 font-mono text-xs">
-                {invoice.id}
+                <button
+                  type="button"
+                  className="rounded-sm hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onInvoiceClick(invoice.id);
+                  }}
+                >
+                  {invoice.id}
+                </button>
               </TableCell>
               <TableCell className="py-3">
                 {invoice.date ? formatToLocalDate(invoice.date) : "—"}

@@ -95,7 +95,7 @@ export default function DialogBookmarkProduct({
       size="md"
       primaryAction={{
         label: "Add to Bookmarks",
-        loadingLabel: "Adding...",
+        loadingLabel: "Adding…",
         form: `bookmark-product-form-${id}`,
         type: "submit",
         loading: bookmarkProduct.isPending,
@@ -137,12 +137,12 @@ export default function DialogBookmarkProduct({
                 size="md"
                 className="w-full bg-background"
               >
-                <SelectValue placeholder="Choose a folder..." />
+                <SelectValue placeholder="Choose a folder…" />
               </SelectTrigger>
               <SelectContent>
                 {isLoading ? (
                   <SelectItem disabled value="loading">
-                    Loading folders...
+                    Loading folders…
                   </SelectItem>
                 ) : error ? (
                   <SelectItem disabled value="error">

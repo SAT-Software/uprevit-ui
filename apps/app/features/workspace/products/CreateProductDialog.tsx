@@ -221,20 +221,20 @@ export default function CreateProductDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button variant="default" size="sm" className="group">
               <Icon
                 icon={PlusSignSquareIcon}
                 className="text-primary-foreground/60 group-hover:text-primary-foreground"
               />
-              Create New Product
+              Create Product
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Create a new product</TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Create a new product</TooltipContent>
+      </Tooltip>
       <AppDialogContent
         title="Create New Product"
         description="Create a new product by providing product details."
@@ -242,7 +242,7 @@ export default function CreateProductDialog() {
         size="lg"
         primaryAction={{
           label: "Create Product",
-          loadingLabel: "Creating...",
+          loadingLabel: "Creating…",
           form: `create-product-form-${id}`,
           type: "submit",
           loading: isPending,
@@ -403,7 +403,7 @@ export default function CreateProductDialog() {
                   >
                     <Command shouldFilter={false}>
                       <CommandInput
-                        placeholder="Search departments..."
+                        placeholder="Search departments…"
                         className="h-9"
                         value={departmentSearch}
                         onValueChange={setDepartmentSearch}
@@ -411,7 +411,7 @@ export default function CreateProductDialog() {
                       <CommandList onScroll={handleDepartmentListScroll}>
                         <CommandEmpty>
                           {isDepartmentsPending
-                            ? "Loading departments..."
+                            ? "Loading departments…"
                             : isDepartmentsError
                               ? "Failed to load departments."
                               : "No department found."}
@@ -496,7 +496,7 @@ export default function CreateProductDialog() {
                   >
                     <Command shouldFilter={false}>
                       <CommandInput
-                        placeholder="Search projects..."
+                        placeholder="Search projects…"
                         className="h-9"
                         value={projectSearch}
                         onValueChange={setProjectSearch}
@@ -504,7 +504,7 @@ export default function CreateProductDialog() {
                       <CommandList onScroll={handleProjectListScroll}>
                         <CommandEmpty>
                           {isProjectsPending
-                            ? "Loading projects..."
+                            ? "Loading projects…"
                             : isProjectsError
                               ? "Failed to load projects."
                               : "No project found."}

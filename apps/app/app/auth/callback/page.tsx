@@ -81,7 +81,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex h-screen w-full items-center justify-center">
-      <p className="text-sm text-muted-foreground">Signing you in...</p>
+      <p className="text-sm text-muted-foreground">Signing you in…</p>
     </div>
   );
 }

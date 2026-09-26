@@ -77,7 +77,7 @@ export default function DialogDeleteSourceFilesFolder({
         }}
         primaryAction={{
           label: "Delete Folder",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: handleConfirm,
           loading: deleteFolder.isPending,
           disabled,

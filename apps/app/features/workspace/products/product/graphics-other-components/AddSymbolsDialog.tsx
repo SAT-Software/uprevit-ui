@@ -329,7 +329,7 @@ export default function AddSymbolsDialog({
                 ) : (
                   <Icon icon={CheckmarkCircle01Icon} size={16} strokeWidth={2} />
                 )}
-                {isPending ? "Adding..." : "Add Selected"}
+                {isPending ? "Adding…" : "Add Selected"}
               </Button>
             ) : (
               <Button
@@ -345,9 +345,9 @@ export default function AddSymbolsDialog({
                   <Icon icon={PlusSignSquareIcon} size={16} strokeWidth={2} />
                 )}
                 {isPending
-                  ? "Adding..."
+                  ? "Adding…"
                   : uploadingImage
-                    ? "Uploading..."
+                    ? "Uploading…"
                     : "Add Symbol"}
               </Button>
             )}
@@ -466,7 +466,7 @@ export default function AddSymbolsDialog({
               {isLoading ? (
                 <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
                   <Spinner />
-                  <span className="ml-2">Loading symbols...</span>
+                  <span className="ml-2">Loading symbols…</span>
                 </div>
               ) : error ? (
                 <div className="flex h-40 items-center justify-center text-sm text-destructive">

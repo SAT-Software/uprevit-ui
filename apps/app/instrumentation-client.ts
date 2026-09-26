@@ -13,7 +13,7 @@ Sentry.init({
       formTitle: SENTRY_FEEDBACK_FORM_TITLE,
       submitButtonLabel: "Send",
       messagePlaceholder:
-        "Describe a bug, issue, feature request, or other feedback...",
+        "Describe a bug, issue, feature request, or other feedback…",
       successMessageText: "Thank you — we received your message.",
       useSentryUser: {
         email: "email",

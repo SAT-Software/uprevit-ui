@@ -140,7 +140,7 @@ export default function Page() {
         <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 p-2 text-sm">
           <span className={cn("font-medium", redlineBannerText)}>
             {isLoadingDiff
-              ? "Loading changes..."
+              ? "Loading changes…"
               : `Redline View: ${labelComponentChangeCount} changes in Label Components`}
           </span>
           <span className="text-xs text-muted-foreground">

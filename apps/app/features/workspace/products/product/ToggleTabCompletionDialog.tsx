@@ -63,8 +63,8 @@ export default function ToggleTabCompletionDialog({
     : "Yes, Mark Complete";
 
   const confirmingText = isCompleted
-    ? "Marking Incomplete..."
-    : "Marking Complete...";
+    ? "Marking Incomplete…"
+    : "Marking Complete…";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -106,7 +106,7 @@ export default function ToggleTabCompletionDialog({
           icon: isCompleted ? Undo02Icon : CheckmarkCircle02Icon,
           className: isCompleted
             ? "bg-amber-600 hover:bg-amber-700 text-white"
-            : "bg-emerald-600 hover:bg-emerald-700 text-white",
+            : "bg-emerald-700 hover:bg-emerald-800 text-white",
         }}
         secondaryAction={{
           label: "Cancel",
