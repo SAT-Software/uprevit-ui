@@ -5,11 +5,24 @@ import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useScrollSection } from "@/lib/scroll-context";
 import { ModernTvIcon } from "@hugeicons/core-free-icons";
-import Lottie from "lottie-react";
+import Lottie, { type LottieRefCurrentProps } from "lottie-react";
+import { useEffect, useRef, useState } from "react";
 import uprevitMarketingVideo from "@/public/Uprevit-Marketing-Video.json";
+import { MediaPlayToggle } from "@/components/MediaPlayToggle";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 export default function DemoSection() {
   const demoRef = useScrollSection("demo");
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
+  const reduceMotion = usePrefersReducedMotion();
+  // null until the visitor toggles; defaults to their motion preference.
+  const [userPlaying, setUserPlaying] = useState<boolean | null>(null);
+  const playing = userPlaying ?? !reduceMotion;
+
+  useEffect(() => {
+    if (playing) lottieRef.current?.play();
+    else lottieRef.current?.pause();
+  }, [playing]);
 
   return (
     <div ref={demoRef} className="w-full mt-40 mb-20">
@@ -18,10 +31,10 @@ export default function DemoSection() {
 
         <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-start text-2xl">
           <h2 className="text-2xl md:text-4xl lg:text-5xl md:w-1/2 font-medium mr-16 mb-4 md:mb-0">
-            The FastTrack way to Global labeling compliance
+            The FastTrack way to global labeling compliance
           </h2>
           <div className="hidden lg:block mr-12 h-16 w-px bg-border" />
-          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground/60">
+          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground">
             Command Your Labels <br /> Command Your Compliance
           </p>
         </div>
@@ -48,18 +61,18 @@ export default function DemoSection() {
 
           <div className="p-1 bg-muted border-border border rounded-2xl shadow-bottom-lg">
             <Card className="aspect-auto mx-auto border-border overflow-hidden shadow-none">
-              <CardContent className="p-0 overflow-hidden dark:hidden">
+              <CardContent className="relative p-0 overflow-hidden">
                 <Lottie
+                  lottieRef={lottieRef}
                   animationData={uprevitMarketingVideo}
-                  loop={true}
+                  loop
+                  autoplay={!reduceMotion}
                   className="aspect-auto"
                 />
-              </CardContent>
-              <CardContent className="p-0 overflow-hidden dark:block hidden">
-                <Lottie
-                  animationData={uprevitMarketingVideo}
-                  loop={true}
-                  className="aspect-auto"
+                <MediaPlayToggle
+                  playing={playing}
+                  onToggle={() => setUserPlaying(!playing)}
+                  label="product demo"
                 />
               </CardContent>
             </Card>

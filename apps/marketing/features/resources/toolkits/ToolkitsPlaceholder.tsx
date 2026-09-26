@@ -50,7 +50,7 @@ export default function ToolkitsPlaceholder() {
             Free compliance tools, built with labeling teams
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg font-normal text-muted-foreground/60 max-w-md leading-relaxed">
+          <p className="text-base md:text-lg font-normal text-muted-foreground max-w-md leading-relaxed">
             We are building a suite of free tools to reduce manual compliance
             work and keep every label aligned to evolving regulations.
           </p>
@@ -84,8 +84,8 @@ export default function ToolkitsPlaceholder() {
 
           <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
             <div className="flex min-h-[28rem] items-center justify-center rounded-xl border border-border bg-background/80 shadow-none">
-              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground/60 text-center">
-                Coming soon...
+              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground text-center">
+                Coming soon…
               </p>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function ToolkitsPlaceholder() {
                     What&apos;s coming next
                   </h4>
                 </div>
-                <p className="text-sm font-normal text-muted-foreground/60">
+                <p className="text-sm font-normal text-muted-foreground">
                   Track upcoming tools and claim early access.
                 </p>
                 <div className="mt-3 flex flex-col gap-2">
@@ -150,7 +150,7 @@ export default function ToolkitsPlaceholder() {
                           className="text-muted-foreground"
                         />
                       </div>
-                      <p className="mt-1 text-xs font-normal text-muted-foreground/60">
+                      <p className="mt-1 text-xs font-normal text-muted-foreground">
                         {tool.description}
                       </p>
                     </div>

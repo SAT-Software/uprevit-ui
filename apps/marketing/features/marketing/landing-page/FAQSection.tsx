@@ -11,15 +11,15 @@ const faqs = [
   {
     question: "How do I get started with Uprevit?",
     answer:
-      "Sign-up with us & set up a workspace with your organization. Invite your team to start collaborating on your projects, products & departments",
+      "Sign up with us & set up a workspace with your organization. Invite your team to start collaborating on your projects, products & departments",
   },
   {
-    question: "How does Uprevit assists in label compliance?",
+    question: "How does Uprevit assist in label compliance?",
     answer:
-      "Uprevit provides a documentation template in compliance with global standards (including EU MDR, FDA UDI, Health Canada, ISO 15223-1 symbols, etc.). , ensuring no label can be finalized or printed until all regional requirements are met, minimizing regulatory feedback cycles",
+      "Uprevit provides a documentation template in compliance with global standards (including EU MDR, FDA UDI, Health Canada, ISO 15223-1 symbols, etc.), ensuring no label can be finalized or printed until all regional requirements are met, minimizing regulatory feedback cycles",
   },
   {
-    question: "How does Uprevit handle version control and change tracking ?",
+    question: "How does Uprevit handle version control and change tracking?",
     answer: [
       "We eliminate manual redlining completely",
       "Uprevit provides Perfect Version Control and a comprehensive product phase tracking",
@@ -29,9 +29,9 @@ const faqs = [
   },
   {
     question:
-      "Can Uprevit integrate with our existing ERP, PLM, or MES systems",
+      "Can Uprevit integrate with our existing ERP, PLM, or MES systems?",
     answer:
-      "Currently, Uprevit is designed for seamless data governance & data exports to .pdf and .xls only which allow users to update in their respective ERP, PLM and MES systems. Customer specific integrations are subjective to Client requirements",
+      "Currently, Uprevit is designed for seamless data governance & data exports to .pdf and .xls only, which allows users to update in their respective ERP, PLM and MES systems. Customer-specific integrations depend on client requirements",
   },
   {
     question:
@@ -59,7 +59,7 @@ export default function FAQSection() {
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium text-center">
             Frequently Asked Questions
           </h2>
-          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground/60 w-full md:w-1/3 text-center">
+          <p className="text-base md:text-lg lg:text-xl font-normal text-muted-foreground w-full md:w-1/3 text-center">
             Find answers to common questions about our product
           </p>
         </div>

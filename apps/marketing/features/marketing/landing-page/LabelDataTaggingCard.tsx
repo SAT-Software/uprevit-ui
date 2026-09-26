@@ -99,38 +99,38 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
               </div>
             </div>
 
-            {/* Toolbar - Right Side */}
-            <div className="absolute top-20 right-1.5 lg:top-22 lg:right-2 flex flex-col gap-1 p-1 bg-background border border-border rounded-lg shadow-sm">
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+            {/* Toolbar - Right Side (decorative) */}
+            <div aria-hidden="true" className="absolute top-20 right-1.5 lg:top-22 lg:right-2 flex flex-col gap-1 p-1 bg-background border border-border rounded-lg shadow-sm">
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={PencilEdit01Icon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Home04Icon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Image01Icon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 rounded-xl text-foreground/70 bg-accent group-hover:text-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:text-blue-500 group-data-[active=true]:bg-blue-500/10 transition-all ease-in-out duration-300 delay-100">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70 bg-accent group-hover:text-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:text-blue-500 group-data-[active=true]:bg-blue-500/10 transition-all ease-in-out duration-300 delay-100">
                 <Icon icon={CubeIcon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Search02Icon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Layers01Icon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={EyeIcon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={FloppyDiskIcon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Delete02Icon} size={16} strokeWidth={2} />
-              </button>
-              <button className="p-1 hover:bg-accent rounded-xl text-foreground/70 hover:text-foreground transition-colors">
+              </span>
+              <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Settings01Icon} size={16} strokeWidth={2} />
-              </button>
+              </span>
             </div>
           </div>
         </div>

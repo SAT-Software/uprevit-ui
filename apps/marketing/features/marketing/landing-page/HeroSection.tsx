@@ -12,7 +12,7 @@ export default function HeroSection() {
       <div className="flex flex-col items-center gap-4">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-center tracking-tighter">
           Your QMS, Digitized <br />
-          <span className="text-muted-foreground/70 tracking-tighter">
+          <span className="text-muted-foreground tracking-tighter">
             Your Labeling, Validated
           </span>
         </h1>
@@ -21,10 +21,10 @@ export default function HeroSection() {
             The unified cloud-based platform for total labeling governance
           </p>
 
-          <p className="w-[80%] text-xs md:text-sm lg:text-base text-center text-muted-foreground/80 dark:text-muted-foreground/80">
+          <p className="w-[80%] text-xs md:text-sm lg:text-base text-center text-muted-foreground">
             Forget document-level risk: Streamline your global labeling process
             with a unified, intuitive platform that manages labels at the data
-            level. Built by compliance experts, designed for Medical devices.
+            level. Built by compliance experts, designed for medical devices.
           </p>
         </div>
         <div className="mt-8 flex items-center justify-center gap-4">

@@ -13,14 +13,14 @@ export default function FooterSection() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-16">
           {/* Brand Column */}
           <div className="md:col-span-6 flex flex-col justify-between">
-            <div>
-              <h3 className="text-lg md:text-xl font-medium text-neutral-50/70 mb-0">
+            <p className="text-lg md:text-xl font-medium mb-12">
+              <span className="block text-neutral-50/70">
                 The unified cloud-based platform
-              </h3>
-              <h3 className="text-lg md:text-xl font-medium text-neutral-50/50 mb-12">
+              </span>
+              <span className="block text-neutral-50/50">
                 for total labeling governance
-              </h3>
-            </div>
+              </span>
+            </p>
 
             <Link href="/" className="flex items-center gap-2 p-1">
               <div className="relative flex aspect-square mb-1 size-8 items-center justify-center">
@@ -41,9 +41,9 @@ export default function FooterSection() {
 
           {/* Product / Company Column */}
           <div className="md:col-span-3">
-            <h4 className="text-sm font-medium text-neutral-50/60 mb-6">
+            <h2 className="text-sm font-medium text-neutral-50/60 mb-6">
               Product / Company
-            </h4>
+            </h2>
             <ul className="space-y-4">
               <li>
                 <Link
@@ -82,9 +82,9 @@ export default function FooterSection() {
 
           {/* Follow Us Column */}
           <div className="md:col-span-3">
-            <h4 className="text-sm font-medium text-neutral-50/60 mb-6">
+            <h2 className="text-sm font-medium text-neutral-50/60 mb-6">
               Follow Us
-            </h4>
+            </h2>
             <ul className="space-y-4 mb-8">
               {/* <li>
                 <Link
@@ -100,6 +100,7 @@ export default function FooterSection() {
                 <Link
                   href="https://linkedin.com/company/uprevit"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2 text-neutral-50/50 hover:text-neutral-50 transition-colors"
                 >
                   <Icon icon={Linkedin02Icon} size={16} strokeWidth={2} />
@@ -112,20 +113,20 @@ export default function FooterSection() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-neutral-50/40">
-          <p>© 2025 Uprevit. All rights reserved.</p>
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-neutral-50/60">
+          <p>© {new Date().getFullYear()} Uprevit. All rights reserved.</p>
           <div className="flex flex-wrap gap-6">
             <Link
               href="/privacy-policy"
-              className="hover:text-neutral-50/60 transition-colors"
+              className="hover:text-neutral-50 transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-service"
-              className="hover:text-neutral-50/60 transition-colors"
+              className="hover:text-neutral-50 transition-colors"
             >
-              Terms of Services
+              Terms of Service
             </Link>
           </div>
         </div>
