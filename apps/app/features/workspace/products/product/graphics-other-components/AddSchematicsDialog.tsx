@@ -139,7 +139,7 @@ export default function AddSchematicsDialog({
         size="lg"
         primaryAction={{
           label: "Add Schematic",
-          loadingLabel: isPending ? "Adding..." : "Uploading...",
+          loadingLabel: isPending ? "Adding…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,

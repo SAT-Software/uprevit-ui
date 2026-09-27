@@ -256,12 +256,17 @@ export function WorkspaceListControls({
   return (
     <div className="flex flex-wrap items-center gap-3">
       <DropdownMenu>
-        <DropdownMenuTrigger>
-          <Tooltip>
-            <TooltipTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size={hasActiveFilters ? "sm" : "icon-xs"}
+                aria-label={
+                  hasActiveFilters
+                    ? `Filter the view, ${filters.length} active`
+                    : "Filter the view"
+                }
                 className="text-muted-foreground/60 hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out"
               >
                 <Icon
@@ -271,15 +276,15 @@ export function WorkspaceListControls({
                   className="transition-colors delay-100 duration-200 ease-in-out"
                 />
                 {hasActiveFilters && (
-                  <span className=" rounded-full bg-border w-4 h-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground">
+                  <span className="rounded-full bg-border size-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground tabular-nums">
                     {filters.length}
                   </span>
                 )}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>Filter the view</TooltipContent>
-          </Tooltip>
-        </DropdownMenuTrigger>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Filter the view</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent
           className="w-full"
           align="start"
@@ -429,17 +434,12 @@ export function WorkspaceListControls({
 
       {hasActiveFilters && (
         <Button
-          variant="destructive"
+          variant="outline"
           size="sm"
           className="group"
           onClick={handleClearFilters}
         >
-          <Icon
-            icon={FilterRemoveIcon}
-            size={16}
-            strokeWidth={2}
-            className="text-destructive/70 group-hover:text-destructive dark:text-foreground/70 dark:group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
-          />
+          <Icon icon={FilterRemoveIcon} size={16} strokeWidth={2} />
           Clear filters
         </Button>
       )}

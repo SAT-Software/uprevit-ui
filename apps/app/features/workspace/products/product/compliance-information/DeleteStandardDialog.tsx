@@ -101,7 +101,7 @@ export default function DeleteStandardDialog({
         }}
         primaryAction={{
           label: "Delete Standard",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: handleDelete,
           loading: isPending,
           disabled: isPending,

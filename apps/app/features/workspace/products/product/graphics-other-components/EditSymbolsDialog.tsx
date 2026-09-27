@@ -202,7 +202,7 @@ export default function EditSymbolsDialog({
         size="lg"
         primaryAction={{
           label: "Update Symbol",
-          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          loadingLabel: isPending ? "Updating…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,

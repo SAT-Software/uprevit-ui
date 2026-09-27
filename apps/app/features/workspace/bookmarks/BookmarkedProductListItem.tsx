@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Blockchain03Icon } from "@hugeicons/core-free-icons";
 
 import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
@@ -52,16 +52,12 @@ export function BookmarkedProductListItem({
   product,
   folderId,
 }: BookmarkedProductListItemProps) {
-  const router = useRouter();
   const productHref = `/products/${product._id}/product-information`;
 
   return (
     <>
-      <div
-        className="group relative w-full flex items-center justify-between cursor-pointer rounded-xl border border-border/60 bg-background transition-colors hover:bg-muted/40 p-2"
-        onClick={() => router.push(productHref)}
-      >
-        <div className="flex items-center gap-4">
+      <div className="group relative w-full flex items-center justify-between rounded-xl border border-border/60 bg-background transition-colors hover:bg-muted/40 p-2 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring">
+        <div className="flex min-w-0 items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted transition-colors delay-100 duration-200 ease-in-out group-hover:border-border group-hover:bg-muted/80 ">
             <Icon
               icon={Blockchain03Icon}
@@ -71,9 +67,13 @@ export function BookmarkedProductListItem({
 
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-2">
-              <p className="truncate text-sm font-medium text-foreground">
+              <Link
+                href={productHref}
+                className="truncate text-sm font-medium text-foreground outline-none after:absolute after:inset-0 after:rounded-xl"
+                title={product.product_name}
+              >
                 {product.product_name}
-              </p>
+              </Link>
               <Badge
                 variant={getStatusBadgeVariant(product.status)}
                 className="shrink-0 font-normal capitalize"
@@ -92,10 +92,7 @@ export function BookmarkedProductListItem({
             </p>
           </div>
         </div>
-        <div
-          className="shrink-0"
-          onClick={(event) => event.stopPropagation()}
-        >
+        <div className="relative z-10 shrink-0">
           <DialogRemoveProductBookmark
             productId={product._id}
             productName={product.product_name}

@@ -205,7 +205,7 @@ export default function EditProductDialog({
         size="xl"
         primaryAction={{
           label: "Save Changes",
-          loadingLabel: "Saving...",
+          loadingLabel: "Saving…",
           form: `edit-product-info-form-${id}`,
           type: "submit",
           loading: isPending,
@@ -255,7 +255,7 @@ export default function EditProductDialog({
                               (market) =>
                                 market.regionAcronym === marketGeographySelect,
                             )?.regionAcronym
-                          : "Select market..."}
+                          : "Select market…"}
                         <Icon
                           icon={UnfoldMoreIcon}
                           size={16}
@@ -268,7 +268,7 @@ export default function EditProductDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search market..." />
+                        <CommandInput placeholder="Search market…" />
                         <CommandList className="max-h-60 overflow-y-auto">
                           <CommandEmpty>No market found.</CommandEmpty>
                           <CommandGroup>
@@ -405,7 +405,7 @@ export default function EditProductDialog({
                             {countryOfOriginSelect}
                           </span>
                         ) : (
-                          "Select country..."
+                          "Select country…"
                         )}
                         <Icon
                           icon={UnfoldMoreIcon}
@@ -419,7 +419,7 @@ export default function EditProductDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search country..." />
+                        <CommandInput placeholder="Search country…" />
                         <CommandList className="max-h-60 overflow-y-auto">
                           <CommandEmpty>No country found.</CommandEmpty>
                           <CommandGroup>
@@ -610,7 +610,7 @@ export default function EditProductDialog({
                             </span>
                           </span>
                         ) : (
-                          "Select device class..."
+                          "Select device class…"
                         )}
                         <Icon
                           icon={UnfoldMoreIcon}
@@ -624,7 +624,7 @@ export default function EditProductDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search device class..." />
+                        <CommandInput placeholder="Search device class…" />
                         <CommandList className="max-h-72 overflow-y-auto">
                           <CommandEmpty>No device class found.</CommandEmpty>
                           {DEVICE_CLASS_GROUPS.map((group) => (
@@ -708,14 +708,14 @@ export default function EditProductDialog({
             <Field data-invalid={!!errors.basicUdiDi}>
               <FormFieldLabel
                 htmlFor={`${id}-basic-udi-di`}
-                label="Basic UDI-DI"
+                label="Basic UDI"
                 optional
                 tooltip="Basic Unique Device Identification — device identifier used for regulatory tracking when applicable."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
                   id={`${id}-basic-udi-di`}
-                  placeholder="Enter Basic UDI-DI"
+                  placeholder="Enter Basic UDI"
                   type="text"
                   aria-invalid={errors.basicUdiDi ? "true" : "false"}
                   {...register("basicUdiDi")}

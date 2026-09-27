@@ -50,6 +50,7 @@ const ToolboxPanel = ({
                 variant={variant}
                 size="icon-sm"
                 className="size-7"
+                aria-label={title}
                 onClick={() => setPopoverOpen(!popoverOpen)}
               >
                 <Icon icon={icon} size={14} strokeWidth={2} />

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 
@@ -31,7 +32,9 @@ export default function CTASection() {
                   </span>
                 </h2>
                 <div className="mt-8 flex items-center justify-center gap-4">
-                  <Button size="lg">Get Started</Button>
+                  <Button asChild size="lg">
+                    <Link href="/contact">Get Started</Link>
+                  </Button>
                 </div>
               </div>
               <div className="w-full flex justify-center md:justify-end">

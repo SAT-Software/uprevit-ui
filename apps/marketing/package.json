@@ -1,6 +1,6 @@
 {
   "name": "@uprevit/marketing",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
@@ -35,9 +35,5 @@
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^4.3.0",
     "typescript": "^5"
-  },
-  "overrides": {
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3"
   }
 }

@@ -43,7 +43,7 @@ function PlatformStatCard({
           )}
         >
           <Icon
-            className="text-muted-foreground/60 group-hover:text-muted-foreground"
+            className="text-muted-foreground group-hover:text-foreground"
             icon={icon}
             size={16}
             strokeWidth={2}
@@ -51,7 +51,7 @@ function PlatformStatCard({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <p className="text-sm font-normal text-muted-foreground/60">
+            <p className="text-sm font-normal text-muted-foreground">
               {title}
             </p>
             <InfoTooltip content={info} />
@@ -79,12 +79,12 @@ function PlatformStatCardSkeleton({
           <Icon icon={icon} size={16} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-sm font-normal text-muted-foreground/60">
+          <p className="text-sm font-normal text-muted-foreground">
             {title}
           </p>
-          <p className="text-2xl font-semibold">
-            <Skeleton className="inline-block h-7 w-10 rounded" />
-          </p>
+          <div className="py-0.5">
+            <Skeleton className="h-7 w-10 rounded" />
+          </div>
         </div>
       </div>
     </div>

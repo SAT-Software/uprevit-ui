@@ -184,7 +184,7 @@ export default function EditSchematicsDialog({
         size="lg"
         primaryAction={{
           label: "Update Schematic",
-          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          loadingLabel: isPending ? "Updating…" : "Uploading…",
           form: formId,
           type: "submit",
           loading: isSaving,

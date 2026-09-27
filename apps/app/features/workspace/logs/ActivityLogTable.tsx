@@ -296,7 +296,7 @@ export function ActivityLogTable({
                 strokeWidth={2}
                 className="animate-spin"
               />
-              Updating logs...
+              Updating logs…
             </div>
           </div>
         ) : null}

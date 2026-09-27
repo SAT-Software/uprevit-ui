@@ -180,7 +180,7 @@ export default function DialogEditLabelTag({
         size="lg"
         primaryAction={{
           label: "Update Label",
-          loadingLabel: isPending ? "Updating..." : "Uploading...",
+          loadingLabel: isPending ? "Updating…" : "Uploading…",
           form: `edit-label-tag-form-${id}`,
           type: "submit",
           loading: isSaving,

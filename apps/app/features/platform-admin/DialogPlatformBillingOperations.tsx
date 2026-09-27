@@ -108,7 +108,7 @@ export function DialogPlatformBillingOperations({
           size="lg"
           primaryAction={{
             label: "Apply adjustment",
-            loadingLabel: "Applying...",
+            loadingLabel: "Applying…",
             form: formId,
             type: "submit",
             loading: isAdjustmentPending,

@@ -85,7 +85,7 @@ export default function DialogDeleteBookmarkFolder({
         }}
         primaryAction={{
           label: "Delete Folder",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: handleConfirm,
           loading: isPending,
           disabled,

@@ -187,13 +187,13 @@ export function ConditionRow({
               <TagInput
                 tags={tags}
                 setTags={handleTagsChange}
-                placeholder="Add values..."
+                placeholder="Add values…"
                 disabled={!condition.field}
               />
             </div>
           ) : (
             <Input
-              placeholder="Enter value..."
+              placeholder="Enter value…"
               value={(condition.value as string) || ""}
               onChange={(e) => onUpdate({ value: e.target.value })}
               disabled={!condition.field}

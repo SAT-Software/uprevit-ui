@@ -193,7 +193,7 @@ const SortableHeader = ({
           className="h-10 group data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
         >
           <div className="flex items-center justify-between w-full gap-2">
-            <div className="flex items-center text-muted-foreground/60 group-hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out">
+            <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out">
               <span>{title}</span>
             </div>
             <div className="opacity-50 group-hover:opacity-100 transition-all delay-100 duration-200 ease-in-out">
@@ -222,7 +222,8 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row }) => {
       return row.getCanExpand() ? (
         <Button
-          className="size-7 shadow-none text-muted-foreground/60 hover:text-foreground"
+          aria-label={row.getIsExpanded() ? "Collapse row" : "Expand row"}
+          className="size-7 shadow-none text-muted-foreground hover:text-foreground"
           onClick={row.getToggleExpandedHandler()}
           aria-expanded={row.getIsExpanded()}
           size="icon"

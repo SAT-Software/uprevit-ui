@@ -54,7 +54,7 @@ export default function StandardsSymbolsSection() {
             Standards, symbols, and references for global compliance
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg font-normal text-muted-foreground/60 max-w-md leading-relaxed">
+          <p className="text-base md:text-lg font-normal text-muted-foreground max-w-md leading-relaxed">
             Centralize symbol guidance and ISO references in one place so teams
             can label confidently across markets.
           </p>
@@ -78,8 +78,8 @@ export default function StandardsSymbolsSection() {
 
           <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
             <div className="flex min-h-[28rem] items-center justify-center rounded-xl border border-border bg-background/80 shadow-none">
-              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground/60 text-center">
-                Coming soon...
+              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground text-center">
+                Coming soon…
               </p>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function StandardsSymbolsSection() {
                   <h2 className="text-base md:text-lg font-semibold">
                     Standards & symbol library
                   </h2>
-                  <p className="text-sm font-normal text-muted-foreground/60 leading-relaxed">
+                  <p className="text-sm font-normal text-muted-foreground leading-relaxed">
                     One consolidated view for ISO guidance and symbol usage
                     references.
                   </p>
@@ -112,7 +112,7 @@ export default function StandardsSymbolsSection() {
                               {symbol.title}
                             </h4>
                           </div>
-                          <p className="text-sm font-normal text-muted-foreground/60">
+                          <p className="text-sm font-normal text-muted-foreground">
                             {symbol.description}
                           </p>
                         </div>
@@ -131,7 +131,7 @@ export default function StandardsSymbolsSection() {
                           {symbolHighlights.map((highlight) => (
                             <div
                               key={highlight}
-                              className="rounded-xl border border-border bg-background/80 p-3 text-xs font-normal text-muted-foreground/60"
+                              className="rounded-xl border border-border bg-background/80 p-3 text-xs font-normal text-muted-foreground"
                             >
                               {highlight}
                             </div>
@@ -153,7 +153,7 @@ export default function StandardsSymbolsSection() {
                           ISO Documents Repository
                         </h4>
                       </div>
-                      <p className="text-sm font-normal text-muted-foreground/60">
+                      <p className="text-sm font-normal text-muted-foreground">
                         Access the latest ISO standards used in medical device
                         labeling and compliance workflows.
                       </p>
@@ -165,7 +165,7 @@ export default function StandardsSymbolsSection() {
                           className="rounded-xl border border-border p-4"
                         >
                           <h5 className="text-sm font-semibold">{doc.title}</h5>
-                          <p className="mt-1 text-xs font-normal text-muted-foreground/60">
+                          <p className="mt-1 text-xs font-normal text-muted-foreground">
                             {doc.description}
                           </p>
                         </div>

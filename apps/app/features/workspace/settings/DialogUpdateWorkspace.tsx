@@ -194,7 +194,7 @@ export function DialogUpdateWorkspace({
         size="xl"
         primaryAction={{
           label: "Save Changes",
-          loadingLabel: "Saving...",
+          loadingLabel: "Saving…",
           form: formId,
           type: "submit",
           loading: isPending,

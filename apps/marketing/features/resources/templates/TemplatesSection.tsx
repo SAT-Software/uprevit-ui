@@ -82,7 +82,7 @@ export default function TemplatesSection() {
             Practical templates built for speed
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg font-normal text-muted-foreground/60 max-w-md leading-relaxed">
+          <p className="text-base md:text-lg font-normal text-muted-foreground max-w-md leading-relaxed">
             Download ready-to-use assets created by regulatory experts. Stop
             rebuilding the basics and focus on quality review.
           </p>
@@ -115,8 +115,8 @@ export default function TemplatesSection() {
 
           <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
             <div className="flex min-h-[28rem] items-center justify-center rounded-xl border border-border bg-background/80 shadow-none">
-              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground/60 text-center">
-                Coming soon...
+              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground text-center">
+                Coming soon…
               </p>
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function TemplatesSection() {
                     <div className="flex items-center gap-2 text-sm md:text-base font-semibold">
                       Built for fast adoption
                     </div>
-                    <p className="text-sm font-normal text-muted-foreground/60 leading-relaxed">
+                    <p className="text-sm font-normal text-muted-foreground leading-relaxed">
                       Each template includes clear guidance so teams can align
                       quickly, reduce review cycles, and keep documentation
                       consistent.
@@ -145,7 +145,7 @@ export default function TemplatesSection() {
                           <h4 className="text-sm font-semibold">
                             {step.title}
                           </h4>
-                          <p className="text-xs font-normal text-muted-foreground/60">
+                          <p className="text-xs font-normal text-muted-foreground">
                             {step.description}
                           </p>
                         </div>
@@ -155,11 +155,11 @@ export default function TemplatesSection() {
                 </div>
                 <div className=" grid grid-cols-2 gap-3">
                   <div className="rounded-xl border border-border bg-background/80 p-3">
-                    <p className="text-xs font-normal text-muted-foreground/60">Formats</p>
+                    <p className="text-xs font-normal text-muted-foreground">Formats</p>
                     <p className="text-sm font-semibold">PDF, CSV, XLSX</p>
                   </div>
                   <div className="rounded-xl border border-border bg-background/80 p-3">
-                    <p className="text-xs font-normal text-muted-foreground/60">
+                    <p className="text-xs font-normal text-muted-foreground">
                       Designed for
                     </p>
                     <p className="text-sm font-semibold">Regulatory Affairs</p>
@@ -194,7 +194,7 @@ export default function TemplatesSection() {
                               {item.title}
                             </h4>
                           </div>
-                           <p className="mt-2 text-sm font-normal text-muted-foreground/60 leading-relaxed">
+                           <p className="mt-2 text-sm font-normal text-muted-foreground leading-relaxed">
                              {item.description}
                            </p>
                         </div>
@@ -203,7 +203,7 @@ export default function TemplatesSection() {
                         </Badge>
                       </div>
                       <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xs font-normal text-muted-foreground/60">
+                        <span className="text-xs font-normal text-muted-foreground">
                           {item.format}
                         </span>
                         <Button variant="outline" size="sm">

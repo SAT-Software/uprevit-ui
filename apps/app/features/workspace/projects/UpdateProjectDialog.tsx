@@ -283,9 +283,9 @@ export default function UpdateProjectDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
             <Button
               variant="outline"
               size="sm"
@@ -307,10 +307,10 @@ export default function UpdateProjectDialog({
               />
               Update
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Update project details</TooltipContent>
-        </Tooltip>
-      </DialogTrigger>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Update project details</TooltipContent>
+      </Tooltip>
       <AppDialogContent
         title="Update Project"
         description="Update this project's details and members."
@@ -318,7 +318,7 @@ export default function UpdateProjectDialog({
         size="lg"
         primaryAction={{
           label: "Update Project",
-          loadingLabel: uploadingImage ? "Uploading..." : "Updating...",
+          loadingLabel: uploadingImage ? "Uploading…" : "Updating…",
           form: `mutate-project-form-${id}`,
           type: "submit",
           loading: uploadingImage || isPending,
@@ -425,7 +425,7 @@ export default function UpdateProjectDialog({
                 >
                   <Command shouldFilter={false}>
                     <CommandInput
-                      placeholder="Search departments..."
+                      placeholder="Search departments…"
                       className="h-9"
                       value={departmentSearch}
                       onValueChange={setDepartmentSearch}
@@ -433,7 +433,7 @@ export default function UpdateProjectDialog({
                     <CommandList onScroll={handleDepartmentListScroll}>
                       <CommandEmpty>
                         {isDepartmentsPending
-                          ? "Loading departments..."
+                          ? "Loading departments…"
                           : isDepartmentsError
                             ? "Failed to load departments."
                             : "No department found."}

@@ -186,9 +186,10 @@ export function UsersTable() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                aria-label={listState.query.order === "asc" ? "Sort order: ascending" : "Sort order: descending"}
                 variant="outline"
                 size="icon-xs"
-                className="h-7 px-2 text-xs text-muted-foreground/60 hover:text-muted-foreground"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                 onClick={() =>
                   listState.setSort(
                     listState.query.sort ?? "name",

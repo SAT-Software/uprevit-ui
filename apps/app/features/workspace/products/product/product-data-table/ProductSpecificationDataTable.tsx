@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@uprevit/ui/components/ui/button";
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import { ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -9,6 +11,7 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@uprevit/ui/components/ui/input-group";
 import {
@@ -95,6 +98,7 @@ import { useTheme } from "next-themes";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
+  Cancel01Icon,
   DragDropVerticalIcon,
   FileExportIcon,
   FileImportIcon,
@@ -290,6 +294,7 @@ const EditableHeaderContent = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder={`Column ${colIndex + 1}`}
+        aria-label={`Column ${colIndex + 1} name`}
       />
       {showInlineDiff && diff && (
         <div className="absolute inset-0 pointer-events-none px-1 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
@@ -318,6 +323,13 @@ const EditableHeaderContent = ({
         <Button
           variant="ghost"
           size="icon-2xs"
+          aria-label={
+            column.getIsSorted() === "asc"
+              ? "Sorted ascending, sort descending"
+              : column.getIsSorted() === "desc"
+                ? "Sorted descending, sort ascending"
+                : "Sort column"
+          }
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="hover:bg-accent-foreground/10"
         >
@@ -407,6 +419,7 @@ const DraggableHeader = ({
         <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-500" />
       )}
       <Button
+        aria-label="Drag to reorder column"
         variant="ghost"
         size="icon-2xs"
         disabled={isReadOnly}
@@ -486,7 +499,10 @@ const DataTypeSelect = ({
     value={value ?? ""}
     onValueChange={(val) => onChange(colIndex, val as DataType)}
   >
-    <SelectTrigger className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2 [&_svg]:size-2.5!">
+    <SelectTrigger
+      aria-label={`Column ${colIndex + 1} data type`}
+      className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2 [&_svg]:size-2.5!"
+    >
       <SelectValue placeholder="" />
     </SelectTrigger>
     <SelectContent>
@@ -1130,6 +1146,8 @@ export function ProductSpecificationDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     globalFilterFn,
+    // The custom filter checks the whole row, even when its first cell is empty.
+    getColumnCanGlobalFilter: (column) => column.id === "col-0",
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     columnResizeDirection: "ltr",
@@ -1471,7 +1489,7 @@ export function ProductSpecificationDataTable({
   );
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col flex-1 min-h-0 min-w-0">
       {/* Formatting Toolbar */}
       <div className="flex items-center gap-2 px-2 h-10 border-b border-border bg-muted/50 shrink-0">
         <WorkbookColorPopover
@@ -1508,6 +1526,7 @@ export function ProductSpecificationDataTable({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              aria-label="Undo"
               variant="outline"
               size="icon-xs"
               onClick={undo}
@@ -1523,6 +1542,7 @@ export function ProductSpecificationDataTable({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              aria-label="Redo"
               variant="outline"
               size="icon-xs"
               onClick={redo}
@@ -1539,7 +1559,8 @@ export function ProductSpecificationDataTable({
 
         <InputGroup className="max-w-48">
           <InputGroupInput
-            placeholder="Search..."
+            aria-label="Search table"
+            placeholder="Search…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className=" text-xs"
@@ -1547,13 +1568,28 @@ export function ProductSpecificationDataTable({
           <InputGroupAddon className="pl-2">
             <Icon icon={Search02Icon} size={14} strokeWidth={2} />
           </InputGroupAddon>
+          {searchQuery && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                aria-label="Clear search"
+                size="icon-xs"
+                onClick={() => {
+                  setSearchQuery("");
+                  setDebouncedSearch("");
+                }}
+              >
+                <Icon icon={Cancel01Icon} size={14} strokeWidth={2} />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
         </InputGroup>
 
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="outline"
               size="icon-xs"
+              aria-label="Find and replace"
               onClick={() => setShowFindReplace(true)}
               disabled={isReadOnly}
             >
@@ -1563,32 +1599,36 @@ export function ProductSpecificationDataTable({
           <TooltipContent>Find &amp; Replace</TooltipContent>
         </Tooltip>
 
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls,.numbers"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
         <Tooltip>
-          <TooltipTrigger>
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,.xlsx,.xls,.numbers"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                size="icon-xs"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isReadOnly}
-              >
-                <Icon icon={FileImportIcon} size={14} strokeWidth={2} />
-              </Button>
-            </>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon-xs"
+              aria-label="Import file"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isReadOnly}
+            >
+              <Icon icon={FileImportIcon} size={14} strokeWidth={2} />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>Import file</TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger>
-            <Button variant="outline" size="icon-xs" onClick={handleExport}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon-xs"
+              aria-label="Export this table"
+              onClick={handleExport}
+            >
               <Icon icon={FileExportIcon} size={14} strokeWidth={2} />
             </Button>
           </TooltipTrigger>
@@ -1603,331 +1643,294 @@ export function ProductSpecificationDataTable({
         onDragEnd={handleDragEnd}
         sensors={sensors}
       >
-        <div
-          ref={parentRef}
-          className="flex-1 min-h-0 overflow-auto overscroll-contain"
+        <ScrollAreaPrimitive.Root
+          type="always"
+          className="relative flex-1 min-h-0 min-w-0 overflow-hidden"
         >
-          <table
-            ref={tableRef}
-            style={{
-              height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
-              width: totalColumnWidth + ROW_NUMBER_WIDTH,
-              position: "relative",
-            }}
+          <ScrollAreaPrimitive.Viewport
+            ref={parentRef}
+            className="absolute inset-0 overscroll-contain [&>div]:!block"
           >
-            <thead
-              className="sticky top-0 z-20 bg-muted"
-              style={{ height: ROW_HEIGHT * 2 }}
+            <table
+              ref={tableRef}
+              style={{
+                height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
+                width: totalColumnWidth + ROW_NUMBER_WIDTH,
+                position: "relative",
+              }}
             >
-              <tr className="flex" style={{ height: ROW_HEIGHT }}>
-                <div
-                  className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                  style={{
-                    width: ROW_NUMBER_WIDTH,
-                    height: ROW_HEIGHT,
-                    minWidth: ROW_NUMBER_WIDTH,
-                  }}
-                >
-                  1
-                </div>
-                <SortableContext
-                  items={columnOrder}
-                  strategy={horizontalListSortingStrategy}
-                >
+              <thead
+                className="sticky top-0 z-20 bg-muted"
+                style={{ height: ROW_HEIGHT * 2 }}
+              >
+                <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                  <div
+                    className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                    style={{
+                      width: ROW_NUMBER_WIDTH,
+                      height: ROW_HEIGHT,
+                      minWidth: ROW_NUMBER_WIDTH,
+                    }}
+                  >
+                    1
+                  </div>
+                  <SortableContext
+                    items={columnOrder}
+                    strategy={horizontalListSortingStrategy}
+                  >
+                    <div
+                      className="relative"
+                      style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
+                    >
+                      {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                        const header = headerGroup?.headers[virtualCol.index];
+                        if (!header) return null;
+
+                        const originalColIndex = parseInt(
+                          header.column.id.split("-")[1],
+                        );
+                        const showChangeIndicator =
+                          isRedlineView &&
+                          redlineDiffs.changedCols.has(originalColIndex);
+
+                        return (
+                          <DraggableHeader
+                            key={header.id}
+                            header={header}
+                            virtualCol={{
+                              start: virtualCol.start,
+                              size: virtualCol.size,
+                            }}
+                            showChangeIndicator={showChangeIndicator}
+                            isReadOnly={isReadOnly}
+                          />
+                        );
+                      })}
+                    </div>
+                  </SortableContext>
+                </tr>
+
+                <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                  <div
+                    className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                    style={{
+                      width: ROW_NUMBER_WIDTH,
+                      height: ROW_HEIGHT,
+                      minWidth: ROW_NUMBER_WIDTH,
+                    }}
+                  >
+                    2
+                  </div>
                   <div
                     className="relative"
                     style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
                   >
                     {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                      const header = headerGroup?.headers[virtualCol.index];
-                      if (!header) return null;
+                      const column = visibleColumns[virtualCol.index];
+                      const originalColIndex = parseInt(column.id.split("-")[1]);
+                      const diff = isRedlineView
+                        ? redlineDiffs.columnTypeDiffs[originalColIndex]
+                        : undefined;
+                      const showInlineDiff =
+                        isRedlineView && redlineMode === "inline" && diff;
+                      const showHighlightDiff =
+                        isRedlineView && redlineMode === "highlight" && diff;
 
-                      const originalColIndex = parseInt(
-                        header.column.id.split("-")[1],
-                      );
-                      const showChangeIndicator =
-                        isRedlineView &&
-                        redlineDiffs.changedCols.has(originalColIndex);
-
-                      return (
-                        <DraggableHeader
-                          key={header.id}
-                          header={header}
-                          virtualCol={{
-                            start: virtualCol.start,
-                            size: virtualCol.size,
+                      const select = (
+                        <div
+                          key={`type-${column.id}`}
+                          className={cn(
+                            "border-r border-b border-border flex items-center bg-muted",
+                            showHighlightDiff && redlineHighlightRing,
+                          )}
+                          style={{
+                            position: "absolute",
+                            left: virtualCol.start,
+                            width: virtualCol.size,
+                            height: ROW_HEIGHT,
+                            boxShadow: showHighlightDiff
+                              ? getRedlineHighlightInsetShadow(workbookTheme)
+                              : undefined,
                           }}
-                          showChangeIndicator={showChangeIndicator}
-                          isReadOnly={isReadOnly}
-                        />
-                      );
-                    })}
-                  </div>
-                </SortableContext>
-              </tr>
-
-              <tr className="flex" style={{ height: ROW_HEIGHT }}>
-                <div
-                  className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                  style={{
-                    width: ROW_NUMBER_WIDTH,
-                    height: ROW_HEIGHT,
-                    minWidth: ROW_NUMBER_WIDTH,
-                  }}
-                >
-                  2
-                </div>
-                <div
-                  className="relative"
-                  style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
-                >
-                  {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                    const column = visibleColumns[virtualCol.index];
-                    const originalColIndex = parseInt(column.id.split("-")[1]);
-                    const diff = isRedlineView
-                      ? redlineDiffs.columnTypeDiffs[originalColIndex]
-                      : undefined;
-                    const showInlineDiff =
-                      isRedlineView && redlineMode === "inline" && diff;
-                    const showHighlightDiff =
-                      isRedlineView && redlineMode === "highlight" && diff;
-
-                    const select = (
-                      <div
-                        key={`type-${column.id}`}
-                        className={cn(
-                          "border-r border-b border-border flex items-center bg-muted",
-                          showHighlightDiff && redlineHighlightRing,
-                        )}
-                        style={{
-                          position: "absolute",
-                          left: virtualCol.start,
-                          width: virtualCol.size,
-                          height: ROW_HEIGHT,
-                          boxShadow: showHighlightDiff
-                            ? getRedlineHighlightInsetShadow(workbookTheme)
-                            : undefined,
-                        }}
-                      >
-                        <DataTypeSelect
-                          colIndex={originalColIndex}
-                          value={
-                            columnTypeData[originalColIndex] !== "blank"
-                              ? columnTypeData[originalColIndex]
-                              : undefined
-                          }
-                          isReadOnly={isReadOnly}
-                          onChange={(col, val) => {
-                            if (isReadOnly) return;
-                            const prev = columnTypeData[col];
-                            setColumnTypeData((d) => ({ ...d, [col]: val }));
-                            if (prev !== val) {
-                              record({
-                                type: "columnType",
-                                colIndex: col,
-                                prev,
-                                next: val,
-                              });
+                        >
+                          <DataTypeSelect
+                            colIndex={originalColIndex}
+                            value={
+                              columnTypeData[originalColIndex] !== "blank"
+                                ? columnTypeData[originalColIndex]
+                                : undefined
                             }
-                          }}
-                        />
-                        {showInlineDiff && diff && (
-                          <div className="absolute inset-0 pointer-events-none bg-muted px-2 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
+                            isReadOnly={isReadOnly}
+                            onChange={(col, val) => {
+                              if (isReadOnly) return;
+                              const prev = columnTypeData[col];
+                              setColumnTypeData((d) => ({ ...d, [col]: val }));
+                              if (prev !== val) {
+                                record({
+                                  type: "columnType",
+                                  colIndex: col,
+                                  prev,
+                                  next: val,
+                                });
+                              }
+                            }}
+                          />
+                          {showInlineDiff && diff && (
+                            <div className="absolute inset-0 pointer-events-none bg-muted px-2 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
+                              <DiffValueDisplay
+                                diff={diff}
+                                formatValue={formatColumnTypeDiffValue}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+
+                      return showHighlightDiff && diff ? (
+                        <Tooltip key={`type-${column.id}`}>
+                          <TooltipTrigger asChild>{select}</TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
                             <DiffValueDisplay
                               diff={diff}
                               formatValue={formatColumnTypeDiffValue}
                             />
-                          </div>
-                        )}
-                      </div>
-                    );
-
-                    return showHighlightDiff && diff ? (
-                      <Tooltip key={`type-${column.id}`}>
-                        <TooltipTrigger asChild>{select}</TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs">
-                          <DiffValueDisplay
-                            diff={diff}
-                            formatValue={formatColumnTypeDiffValue}
-                          />
-                        </TooltipContent>
-                      </Tooltip>
-                    ) : (
-                      select
-                    );
-                  })}
-                </div>
-              </tr>
-            </thead>
-
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const row = tableRows[virtualRow.index];
-              if (!row) return null;
-              const rowIndex = row.original.rowIndex;
-
-              return (
-                <tbody
-                  key={row.id}
-                  className="flex"
-                  style={{
-                    position: "absolute",
-                    top: virtualRow.start + ROW_HEIGHT * 2,
-                    height: virtualRow.size,
-                    width: totalColumnWidth + ROW_NUMBER_WIDTH,
-                  }}
-                >
-                  <div
-                    className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground relative"
-                    style={{
-                      width: ROW_NUMBER_WIDTH,
-                      minWidth: ROW_NUMBER_WIDTH,
-                      height: virtualRow.size,
-                    }}
-                  >
-                    {isRedlineView &&
-                      redlineDiffs.changedRows.has(rowIndex) && (
-                        <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      )}
-                    {virtualRow.index + 3}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        select
+                      );
+                    })}
                   </div>
+                </tr>
+              </thead>
 
-                  <tr
-                    className="relative"
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const row = tableRows[virtualRow.index];
+                if (!row) return null;
+                const rowIndex = row.original.rowIndex;
+
+                return (
+                  <tbody
+                    key={row.id}
+                    className="flex"
                     style={{
-                      width: totalColumnWidth,
+                      position: "absolute",
+                      top: virtualRow.start + ROW_HEIGHT * 2,
                       height: virtualRow.size,
+                      width: totalColumnWidth + ROW_NUMBER_WIDTH,
                     }}
                   >
-                    {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                      const column = visibleColumns[virtualCol.index];
-                      const originalColIndex = parseInt(
-                        column.id.split("-")[1],
-                      );
-                      const cellKey = `${rowIndex},${originalColIndex}`;
-                      const format = cellFormats[cellKey];
-                      const isSelected = selectedCells.has(cellKey);
-                      const diff = isRedlineView
-                        ? redlineDiffs.cellDiffs[cellKey]
-                        : undefined;
-                      const isActiveDiffCell =
-                        activeCell?.row === rowIndex &&
-                        activeCell?.col === originalColIndex;
-                      const showInlineDiff =
-                        isRedlineView &&
-                        redlineMode === "inline" &&
-                        diff &&
-                        !(isActiveDiffCell && !isReadOnly);
-                      const showHighlightDiff =
-                        isRedlineView && redlineMode === "highlight" && diff;
+                    <div
+                      className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground relative"
+                      style={{
+                        width: ROW_NUMBER_WIDTH,
+                        minWidth: ROW_NUMBER_WIDTH,
+                        height: virtualRow.size,
+                      }}
+                    >
+                      {isRedlineView &&
+                        redlineDiffs.changedRows.has(rowIndex) && (
+                          <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        )}
+                      {virtualRow.index + 3}
+                    </div>
 
-                      const resolvedBg = resolveWorkbookFillColor(
-                        format?.bgColor,
-                        workbookTheme,
-                      );
-                      const resolvedText = resolveWorkbookTextColor(
-                        format?.textColor,
-                        workbookTheme,
-                      );
+                    <tr
+                      className="relative"
+                      style={{
+                        width: totalColumnWidth,
+                        height: virtualRow.size,
+                      }}
+                    >
+                      {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                        const column = visibleColumns[virtualCol.index];
+                        const originalColIndex = parseInt(
+                          column.id.split("-")[1],
+                        );
+                        const cellKey = `${rowIndex},${originalColIndex}`;
+                        const format = cellFormats[cellKey];
+                        const isSelected = selectedCells.has(cellKey);
+                        const diff = isRedlineView
+                          ? redlineDiffs.cellDiffs[cellKey]
+                          : undefined;
+                        const isActiveDiffCell =
+                          activeCell?.row === rowIndex &&
+                          activeCell?.col === originalColIndex;
+                        const showInlineDiff =
+                          isRedlineView &&
+                          redlineMode === "inline" &&
+                          diff &&
+                          !(isActiveDiffCell && !isReadOnly);
+                        const showHighlightDiff =
+                          isRedlineView && redlineMode === "highlight" && diff;
 
-                      const input = (
-                        <input
-                          data-cell-key={cellKey}
-                          readOnly={isReadOnly}
-                          className={cn(
-                            "h-full w-full border border-border/60 outline-none px-2 text-sm",
-                            isSelected
-                              ? "ring-1 ring-primary ring-inset border-foreground/60"
-                              : "border-border",
-                            showHighlightDiff && redlineHighlightBorder,
-                            showInlineDiff && "caret-transparent",
-                          )}
-                          style={{
-                            backgroundColor: resolvedBg || "var(--background)",
-                            boxShadow: showHighlightDiff
-                              ? getRedlineHighlightInsetShadow(workbookTheme)
-                              : undefined,
-                            color: showInlineDiff
-                              ? "transparent"
-                              : resolvedText || "inherit",
-                            caretColor: showInlineDiff
-                              ? "transparent"
-                              : undefined,
-                          }}
-                          value={
-                            cellDraftRef.current[cellKey] ??
-                            cellData[cellKey] ??
-                            ""
-                          }
-                          onChange={(e) => {
-                            if (isReadOnly) return;
-                            cellDraftRef.current[cellKey] = e.target.value;
-                            setCellData((d) => ({
-                              ...d,
-                              [cellKey]: e.target.value,
-                            }));
-                          }}
-                          onMouseDown={(e) =>
-                            handleCellMouseDown(
-                              virtualRow.index,
-                              virtualCol.index,
-                              e,
-                            )
-                          }
-                          onContextMenu={(e) => {
-                            if (e.ctrlKey || e.metaKey) e.preventDefault();
-                          }}
-                          onFocus={() => {
-                            cellInitialValueRef.current[cellKey] =
-                              cellData[cellKey];
-                            setActiveCell({
-                              row: rowIndex,
-                              col: originalColIndex,
-                            });
-                          }}
-                          onBlur={() => {
-                            if (isReadOnly) return;
-                            const prev = cellInitialValueRef.current[cellKey];
-                            const next =
+                        const resolvedBg = resolveWorkbookFillColor(
+                          format?.bgColor,
+                          workbookTheme,
+                        );
+                        const resolvedText = resolveWorkbookTextColor(
+                          format?.textColor,
+                          workbookTheme,
+                        );
+
+                        const input = (
+                          <input
+                            data-cell-key={cellKey}
+                            aria-label={`Row ${rowIndex + 1}, column ${originalColIndex + 1}`}
+                            readOnly={isReadOnly}
+                            className={cn(
+                              "h-full w-full border border-border/60 outline-none px-2 text-sm",
+                              isSelected
+                                ? "ring-1 ring-primary ring-inset border-foreground/60"
+                                : "border-border",
+                              showHighlightDiff && redlineHighlightBorder,
+                              showInlineDiff && "caret-transparent",
+                            )}
+                            style={{
+                              backgroundColor: resolvedBg || "var(--background)",
+                              boxShadow: showHighlightDiff
+                                ? getRedlineHighlightInsetShadow(workbookTheme)
+                                : undefined,
+                              color: showInlineDiff
+                                ? "transparent"
+                                : resolvedText || "inherit",
+                              caretColor: showInlineDiff
+                                ? "transparent"
+                                : undefined,
+                            }}
+                            value={
                               cellDraftRef.current[cellKey] ??
-                              cellData[cellKey];
-                            if (prev !== next) {
-                              record({
-                                type: "cell",
-                                changes: [{ key: cellKey, prev, next }],
-                              });
+                              cellData[cellKey] ??
+                              ""
                             }
-                            delete cellDraftRef.current[cellKey];
-                            delete cellInitialValueRef.current[cellKey];
-                          }}
-                          onKeyDown={(e) => {
-                            // Arrow key cell navigation
-                            if (
-                              [
-                                "ArrowUp",
-                                "ArrowDown",
-                                "ArrowLeft",
-                                "ArrowRight",
-                              ].includes(e.key)
-                            ) {
-                              e.preventDefault();
-                              const direction = e.key
-                                .replace("Arrow", "")
-                                .toLowerCase() as
-                                | "up"
-                                | "down"
-                                | "left"
-                                | "right";
-                              moveToCellAndFocus(
+                            onChange={(e) => {
+                              if (isReadOnly) return;
+                              cellDraftRef.current[cellKey] = e.target.value;
+                              setCellData((d) => ({
+                                ...d,
+                                [cellKey]: e.target.value,
+                              }));
+                            }}
+                            onMouseDown={(e) =>
+                              handleCellMouseDown(
                                 virtualRow.index,
                                 virtualCol.index,
-                                direction,
-                              );
-                              return;
+                                e,
+                              )
                             }
-
-                            if (isReadOnly) return;
-
-                            if (e.key === "Enter") {
+                            onContextMenu={(e) => {
+                              if (e.ctrlKey || e.metaKey) e.preventDefault();
+                            }}
+                            onFocus={() => {
+                              cellInitialValueRef.current[cellKey] =
+                                cellData[cellKey];
+                              setActiveCell({
+                                row: rowIndex,
+                                col: originalColIndex,
+                              });
+                            }}
+                            onBlur={() => {
+                              if (isReadOnly) return;
                               const prev = cellInitialValueRef.current[cellKey];
                               const next =
                                 cellDraftRef.current[cellKey] ??
@@ -1939,58 +1942,104 @@ export function ProductSpecificationDataTable({
                                 });
                               }
                               delete cellDraftRef.current[cellKey];
-                              // Re-capture initial value for subsequent edits
-                              cellInitialValueRef.current[cellKey] = next;
-                            }
-                          }}
-                          onPaste={(e) =>
-                            handlePaste(e, rowIndex, originalColIndex)
-                          }
-                        />
-                      );
+                              delete cellInitialValueRef.current[cellKey];
+                            }}
+                            onKeyDown={(e) => {
+                              // Arrow key cell navigation
+                              if (
+                                [
+                                  "ArrowUp",
+                                  "ArrowDown",
+                                  "ArrowLeft",
+                                  "ArrowRight",
+                                ].includes(e.key)
+                              ) {
+                                e.preventDefault();
+                                const direction = e.key
+                                  .replace("Arrow", "")
+                                  .toLowerCase() as
+                                  | "up"
+                                  | "down"
+                                  | "left"
+                                  | "right";
+                                moveToCellAndFocus(
+                                  virtualRow.index,
+                                  virtualCol.index,
+                                  direction,
+                                );
+                                return;
+                              }
 
-                      return (
-                        <div
-                          key={`${rowIndex}-${column.id}`}
-                          style={{
-                            position: "absolute",
-                            left: virtualCol.start,
-                            width: virtualCol.size,
-                            height: virtualRow.size,
-                          }}
-                          className="relative"
-                        >
-                          {showHighlightDiff ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>{input}</TooltipTrigger>
-                              <TooltipContent side="top" className="text-xs">
+                              if (isReadOnly) return;
+
+                              if (e.key === "Enter") {
+                                const prev = cellInitialValueRef.current[cellKey];
+                                const next =
+                                  cellDraftRef.current[cellKey] ??
+                                  cellData[cellKey];
+                                if (prev !== next) {
+                                  record({
+                                    type: "cell",
+                                    changes: [{ key: cellKey, prev, next }],
+                                  });
+                                }
+                                delete cellDraftRef.current[cellKey];
+                                // Re-capture initial value for subsequent edits
+                                cellInitialValueRef.current[cellKey] = next;
+                              }
+                            }}
+                            onPaste={(e) =>
+                              handlePaste(e, rowIndex, originalColIndex)
+                            }
+                          />
+                        );
+
+                        return (
+                          <div
+                            key={`${rowIndex}-${column.id}`}
+                            style={{
+                              position: "absolute",
+                              left: virtualCol.start,
+                              width: virtualCol.size,
+                              height: virtualRow.size,
+                            }}
+                            className="relative"
+                          >
+                            {showHighlightDiff ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>{input}</TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">
+                                  <DiffValueDisplay
+                                    diff={diff}
+                                    formatValue={formatDiffValue}
+                                  />
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              input
+                            )}
+
+                            {showInlineDiff && diff && (
+                              <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
                                 <DiffValueDisplay
                                   diff={diff}
                                   formatValue={formatDiffValue}
                                 />
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : (
-                            input
-                          )}
-
-                          {showInlineDiff && diff && (
-                            <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
-                              <DiffValueDisplay
-                                diff={diff}
-                                formatValue={formatDiffValue}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </tr>
-                </tbody>
-              );
-            })}
-          </table>
-        </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </tr>
+                  </tbody>
+                );
+              })}
+            </table>
+          </ScrollAreaPrimitive.Viewport>
+          <ScrollBar orientation="horizontal" className="z-40" />
+          <ScrollBar orientation="vertical" className="z-40" />
+          <ScrollAreaPrimitive.Corner />
+        </ScrollAreaPrimitive.Root>
       </DndContext>
 
       <ConfirmFileImportAlertDialog

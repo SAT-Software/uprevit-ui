@@ -200,8 +200,9 @@ export default function DepartmentDetailPage() {
                   <HoverCard>
                     <HoverCardTrigger asChild>
                       <Button
+                        aria-label={`Manager: ${department.manager || "Not assigned"}`}
                         variant="outline"
-                        className="text-muted-foreground/60 hover:text-muted-foreground"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <Icon
                           icon={ManagerIcon}

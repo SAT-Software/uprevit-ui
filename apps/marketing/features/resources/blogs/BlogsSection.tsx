@@ -87,7 +87,7 @@ export default function BlogsSection() {
             Insights for labeling leaders who need clarity fast
           </h1>
           <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg font-normal text-muted-foreground/60 max-w-md leading-relaxed">
+          <p className="text-base md:text-lg font-normal text-muted-foreground max-w-md leading-relaxed">
             Clear, concise analysis of the regulatory shifts that matter most.
             Stay ahead of enforcement changes with practical guidance you can
             act on.
@@ -119,8 +119,8 @@ export default function BlogsSection() {
 
           <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
             <div className="flex min-h-[28rem] items-center justify-center rounded-xl border border-border bg-background/80 shadow-none">
-              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground/60 text-center">
-                Coming soon...
+              <p className="text-2xl md:text-4xl lg:text-6xl font-normal text-muted-foreground text-center">
+                Coming soon…
               </p>
             </div>
           </div>
@@ -231,10 +231,10 @@ export default function BlogsSection() {
                     <h4 className="text-base font-semibold leading-tight">
                       {news.title}
                     </h4>
-                    <p className="mt-2 text-sm font-normal text-muted-foreground/60 line-clamp-2">
+                    <p className="mt-2 text-sm font-normal text-muted-foreground line-clamp-2">
                       {news.excerpt}
                     </p>
-                    <div className="mt-4 flex items-center gap-2 text-xs font-normal text-muted-foreground/60">
+                    <div className="mt-4 flex items-center gap-2 text-xs font-normal text-muted-foreground">
                       <Icon icon={Calendar03Icon} size={16} strokeWidth={2} />
                       {news.date}
                     </div>

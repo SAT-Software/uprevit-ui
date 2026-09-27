@@ -128,16 +128,16 @@ export function ActivityLogsSheet({
 
   return (
     <Sheet>
-      <SheetTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SheetTrigger asChild>
             {trigger ?? <Button variant="outline">Open</Button>}
-          </TooltipTrigger>
-          <TooltipContent>
-            Show Activity logs of this {scopeType}
-          </TooltipContent>
-        </Tooltip>
-      </SheetTrigger>
+          </SheetTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          Show Activity logs of this {scopeType}
+        </TooltipContent>
+      </Tooltip>
       <SheetContent
         className="flex flex-col gap-0 overflow-hidden p-0"
         onOpenAutoFocus={(event) => event.preventDefault()}
@@ -159,7 +159,7 @@ export function ActivityLogsSheet({
               <InputGroupInput
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search logs..."
+                placeholder="Search logs…"
                 className="w-full text-sm"
               />
               <InputGroupAddon>

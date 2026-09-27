@@ -105,7 +105,7 @@ export default function DialogDeleteLabelTag({
         }}
         primaryAction={{
           label: "Delete Label",
-          loadingLabel: "Deleting...",
+          loadingLabel: "Deleting…",
           onClick: handleConfirm,
           loading: isPending,
           disabled: isPending,

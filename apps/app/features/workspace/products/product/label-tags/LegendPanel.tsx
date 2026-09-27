@@ -264,7 +264,7 @@ export function LegendPanel({
                           }}
                           primaryAction={{
                             label: "Delete Legend",
-                            loadingLabel: "Deleting...",
+                            loadingLabel: "Deleting…",
                             loading: isDeleting,
                             disabled: isDeleting,
                             icon: Delete02Icon,

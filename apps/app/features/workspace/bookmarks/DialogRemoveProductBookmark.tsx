@@ -13,6 +13,11 @@ import {
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 
 interface DialogRemoveProductBookmarkProps {
@@ -70,19 +75,26 @@ export default function DialogRemoveProductBookmark({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          variant="destructive"
-          className="group"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <Icon
-            icon={BookmarkMinus01Icon}
-            className="text-destructive/60 group-hover:text-destructive"
-          />
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              aria-label={`Remove ${productName} from bookmarks`}
+              className="group"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <Icon
+                icon={BookmarkMinus01Icon}
+                className="text-destructive/60 group-hover:text-destructive"
+              />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Remove from bookmarks</TooltipContent>
+      </Tooltip>
 
       <AppDialogContent
         title="Remove from Bookmarks"
@@ -101,7 +113,7 @@ export default function DialogRemoveProductBookmark({
         }}
         primaryAction={{
           label: "Remove",
-          loadingLabel: "Removing...",
+          loadingLabel: "Removing…",
           onClick: handleRemoveProductBookmark,
           loading: isPending,
           disabled: isPending,

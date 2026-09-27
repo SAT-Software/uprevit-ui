@@ -48,6 +48,8 @@ const ToolbarMarkerGroup = ({
                   variant={isActive ? "secondary" : variant}
                   size="icon-sm"
                   className="size-7"
+                  aria-label={markerType.name}
+                  aria-pressed={isActive}
                   onClick={() => handleMarkerSelection(markerType)}
                 >
                   <Icon icon={markerType.icon} size={14} strokeWidth={2} />

@@ -120,8 +120,6 @@ export default function EditStandardDialog({
         },
         onError: (error) => {
           console.error("Failed to update product information:", error);
-          setOpen(false);
-          reset();
         },
       });
     } catch (error) {
@@ -178,7 +176,7 @@ export default function EditStandardDialog({
         size="lg"
         primaryAction={{
           label: "Update Standard",
-          loadingLabel: "Updating...",
+          loadingLabel: "Updating…",
           form: `update-standard-form-${id}`,
           type: "submit",
           loading: isPending,
@@ -230,7 +228,7 @@ export default function EditStandardDialog({
                           ? COMPLIANCE_STANDARDS.find(
                               (s) => s.id === standardSelect,
                             )?.id
-                          : "Select standard..."}
+                          : "Select standard…"}
                         <Icon
                           icon={UnfoldMoreIcon}
                           size={16}
@@ -243,7 +241,7 @@ export default function EditStandardDialog({
                       onWheel={(e) => e.stopPropagation()}
                     >
                       <Command>
-                        <CommandInput placeholder="Search standard or regulation..." />
+                        <CommandInput placeholder="Search standard or regulation…" />
                         <CommandList className="max-h-64 overflow-y-auto">
                           <CommandEmpty>No standard found.</CommandEmpty>
                           <CommandGroup>

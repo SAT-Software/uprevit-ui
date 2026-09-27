@@ -67,7 +67,7 @@ export function WorkspaceAdminInviteDialog({
         size="md"
         primaryAction={{
           label: "Send invite",
-          loadingLabel: "Sending...",
+          loadingLabel: "Sending…",
           form: formId,
           type: "submit",
           loading: mutation.isPending,

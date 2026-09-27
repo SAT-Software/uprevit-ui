@@ -57,7 +57,7 @@ function DepartmentCard({
       <Link
         href={`/departments/${department._id}`}
         className={cn(
-          "group relative flex flex-col md:flex-row items-start md:items-center w-full p-3 gap-4  transition-all delay-100 duration-200 ease-in-out",
+          "group relative flex flex-col md:flex-row items-start md:items-center w-full p-3 gap-4 transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
 
           "rounded-none hover:bg-muted",
         )}
@@ -67,7 +67,8 @@ function DepartmentCard({
             <Image
               src={departmentImageSrc}
               fill
-              alt={department.department_name}
+              sizes="80px"
+              alt=""
               className="object-cover"
             />
           ) : (
@@ -84,7 +85,10 @@ function DepartmentCard({
 
         <div className="flex flex-col flex-1 gap-1 min-w-0">
           <div className="flex flex-col gap-0">
-            <p className="text-sm font-semibold text-foreground truncate pr-8">
+            <p
+              className="text-sm font-semibold text-foreground truncate pr-8"
+              title={department.department_name}
+            >
               {department.department_name}
             </p>
             <p className="flex items-center w-2/3 gap-1.5 text-xs text-muted-foreground line-clamp-1">

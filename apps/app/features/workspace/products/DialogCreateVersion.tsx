@@ -71,7 +71,7 @@ export default function DialogCreateVersion({
         }}
         primaryAction={{
           label: `Create Version ${newVersion}`,
-          loadingLabel: "Creating...",
+          loadingLabel: "Creating…",
           onClick: handleCreateVersion,
           loading: isPending,
           disabled: isPending || !canCreateVersion,

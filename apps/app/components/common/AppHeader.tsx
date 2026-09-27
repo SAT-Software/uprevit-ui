@@ -59,9 +59,9 @@ export function AppHeader() {
           <SidebarTrigger />
           {isNestedRoute ? (
             <HeaderBackNav />
-          ) : (
-            <p className="text-sm font-medium">{pageTitle}</p>
-          )}
+          ) : pageTitle ? (
+            <h1 className="text-sm font-medium">{pageTitle}</h1>
+          ) : null}
         </div>
         <UserNav />
       </div>

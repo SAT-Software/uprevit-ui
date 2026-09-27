@@ -52,6 +52,7 @@ const ToolbarActionButton = ({
               variant={variant}
               className={cn("size-7", className)}
               size="icon-sm"
+              aria-label={title}
               disabled={disabled}
               onClick={() => onAction(action)}
             >
@@ -70,6 +71,7 @@ const ToolbarActionButton = ({
               variant={toggled ? "secondary" : variant}
               className={cn("size-7", className)}
               size="icon-sm"
+              aria-label={title}
               disabled={disabled}
               aria-pressed={toggled}
               onClick={() => onAction(action)}

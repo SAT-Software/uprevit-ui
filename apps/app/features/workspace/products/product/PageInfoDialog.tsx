@@ -28,6 +28,7 @@ export function PageInfoDialog({
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
             <Button
+              aria-label="About this page"
               variant="ghost"
               size="icon"
               className={`size-5 rounded-full hover:bg-muted ${buttonClassName}`}

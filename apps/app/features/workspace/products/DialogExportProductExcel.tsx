@@ -78,7 +78,7 @@ export default function DialogExportProductExcel({
         }}
         primaryAction={{
           label: "Queue Excel Export",
-          loadingLabel: "Queueing...",
+          loadingLabel: "Queueing…",
           onClick: handleExport,
           loading: isPending,
           disabled: isPending,

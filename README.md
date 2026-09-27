@@ -28,7 +28,7 @@ Uprevit is a medical device labeling documentation platform. This repository con
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- Bun workspaces
+- PNPM workspaces
 - Turborepo
 - AWS Amplify Hosting
 - AWS Cognito for authentication
@@ -36,7 +36,7 @@ Uprevit is a medical device labeling documentation platform. This repository con
 
 ## Prerequisites
 
-- Bun `1.3.11`
+- PNPM `11.21.0` and Node.js `22.13+`
 - A local or deployed backend for the product app API
 - Cognito app client and user pool configuration for authenticated product app flows
 
@@ -45,7 +45,7 @@ Uprevit is a medical device labeling documentation platform. This repository con
 Install dependencies from the repository root:
 
 ```bash
-bun install
+pnpm install
 ```
 
 Create the local environment file for the product app:
@@ -57,7 +57,7 @@ cp apps/app/.env.example apps/app/.env.local
 Run the product app locally:
 
 ```bash
-bun run dev:app
+pnpm run dev:app
 ```
 
 Open `http://localhost:8080`.
@@ -65,7 +65,7 @@ Open `http://localhost:8080`.
 Run the marketing app locally:
 
 ```bash
-bun run dev:marketing
+pnpm run dev:marketing
 ```
 
 Open `http://localhost:3001`.
@@ -73,7 +73,7 @@ Open `http://localhost:3001`.
 If you want Turborepo to run active dev tasks together, use:
 
 ```bash
-bun run dev
+pnpm run dev
 ```
 
 ## Development Commands
@@ -81,28 +81,28 @@ bun run dev
 Run these commands from the repository root.
 
 ```bash
-bun run dev
-bun run dev:app
-bun run dev:marketing
+pnpm run dev
+pnpm run dev:app
+pnpm run dev:marketing
 
-bun run build
-bun run build:app
-bun run build:marketing
+pnpm run build
+pnpm run build:app
+pnpm run build:marketing
 
-bun run lint
-bun run lint:app
-bun run lint:marketing
+pnpm run lint
+pnpm run lint:app
+pnpm run lint:marketing
 
-bun run check-types
-bun run check-types:app
-bun run check-types:marketing
+pnpm run check-types
+pnpm run check-types:app
+pnpm run check-types:marketing
 ```
 
 Useful app-specific start commands:
 
 ```bash
-bun run start:app
-bun run start:marketing
+pnpm run start:app
+pnpm run start:marketing
 ```
 
 ## Environment Variables

@@ -39,12 +39,13 @@ function ShowOrHideTableColumnsDropdown<TData>({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               size="icon-xs"
+              aria-label="Show or hide table columns"
               className="text-muted-foreground/60 hover:text-muted-foreground"
             >
               <Icon
@@ -53,12 +54,12 @@ function ShowOrHideTableColumnsDropdown<TData>({
                 className="transition-colors delay-100 duration-200 ease-in-out"
               />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Show or hide table columns</p>
-          </TooltipContent>
-        </Tooltip>
-      </DropdownMenuTrigger>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Show or hide table columns</p>
+        </TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         style={{ boxShadow: "0 12px 28px rgba(0, 0, 0, 0.18)" }}
