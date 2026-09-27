@@ -65,6 +65,12 @@ export const QUERYABLE_TABS: TabConfig[] = [
         options: STATUS_OPTIONS,
       },
       { key: "product_name", label: "Product Name", type: "text" },
+      { key: "product_description", label: "Product Description", type: "text" },
+      { key: "department_name", label: "Department Name", type: "text" },
+      { key: "department_description", label: "Department Description", type: "text" },
+      { key: "project_name", label: "Project Name", type: "text" },
+      { key: "project_description", label: "Project Description", type: "text" },
+      { key: "project_number", label: "Project Number", type: "text" },
       {
         key: "product_plan_number",
         label: "Product Plan Number",
@@ -103,7 +109,7 @@ export const QUERYABLE_TABS: TabConfig[] = [
       },
       {
         key: "basic_udi_di",
-        label: "Basic UDI-DI",
+        label: "Basic UDI",
         type: "text",
       },
     ],

@@ -46,6 +46,7 @@ export function useBookmarkProduct() {
       queryClient.invalidateQueries({ queryKey: ["all-bookmark-folders"] });
       queryClient.invalidateQueries({ queryKey: ["all-user-bookmark-folders"] });
       queryClient.invalidateQueries({ queryKey: ["all-bookmarked-products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-in-bookmark-folder"] });
     },
     onError: (error) => {
       const message = getErrorMessage(

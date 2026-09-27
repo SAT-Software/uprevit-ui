@@ -51,3 +51,6 @@ next-env.d.ts
 .cursor/e2e-testing/
 monorepo*
 .source/
+
+# local planning notes
+/plan.md
