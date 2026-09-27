@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-09-27
+
+### Added
+
+- Added a Back to product button in source folders linked to a product, including subfolders.
+- Added a clear search button to the Product Specifications and Operational Parameters tables.
+- Added department, project, and product description filters to reports.
+- Added pause controls and reduced-motion support to marketing site media.
+
+### Updated
+
+- Updated the Basic UDI-DI label to Basic UDI in product views and documentation.
+- Updated the source file upload limit from 4 to 50 files per upload.
+- Updated the product data tables to always show scrollbars above pinned columns.
+- Updated contrast, focus rings, badge colors, and heading structure across the app and shared UI.
+- Updated table rows, card grids, and icon buttons to be keyboard and screen-reader accessible.
+- Updated the monorepo from Bun to PNPM 11.21.0, including Amplify build commands.
+- Updated frontend agent instructions.
+- Updated monorepo package versions to `0.7.0`.
+
+### Fixed
+
+- Fixed new bookmarks not appearing in an open bookmark folder until a page refresh.
+- Fixed standard dialogs closing when a duplicate standard is rejected.
+- Fixed table search skipping rows whose first cell is empty.
+- Fixed nested buttons, pagination, stat card hydration, and inconsistent create actions.
+- Fixed Outfit font loading in both apps.
+- Fixed dead CTAs, decorative mock controls, footer, and copy on the marketing site.
+- Fixed PNPM installation in Amplify builds by bootstrapping it through Corepack.
+
 ## [0.6.1] - 2026-07-30
 
 ### Fixed
