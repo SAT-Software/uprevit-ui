@@ -14,6 +14,7 @@ export function usePrefersReducedMotion() {
   return useSyncExternalStore(
     subscribe,
     () => window.matchMedia(query).matches,
-    () => false,
+    // Assume reduced motion until the client knows, so nothing autoplays during hydration.
+    () => true,
   );
 }
