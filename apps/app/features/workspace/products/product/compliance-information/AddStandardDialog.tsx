@@ -110,8 +110,6 @@ export default function AddStandardDialog({
         },
         onError: (error) => {
           console.error("Failed to update product information:", error);
-          setOpen(false);
-          reset();
         },
       });
     } catch (error) {

@@ -708,14 +708,14 @@ export default function EditProductDialog({
             <Field data-invalid={!!errors.basicUdiDi}>
               <FormFieldLabel
                 htmlFor={`${id}-basic-udi-di`}
-                label="Basic UDI-DI"
+                label="Basic UDI"
                 optional
                 tooltip="Basic Unique Device Identification — device identifier used for regulatory tracking when applicable."
               />
               <InputGroup size="md" className="bg-background">
                 <InputGroupInput
                   id={`${id}-basic-udi-di`}
-                  placeholder="Enter Basic UDI-DI"
+                  placeholder="Enter Basic UDI"
                   type="text"
                   aria-invalid={errors.basicUdiDi ? "true" : "false"}
                   {...register("basicUdiDi")}

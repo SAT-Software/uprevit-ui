@@ -394,7 +394,7 @@ export default function Page() {
         diffKey: "classOfDevice",
       },
       {
-        label: "Basic UDI-DI",
+        label: "Basic UDI",
         value: productData.basic_udi_di || "N/A",
         icon: BarcodeScanIcon,
         diffKey: "basicUdiDi",

@@ -32,7 +32,7 @@ export default function ProductInformationCard({
       },
       { label: "Commercial / Clinical", value: commercialClinical || "N/A" },
       { label: "Class of Device", value: classOfDevice || "N/A" },
-      { label: "Basic UDI-DI", value: basicUdiDi || "N/A" },
+      { label: "Basic UDI", value: basicUdiDi || "N/A" },
     ];
 
     // Add custom fields if they exist

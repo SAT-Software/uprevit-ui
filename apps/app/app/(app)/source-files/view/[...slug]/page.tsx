@@ -2,10 +2,11 @@
 
 import { useAuth } from "react-oidc-context";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { FolderAddIcon, Link05Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, FolderAddIcon, Link05Icon } from "@hugeicons/core-free-icons";
 
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import DialogDeleteSourceFile from "@/features/workspace/source-files/DialogDeleteSourceFile";
@@ -20,7 +21,6 @@ import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles"
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
 import { useGetSourceFilesFolderById } from "@/hooks/source-files/useGetSourceFilesFolderById";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import type { SourceFilesFolder } from "@/types/source-files";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Badge } from "@uprevit/ui/components/ui/badge";
@@ -94,8 +94,6 @@ export default function ProductSourceFilesPage() {
   const { data, isLoading, isError, refetch } =
     useGetSourceFilesFolderById(folderId);
   const { data: currentFolderData } = useGetCurrentSourceFilesFolder(folderId);
-  const { data: productsData } = useGetAllProducts();
-  const products = (productsData?.result?.products ?? []) as ProductLinkItem[];
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
 
@@ -105,9 +103,7 @@ export default function ProductSourceFilesPage() {
 
   const folder = data?.result;
   const currentFolder = currentFolderData?.result;
-  const linkedProduct = products.find(
-    (product) => product._id === currentFolder?.product_id,
-  );
+  const linkedProduct = currentFolder?.linked_product as ProductLinkItem | null | undefined;
 
   const subfolders =
     folder?.filter((item: SourceFilesFolder) => item.type === "folder") ?? [];
@@ -197,6 +193,14 @@ export default function ProductSourceFilesPage() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {linkedProduct && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/products/${linkedProduct._id}/product-information`}>
+                <Icon icon={ArrowLeft01Icon} />
+                Back to product
+              </Link>
+            </Button>
+          )}
           {currentFolder && (
             <DialogEditSourceFilesFolder
               currentFolder={currentFolder}

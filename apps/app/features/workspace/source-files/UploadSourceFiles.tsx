@@ -95,7 +95,7 @@ export default function Component({
   maxFiles: maxFilesProp,
   maxSize: maxSizeProp,
 }: UploadSourceFilesProps) {
-  const maxFiles = useMemo(() => maxFilesProp ?? 4, [maxFilesProp]);
+  const maxFiles = useMemo(() => maxFilesProp ?? 50, [maxFilesProp]);
   const maxSize = useMemo(() => maxSizeProp ?? 4 * 1024 * 1024, [maxSizeProp]);
 
   const [
