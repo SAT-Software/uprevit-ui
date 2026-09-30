@@ -79,6 +79,12 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import { cn } from "@uprevit/ui/lib/utils";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import {
+  PRODUCT_STATUS_LABELS,
+  canCreateProductVersion,
+  isProductContentLocked,
+} from "@/utils/product/product-lifecycle";
 
 const PRODUCTS_TABS = ["all", "bookmarked"] as const;
 type ProductsTab = (typeof PRODUCTS_TABS)[number];
@@ -166,7 +172,7 @@ const columnHeaderMap = [
   },
   {
     title: "Status",
-    info: "Current status of the product. Draft, Submitted or Archived",
+    info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
   },
   { title: "Version", info: "Latest version number of the product" },
   {
@@ -282,26 +288,7 @@ const columns: ColumnDef<ProductListItem>[] = [
     maxSize: 100,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <Badge
-        variant={
-          row.original?.status === "submitted"
-            ? "green"
-            : row.original?.status === "draft"
-              ? "blue"
-              : "gray"
-        }
-        className="font-normal capitalize"
-      >
-        <div
-          className={cn("w-2 h-2 rounded-full", {
-            "bg-green-500 dark:bg-green-400":
-              row.original?.status === "submitted",
-            "bg-blue-500 dark:bg-blue-400": row.original?.status === "draft",
-            "bg-gray-500 dark:bg-gray-400": row.original?.status === "archived",
-          })}
-        />
-        {row.getValue("status")}
-      </Badge>
+      <ProductStatusBadge status={row.original?.status} />
     ),
   },
   {
@@ -394,9 +381,10 @@ const columns: ColumnDef<ProductListItem>[] = [
         Math.min(100, Math.round(progress || 0)),
       );
 
+      const status = row.original.status;
       const progressState =
-        row.original.status === "submitted"
-          ? SUBMITTED_STATE
+        status && status !== "draft"
+          ? { ...SUBMITTED_STATE, label: PRODUCT_STATUS_LABELS[status] }
           : getProgressState(clampedPercentage);
 
       return (
@@ -807,7 +795,8 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
-  const canCreateVersion = row.original.status === "submitted";
+  const canCreateVersion = canCreateProductVersion(row.original);
+  const isContentLocked = isProductContentLocked(row.original.status);
 
   return (
     <div
@@ -833,23 +822,22 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
               onSelect={() => {
                 setTimeout(() => setShowUpdateDialog(true), 100);
               }}
+              disabled={isContentLocked}
             >
               <Icon icon={PropertyEditIcon} />
               <span>Edit</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => {
-                setTimeout(() => setShowVersionDialog(true), 100);
-              }}
-              disabled={!canCreateVersion}
-              className={cn(
-                !canCreateVersion && "opacity-50 cursor-not-allowed",
-              )}
-            >
-              <Icon icon={PropertyAddIcon} />
-              New version
-            </DropdownMenuItem>
+            {canCreateVersion ? (
+              <DropdownMenuItem
+                onClick={(e) => e.stopPropagation()}
+                onSelect={() => {
+                  setTimeout(() => setShowVersionDialog(true), 100);
+                }}
+              >
+                <Icon icon={PropertyAddIcon} />
+                New version
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem
               onClick={(e) => e.stopPropagation()}
               onSelect={() => {

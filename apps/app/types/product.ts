@@ -1,3 +1,10 @@
+export type ProductStatus =
+  | "draft"
+  | "submitted"
+  | "in_review"
+  | "released"
+  | "obsolete";
+
 export interface Product {
   _id?: string;
   workspace_id?: string;
@@ -6,7 +13,7 @@ export interface Product {
   product_description: string;
   department_id: string;
   project_id: string;
-  status?: "draft" | "submitted" | "archived";
+  status?: ProductStatus;
   target_date?: string | null;
   actual_completion_date?: string | null;
   complete_count?: number;
@@ -15,6 +22,11 @@ export interface Product {
   version?: number;
   is_latest?: boolean;
   parent_id?: string | null;
+  product_lineage_id?: string;
+  is_archived?: boolean;
+  released_at?: string | null;
+  obsoleted_at?: string | null;
+  legacy_release?: boolean;
 
   auditLogs?: Array<AuditLog>;
   createdBy?: string;
@@ -129,7 +141,7 @@ export interface ProductApiResponse {
   product_name?: string;
   project_id?: string;
   department_id?: string;
-  status?: "draft" | "submitted" | "archived";
+  status?: ProductStatus;
   version?: number;
   is_latest?: boolean;
   parent_id?: string | null;
@@ -145,7 +157,7 @@ export interface ProductMetadata {
   product_name: string;
   product_plan_number: string;
   project_id: string;
-  status: "submitted";
+  status: ProductStatus;
   target_date: string;
   version: number;
   workspace_id: string;
@@ -182,7 +194,7 @@ export interface ProductDataContent {
 
   target_date: string | null;
   actual_completion_date: string | null;
-  status: "draft" | "submitted" | "archived";
+  status: ProductStatus;
   complete_count?: number;
   version?: string;
 }

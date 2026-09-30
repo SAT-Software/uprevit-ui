@@ -57,11 +57,11 @@ interface Standards {
 export default function EditStandardDialog({
   productId,
   standards,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
   standards: Standards;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const id = useId();
   const { mutate: updateStandard, isPending } = useUpdateProductTabData();
@@ -156,7 +156,7 @@ export default function EditStandardDialog({
             <Button
               size="icon-xs"
               variant="outline"
-              disabled={isSubmitted}
+              disabled={isContentLocked}
               aria-label="Edit standard"
             >
               <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
@@ -164,8 +164,8 @@ export default function EditStandardDialog({
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Edit standard details"}
         </TooltipContent>
       </Tooltip>
@@ -180,7 +180,7 @@ export default function EditStandardDialog({
           form: `update-standard-form-${id}`,
           type: "submit",
           loading: isPending,
-          disabled: isPending || isSubmitted,
+          disabled: isPending || isContentLocked,
           icon: CheckmarkCircle01Icon,
         }}
         secondaryAction={{

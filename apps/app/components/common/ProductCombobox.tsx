@@ -8,7 +8,6 @@ import {
 } from "react";
 
 import { cn } from "@uprevit/ui/lib/utils";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Command,
@@ -27,12 +26,14 @@ import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Tick01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useGetProductsInfinite } from "@/hooks/product/useGetProductsInfinite";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import type { ProductStatus } from "@/types/product";
 
 export type ProductComboboxItem = {
   _id: string;
   product_name?: string;
   product_plan_number?: string;
-  status?: string;
+  status?: ProductStatus;
 };
 
 export type ProductComboboxProps = {
@@ -50,32 +51,6 @@ export type ProductComboboxProps = {
   disabled?: boolean;
   className?: string;
 };
-
-function ProductStatusBadge({ status }: { status?: string }) {
-  if (!status) return null;
-
-  return (
-    <Badge
-      variant={
-        status === "submitted"
-          ? "green"
-          : status === "draft"
-            ? "blue"
-            : "gray"
-      }
-      className="ml-2 shrink-0 font-normal capitalize"
-    >
-      <div
-        className={cn("h-2 w-2 rounded-full", {
-          "bg-green-500 dark:bg-green-400": status === "submitted",
-          "bg-blue-500 dark:bg-blue-400": status === "draft",
-          "bg-gray-500 dark:bg-gray-400": status === "archived",
-        })}
-      />
-      {status}
-    </Badge>
-  );
-}
 
 export function ProductCombobox({
   value,
@@ -235,7 +210,10 @@ export function ProductCombobox({
                       <span className="min-w-0 flex-1 truncate">
                         {product.product_name || "Unnamed Product"}
                       </span>
-                      <ProductStatusBadge status={product.status} />
+                      <ProductStatusBadge
+                        status={product.status}
+                        className="ml-2 shrink-0"
+                      />
                       <Icon
                         icon={Tick01Icon}
                         size={16}

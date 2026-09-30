@@ -1,4 +1,4 @@
-import { AuditLog } from "@/types/product";
+import type { AuditLog, ProductStatus } from "@/types/product";
 
 export type ProductListItem = {
   _id: string;
@@ -12,7 +12,7 @@ export type ProductListItem = {
   product_name: string;
   product_plan_number: string;
   project_id: string;
-  status: string;
+  status: ProductStatus;
   is_latest?: boolean;
   parent_id?: string | null;
   product_information?: { tab_completed?: boolean };

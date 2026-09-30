@@ -46,11 +46,11 @@ interface LabelTagItem {
 export default function DialogEditLabelTag({
   productId,
   labelTag,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
   labelTag: LabelTagItem;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -160,7 +160,7 @@ export default function DialogEditLabelTag({
             <Button
               size="icon-xs"
               variant="outline"
-              disabled={isSubmitted}
+              disabled={isContentLocked}
               aria-label="Edit label"
             >
               <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
@@ -168,8 +168,8 @@ export default function DialogEditLabelTag({
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Edit label"}
         </TooltipContent>
       </Tooltip>
@@ -184,7 +184,7 @@ export default function DialogEditLabelTag({
           form: `edit-label-tag-form-${id}`,
           type: "submit",
           loading: isSaving,
-          disabled: isSaving || isSubmitted,
+          disabled: isSaving || isContentLocked,
           icon: CheckmarkCircle01Icon,
         }}
         secondaryAction={{

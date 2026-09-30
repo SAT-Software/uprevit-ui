@@ -22,14 +22,14 @@ interface DeleteStandardDialogProps {
   standardId: string;
   standardName: string;
   onDeleted?: () => void;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }
 
 export default function DeleteStandardDialog({
   productId,
   standardId,
   standardName,
-  isSubmitted = false,
+  isContentLocked = false,
 }: DeleteStandardDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate: deleteStandard, isPending } = useUpdateProductTabData();
@@ -68,7 +68,7 @@ export default function DeleteStandardDialog({
             <Button
               size="icon-xs"
               variant="destructive"
-              disabled={isSubmitted}
+              disabled={isContentLocked}
               aria-label="Delete standard"
             >
               <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
@@ -76,8 +76,8 @@ export default function DeleteStandardDialog({
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Delete standard"}
         </TooltipContent>
       </Tooltip>

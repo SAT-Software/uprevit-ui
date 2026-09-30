@@ -9,6 +9,7 @@ import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { cn } from "@uprevit/ui/lib/utils";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 
 interface ComponentItem {
   _id: string;
@@ -63,8 +64,9 @@ export default function Page() {
     compareVersionId,
   );
 
-  const isSubmitted =
-    componentsData?.result?.data?.product_data?.data?.status === "submitted";
+  const isContentLocked = isProductContentLocked(
+    componentsData?.result?.data?.product_data?.data?.status,
+  );
 
   if (isLoading) {
     return (
@@ -152,7 +154,7 @@ export default function Page() {
       <ProductComponentDetailsTable
         data={components}
         productId={productId as string}
-        isSubmitted={isSubmitted}
+        isContentLocked={isContentLocked}
         isRedlineView={isRedlineView}
       />
     </div>

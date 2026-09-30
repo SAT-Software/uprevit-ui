@@ -49,10 +49,10 @@ type FormData = {
 
 export default function AddBarcodesDialog({
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const id = useId();
   const formId = `add-barcodes-form-${id}`;
@@ -162,7 +162,7 @@ export default function AddBarcodesDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" disabled={isSubmitted}>
+        <Button size="sm" variant="secondary" disabled={isContentLocked}>
           <Icon icon={PlusSignSquareIcon} />
           Add Barcode
         </Button>
@@ -178,7 +178,7 @@ export default function AddBarcodesDialog({
           form: formId,
           type: "submit",
           loading: isSaving,
-          disabled: isSaving || isSubmitted,
+          disabled: isSaving || isContentLocked,
           icon: PlusSignSquareIcon,
         }}
         secondaryAction={{

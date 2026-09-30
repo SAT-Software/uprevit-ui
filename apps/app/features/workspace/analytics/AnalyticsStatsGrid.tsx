@@ -15,7 +15,7 @@ import { cn } from "@uprevit/ui/lib/utils";
 interface AnalyticsKpi {
   totalProducts: number;
   draftCount: number;
-  submittedCount: number;
+  releasedCount: number;
   archivedCount: number;
   overdueCount: number;
 }
@@ -45,11 +45,11 @@ const STATS = [
     info: "Products still in draft status",
   },
   {
-    id: "submitted",
-    title: "Submitted",
-    key: "submittedCount" as const,
+    id: "released",
+    title: "Released",
+    key: "releasedCount" as const,
     icon: CheckmarkCircle02Icon,
-    info: "Products that have been submitted",
+    info: "Products whose latest version is released",
   },
   {
     id: "archived",

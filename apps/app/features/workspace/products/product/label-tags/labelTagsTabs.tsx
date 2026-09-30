@@ -66,7 +66,7 @@ interface LabelTagItem {
 interface LabelTagsTabsProps {
   labelTagsData: LabelTagItem[];
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
 }
 
@@ -79,7 +79,7 @@ type PendingSaveCompletion = {
 export default function LabelTagsTabs({
   labelTagsData,
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
   isRedlineView = false,
 }: LabelTagsTabsProps) {
   const [activeTab, setActiveTab] = useState("");
@@ -318,7 +318,7 @@ export default function LabelTagsTabs({
     [hasAnyDirtyItems],
   );
 
-  const showEditStatus = !isSubmitted && !isRedlineView;
+  const showEditStatus = !isContentLocked && !isRedlineView;
   const isPersisting = isSaving || isUpdating;
 
   const getDirtyItemIds = useCallback(
@@ -516,7 +516,7 @@ export default function LabelTagsTabs({
 
   useRegisterProductWorkbookGuard(
     labelTagsGuardRegistration,
-    !isSubmitted && !isRedlineView,
+    !isContentLocked && !isRedlineView,
   );
 
   // Initialize savedAnnotations from labelTagsData on mount
@@ -766,7 +766,7 @@ export default function LabelTagsTabs({
             <p className="text-sm font-medium">Label Tags</p>
             <InfoTooltip content="Add and organize label tags with annotations to highlight specific areas on label images." />
           </div>
-          <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
+          <DialogAddLabelTag productId={productId} isContentLocked={isContentLocked} />
         </div>
 
         <div className="flex flex-col items-center justify-center gap-4 px-4 py-16">
@@ -785,7 +785,7 @@ export default function LabelTagsTabs({
               product.
             </p>
           </div>
-          <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
+          <DialogAddLabelTag productId={productId} isContentLocked={isContentLocked} />
         </div>
       </div>
     );
@@ -828,7 +828,7 @@ export default function LabelTagsTabs({
                 </span>
               </div>
             ) : null)}
-          <DialogAddLabelTag productId={productId} isSubmitted={isSubmitted} />
+          <DialogAddLabelTag productId={productId} isContentLocked={isContentLocked} />
         </div>
       </div>
 
@@ -1014,14 +1014,14 @@ export default function LabelTagsTabs({
                           <DialogEditLabelTag
                             productId={productId}
                             labelTag={item}
-                            isSubmitted={isSubmitted}
+                            isContentLocked={isContentLocked}
                           />
                           <DialogDeleteLabelTag
                             productId={productId}
                             labelTag={item}
-                            isSubmitted={isSubmitted}
+                            isContentLocked={isContentLocked}
                           />
-                          {!isSubmitted &&
+                          {!isContentLocked &&
                             !isRedlineView &&
                             item.image &&
                             !isRemoved && (
@@ -1116,7 +1116,7 @@ export default function LabelTagsTabs({
                             productId={productId}
                             labelTagId={item._id}
                             legendItems={item.legend_items ?? []}
-                            isEditable={!isSubmitted && !isRedlineView}
+                            isEditable={!isContentLocked && !isRedlineView}
                             overlayEnabled={!!legendOverlayById[item._id]}
                             onOverlayToggle={(value) =>
                               handleLegendOverlayToggle(item._id, value)

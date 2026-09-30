@@ -196,7 +196,7 @@ export default function CreateProductDialog() {
         workspace_id: user?.workspaceId as string,
         project_id: data.project,
         version: data.version,
-        status: data.status.toLowerCase() as "draft" | "submitted" | "archived",
+        status: "draft" as const,
       };
 
       createProduct(productData, {

@@ -58,7 +58,7 @@ interface SchematicsSymbolsTabsProps {
   otherComponentsData: OtherComponentData[];
   symbolsData: SymbolData[];
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
 }
 
@@ -68,7 +68,7 @@ export default function SchematicsSymbolsTabs({
   otherComponentsData,
   symbolsData,
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
   isRedlineView = false,
 }: SchematicsSymbolsTabsProps) {
   const [activeTab, setActiveTab] = useState("tab-1");
@@ -101,7 +101,7 @@ export default function SchematicsSymbolsTabs({
         <SymbolsGraphicsPageSymbolsTable
           data={symbolsData}
           productId={productId}
-          isSubmitted={isSubmitted}
+          isContentLocked={isContentLocked}
           isRedlineView={isRedlineView}
         />
       </TabsContent>
@@ -112,7 +112,7 @@ export default function SchematicsSymbolsTabs({
         <SymbolsGraphicsPageSchematicsTable
           data={schematicsData}
           productId={productId}
-          isSubmitted={isSubmitted}
+          isContentLocked={isContentLocked}
           isRedlineView={isRedlineView}
         />
       </TabsContent>
@@ -123,7 +123,7 @@ export default function SchematicsSymbolsTabs({
         <SymbolsGraphicsPageBarcodesTable
           data={barcodesData}
           productId={productId}
-          isSubmitted={isSubmitted}
+          isContentLocked={isContentLocked}
           isRedlineView={isRedlineView}
         />
       </TabsContent>
@@ -134,7 +134,7 @@ export default function SchematicsSymbolsTabs({
         <SymbolsGraphicsPageOtherComponentsTable
           data={otherComponentsData}
           productId={productId}
-          isSubmitted={isSubmitted}
+          isContentLocked={isContentLocked}
           isRedlineView={isRedlineView}
         />
       </TabsContent>

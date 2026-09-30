@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { useCreateProductVersion } from "@/hooks/product/useCreateProductVersion";
+import type { ProductStatus } from "@/types/product";
+import { canCreateProductVersion } from "@/utils/product/product-lifecycle";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
@@ -20,7 +22,8 @@ interface DialogCreateVersionProps {
     _id: string;
     product_name?: string;
     version?: number;
-    status?: string;
+    status?: ProductStatus;
+    is_latest?: boolean;
   };
 }
 
@@ -35,7 +38,7 @@ export default function DialogCreateVersion({
   const currentVersion = product.version || 1;
   const newVersion = currentVersion + 1;
 
-  const canCreateVersion = product.status === "submitted";
+  const canCreateVersion = canCreateProductVersion(product);
 
   async function handleCreateVersion(e: React.MouseEvent) {
     e.preventDefault();
@@ -107,16 +110,6 @@ export default function DialogCreateVersion({
               </li>
             </ul>
           </div>
-
-          {!canCreateVersion ? (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                You can only create a new version from a submitted product.
-                Current status:{" "}
-                <Badge variant="outline">{product.status}</Badge>
-              </p>
-            </div>
-          ) : null}
         </div>
       </AppDialogContent>
     </Dialog>

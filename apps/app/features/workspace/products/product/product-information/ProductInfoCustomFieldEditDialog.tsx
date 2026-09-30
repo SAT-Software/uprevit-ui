@@ -36,6 +36,7 @@ import {
   TabsTrigger,
 } from "@uprevit/ui/components/ui/tabs";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 
 interface ProductData {
   id?: string;
@@ -78,7 +79,9 @@ export default function ProductInformationCustomFieldEditDialog({
   const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null);
   const [deleteFieldOpen, setDeleteFieldOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isSubmitted = productMetadata?.status === "submitted";
+  const isContentLocked = isProductContentLocked(
+    productMetadata?.status,
+  );
 
   const {
     register,
@@ -136,7 +139,7 @@ export default function ProductInformationCustomFieldEditDialog({
   }, [customFieldsData, resetManage]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (isSubmitted) {
+    if (isContentLocked) {
       return;
     }
 
@@ -185,7 +188,7 @@ export default function ProductInformationCustomFieldEditDialog({
     label: string,
     value: string,
   ) => {
-    if (isSubmitted) {
+    if (isContentLocked) {
       return;
     }
 
@@ -224,7 +227,7 @@ export default function ProductInformationCustomFieldEditDialog({
   };
 
   const handleDeleteCustomField = async (fieldId: string) => {
-    if (isSubmitted) {
+    if (isContentLocked) {
       return;
     }
 
@@ -269,15 +272,15 @@ export default function ProductInformationCustomFieldEditDialog({
         <Tooltip>
           <DialogTrigger asChild>
             <TooltipTrigger asChild>
-              <Button size="sm" variant="outline" disabled={isSubmitted}>
+              <Button size="sm" variant="outline" disabled={isContentLocked}>
                 <Icon icon={Settings05Icon} />
                 Manage Custom Fields
               </Button>
             </TooltipTrigger>
           </DialogTrigger>
           <TooltipContent side="bottom">
-            {isSubmitted
-              ? "Submitted products can't be edited"
+            {isContentLocked
+              ? "This version can't be edited"
               : "Add and manage custom fields"}
           </TooltipContent>
         </Tooltip>
@@ -294,7 +297,7 @@ export default function ProductInformationCustomFieldEditDialog({
                   form: `edit-custom-fields-form-${id}`,
                   type: "submit",
                   loading: isPending,
-                  disabled: isPending || isSubmitted,
+                  disabled: isPending || isContentLocked,
                   icon: CheckmarkCircle01Icon,
                 }
               : undefined
@@ -481,7 +484,7 @@ export default function ProductInformationCustomFieldEditDialog({
                                 data.value,
                               );
                             }}
-                            disabled={isPending || isSubmitted}
+                            disabled={isPending || isContentLocked}
                           >
                             <Icon
                               icon={PropertyEditIcon}
@@ -498,7 +501,7 @@ export default function ProductInformationCustomFieldEditDialog({
                               setDeleteFieldId(field._id);
                               setDeleteFieldOpen(true);
                             }}
-                            disabled={isPending || isSubmitted}
+                            disabled={isPending || isContentLocked}
                           >
                             <Icon
                               icon={Delete02Icon}
@@ -549,7 +552,7 @@ export default function ProductInformationCustomFieldEditDialog({
               }
             },
             loading: isPending,
-            disabled: isPending || isSubmitted,
+            disabled: isPending || isContentLocked,
             icon: Delete02Icon,
             variant: "destructive",
           }}
