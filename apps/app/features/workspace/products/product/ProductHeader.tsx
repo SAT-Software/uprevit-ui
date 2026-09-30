@@ -26,7 +26,14 @@ import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { cn } from "@uprevit/ui/lib/utils";
-import { Product } from "@/types/product";
+import type { Product, ProductStatus } from "@/types/product";
+import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
+import {
+  PRODUCT_STATUS_LABELS,
+  isProductContentLocked,
+} from "@/utils/product/product-lifecycle";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
@@ -65,7 +72,7 @@ export type Item = {
   version: number;
   isLatest: boolean;
   parentId: string | null;
-  status: "submitted" | "draft" | "archived";
+  status: ProductStatus;
   targetDate: string | null;
   completionDate: string | null;
   delayReason: string | null;
@@ -121,6 +128,16 @@ const getProgressState = (value: number) => {
   return PROGRESS_STATES[PROGRESS_STATES.length - 1];
 };
 
+const getVersionLifecycleNote = (version: Product) =>
+  [
+    version.released_at && `Released ${formatToLocalDate(version.released_at)}`,
+    version.obsoleted_at &&
+      `Obsolete ${formatToLocalDate(version.obsoleted_at)}`,
+    version.legacy_release && "Released before workflows",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
 interface ProductHeaderProps {
   isExportLocked?: boolean;
 }
@@ -149,6 +166,9 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     useUpdateProduct();
   const { mutate: exportPDF, isPending: isExportingPDF } =
     useExportProductPDF();
+  const { data: workspaceData } = useGetWorkspace();
+  const workflowsEnabled =
+    workspaceData?.workspace?.approvalWorkflowsEnabled === true;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
@@ -198,32 +218,25 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const allTabsData = productData?.result?.data;
   const productCoreData = allTabsData?.product_information?.product_data?.data;
 
+  const status: ProductStatus = productCoreData?.status ?? "draft";
+  const statusLabel = PRODUCT_STATUS_LABELS[status];
   const isProductComplete = productCoreData?.complete_count === 100;
-  const isReadOnly = productCoreData?.status === "submitted";
+  const isReadOnly = isProductContentLocked(status);
   const isEditLocked = isReadOnly || isExportLocked;
+  const isSubmittable =
+    status === "draft" || (status === "submitted" && !workflowsEnabled);
+  const canSubmit = isSubmittable && isProductComplete && !isExportLocked;
+  const submitLabel = workflowsEnabled
+    ? "Submit for approval"
+    : "Submit and release";
 
   const handleSubmit = async () => {
-    if (!productId || isEditLocked) return;
-
-    const today = new Date().toISOString();
-
-    await Promise.all([
-      updateProduct({
-        _id: productId,
-        action: "update-status",
-        data: {
-          status: "submitted",
-        },
-      }),
-      updateProduct({
-        _id: productId,
-        action: "update-product",
-        data: {
-          _id: productId,
-          actual_completion_date: today,
-        },
-      }),
-    ]);
+    if (!productId || !canSubmit) return;
+    if (workbookGuard?.isNavigationBlocked()) {
+      toast.warning("Save your changes before submitting");
+      return;
+    }
+    await updateProduct({ _id: productId, action: "submit" });
   };
 
   const tabsCompleted = useMemo(() => {
@@ -259,7 +272,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         version: productCoreData.version || 1,
         isLatest: productCoreData.is_latest ?? true,
         parentId: productCoreData.parent_id || null,
-        status: productCoreData.status || "draft",
+        status,
         targetDate: productCoreData.target_date || null,
         completionDate: productCoreData.actual_completion_date || null,
         delayReason: null,
@@ -274,9 +287,9 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     Math.min(100, Math.round(completionPercentage || 0)),
   );
   const progressState =
-    productCoreData?.status === "submitted"
-      ? SUBMITTED_STATE
-      : getProgressState(clampedPercentage);
+    status === "draft"
+      ? getProgressState(clampedPercentage)
+      : { ...SUBMITTED_STATE, label: statusLabel };
 
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
@@ -304,7 +317,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     : isExportLocked
       ? "Export in progress"
       : isReadOnly
-        ? "Submitted"
+        ? statusLabel
         : isCurrentTabCompleted
           ? "Mark Incomplete"
           : "Mark Complete";
@@ -595,13 +608,21 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                           onSelect={() => handleVersionChange(v._id)}
                           className="flex items-center justify-between gap-2"
                         >
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span>Version {v.version}</span>
-                            {v.is_latest && (
-                              <Badge variant="green" className="text-xs">
-                                Latest
-                              </Badge>
-                            )}
+                          <div className="flex min-w-0 flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span>Version {v.version}</span>
+                              <ProductStatusBadge status={v.status} />
+                              {v.is_latest && (
+                                <Badge variant="outline" className="text-xs">
+                                  Latest
+                                </Badge>
+                              )}
+                            </div>
+                            {getVersionLifecycleNote(v) ? (
+                              <span className="truncate text-xs text-muted-foreground">
+                                {getVersionLifecycleNote(v)}
+                              </span>
+                            ) : null}
                           </div>
                           {v._id === productId && (
                             <Icon
@@ -644,8 +665,8 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                         >
                           <div className="flex min-w-0 items-center gap-2">
                             <span>Version {v.version}</span>
-                            <span className="text-xs text-muted-foreground capitalize">
-                              {v.status}
+                            <span className="text-xs text-muted-foreground">
+                              {v.status && PRODUCT_STATUS_LABELS[v.status]}
                             </span>
                           </div>
                           {compareVersionId === v._id && (
@@ -705,7 +726,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                     isExportLocked
                       ? "Editing is disabled while export is in progress"
                       : isReadOnly
-                        ? "Cannot edit submitted product"
+                        ? "This version can't be edited"
                         : undefined
                   }
                 >
@@ -726,33 +747,32 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
               <TooltipTrigger asChild>
                 <span
                   className="inline-flex rounded-lg"
-                  tabIndex={
-                    !isProductComplete || isEditLocked ? 0 : undefined
-                  }
+                  tabIndex={canSubmit ? undefined : 0}
                 >
                   <ConfirmSubmitProductDialog
                     productName={product?.productName}
+                    title={submitLabel}
+                    workflowsEnabled={workflowsEnabled}
                     onConfirm={handleSubmit}
-                    disabled={!isProductComplete || isEditLocked}
+                    disabled={!canSubmit}
                   >
-                    <Button
-                      size="sm"
-                      disabled={!isProductComplete || isEditLocked}
-                    >
+                    <Button size="sm" disabled={!canSubmit}>
                       <Icon icon={SentIcon} size={14} />
-                      {isReadOnly ? "Submitted" : "Submit"}
+                      {isSubmittable ? submitLabel : statusLabel}
                     </Button>
                   </ConfirmSubmitProductDialog>
                 </span>
               </TooltipTrigger>
               <TooltipContent side="bottom" align="end">
-                {isExportLocked
-                  ? "Cannot submit while an export is in progress"
-                  : isReadOnly
-                    ? "Product is already submitted"
+                {!isSubmittable
+                  ? `This version is ${statusLabel.toLowerCase()}`
+                  : isExportLocked
+                    ? "Cannot submit while an export is in progress"
                     : !isProductComplete
                       ? "Complete all tabs to enable submission"
-                      : "Submit product for review"}
+                      : workflowsEnabled
+                        ? "An approval workflow will release this version"
+                        : "Release this version now"}
               </TooltipContent>
             </Tooltip>
           </div>

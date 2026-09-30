@@ -32,6 +32,7 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 
 interface FormValues {
   productName: string;
@@ -62,7 +63,9 @@ export default function ProductInfoEditMetadataDialog({
   const [open, setOpen] = useState(false);
   const [openTargetDate, setOpenTargetDate] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isSubmitted = productMetadata?.status === "submitted";
+  const isContentLocked = isProductContentLocked(
+    productMetadata?.status,
+  );
 
   const initialValues: FormValues = {
     productName: productMetadata?.product_name || "",
@@ -88,7 +91,7 @@ export default function ProductInfoEditMetadataDialog({
   const targetDateValue = watch("targetDate");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (isSubmitted) return;
+    if (isContentLocked) return;
 
     const updateData = {
       id: productId,
@@ -121,14 +124,14 @@ export default function ProductInfoEditMetadataDialog({
       <Tooltip>
         <DialogTrigger asChild>
           <TooltipTrigger asChild>
-            <Button size="sm" variant="outline" disabled={isSubmitted}>
+            <Button size="sm" variant="outline" disabled={isContentLocked}>
               <Icon icon={PropertyEditIcon} /> Update
             </Button>
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Edit product name, description, and target date"}
         </TooltipContent>
       </Tooltip>

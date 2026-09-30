@@ -44,10 +44,10 @@ type FormData = {
 
 export default function AddComponentDialog({
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -139,15 +139,15 @@ export default function AddComponentDialog({
       <Tooltip>
         <DialogTrigger asChild>
           <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isSubmitted}>
+            <Button size="sm" variant="secondary" disabled={isContentLocked}>
               <Icon icon={PlusSignSquareIcon} />
               Add Component
             </Button>
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Add a new label component"}
         </TooltipContent>
       </Tooltip>
@@ -162,7 +162,7 @@ export default function AddComponentDialog({
           form: `add-component-form-${id}`,
           type: "submit",
           loading: isSaving,
-          disabled: isSaving || isSubmitted,
+          disabled: isSaving || isContentLocked,
           icon: PlusSignSquareIcon,
         }}
         secondaryAction={{

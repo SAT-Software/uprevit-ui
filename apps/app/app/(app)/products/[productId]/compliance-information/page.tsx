@@ -14,6 +14,8 @@ import { buildRedlineArray, type WithRedlineMeta } from "@/utils/redlineArray";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { Alert01Icon, ArrowRight01Icon, Home04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import type { ProductStatus } from "@/types/product";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 
 type ComplianceItem = {
   _id: string;
@@ -31,7 +33,7 @@ type ComplianceTabsData = {
   compliance_information?: { data?: ComplianceItem[] };
   languages_information?: { data?: LanguageItem[] };
   product_information?: {
-    product_data?: { data?: { status?: "draft" | "submitted" | "archived" } };
+    product_data?: { data?: { status?: ProductStatus } };
   };
 };
 
@@ -235,9 +237,9 @@ export default function Page() {
       .filter(Boolean) as WithRedlineMeta<LanguageItem>[];
   })();
 
-  const isSubmitted =
-    allTabsData?.product_information?.product_data?.data?.status ===
-    "submitted";
+  const isContentLocked = isProductContentLocked(
+    allTabsData?.product_information?.product_data?.data?.status,
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -264,14 +266,14 @@ export default function Page() {
           <ComplianceStandardsSection
             productId={productId}
             standards={standards}
-            isSubmitted={isSubmitted}
+            isContentLocked={isContentLocked}
             isRedlineView={isRedlineView}
           />
           <ComplianceLanguagesSection
             productId={productId}
             languages={languages}
             currentLanguages={currentLanguages}
-            isSubmitted={isSubmitted}
+            isContentLocked={isContentLocked}
             isRedlineView={isRedlineView}
           />
         </div>

@@ -35,7 +35,7 @@ interface ProductWorkbookTabPageProps {
   isLoading: boolean;
   error: Error | null;
   workbookData: ProductDataTableSchema | undefined;
-  isSubmitted: boolean;
+  isContentLocked: boolean;
   isRedlineView: boolean;
   isLoadingDiff: boolean;
   baseVersionWorkbook?: ProductDataTableSchema;
@@ -53,7 +53,7 @@ export function ProductWorkbookTabPage({
   isLoading,
   error,
   workbookData,
-  isSubmitted,
+  isContentLocked,
   isRedlineView,
   isLoadingDiff,
   baseVersionWorkbook,
@@ -67,7 +67,7 @@ export function ProductWorkbookTabPage({
     productId,
     tab,
     action,
-    isSubmitted,
+    isContentLocked,
     serverWorkbookData: workbookData,
   });
 
@@ -100,7 +100,7 @@ export function ProductWorkbookTabPage({
 
   useRegisterProductWorkbookGuard(
     workbookGuardRegistration,
-    !isRedlineView && !isSubmitted,
+    !isRedlineView && !isContentLocked,
   );
 
   if (isLoading) {
@@ -222,7 +222,7 @@ export function ProductWorkbookTabPage({
             disabled={
               editor.isSaving ||
               !editor.hasEditableUnsavedChanges ||
-              isSubmitted
+              isContentLocked
             }
             className="gap-1.5"
           >
@@ -240,11 +240,11 @@ export function ProductWorkbookTabPage({
         resetKey={editor.tableResetKey}
         initialData={initialData}
         onDataChange={
-          isSubmitted || isRedlineView ? undefined : editor.handleDataChange
+          isContentLocked || isRedlineView ? undefined : editor.handleDataChange
         }
         onSaveSuccess={editor.registerClearHistoryOnSave}
         isRedlineView={isRedlineView}
-        isReadOnly={isSubmitted || isRedlineView}
+        isReadOnly={isContentLocked || isRedlineView}
         redlineMode={redlineMode}
         redlineBaseData={redlineBaseData}
       />

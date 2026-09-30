@@ -83,7 +83,7 @@ type ComponentItem = {
 };
 
 type TableMeta = {
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
   getFieldDiff?: (
     row: ComponentItem,
@@ -526,8 +526,8 @@ const columns: ColumnDef<ComponentItem>[] = [
     cell: ({ row, table }) => (
       <RowActions
         row={row}
-        isSubmitted={
-          (table.options.meta as { isSubmitted?: boolean })?.isSubmitted
+        isContentLocked={
+          (table.options.meta as { isContentLocked?: boolean })?.isContentLocked
         }
       />
     ),
@@ -539,12 +539,12 @@ const columns: ColumnDef<ComponentItem>[] = [
 export default function ProductComponentDetailsTable({
   data,
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
   isRedlineView = false,
 }: {
   data: ComponentItem[];
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
 }) {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -612,7 +612,7 @@ export default function ProductComponentDetailsTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
-    meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
+    meta: { isContentLocked, isRedlineView, getFieldDiff, getRowStatus },
   });
 
   const handleApplyFilters = (nextFilters: ListFilter[]) => {
@@ -654,7 +654,7 @@ export default function ProductComponentDetailsTable({
             onApplyFilters={handleApplyFilters}
             onClearFilters={handleClearFilters}
           />
-          <AddComponentDialog productId={productId} isSubmitted={isSubmitted} />
+          <AddComponentDialog productId={productId} isContentLocked={isContentLocked} />
         </div>
       </div>
 
@@ -805,16 +805,16 @@ export default function ProductComponentDetailsTable({
 
 function RowActions({
   row,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   row: Row<ComponentItem>;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const componentId = getPersistentComponentId(row.original);
   const actionsDisabled =
-    isSubmitted || row.original._redlineStatus === "removed";
+    isContentLocked || row.original._redlineStatus === "removed";
 
   const pathname = usePathname();
   const getProductId = (): string => {

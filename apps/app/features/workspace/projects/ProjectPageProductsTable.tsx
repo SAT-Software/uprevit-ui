@@ -28,7 +28,7 @@ import {
   ListFilterColumn,
   useWorkspaceListQuery,
 } from "@/lib/workspace-list-query";
-import { AuditLog } from "@/types/product";
+import type { AuditLog, ProductStatus } from "@/types/product";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
@@ -50,9 +50,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { cn } from "@uprevit/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
 export type Item = {
   _id: string;
@@ -66,7 +67,7 @@ export type Item = {
   product_name: string;
   product_plan_number: string;
   project_id: string;
-  status: string;
+  status: ProductStatus;
   product_information?: { tab_completed?: boolean };
   compliance_information?: { tab_completed?: boolean };
   label_components?: { tab_completed?: boolean };
@@ -125,7 +126,7 @@ const columnHeaderMap = [
   },
   {
     title: "Status",
-    info: "Current status of the product. Draft, Submitted or Archived",
+    info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
   },
   { title: "Version", info: "Latest version number of the product" },
   {
@@ -221,26 +222,7 @@ const columns: ColumnDef<Item>[] = [
     maxSize: 90,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <Badge
-        variant={
-          row.original?.status === "submitted"
-            ? "green"
-            : row.original?.status === "draft"
-              ? "blue"
-              : "gray"
-        }
-        className="font-normal capitalize"
-      >
-        <div
-          className={cn("w-2 h-2 rounded-full", {
-            "bg-green-500 dark:bg-green-400":
-              row.original?.status === "submitted",
-            "bg-blue-500 dark:bg-blue-400": row.original?.status === "draft",
-            "bg-gray-500 dark:bg-gray-400": row.original?.status === "archived",
-          })}
-        />
-        {row.original?.status}
-      </Badge>
+      <ProductStatusBadge status={row.original?.status} />
     ),
   },
   {
@@ -333,9 +315,10 @@ const columns: ColumnDef<Item>[] = [
         Math.min(100, Math.round(progress || 0)),
       );
 
+      const status = row.original.status;
       const progressState =
-        row.original.status === "submitted"
-          ? SUBMITTED_STATE
+        status && status !== "draft"
+          ? { ...SUBMITTED_STATE, label: PRODUCT_STATUS_LABELS[status] }
           : getProgressState(clampedPercentage);
 
       return (

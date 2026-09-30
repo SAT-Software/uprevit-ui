@@ -47,6 +47,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 
 interface ProductData {
   id?: string;
@@ -85,7 +86,9 @@ export default function EditProductDialog({
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const [classComboboxOpen, setClassComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isSubmitted = productMetadata?.status === "submitted";
+  const isContentLocked = isProductContentLocked(
+    productMetadata?.status,
+  );
 
   const initialValues: FormValues = {
     marketGeographySelect:
@@ -145,7 +148,7 @@ export default function EditProductDialog({
   const selectedDeviceClass = findDeviceClassOption(classOfDeviceSelect);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (isSubmitted) return;
+    if (isContentLocked) return;
 
     if (!product?.id) {
       console.error("Product ID is missing");
@@ -187,14 +190,14 @@ export default function EditProductDialog({
       <Tooltip>
         <DialogTrigger asChild>
           <TooltipTrigger asChild>
-            <Button size="sm" variant="outline" disabled={isSubmitted}>
+            <Button size="sm" variant="outline" disabled={isContentLocked}>
               <Icon icon={TaskEdit01Icon} /> Update Product Info
             </Button>
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Edit product information fields"}
         </TooltipContent>
       </Tooltip>

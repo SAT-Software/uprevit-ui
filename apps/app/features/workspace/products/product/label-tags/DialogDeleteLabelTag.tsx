@@ -29,11 +29,11 @@ interface LabelTagItem {
 export default function DialogDeleteLabelTag({
   productId,
   labelTag,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
   labelTag: LabelTagItem;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const { mutate: deleteLabelTag, isPending } = useUpdateProductTabData();
@@ -72,7 +72,7 @@ export default function DialogDeleteLabelTag({
             <Button
               size="icon-xs"
               variant="destructive"
-              disabled={isSubmitted}
+              disabled={isContentLocked}
               aria-label="Delete label"
             >
               <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
@@ -80,8 +80,8 @@ export default function DialogDeleteLabelTag({
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Delete label"}
         </TooltipContent>
       </Tooltip>

@@ -44,6 +44,7 @@ const TEXT_FIELD_OPERATORS: Operator[] = [
 ];
 
 function getOperatorsForField(fieldType: string | undefined): Operator[] {
+  if (fieldType === "boolean") return ["equals", "not_equals"];
   if (fieldType === "array") {
     return [
       ...ARRAY_FIELD_OPERATORS,
@@ -165,7 +166,7 @@ export function ConditionRow({
 
       {needsValue ? (
         <>
-          {selectedField?.type === "select" && selectedField.options ? (
+          {selectedField?.options ? (
             <Select
               value={(condition.value as string) || ""}
               onValueChange={(value) => onUpdate({ value })}

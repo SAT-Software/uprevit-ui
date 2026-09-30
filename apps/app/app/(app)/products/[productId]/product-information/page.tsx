@@ -11,7 +11,8 @@ import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline"
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetProductLinkedSourceFileFolders } from "@/hooks/source-files/useGetProductLinkedSourceFileFolders";
 import { AuditLog } from "@/types/audit-log";
-import type { ProductMetadata } from "@/types/product";
+import type { ProductMetadata, ProductStatus } from "@/types/product";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import {
   formatToLocalDate,
   formatToLocalDateTime,
@@ -47,7 +48,6 @@ import {
   Flag03Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon, type IconProps } from "@uprevit/ui/components/common/Icon";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { File, Folder, Tree } from "@uprevit/ui/components/ui/file-tree";
 import {
@@ -101,7 +101,7 @@ type ProductCustomFieldView = {
 };
 
 type ProductMetadataView = Omit<ProductMetadata, "status"> & {
-  status?: "draft" | "submitted" | "archived";
+  status?: ProductStatus;
 };
 
 type ProductInformationTabPayload = {
@@ -128,14 +128,6 @@ type ProductInfoField = {
   redlineStatus?: RedlineStatus;
   redlineDiffs?: DiffItem[];
 };
-
-function statusBadgeVariant(
-  status?: "draft" | "submitted" | "archived",
-): "blue" | "green" | "gray" {
-  if (status === "submitted") return "green";
-  if (status === "archived") return "gray";
-  return "blue";
-}
 
 const PRODUCT_INFO_DIFF_PATHS = {
   productName: ["product_information.product_data.data.product_name"],
@@ -653,12 +645,7 @@ export default function Page() {
                   size="sm"
                   className="group text-xs font-normal text-muted-foreground hover:text-foreground"
                 >
-                  <Badge
-                    variant={statusBadgeVariant(productStatus)}
-                    className="capitalize -ml-1"
-                  >
-                    {productStatus || "N/A"}
-                  </Badge>
+                  <ProductStatusBadge status={productStatus} className="-ml-1" />
                   <span className="inline-flex items-center gap-1">
                     <Icon
                       icon={CalendarDownload01Icon}
@@ -720,12 +707,7 @@ export default function Page() {
                         />
                         <p className="text-xs text-muted-foreground">Status</p>
                       </div>
-                      <Badge
-                        variant={statusBadgeVariant(productStatus)}
-                        className="capitalize"
-                      >
-                        {productStatus || "N/A"}
-                      </Badge>
+                      <ProductStatusBadge status={productStatus} />
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">

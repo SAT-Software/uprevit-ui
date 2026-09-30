@@ -34,10 +34,10 @@ type FormData = {
 
 export default function DialogAddLabelTag({
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -132,15 +132,15 @@ export default function DialogAddLabelTag({
       <Tooltip>
         <DialogTrigger asChild>
           <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isSubmitted}>
+            <Button size="sm" variant="secondary" disabled={isContentLocked}>
               <Icon icon={PlusSignSquareIcon} />
               Add Label
             </Button>
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Add a new label tag"}
         </TooltipContent>
       </Tooltip>
@@ -155,7 +155,7 @@ export default function DialogAddLabelTag({
           form: `add-label-tag-form-${id}`,
           type: "submit",
           loading: isSaving,
-          disabled: isSaving || isSubmitted,
+          disabled: isSaving || isContentLocked,
           icon: PlusSignSquareIcon,
         }}
         secondaryAction={{

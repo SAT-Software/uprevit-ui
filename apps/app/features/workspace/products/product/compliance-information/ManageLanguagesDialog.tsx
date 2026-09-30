@@ -43,7 +43,7 @@ type ManageLanguagesDialogProps = {
     name: string;
     country?: string;
   }>;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 };
 
 type LanguageRecord = {
@@ -59,7 +59,7 @@ const sortLanguages = (languages: LanguageRecord[]) => {
 export default function ManageLanguagesDialog({
   productId,
   selectedLanguages,
-  isSubmitted = false,
+  isContentLocked = false,
 }: ManageLanguagesDialogProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -203,15 +203,15 @@ export default function ManageLanguagesDialog({
       <Tooltip>
         <DialogTrigger asChild>
           <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isSubmitted}>
+            <Button size="sm" variant="secondary" disabled={isContentLocked}>
               <Icon icon={LanguageSquareIcon} />
               Manage Languages
             </Button>
           </TooltipTrigger>
         </DialogTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? "This version can't be edited"
             : "Manage product languages for packaging and labeling"}
         </TooltipContent>
       </Tooltip>
