@@ -112,6 +112,19 @@ export function NotificationsList({ unread }: { unread: boolean }) {
     if (!notification.readAt) markRead({ ids: [notification._id] });
   };
 
+  const retryButton = (onRetry: () => void) => (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={isFetching}
+      onClick={onRetry}
+    >
+      {isFetching ? <Spinner /> : null}
+      Retry
+    </Button>
+  );
+
   if (isPending) {
     return (
       <div className="divide-y overflow-hidden rounded-xl border bg-background">
@@ -129,11 +142,14 @@ export function NotificationsList({ unread }: { unread: boolean }) {
     );
   }
 
-  if (isError && !data) {
+  if ((isError && !data) || (notifications.length === 0 && isRefetchError)) {
     return (
-      <p className="rounded-xl border bg-background py-16 text-center text-sm text-muted-foreground">
-        Failed to load notifications.
-      </p>
+      <div className="flex flex-col items-center gap-3 rounded-xl border bg-background py-16 text-center">
+        <p className="text-sm text-muted-foreground">
+          Failed to load notifications.
+        </p>
+        {retryButton(() => refetch())}
+      </div>
     );
   }
 
@@ -175,16 +191,9 @@ export function NotificationsList({ unread }: { unread: boolean }) {
               ? "Couldn't load more notifications."
               : "Couldn't refresh notifications."}
           </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isFetching}
-            onClick={() => (isFetchNextPageError ? fetchNextPage() : refetch())}
-          >
-            {isFetching ? <Spinner /> : null}
-            Retry
-          </Button>
+          {retryButton(() =>
+            isFetchNextPageError ? fetchNextPage() : refetch(),
+          )}
         </div>
       ) : hasNextPage ? (
         <Button

@@ -69,11 +69,11 @@ export function ProductWorkbookUnsavedGuardProvider({
   }, []);
 
   const completeNavigation = useCallback(
-    (href: string) => {
+    (href: string, onNavigate?: () => void) => {
       setDialogOpen(false);
       setPendingHref(null);
-      pendingOnNavigateRef.current?.();
       pendingOnNavigateRef.current = undefined;
+      onNavigate?.();
       if (!isSameLocation(href)) {
         router.push(href);
       }
@@ -107,12 +107,13 @@ export function ProductWorkbookUnsavedGuardProvider({
   const handleDialogSave = useCallback(async () => {
     const guard = guardRef.current;
     const href = pendingHref;
+    const onNavigate = pendingOnNavigateRef.current;
     if (!guard || !href) return;
 
     setIsSaving(true);
     try {
       await guard.save();
-      completeNavigation(href);
+      completeNavigation(href, onNavigate);
     } finally {
       setIsSaving(false);
     }
@@ -124,7 +125,7 @@ export function ProductWorkbookUnsavedGuardProvider({
     if (!guard || !href) return;
 
     guard.discard();
-    completeNavigation(href);
+    completeNavigation(href, pendingOnNavigateRef.current);
   }, [completeNavigation, pendingHref]);
 
   const handleDialogCancel = useCallback(() => {
