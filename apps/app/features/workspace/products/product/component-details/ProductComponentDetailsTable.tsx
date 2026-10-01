@@ -864,7 +864,7 @@ function RowActions({
       </DropdownMenu>
 
       <EditComponentDialog
-        key={`edit-${componentId}`}
+        key={`edit-${componentId}-${showEditDialog}`}
         productId={getProductId()}
         component={row.original}
         open={showEditDialog}

@@ -209,7 +209,9 @@ export function useWorkspaceListQuery({
   );
 
   const updateParamsRef = useRef(updateParams);
-  updateParamsRef.current = updateParams;
+  useEffect(() => {
+    updateParamsRef.current = updateParams;
+  }, [updateParams]);
 
   const setPage = useCallback((page: number) => {
     updateParamsRef.current((params) => {

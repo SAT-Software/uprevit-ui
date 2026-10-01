@@ -12,7 +12,6 @@ import { isAdminProfile } from "@/utils/isAdmin";
 import { getNextImageSrc } from "@/utils/isNextImageSrc";
 import {
   Calendar03Icon,
-  KanbanIcon,
   ManagerIcon,
   NewOfficeIcon,
   ProfileIcon,

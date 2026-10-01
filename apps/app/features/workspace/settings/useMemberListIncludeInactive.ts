@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { isAdminProfile } from "@/utils/isAdmin";
@@ -20,9 +20,13 @@ export function useMemberListIncludeInactive() {
 
   const [includeInactive, setIncludeInactive] = useState(workspaceDefault);
 
-  useEffect(() => {
+  const [previousDefault, setPreviousDefault] = useState(workspaceDefault);
+  if (previousDefault !== workspaceDefault) {
+    setPreviousDefault(workspaceDefault);
     setIncludeInactive(workspaceDefault);
-  }, [workspaceDefault]);
+  }
+
+  const accessToken = auth.user?.access_token;
 
   const toggleIncludeInactive = useCallback(
     async (next: boolean) => {
@@ -31,7 +35,6 @@ export function useMemberListIncludeInactive() {
       if (!isAdmin || !workspace || !workspaceId) return;
 
       try {
-        const accessToken = auth.user?.access_token;
         if (!accessToken) return;
 
         const response = await fetch(`/api/workspace`, {
@@ -66,7 +69,7 @@ export function useMemberListIncludeInactive() {
         toast.error(message);
       }
     },
-    [auth.user?.access_token, isAdmin, queryClient, workspace, workspaceId],
+    [accessToken, isAdmin, queryClient, workspace, workspaceId],
   );
 
   return {

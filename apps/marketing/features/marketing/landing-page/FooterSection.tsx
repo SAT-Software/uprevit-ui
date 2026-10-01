@@ -1,6 +1,6 @@
 "use client";
 
-import { Linkedin02Icon, NewTwitterIcon } from "@hugeicons/core-free-icons";
+import { Linkedin02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import Link from "next/link";
 import Image from "next/image";

@@ -1,5 +1,3 @@
-import { Badge } from "@uprevit/ui/components/ui/badge";
-import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,8 +6,6 @@ import {
   TableHeader,
   TableRow,
 } from "@uprevit/ui/components/ui/table";
-import { TextLoop } from "@uprevit/ui/components/ui/text-loop";
-import { TextMorph } from "@uprevit/ui/components/ui/text-morph";
 import { TextScramble } from "@uprevit/ui/components/ui/text-scramble";
 import { cn } from "@uprevit/ui/lib/utils";
 import { useState } from "react";
@@ -65,54 +61,6 @@ const CellContent = ({
     );
   }
   return <span className={cn(isMono && "font-mono")}>{data.clean}</span>;
-};
-
-const LabelTypesBadge = ({
-  data,
-}: {
-  data: { clean: string[]; redline?: { old: string[]; new: string[] } };
-}) => {
-  if (data.redline) {
-    return (
-      <div className="flex flex-col gap-0.5">
-        <div className="flex flex-wrap gap-0.5">
-          {data.redline.old.map((label, idx) => (
-            <Badge
-              key={idx}
-              variant="outline"
-              className="text-[8px] text-muted-foreground group-hover:text-red-500 group-hover:dark:text-red-300 duration-300 ease-in-out delay-300 line-through opacity-70"
-            >
-              {label}
-            </Badge>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-0.5">
-          {data.redline.new.map((label, idx) => (
-            <Badge
-              key={idx}
-              variant="default"
-              className="text-[8px] bg-emerald-100/50 text-foreground group-hover:text-emerald-600 group-hover:dark:text-emerald-300 duration-300 ease-in-out delay-300 opacity-0 -mt-2 group-hover:opacity-100 group-hover:mt-0 transition-all border border-emerald-600"
-            >
-              {label}
-            </Badge>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-wrap gap-0.5">
-      {data.clean.map((label, idx) => (
-        <Badge
-          key={idx}
-          variant="outline"
-          className="text-[8px] py-0 px-1 h-3.5"
-        >
-          {label}
-        </Badge>
-      ))}
-    </div>
-  );
 };
 
 const tableData: RowData[] = [
@@ -387,7 +335,7 @@ export function AutomatedRedliningCard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tableData.map((row, index) => (
+                    {tableData.map((row) => (
                       <TableRow
                         key={row.no}
                         className="border-border hover:bg-transparent"

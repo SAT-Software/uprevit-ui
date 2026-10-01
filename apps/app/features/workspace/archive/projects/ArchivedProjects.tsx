@@ -89,7 +89,7 @@ export function ArchivedProjects() {
     if (listState.query.page > pagination.totalPages) {
       listState.setPage(1);
     }
-  }, [listState.query.page, listState.setPage, pagination?.totalPages]);
+  }, [listState, pagination]);
 
   return (
     <>

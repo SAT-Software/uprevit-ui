@@ -15,20 +15,12 @@ import {
   ArchiveIcon,
   Blockchain03Icon,
   Chart01Icon,
-  Chart02Icon,
-  ChartBreakoutSquareIcon,
-  ChartBubble02Icon,
-  ChartNoAxesCombinedIcon,
-  ChartUpIcon,
   DashboardSpeed01Icon,
   Folder02Icon,
   KanbanIcon,
   NewOfficeIcon,
-  TimelineEventIcon,
-  UploadSquare01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import type { IconProps } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { DashboardErrorState } from "./DashboardErrorState";

@@ -83,8 +83,9 @@ export function useQueryBuilderState() {
   const getApiConditions = useCallback(() => {
     return conditions.map((condition, index) => {
       if (index === 0) {
-        const { id, logic, ...rest } = condition;
-        return { id, ...rest };
+        const firstCondition = { ...condition };
+        delete firstCondition.logic;
+        return firstCondition;
       }
       return condition;
     });

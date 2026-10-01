@@ -49,6 +49,20 @@ export function useProductWorkbookEditor({
     [serverWorkbookData],
   );
 
+  const [previousSource, setPreviousSource] = useState({
+    productId,
+    tab,
+    serverBaseline,
+  });
+  if (
+    previousSource.productId !== productId ||
+    previousSource.tab !== tab ||
+    previousSource.serverBaseline !== serverBaseline
+  ) {
+    setPreviousSource({ productId, tab, serverBaseline });
+    setHasUnsavedChanges(false);
+  }
+
   const hasEditableUnsavedChanges = hasUnsavedChanges && !isContentLocked;
 
   const registerClearHistoryOnSave = useCallback((clearHistory: () => void) => {
@@ -58,7 +72,6 @@ export function useProductWorkbookEditor({
   useEffect(() => {
     savedBaselineRef.current = serverBaseline;
     pendingDataRef.current = null;
-    setHasUnsavedChanges(false);
   }, [productId, tab, tableResetKey, serverBaseline]);
 
   const saveDataToDB = useCallback(

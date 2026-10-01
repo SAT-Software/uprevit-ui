@@ -91,7 +91,7 @@ export function PlatformUsageEventsTable({
     if (listState.query.page > paginationInfo.totalPages) {
       listState.setPage(1);
     }
-  }, [listState.query.page, listState.setPage, paginationInfo]);
+  }, [listState, paginationInfo]);
 
   const columns = useMemo<ColumnDef<UsageEvent>[]>(
     () => [
