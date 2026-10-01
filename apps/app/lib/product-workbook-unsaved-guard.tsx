@@ -22,7 +22,7 @@ export type ProductWorkbookGuard = {
 
 type ProductWorkbookUnsavedGuardContextValue = {
   setActiveGuard: (guard: ProductWorkbookGuard | null) => void;
-  tryNavigate: (href: string) => boolean;
+  tryNavigate: (href: string, onNavigate?: () => void) => boolean;
   isNavigationBlocked: () => boolean;
 };
 
@@ -58,6 +58,7 @@ export function ProductWorkbookUnsavedGuardProvider({
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogTabLabel, setDialogTabLabel] = useState("this tab");
+  const pendingOnNavigateRef = useRef<(() => void) | undefined>(undefined);
 
   const setActiveGuard = useCallback((guard: ProductWorkbookGuard | null) => {
     guardRef.current = guard;
@@ -71,6 +72,8 @@ export function ProductWorkbookUnsavedGuardProvider({
     (href: string) => {
       setDialogOpen(false);
       setPendingHref(null);
+      pendingOnNavigateRef.current?.();
+      pendingOnNavigateRef.current = undefined;
       if (!isSameLocation(href)) {
         router.push(href);
       }
@@ -79,17 +82,20 @@ export function ProductWorkbookUnsavedGuardProvider({
   );
 
   const tryNavigate = useCallback(
-    (href: string): boolean => {
+    (href: string, onNavigate?: () => void): boolean => {
       if (isSameLocation(href)) {
+        onNavigate?.();
         return true;
       }
 
       const guard = guardRef.current;
       if (!guard?.isDirty()) {
+        onNavigate?.();
         router.push(href);
         return true;
       }
 
+      pendingOnNavigateRef.current = onNavigate;
       setDialogTabLabel(guard.tabLabel);
       setPendingHref(href);
       setDialogOpen(true);
@@ -124,6 +130,7 @@ export function ProductWorkbookUnsavedGuardProvider({
   const handleDialogCancel = useCallback(() => {
     setDialogOpen(false);
     setPendingHref(null);
+    pendingOnNavigateRef.current = undefined;
   }, []);
 
   const value = useMemo(

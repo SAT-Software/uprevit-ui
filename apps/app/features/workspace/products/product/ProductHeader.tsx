@@ -37,6 +37,7 @@ import {
 } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 import ProductTeamMenu from "./ProductTeamMenu";
+import { NotificationsBell } from "@/components/common/NotificationsBell";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
@@ -818,6 +819,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
             </Tooltip>
           </div>
         </div>
+        <NotificationsBell />
       </div>
     </header>
   );

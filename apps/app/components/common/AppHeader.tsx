@@ -4,6 +4,7 @@ import { HeaderBackNav } from "@/components/common/HeaderBackNav";
 import { cn } from "@uprevit/ui/lib/utils";
 import { useParams, usePathname } from "next/navigation";
 import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
+import { NotificationsBell } from "./NotificationsBell";
 import { UserNav } from "./UserNav";
 
 const pathData = [
@@ -16,6 +17,7 @@ const pathData = [
   { title: "Reports", url: "/reports" },
   { title: "Analytics", url: "/analytics" },
   { title: "Archive", url: "/archive" },
+  { title: "Notifications", url: "/notifications" },
   { title: "Settings", url: "/settings" },
   { title: "Feedback", url: "/feedback" },
   { title: "Help Center", url: "/help-center" },
@@ -63,7 +65,10 @@ export function AppHeader() {
             <h1 className="text-sm font-medium">{pageTitle}</h1>
           ) : null}
         </div>
-        <UserNav />
+        <div className="flex shrink-0 items-center gap-2">
+          <NotificationsBell />
+          <UserNav />
+        </div>
       </div>
     </header>
   );
