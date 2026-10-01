@@ -111,6 +111,11 @@ export default function LabelTagsTabs({
   const [savedAnnotations, setSavedAnnotations] = useState<
     Record<string, AnnotationState>
   >({});
+  const [previousLabelTags, setPreviousLabelTags] = useState(labelTagsData);
+  if (previousLabelTags !== labelTagsData) {
+    setPreviousLabelTags(labelTagsData);
+    setSavedAnnotations({});
+  }
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<string | null>(null);
 
@@ -518,17 +523,6 @@ export default function LabelTagsTabs({
     labelTagsGuardRegistration,
     !isContentLocked && !isRedlineView,
   );
-
-  // Initialize savedAnnotations from labelTagsData on mount
-  useEffect(() => {
-    const initialSaved: Record<string, AnnotationState> = {};
-    labelTagsData.forEach((item: LabelTagItem) => {
-      if (item._id && item.annotation_state) {
-        initialSaved[item._id] = item.annotation_state;
-      }
-    });
-    setSavedAnnotations(initialSaved);
-  }, [labelTagsData]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

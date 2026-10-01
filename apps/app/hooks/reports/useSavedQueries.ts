@@ -1,31 +1,38 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { SavedQuery, QueryCondition } from "@/types/reports";
 
 const LOCAL_STORAGE_KEY = "uprevit_reports_saved_queries";
 
-export function useSavedQueries() {
-  const [queries, setQueries] = useState<SavedQuery[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+function subscribe(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(LOCAL_STORAGE_KEY, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(LOCAL_STORAGE_KEY, onChange);
+  };
+}
 
-  useEffect(() => {
-    let isMounted = true;
+function getSnapshot() {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function useSavedQueries() {
+  const stored = useSyncExternalStore(subscribe, getSnapshot, () => undefined);
+  const isLoaded = stored !== undefined;
+  const queries = useMemo<SavedQuery[]>(() => {
     try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      const parsed = stored ? (JSON.parse(stored) as SavedQuery[]) : [];
-      if (isMounted) setQueries(parsed);
+      return stored ? JSON.parse(stored) : [];
     } catch (error) {
       console.error("Failed to load saved queries from localStorage:", error);
-      if (isMounted) setQueries([]);
-    } finally {
-      if (isMounted) setIsLoaded(true);
+      return [];
     }
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [stored]);
 
   const saveQuery = useCallback(
     (
@@ -43,7 +50,7 @@ export function useSavedQueries() {
         };
         const updated = [...queries, newQuery];
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-        setQueries(updated);
+        window.dispatchEvent(new Event(LOCAL_STORAGE_KEY));
         return { success: true, query: newQuery };
       } catch (error) {
         console.error("Failed to save query:", error);
@@ -61,7 +68,7 @@ export function useSavedQueries() {
       try {
         const updated = queries.filter((q) => q.id !== id);
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-        setQueries(updated);
+        window.dispatchEvent(new Event(LOCAL_STORAGE_KEY));
         return { success: true };
       } catch (error) {
         console.error("Failed to delete query:", error);

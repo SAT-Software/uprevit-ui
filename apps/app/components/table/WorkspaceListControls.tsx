@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import { format } from "date-fns";
 
@@ -36,7 +36,6 @@ import {
   CancelSquareIcon,
   FilterAddIcon,
   FilterEditIcon,
-  FilterIcon,
   FilterRemoveIcon,
   FilterResetIcon,
 } from "@hugeicons/core-free-icons";
@@ -183,9 +182,11 @@ export function WorkspaceListControls({
     toDraftFilters(filters),
   );
 
-  useEffect(() => {
+  const [previousFilters, setPreviousFilters] = useState(filters);
+  if (previousFilters !== filters) {
+    setPreviousFilters(filters);
     setDraftFilters(toDraftFilters(filters));
-  }, [filters]);
+  }
 
   const handleAddFilter = () => {
     setDraftFilters((current) => [

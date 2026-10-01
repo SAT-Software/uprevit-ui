@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
@@ -77,14 +77,6 @@ export default function EditSchematicsDialog({
   } = useForm<FormData>({
     defaultValues: formDefaults,
   });
-
-  useEffect(() => {
-    if (!open) return;
-    reset(formDefaults);
-    setLabelPresence(formDefaults.labelPresence);
-    setNewGraphicImage(null);
-    setRemoveGraphicImage(false);
-  }, [formDefaults, open, reset]);
 
   const { mutate: updateSchematicsData, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadFileToS3 } = useUploadFilesToS3();

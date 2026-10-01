@@ -3,6 +3,7 @@
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Separator } from "@uprevit/ui/components/ui/separator";
+import Image from "next/image";
 
 function SecurityTab() {
   return (
@@ -367,8 +368,11 @@ function SecurityTab() {
         <div className="border border-border rounded-lg divide-y">
           {/* Device Row 1 */}
           <div className="flex items-center p-4">
-            <img
+            <Image
               src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/brave.svg"
+              width={24}
+              height={24}
+              unoptimized
               alt="Brave"
               className="w-6 h-6 mr-4"
             />
@@ -396,8 +400,11 @@ function SecurityTab() {
 
           {/* Device Row 2 */}
           <div className="flex items-center p-4">
-            <img
+            <Image
               src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/apple.svg"
+              width={24}
+              height={24}
+              unoptimized
               alt="MacBook"
               className="w-6 h-6 mr-4"
             />
@@ -425,8 +432,11 @@ function SecurityTab() {
 
           {/* Device Row 3 */}
           <div className="flex items-center p-4">
-            <img
+            <Image
               src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/brave.svg"
+              width={24}
+              height={24}
+              unoptimized
               alt="Brave"
               className="w-6 h-6 mr-4"
             />
@@ -454,8 +464,11 @@ function SecurityTab() {
 
           {/* Device Row 4 */}
           <div className="flex items-center p-4">
-            <img
+            <Image
               src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/apple.svg"
+              width={24}
+              height={24}
+              unoptimized
               alt="MacBook"
               className="w-6 h-6 mr-4"
             />

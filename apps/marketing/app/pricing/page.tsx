@@ -3,12 +3,7 @@
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
-import { PricingCalculatorCards } from "@/features/pricing/PricingCalculatorCards";
-import {
-  ScrollProvider,
-  useScrollSection,
-  useScrollTo,
-} from "@/lib/scroll-context";
+import { ScrollProvider } from "@/lib/scroll-context";
 import {
   Accordion,
   AccordionContent,
@@ -66,9 +61,6 @@ const pricingFAQs = [
 ];
 
 function PricingPageContent() {
-  const scrollTo = useScrollTo();
-  const pricingCalculatorRef = useScrollSection("pricing-calculator");
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
       <MarketingHeader />

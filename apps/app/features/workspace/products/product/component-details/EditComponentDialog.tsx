@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
@@ -96,13 +96,6 @@ export default function EditComponentDialog({
   const { mutate: updateComponent, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadImage, isPending: isUploadingImage } =
     useUploadFilesToS3();
-
-  useEffect(() => {
-    if (!open) return;
-    reset(formDefaults);
-    setNewComponentImage(null);
-    setRemoveComponentImage(false);
-  }, [formDefaults, open, reset]);
 
   const isSaving = isPending || isUploadingImage || uploadingImage;
 

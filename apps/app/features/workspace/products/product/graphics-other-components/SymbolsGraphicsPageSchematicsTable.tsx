@@ -776,7 +776,7 @@ function RowActions({
       </DropdownMenu>
 
       <EditSchematicsDialog
-        key={`edit-${itemId}`}
+        key={`edit-${itemId}-${showEditDialog}`}
         productId={getProductId()}
         schematic={schematicItem}
         open={showEditDialog}

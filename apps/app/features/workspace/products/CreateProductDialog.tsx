@@ -100,7 +100,6 @@ export default function CreateProductDialog() {
     mode: "onSubmit",
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedDepartment = watch("department");
   const selectedProject = watch("project");
   const descriptionLength = (watch("description") || "").length;

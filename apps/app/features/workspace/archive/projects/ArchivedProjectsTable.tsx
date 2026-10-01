@@ -13,7 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
@@ -158,13 +158,13 @@ export function ArchivedProjectsTable({
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
-  const handleRestore = (item: ProjectArchiveRow) => {
+  const handleRestore = useCallback((item: ProjectArchiveRow) => {
     if (!isAdmin) {
       toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     onRestore(item);
-  };
+  }, [isAdmin, onRestore]);
 
   const columns: ColumnDef<ProjectArchiveRow>[] = useMemo(() => {
     return [
@@ -281,7 +281,7 @@ export function ArchivedProjectsTable({
         },
       },
     ];
-  }, [loadingRowId, onRestore]);
+  }, [loadingRowId, handleRestore]);
 
   const table = useReactTable({
     data,
