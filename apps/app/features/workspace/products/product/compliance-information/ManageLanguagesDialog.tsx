@@ -35,6 +35,7 @@ import {
   LanguageSquareIcon,
   Tick01Icon,
 } from "@hugeicons/core-free-icons";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 type ManageLanguagesDialogProps = {
   productId: string;
@@ -61,6 +62,7 @@ export default function ManageLanguagesDialog({
   selectedLanguages,
   isContentLocked = false,
 }: ManageLanguagesDialogProps) {
+  const { lockedMessage } = useProductAccess();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -201,17 +203,22 @@ export default function ManageLanguagesDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isContentLocked}>
-              <Icon icon={LanguageSquareIcon} />
-              Manage Languages
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="secondary" disabled={isContentLocked}>
+                <Icon icon={LanguageSquareIcon} />
+                Manage Languages
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Manage product languages for packaging and labeling"}
         </TooltipContent>
       </Tooltip>

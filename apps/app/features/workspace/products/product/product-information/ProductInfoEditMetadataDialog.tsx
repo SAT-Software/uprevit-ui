@@ -33,6 +33,7 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface FormValues {
   productName: string;
@@ -63,9 +64,9 @@ export default function ProductInfoEditMetadataDialog({
   const [open, setOpen] = useState(false);
   const [openTargetDate, setOpenTargetDate] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isContentLocked = isProductContentLocked(
-    productMetadata?.status,
-  );
+  const { canEdit, lockedMessage } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(productMetadata?.status) || !canEdit;
 
   const initialValues: FormValues = {
     productName: productMetadata?.product_name || "",
@@ -122,16 +123,21 @@ export default function ProductInfoEditMetadataDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="outline" disabled={isContentLocked}>
-              <Icon icon={PropertyEditIcon} /> Update
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" disabled={isContentLocked}>
+                <Icon icon={PropertyEditIcon} /> Update
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Edit product name, description, and target date"}
         </TooltipContent>
       </Tooltip>

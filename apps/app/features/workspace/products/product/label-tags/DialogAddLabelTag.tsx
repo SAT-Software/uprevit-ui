@@ -25,6 +25,7 @@ import {
   PlusSignSquareIcon,
 } from "@hugeicons/core-free-icons";
 import { LabelTagImageUpload } from "./LabelTagImageUpload";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 type FormData = {
   name: string;
@@ -39,6 +40,7 @@ export default function DialogAddLabelTag({
   productId: string;
   isContentLocked?: boolean;
 }) {
+  const { lockedMessage } = useProductAccess();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -130,17 +132,22 @@ export default function DialogAddLabelTag({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isContentLocked}>
-              <Icon icon={PlusSignSquareIcon} />
-              Add Label
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="secondary" disabled={isContentLocked}>
+                <Icon icon={PlusSignSquareIcon} />
+                Add Label
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Add a new label tag"}
         </TooltipContent>
       </Tooltip>

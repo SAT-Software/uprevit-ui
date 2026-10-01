@@ -16,6 +16,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface LabelTagItem {
   _id: string;
@@ -35,6 +36,7 @@ export default function DialogDeleteLabelTag({
   labelTag: LabelTagItem;
   isContentLocked?: boolean;
 }) {
+  const { lockedMessage } = useProductAccess();
   const [open, setOpen] = useState(false);
   const { mutate: deleteLabelTag, isPending } = useUpdateProductTabData();
 
@@ -67,21 +69,26 @@ export default function DialogDeleteLabelTag({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon-xs"
-              variant="destructive"
-              disabled={isContentLocked}
-              aria-label="Delete label"
-            >
-              <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button
+                size="icon-xs"
+                variant="destructive"
+                disabled={isContentLocked}
+                aria-label="Delete label"
+              >
+                <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Delete label"}
         </TooltipContent>
       </Tooltip>

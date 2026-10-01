@@ -1,4 +1,4 @@
-import type { Product, ProductStatus } from "@/types/product";
+import type { Product, ProductStatus, ProductTeam } from "@/types/product";
 
 const CONTENT_LOCKED_STATUSES: ProductStatus[] = [
   "in_review",
@@ -20,3 +20,20 @@ export const isProductContentLocked = (status?: ProductStatus) =>
 export const canCreateProductVersion = (
   product: Pick<Product, "status" | "is_latest">,
 ) => product.status === "released" && product.is_latest !== false;
+
+export type ProductRole = "owner" | "contributor" | "admin" | "viewer";
+
+export const PRODUCT_EDIT_FORBIDDEN_MESSAGE =
+  "Only the Product Owner, Contributors, or an admin can edit.";
+
+export const getProductRole = (
+  product: ProductTeam | undefined,
+  userId: string | undefined,
+  isAdmin: boolean,
+): ProductRole => {
+  if (userId && product?.owner_user_id === userId) return "owner";
+  if (isAdmin) return "admin";
+  if (userId && product?.contributor_user_ids?.includes(userId))
+    return "contributor";
+  return "viewer";
+};

@@ -37,6 +37,7 @@ import {
 } from "@uprevit/ui/components/ui/tabs";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ProductData {
   id?: string;
@@ -79,9 +80,9 @@ export default function ProductInformationCustomFieldEditDialog({
   const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null);
   const [deleteFieldOpen, setDeleteFieldOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isContentLocked = isProductContentLocked(
-    productMetadata?.status,
-  );
+  const { canEdit, lockedMessage } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(productMetadata?.status) || !canEdit;
 
   const {
     register,
@@ -270,17 +271,22 @@ export default function ProductInformationCustomFieldEditDialog({
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <Tooltip>
-          <DialogTrigger asChild>
-            <TooltipTrigger asChild>
-              <Button size="sm" variant="outline" disabled={isContentLocked}>
-                <Icon icon={Settings05Icon} />
-                Manage Custom Fields
-              </Button>
-            </TooltipTrigger>
-          </DialogTrigger>
+          <TooltipTrigger asChild>
+            <span
+              className="inline-flex"
+              tabIndex={isContentLocked ? 0 : undefined}
+            >
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" disabled={isContentLocked}>
+                  <Icon icon={Settings05Icon} />
+                  Manage Custom Fields
+                </Button>
+              </DialogTrigger>
+            </span>
+          </TooltipTrigger>
           <TooltipContent side="bottom">
             {isContentLocked
-              ? "This version can't be edited"
+              ? lockedMessage
               : "Add and manage custom fields"}
           </TooltipContent>
         </Tooltip>

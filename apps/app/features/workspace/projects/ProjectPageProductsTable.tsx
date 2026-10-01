@@ -28,7 +28,8 @@ import {
   ListFilterColumn,
   useWorkspaceListQuery,
 } from "@/lib/workspace-list-query";
-import type { AuditLog, ProductStatus } from "@/types/product";
+import type { AuditLog, ProductStatus, ProductTeam } from "@/types/product";
+import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
@@ -55,7 +56,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
-export type Item = {
+export type Item = ProductTeam & {
   _id: string;
   productId?: string;
   auditLogs?: Array<AuditLog>;
@@ -90,6 +91,7 @@ const PROJECT_PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "product_plan_number", label: "PPN", type: "text" },
   { name: "product_name", label: "Product Name", type: "text" },
   { name: "department_name", label: "Department Name", type: "text" },
+  { name: "owner_name", label: "Owner", type: "text" },
   { name: "status", label: "Status", type: "text" },
   { name: "version", label: "Version", type: "number" },
   { name: "complete_count", label: "Progress", type: "number" },
@@ -103,6 +105,7 @@ const PROJECT_PRODUCT_SORT_FIELDS = [
   "product_name",
   "product_plan_number",
   "department_name",
+  "owner_name",
   "version",
   "status",
   "complete_count",
@@ -124,6 +127,7 @@ const columnHeaderMap = [
     title: "Department",
     info: "Name of the department this product belongs to",
   },
+  { title: "Owner", info: "Product Owner accountable for this product" },
   {
     title: "Status",
     info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
@@ -214,6 +218,13 @@ const columns: ColumnDef<Item>[] = [
         {row.original?.department[0]?.department_name}
       </div>
     ),
+  },
+  {
+    id: "owner_name",
+    accessorFn: (row) => row.owner?.name ?? "",
+    size: 150,
+    header: ({ column }) => <SortableHeader column={column} title="Owner" />,
+    cell: ({ row }) => <ProductOwnerCell owner={row.original.owner} />,
   },
   {
     accessorKey: "status",
@@ -337,7 +348,7 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-const PROJECT_PRODUCT_TABLE_COLUMN_COUNT = 6;
+const PROJECT_PRODUCT_TABLE_COLUMN_COUNT = 7;
 
 export default function ProjectPageProductsTable({
   projectId,
