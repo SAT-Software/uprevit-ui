@@ -29,7 +29,9 @@ This guide provides instructions and conventions for agents operating in the upr
   - Self code review of the full diff in both repos.
 - The local UI calls the dev API, so deploy backend changes to the dev stack first (see `../uprevit-backend/AGENTS.md`).
 - If port 8080 is taken (e.g. by Tailscale), start the app bound to localhost from `apps/app`: `pnpm exec next dev -p 8080 -H localhost` (the login redirect expects `localhost:8080`).
-- Browser-test every changed flow in the running app. Open the app and ask the user to log in (or use test credentials if the user has provided them), then verify the changes work as intended.
+- Browser-test every changed flow in the running app, then verify the changes work as intended.
+  - Log in yourself with the test accounts on dev: `amittambulkar104@gmail.com` (workspace admin) and `amittambulkar96@gmail.com` (plain member, "Amit Test Member", same workspace). Choose the email one-time code option, then ask the user for the code every time you need it.
+  - Wait on `/auth/callback` until the app redirects to the dashboard; navigating away earlier drops the session.
 - Data migration scripts: always `--dry-run` first, check the counts/output, then do the real run on the dev environment only.
 - app is pre-customer, so back-and-forth is fine, but do it properly.
 
