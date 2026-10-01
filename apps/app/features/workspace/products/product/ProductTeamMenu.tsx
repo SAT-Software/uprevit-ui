@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { useProductWorkbookUnsavedGuardOptional } from "@/lib/product-workbook-unsaved-guard";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -41,6 +43,7 @@ export default function ProductTeamMenu({
   canManageTeam: boolean;
 }) {
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const workbookGuard = useProductWorkbookUnsavedGuardOptional();
   const contributors = team.contributors ?? [];
   const hiddenContributors = contributors.length - MAX_CONTRIBUTOR_AVATARS;
 
@@ -112,7 +115,13 @@ export default function ProductTeamMenu({
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onSelect={() => setTimeout(() => setTeamDialogOpen(true), 100)}
+                onSelect={() => {
+                  if (workbookGuard?.isNavigationBlocked()) {
+                    toast.warning("Save your changes before managing the team");
+                    return;
+                  }
+                  setTimeout(() => setTeamDialogOpen(true), 100);
+                }}
               >
                 <Icon icon={UserSettings01Icon} />
                 Manage team
