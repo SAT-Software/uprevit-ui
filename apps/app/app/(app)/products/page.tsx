@@ -32,6 +32,8 @@ import { ProductBookmarkMenuItem } from "@/features/workspace/products/ProductBo
 import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
 import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductListItem } from "@/features/workspace/products/productListItem";
+import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
+import { useProductRole } from "@/hooks/product/useProductAccess";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useGetAllBookmarkedProducts } from "@/hooks/product/useGetAllBookmarkedProducts";
@@ -146,6 +148,7 @@ const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "product_plan_number", label: "Product Plan Number", type: "text" },
   { name: "project_name", label: "Project", type: "text" },
   { name: "department_name", label: "Department", type: "text" },
+  { name: "owner_name", label: "Owner", type: "text" },
   { name: "status", label: "Status", type: "text" },
   { name: "version", label: "Version", type: "number" },
   { name: "complete_count", label: "Progress", type: "number" },
@@ -157,7 +160,7 @@ const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
 
 const PRODUCT_SORT_FIELDS = PRODUCT_FILTER_COLUMNS.map((column) => column.name);
 
-const PRODUCT_TABLE_COLUMN_COUNT = 8;
+const PRODUCT_TABLE_COLUMN_COUNT = 9;
 
 const columnHeaderMap = [
   {
@@ -170,6 +173,7 @@ const columnHeaderMap = [
     title: "Department",
     info: "Name of the department this product belongs to",
   },
+  { title: "Owner", info: "Product Owner accountable for this product" },
   {
     title: "Status",
     info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
@@ -280,6 +284,13 @@ const columns: ColumnDef<ProductListItem>[] = [
         {row.original?.department?.[0]?.department_name}
       </div>
     ),
+  },
+  {
+    id: "owner_name",
+    accessorFn: (row) => row.owner?.name ?? "",
+    size: 150,
+    header: ({ column }) => <SortableHeader column={column} title="Owner" />,
+    cell: ({ row }) => <ProductOwnerCell owner={row.original.owner} />,
   },
   {
     accessorKey: "status",
@@ -795,8 +806,10 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
-  const canCreateVersion = canCreateProductVersion(row.original);
-  const isContentLocked = isProductContentLocked(row.original.status);
+  const { canEdit } = useProductRole(row.original);
+  const canCreateVersion = canCreateProductVersion(row.original) && canEdit;
+  const isContentLocked =
+    isProductContentLocked(row.original.status) || !canEdit;
 
   return (
     <div

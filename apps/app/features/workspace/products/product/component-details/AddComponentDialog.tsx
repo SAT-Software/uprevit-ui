@@ -33,6 +33,7 @@ import {
   PlusSignSquareIcon,
 } from "@hugeicons/core-free-icons";
 import { ComponentImageUpload } from "./ComponentImageUpload";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 type FormData = {
   componentNumber: string;
@@ -49,6 +50,7 @@ export default function AddComponentDialog({
   productId: string;
   isContentLocked?: boolean;
 }) {
+  const { lockedMessage } = useProductAccess();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -137,17 +139,22 @@ export default function AddComponentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isContentLocked}>
-              <Icon icon={PlusSignSquareIcon} />
-              Add Component
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="secondary" disabled={isContentLocked}>
+                <Icon icon={PlusSignSquareIcon} />
+                Add Component
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Add a new label component"}
         </TooltipContent>
       </Tooltip>

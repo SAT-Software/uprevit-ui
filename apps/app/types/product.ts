@@ -5,7 +5,21 @@ export type ProductStatus =
   | "released"
   | "obsolete";
 
-export interface Product {
+export interface ProductTeamMember {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+export interface ProductTeam {
+  owner_user_id?: string;
+  contributor_user_ids?: string[];
+  owner?: ProductTeamMember | null;
+  contributors?: ProductTeamMember[];
+}
+
+export interface Product extends ProductTeam {
   _id?: string;
   workspace_id?: string;
   product_plan_number: string;
@@ -179,7 +193,7 @@ export interface AuditLog {
 // =====================================
 
 /** Core product data included in every tab response */
-export interface ProductDataContent {
+export interface ProductDataContent extends ProductTeam {
   _id: string;
   workspace_id: string;
   project_id: string;

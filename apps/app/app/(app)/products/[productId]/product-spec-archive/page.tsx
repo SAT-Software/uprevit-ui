@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import type { DiffItem } from "@/utils/deepDiff";
 import type { IWorkbookData } from "@univerjs/core";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 // Dynamic import for read-only viewer (SSR disabled)
 const UniverReadOnlyViewer = dynamic(
@@ -60,9 +61,11 @@ export default function Page() {
     compareVersionId
   );
 
-  const isContentLocked = isProductContentLocked(
-    productInfoData?.result?.data?.product_data?.data?.status,
-  );
+  const { canEdit } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(
+      productInfoData?.result?.data?.product_data?.data?.status,
+    ) || !canEdit;
 
   // Extract base and next version workbook data for redline view
   const baseVersionWorkbook =

@@ -10,6 +10,7 @@ import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { cn } from "@uprevit/ui/lib/utils";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ComponentItem {
   _id: string;
@@ -64,9 +65,11 @@ export default function Page() {
     compareVersionId,
   );
 
-  const isContentLocked = isProductContentLocked(
-    componentsData?.result?.data?.product_data?.data?.status,
-  );
+  const { canEdit } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(
+      componentsData?.result?.data?.product_data?.data?.status,
+    ) || !canEdit;
 
   if (isLoading) {
     return (

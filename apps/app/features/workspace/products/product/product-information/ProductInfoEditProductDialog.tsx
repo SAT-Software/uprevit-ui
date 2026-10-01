@@ -48,6 +48,7 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ProductData {
   id?: string;
@@ -86,9 +87,9 @@ export default function EditProductDialog({
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const [classComboboxOpen, setClassComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isContentLocked = isProductContentLocked(
-    productMetadata?.status,
-  );
+  const { canEdit, lockedMessage } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(productMetadata?.status) || !canEdit;
 
   const initialValues: FormValues = {
     marketGeographySelect:
@@ -188,16 +189,21 @@ export default function EditProductDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="outline" disabled={isContentLocked}>
-              <Icon icon={TaskEdit01Icon} /> Update Product Info
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" disabled={isContentLocked}>
+                <Icon icon={TaskEdit01Icon} /> Update Product Info
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Edit product information fields"}
         </TooltipContent>
       </Tooltip>

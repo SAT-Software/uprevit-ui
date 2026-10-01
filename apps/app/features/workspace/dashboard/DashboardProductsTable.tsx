@@ -14,13 +14,15 @@ import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import type { AuditLog, ProductStatus } from "@/types/product";
+import type { AuditLog, ProductStatus, ProductTeam } from "@/types/product";
+import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
   ArrowUpRight01Icon,
   Blockchain03Icon,
   UnfoldMoreIcon,
+  UserIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
@@ -43,6 +45,11 @@ import { cn } from "@uprevit/ui/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useAuth } from "react-oidc-context";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@uprevit/ui/components/ui/toggle-group";
 import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
 import {
   DashboardErrorState,
@@ -51,7 +58,12 @@ import {
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
-export type Item = {
+const OWNER_FILTER_OPTIONS = [
+  { value: "all", label: "Show all products", icon: Blockchain03Icon },
+  { value: "mine", label: "Show products owned by me", icon: UserIcon },
+] as const;
+
+export type Item = ProductTeam & {
   _id: string;
   productId?: string;
   auditLogs?: Array<AuditLog>;
@@ -87,6 +99,7 @@ const dashboardTableColumns = [
   { title: "Product Name", width: 270 },
   { title: "Project", width: 160 },
   { title: "Department", width: 160 },
+  { title: "Owner", width: 150 },
   { title: "Status", width: 80 },
   { title: "Version", width: 80 },
   { title: "Progress", width: 90 },
@@ -109,6 +122,7 @@ const columnHeaderMap = [
     title: "Department",
     info: "Name of the department this product belongs to",
   },
+  { title: "Owner", info: "Product Owner accountable for this product" },
   {
     title: "Status",
     info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
@@ -217,6 +231,13 @@ const columns: ColumnDef<Item>[] = [
         <div className="text-sm font-medium truncate">{departmentName}</div>
       );
     },
+  },
+  {
+    id: "owner_name",
+    accessorFn: (row) => row.owner?.name ?? "",
+    size: 150,
+    header: ({ column }) => <SortableHeader column={column} title="Owner" />,
+    cell: ({ row }) => <ProductOwnerCell owner={row.original.owner} />,
   },
   {
     accessorKey: "status",
@@ -344,10 +365,16 @@ const columns: ColumnDef<Item>[] = [
 ];
 
 export default function DashboardProductsTable() {
+  const auth = useAuth();
+  const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
   const { data, isLoading, error } = useGetAllProducts({
     limit: 5,
     sort: "actionAt",
     order: "desc",
+    ownerId:
+      ownerFilter === "mine"
+        ? (auth.user?.profile?.userId as string | undefined)
+        : undefined,
   });
   const [sorting, setSorting] = useState<SortingState>([]);
   const router = useRouter();
@@ -406,7 +433,7 @@ export default function DashboardProductsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableBodySkeleton columnCount={7} rowCount={5} />
+            <TableBodySkeleton columnCount={8} rowCount={5} />
           </TableBody>
         </Table>
       </div>
@@ -452,6 +479,32 @@ export default function DashboardProductsTable() {
           <InfoTooltip content="A product in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and redlines" />
         </div>
         <div className="flex items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={ownerFilter}
+            onValueChange={(value) =>
+              value && setOwnerFilter(value as "all" | "mine")
+            }
+            aria-label="Filter products by owner"
+            className="h-7 gap-0.5 rounded-lg border border-input bg-muted p-0.5"
+          >
+            {OWNER_FILTER_OPTIONS.map((option) => (
+              <Tooltip key={option.value}>
+                <TooltipTrigger asChild>
+                  <ToggleGroupItem
+                    value={option.value}
+                    aria-label={option.label}
+                    className="size-[22px] min-w-0 rounded-md p-0 text-muted-foreground/50 hover:bg-transparent hover:text-foreground aria-checked:bg-background aria-checked:text-foreground aria-checked:shadow-sm aria-checked:ring-1 aria-checked:ring-border dark:aria-checked:bg-input/50"
+                  >
+                    <Icon icon={option.icon} size={14} strokeWidth={2} />
+                  </ToggleGroupItem>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{option.label}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </ToggleGroup>
           <ShowOrHideTableColumnsDropdown table={table} />
           <Button asChild size="sm" variant="secondary" className="shrink-0 group">
             <Link href="/products" aria-label="Show all products">

@@ -1,6 +1,6 @@
-import type { AuditLog, ProductStatus } from "@/types/product";
+import type { AuditLog, ProductStatus, ProductTeam } from "@/types/product";
 
-export type ProductListItem = {
+export type ProductListItem = ProductTeam & {
   _id: string;
   productId?: string;
   product_description: string;

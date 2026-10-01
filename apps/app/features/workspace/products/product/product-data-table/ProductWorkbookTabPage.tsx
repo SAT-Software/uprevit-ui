@@ -2,6 +2,12 @@
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import {
@@ -59,6 +65,7 @@ export function ProductWorkbookTabPage({
   baseVersionWorkbook,
   nextVersionWorkbook,
 }: ProductWorkbookTabPageProps) {
+  const { lockedMessage } = useProductAccess();
   const [redlineMode, setRedlineMode] = useState<"highlight" | "inline">(
     "inline",
   );
@@ -215,24 +222,36 @@ export function ProductWorkbookTabPage({
             </div>
           ) : null}
 
-          <Button
-            size="sm"
-            variant={editor.hasEditableUnsavedChanges ? "default" : "outline"}
-            onClick={editor.handleManualSave}
-            disabled={
-              editor.isSaving ||
-              !editor.hasEditableUnsavedChanges ||
-              isContentLocked
-            }
-            className="gap-1.5"
-          >
-            {editor.isSaving ? (
-              <Spinner className="w-4 h-4" />
-            ) : (
-              <Icon icon={SaveIcon} size={14} strokeWidth={2} />
-            )}
-            {editor.isSaving ? "Saving" : "Save"}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="inline-flex"
+                tabIndex={isContentLocked ? 0 : undefined}
+              >
+              <Button
+                size="sm"
+                variant={editor.hasEditableUnsavedChanges ? "default" : "outline"}
+                onClick={editor.handleManualSave}
+                disabled={
+                  editor.isSaving ||
+                  !editor.hasEditableUnsavedChanges ||
+                  isContentLocked
+                }
+                className="gap-1.5"
+              >
+                {editor.isSaving ? (
+                  <Spinner className="w-4 h-4" />
+                ) : (
+                  <Icon icon={SaveIcon} size={14} strokeWidth={2} />
+                )}
+                {editor.isSaving ? "Saving" : "Save"}
+              </Button>
+              </span>
+            </TooltipTrigger>
+            {isContentLocked ? (
+              <TooltipContent side="bottom">{lockedMessage}</TooltipContent>
+            ) : null}
+          </Tooltip>
         </div>
       </div>
 

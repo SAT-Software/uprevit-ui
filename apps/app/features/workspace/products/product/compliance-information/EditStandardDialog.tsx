@@ -41,6 +41,7 @@ import {
 } from "@uprevit/ui/components/ui/command";
 import { cn } from "@uprevit/ui/lib/utils";
 import { COMPLIANCE_STANDARDS } from "@/data/compliance-standards";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface FormValues {
   standardSelect: string;
@@ -63,6 +64,7 @@ export default function EditStandardDialog({
   standards: Standards;
   isContentLocked?: boolean;
 }) {
+  const { lockedMessage } = useProductAccess();
   const id = useId();
   const { mutate: updateStandard, isPending } = useUpdateProductTabData();
   const [open, setOpen] = useState(false);
@@ -151,21 +153,26 @@ export default function EditStandardDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon-xs"
-              variant="outline"
-              disabled={isContentLocked}
-              aria-label="Edit standard"
-            >
-              <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button
+                size="icon-xs"
+                variant="outline"
+                disabled={isContentLocked}
+                aria-label="Edit standard"
+              >
+                <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
           {isContentLocked
-            ? "This version can't be edited"
+            ? lockedMessage
             : "Edit standard details"}
         </TooltipContent>
       </Tooltip>

@@ -16,6 +16,7 @@ import { Alert01Icon, ArrowRight01Icon, Home04Icon } from "@hugeicons/core-free-
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import type { ProductStatus } from "@/types/product";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 type ComplianceItem = {
   _id: string;
@@ -50,6 +51,7 @@ export default function Page() {
   );
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
+  const { canEdit } = useProductAccess();
 
   if (isLoading) {
     return (
@@ -237,9 +239,10 @@ export default function Page() {
       .filter(Boolean) as WithRedlineMeta<LanguageItem>[];
   })();
 
-  const isContentLocked = isProductContentLocked(
-    allTabsData?.product_information?.product_data?.data?.status,
-  );
+  const isContentLocked =
+    isProductContentLocked(
+      allTabsData?.product_information?.product_data?.data?.status,
+    ) || !canEdit;
 
   return (
     <div className="flex h-full flex-col">

@@ -31,9 +31,12 @@ import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
+  PRODUCT_EDIT_FORBIDDEN_MESSAGE,
   PRODUCT_STATUS_LABELS,
   isProductContentLocked,
 } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
+import ProductTeamMenu from "./ProductTeamMenu";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
@@ -51,6 +54,7 @@ import {
   Pdf01Icon,
   SentIcon,
   Tick02Icon,
+  Undo02Icon,
 } from "@hugeicons/core-free-icons";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
@@ -173,6 +177,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
   const workbookGuard = useProductWorkbookUnsavedGuardOptional();
+  const { canEdit, canManageTeam } = useProductAccess();
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -222,13 +227,22 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const statusLabel = PRODUCT_STATUS_LABELS[status];
   const isProductComplete = productCoreData?.complete_count === 100;
   const isReadOnly = isProductContentLocked(status);
-  const isEditLocked = isReadOnly || isExportLocked;
+  const isEditLocked = isReadOnly || isExportLocked || !canEdit;
   const isSubmittable =
     status === "draft" || (status === "submitted" && !workflowsEnabled);
-  const canSubmit = isSubmittable && isProductComplete && !isExportLocked;
+  const canSubmit =
+    isSubmittable && isProductComplete && !isExportLocked && canEdit;
   const submitLabel = workflowsEnabled
     ? "Submit for approval"
     : "Submit and release";
+
+  const canReturnToDraft =
+    status === "submitted" && canEdit && !isExportLocked && !isUpdatingProduct;
+
+  const handleReturnToDraft = async () => {
+    if (!productId || !canReturnToDraft) return;
+    await updateProduct({ _id: productId, action: "return-to-draft" });
+  };
 
   const handleSubmit = async () => {
     if (!productId || !canSubmit) return;
@@ -294,6 +308,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
     : false;
+  const isCompletionLocked = status === "submitted" && isCurrentTabCompleted;
 
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
@@ -335,47 +350,23 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
       !currentTabConfig ||
       !isTabCompletionEnabled ||
       isSyncingStatus ||
-      isEditLocked
+      isEditLocked ||
+      isCompletionLocked
     ) {
       return;
     }
 
-    const updatedTabsCompleted = isCurrentTabCompleted
-      ? tabsCompleted.filter((tab: string) => tab !== currentTab)
-      : [...tabsCompleted, currentTab];
-
-    const newCompletionPercentage = Math.round(
-      (updatedTabsCompleted.length / TOTAL_TABS) * 100,
-    );
-
-    const results = await Promise.allSettled([
-      updateProductTabData({
+    try {
+      await updateProductTabData({
         id: productId,
         action: currentTabConfig.action,
         tab: currentTabConfig.tab,
         data: {
           tab_completed: !isCurrentTabCompleted,
         },
-      }),
-      updateProduct({
-        _id: productId,
-        action: "update-product",
-        data: {
-          _id: productId,
-          complete_count: newCompletionPercentage,
-        },
-      }),
-    ]);
-
-    const hasFailure = results.some((result) => result.status === "rejected");
-
-    if (hasFailure) {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
-        queryClient.invalidateQueries({ queryKey: ["all-products"] }),
-        queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
-      ]);
-      toast.error("Failed to update tab completion. Please try again.");
+      });
+    } finally {
+      await queryClient.invalidateQueries({ queryKey: ["all-products"] });
     }
   };
 
@@ -697,6 +688,13 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+        {productCoreData ? (
+          <ProductTeamMenu
+            productId={productId}
+            team={productCoreData}
+            canManageTeam={canManageTeam}
+          />
+        ) : null}
         <ProductProgressHoverCard
           // variant="secondary"
           percentage={clampedPercentage}
@@ -712,7 +710,12 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 tabName={currentTab}
                 isCompleted={isCurrentTabCompleted}
                 onConfirm={handleToggleTab}
-                disabled={!product || isSyncingStatus || isEditLocked}
+                disabled={
+                  !product ||
+                  isSyncingStatus ||
+                  isEditLocked ||
+                  isCompletionLocked
+                }
               >
                 <Button
                   variant="secondary"
@@ -721,13 +724,22 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                     toggleButtonClasses,
                     "[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground ",
                   )}
-                  disabled={!product || isSyncingStatus || isEditLocked}
+                  disabled={
+                    !product ||
+                    isSyncingStatus ||
+                    isEditLocked ||
+                    isCompletionLocked
+                  }
                   title={
                     isExportLocked
                       ? "Editing is disabled while export is in progress"
                       : isReadOnly
                         ? "This version can't be edited"
-                        : undefined
+                        : !canEdit
+                          ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                          : isCompletionLocked
+                            ? "Return to draft to mark a tab incomplete"
+                            : undefined
                   }
                 >
                   {isCurrentTabCompleted ? (
@@ -743,6 +755,33 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         />
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
+            {status === "submitted" ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="inline-flex rounded-lg"
+                    tabIndex={canReturnToDraft ? undefined : 0}
+                  >
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!canReturnToDraft}
+                      onClick={handleReturnToDraft}
+                    >
+                      <Icon icon={Undo02Icon} size={14} />
+                      Return to draft
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  {!canEdit
+                    ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                    : isExportLocked
+                      ? "Cannot change status while an export is in progress"
+                      : "Move this version back to Draft"}
+                </TooltipContent>
+              </Tooltip>
+            ) : null}
             <Tooltip>
               <TooltipTrigger asChild>
                 <span
@@ -766,13 +805,15 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
               <TooltipContent side="bottom" align="end">
                 {!isSubmittable
                   ? `This version is ${statusLabel.toLowerCase()}`
-                  : isExportLocked
-                    ? "Cannot submit while an export is in progress"
-                    : !isProductComplete
-                      ? "Complete all tabs to enable submission"
-                      : workflowsEnabled
-                        ? "An approval workflow will release this version"
-                        : "Release this version now"}
+                  : !canEdit
+                    ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                    : isExportLocked
+                      ? "Cannot submit while an export is in progress"
+                      : !isProductComplete
+                        ? "Complete all tabs to enable submission"
+                        : workflowsEnabled
+                          ? "An approval workflow will release this version"
+                          : "Release this version now"}
               </TooltipContent>
             </Tooltip>
           </div>
