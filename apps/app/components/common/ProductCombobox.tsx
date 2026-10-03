@@ -114,10 +114,10 @@ export function ProductCombobox({
     isPending || (isFetching && !isFetchingNextPage && products.length === 0);
 
   useEffect(() => {
-    if (open && products.length < 5 && hasNextPage && !isFetching) {
+    if (open && products.length < 5 && hasNextPage && !isFetching && !isError) {
       fetchNextPage();
     }
-  }, [open, products.length, hasNextPage, isFetching, fetchNextPage]);
+  }, [open, products.length, hasNextPage, isFetching, isError, fetchNextPage]);
 
   const selectedProduct = products.find((product) => product._id === value);
 

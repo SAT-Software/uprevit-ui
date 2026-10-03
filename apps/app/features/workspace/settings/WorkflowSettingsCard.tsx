@@ -26,7 +26,7 @@ export function WorkflowSettingsCard({ workspace }: { workspace: Workspace }) {
           value={workspace.defaultWorkflowCompletionMode ?? "automatic"}
           disabled={isPending}
           onValueChange={(defaultWorkflowCompletionMode) =>
-            updateWorkspace({ ...workspace, defaultWorkflowCompletionMode })
+            updateWorkspace({ defaultWorkflowCompletionMode })
           }
         />
       </div>
