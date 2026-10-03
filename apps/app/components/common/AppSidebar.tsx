@@ -25,6 +25,7 @@ import {
   Layout01Icon,
   NewOfficeIcon,
   Settings01Icon,
+  WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
@@ -106,6 +107,18 @@ const data = {
             <Icon
               className="transition-all delay-100 duration-200 ease-in-out"
               icon={Blockchain03Icon}
+              size={16}
+              strokeWidth={2}
+            />
+          ),
+        },
+        {
+          title: "Workflows",
+          url: "/workflows",
+          icon: (
+            <Icon
+              className="transition-all delay-100 duration-200 ease-in-out"
+              icon={WorkflowIcon}
               size={16}
               strokeWidth={2}
             />
@@ -346,6 +359,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: workspaceData, isLoading: isWorkspaceLoading } =
     useGetWorkspace();
   const workspace = workspaceData?.workspace;
+  const workflowsEnabled = workspace?.approvalWorkflowsEnabled === true;
+  const isNavItemVisible = ({ url }: { url: string }) =>
+    url !== "/workflows" || workflowsEnabled;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -405,7 +421,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
-                {item.items.map((item) => (
+                {item.items.filter(isNavItemVisible).map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild

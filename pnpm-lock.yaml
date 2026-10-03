@@ -17,8 +17,8 @@ importers:
   .:
     dependencies:
       '@hugeicons/core-free-icons':
-        specifier: ^4.2.1
-        version: 4.2.3
+        specifier: ^4.3.5
+        version: 4.3.5
       '@hugeicons/react':
         specifier: ^1.1.9
         version: 1.1.9(react@19.2.1)
@@ -332,8 +332,8 @@ importers:
   packages/ui:
     dependencies:
       '@hugeicons/core-free-icons':
-        specifier: ^4.2.1
-        version: 4.2.3
+        specifier: ^4.3.5
+        version: 4.3.5
       '@hugeicons/react':
         specifier: ^1.1.9
         version: 1.1.9(react@19.2.1)
@@ -990,8 +990,8 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@hugeicons/core-free-icons@4.2.3':
-    resolution: {integrity: sha512-fpiU0qFZkv4ABi23xJ2m4qNr0BBfuIaYjPboN8WDA6aj9D+OzXa7eykxKOpACZRuGbDz1U9S5DsNx1d5KNnsgA==}
+  '@hugeicons/core-free-icons@4.3.5':
+    resolution: {integrity: sha512-Sv+NjHRPnQk+yZsGCMcGznCHdTfJR9PMMOEKcJYAQU4gy90dmlc9PwdtvYOImBZIjiheMsTLL5eMn2DmHxUiUg==}
 
   '@hugeicons/react@1.1.9':
     resolution: {integrity: sha512-O+lWSWjbijoAvMCxn4K2bQWCGN5+mP1y5j+X99j23mXMj+s0X25fs71T6t9YJLaBodwmZdaewD27dzS/PiboQw==}
@@ -1378,6 +1378,7 @@ packages:
 
   '@mux/mux-node@9.0.1':
     resolution: {integrity: sha512-+wSqwCkb3/RplJkhd35R44+Ov1pQTzXDJSCLF8yxBRodUL2uqG/ajCSix+miIiPNY+v/tx0rJ9+t6dxe2ZR/Dg==}
+    deprecated: '@mux/mux-node was renamed to @mux/ts. 15.5.0 is the final release under this name; install @mux/ts for all future releases. Migration guide: https://github.com/muxinc/mux-ts/blob/main/MIGRATION.md'
 
   '@mux/mux-video@0.30.7':
     resolution: {integrity: sha512-xZrNVaBAmZkoL0fCGMeAQDji+LYWvZKrtQhXVkAo5CLgik6eeTeMI1kyW5/U+7yEjpe7qXN6dlvZ7nrtuEIUQg==}
@@ -4674,6 +4675,7 @@ packages:
   eslint@9.39.5:
     resolution: {integrity: sha512-DgZS62aPLXKlnxILS/AYCoRvHaZeXceIzlXPkkGGzJWSow1aEk0lbTlxUSlyjC8jcaKxAdOnTDz+o1JFSBsyjw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -8167,7 +8169,7 @@ snapshots:
     dependencies:
       hono: 4.13.1
 
-  '@hugeicons/core-free-icons@4.2.3': {}
+  '@hugeicons/core-free-icons@4.3.5': {}
 
   '@hugeicons/react@1.1.9(react@19.2.1)':
     dependencies:

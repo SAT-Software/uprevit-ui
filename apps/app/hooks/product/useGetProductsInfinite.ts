@@ -12,6 +12,7 @@ export type UseGetProductsInfiniteOptions = {
   sort?: string;
   order?: ListOrder;
   search?: string;
+  status?: string[];
   enabled?: boolean;
 };
 
@@ -44,6 +45,7 @@ export function useGetProductsInfinite(options?: UseGetProductsInfiniteOptions) 
       sort,
       order,
       search,
+      options?.status,
     ],
     queryFn: ({ pageParam, signal }) =>
       getAllProducts({
@@ -55,6 +57,7 @@ export function useGetProductsInfinite(options?: UseGetProductsInfiniteOptions) 
           sort,
           order,
           filters: buildProductSearchFilters(search),
+          status: options?.status,
         },
       }),
     initialPageParam: 1,

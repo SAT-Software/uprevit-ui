@@ -6,7 +6,7 @@ import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
 import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 async function updateWorkspace(
-  workspaceData: Workspace,
+  workspaceData: Partial<Workspace>,
   {
     signal,
     accessToken,
@@ -41,7 +41,7 @@ export function useUpdateWorkspace() {
   const workspaceId = auth.user?.profile.workspaceId;
 
   return useMutation({
-    mutationFn: async (workspaceData: Workspace) => {
+    mutationFn: async (workspaceData: Partial<Workspace>) => {
       const accessToken = auth.user?.access_token;
       if (!accessToken) {
         throw new Error("User is not authenticated");

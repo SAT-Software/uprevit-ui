@@ -1,6 +1,6 @@
 "use client";
 
-import { WorkflowSquare03Icon } from "@hugeicons/core-free-icons";
+import { WorkflowIcon } from "@hugeicons/core-free-icons";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useUpdatePlatformWorkspaceFeatures } from "@/hooks/platform-admin/useUpdatePlatformWorkspaceFeatures";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -25,7 +25,7 @@ export function PlatformWorkspaceFeaturesCard({
       </div>
       <div className="flex items-center gap-4 p-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60">
-          <Icon icon={WorkflowSquare03Icon} size={18} strokeWidth={2} />
+          <Icon icon={WorkflowIcon} size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 space-y-0.5">
           <Label htmlFor="approval-workflows" className="text-sm font-medium">

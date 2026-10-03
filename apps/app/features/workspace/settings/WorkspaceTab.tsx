@@ -24,6 +24,9 @@ import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@uprevit/ui/lib/utils";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
+import { WorkflowSettingsCard } from "./WorkflowSettingsCard";
 
 const WORKSPACE_FIELDS = [
   {
@@ -73,6 +76,8 @@ const workspaceFieldCellClassName = (index: number, span: number) =>
   );
 
 function WorkspaceTab() {
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
   const {
     data,
     isLoading: workspaceLoading,
@@ -252,6 +257,10 @@ function WorkspaceTab() {
           ))}
         </div>
       </div>
+
+      {isAdmin && workspaceData?.approvalWorkflowsEnabled ? (
+        <WorkflowSettingsCard workspace={workspaceData} />
+      ) : null}
     </div>
   );
 }
