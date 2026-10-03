@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "react-oidc-context";
 import {
   Blockchain03Icon,
   Cancel01Icon,
+  CancelCircleIcon,
+  CheckmarkCircle02Icon,
   UserAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -39,8 +42,11 @@ import type {
   WorkflowDetail,
   WorkflowProductDetail,
 } from "@/types/workflow";
+import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import { WORKFLOW_RELATIONSHIP_LABELS } from "@/utils/workflow/workflow-labels";
+import { ApproveAssignmentDialog } from "./ApproveAssignmentDialog";
 import { ConfirmWorkflowRemovalDialog } from "./ConfirmWorkflowRemovalDialog";
+import { RejectWorkflowDialog } from "./RejectWorkflowDialog";
 import { WorkflowDecisionBadge } from "./WorkflowDecisionBadge";
 
 type UpdateWorkflow = ReturnType<typeof useUpdateWorkflow>;
@@ -49,6 +55,17 @@ const GROUP_GRID =
   "grid gap-x-6 gap-y-1 px-4 py-2 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)_auto]";
 
 type RemovalTarget = { assignment: WorkflowAssignment; groupLabel: string };
+type DecisionTarget = RemovalTarget & { decision: "approve" | "reject" };
+
+type RowContext = {
+  canEdit: boolean;
+  disabled: boolean;
+  isActive: boolean;
+  isEnded: boolean;
+  currentUserId?: string;
+  onRemove: (target: RemovalTarget) => void;
+  onDecide: (target: DecisionTarget) => void;
+};
 
 function AddApproverButton(props: React.ComponentProps<typeof Button>) {
   return (
@@ -72,48 +89,105 @@ function AddApproverButton(props: React.ComponentProps<typeof Button>) {
 function AssignmentRow({
   assignment,
   groupLabel,
-  canEdit,
-  disabled,
-  onRemove,
+  context,
 }: {
   assignment: WorkflowAssignment;
   groupLabel: string;
-  canEdit: boolean;
-  disabled: boolean;
-  onRemove: (target: RemovalTarget) => void;
+  context: RowContext;
 }) {
   const { name, email } = assignment.userSnapshot;
+  const {
+    canEdit,
+    disabled,
+    isActive,
+    isEnded,
+    currentUserId,
+    onRemove,
+    onDecide,
+  } = context;
+  const canDecide =
+    isActive &&
+    assignment.decision === "pending" &&
+    assignment.userId === currentUserId;
+  const note = assignment.reason ?? assignment.comment;
 
   return (
-    <li className="flex min-h-9 items-center gap-2.5">
-      <ProductMemberAvatar member={{ name }} />
-      <p className="min-w-0 flex-1 truncate text-sm" title={email}>
-        <span className="font-medium">{name}</span>
-        {assignment.relationship ? (
-          <span className="text-muted-foreground">
-            {" · "}
-            {WORKFLOW_RELATIONSHIP_LABELS[assignment.relationship]}
-          </span>
+    <li className="flex items-start gap-2.5">
+      <span className="flex h-9 shrink-0 items-center">
+        <ProductMemberAvatar member={{ name }} />
+      </span>
+      <div className="min-w-0 flex-1 py-2">
+        <p className="truncate text-sm leading-5" title={email}>
+          <span className="font-medium">{name}</span>
+          {assignment.relationship ? (
+            <span className="text-muted-foreground">
+              {" · "}
+              {WORKFLOW_RELATIONSHIP_LABELS[assignment.relationship]}
+            </span>
+          ) : null}
+        </p>
+        {assignment.decidedAt ? (
+          <p className="text-xs text-muted-foreground">
+            {formatToLocalDateTime(assignment.decidedAt)}
+          </p>
         ) : null}
-      </p>
-      <WorkflowDecisionBadge decision={assignment.decision} />
-      {canEdit ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
+        {note ? (
+          <p className="mt-1 whitespace-pre-wrap break-words border-l-2 border-border pl-2 text-xs text-foreground/80">
+            {note}
+          </p>
+        ) : null}
+      </div>
+      <div className="flex h-9 shrink-0 items-center gap-1.5">
+        {canDecide ? (
+          <>
             <Button
               type="button"
-              size="icon-xs"
-              variant="destructive"
-              aria-label={`Remove ${name} from ${groupLabel}`}
+              size="sm"
+              variant="outline"
               disabled={disabled}
-              onClick={() => onRemove({ assignment, groupLabel })}
+              onClick={() =>
+                onDecide({ assignment, groupLabel, decision: "reject" })
+              }
             >
-              <Icon icon={Cancel01Icon} size={14} strokeWidth={2} />
+              <Icon icon={CancelCircleIcon} size={14} />
+              Reject
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Remove approver</TooltipContent>
-        </Tooltip>
-      ) : null}
+            <Button
+              type="button"
+              size="sm"
+              disabled={disabled}
+              onClick={() =>
+                onDecide({ assignment, groupLabel, decision: "approve" })
+              }
+            >
+              <Icon icon={CheckmarkCircle02Icon} size={14} />
+              Approve
+            </Button>
+          </>
+        ) : (
+          <WorkflowDecisionBadge
+            decision={assignment.decision}
+            closed={isEnded}
+          />
+        )}
+        {canEdit ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                size="icon-xs"
+                variant="destructive"
+                aria-label={`Remove ${name} from ${groupLabel}`}
+                disabled={disabled}
+                onClick={() => onRemove({ assignment, groupLabel })}
+              >
+                <Icon icon={Cancel01Icon} size={14} strokeWidth={2} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Remove approver</TooltipContent>
+          </Tooltip>
+        ) : null}
+      </div>
     </li>
   );
 }
@@ -121,16 +195,12 @@ function AssignmentRow({
 function AssignmentList({
   assignments,
   groupLabel,
-  canEdit,
-  disabled,
-  onRemove,
+  context,
   emptyText,
 }: {
   assignments: WorkflowAssignment[];
   groupLabel: string;
-  canEdit: boolean;
-  disabled: boolean;
-  onRemove: (target: RemovalTarget) => void;
+  context: RowContext;
   emptyText: string;
 }) {
   return (
@@ -142,9 +212,7 @@ function AssignmentList({
               key={assignment._id}
               assignment={assignment}
               groupLabel={groupLabel}
-              canEdit={canEdit}
-              disabled={disabled}
-              onRemove={onRemove}
+              context={context}
             />
           ))}
         </ul>
@@ -248,22 +316,77 @@ function EmptyLine({ children }: { children: React.ReactNode }) {
   return <p className="px-4 py-3 text-sm text-muted-foreground">{children}</p>;
 }
 
+function ApprovalProgress({ workflow }: { workflow: WorkflowDetail }) {
+  const total = workflow.assignments.length;
+  const approved = workflow.assignments.filter(
+    (assignment) => assignment.decision === "approved",
+  ).length;
+  const pending = workflow.assignments.filter(
+    (assignment) => assignment.decision === "pending",
+  ).length;
+  const percentage = total ? Math.round((approved / total) * 100) : 0;
+
+  return (
+    <section className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-background px-4 py-3">
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-sm font-medium tabular-nums">
+          {approved} of {total} approved
+        </span>
+        {workflow.status === "in_review" ? (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            · {pending} pending
+          </span>
+        ) : null}
+      </div>
+      <div
+        className="h-1.5 min-w-40 flex-1 overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-label="Approvals"
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-valuenow={approved}
+      >
+        <div
+          className="h-full rounded-full bg-teal-500 transition-[width] duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </section>
+  );
+}
+
 export function WorkflowApprovalsTab({
   workflow,
 }: {
   workflow: WorkflowDetail;
 }) {
+  const auth = useAuth();
   const update = useUpdateWorkflow(workflow._id);
   const [functionLabel, setFunctionLabel] = useState("");
+  const [decisionOpen, setDecisionOpen] = useState(false);
+  const [decisionTarget, setDecisionTarget] = useState<DecisionTarget | null>(
+    null,
+  );
   const [removeOpen, setRemoveOpen] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<RemovalTarget | null>(
     null,
   );
   const { canEdit } = workflow;
-
-  const requestRemoval = (target: RemovalTarget) => {
-    setRemoveTarget(target);
-    setRemoveOpen(true);
+  const isStarted = workflow.status !== "draft";
+  const rowContext: RowContext = {
+    canEdit,
+    disabled: update.isPending,
+    isActive: workflow.status === "in_review",
+    isEnded: ["completed", "rejected", "cancelled"].includes(workflow.status),
+    currentUserId: auth.user?.profile?.userId as string | undefined,
+    onRemove: (target) => {
+      setRemoveTarget(target);
+      setRemoveOpen(true);
+    },
+    onDecide: (target) => {
+      setDecisionTarget(target);
+      setDecisionOpen(true);
+    },
   };
 
   const confirmRemoval = () => {
@@ -313,12 +436,14 @@ export function WorkflowApprovalsTab({
 
   return (
     <div className="flex flex-col gap-4">
+      {isStarted ? <ApprovalProgress workflow={workflow} /> : null}
+
       <section className="overflow-hidden rounded-2xl border border-border bg-background">
         <SectionHeader
           title="Product Team"
           info="Each Product needs at least one approver from its own Product Owner or Contributors."
         >
-          {productTeams.length ? (
+          {productTeams.length && !isStarted ? (
             <span
               className={cn(
                 "text-xs font-medium tabular-nums",
@@ -356,9 +481,7 @@ export function WorkflowApprovalsTab({
                 <AssignmentList
                   assignments={assignments}
                   groupLabel={product.name}
-                  canEdit={canEdit}
-                  disabled={update.isPending}
-                  onRemove={requestRemoval}
+                  context={rowContext}
                   emptyText="No approver yet"
                 />
                 {canEdit ? (
@@ -397,9 +520,7 @@ export function WorkflowApprovalsTab({
                 <AssignmentList
                   assignments={assignments}
                   groupLabel={label}
-                  canEdit={canEdit}
-                  disabled={update.isPending}
-                  onRemove={requestRemoval}
+                  context={rowContext}
                   emptyText="No approver yet"
                 />
                 {canEdit ? (
@@ -447,6 +568,23 @@ export function WorkflowApprovalsTab({
           ) : null}
         </div>
       </section>
+
+      {decisionTarget?.decision === "approve" ? (
+        <ApproveAssignmentDialog
+          workflowId={workflow._id}
+          assignment={decisionTarget.assignment}
+          groupLabel={decisionTarget.groupLabel}
+          open={decisionOpen}
+          onOpenChange={setDecisionOpen}
+        />
+      ) : decisionTarget?.decision === "reject" ? (
+        <RejectWorkflowDialog
+          workflow={workflow}
+          assignment={decisionTarget.assignment}
+          open={decisionOpen}
+          onOpenChange={setDecisionOpen}
+        />
+      ) : null}
 
       {canEdit ? (
         <ConfirmWorkflowRemovalDialog

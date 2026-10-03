@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "react-oidc-context";
 import {
+  CheckListIcon,
   Search01Icon,
   UserIcon,
   WorkflowIcon,
@@ -36,22 +38,41 @@ import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
 import { CreateWorkflowDialog } from "@/features/workspace/workflows/WorkflowDetailsDialog";
+import { WorkflowDecisionBadge } from "@/features/workspace/workflows/WorkflowDecisionBadge";
 import { WorkflowStatusBadge } from "@/features/workspace/workflows/WorkflowStatusBadge";
 import { WorkflowsFeatureGate } from "@/features/workspace/workflows/WorkflowsFeatureGate";
 import { useWorkflows } from "@/hooks/workflow/useWorkflows";
 import { WORKSPACE_LIST_LIMIT } from "@/lib/workspace-list-query";
-import type { WorkflowStatus, WorkflowView } from "@/types/workflow";
+import type {
+  Workflow,
+  WorkflowDecision,
+  WorkflowStatus,
+  WorkflowView,
+} from "@/types/workflow";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import { WORKFLOW_STATUS_LABELS } from "@/utils/workflow/workflow-labels";
 
-const WORKFLOW_VIEWS: WorkflowView[] = ["all", "created-by-me"];
+const WORKFLOW_VIEWS: WorkflowView[] = ["all", "created-by-me", "my-tasks"];
 const ALL_STATUSES = "all";
-const COLUMN_COUNT = 6;
+
+const getMyDecision = (
+  workflow: Workflow,
+  userId: string | undefined,
+): WorkflowDecision => {
+  const decisions = workflow.assignments
+    .filter((assignment) => assignment.userId === userId)
+    .map((assignment) => assignment.decision);
+  if (decisions.includes("rejected")) return "rejected";
+  if (decisions.includes("pending")) return "pending";
+  return "approved";
+};
 
 function WorkflowsList() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const auth = useAuth();
+  const userId = auth.user?.profile?.userId as string | undefined;
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -81,6 +102,7 @@ function WorkflowsList() {
   });
   const workflows = data?.result.workflows ?? [];
   const hasFilters = !!debouncedSearch || !!status || !!product;
+  const isMyTasks = view === "my-tasks";
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
@@ -109,6 +131,10 @@ function WorkflowsList() {
             <TabsTrigger value="created-by-me">
               <Icon icon={UserIcon} size={14} strokeWidth={2} />
               Created by Me
+            </TabsTrigger>
+            <TabsTrigger value="my-tasks">
+              <Icon icon={CheckListIcon} size={14} strokeWidth={2} />
+              My Tasks
             </TabsTrigger>
           </TabsList>
           <div className="flex flex-wrap items-center gap-2">
@@ -187,7 +213,9 @@ function WorkflowsList() {
                 <p className="text-xs text-muted-foreground">
                   {hasFilters
                     ? "Try a different search or filter."
-                    : "Create a workflow to send Products for approval."}
+                    : isMyTasks
+                      ? "Workflows you are asked to approve will show up here."
+                      : "Create a workflow to send Products for approval."}
                 </p>
               </div>
             </div>
@@ -200,6 +228,9 @@ function WorkflowsList() {
                       <TableHead className="w-[14%]">Number</TableHead>
                       <TableHead className="w-[32%]">Name</TableHead>
                       <TableHead className="w-[14%]">Status</TableHead>
+                      {isMyTasks ? (
+                        <TableHead className="w-[12%]">Your Decision</TableHead>
+                      ) : null}
                       <TableHead className="w-[8%]">Products</TableHead>
                       <TableHead className="w-[14%]">Initiator</TableHead>
                       <TableHead className="w-[18%]">Created</TableHead>
@@ -207,7 +238,7 @@ function WorkflowsList() {
                   </TableHeader>
                   <TableBody>
                     {isPending ? (
-                      <TableBodySkeleton columnCount={COLUMN_COUNT} />
+                      <TableBodySkeleton columnCount={isMyTasks ? 7 : 6} />
                     ) : (
                       workflows.map((workflow) => (
                         <TableRow
@@ -231,6 +262,14 @@ function WorkflowsList() {
                           <TableCell>
                             <WorkflowStatusBadge status={workflow.status} />
                           </TableCell>
+                          {isMyTasks ? (
+                            <TableCell>
+                              <WorkflowDecisionBadge
+                                decision={getMyDecision(workflow, userId)}
+                                closed={workflow.status !== "in_review"}
+                              />
+                            </TableCell>
+                          ) : null}
                           <TableCell className="tabular-nums">
                             {workflow.products.length}
                           </TableCell>

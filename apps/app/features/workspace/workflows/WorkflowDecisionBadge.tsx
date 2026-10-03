@@ -11,18 +11,22 @@ const DECISION_VARIANTS: Record<WorkflowDecision, "violet" | "teal" | "red"> = {
 
 export function WorkflowDecisionBadge({
   decision,
+  closed = false,
   className,
 }: {
   decision: WorkflowDecision;
+  closed?: boolean;
   className?: string;
 }) {
+  const undecided = closed && decision === "pending";
+
   return (
     <Badge
-      variant={DECISION_VARIANTS[decision]}
+      variant={undecided ? "gray" : DECISION_VARIANTS[decision]}
       className={cn("font-normal", className)}
     >
       <span className="size-2 rounded-full bg-current opacity-70" />
-      {WORKFLOW_DECISION_LABELS[decision]}
+      {undecided ? "No decision" : WORKFLOW_DECISION_LABELS[decision]}
     </Badge>
   );
 }

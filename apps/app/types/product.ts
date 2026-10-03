@@ -211,6 +211,7 @@ export interface ProductDataContent extends ProductTeam {
   status: ProductStatus;
   complete_count?: number;
   version?: string;
+  active_workflow?: { id: string; numberLabel: string } | null;
 }
 
 /** Wrapper for product_data in tab responses */

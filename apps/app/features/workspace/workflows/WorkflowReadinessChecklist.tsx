@@ -8,6 +8,7 @@ import {
   ArrowRight01Icon,
   CancelCircleIcon,
   CheckmarkCircle02Icon,
+  PlayIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
@@ -17,6 +18,11 @@ import {
   CollapsibleTrigger,
 } from "@uprevit/ui/components/ui/collapsible";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useWorkflowReadiness } from "@/hooks/workflow/useWorkflows";
@@ -80,8 +86,10 @@ function PassedCheck({ check }: { check: WorkflowReadinessCheck }) {
 
 export function WorkflowReadinessChecklist({
   workflowId,
+  onStart,
 }: {
   workflowId: string;
+  onStart?: () => void;
 }) {
   const { data, isPending, isError } = useWorkflowReadiness(workflowId);
   const [showPassed, setShowPassed] = useState(false);
@@ -91,23 +99,55 @@ export function WorkflowReadinessChecklist({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-background">
-      <div className="flex h-10 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-4">
+      <div
+        className={cn(
+          "flex h-10 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3",
+          onStart ? "pr-2" : "pr-4",
+        )}
+      >
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Ready to start?</p>
           <InfoTooltip content="Everything below must pass before the workflow can be started." />
         </div>
-        {data ? (
-          <span
-            className={cn(
-              "text-xs font-medium tabular-nums",
-              failed.length
-                ? "text-muted-foreground"
-                : "text-emerald-600 dark:text-emerald-400",
-            )}
-          >
-            {passed.length} of {checks.length} passed
-          </span>
-        ) : null}
+        <div className="flex items-center gap-3">
+          {data ? (
+            <span
+              className={cn(
+                "text-xs font-medium tabular-nums",
+                failed.length
+                  ? "text-muted-foreground"
+                  : "text-emerald-600 dark:text-emerald-400",
+              )}
+            >
+              {passed.length} of {checks.length} passed
+            </span>
+          ) : null}
+          {onStart ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="inline-flex rounded-lg"
+                  tabIndex={data?.readiness.ready ? undefined : 0}
+                >
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={!data?.readiness.ready}
+                    onClick={onStart}
+                  >
+                    <Icon icon={PlayIcon} size={14} />
+                    Start Workflow
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end">
+                {data?.readiness.ready
+                  ? "Send this workflow to its approvers"
+                  : "Every check must pass first"}
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
+        </div>
       </div>
 
       {isPending ? (

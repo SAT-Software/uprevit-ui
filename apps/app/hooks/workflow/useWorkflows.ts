@@ -12,13 +12,23 @@ import type {
   UpdateWorkflowInput,
   Workflow,
   WorkflowCompletionMode,
+  WorkflowDecisionInput,
   WorkflowDetail,
+  WorkflowEvent,
   WorkflowReadinessCheck,
   WorkflowStatus,
   WorkflowView,
 } from "@/types/workflow";
 
 const WORKFLOWS_QUERY_KEY = ["workflows"];
+const PRODUCT_QUERY_KEYS = [
+  ["all-products"],
+  ["products-infinite"],
+  ["product-tab-data"],
+  ["product-versions-infinite"],
+  ["all-bookmarked-products"],
+  ["products-in-bookmark-folder"],
+];
 
 export type WorkflowListParams = {
   view: WorkflowView;
@@ -173,4 +183,87 @@ export function useDeleteWorkflow() {
       toast.error(getErrorMessage(error, "Failed to delete workflow"));
     },
   });
+}
+
+export function useWorkflowHistory(workflowId: string, enabled = true) {
+  const auth = useAuth();
+
+  return useQuery({
+    queryKey: [...WORKFLOWS_QUERY_KEY, "history", workflowId],
+    queryFn: ({ signal }) =>
+      workflowRequest<{ events: WorkflowEvent[] }>(
+        `/${workflowId}/history`,
+        auth,
+        "Failed to fetch workflow history",
+        { signal },
+      ),
+    enabled: auth.isAuthenticated && !!workflowId && enabled,
+  });
+}
+
+function useWorkflowAction<TVariables>(
+  workflowId: string,
+  request: (variables: TVariables) => { path: string; body: unknown },
+  messages: { success: (variables: TVariables) => string; error: string },
+) {
+  const queryClient = useQueryClient();
+  const auth = useAuth();
+
+  return useMutation({
+    mutationFn: (variables: TVariables) => {
+      const { path, body } = request(variables);
+      return workflowRequest<{ workflow: Workflow }>(
+        `/${workflowId}${path}`,
+        auth,
+        messages.error,
+        { method: "POST", body: JSON.stringify(body) },
+      );
+    },
+    onSuccess: (_data, variables) => {
+      toast.success(messages.success(variables));
+      for (const queryKey of PRODUCT_QUERY_KEYS) {
+        queryClient.invalidateQueries({ queryKey });
+      }
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, messages.error));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: WORKFLOWS_QUERY_KEY });
+    },
+  });
+}
+
+export function useStartWorkflow(workflowId: string) {
+  return useWorkflowAction(
+    workflowId,
+    () => ({ path: "/start", body: {} }),
+    { success: () => "Workflow started", error: "Failed to start workflow" },
+  );
+}
+
+export function useDecideWorkflowAssignment(workflowId: string) {
+  return useWorkflowAction(
+    workflowId,
+    ({
+      assignmentId,
+      ...body
+    }: WorkflowDecisionInput & { assignmentId: string }) => ({
+      path: `/assignments/${assignmentId}/decision`,
+      body,
+    }),
+    {
+      success: ({ decision }) =>
+        decision === "approve" ? "Approved" : "Workflow rejected",
+      error: "Failed to record decision",
+    },
+  );
+}
+
+export function useCancelWorkflow(workflowId: string) {
+  return useWorkflowAction(
+    workflowId,
+    (reason: string) => ({ path: "/cancel", body: { reason } }),
+    { success: () => "Workflow cancelled", error: "Failed to cancel workflow" },
+  );
 }
