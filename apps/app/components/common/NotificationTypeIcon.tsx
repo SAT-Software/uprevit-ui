@@ -1,9 +1,13 @@
 import {
   ArrowTurnBackwardIcon,
   BellIcon,
+  CancelCircleIcon,
   CrownIcon,
+  StopCircleIcon,
   UserAdd01Icon,
   UserSwitchIcon,
+  ValidationApprovalIcon,
+  WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
@@ -14,6 +18,10 @@ const TYPE_ICONS: Record<NotificationType, typeof BellIcon> = {
   "product.contributor_added": UserAdd01Icon,
   "product.returned_to_draft": ArrowTurnBackwardIcon,
   "product.ownership_transferred": UserSwitchIcon,
+  "workflow.approval_requested": ValidationApprovalIcon,
+  "workflow.product_in_review": WorkflowIcon,
+  "workflow.rejected": CancelCircleIcon,
+  "workflow.cancelled": StopCircleIcon,
 };
 
 export function NotificationTypeIcon({

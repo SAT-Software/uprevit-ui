@@ -4,6 +4,7 @@ import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import type { GetAllTabsResponse, ProductTeam } from "@/types/product";
 import { isAdminProfile } from "@/utils/isAdmin";
 import {
+  getProductLockedMessage,
   getProductRole,
   PRODUCT_EDIT_FORBIDDEN_MESSAGE,
 } from "@/utils/product/product-lifecycle";
@@ -37,7 +38,7 @@ export function useProductAccess() {
     ...access,
     product,
     lockedMessage: access.canEdit
-      ? "This version can't be edited"
+      ? getProductLockedMessage(product)
       : PRODUCT_EDIT_FORBIDDEN_MESSAGE,
   };
 }

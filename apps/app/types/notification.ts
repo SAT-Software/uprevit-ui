@@ -2,7 +2,11 @@ export type NotificationType =
   | "product.owner_assigned"
   | "product.contributor_added"
   | "product.returned_to_draft"
-  | "product.ownership_transferred";
+  | "product.ownership_transferred"
+  | "workflow.approval_requested"
+  | "workflow.product_in_review"
+  | "workflow.rejected"
+  | "workflow.cancelled";
 
 export interface AppNotification {
   _id: string;

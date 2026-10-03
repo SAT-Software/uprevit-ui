@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import {
+  CancelCircleIcon,
+  PencilEdit02Icon,
+  StopCircleIcon,
+} from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import type { WorkflowDetail } from "@/types/workflow";
 import { WORKFLOW_COMPLETION_MODE_OPTIONS } from "@/utils/workflow/workflow-labels";
+import { StartWorkflowDialog } from "./StartWorkflowDialog";
 import { UpdateWorkflowDialog } from "./WorkflowDetailsDialog";
 import { WorkflowStatusBadge } from "./WorkflowStatusBadge";
 import { WorkflowReadinessChecklist } from "./WorkflowReadinessChecklist";
@@ -32,14 +37,59 @@ function DetailItem({
   );
 }
 
+function WorkflowOutcomeBanner({ workflow }: { workflow: WorkflowDetail }) {
+  if (workflow.status !== "rejected" && workflow.status !== "cancelled") {
+    return null;
+  }
+  const rejected = workflow.status === "rejected";
+  const endedAt = rejected
+    ? workflow.dates.rejectedAt
+    : workflow.dates.cancelledAt;
+
+  return (
+    <section className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/60 px-4 py-3 dark:border-red-900/60 dark:bg-red-950/20">
+      <Icon
+        icon={rejected ? CancelCircleIcon : StopCircleIcon}
+        size={18}
+        strokeWidth={2}
+        className="mt-0.5 shrink-0 text-red-600 dark:text-red-400"
+      />
+      <div className="min-w-0 space-y-1">
+        <p className="text-sm font-medium">
+          {rejected ? "Rejected" : "Cancelled"}
+          {workflow.endedBy ? ` by ${workflow.endedBy.name}` : ""}
+          {endedAt ? (
+            <span className="font-normal text-muted-foreground">
+              {" · "}
+              {formatToLocalDateTime(endedAt)}
+            </span>
+          ) : null}
+        </p>
+        {workflow.endReason ? (
+          <p className="whitespace-pre-wrap break-words text-sm text-foreground/80">
+            {workflow.endReason}
+          </p>
+        ) : null}
+        <p className="text-xs text-muted-foreground">
+          The Products went back to Submitted. Create a new workflow to approve
+          them.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export function WorkflowSummaryTab({ workflow }: { workflow: WorkflowDetail }) {
   const [editOpen, setEditOpen] = useState(false);
+  const [startOpen, setStartOpen] = useState(false);
   const completionMode = WORKFLOW_COMPLETION_MODE_OPTIONS.find(
     (option) => option.value === workflow.completionMode,
   );
 
   return (
     <div className="flex flex-col gap-4">
+      <WorkflowOutcomeBanner workflow={workflow} />
+
       <section className="overflow-hidden rounded-2xl border border-border bg-background">
         <div className="flex h-10 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
           <p className="text-sm font-medium">Details</p>
@@ -78,6 +128,11 @@ export function WorkflowSummaryTab({ workflow }: { workflow: WorkflowDetail }) {
           <DetailItem label="Completion" info={completionMode?.description}>
             {completionMode?.label}
           </DetailItem>
+          {workflow.dates.startedAt ? (
+            <DetailItem label="Started">
+              {formatToLocalDateTime(workflow.dates.startedAt)}
+            </DetailItem>
+          ) : null}
           {workflow.description ? (
             <div className="sm:col-span-3">
               <DetailItem label="Description">
@@ -91,15 +146,25 @@ export function WorkflowSummaryTab({ workflow }: { workflow: WorkflowDetail }) {
       </section>
 
       {workflow.status === "draft" ? (
-        <WorkflowReadinessChecklist workflowId={workflow._id} />
+        <WorkflowReadinessChecklist
+          workflowId={workflow._id}
+          onStart={workflow.canEdit ? () => setStartOpen(true) : undefined}
+        />
       ) : null}
 
       {workflow.canEdit ? (
-        <UpdateWorkflowDialog
-          workflow={workflow}
-          open={editOpen}
-          onOpenChange={setEditOpen}
-        />
+        <>
+          <UpdateWorkflowDialog
+            workflow={workflow}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+          />
+          <StartWorkflowDialog
+            workflow={workflow}
+            open={startOpen}
+            onOpenChange={setStartOpen}
+          />
+        </>
       ) : null}
     </div>
   );

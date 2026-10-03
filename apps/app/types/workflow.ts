@@ -43,6 +43,15 @@ export interface WorkflowAssignment {
   userSnapshot: { name: string; email: string };
   relationship?: WorkflowRelationship;
   decision: WorkflowDecision;
+  decidedAt?: string;
+  comment?: string;
+  reason?: string;
+}
+
+export interface WorkflowActor {
+  userId: string;
+  name: string;
+  email: string;
 }
 
 export interface Workflow {
@@ -53,15 +62,38 @@ export interface Workflow {
   description: string;
   status: WorkflowStatus;
   completionMode: WorkflowCompletionMode;
-  initiator: { userId: string; name: string; email: string };
+  initiator: WorkflowActor;
   products: WorkflowProduct[];
   assignments: WorkflowAssignment[];
-  dates: { createdAt: string };
+  dates: {
+    createdAt: string;
+    startedAt?: string;
+    rejectedAt?: string;
+    cancelledAt?: string;
+  };
+  endReason?: string;
+  endedBy?: WorkflowActor;
 }
 
 export interface WorkflowDetail extends Omit<Workflow, "products"> {
   products: WorkflowProductDetail[];
   canEdit: boolean;
+  canCancel: boolean;
+}
+
+export type WorkflowEventType = "started" | "approved" | "rejected" | "cancelled";
+
+export interface WorkflowEvent {
+  _id: string;
+  workflowId: string;
+  type: WorkflowEventType;
+  actorSnapshot: WorkflowActor;
+  assignmentId?: string;
+  lineageId?: string;
+  reason?: string;
+  comment?: string;
+  data: { functionLabel?: string; productCount?: number; assignmentCount?: number };
+  createdAt: string;
 }
 
 export interface WorkflowReadinessCheck {
@@ -85,7 +117,7 @@ export interface GetWorkflowsResponse {
   };
 }
 
-export type WorkflowView = "all" | "created-by-me";
+export type WorkflowView = "all" | "created-by-me" | "my-tasks";
 
 export type UpdateWorkflowInput =
   | {
@@ -109,3 +141,7 @@ export type UpdateWorkflowInput =
       userId: string;
     }
   | { action: "remove-assignment"; assignmentId: string };
+
+export type WorkflowDecisionInput =
+  | { decision: "approve"; comment?: string }
+  | { decision: "reject"; reason: string };

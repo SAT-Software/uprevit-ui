@@ -33,8 +33,10 @@ import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
   PRODUCT_EDIT_FORBIDDEN_MESSAGE,
   PRODUCT_STATUS_LABELS,
+  getProductLockedMessage,
   isProductContentLocked,
 } from "@/utils/product/product-lifecycle";
+import Link from "next/link";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 import ProductTeamMenu from "./ProductTeamMenu";
 import { NotificationsBell } from "@/components/common/NotificationsBell";
@@ -56,6 +58,7 @@ import {
   SentIcon,
   Tick02Icon,
   Undo02Icon,
+  WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
@@ -228,6 +231,8 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const statusLabel = PRODUCT_STATUS_LABELS[status];
   const isProductComplete = productCoreData?.complete_count === 100;
   const isReadOnly = isProductContentLocked(status);
+  const activeWorkflow =
+    status === "in_review" ? productCoreData?.active_workflow : null;
   const isEditLocked = isReadOnly || isExportLocked || !canEdit;
   const isSubmittable =
     status === "draft" || (status === "submitted" && !workflowsEnabled);
@@ -735,7 +740,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                     isExportLocked
                       ? "Editing is disabled while export is in progress"
                       : isReadOnly
-                        ? "This version can't be edited"
+                        ? getProductLockedMessage(productCoreData)
                         : !canEdit
                           ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
                           : isCompletionLocked
@@ -783,40 +788,59 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 </TooltipContent>
               </Tooltip>
             ) : null}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span
-                  className="inline-flex rounded-lg"
-                  tabIndex={canSubmit ? undefined : 0}
-                >
-                  <ConfirmSubmitProductDialog
-                    productName={product?.productName}
-                    title={submitLabel}
-                    workflowsEnabled={workflowsEnabled}
-                    onConfirm={handleSubmit}
-                    disabled={!canSubmit}
+            {activeWorkflow ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={`/workflows/${activeWorkflow.id}`}>
+                      <Icon icon={WorkflowIcon} size={14} />
+                      {statusLabel} ·{" "}
+                      <span className="font-mono">
+                        {activeWorkflow.numberLabel}
+                      </span>
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  {getProductLockedMessage(productCoreData)}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="inline-flex rounded-lg"
+                    tabIndex={canSubmit ? undefined : 0}
                   >
-                    <Button size="sm" disabled={!canSubmit}>
-                      <Icon icon={SentIcon} size={14} />
-                      {isSubmittable ? submitLabel : statusLabel}
-                    </Button>
-                  </ConfirmSubmitProductDialog>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="end">
-                {!isSubmittable
-                  ? `This version is ${statusLabel.toLowerCase()}`
-                  : !canEdit
-                    ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
-                    : isExportLocked
-                      ? "Cannot submit while an export is in progress"
-                      : !isProductComplete
-                        ? "Complete all tabs to enable submission"
-                        : workflowsEnabled
-                          ? "An approval workflow will release this version"
-                          : "Release this version now"}
-              </TooltipContent>
-            </Tooltip>
+                    <ConfirmSubmitProductDialog
+                      productName={product?.productName}
+                      title={submitLabel}
+                      workflowsEnabled={workflowsEnabled}
+                      onConfirm={handleSubmit}
+                      disabled={!canSubmit}
+                    >
+                      <Button size="sm" disabled={!canSubmit}>
+                        <Icon icon={SentIcon} size={14} />
+                        {isSubmittable ? submitLabel : statusLabel}
+                      </Button>
+                    </ConfirmSubmitProductDialog>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  {!isSubmittable
+                    ? `This version is ${statusLabel.toLowerCase()}`
+                    : !canEdit
+                      ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                      : isExportLocked
+                        ? "Cannot submit while an export is in progress"
+                        : !isProductComplete
+                          ? "Complete all tabs to enable submission"
+                          : workflowsEnabled
+                            ? "An approval workflow will release this version"
+                            : "Release this version now"}
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </div>
         <NotificationsBell />

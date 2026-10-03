@@ -1,4 +1,9 @@
-import type { Product, ProductStatus, ProductTeam } from "@/types/product";
+import type {
+  Product,
+  ProductDataContent,
+  ProductStatus,
+  ProductTeam,
+} from "@/types/product";
 
 const CONTENT_LOCKED_STATUSES: ProductStatus[] = [
   "in_review",
@@ -30,6 +35,13 @@ export const getProductProgressColor = (
 
 export const isProductContentLocked = (status?: ProductStatus) =>
   !!status && CONTENT_LOCKED_STATUSES.includes(status);
+
+export const getProductLockedMessage = (
+  product?: Pick<ProductDataContent, "status" | "active_workflow"> | null,
+) =>
+  product?.status === "in_review"
+    ? `This version is in review${product.active_workflow ? ` in ${product.active_workflow.numberLabel}` : ""}. It can't be edited until the workflow ends.`
+    : "This version can't be edited";
 
 export const canCreateProductVersion = (
   product: Pick<Product, "status" | "is_latest">,

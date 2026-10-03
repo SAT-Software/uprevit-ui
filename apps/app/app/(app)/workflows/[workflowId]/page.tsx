@@ -11,7 +11,9 @@ import {
   Blockchain03Icon,
   DashboardSquare01Icon,
   Delete02Icon,
+  StopCircleIcon,
   ValidationApprovalIcon,
+  WorkHistoryIcon,
   WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -24,15 +26,17 @@ import {
   TabsTrigger,
 } from "@uprevit/ui/components/ui/tabs";
 import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { CancelWorkflowDialog } from "@/features/workspace/workflows/CancelWorkflowDialog";
 import { DeleteWorkflowDialog } from "@/features/workspace/workflows/DeleteWorkflowDialog";
 import { WorkflowApprovalsTab } from "@/features/workspace/workflows/WorkflowApprovalsTab";
+import { WorkflowHistoryTab } from "@/features/workspace/workflows/WorkflowHistoryTab";
 import { WorkflowProductsTab } from "@/features/workspace/workflows/WorkflowProductsTab";
 import { WorkflowStatusBadge } from "@/features/workspace/workflows/WorkflowStatusBadge";
 import { WorkflowSummaryTab } from "@/features/workspace/workflows/WorkflowSummaryTab";
 import { WorkflowsFeatureGate } from "@/features/workspace/workflows/WorkflowsFeatureGate";
 import { useWorkflow } from "@/hooks/workflow/useWorkflows";
 
-const WORKFLOW_TABS = ["summary", "products", "approvals"] as const;
+const WORKFLOW_TABS = ["summary", "products", "approvals", "history"] as const;
 type WorkflowTab = (typeof WORKFLOW_TABS)[number];
 
 function WorkflowDetail() {
@@ -41,6 +45,7 @@ function WorkflowDetail() {
   const pathname = usePathname();
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const { data, isPending, isError, error } = useWorkflow(params.workflowId);
   const workflow = data?.workflow;
 
@@ -96,6 +101,16 @@ function WorkflowDetail() {
             <Icon icon={Delete02Icon} size={16} />
             Delete Draft
           </Button>
+        ) : workflow.canCancel ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCancelOpen(true)}
+          >
+            <Icon icon={StopCircleIcon} size={16} />
+            Cancel Workflow
+          </Button>
         ) : null}
       </div>
 
@@ -124,6 +139,10 @@ function WorkflowDetail() {
                 {workflow.assignments.length}
               </span>
             </TabsTrigger>
+            <TabsTrigger value="history">
+              <Icon icon={WorkHistoryIcon} size={14} strokeWidth={2} />
+              History
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -138,6 +157,9 @@ function WorkflowDetail() {
             <TabsContent value="approvals">
               <WorkflowApprovalsTab workflow={workflow} />
             </TabsContent>
+            <TabsContent value="history">
+              <WorkflowHistoryTab workflow={workflow} />
+            </TabsContent>
           </div>
         </div>
       </Tabs>
@@ -147,6 +169,13 @@ function WorkflowDetail() {
           workflow={workflow}
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
+        />
+      ) : null}
+      {workflow.canCancel ? (
+        <CancelWorkflowDialog
+          workflow={workflow}
+          open={cancelOpen}
+          onOpenChange={setCancelOpen}
         />
       ) : null}
     </div>
