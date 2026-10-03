@@ -1,3 +1,5 @@
+import type { WorkflowCompletionMode } from "@/types/workflow";
+
 export interface Workspace {
   _id?: string;
   workspaceName: string;
@@ -17,4 +19,6 @@ export interface Workspace {
   userIds?: string[];
   memberListIncludeInactive?: boolean;
   approvalWorkflowsEnabled?: boolean;
+  workflowPrefix?: string;
+  defaultWorkflowCompletionMode?: WorkflowCompletionMode;
 }

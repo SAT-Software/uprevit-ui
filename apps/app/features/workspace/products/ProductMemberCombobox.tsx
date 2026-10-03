@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, type UIEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+  type UIEvent,
+} from "react";
 import { useAuth } from "react-oidc-context";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -32,6 +38,7 @@ interface ProductMemberComboboxProps {
   excludeIds?: string[];
   disabled?: boolean;
   onSelect: (member: ProductTeamMember) => void;
+  trigger?: ReactNode;
 }
 
 export default function ProductMemberCombobox({
@@ -41,6 +48,7 @@ export default function ProductMemberCombobox({
   excludeIds = [],
   disabled,
   onSelect,
+  trigger,
 }: ProductMemberComboboxProps) {
   const auth = useAuth();
   const currentUserId = auth.user?.profile?.userId as string | undefined;
@@ -91,29 +99,33 @@ export default function ProductMemberCombobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          id={id}
-          type="button"
-          variant="outline"
-          size="default"
-          role="combobox"
-          aria-expanded={open}
-          disabled={disabled}
-          className="w-full justify-between bg-background font-normal"
-        >
-          <span className="flex min-w-0 items-center gap-2">
-            {value ? <ProductMemberAvatar member={value} /> : null}
-            <span className="truncate">
-              {value
-                ? `${value.name}${value._id === currentUserId ? " (Me)" : ""}`
-                : placeholder}
+        {trigger ?? (
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            size="default"
+            role="combobox"
+            aria-expanded={open}
+            disabled={disabled}
+            className="w-full justify-between bg-background font-normal"
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              {value ? <ProductMemberAvatar member={value} /> : null}
+              <span className="truncate">
+                {value
+                  ? `${value.name}${value._id === currentUserId ? " (Me)" : ""}`
+                  : placeholder}
+              </span>
             </span>
-          </span>
-          <Icon icon={UnfoldMoreIcon} size={16} className="shrink-0 opacity-50" />
-        </Button>
+            <Icon icon={UnfoldMoreIcon} size={16} className="shrink-0 opacity-50" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent
-        className="w-(--radix-popover-trigger-width) p-0"
+        className={
+          trigger ? "w-72 p-0" : "w-(--radix-popover-trigger-width) p-0"
+        }
         align="start"
         onWheel={(event) => event.stopPropagation()}
       >

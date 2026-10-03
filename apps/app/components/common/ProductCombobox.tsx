@@ -33,6 +33,7 @@ export type ProductComboboxItem = {
   _id: string;
   product_name?: string;
   product_plan_number?: string;
+  product_lineage_id?: string;
   status?: ProductStatus;
 };
 
@@ -44,6 +45,8 @@ export type ProductComboboxProps = {
   ) => void;
   allowNone?: boolean;
   enabled?: boolean;
+  statuses?: ProductStatus[];
+  excludeIds?: string[];
   placeholder?: string;
   noneLabel?: string;
   initialSelectedLabel?: string;
@@ -57,6 +60,8 @@ export function ProductCombobox({
   onValueChange,
   allowNone = false,
   enabled = true,
+  statuses,
+  excludeIds,
   placeholder = "Select a product",
   noneLabel = "No product",
   initialSelectedLabel,
@@ -88,18 +93,31 @@ export function ProductCombobox({
   } = useGetProductsInfinite({
     enabled: enabled && open,
     search: debouncedSearch,
+    status: statuses,
   });
 
   const products = useMemo(
     () =>
-      productsData?.pages.flatMap(
-        (page) => (page.result?.products as ProductComboboxItem[]) ?? [],
-      ) ?? [],
-    [productsData],
+      (
+        productsData?.pages.flatMap(
+          (page) => (page.result?.products as ProductComboboxItem[]) ?? [],
+        ) ?? []
+      ).filter(
+        (product) =>
+          !excludeIds?.includes(product._id) &&
+          !excludeIds?.includes(product.product_lineage_id ?? ""),
+      ),
+    [productsData, excludeIds],
   );
 
   const isLoadingProducts =
     isPending || (isFetching && !isFetchingNextPage && products.length === 0);
+
+  useEffect(() => {
+    if (open && products.length < 5 && hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  }, [open, products.length, hasNextPage, isFetching, fetchNextPage]);
 
   const selectedProduct = products.find((product) => product._id === value);
 

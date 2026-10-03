@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
+import { AuditMetaCell } from "@/components/table/AuditMetaCell";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
@@ -42,7 +43,6 @@ import {
   useWorkspaceListQuery,
 } from "@/lib/workspace-list-query";
 import { AuditLog } from "@/types/product";
-import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import {
   ArchiveIcon,
   ArrowDown01Icon,
@@ -127,21 +127,6 @@ const getAuditActionAt = (
 
   return typeof actionAt === "string" ? actionAt : actionAt.toISOString();
 };
-
-function AuditMetaCell({ name, date }: { name: string; date?: string | null }) {
-  const formattedDate = formatToLocalDateTime(date);
-
-  return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <span className="truncate text-sm font-medium">{name || "—"}</span>
-      {formattedDate ? (
-        <span className="truncate text-xs text-muted-foreground/60">
-          {formattedDate}
-        </span>
-      ) : null}
-    </div>
-  );
-}
 
 const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "product_name", label: "Product Name", type: "text" },
