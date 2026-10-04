@@ -5,6 +5,8 @@ import {
   CancelCircleIcon,
   CheckmarkBadge01Icon,
   CheckmarkCircle02Icon,
+  MessageDone01Icon,
+  MessageEdit01Icon,
   PlayIcon,
   StopCircleIcon,
   TaskDone01Icon,
@@ -36,6 +38,17 @@ const EVENT_STYLES: Record<
     className: "bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400",
     verb: "approved",
   },
+  changes_requested: {
+    icon: MessageEdit01Icon,
+    className:
+      "bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400",
+    verb: "requested changes",
+  },
+  change_request_addressed: {
+    icon: MessageDone01Icon,
+    className: "bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400",
+    verb: "addressed a change request",
+  },
   ready_to_complete: {
     icon: TaskDone01Icon,
     className: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
@@ -63,6 +76,16 @@ const plural = (count: number, noun: string) =>
   `${count} ${count === 1 ? noun : `${noun}s`}`;
 
 function eventContext(event: WorkflowEvent, workflow: WorkflowDetail) {
+  const product = event.lineageId
+    ? workflow.products.find((item) => item.lineageId === event.lineageId)
+    : undefined;
+  if (event.type === "changes_requested") {
+    const scope = `on ${product ? product.name : "the whole package"}`;
+    return `as ${event.data.functionLabel} · ${scope}${event.data.reopened ? " · back to In Review" : ""}`;
+  }
+  if (event.type === "change_request_addressed") {
+    return `from ${event.data.requestedBy} · on ${product ? product.name : "the whole package"}`;
+  }
   if (event.type === "ready_to_complete") return "with the final approval";
   if (event.type === "completed") {
     const released = `${plural(event.data.productCount ?? 0, "Product")} released`;
@@ -75,9 +98,6 @@ function eventContext(event: WorkflowEvent, workflow: WorkflowDetail) {
     return `${plural(productCount, "Product")}, ${plural(assignmentCount, "assignment")}`;
   }
   if (!event.data.functionLabel) return null;
-  const product = event.lineageId
-    ? workflow.products.find((item) => item.lineageId === event.lineageId)
-    : undefined;
   return `as ${event.data.functionLabel}${product ? ` · ${product.name}` : ""}`;
 }
 

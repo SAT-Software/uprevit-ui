@@ -3,10 +3,14 @@ import { cn } from "@uprevit/ui/lib/utils";
 import type { WorkflowDecision } from "@/types/workflow";
 import { WORKFLOW_DECISION_LABELS } from "@/utils/workflow/workflow-labels";
 
-const DECISION_VARIANTS: Record<WorkflowDecision, "violet" | "teal" | "red"> = {
+const DECISION_VARIANTS: Record<
+  WorkflowDecision,
+  "violet" | "teal" | "red" | "orange"
+> = {
   pending: "violet",
   approved: "teal",
   rejected: "red",
+  changes_requested: "orange",
 };
 
 export function WorkflowDecisionBadge({

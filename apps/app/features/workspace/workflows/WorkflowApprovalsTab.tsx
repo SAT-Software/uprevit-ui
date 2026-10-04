@@ -7,6 +7,7 @@ import {
   Cancel01Icon,
   CancelCircleIcon,
   CheckmarkCircle02Icon,
+  MessageEdit01Icon,
   UserAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -38,7 +39,7 @@ import ProductMemberCombobox from "@/features/workspace/products/ProductMemberCo
 import { ProductMemberAvatar } from "@/features/workspace/products/ProductMemberAvatar";
 import { useUpdateWorkflow } from "@/hooks/workflow/useWorkflows";
 import type {
-  WorkflowAssignment,
+  WorkflowAssignmentDetail,
   WorkflowDetail,
   WorkflowProductDetail,
 } from "@/types/workflow";
@@ -47,6 +48,7 @@ import { WORKFLOW_RELATIONSHIP_LABELS } from "@/utils/workflow/workflow-labels";
 import { ApproveAssignmentDialog } from "./ApproveAssignmentDialog";
 import { ConfirmWorkflowRemovalDialog } from "./ConfirmWorkflowRemovalDialog";
 import { RejectWorkflowDialog } from "./RejectWorkflowDialog";
+import { RequestChangesDialog } from "./RequestChangesDialog";
 import { WorkflowDecisionBadge } from "./WorkflowDecisionBadge";
 
 type UpdateWorkflow = ReturnType<typeof useUpdateWorkflow>;
@@ -54,12 +56,18 @@ type UpdateWorkflow = ReturnType<typeof useUpdateWorkflow>;
 const GROUP_GRID =
   "grid gap-x-6 gap-y-1 px-4 py-2 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)_auto]";
 
-type RemovalTarget = { assignment: WorkflowAssignment; groupLabel: string };
-type DecisionTarget = RemovalTarget & { decision: "approve" | "reject" };
+type RemovalTarget = {
+  assignment: WorkflowAssignmentDetail;
+  groupLabel: string;
+};
+type DecisionTarget = RemovalTarget & {
+  decision: "approve" | "reject" | "request_changes";
+};
 
 type RowContext = {
   canEdit: boolean;
   disabled: boolean;
+  isInReview: boolean;
   isActive: boolean;
   isEnded: boolean;
   currentUserId?: string;
@@ -86,12 +94,37 @@ function AddApproverButton(props: React.ComponentProps<typeof Button>) {
   );
 }
 
+const plural = (count: number, noun: string) =>
+  `${count} ${count === 1 ? noun : `${noun}s`}`;
+
+function ChangeRequestStatus({
+  assignment,
+  isMine,
+  isActive,
+}: {
+  assignment: WorkflowAssignmentDetail;
+  isMine: boolean;
+  isActive: boolean;
+}) {
+  if (assignment.decision !== "changes_requested") return null;
+  const open = assignment.openChangeRequestCount;
+  if (!isActive && !open) return null;
+
+  return (
+    <p className="text-xs text-orange-600 dark:text-orange-400">
+      {open
+        ? `${plural(open, "open change request")}${isMine && isActive ? ", waiting to be addressed" : ""}`
+        : `Addressed, waiting for ${isMine ? "your" : "their"} decision`}
+    </p>
+  );
+}
+
 function AssignmentRow({
   assignment,
   groupLabel,
   context,
 }: {
-  assignment: WorkflowAssignment;
+  assignment: WorkflowAssignmentDetail;
   groupLabel: string;
   context: RowContext;
 }) {
@@ -99,16 +132,21 @@ function AssignmentRow({
   const {
     canEdit,
     disabled,
+    isInReview,
     isActive,
     isEnded,
     currentUserId,
     onRemove,
     onDecide,
   } = context;
-  const canDecide =
-    isActive &&
-    assignment.decision === "pending" &&
-    assignment.userId === currentUserId;
+  const isMine = assignment.userId === currentUserId;
+  const isUndecided =
+    assignment.decision === "pending" ||
+    assignment.decision === "changes_requested";
+  const canDecide = isInReview && isMine && isUndecided;
+  const canApprove = canDecide && assignment.openChangeRequestCount === 0;
+  const canRequestChanges =
+    isActive && isMine && assignment.decision !== "rejected";
   const note = assignment.reason ?? assignment.comment;
 
   return (
@@ -131,6 +169,11 @@ function AssignmentRow({
             {formatToLocalDateTime(assignment.decidedAt)}
           </p>
         ) : null}
+        <ChangeRequestStatus
+          assignment={assignment}
+          isMine={isMine}
+          isActive={isActive}
+        />
         {note ? (
           <p className="mt-1 whitespace-pre-wrap break-words border-l-2 border-border pl-2 text-xs text-foreground/80">
             {note}
@@ -138,6 +181,20 @@ function AssignmentRow({
         ) : null}
       </div>
       <div className="flex h-9 shrink-0 items-center gap-1.5">
+        {canRequestChanges ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={disabled}
+            onClick={() =>
+              onDecide({ assignment, groupLabel, decision: "request_changes" })
+            }
+          >
+            <Icon icon={MessageEdit01Icon} size={14} />
+            Request Changes
+          </Button>
+        ) : null}
         {canDecide ? (
           <>
             <Button
@@ -152,17 +209,19 @@ function AssignmentRow({
               <Icon icon={CancelCircleIcon} size={14} />
               Reject
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              disabled={disabled}
-              onClick={() =>
-                onDecide({ assignment, groupLabel, decision: "approve" })
-              }
-            >
-              <Icon icon={CheckmarkCircle02Icon} size={14} />
-              Approve
-            </Button>
+            {canApprove ? (
+              <Button
+                type="button"
+                size="sm"
+                disabled={disabled}
+                onClick={() =>
+                  onDecide({ assignment, groupLabel, decision: "approve" })
+                }
+              >
+                <Icon icon={CheckmarkCircle02Icon} size={14} />
+                Approve
+              </Button>
+            ) : null}
           </>
         ) : (
           <WorkflowDecisionBadge
@@ -198,7 +257,7 @@ function AssignmentList({
   context,
   emptyText,
 }: {
-  assignments: WorkflowAssignment[];
+  assignments: WorkflowAssignmentDetail[];
   groupLabel: string;
   context: RowContext;
   emptyText: string;
@@ -322,8 +381,14 @@ function ApprovalProgress({ workflow }: { workflow: WorkflowDetail }) {
     (assignment) => assignment.decision === "approved",
   ).length;
   const pending = workflow.assignments.filter(
-    (assignment) => assignment.decision === "pending",
+    (assignment) =>
+      assignment.decision === "pending" ||
+      assignment.decision === "changes_requested",
   ).length;
+  const openRequests = workflow.assignments.reduce(
+    (count, assignment) => count + assignment.openChangeRequestCount,
+    0,
+  );
   const percentage = total ? Math.round((approved / total) * 100) : 0;
 
   return (
@@ -335,6 +400,11 @@ function ApprovalProgress({ workflow }: { workflow: WorkflowDetail }) {
         {workflow.status === "in_review" ? (
           <span className="text-xs text-muted-foreground tabular-nums">
             · {pending} pending
+          </span>
+        ) : null}
+        {openRequests ? (
+          <span className="text-xs text-orange-600 tabular-nums dark:text-orange-400">
+            · {plural(openRequests, "open change request")}
           </span>
         ) : null}
       </div>
@@ -376,7 +446,10 @@ export function WorkflowApprovalsTab({
   const rowContext: RowContext = {
     canEdit,
     disabled: update.isPending,
-    isActive: workflow.status === "in_review",
+    isInReview: workflow.status === "in_review",
+    isActive:
+      workflow.status === "in_review" ||
+      workflow.status === "ready_to_complete",
     isEnded: ["completed", "rejected", "cancelled"].includes(workflow.status),
     currentUserId: auth.user?.profile?.userId as string | undefined,
     onRemove: (target) => {
@@ -419,7 +492,7 @@ export function WorkflowApprovalsTab({
         const key = assignment.functionLabel.toLowerCase();
         groups.set(key, [...(groups.get(key) ?? []), assignment]);
         return groups;
-      }, new Map<string, WorkflowAssignment[]>())
+      }, new Map<string, WorkflowAssignmentDetail[]>())
       .values(),
   ];
 
@@ -579,6 +652,14 @@ export function WorkflowApprovalsTab({
         />
       ) : decisionTarget?.decision === "reject" ? (
         <RejectWorkflowDialog
+          workflow={workflow}
+          assignment={decisionTarget.assignment}
+          open={decisionOpen}
+          onOpenChange={setDecisionOpen}
+        />
+      ) : decisionTarget?.decision === "request_changes" ? (
+        <RequestChangesDialog
+          key={decisionTarget.assignment._id}
           workflow={workflow}
           assignment={decisionTarget.assignment}
           open={decisionOpen}

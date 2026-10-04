@@ -18,6 +18,7 @@ export const WORKFLOW_DECISION_LABELS: Record<WorkflowDecision, string> = {
   pending: "Pending",
   approved: "Approved",
   rejected: "Rejected",
+  changes_requested: "Changes Requested",
 };
 
 export const WORKFLOW_COMPLETION_MODE_OPTIONS: {
