@@ -9,6 +9,7 @@ import {
 } from "next/navigation";
 import {
   Blockchain03Icon,
+  CheckmarkBadge01Icon,
   DashboardSquare01Icon,
   Delete02Icon,
   StopCircleIcon,
@@ -27,6 +28,7 @@ import {
 } from "@uprevit/ui/components/ui/tabs";
 import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
 import { CancelWorkflowDialog } from "@/features/workspace/workflows/CancelWorkflowDialog";
+import { CompleteWorkflowDialog } from "@/features/workspace/workflows/CompleteWorkflowDialog";
 import { DeleteWorkflowDialog } from "@/features/workspace/workflows/DeleteWorkflowDialog";
 import { WorkflowApprovalsTab } from "@/features/workspace/workflows/WorkflowApprovalsTab";
 import { WorkflowHistoryTab } from "@/features/workspace/workflows/WorkflowHistoryTab";
@@ -46,6 +48,7 @@ function WorkflowDetail() {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [completeOpen, setCompleteOpen] = useState(false);
   const { data, isPending, isError, error } = useWorkflow(params.workflowId);
   const workflow = data?.workflow;
 
@@ -102,15 +105,27 @@ function WorkflowDetail() {
             Delete Draft
           </Button>
         ) : workflow.canCancel ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setCancelOpen(true)}
-          >
-            <Icon icon={StopCircleIcon} size={16} />
-            Cancel Workflow
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCancelOpen(true)}
+            >
+              <Icon icon={StopCircleIcon} size={16} />
+              Cancel Workflow
+            </Button>
+            {workflow.canComplete ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setCompleteOpen(true)}
+              >
+                <Icon icon={CheckmarkBadge01Icon} size={16} />
+                Complete Workflow
+              </Button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
@@ -176,6 +191,13 @@ function WorkflowDetail() {
           workflow={workflow}
           open={cancelOpen}
           onOpenChange={setCancelOpen}
+        />
+      ) : null}
+      {workflow.canComplete ? (
+        <CompleteWorkflowDialog
+          workflow={workflow}
+          open={completeOpen}
+          onOpenChange={setCompleteOpen}
         />
       ) : null}
     </div>

@@ -68,6 +68,8 @@ export interface Workflow {
   dates: {
     createdAt: string;
     startedAt?: string;
+    readyToCompleteAt?: string;
+    completedAt?: string;
     rejectedAt?: string;
     cancelledAt?: string;
   };
@@ -79,9 +81,16 @@ export interface WorkflowDetail extends Omit<Workflow, "products"> {
   products: WorkflowProductDetail[];
   canEdit: boolean;
   canCancel: boolean;
+  canComplete: boolean;
 }
 
-export type WorkflowEventType = "started" | "approved" | "rejected" | "cancelled";
+export type WorkflowEventType =
+  | "started"
+  | "approved"
+  | "ready_to_complete"
+  | "completed"
+  | "rejected"
+  | "cancelled";
 
 export interface WorkflowEvent {
   _id: string;
@@ -92,7 +101,12 @@ export interface WorkflowEvent {
   lineageId?: string;
   reason?: string;
   comment?: string;
-  data: { functionLabel?: string; productCount?: number; assignmentCount?: number };
+  data: {
+    functionLabel?: string;
+    productCount?: number;
+    assignmentCount?: number;
+    automatic?: boolean;
+  };
   createdAt: string;
 }
 

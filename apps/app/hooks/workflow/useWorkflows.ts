@@ -21,6 +21,11 @@ import type {
 } from "@/types/workflow";
 
 const WORKFLOWS_QUERY_KEY = ["workflows"];
+const ACTIVE_POLL_INTERVAL_MS = 30_000;
+const LIST_POLL_INTERVAL_MS = 60_000;
+
+const isActiveWorkflow = (status?: WorkflowStatus) =>
+  status === "in_review" || status === "ready_to_complete";
 const PRODUCT_QUERY_KEYS = [
   ["all-products"],
   ["products-infinite"],
@@ -83,6 +88,7 @@ export function useWorkflows(params: WorkflowListParams, enabled = true) {
     },
     placeholderData: keepPreviousData,
     enabled: auth.isAuthenticated && enabled,
+    refetchInterval: LIST_POLL_INTERVAL_MS,
   });
 }
 
@@ -99,6 +105,10 @@ export function useWorkflow(workflowId: string) {
         { signal },
       ),
     enabled: auth.isAuthenticated && !!workflowId,
+    refetchInterval: (query) =>
+      isActiveWorkflow(query.state.data?.workflow.status)
+        ? ACTIVE_POLL_INTERVAL_MS
+        : false,
   });
 }
 
@@ -185,11 +195,14 @@ export function useDeleteWorkflow() {
   });
 }
 
-export function useWorkflowHistory(workflowId: string, enabled = true) {
+export function useWorkflowHistory(
+  workflowId: string,
+  status: WorkflowStatus,
+) {
   const auth = useAuth();
 
   return useQuery({
-    queryKey: [...WORKFLOWS_QUERY_KEY, "history", workflowId],
+    queryKey: [...WORKFLOWS_QUERY_KEY, "history", workflowId, status],
     queryFn: ({ signal }) =>
       workflowRequest<{ events: WorkflowEvent[] }>(
         `/${workflowId}/history`,
@@ -197,14 +210,19 @@ export function useWorkflowHistory(workflowId: string, enabled = true) {
         "Failed to fetch workflow history",
         { signal },
       ),
-    enabled: auth.isAuthenticated && !!workflowId && enabled,
+    placeholderData: keepPreviousData,
+    enabled: auth.isAuthenticated && !!workflowId && status !== "draft",
+    refetchInterval: isActiveWorkflow(status) ? ACTIVE_POLL_INTERVAL_MS : false,
   });
 }
 
 function useWorkflowAction<TVariables>(
   workflowId: string,
   request: (variables: TVariables) => { path: string; body: unknown },
-  messages: { success: (variables: TVariables) => string; error: string },
+  messages: {
+    success: (variables: TVariables, workflow: Workflow) => string;
+    error: string;
+  },
 ) {
   const queryClient = useQueryClient();
   const auth = useAuth();
@@ -219,8 +237,8 @@ function useWorkflowAction<TVariables>(
         { method: "POST", body: JSON.stringify(body) },
       );
     },
-    onSuccess: (_data, variables) => {
-      toast.success(messages.success(variables));
+    onSuccess: ({ workflow }, variables) => {
+      toast.success(messages.success(variables, workflow));
       for (const queryKey of PRODUCT_QUERY_KEYS) {
         queryClient.invalidateQueries({ queryKey });
       }
@@ -253,8 +271,14 @@ export function useDecideWorkflowAssignment(workflowId: string) {
       body,
     }),
     {
-      success: ({ decision }) =>
-        decision === "approve" ? "Approved" : "Workflow rejected",
+      success: ({ decision }, workflow) =>
+        decision === "reject"
+          ? "Workflow rejected"
+          : workflow.status === "completed"
+            ? "Approved. The workflow is complete and its Products are Released"
+            : workflow.status === "ready_to_complete"
+              ? "Approved. The workflow is ready to complete"
+              : "Approved",
       error: "Failed to record decision",
     },
   );
@@ -265,5 +289,16 @@ export function useCancelWorkflow(workflowId: string) {
     workflowId,
     (reason: string) => ({ path: "/cancel", body: { reason } }),
     { success: () => "Workflow cancelled", error: "Failed to cancel workflow" },
+  );
+}
+
+export function useCompleteWorkflow(workflowId: string) {
+  return useWorkflowAction(
+    workflowId,
+    () => ({ path: "/complete", body: {} }),
+    {
+      success: () => "Workflow completed. Its Products are Released",
+      error: "Failed to complete workflow",
+    },
   );
 }

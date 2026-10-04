@@ -143,7 +143,7 @@ function AssignmentRow({
             <Button
               type="button"
               size="sm"
-              variant="outline"
+              variant="destructive"
               disabled={disabled}
               onClick={() =>
                 onDecide({ assignment, groupLabel, decision: "reject" })

@@ -41,6 +41,7 @@ export interface Product extends ProductTeam {
   released_at?: string | null;
   obsoleted_at?: string | null;
   legacy_release?: boolean;
+  released_by_workflow?: { id: string; numberLabel: string } | null;
 
   auditLogs?: Array<AuditLog>;
   createdBy?: string;

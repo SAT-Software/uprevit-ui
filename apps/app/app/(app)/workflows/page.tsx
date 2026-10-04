@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import {
-  CheckListIcon,
   Search01Icon,
+  TaskDaily01Icon,
   UserIcon,
   WorkflowIcon,
 } from "@hugeicons/core-free-icons";
@@ -133,7 +133,7 @@ function WorkflowsList() {
               Created by Me
             </TabsTrigger>
             <TabsTrigger value="my-tasks">
-              <Icon icon={CheckListIcon} size={14} strokeWidth={2} />
+              <Icon icon={TaskDaily01Icon} size={14} strokeWidth={2} />
               My Tasks
             </TabsTrigger>
           </TabsList>
@@ -246,7 +246,7 @@ function WorkflowsList() {
                           className="cursor-pointer hover:bg-muted/50"
                           onClick={() => router.push(`/workflows/${workflow._id}`)}
                         >
-                          <TableCell className="font-mono text-sm">
+                          <TableCell className="whitespace-nowrap font-mono text-sm">
                             {workflow.numberLabel}
                           </TableCell>
                           <TableCell>
