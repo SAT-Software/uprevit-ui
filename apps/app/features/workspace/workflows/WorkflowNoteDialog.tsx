@@ -21,6 +21,7 @@ function WorkflowNoteForm({
   noteTooltip,
   notePlaceholder,
   required,
+  children,
   onSubmit,
 }: {
   formId: string;
@@ -28,6 +29,7 @@ function WorkflowNoteForm({
   noteTooltip: string;
   notePlaceholder: string;
   required: boolean;
+  children?: React.ReactNode;
   onSubmit: (note: string) => void;
 }) {
   const [note, setNote] = useState("");
@@ -52,6 +54,7 @@ function WorkflowNoteForm({
   return (
     <form id={formId} onSubmit={handleSubmit} noValidate>
       <FieldGroup className="px-4 pb-4">
+        {children}
         <Field data-invalid={showError && !!error}>
           <FormFieldLabel
             htmlFor={`${formId}-note`}
@@ -99,6 +102,7 @@ export function WorkflowNoteDialog({
   submitIcon,
   submitVariant,
   isPending,
+  children,
   onSubmit,
 }: {
   open: boolean;
@@ -117,6 +121,7 @@ export function WorkflowNoteDialog({
   submitIcon: IconSvgElement;
   submitVariant?: React.ComponentProps<typeof Button>["variant"];
   isPending: boolean;
+  children?: React.ReactNode;
   onSubmit: (note: string) => void;
 }) {
   const formId = `workflow-note-form-${useId()}`;
@@ -157,7 +162,9 @@ export function WorkflowNoteDialog({
           notePlaceholder={notePlaceholder}
           required={required}
           onSubmit={onSubmit}
-        />
+        >
+          {children}
+        </WorkflowNoteForm>
       </AppDialogContent>
     </Dialog>
   );

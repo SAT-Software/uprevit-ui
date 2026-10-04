@@ -63,6 +63,7 @@ const getMyDecision = (
     .filter((assignment) => assignment.userId === userId)
     .map((assignment) => assignment.decision);
   if (decisions.includes("rejected")) return "rejected";
+  if (decisions.includes("changes_requested")) return "changes_requested";
   if (decisions.includes("pending")) return "pending";
   return "approved";
 };

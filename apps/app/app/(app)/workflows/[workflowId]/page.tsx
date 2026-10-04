@@ -9,6 +9,7 @@ import {
 } from "next/navigation";
 import {
   Blockchain03Icon,
+  BubbleChatIcon,
   CheckmarkBadge01Icon,
   DashboardSquare01Icon,
   Delete02Icon,
@@ -31,6 +32,7 @@ import { CancelWorkflowDialog } from "@/features/workspace/workflows/CancelWorkf
 import { CompleteWorkflowDialog } from "@/features/workspace/workflows/CompleteWorkflowDialog";
 import { DeleteWorkflowDialog } from "@/features/workspace/workflows/DeleteWorkflowDialog";
 import { WorkflowApprovalsTab } from "@/features/workspace/workflows/WorkflowApprovalsTab";
+import { WorkflowDiscussionTab } from "@/features/workspace/workflows/WorkflowDiscussionTab";
 import { WorkflowHistoryTab } from "@/features/workspace/workflows/WorkflowHistoryTab";
 import { WorkflowProductsTab } from "@/features/workspace/workflows/WorkflowProductsTab";
 import { WorkflowStatusBadge } from "@/features/workspace/workflows/WorkflowStatusBadge";
@@ -38,7 +40,13 @@ import { WorkflowSummaryTab } from "@/features/workspace/workflows/WorkflowSumma
 import { WorkflowsFeatureGate } from "@/features/workspace/workflows/WorkflowsFeatureGate";
 import { useWorkflow } from "@/hooks/workflow/useWorkflows";
 
-const WORKFLOW_TABS = ["summary", "products", "approvals", "history"] as const;
+const WORKFLOW_TABS = [
+  "summary",
+  "products",
+  "approvals",
+  "discussion",
+  "history",
+] as const;
 type WorkflowTab = (typeof WORKFLOW_TABS)[number];
 
 function WorkflowDetail() {
@@ -51,6 +59,11 @@ function WorkflowDetail() {
   const [completeOpen, setCompleteOpen] = useState(false);
   const { data, isPending, isError, error } = useWorkflow(params.workflowId);
   const workflow = data?.workflow;
+  const openRequests =
+    workflow?.assignments.reduce(
+      (count, assignment) => count + (assignment.openChangeRequestCount ?? 0),
+      0,
+    ) ?? 0;
 
   const tabParam = searchParams.get("tab");
   const activeTab: WorkflowTab = WORKFLOW_TABS.includes(tabParam as WorkflowTab)
@@ -154,6 +167,18 @@ function WorkflowDetail() {
                 {workflow.assignments.length}
               </span>
             </TabsTrigger>
+            <TabsTrigger value="discussion">
+              <Icon icon={BubbleChatIcon} size={14} strokeWidth={2} />
+              Discussion
+              {openRequests ? (
+                <span
+                  className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[11px] leading-none tabular-nums text-orange-700 dark:bg-orange-500/20 dark:text-orange-300"
+                  title="Open change requests"
+                >
+                  {openRequests}
+                </span>
+              ) : null}
+            </TabsTrigger>
             <TabsTrigger value="history">
               <Icon icon={WorkHistoryIcon} size={14} strokeWidth={2} />
               History
@@ -171,6 +196,9 @@ function WorkflowDetail() {
             </TabsContent>
             <TabsContent value="approvals">
               <WorkflowApprovalsTab workflow={workflow} />
+            </TabsContent>
+            <TabsContent value="discussion">
+              <WorkflowDiscussionTab workflow={workflow} />
             </TabsContent>
             <TabsContent value="history">
               <WorkflowHistoryTab workflow={workflow} />

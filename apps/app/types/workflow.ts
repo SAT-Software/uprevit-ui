@@ -10,7 +10,11 @@ export type WorkflowStatus =
 
 export type WorkflowCompletionMode = "automatic" | "initiator_controlled";
 
-export type WorkflowDecision = "pending" | "approved" | "rejected";
+export type WorkflowDecision =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "changes_requested";
 
 export type WorkflowRelationship = "product_owner" | "product_contributor";
 
@@ -77,8 +81,13 @@ export interface Workflow {
   endedBy?: WorkflowActor;
 }
 
-export interface WorkflowDetail extends Omit<Workflow, "products"> {
+export interface WorkflowAssignmentDetail extends WorkflowAssignment {
+  openChangeRequestCount?: number;
+}
+
+export interface WorkflowDetail extends Omit<Workflow, "products" | "assignments"> {
   products: WorkflowProductDetail[];
+  assignments: WorkflowAssignmentDetail[];
   canEdit: boolean;
   canCancel: boolean;
   canComplete: boolean;
@@ -87,6 +96,8 @@ export interface WorkflowDetail extends Omit<Workflow, "products"> {
 export type WorkflowEventType =
   | "started"
   | "approved"
+  | "changes_requested"
+  | "change_request_addressed"
   | "ready_to_complete"
   | "completed"
   | "rejected"
@@ -106,6 +117,8 @@ export interface WorkflowEvent {
     productCount?: number;
     assignmentCount?: number;
     automatic?: boolean;
+    reopened?: boolean;
+    requestedBy?: string;
   };
   createdAt: string;
 }
@@ -156,6 +169,33 @@ export type UpdateWorkflowInput =
     }
   | { action: "remove-assignment"; assignmentId: string };
 
+export type WorkflowDiscussionScope =
+  | { type: "package" }
+  | { type: "product"; lineageId: string };
+
+export type WorkflowDiscussionKind = "comment" | "change_request";
+
+export interface WorkflowDiscussionItem {
+  _id: string;
+  workflowId: string;
+  kind: WorkflowDiscussionKind;
+  scope: WorkflowDiscussionScope;
+  authorSnapshot: WorkflowActor;
+  body: string;
+  createdAt: string;
+  assignmentId?: string;
+  status?: "open" | "addressed";
+  addressedBySnapshot?: WorkflowActor;
+  addressNote?: string;
+  addressedAt?: string;
+  canAddress: boolean;
+}
+
 export type WorkflowDecisionInput =
   | { decision: "approve"; comment?: string }
-  | { decision: "reject"; reason: string };
+  | { decision: "reject"; reason: string }
+  | {
+      decision: "request_changes";
+      reason: string;
+      scope: WorkflowDiscussionScope;
+    };

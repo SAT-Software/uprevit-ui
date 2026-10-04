@@ -14,6 +14,9 @@ import type {
   WorkflowCompletionMode,
   WorkflowDecisionInput,
   WorkflowDetail,
+  WorkflowDiscussionItem,
+  WorkflowDiscussionKind,
+  WorkflowDiscussionScope,
   WorkflowEvent,
   WorkflowReadinessCheck,
   WorkflowStatus,
@@ -274,11 +277,13 @@ export function useDecideWorkflowAssignment(workflowId: string) {
       success: ({ decision }, workflow) =>
         decision === "reject"
           ? "Workflow rejected"
-          : workflow.status === "completed"
-            ? "Approved. The workflow is complete and its Products are Released"
-            : workflow.status === "ready_to_complete"
-              ? "Approved. The workflow is ready to complete"
-              : "Approved",
+          : decision === "request_changes"
+            ? "Changes requested"
+            : workflow.status === "completed"
+              ? "Approved. The workflow is complete and its Products are Released"
+              : workflow.status === "ready_to_complete"
+                ? "Approved. The workflow is ready to complete"
+                : "Approved",
       error: "Failed to record decision",
     },
   );
@@ -299,6 +304,83 @@ export function useCompleteWorkflow(workflowId: string) {
     {
       success: () => "Workflow completed. Its Products are Released",
       error: "Failed to complete workflow",
+    },
+  );
+}
+
+export function useWorkflowDiscussion(
+  workflowId: string,
+  status: WorkflowStatus,
+  kind?: WorkflowDiscussionKind,
+) {
+  const auth = useAuth();
+
+  return useQuery({
+    queryKey: [...WORKFLOWS_QUERY_KEY, "discussion", workflowId, status, kind],
+    queryFn: ({ signal }) =>
+      workflowRequest<{ items: WorkflowDiscussionItem[]; canComment: boolean }>(
+        `/${workflowId}/discussion${kind ? `?kind=${kind}` : ""}`,
+        auth,
+        "Failed to fetch discussion",
+        { signal },
+      ),
+    placeholderData: keepPreviousData,
+    enabled: auth.isAuthenticated && !!workflowId && status !== "draft",
+    refetchInterval: isActiveWorkflow(status) ? ACTIVE_POLL_INTERVAL_MS : false,
+  });
+}
+
+function useDiscussionMutation<TVariables>(
+  workflowId: string,
+  request: (variables: TVariables) => { path: string; body: unknown },
+  messages: { success: string; error: string },
+) {
+  const queryClient = useQueryClient();
+  const auth = useAuth();
+
+  return useMutation({
+    mutationFn: (variables: TVariables) => {
+      const { path, body } = request(variables);
+      return workflowRequest<{ item: WorkflowDiscussionItem }>(
+        `/${workflowId}/discussion${path}`,
+        auth,
+        messages.error,
+        { method: "POST", body: JSON.stringify(body) },
+      );
+    },
+    onSuccess: () => {
+      toast.success(messages.success);
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, messages.error));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: WORKFLOWS_QUERY_KEY });
+    },
+  });
+}
+
+export function useAddWorkflowComment(workflowId: string) {
+  return useDiscussionMutation(
+    workflowId,
+    (body: { body: string; scope: WorkflowDiscussionScope }) => ({
+      path: "",
+      body,
+    }),
+    { success: "Comment added", error: "Failed to add comment" },
+  );
+}
+
+export function useAddressChangeRequest(workflowId: string) {
+  return useDiscussionMutation(
+    workflowId,
+    ({ itemId, note }: { itemId: string; note: string }) => ({
+      path: `/${itemId}/address`,
+      body: { note },
+    }),
+    {
+      success: "Marked as addressed",
+      error: "Failed to address change request",
     },
   );
 }
