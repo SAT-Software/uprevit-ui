@@ -10,9 +10,12 @@ import {
   FileEditIcon,
   MessageDone01Icon,
   MessageEdit01Icon,
+  Notification01Icon,
   PlayIcon,
   StopCircleIcon,
   TaskDone01Icon,
+  UserSwitchIcon,
+  UserWarning01Icon,
   WorkHistoryIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -63,6 +66,22 @@ const EVENT_STYLES: Record<
     className: "bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400",
     verb: "addressed a change request",
   },
+  approver_replaced: {
+    icon: UserSwitchIcon,
+    className: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
+    verb: "replaced",
+  },
+  approver_unavailable: {
+    icon: UserWarning01Icon,
+    className:
+      "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+    verb: "removed",
+  },
+  reminder_sent: {
+    icon: Notification01Icon,
+    className: "bg-muted text-muted-foreground",
+    verb: "sent a reminder",
+  },
   ready_to_complete: {
     icon: TaskDone01Icon,
     className: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
@@ -109,6 +128,19 @@ function eventContext(event: WorkflowEvent, workflow: WorkflowDetail) {
   if (event.type === "content_changed") {
     const notified = event.data.notified ?? [];
     return `${event.data.productName ?? product?.name ?? "a Product"} · ${notified.length ? `notified ${notified.join(", ")}` : "no new notices"}`;
+  }
+  if (event.type === "approver_replaced") {
+    return `${event.data.from?.name ?? "an approver"} with ${event.data.to?.name ?? "another member"} · as ${event.data.functionLabel}${product ? ` · ${product.name}` : ""}`;
+  }
+  if (event.type === "approver_unavailable") {
+    const from =
+      event.data.cause === "removed_from_workspace"
+        ? "the workspace"
+        : "the Product Team";
+    return `${event.data.approver?.name ?? "an approver"} from ${from} · needs replacement as ${event.data.functionLabel}${product ? ` · ${product.name}` : ""}`;
+  }
+  if (event.type === "reminder_sent") {
+    return `to ${(event.data.notified ?? []).join(", ")}`;
   }
   if (event.type === "ready_to_complete") return "with the final approval";
   if (event.type === "completed") {

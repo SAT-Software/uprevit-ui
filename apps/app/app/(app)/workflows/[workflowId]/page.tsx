@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "react-oidc-context";
 import {
   useParams,
   usePathname,
@@ -13,6 +14,7 @@ import {
   CheckmarkBadge01Icon,
   DashboardSquare01Icon,
   Delete02Icon,
+  Notification01Icon,
   StopCircleIcon,
   ValidationApprovalIcon,
   WorkHistoryIcon,
@@ -31,6 +33,7 @@ import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErr
 import { CancelWorkflowDialog } from "@/features/workspace/workflows/CancelWorkflowDialog";
 import { CompleteWorkflowDialog } from "@/features/workspace/workflows/CompleteWorkflowDialog";
 import { DeleteWorkflowDialog } from "@/features/workspace/workflows/DeleteWorkflowDialog";
+import { SendReminderDialog } from "@/features/workspace/workflows/SendReminderDialog";
 import { WorkflowApprovalsTab } from "@/features/workspace/workflows/WorkflowApprovalsTab";
 import { WorkflowDiscussionTab } from "@/features/workspace/workflows/WorkflowDiscussionTab";
 import { WorkflowHistoryTab } from "@/features/workspace/workflows/WorkflowHistoryTab";
@@ -57,6 +60,9 @@ function WorkflowDetail() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [completeOpen, setCompleteOpen] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [reminderKey, setReminderKey] = useState(0);
+  const auth = useAuth();
   const { data, isPending, isError, error } = useWorkflow(params.workflowId);
   const workflow = data?.workflow;
   const openRequests =
@@ -119,6 +125,20 @@ function WorkflowDetail() {
           </Button>
         ) : workflow.canCancel ? (
           <div className="flex items-center gap-2">
+            {workflow.canSendReminder ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setReminderKey((key) => key + 1);
+                  setReminderOpen(true);
+                }}
+              >
+                <Icon icon={Notification01Icon} size={16} />
+                Send Reminder
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="outline"
@@ -219,6 +239,15 @@ function WorkflowDetail() {
           workflow={workflow}
           open={cancelOpen}
           onOpenChange={setCancelOpen}
+        />
+      ) : null}
+      {workflow.canSendReminder ? (
+        <SendReminderDialog
+          key={reminderKey}
+          workflow={workflow}
+          currentUserId={auth.user?.profile?.userId as string | undefined}
+          open={reminderOpen}
+          onOpenChange={setReminderOpen}
         />
       ) : null}
       {workflow.canComplete ? (
