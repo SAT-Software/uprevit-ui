@@ -202,7 +202,7 @@ export function useWorkflowHistory(
   const auth = useAuth();
 
   return useQuery({
-    queryKey: [...WORKFLOWS_QUERY_KEY, "history", workflowId],
+    queryKey: [...WORKFLOWS_QUERY_KEY, "history", workflowId, status],
     queryFn: ({ signal }) =>
       workflowRequest<{ events: WorkflowEvent[] }>(
         `/${workflowId}/history`,
@@ -210,6 +210,7 @@ export function useWorkflowHistory(
         "Failed to fetch workflow history",
         { signal },
       ),
+    placeholderData: keepPreviousData,
     enabled: auth.isAuthenticated && !!workflowId && status !== "draft",
     refetchInterval: isActiveWorkflow(status) ? ACTIVE_POLL_INTERVAL_MS : false,
   });
