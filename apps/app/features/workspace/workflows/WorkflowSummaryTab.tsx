@@ -3,11 +3,14 @@
 import { useState } from "react";
 import {
   CancelCircleIcon,
+  CheckmarkBadge01Icon,
   PencilEdit02Icon,
   StopCircleIcon,
+  TaskDone01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { cn } from "@uprevit/ui/lib/utils";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import type { WorkflowDetail } from "@/types/workflow";
@@ -37,43 +40,88 @@ function DetailItem({
   );
 }
 
-function WorkflowOutcomeBanner({ workflow }: { workflow: WorkflowDetail }) {
-  if (workflow.status !== "rejected" && workflow.status !== "cancelled") {
-    return null;
+const MILESTONES: { key: keyof WorkflowDetail["dates"]; label: string }[] = [
+  { key: "createdAt", label: "Created" },
+  { key: "startedAt", label: "Started" },
+  { key: "readyToCompleteAt", label: "Ready to Complete" },
+  { key: "completedAt", label: "Completed" },
+  { key: "rejectedAt", label: "Rejected" },
+  { key: "cancelledAt", label: "Cancelled" },
+];
+
+const BANNER_ICON_STYLES = {
+  green:
+    "bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400",
+  blue: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
+  red: "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400",
+};
+
+function getOutcome(workflow: WorkflowDetail) {
+  const { status, dates, endedBy, endReason } = workflow;
+  if (status === "completed") {
+    return {
+      tone: "green" as const,
+      icon: CheckmarkBadge01Icon,
+      title: "Completed",
+      date: dates.completedAt,
+      note: "The Products are Released. This workflow is now a read-only record.",
+    };
   }
-  const rejected = workflow.status === "rejected";
-  const endedAt = rejected
-    ? workflow.dates.rejectedAt
-    : workflow.dates.cancelledAt;
+  if (status === "ready_to_complete") {
+    return {
+      tone: "blue" as const,
+      icon: TaskDone01Icon,
+      title: "Everyone approved",
+      date: dates.readyToCompleteAt,
+      note: workflow.canComplete
+        ? "Complete the workflow to release its Products."
+        : "Waiting for the Initiator or an admin to complete it and release the Products.",
+    };
+  }
+  if (status === "rejected" || status === "cancelled") {
+    const rejected = status === "rejected";
+    return {
+      tone: "red" as const,
+      icon: rejected ? CancelCircleIcon : StopCircleIcon,
+      title: `${rejected ? "Rejected" : "Cancelled"}${endedBy ? ` by ${endedBy.name}` : ""}`,
+      date: rejected ? dates.rejectedAt : dates.cancelledAt,
+      reason: endReason,
+      note: "The Products went back to Submitted. Create a new workflow to approve them.",
+    };
+  }
+  return null;
+}
+
+function WorkflowOutcomeBanner({ workflow }: { workflow: WorkflowDetail }) {
+  const outcome = getOutcome(workflow);
+  if (!outcome) return null;
 
   return (
-    <section className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/60 px-4 py-3 dark:border-red-900/60 dark:bg-red-950/20">
-      <Icon
-        icon={rejected ? CancelCircleIcon : StopCircleIcon}
-        size={18}
-        strokeWidth={2}
-        className="mt-0.5 shrink-0 text-red-600 dark:text-red-400"
-      />
-      <div className="min-w-0 space-y-1">
+    <section className="flex items-start gap-3 rounded-2xl border border-border bg-background px-4 py-3">
+      <span
+        className={cn(
+          "flex size-7 shrink-0 items-center justify-center rounded-full",
+          BANNER_ICON_STYLES[outcome.tone],
+        )}
+      >
+        <Icon icon={outcome.icon} size={14} strokeWidth={2} />
+      </span>
+      <div className="min-w-0 space-y-1 pt-0.5">
         <p className="text-sm font-medium">
-          {rejected ? "Rejected" : "Cancelled"}
-          {workflow.endedBy ? ` by ${workflow.endedBy.name}` : ""}
-          {endedAt ? (
+          {outcome.title}
+          {outcome.date ? (
             <span className="font-normal text-muted-foreground">
               {" · "}
-              {formatToLocalDateTime(endedAt)}
+              {formatToLocalDateTime(outcome.date)}
             </span>
           ) : null}
         </p>
-        {workflow.endReason ? (
+        {outcome.reason ? (
           <p className="whitespace-pre-wrap break-words text-sm text-foreground/80">
-            {workflow.endReason}
+            {outcome.reason}
           </p>
         ) : null}
-        <p className="text-xs text-muted-foreground">
-          The Products went back to Submitted. Create a new workflow to approve
-          them.
-        </p>
+        <p className="text-xs text-muted-foreground">{outcome.note}</p>
       </div>
     </section>
   );
@@ -122,17 +170,17 @@ export function WorkflowSummaryTab({ workflow }: { workflow: WorkflowDetail }) {
               {workflow.initiator.name}
             </span>
           </DetailItem>
-          <DetailItem label="Created">
-            {formatToLocalDateTime(workflow.dates.createdAt)}
-          </DetailItem>
           <DetailItem label="Completion" info={completionMode?.description}>
             {completionMode?.label}
           </DetailItem>
-          {workflow.dates.startedAt ? (
-            <DetailItem label="Started">
-              {formatToLocalDateTime(workflow.dates.startedAt)}
-            </DetailItem>
-          ) : null}
+          {MILESTONES.map(({ key, label }) => {
+            const date = workflow.dates[key];
+            return date ? (
+              <DetailItem key={key} label={label}>
+                {formatToLocalDateTime(date)}
+              </DetailItem>
+            ) : null;
+          })}
           {workflow.description ? (
             <div className="sm:col-span-3">
               <DetailItem label="Description">

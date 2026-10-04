@@ -3,9 +3,11 @@
 import {
   AlertCircleIcon,
   CancelCircleIcon,
+  CheckmarkBadge01Icon,
   CheckmarkCircle02Icon,
   PlayIcon,
   StopCircleIcon,
+  TaskDone01Icon,
   WorkHistoryIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -34,6 +36,17 @@ const EVENT_STYLES: Record<
     className: "bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400",
     verb: "approved",
   },
+  ready_to_complete: {
+    icon: TaskDone01Icon,
+    className: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
+    verb: "made the workflow ready to complete",
+  },
+  completed: {
+    icon: CheckmarkBadge01Icon,
+    className:
+      "bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400",
+    verb: "completed the workflow",
+  },
   rejected: {
     icon: CancelCircleIcon,
     className: "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400",
@@ -46,10 +59,20 @@ const EVENT_STYLES: Record<
   },
 };
 
+const plural = (count: number, noun: string) =>
+  `${count} ${count === 1 ? noun : `${noun}s`}`;
+
 function eventContext(event: WorkflowEvent, workflow: WorkflowDetail) {
+  if (event.type === "ready_to_complete") return "with the final approval";
+  if (event.type === "completed") {
+    const released = `${plural(event.data.productCount ?? 0, "Product")} released`;
+    return event.data.automatic
+      ? `automatically with the final approval · ${released}`
+      : released;
+  }
   if (event.type === "started") {
     const { productCount = 0, assignmentCount = 0 } = event.data;
-    return `${productCount} ${productCount === 1 ? "Product" : "Products"}, ${assignmentCount} ${assignmentCount === 1 ? "assignment" : "assignments"}`;
+    return `${plural(productCount, "Product")}, ${plural(assignmentCount, "assignment")}`;
   }
   if (!event.data.functionLabel) return null;
   const product = event.lineageId
@@ -117,7 +140,7 @@ export function WorkflowHistoryTab({ workflow }: { workflow: WorkflowDetail }) {
   const isDraft = workflow.status === "draft";
   const { data, isPending, isError } = useWorkflowHistory(
     workflow._id,
-    !isDraft,
+    workflow.status,
   );
   const events = data?.events ?? [];
 

@@ -5,14 +5,14 @@ import { WORKFLOW_STATUS_LABELS } from "@/utils/workflow/workflow-labels";
 
 const STATUS_STYLES: Record<
   WorkflowStatus,
-  { variant: "gray" | "blue" | "yellow" | "green" | "secondary"; dot: string }
+  { variant: "gray" | "blue" | "yellow" | "green" | "red"; dot: string }
 > = {
   draft: { variant: "gray", dot: "bg-gray-500 dark:bg-gray-400" },
   in_review: { variant: "yellow", dot: "bg-amber-500 dark:bg-amber-400" },
   ready_to_complete: { variant: "blue", dot: "bg-blue-500 dark:bg-blue-400" },
   completed: { variant: "green", dot: "bg-green-500 dark:bg-green-400" },
-  rejected: { variant: "secondary", dot: "bg-red-500 dark:bg-red-400" },
-  cancelled: { variant: "secondary", dot: "bg-muted-foreground/50" },
+  rejected: { variant: "red", dot: "bg-red-500 dark:bg-red-400" },
+  cancelled: { variant: "gray", dot: "bg-muted-foreground/50" },
 };
 
 export function WorkflowStatusBadge({

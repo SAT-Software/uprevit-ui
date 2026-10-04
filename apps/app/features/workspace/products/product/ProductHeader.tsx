@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type UIEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type UIEvent } from "react";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -319,16 +319,21 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
 
-  const handleVersionChange = (versionId: string) => {
+  const navigateTo = (href: string) => {
     setVersionPopoverOpen(false);
-    if (versionId !== productId) {
-      const href = `/products/${versionId}/${currentTab}`;
-      if (workbookGuard) {
-        workbookGuard.tryNavigate(href);
-        return;
-      }
-      router.push(href);
+    if (workbookGuard) {
+      workbookGuard.tryNavigate(href);
+      return;
     }
+    router.push(href);
+  };
+
+  const handleVersionChange = (versionId: string) => {
+    if (versionId === productId) {
+      setVersionPopoverOpen(false);
+      return;
+    }
+    navigateTo(`/products/${versionId}/${currentTab}`);
   };
 
   const toggleButtonTitle = isSyncingStatus
@@ -409,13 +414,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     } else {
       params.set("compareVersion", value);
     }
-    const href = `${pathname}?${params.toString()}`;
-    if (workbookGuard) {
-      workbookGuard.tryNavigate(href);
-      return;
-    }
-    router.push(href);
-    setVersionPopoverOpen(false);
+    navigateTo(`${pathname}?${params.toString()}`);
   };
 
   // Get selected version info for display
@@ -598,38 +597,59 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
 
                   <CommandGroup heading="Product Versions">
                     {versions.length > 0 ? (
-                      versions.map((v: Product & { _id: string }) => (
-                        <CommandItem
-                          key={`switch-${v._id}`}
-                          value={`version ${v.version} ${v.status ?? "draft"}`}
-                          onSelect={() => handleVersionChange(v._id)}
-                          className="flex items-center justify-between gap-2"
-                        >
-                          <div className="flex min-w-0 flex-col gap-0.5">
-                            <div className="flex items-center gap-2">
-                              <span>Version {v.version}</span>
-                              <ProductStatusBadge status={v.status} />
-                              {v.is_latest && (
-                                <Badge variant="outline" className="text-xs">
-                                  Latest
-                                </Badge>
+                      versions.map((v: Product & { _id: string }) => {
+                        const releasedBy = v.released_by_workflow;
+                        return (
+                          <Fragment key={`switch-${v._id}`}>
+                            <CommandItem
+                              value={`version ${v.version} ${v.status ?? "draft"}`}
+                              onSelect={() => handleVersionChange(v._id)}
+                              className="flex items-center justify-between gap-2"
+                            >
+                              <div className="flex min-w-0 flex-col gap-0.5">
+                                <div className="flex items-center gap-2">
+                                  <span>Version {v.version}</span>
+                                  <ProductStatusBadge status={v.status} />
+                                  {v.is_latest && (
+                                    <Badge variant="outline" className="text-xs">
+                                      Latest
+                                    </Badge>
+                                  )}
+                                </div>
+                                {getVersionLifecycleNote(v) ? (
+                                  <span className="text-xs text-muted-foreground">
+                                    {getVersionLifecycleNote(v)}
+                                  </span>
+                                ) : null}
+                              </div>
+                              {v._id === productId && (
+                                <Icon
+                                  icon={Tick02Icon}
+                                  size={14}
+                                  className="shrink-0 text-muted-foreground"
+                                />
                               )}
-                            </div>
-                            {getVersionLifecycleNote(v) ? (
-                              <span className="truncate text-xs text-muted-foreground">
-                                {getVersionLifecycleNote(v)}
-                              </span>
+                            </CommandItem>
+                            {releasedBy ? (
+                              <CommandItem
+                                value={`version ${v.version} released by ${releasedBy.numberLabel}`}
+                                onSelect={() =>
+                                  navigateTo(`/workflows/${releasedBy.id}`)
+                                }
+                                className="gap-2 pl-6 text-xs text-muted-foreground"
+                              >
+                                <Icon icon={WorkflowIcon} size={14} />
+                                <span className="truncate">
+                                  Released by{" "}
+                                  <span className="font-mono">
+                                    {releasedBy.numberLabel}
+                                  </span>
+                                </span>
+                              </CommandItem>
                             ) : null}
-                          </div>
-                          {v._id === productId && (
-                            <Icon
-                              icon={Tick02Icon}
-                              size={14}
-                              className="shrink-0 text-muted-foreground"
-                            />
-                          )}
-                        </CommandItem>
-                      ))
+                          </Fragment>
+                        );
+                      })
                     ) : product?.version ? (
                       <CommandItem
                         value={`version ${product.version}`}
