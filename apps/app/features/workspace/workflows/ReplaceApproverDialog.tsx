@@ -53,6 +53,14 @@ export function ReplaceApproverDialog({
           ?.team.filter((item) => !assignedIds.includes(item._id)) ?? [])
       : null;
 
+  const selected =
+    member &&
+    (team
+      ? team.some((item) => item._id === member._id)
+      : !assignedIds.includes(member._id))
+      ? member
+      : null;
+
   return (
     <WorkflowNoteDialog
       open={open}
@@ -69,12 +77,12 @@ export function ReplaceApproverDialog({
       submitLabel="Replace"
       submitLoadingLabel="Replacing…"
       submitIcon={UserSwitchIcon}
-      submitDisabled={!member}
+      submitDisabled={!selected}
       isPending={isPending}
       onSubmit={(reason) => {
-        if (!member) return;
+        if (!selected) return;
         replace(
-          { assignmentId: assignment._id, userId: member._id, reason },
+          { assignmentId: assignment._id, userId: selected._id, reason },
           { onSuccess: () => onOpenChange(false) },
         );
       }}
@@ -91,7 +99,7 @@ export function ReplaceApproverDialog({
         />
         {team ? (
           <Select
-            value={member?._id ?? ""}
+            value={selected?._id ?? ""}
             disabled={isPending || team.length === 0}
             onValueChange={(next) =>
               setMember(team.find((item) => item._id === next) ?? null)
@@ -123,7 +131,7 @@ export function ReplaceApproverDialog({
         ) : (
           <ProductMemberCombobox
             id={memberId}
-            value={member}
+            value={selected}
             placeholder="Pick a member"
             excludeIds={assignedIds}
             disabled={isPending}
