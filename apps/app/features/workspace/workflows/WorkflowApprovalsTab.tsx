@@ -575,7 +575,7 @@ export function WorkflowApprovalsTab({
       <section className="overflow-hidden rounded-2xl border border-border bg-background">
         <SectionHeader
           title="Functions"
-          info="Approve the whole package, e.g. Quality or Regulatory. The same person can be assigned under more than one Function."
+          info="Approve the whole workflow, e.g. Quality or Regulatory. The same person can be assigned under more than one Function."
         />
         <div className="divide-y divide-border">
           {functionGroups.length === 0 && !canEdit ? (

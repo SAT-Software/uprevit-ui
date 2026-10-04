@@ -80,11 +80,11 @@ function eventContext(event: WorkflowEvent, workflow: WorkflowDetail) {
     ? workflow.products.find((item) => item.lineageId === event.lineageId)
     : undefined;
   if (event.type === "changes_requested") {
-    const scope = `on ${product ? product.name : "the whole package"}`;
+    const scope = `on ${product ? product.name : "the whole workflow"}`;
     return `as ${event.data.functionLabel} · ${scope}${event.data.reopened ? " · back to In Review" : ""}`;
   }
   if (event.type === "change_request_addressed") {
-    return `from ${event.data.requestedBy} · on ${product ? product.name : "the whole package"}`;
+    return `from ${event.data.requestedBy} · on ${product ? product.name : "the whole workflow"}`;
   }
   if (event.type === "ready_to_complete") return "with the final approval";
   if (event.type === "completed") {

@@ -1,4 +1,4 @@
-import { Blockchain03Icon, PackageIcon } from "@hugeicons/core-free-icons";
+import { Blockchain03Icon, FlowIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Select,
@@ -20,9 +20,24 @@ export const getScopeLabel = (
   products: WorkflowProduct[],
 ) =>
   scope.type === "package"
-    ? "Whole package"
+    ? "Whole workflow"
     : (products.find((product) => product.lineageId === scope.lineageId)
         ?.name ?? "Removed Product");
+
+function ScopeOption({
+  icon,
+  label,
+}: {
+  icon: typeof FlowIcon;
+  label: string;
+}) {
+  return (
+    <span className="flex min-w-0 items-center gap-2">
+      <Icon icon={icon} size={14} className="shrink-0" />
+      <span className="truncate">{label}</span>
+    </span>
+  );
+}
 
 export function WorkflowScopeSelect({
   id,
@@ -63,13 +78,11 @@ export function WorkflowScopeSelect({
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={PACKAGE_VALUE}>
-          <Icon icon={PackageIcon} size={14} />
-          Whole package
+          <ScopeOption icon={FlowIcon} label="Whole workflow" />
         </SelectItem>
         {products.map((product) => (
           <SelectItem key={product.lineageId} value={product.lineageId}>
-            <Icon icon={Blockchain03Icon} size={14} />
-            {product.name}
+            <ScopeOption icon={Blockchain03Icon} label={product.name} />
           </SelectItem>
         ))}
       </SelectContent>
@@ -92,7 +105,7 @@ export function WorkflowScopeChip({
       title={label}
     >
       <Icon
-        icon={scope.type === "package" ? PackageIcon : Blockchain03Icon}
+        icon={scope.type === "package" ? FlowIcon : Blockchain03Icon}
         size={12}
         className="shrink-0"
       />

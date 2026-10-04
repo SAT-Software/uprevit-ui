@@ -16,7 +16,10 @@ import {
   InputGroupTextarea,
 } from "@uprevit/ui/components/ui/input-group";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@uprevit/ui/components/ui/toggle-group";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductMemberAvatar } from "@/features/workspace/products/ProductMemberAvatar";
 import {
@@ -65,65 +68,79 @@ function DiscussionItem({
         className="mt-0.5 size-7"
       />
       <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span
-            className="text-sm font-medium"
-            title={item.authorSnapshot.email}
-          >
-            {item.authorSnapshot.name}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <p className="min-w-0 truncate text-sm font-medium">
+            <span title={item.authorSnapshot.email}>
+              {item.authorSnapshot.name}
+            </span>
             {functionLabel ? (
               <span className="font-normal text-muted-foreground">
                 {" "}
                 as {functionLabel}
               </span>
             ) : null}
-          </span>
-          {isRequest ? (
-            <Badge
-              variant={addressed ? "teal" : "orange"}
-              className="font-normal"
+          </p>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {isRequest ? (
+              <Badge
+                variant={addressed ? "teal" : "orange"}
+                className="font-normal"
+              >
+                {addressed ? "Request addressed" : "Change request"}
+              </Badge>
+            ) : null}
+            <WorkflowScopeChip
+              scope={item.scope}
+              products={workflow.products}
+            />
+            <time
+              dateTime={item.createdAt}
+              className="text-xs text-muted-foreground tabular-nums"
             >
-              {addressed ? "Request addressed" : "Change request"}
-            </Badge>
-          ) : null}
-          <WorkflowScopeChip scope={item.scope} products={workflow.products} />
-          <span className="text-xs text-muted-foreground">
-            {formatToLocalDateTime(item.createdAt)}
-          </span>
+              {formatToLocalDateTime(item.createdAt)}
+            </time>
+          </div>
         </div>
-        <p className="whitespace-pre-wrap break-words text-sm text-foreground/90">
-          {item.body}
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <p className="min-w-0 whitespace-pre-wrap break-words text-sm text-foreground/90">
+            {item.body}
+          </p>
+          {canAddress ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="shrink-0"
+              onClick={() => onAddress(item)}
+            >
+              <Icon icon={MessageDone01Icon} size={14} />
+              Mark Addressed
+            </Button>
+          ) : null}
+        </div>
         {addressed && item.addressedBySnapshot ? (
           <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-3 py-2">
-            <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-              <Icon icon={MessageDone01Icon} size={12} />
-              <span
-                className="font-medium text-foreground"
-                title={item.addressedBySnapshot.email}
-              >
-                {item.addressedBySnapshot.name}
-              </span>
-              addressed this
-              {item.addressedAt
-                ? ` · ${formatToLocalDateTime(item.addressedAt)}`
-                : null}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1.5">
+                <Icon icon={MessageDone01Icon} size={12} />
+                <span
+                  className="font-medium text-foreground"
+                  title={item.addressedBySnapshot.email}
+                >
+                  {item.addressedBySnapshot.name}
+                </span>
+                addressed this
+              </p>
+              {item.addressedAt ? (
+                <time dateTime={item.addressedAt} className="tabular-nums">
+                  {formatToLocalDateTime(item.addressedAt)}
+                </time>
+              ) : null}
+            </div>
             <p className="whitespace-pre-wrap break-words text-sm text-foreground/80">
               {item.addressNote}
             </p>
           </div>
-        ) : null}
-        {canAddress ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => onAddress(item)}
-          >
-            <Icon icon={MessageDone01Icon} size={14} />
-            Mark Addressed
-          </Button>
         ) : null}
       </div>
     </li>
@@ -188,8 +205,7 @@ export function WorkflowDiscussionTab({
     useState<WorkflowDiscussionItem | null>(null);
   const isDraft = workflow.status === "draft";
   const isActive =
-    workflow.status === "in_review" ||
-    workflow.status === "ready_to_complete";
+    workflow.status === "in_review" || workflow.status === "ready_to_complete";
   const { data, isPending, isError } = useWorkflowDiscussion(
     workflow._id,
     workflow.status,
@@ -202,21 +218,28 @@ export function WorkflowDiscussionTab({
       <div className="flex h-10 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Discussion</p>
-          <InfoTooltip content="Comments and change requests on one Product or the whole package. Only change requests and their answers send notifications." />
+          <InfoTooltip content="Comments and change requests on one Product or the whole workflow. Only change requests and their answers send notifications." />
         </div>
         {!isDraft ? (
-          <Tabs
+          <ToggleGroup
+            type="single"
             value={filter}
-            onValueChange={(value) => setFilter(value as typeof filter)}
+            onValueChange={(value) =>
+              value && setFilter(value as typeof filter)
+            }
+            aria-label="Filter discussion"
+            className="h-7 gap-0.5 rounded-lg border border-input bg-muted p-0.5"
           >
-            <TabsList className="h-7">
-              {FILTERS.map(({ value, label }) => (
-                <TabsTrigger key={value} value={value} className="text-xs">
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+            {FILTERS.map(({ value, label }) => (
+              <ToggleGroupItem
+                key={value}
+                value={value}
+                className="h-[22px] min-w-0 rounded-md px-2 text-xs text-muted-foreground/50 hover:bg-transparent hover:text-foreground aria-checked:bg-background aria-checked:text-foreground data-[state=on]:bg-background aria-checked:shadow-sm aria-checked:ring-1 aria-checked:ring-border dark:aria-checked:bg-input/50 dark:data-[state=on]:bg-input/50"
+              >
+                {label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         ) : null}
       </div>
       {isDraft ? (
