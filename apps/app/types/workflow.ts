@@ -83,6 +83,7 @@ export interface Workflow {
 
 export interface WorkflowAssignmentDetail extends WorkflowAssignment {
   openChangeRequestCount?: number;
+  contentChangedSinceDecision?: boolean;
 }
 
 export interface WorkflowDetail extends Omit<Workflow, "products" | "assignments"> {
@@ -96,6 +97,8 @@ export interface WorkflowDetail extends Omit<Workflow, "products" | "assignments
 export type WorkflowEventType =
   | "started"
   | "approved"
+  | "approval_reconfirmed"
+  | "content_changed"
   | "changes_requested"
   | "change_request_addressed"
   | "ready_to_complete"
@@ -119,6 +122,9 @@ export interface WorkflowEvent {
     automatic?: boolean;
     reopened?: boolean;
     requestedBy?: string;
+    productVersionId?: string;
+    productName?: string;
+    notified?: string[];
   };
   createdAt: string;
 }

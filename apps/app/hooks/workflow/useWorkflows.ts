@@ -263,7 +263,10 @@ export function useStartWorkflow(workflowId: string) {
   );
 }
 
-export function useDecideWorkflowAssignment(workflowId: string) {
+export function useDecideWorkflowAssignment(
+  workflowId: string,
+  { approveAgain = false }: { approveAgain?: boolean } = {},
+) {
   return useWorkflowAction(
     workflowId,
     ({
@@ -275,7 +278,9 @@ export function useDecideWorkflowAssignment(workflowId: string) {
     }),
     {
       success: ({ decision }, workflow) =>
-        decision === "reject"
+        approveAgain
+          ? "Approved again on the latest content"
+          : decision === "reject"
           ? "Workflow rejected"
           : decision === "request_changes"
             ? "Changes requested"
