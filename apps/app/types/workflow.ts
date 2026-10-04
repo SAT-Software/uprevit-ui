@@ -82,7 +82,7 @@ export interface Workflow {
 }
 
 export interface WorkflowAssignmentDetail extends WorkflowAssignment {
-  openChangeRequestCount: number;
+  openChangeRequestCount?: number;
 }
 
 export interface WorkflowDetail extends Omit<Workflow, "products" | "assignments"> {

@@ -61,7 +61,7 @@ function WorkflowDetail() {
   const workflow = data?.workflow;
   const openRequests =
     workflow?.assignments.reduce(
-      (count, assignment) => count + assignment.openChangeRequestCount,
+      (count, assignment) => count + (assignment.openChangeRequestCount ?? 0),
       0,
     ) ?? 0;
 

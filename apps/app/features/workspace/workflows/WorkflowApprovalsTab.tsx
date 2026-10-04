@@ -107,7 +107,7 @@ function ChangeRequestStatus({
   isActive: boolean;
 }) {
   if (assignment.decision !== "changes_requested") return null;
-  const open = assignment.openChangeRequestCount;
+  const open = assignment.openChangeRequestCount ?? 0;
   if (!isActive && !open) return null;
 
   return (
@@ -144,7 +144,7 @@ function AssignmentRow({
     assignment.decision === "pending" ||
     assignment.decision === "changes_requested";
   const canDecide = isInReview && isMine && isUndecided;
-  const canApprove = canDecide && assignment.openChangeRequestCount === 0;
+  const canApprove = canDecide && !assignment.openChangeRequestCount;
   const canRequestChanges =
     isActive && isMine && assignment.decision !== "rejected";
   const note = assignment.reason ?? assignment.comment;
@@ -386,7 +386,7 @@ function ApprovalProgress({ workflow }: { workflow: WorkflowDetail }) {
       assignment.decision === "changes_requested",
   ).length;
   const openRequests = workflow.assignments.reduce(
-    (count, assignment) => count + assignment.openChangeRequestCount,
+    (count, assignment) => count + (assignment.openChangeRequestCount ?? 0),
     0,
   );
   const percentage = total ? Math.round((approved / total) * 100) : 0;
