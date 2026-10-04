@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import {
   AlertCircleIcon,
+  ArrowRight01Icon,
   CancelCircleIcon,
   CheckmarkBadge01Icon,
   CheckmarkCircle02Icon,
+  FileEditIcon,
   MessageDone01Icon,
   MessageEdit01Icon,
   PlayIcon,
@@ -37,6 +40,17 @@ const EVENT_STYLES: Record<
     icon: CheckmarkCircle02Icon,
     className: "bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400",
     verb: "approved",
+  },
+  approval_reconfirmed: {
+    icon: CheckmarkCircle02Icon,
+    className: "bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400",
+    verb: "approved again on the latest content",
+  },
+  content_changed: {
+    icon: FileEditIcon,
+    className:
+      "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+    verb: "changed",
   },
   changes_requested: {
     icon: MessageEdit01Icon,
@@ -72,6 +86,12 @@ const EVENT_STYLES: Record<
   },
 };
 
+const FALLBACK_STYLE = {
+  icon: WorkHistoryIcon,
+  className: "bg-muted text-muted-foreground",
+  verb: "updated the workflow",
+};
+
 const plural = (count: number, noun: string) =>
   `${count} ${count === 1 ? noun : `${noun}s`}`;
 
@@ -85,6 +105,10 @@ function eventContext(event: WorkflowEvent, workflow: WorkflowDetail) {
   }
   if (event.type === "change_request_addressed") {
     return `from ${event.data.requestedBy} · on ${product ? product.name : "the whole workflow"}`;
+  }
+  if (event.type === "content_changed") {
+    const notified = event.data.notified ?? [];
+    return `${event.data.productName ?? product?.name ?? "a Product"} · ${notified.length ? `notified ${notified.join(", ")}` : "no new notices"}`;
   }
   if (event.type === "ready_to_complete") return "with the final approval";
   if (event.type === "completed") {
@@ -110,7 +134,7 @@ function HistoryItem({
   workflow: WorkflowDetail;
   isLast: boolean;
 }) {
-  const style = EVENT_STYLES[event.type];
+  const style = EVENT_STYLES[event.type] ?? FALLBACK_STYLE;
   const context = eventContext(event, workflow);
   const note = event.reason ?? event.comment;
 
@@ -140,8 +164,17 @@ function HistoryItem({
             <span className="text-muted-foreground"> {context}</span>
           ) : null}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
           {formatToLocalDateTime(event.createdAt)}
+          {event.type === "content_changed" && event.data.productVersionId ? (
+            <Link
+              href={`/products/${event.data.productVersionId}/logs`}
+              className="inline-flex items-center gap-0.5 font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              View changes
+              <Icon icon={ArrowRight01Icon} size={12} />
+            </Link>
+          ) : null}
         </p>
         {note ? (
           <p className="whitespace-pre-wrap break-words rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-foreground/80">

@@ -5,11 +5,7 @@ import type {
   ProductTeam,
 } from "@/types/product";
 
-const CONTENT_LOCKED_STATUSES: ProductStatus[] = [
-  "in_review",
-  "released",
-  "obsolete",
-];
+const CONTENT_LOCKED_STATUSES: ProductStatus[] = ["released", "obsolete"];
 
 export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
   draft: "Draft",
@@ -37,11 +33,16 @@ export const isProductContentLocked = (status?: ProductStatus) =>
   !!status && CONTENT_LOCKED_STATUSES.includes(status);
 
 export const getProductLockedMessage = (
-  product?: Pick<ProductDataContent, "status" | "active_workflow"> | null,
+  product?: Pick<ProductDataContent, "status"> | null,
 ) =>
-  product?.status === "in_review"
-    ? `This version is in review${product.active_workflow ? ` in ${product.active_workflow.numberLabel}` : ""}. It can't be edited until the workflow ends.`
+  product?.status === "released"
+    ? "Released versions can't be edited. Create a new version to make changes."
     : "This version can't be edited";
+
+export const getProductInReviewMessage = (
+  product?: Pick<ProductDataContent, "active_workflow"> | null,
+) =>
+  `This product is in review${product?.active_workflow ? ` (${product.active_workflow.numberLabel})` : ""}. Approvers will be notified of any change you save.`;
 
 export const canCreateProductVersion = (
   product: Pick<Product, "status" | "is_latest">,

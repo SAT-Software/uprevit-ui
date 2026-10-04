@@ -21,22 +21,34 @@ export function ApproveAssignmentDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { mutate: decide, isPending } = useDecideWorkflowAssignment(workflowId);
+  const isAgain = assignment.decision === "approved";
+  const { mutate: decide, isPending } = useDecideWorkflowAssignment(
+    workflowId,
+    { approveAgain: isAgain },
+  );
 
   return (
     <WorkflowNoteDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Approve"
+      title={isAgain ? "Approve again" : "Approve"}
       variant="confirm"
-      heading={`Approve for ${groupLabel}?`}
-      message="Your approval is recorded in the workflow history with your name and the time."
+      heading={
+        isAgain
+          ? `Approve the latest content for ${groupLabel}?`
+          : `Approve for ${groupLabel}?`
+      }
+      message={
+        isAgain
+          ? "Your earlier approval still counts. This is optional and records a new approval on the latest content in the workflow history."
+          : "Your approval is recorded in the workflow history with your name and the time."
+      }
       icon={ThumbsUpIcon}
       noteLabel="Comment"
       noteTooltip="Visible to everyone on this workflow."
       notePlaceholder="Add a comment for the team"
       required={false}
-      submitLabel="Approve"
+      submitLabel={isAgain ? "Approve again" : "Approve"}
       submitLoadingLabel="Approving…"
       submitIcon={CheckmarkCircle02Icon}
       isPending={isPending}

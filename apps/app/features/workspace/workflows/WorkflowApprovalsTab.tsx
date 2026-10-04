@@ -147,6 +147,11 @@ function AssignmentRow({
   const canApprove = canDecide && !assignment.openChangeRequestCount;
   const canRequestChanges =
     isActive && isMine && assignment.decision !== "rejected";
+  const canApproveAgain =
+    isActive &&
+    isMine &&
+    assignment.decision === "approved" &&
+    !!assignment.contentChangedSinceDecision;
   const note = assignment.reason ?? assignment.comment;
 
   return (
@@ -174,6 +179,11 @@ function AssignmentRow({
           isMine={isMine}
           isActive={isActive}
         />
+        {assignment.contentChangedSinceDecision ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            Content changed since this approval
+          </p>
+        ) : null}
         {note ? (
           <p className="mt-1 whitespace-pre-wrap break-words border-l-2 border-border pl-2 text-xs text-foreground/80">
             {note}
@@ -224,10 +234,26 @@ function AssignmentRow({
             ) : null}
           </>
         ) : (
-          <WorkflowDecisionBadge
-            decision={assignment.decision}
-            closed={isEnded}
-          />
+          <>
+            {canApproveAgain ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={disabled}
+                onClick={() =>
+                  onDecide({ assignment, groupLabel, decision: "approve" })
+                }
+              >
+                <Icon icon={CheckmarkCircle02Icon} size={14} />
+                Approve again
+              </Button>
+            ) : null}
+            <WorkflowDecisionBadge
+              decision={assignment.decision}
+              closed={isEnded}
+            />
+          </>
         )}
         {canEdit ? (
           <Tooltip>

@@ -33,12 +33,13 @@ import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
   PRODUCT_EDIT_FORBIDDEN_MESSAGE,
   PRODUCT_STATUS_LABELS,
+  getProductInReviewMessage,
   getProductLockedMessage,
   isProductContentLocked,
 } from "@/utils/product/product-lifecycle";
-import Link from "next/link";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 import ProductTeamMenu from "./ProductTeamMenu";
+import { GuardedLink } from "@/components/common/GuardedLink";
 import { NotificationsBell } from "@/components/common/NotificationsBell";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -314,7 +315,8 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
     : false;
-  const isCompletionLocked = status === "submitted" && isCurrentTabCompleted;
+  const isCompletionLocked =
+    (status === "submitted" || status === "in_review") && isCurrentTabCompleted;
 
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
@@ -764,7 +766,9 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                         : !canEdit
                           ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
                           : isCompletionLocked
-                            ? "Return to draft to mark a tab incomplete"
+                            ? status === "in_review"
+                              ? "Tabs can't be marked incomplete while in review"
+                              : "Return to draft to mark a tab incomplete"
                             : undefined
                   }
                 >
@@ -812,17 +816,17 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button size="sm" variant="outline" asChild>
-                    <Link href={`/workflows/${activeWorkflow.id}`}>
+                    <GuardedLink href={`/workflows/${activeWorkflow.id}`}>
                       <Icon icon={WorkflowIcon} size={14} />
                       {statusLabel} ·{" "}
                       <span className="font-mono">
                         {activeWorkflow.numberLabel}
                       </span>
-                    </Link>
+                    </GuardedLink>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="end">
-                  {getProductLockedMessage(productCoreData)}
+                  {getProductInReviewMessage(productCoreData)}
                 </TooltipContent>
               </Tooltip>
             ) : (

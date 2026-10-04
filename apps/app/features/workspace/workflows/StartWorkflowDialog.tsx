@@ -39,7 +39,8 @@ export function StartWorkflowDialog({
             <ul className="list-disc space-y-1 pl-4">
               <li>
                 {productCount} {productCount === 1 ? "Product moves" : "Products move"}{" "}
-                to In Review and can&apos;t be edited until the workflow ends.
+                to In Review. Approvers are notified of any change saved
+                while it&apos;s in review.
               </li>
               <li>
                 Products and approvers are locked. They can&apos;t be changed
