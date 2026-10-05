@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Added approval workflows for every workspace: submitting a product marks it Submitted, and a workflow releases it.
+- Added advanced workflow search with saved searches.
+- Added the released version and active workflow to product tables and the product header, and a Workflows list on the product page.
+- Added an Approval workflows help page.
+
+### Removed
+
+- Removed the approval workflows switch from Platform Admin and the Submit and release option.
+
 ## [0.7.0] - 2026-09-27
 
 ### Added

@@ -16,8 +16,9 @@ Open **Products** (`/products`) to see all products you can access. The table in
 | **Product name** | Display name. |
 | **PPN** | Product Plan Number (unique identifier). |
 | **Project / Department** | Structural placement. |
-| **Status** | `Draft`, `Submitted`, or `Archived`. |
-| **Version** | Numeric version (e.g. v1, v2). |
+| **Owner** | Product Owner accountable for the product. |
+| **Status** | `Draft`, `Submitted`, `In Review`, `Released`, or `Obsolete`, with a link to the active workflow when In Review. |
+| **Version** | Numeric version (e.g. v4), plus the released version when a newer one is being worked on (e.g. **Released v3**). |
 | **Progress** | Tab completion percentage (0–7 tabs). |
 
 Click a row to open **Product Information** for that product. Use the row menu for shortcuts without navigating away.
@@ -54,32 +55,37 @@ After creating a product, open the seven documentation tabs from the product sid
 | Status | Meaning |
 |--------|---------|
 | **Draft** | Editable; default for new products and new versions. |
-| **Submitted** | Locked snapshot; editing disabled on all tabs. |
-| **Archived** | Removed from active work; listed under Archive. |
+| **Submitted** | Ready for an approval workflow; still editable. |
+| **In Review** | Inside an active approval workflow; still editable. |
+| **Released** | Approved and frozen; editing disabled on all tabs. |
+| **Obsolete** | An earlier release replaced by a newer one. |
 
-**Submit** (product header) is available at 100% tab completion and locks the current version. To continue work, create a **New version** from the products table when status is **Submitted**—see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+**Submit for approval** (product header) is available at 100% tab completion. An [approval workflow](/docs/review-outputs/approval-workflows) releases the version. To continue work after release, create a **New version** from the products table—see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+
+Archiving is separate from status: an archived product is hidden from active work, and its versions keep their status.
 
 ## Row actions
 
 | Action | Who can use | Notes |
 |--------|-------------|-------|
-| Edit name/description | All users | |
-| New version | All users | Only when status is **Submitted**. |
+| Edit name/description | Product Owner, Contributors, or admins | Draft, Submitted, or In Review versions only. |
+| New version | Product Owner, Contributors, or admins | Only when the latest version is **Released** and the product is not archived. |
 | Share | All users | Copies product URL. |
 | Bookmark | All users | Adds to bookmark folders; see [Bookmarks](/docs/source-files-bookmarks/bookmarks). |
 | Export PDF | All users | Queues async job; see [Exports](/docs/review-outputs/exports). |
-| Archive | **Admin only** | Moves product to archived status. |
+| Archive | **Admin only** | Moves the product to Archive. |
 
 <Callout type="warn" title="Admin only">
-**Archive** on the products table sets status to **archived** and is restricted to admins.
+**Archive** on the products table moves the product to Archive and is restricted to admins.
 </Callout>
 
 ## Archiving and restoring products
 
-Admins archive products from the table menu. Restore archived products from **Archive → Products** (`/archive`). Restored products return to **Draft** status.
+Admins archive products from the table menu. Restore archived products from **Archive → Products** (`/archive`). Restored products keep the status each version had.
 
 ## Related topics
 
 - [Product Overview](/docs/product-documentation/product-overview) — seven documentation tabs, completion, and header tools.
 - [Source Files](/docs/source-files-bookmarks/source-files) — link folders from Product Information.
 - [Redlines and Versions](/docs/review-outputs/redlines-versions) — submit and compare workflow.
+- [Approval Workflows](/docs/review-outputs/approval-workflows) — review and release versions.

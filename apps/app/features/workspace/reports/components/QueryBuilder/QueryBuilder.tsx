@@ -3,32 +3,40 @@
 import { Add01Icon, FilterVerticalIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { QueryCondition } from "@/types/reports";
-import { ConditionRow } from "./ConditionRow";
+import type { ReactNode } from "react";
 import { LogicToggle } from "./LogicToggle";
 
-export interface QueryBuilderProps {
-  conditions: QueryCondition[];
+type BaseCondition = { id: string; logic?: "AND" | "OR" };
+
+export type ConditionRowRenderProps<T> = {
+  position: number;
+  onUpdate: (updates: Partial<Omit<T, "id">>) => void;
+  onRemove: () => void;
+};
+
+export interface QueryBuilderProps<T extends BaseCondition> {
+  conditions: T[];
   conditionLogic: "AND" | "OR";
   onAddCondition: () => void;
-  onUpdateCondition: (
-    id: string,
-    updates: Partial<Omit<QueryCondition, "id">>,
-  ) => void;
+  onUpdateCondition: (id: string, updates: Partial<Omit<T, "id">>) => void;
   onRemoveCondition: (id: string) => void;
   onConditionLogicChange: (id: string, logic: "AND" | "OR") => void;
+  renderCondition: (condition: T, props: ConditionRowRenderProps<T>) => ReactNode;
+  emptyDescription?: string;
   maxConditions?: number;
 }
 
-export function QueryBuilder({
+export function QueryBuilder<T extends BaseCondition>({
   conditions,
   conditionLogic,
   onAddCondition,
   onUpdateCondition,
   onRemoveCondition,
   onConditionLogicChange,
+  renderCondition,
+  emptyDescription = "Add conditions to filter and search products",
   maxConditions = 10,
-}: QueryBuilderProps) {
+}: QueryBuilderProps<T>) {
   const canAddMore = conditions.length < maxConditions;
 
   return (
@@ -51,7 +59,7 @@ export function QueryBuilder({
             No conditions added yet
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Add conditions to filter and search products
+            {emptyDescription}
           </p>
           <Button
             type="button"
@@ -67,12 +75,11 @@ export function QueryBuilder({
         <div className="space-y-0">
           {conditions.map((condition, index) => (
             <div key={condition.id}>
-              <ConditionRow
-                condition={condition}
-                position={index + 1}
-                onUpdate={(updates) => onUpdateCondition(condition.id, updates)}
-                onRemove={() => onRemoveCondition(condition.id)}
-              />
+              {renderCondition(condition, {
+                position: index + 1,
+                onUpdate: (updates) => onUpdateCondition(condition.id, updates),
+                onRemove: () => onRemoveCondition(condition.id),
+              })}
               {index < conditions.length - 1 ? (
                 <LogicToggle
                   value={conditions[index + 1].logic || conditionLogic}

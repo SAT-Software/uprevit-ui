@@ -40,7 +40,6 @@ import { WorkflowHistoryTab } from "@/features/workspace/workflows/WorkflowHisto
 import { WorkflowProductsTab } from "@/features/workspace/workflows/WorkflowProductsTab";
 import { WorkflowStatusBadge } from "@/features/workspace/workflows/WorkflowStatusBadge";
 import { WorkflowSummaryTab } from "@/features/workspace/workflows/WorkflowSummaryTab";
-import { WorkflowsFeatureGate } from "@/features/workspace/workflows/WorkflowsFeatureGate";
 import { useWorkflow } from "@/hooks/workflow/useWorkflows";
 
 const WORKFLOW_TABS = [
@@ -262,9 +261,5 @@ function WorkflowDetail() {
 }
 
 export default function WorkflowPage() {
-  return (
-    <WorkflowsFeatureGate>
-      <WorkflowDetail />
-    </WorkflowsFeatureGate>
-  );
+  return <WorkflowDetail />;
 }

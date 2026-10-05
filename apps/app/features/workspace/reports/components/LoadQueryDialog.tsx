@@ -16,21 +16,21 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 
-interface LoadQueryDialogProps {
+interface LoadQueryDialogProps<T extends SavedQuery<unknown>> {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  queries: SavedQuery[];
-  onLoad: (query: SavedQuery) => void;
+  queries: T[];
+  onLoad: (query: T) => void;
   onDelete: (id: string) => void;
 }
 
-export function LoadQueryDialog({
+export function LoadQueryDialog<T extends SavedQuery<unknown>>({
   open,
   onOpenChange,
   queries,
   onLoad,
   onDelete,
-}: LoadQueryDialogProps) {
+}: LoadQueryDialogProps<T>) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",

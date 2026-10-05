@@ -359,9 +359,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: workspaceData, isLoading: isWorkspaceLoading } =
     useGetWorkspace();
   const workspace = workspaceData?.workspace;
-  const workflowsEnabled = workspace?.approvalWorkflowsEnabled === true;
-  const isNavItemVisible = ({ url }: { url: string }) =>
-    url !== "/workflows" || workflowsEnabled;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -421,7 +418,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
-                {item.items.filter(isNavItemVisible).map((item) => (
+                {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild

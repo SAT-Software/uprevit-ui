@@ -1,0 +1,99 @@
+---
+title: Approval Workflows
+description: Send product versions for review, approve or request changes, and release them together.
+---
+
+An **approval workflow** groups the latest version of one or more products for review. Approvers are assigned by **Function** (for example Product Team, Quality, or Regulatory). When everyone approves, all versions in the workflow are **Released** together. A workflow is the only way a version becomes Released.
+
+Each workflow gets a permanent number such as `AM-WF-000123`.
+
+## Product lifecycle
+
+```text
+Draft → Submitted → In Review → Released → Obsolete
+                        │
+                        └─ Rejected or Cancelled workflow → back to Submitted
+```
+
+| Status | Meaning |
+|--------|---------|
+| **Draft** | Being written. New products and new versions start here. |
+| **Submitted** | Ready for a workflow. Still editable. The Product Owner or a Contributor can return it to Draft before a workflow starts. |
+| **In Review** | Inside an active workflow. Still editable; approvers are told about changes. |
+| **Released** | Approved and frozen. Create a new version to make changes. |
+| **Obsolete** | An older release replaced by a newer one. Kept as read-only history. |
+
+Product tables and the product header show the working version and the released version on one row, for example **v4 In Review · Released v3**, with a link to the active workflow.
+
+## Submit a product
+
+1. Mark all seven tabs complete so progress shows **100%**.
+2. Click **Submit for approval** in the product header and confirm.
+
+The version becomes **Submitted**. Nothing is released yet.
+
+## Create and start a workflow
+
+1. Open **Workflows** in the sidebar and click **Create Workflow**.
+2. Add one or more Submitted products.
+3. Add approvers:
+   - **Product Team:** at least one owner or contributor of each product.
+   - **Other Functions:** at least one more Function, such as Quality. Type the Function name when you add the approver.
+4. Choose a **completion mode**:
+   - **Automatic:** releases the products as soon as everyone approves.
+   - **Initiator-controlled:** waits for the Initiator or an admin to click **Complete Workflow**.
+5. Check the **Ready to start?** list, then click **Start Workflow**.
+
+After start, the products, approvers, and completion mode are locked. The products move to **In Review** and every approver is notified.
+
+## Review and decide
+
+Approvers open the workflow from **Workflows → My Tasks** or from their notification.
+
+| Decision | What happens |
+|----------|--------------|
+| **Approve** | Records approval for your assignment. |
+| **Request Changes** | Keeps the workflow open. Add a reason for one product or the whole workflow. Approvals from other approvers keep counting. If you had approved earlier, approve again once your request is addressed. |
+| **Reject** | Ends the whole workflow without release. Every product returns to **Submitted**. A reason is required. |
+
+Use the **Discussion** tab to comment on one product or on the whole workflow.
+
+### Address requested changes
+
+The Product Owner or a Contributor edits the product, then clicks **Mark Addressed** with a short note. The approver who asked is notified. Addressing a request does not count as approval.
+
+## Change notices and Approve again
+
+In Review versions can still be edited. When someone saves a change to reviewed product content, every approver gets one **change notice**. Approvals are kept and the workflow status does not change.
+
+An approver whose approval came before the latest change sees **Approve again**. It records a fresh approval against the current content. It is optional and never required to complete the workflow.
+
+## Replace approvers and send reminders
+
+The Initiator or an admin can **replace** a pending approver with a reason. Decisions already made stay with the original person. If an approver leaves the workspace or the product team, their assignment shows **Needs replacement** and the Initiator is notified.
+
+The Initiator can click **Send Reminder** to notify chosen approvers, with an optional message. Pending approvers are selected by default.
+
+## Complete, cancel, and history
+
+- **Complete:** in Initiator-controlled mode, the Initiator or an admin completes a **Ready to Complete** workflow. All products are released together; any previous release becomes **Obsolete**.
+- **Cancel:** the Initiator or an admin can cancel an active workflow with a reason. Products return to **Submitted**.
+- **History:** every decision, change, replacement, and reminder is kept in the workflow's **History** tab.
+
+A product page's **Workflows** button lists every workflow that product was in.
+
+## Find workflows
+
+- **Workflows** lists all workflows, the ones you created, and your tasks. Search by number or name and filter by status or product.
+- **Advanced search** finds workflows with up to 10 conditions joined with **AND** or **OR**, such as *Status is In Review AND Function contains Quality*. You can search by number, name, status, product, Initiator, approver, Function, completion mode, and milestone dates.
+- Save a search to load it again later. Saved searches stay in your browser.
+
+<Callout title="Not an electronic signature">
+Workflow approvals are an internal approval record. They are not legally binding electronic signatures and do not replace your regulatory or QMS sign-off process.
+</Callout>
+
+## Related topics
+
+- [Redlines and Versions](/docs/review-outputs/redlines-versions): compare versions and create a new draft.
+- [Products](/docs/getting-started/products): status, owner, and row actions.
+- [Archives](/docs/review-outputs/archives): archive a product without changing its versions.

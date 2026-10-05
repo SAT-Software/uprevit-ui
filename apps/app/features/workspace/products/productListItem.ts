@@ -1,4 +1,10 @@
-import type { AuditLog, ProductStatus, ProductTeam } from "@/types/product";
+import type {
+  AuditLog,
+  ProductActiveWorkflow,
+  ProductReleasedVersion,
+  ProductStatus,
+  ProductTeam,
+} from "@/types/product";
 
 export type ProductListItem = ProductTeam & {
   _id: string;
@@ -36,4 +42,6 @@ export type ProductListItem = ProductTeam & {
     project_name: string;
   }>;
   complete_count: number;
+  active_workflow?: ProductActiveWorkflow | null;
+  released_version?: ProductReleasedVersion | null;
 };

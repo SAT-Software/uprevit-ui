@@ -90,7 +90,6 @@ export type PlatformWorkspaceDetail = {
     description: string;
     logo: string | null;
     planName: string | null;
-    approvalWorkflowsEnabled: boolean;
   };
   counts: {
     members: number;

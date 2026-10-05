@@ -23,6 +23,7 @@ import {
   ThreeDViewIcon,
   AiSheetsIcon,
   BookOpen01Icon,
+  WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 
@@ -174,6 +175,12 @@ export default function DocsRootLayout({
                 icon: <DocsIcon icon={Presentation01Icon} />,
                 defaultOpen: true,
                 children: [
+                  {
+                    name: "Approval Workflows",
+                    type: "page",
+                    url: "/docs/review-outputs/approval-workflows",
+                    icon: <DocsIcon icon={WorkflowIcon} />,
+                  },
                   {
                     name: "Redlines and Versions",
                     type: "page",

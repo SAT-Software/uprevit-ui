@@ -9,6 +9,7 @@ import ProductInfoEditMetadataDialog from "@/features/workspace/products/product
 import EditProductDialog from "@/features/workspace/products/product/product-information/ProductInfoEditProductDialog";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
+import { ProductWorkflowsSheet } from "@/features/workspace/products/product/ProductWorkflowsSheet";
 import { useGetProductLinkedSourceFileFolders } from "@/hooks/source-files/useGetProductLinkedSourceFileFolders";
 import { AuditLog } from "@/types/audit-log";
 import type { ProductMetadata, ProductStatus } from "@/types/product";
@@ -630,6 +631,11 @@ export default function Page() {
                   }
                 />
               )}
+              {productMetadata?.product_lineage_id ? (
+                <ProductWorkflowsSheet
+                  lineageId={productMetadata.product_lineage_id}
+                />
+              ) : null}
               {productId && productMetadataForDialog && (
                 <ProductInfoEditMetadataDialog
                   productId={productId}
