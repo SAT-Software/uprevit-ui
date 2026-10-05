@@ -282,8 +282,9 @@ export default function WorkflowSearchPage() {
         queries={savedSearches}
         onLoad={handleLoad}
         onDelete={(id) => {
-          deleteQuery(id);
-          toast.success("The saved search has been deleted.");
+          const result = deleteQuery(id);
+          if (result.success) toast.success("The saved search has been deleted.");
+          else toast.error(result.error || "Failed to delete saved search.");
         }}
       />
     </div>
