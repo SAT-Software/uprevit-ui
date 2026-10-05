@@ -9,8 +9,10 @@ import {
   CheckmarkCircle02Icon,
   MessageEdit01Icon,
   UserAdd01Icon,
+  UserSwitchIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Command,
@@ -48,6 +50,7 @@ import { WORKFLOW_RELATIONSHIP_LABELS } from "@/utils/workflow/workflow-labels";
 import { ApproveAssignmentDialog } from "./ApproveAssignmentDialog";
 import { ConfirmWorkflowRemovalDialog } from "./ConfirmWorkflowRemovalDialog";
 import { RejectWorkflowDialog } from "./RejectWorkflowDialog";
+import { ReplaceApproverDialog } from "./ReplaceApproverDialog";
 import { RequestChangesDialog } from "./RequestChangesDialog";
 import { WorkflowDecisionBadge } from "./WorkflowDecisionBadge";
 
@@ -61,11 +64,14 @@ type RemovalTarget = {
   groupLabel: string;
 };
 type DecisionTarget = RemovalTarget & {
-  decision: "approve" | "reject" | "request_changes";
+  decision: "approve" | "reject" | "request_changes" | "replace";
 };
 
 type RowContext = {
   canEdit: boolean;
+  canReplace: boolean;
+  replacedNames: Map<string, string>;
+  isOnTeam: (assignment: WorkflowAssignmentDetail) => boolean;
   disabled: boolean;
   isInReview: boolean;
   isActive: boolean;
@@ -106,8 +112,8 @@ function ChangeRequestStatus({
   isMine: boolean;
   isActive: boolean;
 }) {
-  if (assignment.decision !== "changes_requested") return null;
   const open = assignment.openChangeRequestCount ?? 0;
+  if (assignment.decision !== "changes_requested" && !open) return null;
   if (!isActive && !open) return null;
 
   return (
@@ -131,6 +137,9 @@ function AssignmentRow({
   const { name, email } = assignment.userSnapshot;
   const {
     canEdit,
+    canReplace,
+    replacedNames,
+    isOnTeam,
     disabled,
     isInReview,
     isActive,
@@ -143,13 +152,16 @@ function AssignmentRow({
   const isUndecided =
     assignment.decision === "pending" ||
     assignment.decision === "changes_requested";
-  const canDecide = isInReview && isMine && isUndecided;
+  const isEligible = !assignment.needsReplacement && isOnTeam(assignment);
+  const canDecide = isInReview && isMine && isUndecided && isEligible;
   const canApprove = canDecide && !assignment.openChangeRequestCount;
   const canRequestChanges =
-    isActive && isMine && assignment.decision !== "rejected";
+    isActive && isMine && isEligible && assignment.decision !== "rejected";
+  const replacedName = replacedNames.get(assignment._id);
   const canApproveAgain =
     isActive &&
     isMine &&
+    isEligible &&
     assignment.decision === "approved" &&
     !!assignment.contentChangedSinceDecision;
   const note = assignment.reason ?? assignment.comment;
@@ -174,6 +186,16 @@ function AssignmentRow({
             {formatToLocalDateTime(assignment.decidedAt)}
           </p>
         ) : null}
+        {replacedName ? (
+          <p className="text-xs text-muted-foreground">
+            Replaced {replacedName}
+          </p>
+        ) : null}
+        {assignment.needsReplacement && isUndecided && isMine ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            You can no longer approve here. The Initiator needs to replace you.
+          </p>
+        ) : null}
         <ChangeRequestStatus
           assignment={assignment}
           isMine={isMine}
@@ -191,6 +213,30 @@ function AssignmentRow({
         ) : null}
       </div>
       <div className="flex h-9 shrink-0 items-center gap-1.5">
+        {assignment.needsReplacement && isUndecided ? (
+          <Badge variant="yellow" className="font-normal">
+            Needs replacement
+          </Badge>
+        ) : null}
+        {canReplace && isUndecided ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                size="icon-xs"
+                variant="outline"
+                aria-label={`Replace ${name} for ${groupLabel}`}
+                disabled={disabled}
+                onClick={() =>
+                  onDecide({ assignment, groupLabel, decision: "replace" })
+                }
+              >
+                <Icon icon={UserSwitchIcon} size={14} strokeWidth={2} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Replace approver</TooltipContent>
+          </Tooltip>
+        ) : null}
         {canRequestChanges ? (
           <Button
             type="button"
@@ -471,6 +517,18 @@ export function WorkflowApprovalsTab({
   const isStarted = workflow.status !== "draft";
   const rowContext: RowContext = {
     canEdit,
+    canReplace: workflow.canReplace,
+    isOnTeam: (assignment) =>
+      assignment.functionType !== "product_team" ||
+      !!workflow.products
+        .find((product) => product.lineageId === assignment.lineageId)
+        ?.team.some((member) => member._id === assignment.userId),
+    replacedNames: new Map(
+      (workflow.replacedAssignments ?? []).map((item) => [
+        item.replacementAssignmentId,
+        item.userSnapshot.name,
+      ]),
+    ),
     disabled: update.isPending,
     isInReview: workflow.status === "in_review",
     isActive:
@@ -680,6 +738,15 @@ export function WorkflowApprovalsTab({
         <RejectWorkflowDialog
           workflow={workflow}
           assignment={decisionTarget.assignment}
+          open={decisionOpen}
+          onOpenChange={setDecisionOpen}
+        />
+      ) : decisionTarget?.decision === "replace" ? (
+        <ReplaceApproverDialog
+          key={decisionTarget.assignment._id}
+          workflow={workflow}
+          assignment={decisionTarget.assignment}
+          groupLabel={decisionTarget.groupLabel}
           open={decisionOpen}
           onOpenChange={setDecisionOpen}
         />

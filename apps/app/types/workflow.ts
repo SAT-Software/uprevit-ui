@@ -16,6 +16,10 @@ export type WorkflowDecision =
   | "rejected"
   | "changes_requested";
 
+export type WorkflowUnavailableCause =
+  | "removed_from_workspace"
+  | "left_product_team";
+
 export type WorkflowRelationship = "product_owner" | "product_contributor";
 
 export interface WorkflowProduct {
@@ -50,12 +54,20 @@ export interface WorkflowAssignment {
   decidedAt?: string;
   comment?: string;
   reason?: string;
+  needsReplacement?: WorkflowUnavailableCause;
 }
 
 export interface WorkflowActor {
   userId: string;
   name: string;
   email: string;
+}
+
+export interface ReplacedWorkflowAssignment extends WorkflowAssignment {
+  replacedAt: string;
+  replacedBy: WorkflowActor;
+  replacementReason: string;
+  replacementAssignmentId: string;
 }
 
 export interface Workflow {
@@ -69,6 +81,7 @@ export interface Workflow {
   initiator: WorkflowActor;
   products: WorkflowProduct[];
   assignments: WorkflowAssignment[];
+  replacedAssignments?: ReplacedWorkflowAssignment[];
   dates: {
     createdAt: string;
     startedAt?: string;
@@ -92,6 +105,8 @@ export interface WorkflowDetail extends Omit<Workflow, "products" | "assignments
   canEdit: boolean;
   canCancel: boolean;
   canComplete: boolean;
+  canReplace: boolean;
+  canSendReminder: boolean;
 }
 
 export type WorkflowEventType =
@@ -101,10 +116,15 @@ export type WorkflowEventType =
   | "content_changed"
   | "changes_requested"
   | "change_request_addressed"
+  | "approver_replaced"
+  | "approver_unavailable"
+  | "reminder_sent"
   | "ready_to_complete"
   | "completed"
   | "rejected"
   | "cancelled";
+
+type WorkflowUserSnapshot = { name: string; email: string };
 
 export interface WorkflowEvent {
   _id: string;
@@ -125,6 +145,10 @@ export interface WorkflowEvent {
     productVersionId?: string;
     productName?: string;
     notified?: string[];
+    from?: WorkflowUserSnapshot;
+    to?: WorkflowUserSnapshot;
+    approver?: WorkflowUserSnapshot;
+    cause?: WorkflowUnavailableCause;
   };
   createdAt: string;
 }

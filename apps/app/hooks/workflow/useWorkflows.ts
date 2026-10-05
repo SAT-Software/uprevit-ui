@@ -294,6 +294,47 @@ export function useDecideWorkflowAssignment(
   );
 }
 
+export function useReplaceWorkflowApprover(workflowId: string) {
+  return useWorkflowAction(
+    workflowId,
+    ({
+      assignmentId,
+      ...body
+    }: {
+      assignmentId: string;
+      userId: string;
+      reason: string;
+    }) => ({ path: `/assignments/${assignmentId}/replace`, body }),
+    { success: () => "Approver replaced", error: "Failed to replace approver" },
+  );
+}
+
+export function useSendWorkflowReminder(workflowId: string) {
+  const queryClient = useQueryClient();
+  const auth = useAuth();
+
+  return useMutation({
+    mutationFn: (body: { assignmentIds: string[]; message?: string }) =>
+      workflowRequest<{ notified: string[] }>(
+        `/${workflowId}/reminders`,
+        auth,
+        "Failed to send reminder",
+        { method: "POST", body: JSON.stringify(body) },
+      ),
+    onSuccess: ({ notified }) => {
+      toast.success(`Reminder sent to ${notified.join(", ")}`);
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Failed to send reminder"));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: [...WORKFLOWS_QUERY_KEY, "history", workflowId],
+      });
+    },
+  });
+}
+
 export function useCancelWorkflow(workflowId: string) {
   return useWorkflowAction(
     workflowId,

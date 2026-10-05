@@ -101,6 +101,7 @@ export function WorkflowNoteDialog({
   submitLoadingLabel,
   submitIcon,
   submitVariant,
+  submitDisabled = false,
   isPending,
   children,
   onSubmit,
@@ -120,6 +121,7 @@ export function WorkflowNoteDialog({
   submitLoadingLabel: string;
   submitIcon: IconSvgElement;
   submitVariant?: React.ComponentProps<typeof Button>["variant"];
+  submitDisabled?: boolean;
   isPending: boolean;
   children?: React.ReactNode;
   onSubmit: (note: string) => void;
@@ -145,7 +147,7 @@ export function WorkflowNoteDialog({
           form: formId,
           type: "submit",
           loading: isPending,
-          disabled: isPending,
+          disabled: isPending || submitDisabled,
           icon: submitIcon,
           variant: submitVariant,
         }}
