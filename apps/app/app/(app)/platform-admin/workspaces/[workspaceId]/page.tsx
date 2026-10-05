@@ -28,7 +28,6 @@ import {
 } from "@/features/platform-admin/PlatformBillingSection";
 import { WorkspaceAdminInviteDialog } from "@/features/platform-admin/WorkspaceAdminInviteDialog";
 import { WorkspaceStatsRow } from "@/features/platform-admin/WorkspaceStatsRow";
-import { PlatformWorkspaceFeaturesCard } from "@/features/platform-admin/PlatformWorkspaceFeaturesCard";
 import { useGetPlatformWorkspaceDetail } from "@/hooks/platform-admin/useGetPlatformWorkspaceDetail";
 import type { PlatformWorkspaceAdmin } from "@/types/platform-admin";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
@@ -286,12 +285,6 @@ export default function PlatformAdminWorkspaceDetailPage() {
                       }
                     />
                     <div className="flex flex-col gap-2 p-2">
-                      <PlatformWorkspaceFeaturesCard
-                        workspaceId={workspaceId}
-                        approvalWorkflowsEnabled={
-                          data?.workspace.approvalWorkflowsEnabled ?? false
-                        }
-                      />
                       <PlatformBillingOverviewSection
                         workspaceId={workspaceId}
                         billingStatus={data?.billing.status}

@@ -27,7 +27,6 @@ import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { cn } from "@uprevit/ui/lib/utils";
 import type { Product, ProductStatus } from "@/types/product";
-import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
@@ -175,9 +174,6 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     useUpdateProduct();
   const { mutate: exportPDF, isPending: isExportingPDF } =
     useExportProductPDF();
-  const { data: workspaceData } = useGetWorkspace();
-  const workflowsEnabled =
-    workspaceData?.workspace?.approvalWorkflowsEnabled === true;
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
@@ -235,13 +231,15 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const activeWorkflow =
     status === "in_review" ? productCoreData?.active_workflow : null;
   const isEditLocked = isReadOnly || isExportLocked || !canEdit;
-  const isSubmittable =
-    status === "draft" || (status === "submitted" && !workflowsEnabled);
+  const isSubmittable = status === "draft";
   const canSubmit =
     isSubmittable && isProductComplete && !isExportLocked && canEdit;
-  const submitLabel = workflowsEnabled
-    ? "Submit for approval"
-    : "Submit and release";
+  const submitLabel = "Submit for approval";
+  const releasedVersion =
+    productCoreData?.released_version &&
+    productCoreData.released_version.id !== productId
+      ? productCoreData.released_version
+      : null;
 
   const canReturnToDraft =
     status === "submitted" && canEdit && !isExportLocked && !isUpdatingProduct;
@@ -713,6 +711,27 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
               </Command>
             </PopoverContent>
           </Popover>
+          {releasedVersion ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-xs font-normal text-muted-foreground"
+                  asChild
+                >
+                  <GuardedLink
+                    href={`/products/${releasedVersion.id}/${currentTab}`}
+                  >
+                    Released v{releasedVersion.version}
+                  </GuardedLink>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Open the released version
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
@@ -839,7 +858,6 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                     <ConfirmSubmitProductDialog
                       productName={product?.productName}
                       title={submitLabel}
-                      workflowsEnabled={workflowsEnabled}
                       onConfirm={handleSubmit}
                       disabled={!canSubmit}
                     >
@@ -859,9 +877,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                         ? "Cannot submit while an export is in progress"
                         : !isProductComplete
                           ? "Complete all tabs to enable submission"
-                          : workflowsEnabled
-                            ? "An approval workflow will release this version"
-                            : "Release this version now"}
+                          : "An approval workflow will release this version"}
                 </TooltipContent>
               </Tooltip>
             )}

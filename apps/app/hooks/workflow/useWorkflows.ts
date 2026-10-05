@@ -19,6 +19,7 @@ import type {
   WorkflowDiscussionScope,
   WorkflowEvent,
   WorkflowReadinessCheck,
+  WorkflowSearchCondition,
   WorkflowStatus,
   WorkflowView,
 } from "@/types/workflow";
@@ -92,6 +93,37 @@ export function useWorkflows(params: WorkflowListParams, enabled = true) {
     placeholderData: keepPreviousData,
     enabled: auth.isAuthenticated && enabled,
     refetchInterval: LIST_POLL_INTERVAL_MS,
+  });
+}
+
+export type WorkflowSearchRequest = {
+  conditions: Omit<WorkflowSearchCondition, "id">[];
+  page: number;
+  limit: number;
+};
+
+export function useWorkflowSearch(request: WorkflowSearchRequest | null) {
+  const auth = useAuth();
+
+  return useQuery({
+    queryKey: [...WORKFLOWS_QUERY_KEY, "search", request],
+    queryFn: ({ signal }) =>
+      workflowRequest<GetWorkflowsResponse>(
+        "/query",
+        auth,
+        "Failed to search workflows",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            conditions: request!.conditions,
+            pagination: { page: request!.page, limit: request!.limit },
+          }),
+          signal,
+        },
+      ),
+    placeholderData: keepPreviousData,
+    staleTime: 0,
+    enabled: auth.isAuthenticated && !!request,
   });
 }
 

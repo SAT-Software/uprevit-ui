@@ -229,3 +229,38 @@ export type WorkflowDecisionInput =
       reason: string;
       scope: WorkflowDiscussionScope;
     };
+
+export type WorkflowSearchField =
+  | "number"
+  | "name"
+  | "status"
+  | "product"
+  | "initiator"
+  | "approver"
+  | "function"
+  | "completionMode"
+  | "createdAt"
+  | "startedAt"
+  | "readyToCompleteAt"
+  | "completedAt"
+  | "rejectedAt"
+  | "cancelledAt";
+
+export type WorkflowSearchOperator =
+  | "equals"
+  | "not_equals"
+  | "contains"
+  | "not_contains"
+  | "on"
+  | "before"
+  | "after"
+  | "exists"
+  | "not_exists";
+
+export interface WorkflowSearchCondition {
+  id: string;
+  field: WorkflowSearchField | "";
+  operator: WorkflowSearchOperator;
+  value: string;
+  logic?: "AND" | "OR";
+}

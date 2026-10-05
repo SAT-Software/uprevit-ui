@@ -176,6 +176,7 @@ export interface ProductMetadata {
   target_date: string;
   version: number;
   workspace_id: string;
+  product_lineage_id?: string;
   _id: string;
 }
 
@@ -204,6 +205,7 @@ export interface ProductDataContent extends ProductTeam {
   product_description: string;
 
   // Versioning fields
+  product_lineage_id?: string;
   is_latest: boolean;
   parent_id: string | null;
 
@@ -212,8 +214,13 @@ export interface ProductDataContent extends ProductTeam {
   status: ProductStatus;
   complete_count?: number;
   version?: string;
-  active_workflow?: { id: string; numberLabel: string } | null;
+  active_workflow?: ProductActiveWorkflow | null;
+  released_version?: ProductReleasedVersion | null;
 }
+
+export type ProductActiveWorkflow = { id: string; numberLabel: string };
+
+export type ProductReleasedVersion = { id: string; version: number };
 
 /** Wrapper for product_data in tab responses */
 export interface ProductDataWrapper {

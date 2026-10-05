@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import {
+  FilterVerticalIcon,
   Search01Icon,
   TaskDaily01Icon,
   UserIcon,
@@ -23,50 +24,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@uprevit/ui/components/ui/table";
+import { Button } from "@uprevit/ui/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductCombobox } from "@/components/common/ProductCombobox";
-import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
 import { CreateWorkflowDialog } from "@/features/workspace/workflows/WorkflowDetailsDialog";
-import { WorkflowDecisionBadge } from "@/features/workspace/workflows/WorkflowDecisionBadge";
-import { WorkflowStatusBadge } from "@/features/workspace/workflows/WorkflowStatusBadge";
-import { WorkflowsFeatureGate } from "@/features/workspace/workflows/WorkflowsFeatureGate";
+import { WorkflowsTable } from "@/features/workspace/workflows/WorkflowsTable";
 import { useWorkflows } from "@/hooks/workflow/useWorkflows";
 import { WORKSPACE_LIST_LIMIT } from "@/lib/workspace-list-query";
-import type {
-  Workflow,
-  WorkflowDecision,
-  WorkflowStatus,
-  WorkflowView,
-} from "@/types/workflow";
-import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
+import type { WorkflowStatus, WorkflowView } from "@/types/workflow";
 import { WORKFLOW_STATUS_LABELS } from "@/utils/workflow/workflow-labels";
 
 const WORKFLOW_VIEWS: WorkflowView[] = ["all", "created-by-me", "my-tasks"];
 const ALL_STATUSES = "all";
-
-const getMyDecision = (
-  workflow: Workflow,
-  userId: string | undefined,
-): WorkflowDecision => {
-  const decisions = workflow.assignments
-    .filter((assignment) => assignment.userId === userId)
-    .map((assignment) => assignment.decision);
-  if (decisions.includes("rejected")) return "rejected";
-  if (decisions.includes("changes_requested")) return "changes_requested";
-  if (decisions.includes("pending")) return "pending";
-  return "approved";
-};
 
 function WorkflowsList() {
   const searchParams = useSearchParams();
@@ -112,7 +84,15 @@ function WorkflowsList() {
           <p className="text-sm font-medium">Workflows</p>
           <InfoTooltip content="Approval workflows package the latest version of one or more Products for review and release." />
         </div>
-        <CreateWorkflowDialog />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/workflows/search">
+              <Icon icon={FilterVerticalIcon} size={14} strokeWidth={2} />
+              Advanced search
+            </Link>
+          </Button>
+          <CreateWorkflowDialog />
+        </div>
       </div>
 
       <Tabs
@@ -223,68 +203,12 @@ function WorkflowsList() {
           ) : (
             <>
               <div className="w-full border-b border-border">
-                <Table className="min-w-250">
-                  <TableHeader className="bg-muted">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="w-[14%]">Number</TableHead>
-                      <TableHead className="w-[32%]">Name</TableHead>
-                      <TableHead className="w-[14%]">Status</TableHead>
-                      {isMyTasks ? (
-                        <TableHead className="w-[12%]">Your Decision</TableHead>
-                      ) : null}
-                      <TableHead className="w-[8%]">Products</TableHead>
-                      <TableHead className="w-[14%]">Initiator</TableHead>
-                      <TableHead className="w-[18%]">Created</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {isPending ? (
-                      <TableBodySkeleton columnCount={isMyTasks ? 7 : 6} />
-                    ) : (
-                      workflows.map((workflow) => (
-                        <TableRow
-                          key={workflow._id}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => router.push(`/workflows/${workflow._id}`)}
-                        >
-                          <TableCell className="whitespace-nowrap font-mono text-sm">
-                            {workflow.numberLabel}
-                          </TableCell>
-                          <TableCell>
-                            <Link
-                              href={`/workflows/${workflow._id}`}
-                              className="block truncate text-sm font-medium rounded-sm hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              title={workflow.name}
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              {workflow.name}
-                            </Link>
-                          </TableCell>
-                          <TableCell>
-                            <WorkflowStatusBadge status={workflow.status} />
-                          </TableCell>
-                          {isMyTasks ? (
-                            <TableCell>
-                              <WorkflowDecisionBadge
-                                decision={getMyDecision(workflow, userId)}
-                                closed={workflow.status !== "in_review"}
-                              />
-                            </TableCell>
-                          ) : null}
-                          <TableCell className="tabular-nums">
-                            {workflow.products.length}
-                          </TableCell>
-                          <TableCell title={workflow.initiator.email}>
-                            {workflow.initiator.name}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {formatToLocalDateTime(workflow.dates.createdAt)}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                <WorkflowsTable
+                  workflows={workflows}
+                  isPending={isPending}
+                  showMyDecision={isMyTasks}
+                  userId={userId}
+                />
               </div>
               <div
                 className="flex h-10 w-full items-center border-b"
@@ -304,9 +228,5 @@ function WorkflowsList() {
 }
 
 export default function WorkflowsPage() {
-  return (
-    <WorkflowsFeatureGate>
-      <WorkflowsList />
-    </WorkflowsFeatureGate>
-  );
+  return <WorkflowsList />;
 }

@@ -37,10 +37,10 @@ export interface ReportsProduct {
   version?: number;
 }
 
-export interface SavedQuery {
+export interface SavedQuery<T = QueryCondition> {
   id: string;
   name: string;
-  conditions: QueryCondition[];
+  conditions: T[];
   conditionLogic?: "AND" | "OR";
   createdAt: string;
 }

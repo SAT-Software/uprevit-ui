@@ -258,7 +258,7 @@ function WorkspaceTab() {
         </div>
       </div>
 
-      {isAdmin && workspaceData?.approvalWorkflowsEnabled ? (
+      {isAdmin && workspaceData ? (
         <WorkflowSettingsCard workspace={workspaceData} />
       ) : null}
     </div>

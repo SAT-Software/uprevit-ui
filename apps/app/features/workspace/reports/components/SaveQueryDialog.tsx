@@ -21,6 +21,7 @@ interface SaveQueryDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (name: string) => void;
   isConditionsEmpty: boolean;
+  placeholder?: string;
 }
 
 export function SaveQueryDialog({
@@ -28,6 +29,7 @@ export function SaveQueryDialog({
   onOpenChange,
   onSave,
   isConditionsEmpty,
+  placeholder = "e.g., OUS Products with CE Marking",
 }: SaveQueryDialogProps) {
   const inputId = useId();
   const [name, setName] = useState("");
@@ -87,7 +89,7 @@ export function SaveQueryDialog({
             <InputGroup size="md">
               <InputGroupInput
                 id={inputId}
-                placeholder="e.g., OUS Products with CE Marking"
+                placeholder={placeholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}

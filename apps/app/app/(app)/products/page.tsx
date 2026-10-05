@@ -56,7 +56,6 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -81,7 +80,10 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import { cn } from "@uprevit/ui/lib/utils";
-import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import {
+  ProductStatusCell,
+  ProductVersionCell,
+} from "@/features/workspace/products/ProductLifecycleCells";
 import {
   PRODUCT_STATUS_LABELS,
   canCreateProductVersion,
@@ -279,24 +281,29 @@ const columns: ColumnDef<ProductListItem>[] = [
   },
   {
     accessorKey: "status",
-    size: 90,
-    minSize: 80,
-    maxSize: 100,
+    size: 210,
+    minSize: 100,
+    maxSize: 230,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <ProductStatusBadge status={row.original?.status} />
+      <ProductStatusCell
+        status={row.original?.status}
+        activeWorkflow={row.original?.active_workflow}
+      />
     ),
   },
   {
     accessorKey: "version",
-    size: 80,
+    size: 130,
     minSize: 80,
-    maxSize: 90,
+    maxSize: 150,
     header: ({ column }) => <SortableHeader column={column} title="Version" />,
     cell: ({ row }) => (
-      <Badge variant="secondary" className="font-mono text-xs">
-        v{row.getValue("version")}
-      </Badge>
+      <ProductVersionCell
+        productId={row.original._id}
+        version={row.original.version}
+        releasedVersion={row.original?.released_version}
+      />
     ),
   },
   {

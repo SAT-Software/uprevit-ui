@@ -3,29 +3,37 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { SavedQuery, QueryCondition } from "@/types/reports";
 
-const LOCAL_STORAGE_KEY = "uprevit_reports_saved_queries";
+const REPORTS_STORAGE_KEY = "uprevit_reports_saved_queries";
 
-function subscribe(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  window.addEventListener(LOCAL_STORAGE_KEY, onChange);
-  return () => {
-    window.removeEventListener("storage", onChange);
-    window.removeEventListener(LOCAL_STORAGE_KEY, onChange);
-  };
-}
-
-function getSnapshot() {
+function readStorage(storageKey: string) {
   try {
-    return localStorage.getItem(LOCAL_STORAGE_KEY);
+    return localStorage.getItem(storageKey);
   } catch {
     return null;
   }
 }
 
-export function useSavedQueries() {
-  const stored = useSyncExternalStore(subscribe, getSnapshot, () => undefined);
+export function useSavedQueries<T = QueryCondition>(
+  storageKey: string = REPORTS_STORAGE_KEY,
+) {
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      window.addEventListener("storage", onChange);
+      window.addEventListener(storageKey, onChange);
+      return () => {
+        window.removeEventListener("storage", onChange);
+        window.removeEventListener(storageKey, onChange);
+      };
+    },
+    [storageKey],
+  );
+  const stored = useSyncExternalStore(
+    subscribe,
+    () => readStorage(storageKey),
+    () => undefined,
+  );
   const isLoaded = stored !== undefined;
-  const queries = useMemo<SavedQuery[]>(() => {
+  const queries = useMemo<SavedQuery<T>[]>(() => {
     try {
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
@@ -37,11 +45,11 @@ export function useSavedQueries() {
   const saveQuery = useCallback(
     (
       name: string,
-      conditions: QueryCondition[],
+      conditions: T[],
       conditionLogic: "AND" | "OR"
     ) => {
       try {
-        const newQuery: SavedQuery = {
+        const newQuery: SavedQuery<T> = {
           id: crypto.randomUUID(),
           name,
           conditions,
@@ -49,8 +57,8 @@ export function useSavedQueries() {
           createdAt: new Date().toISOString(),
         };
         const updated = [...queries, newQuery];
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-        window.dispatchEvent(new Event(LOCAL_STORAGE_KEY));
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        window.dispatchEvent(new Event(storageKey));
         return { success: true, query: newQuery };
       } catch (error) {
         console.error("Failed to save query:", error);
@@ -60,22 +68,22 @@ export function useSavedQueries() {
         };
       }
     },
-    [queries]
+    [queries, storageKey]
   );
 
   const deleteQuery = useCallback(
     (id: string) => {
       try {
         const updated = queries.filter((q) => q.id !== id);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-        window.dispatchEvent(new Event(LOCAL_STORAGE_KEY));
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        window.dispatchEvent(new Event(storageKey));
         return { success: true };
       } catch (error) {
         console.error("Failed to delete query:", error);
         return { success: false, error: "Failed to delete query" };
       }
     },
-    [queries]
+    [queries, storageKey]
   );
 
   const getQuery = useCallback(

@@ -14,7 +14,13 @@ import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import type { AuditLog, ProductStatus, ProductTeam } from "@/types/product";
+import type {
+  AuditLog,
+  ProductActiveWorkflow,
+  ProductReleasedVersion,
+  ProductStatus,
+  ProductTeam,
+} from "@/types/product";
 import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
 import {
   ArrowDown01Icon,
@@ -25,7 +31,6 @@ import {
   UserIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import {
@@ -55,7 +60,10 @@ import {
   DashboardErrorState,
   DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
 } from "./DashboardErrorState";
-import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import {
+  ProductStatusCell,
+  ProductVersionCell,
+} from "@/features/workspace/products/ProductLifecycleCells";
 import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
 const OWNER_FILTER_OPTIONS = [
@@ -76,6 +84,8 @@ export type Item = ProductTeam & {
   product_plan_number: string;
   project_id: string;
   status: ProductStatus;
+  active_workflow?: ProductActiveWorkflow | null;
+  released_version?: ProductReleasedVersion | null;
   product_information?: { tab_completed?: boolean };
   compliance_information?: { tab_completed?: boolean };
   label_components?: { tab_completed?: boolean };
@@ -241,24 +251,29 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     accessorKey: "status",
-    size: 80,
-    minSize: 80,
-    maxSize: 90,
+    size: 210,
+    minSize: 100,
+    maxSize: 230,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <ProductStatusBadge status={row.original?.status} />
+      <ProductStatusCell
+        status={row.original?.status}
+        activeWorkflow={row.original?.active_workflow}
+      />
     ),
   },
   {
     accessorKey: "version",
-    size: 80,
+    size: 130,
     minSize: 80,
-    maxSize: 90,
+    maxSize: 150,
     header: ({ column }) => <SortableHeader column={column} title="Version" />,
     cell: ({ row }) => (
-      <Badge variant="secondary" className="font-mono text-xs">
-        v{row.getValue("version")}
-      </Badge>
+      <ProductVersionCell
+        productId={row.original._id}
+        version={row.original.version}
+        releasedVersion={row.original?.released_version}
+      />
     ),
   },
   {

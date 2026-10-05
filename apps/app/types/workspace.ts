@@ -18,7 +18,6 @@ export interface Workspace {
   adminIds?: string[];
   userIds?: string[];
   memberListIncludeInactive?: boolean;
-  approvalWorkflowsEnabled?: boolean;
   workflowPrefix?: string;
   defaultWorkflowCompletionMode?: WorkflowCompletionMode;
 }

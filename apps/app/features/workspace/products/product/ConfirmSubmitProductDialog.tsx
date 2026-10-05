@@ -15,7 +15,6 @@ interface ConfirmSubmitProductDialogProps {
   children: React.ReactNode;
   productName?: string;
   title: string;
-  workflowsEnabled: boolean;
   onConfirm: () => Promise<void>;
   disabled?: boolean;
 }
@@ -24,7 +23,6 @@ export default function ConfirmSubmitProductDialog({
   children,
   productName,
   title,
-  workflowsEnabled,
   onConfirm,
   disabled = false,
 }: ConfirmSubmitProductDialogProps) {
@@ -51,11 +49,7 @@ export default function ConfirmSubmitProductDialog({
       </DialogTrigger>
       <AppDialogContent
         title={title}
-        description={
-          workflowsEnabled
-            ? "Mark this version as ready for an approval workflow."
-            : "Release this version now. Released versions are locked from further editing."
-        }
+        description="Mark this version as ready for an approval workflow."
         variant="confirm"
         size="md"
         confirmContent={{
@@ -66,7 +60,7 @@ export default function ConfirmSubmitProductDialog({
               <span className="font-medium text-foreground">
                 {productName || "this product"}
               </span>{" "}
-              {workflowsEnabled ? "for approval." : "and release it."}
+              for approval.
             </>
           ),
           icon: Alert01Icon,
@@ -95,37 +89,16 @@ export default function ConfirmSubmitProductDialog({
                 className="text-muted-foreground"
               />
               <span className="font-medium text-muted-foreground">
-                {workflowsEnabled
-                  ? "What happens next"
-                  : "Important: This action is irreversible"}
+                What happens next
               </span>
             </div>
             <ul className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
-              {workflowsEnabled ? (
-                <>
-                  <li>
-                    The version <strong>stays editable</strong> until it is
-                    released
-                  </li>
-                  <li>
-                    An <strong>approval workflow</strong> will release it
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    Once released, you <strong>cannot edit</strong> this
-                    version
-                  </li>
-                  <li>
-                    To make changes, you will need to{" "}
-                    <strong>create a new version</strong>
-                  </li>
-                  <li>
-                    The previous release becomes <strong>obsolete</strong>
-                  </li>
-                </>
-              )}
+              <li>
+                The version <strong>stays editable</strong> until it is released
+              </li>
+              <li>
+                An <strong>approval workflow</strong> will release it
+              </li>
               <li>
                 The completion date will be set to <strong>today</strong>
               </li>
