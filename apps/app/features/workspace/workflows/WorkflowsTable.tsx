@@ -47,14 +47,18 @@ export function WorkflowsTable({
       <TableHeader className="bg-muted">
         <TableRow className="hover:bg-transparent">
           <TableHead className="w-[14%]">Number</TableHead>
-          <TableHead className="w-[32%]">Name</TableHead>
+          <TableHead className={showMyDecision ? "w-[20%]" : "w-[32%]"}>
+            Name
+          </TableHead>
           <TableHead className="w-[14%]">Status</TableHead>
           {showMyDecision ? (
-            <TableHead className="w-[12%]">Your Decision</TableHead>
+            <TableHead className="w-[18%]">Your Decision</TableHead>
           ) : null}
           <TableHead className="w-[8%]">Products</TableHead>
           <TableHead className="w-[14%]">Initiator</TableHead>
-          <TableHead className="w-[18%]">Created</TableHead>
+          <TableHead className={showMyDecision ? "w-[14%]" : "w-[18%]"}>
+            Created
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -82,7 +82,7 @@ function WorkflowsList() {
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Workflows</p>
-          <InfoTooltip content="Approval workflows package the latest version of one or more Products for review and release." />
+          <InfoTooltip content="Approval workflows group the latest version of one or more Products for review and release." />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
