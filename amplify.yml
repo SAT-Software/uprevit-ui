@@ -17,7 +17,7 @@ applications:
         build:
           commands:
             - nvm use 22
-            - env | grep -E '^OPENROUTER_(API_KEY|MODEL)=' >> apps/app/.env.production
+            - env | sed -nE '/^OPENROUTER_(API_KEY|MODEL)=/p' >> apps/app/.env.production
             - pnpm run build:app
       artifacts:
         baseDirectory: apps/app/.next
