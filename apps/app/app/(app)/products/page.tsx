@@ -281,9 +281,9 @@ const columns: ColumnDef<ProductListItem>[] = [
   },
   {
     accessorKey: "status",
-    size: 210,
-    minSize: 100,
-    maxSize: 230,
+    size: 140,
+    minSize: 120,
+    maxSize: 170,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
       <ProductStatusCell
@@ -294,9 +294,9 @@ const columns: ColumnDef<ProductListItem>[] = [
   },
   {
     accessorKey: "version",
-    size: 130,
+    size: 90,
     minSize: 80,
-    maxSize: 150,
+    maxSize: 110,
     header: ({ column }) => <SortableHeader column={column} title="Version" />,
     cell: ({ row }) => (
       <ProductVersionCell
