@@ -21,6 +21,7 @@ interface ComponentItem {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
   _redlineStatus?: RedlineStatus;
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
@@ -35,6 +36,7 @@ interface LabelComponentItem {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
 }
 
 const mapComponentItem = (item: LabelComponentItem): ComponentItem => ({
@@ -46,6 +48,7 @@ const mapComponentItem = (item: LabelComponentItem): ComponentItem => ({
   label_type: item.label_type || [],
   dimensions: item.dimensions || "",
   component_type: item.component_type || "",
+  print_direction: item.print_direction || "",
 });
 
 export default function Page() {

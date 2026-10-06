@@ -41,6 +41,7 @@ type FormData = {
   labelType: Tag[];
   dimensions: string;
   componentType: string;
+  printDirection: string;
 };
 
 export default function AddComponentDialog({
@@ -67,6 +68,7 @@ export default function AddComponentDialog({
       labelType: [],
       dimensions: "",
       componentType: "",
+      printDirection: "",
     },
   });
   const { mutate: addComponent, isPending } = useUpdateProductTabData();
@@ -106,6 +108,7 @@ export default function AddComponentDialog({
             ).map((tag: Tag) => tag.text),
             dimensions: data.dimensions,
             component_type: data.componentType,
+            print_direction: data.printDirection,
           },
         ],
       };
@@ -270,6 +273,21 @@ export default function AddComponentDialog({
                   placeholder="Enter dimensions"
                   type="text"
                   {...register("dimensions")}
+                />
+              </InputGroup>
+            </Field>
+
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-print-direction`}
+                label="Print Direction"
+                optional
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-print-direction`}
+                  placeholder="Enter print direction"
+                  {...register("printDirection")}
                 />
               </InputGroup>
             </Field>

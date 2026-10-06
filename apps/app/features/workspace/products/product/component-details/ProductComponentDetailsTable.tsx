@@ -77,6 +77,7 @@ type ComponentItem = {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
@@ -101,6 +102,7 @@ const FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "label_type", label: "Label Type", type: "text" },
   { name: "dimensions", label: "Dimensions", type: "text" },
   { name: "component_type", label: "Component Type", type: "text" },
+  { name: "print_direction", label: "Print Direction", type: "text" },
 ];
 
 const getPersistentComponentId = (item: ComponentItem): string =>
@@ -515,6 +517,27 @@ const columns: ColumnDef<ComponentItem>[] = [
           ) : (
             row.getValue("component_type") || "-"
           )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "print_direction",
+    enableSorting: true,
+    meta: { label: "Print Direction" },
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Print Direction" />
+    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta | undefined;
+      const value = row.original.print_direction;
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, "print_direction", value)
+        : null;
+
+      return (
+        <div className="text-sm">
+          {diff ? <RedlineCell value={value} diff={diff} /> : value || "-"}
         </div>
       );
     },
