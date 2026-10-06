@@ -75,13 +75,14 @@ export function GlossenProvider({
   contentSelector = "#nd-page",
   headers,
 }: GlossenOptions & { children: ReactNode }) {
-  const [store] = useState(
+  const store = useMemo(
     () =>
       new GlossenStore({
         endpoint,
         historyLimit: Math.max(0, historyLimit),
         namespace: storageKey,
-      })
+      }),
+    [endpoint, historyLimit, storageKey]
   )
   const [open, setOpen] = useState(false)
   const [view, setView] = useState<GlossenView>("chat")

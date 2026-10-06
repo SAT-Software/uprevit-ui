@@ -6,9 +6,11 @@ import { useAuth } from "react-oidc-context";
 export function DocsAskAIProvider({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const accessToken = auth.user?.access_token;
+  const userId = auth.user?.profile.sub;
 
   return (
     <GlossenProvider
+      storageKey={`glossen:${userId ?? "signed-out"}`}
       headers={(): Record<string, string> =>
         accessToken ? { Authorization: `Bearer ${accessToken}` } : {}
       }
