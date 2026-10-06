@@ -10,11 +10,13 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/react": "^4.0.130",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@markerjs/markerjs3": "^3.8.1",
+    "@openrouter/ai-sdk-provider": "^3.1.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-avatar": "^1.1.4",
@@ -49,6 +51,7 @@
     "@univerjs/sheets-zen-editor": "^0.8.3",
     "@uploadthing/react": "^7.3.3",
     "@uprevit/ui": "workspace:*",
+    "ai": "^7.0.127",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -68,14 +71,18 @@
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "^7.62.0",
+    "react-markdown": "^10.1.0",
     "react-oidc-context": "^3.3.0",
     "recharts": "2.15.4",
+    "remark-gfm": "^4.0.1",
     "shadcn": "^4.13.0",
+    "shiki": "^4.5.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.1.0",
     "tw-animate-css": "^1.2.5",
     "uploadthing": "^7.7.4",
-    "xlsx-js-style": "^1.2.0"
+    "xlsx-js-style": "^1.2.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",

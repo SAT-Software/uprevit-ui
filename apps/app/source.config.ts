@@ -2,6 +2,12 @@ import { defineDocs, defineConfig } from "fumadocs-mdx/config";
 
 export const docs = defineDocs({
   dir: "content/docs",
+  docs: {
+    postprocess: {
+      // Ask AI reads each page as processed Markdown.
+      includeProcessedMarkdown: true,
+    },
+  },
 });
 
 export default defineConfig();
