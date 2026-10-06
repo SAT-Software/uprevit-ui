@@ -43,6 +43,18 @@ When status is **Released** or **Obsolete**, the grid is **read-only**: no edits
 
 For workspace-wide PDF/Excel jobs, see [Exports](/docs/review-outputs/exports).
 
+## Importing Excel workbooks
+
+Use **Import** to load an Excel workbook. Import replaces the current grid; if it already contains data, confirm the replacement first. Click **Save** after importing to keep the result.
+
+- **One sheet:** the first row becomes column headers. An optional second row containing only `constant`, `variable`, `na`, or `blank` values becomes column types. The remaining rows become cell values.
+- **Multiple sheets:** all sheets are stacked vertically in workbook order inside the existing single grid. Each non-empty sheet starts with its name, followed by its original rows, including headers and any type row. A blank row separates sheets. Headers and type rows stay as ordinary cells because different sheets can have different layouts; global column headers and types start blank.
+- Empty sheets are skipped. Import keeps cell values, including cached formula results, but does not preserve formulas, images, merged cells, or Excel formatting.
+- The file must be at most **5 MB**, with at most **150 columns** and **5,000 combined rows**, including sheet names and separators. Files exceeding these limits are rejected without replacing the current grid.
+- Export downloads the stacked result as **one Excel sheet**. It does not recreate the original sheet tabs.
+
+These import rules also apply to [Operational Parameters](/docs/product-documentation/operational-parameters). Separate editable sheet tabs are planned for a future version.
+
 ## Tab completion
 
 Mark **Product Specifications** complete in the header when the workbook is finalized for this version.

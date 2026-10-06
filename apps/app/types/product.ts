@@ -89,6 +89,7 @@ export interface Product extends ProductTeam {
       component_number: string;
       component_type: string;
       component_description: string;
+      print_direction?: string;
       image?: string;
       key?: string;
     }>;
@@ -296,6 +297,7 @@ export interface AllTabsData {
     component_number: string;
     component_type: string;
     component_description: string;
+    print_direction?: string;
     image?: string;
     key?: string;
   }>;

@@ -2,7 +2,6 @@ import XLSX from "xlsx-js-style";
 import type { DataType } from "@/types/product-data-table";
 import {
   validateFileSize,
-  validateSheetCount,
   validateDataBoundaries,
   validateCellCount,
 } from "./import-validation";
@@ -40,19 +39,32 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
     throw new Error("The file contains no sheets");
   }
 
-  validateSheetCount(workbook.SheetNames);
+  const isMultiSheet = workbook.SheetNames.length > 1;
+  const rawData: (string | number | undefined)[][] = [];
+  for (const sheetName of workbook.SheetNames) {
+    const worksheet = workbook.Sheets[sheetName];
+    if (!worksheet) throw new Error(`Sheet "${sheetName}" is empty or missing`);
+    if (!worksheet["!ref"]) continue;
+    const hasValues = Object.entries(worksheet).some(([key, cell]) =>
+      !key.startsWith("!") && cell?.v != null && String(cell.v).trim() !== "",
+    );
+    if (!hasValues) continue;
 
-  const sheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[sheetName];
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    const sheetRows = range.e.r - range.s.r + 1;
+    const separatorRows = isMultiSheet ? (rawData.length ? 2 : 1) : 0;
+    validateDataBoundaries(rawData.length + sheetRows + separatorRows, range.e.c + 1);
 
-  if (!worksheet) {
-    throw new Error(`Sheet "${sheetName}" is empty or missing`);
+    const rows = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(
+      worksheet,
+      { header: 1, defval: undefined },
+    );
+    if (isMultiSheet) {
+      if (rawData.length) rawData.push([]);
+      rawData.push([sheetName]);
+    }
+    rows.forEach((row) => rawData.push(row));
   }
-
-  const rawData: (string | number | undefined)[][] = XLSX.utils.sheet_to_json(
-    worksheet,
-    { header: 1, defval: undefined }
-  );
 
   if (rawData.length === 0) return { headers: {}, columnTypes: {}, cells: {} };
 
@@ -60,7 +72,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
   validateDataBoundaries(rawData.length, maxColumnCount);
 
   const headers: Record<number, string> = {};
-  const headerRow = rawData[0] || [];
+  const headerRow = isMultiSheet ? [] : rawData[0] || [];
   headerRow.forEach((val, colIndex) => {
     if (val !== undefined && val !== null && String(val).trim() !== "") {
       headers[colIndex] = String(val);
@@ -68,7 +80,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
   });
 
   const typeRow = rawData[1] || [];
-  const hasDataTypeRow = isDataTypeRow(typeRow);
+  const hasDataTypeRow = !isMultiSheet && isDataTypeRow(typeRow);
 
   const columnTypes: Record<number, "constant" | "variable" | "na"> = {};
   if (hasDataTypeRow) {
@@ -85,7 +97,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer) {
     });
   }
 
-  const dataStartRow = hasDataTypeRow ? 2 : 1;
+  const dataStartRow = isMultiSheet ? 0 : hasDataTypeRow ? 2 : 1;
   const cells: Record<string, string> = {};
   for (let rowIndex = dataStartRow; rowIndex < rawData.length; rowIndex++) {
     const row = rawData[rowIndex];

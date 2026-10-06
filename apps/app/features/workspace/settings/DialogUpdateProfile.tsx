@@ -73,6 +73,7 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
       name: userProfile?.name,
       email: userProfile?.email,
       designation: userProfile?.designation,
+      unit: userProfile?.unit ?? "",
       location: userProfile?.location,
       phone: userProfile?.phone,
       profileAvatar: existingProfileAvatarValue,
@@ -334,6 +335,22 @@ export function DialogUpdateProfile({ userProfile }: DialogUpdateProfileProps) {
                   />
                 </InputGroup>
                 <FieldError errors={[errors.designation]} />
+              </Field>
+
+              <Field>
+                <FormFieldLabel
+                  htmlFor={`${id}-unit`}
+                  label="Unit"
+                  tooltip="Your department or project within the company."
+                  optional
+                />
+                <InputGroup size="md" className="bg-background">
+                  <InputGroupInput
+                    id={`${id}-unit`}
+                    placeholder="Enter your unit"
+                    {...register("unit")}
+                  />
+                </InputGroup>
               </Field>
 
               <Field>
