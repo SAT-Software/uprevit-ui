@@ -112,11 +112,6 @@ export default function ProductInfoEditMetadataDialog({
         setOpen(false);
         reset();
       },
-      onError: (error) => {
-        console.error("Failed to update product metadata:", error);
-        setOpen(false);
-        reset();
-      },
     });
   };
 

@@ -178,11 +178,6 @@ export default function EditProductDialog({
         setOpen(false);
         reset();
       },
-      onError: (error) => {
-        console.error("Failed to update product information:", error);
-        setOpen(false);
-        reset();
-      },
     });
   };
 

@@ -205,6 +205,14 @@ export type WorkflowDiscussionScope =
 
 export type WorkflowDiscussionKind = "comment" | "change_request";
 
+export interface WorkflowDiscussionAttachment {
+  key: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  url?: string;
+}
+
 export interface WorkflowDiscussionItem {
   _id: string;
   workflowId: string;
@@ -212,6 +220,7 @@ export interface WorkflowDiscussionItem {
   scope: WorkflowDiscussionScope;
   authorSnapshot: WorkflowActor;
   body: string;
+  attachments?: WorkflowDiscussionAttachment[];
   createdAt: string;
   assignmentId?: string;
   status?: "open" | "addressed";
@@ -228,6 +237,7 @@ export type WorkflowDecisionInput =
       decision: "request_changes";
       reason: string;
       scope: WorkflowDiscussionScope;
+      attachments?: string[];
     };
 
 export type WorkflowSearchField =

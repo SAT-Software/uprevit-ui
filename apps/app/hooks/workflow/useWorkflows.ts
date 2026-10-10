@@ -441,7 +441,11 @@ function useDiscussionMutation<TVariables>(
 export function useAddWorkflowComment(workflowId: string) {
   return useDiscussionMutation(
     workflowId,
-    (body: { body: string; scope: WorkflowDiscussionScope }) => ({
+    (body: {
+      body: string;
+      scope: WorkflowDiscussionScope;
+      attachments?: string[];
+    }) => ({
       path: "",
       body,
     }),

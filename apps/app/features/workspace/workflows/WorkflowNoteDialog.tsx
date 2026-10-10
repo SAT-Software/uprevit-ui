@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { toast } from "sonner";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
@@ -12,6 +13,11 @@ import {
 } from "@uprevit/ui/components/ui/input-group";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { useWorkflowAttachmentUploads } from "@/hooks/workflow/useWorkflowAttachmentUploads";
+import {
+  WorkflowAttachButton,
+  WorkflowAttachmentUploadList,
+} from "./WorkflowAttachments";
 
 const NOTE_MAX_LENGTH = 1000;
 
@@ -21,6 +27,8 @@ function WorkflowNoteForm({
   noteTooltip,
   notePlaceholder,
   required,
+  attachmentsWorkflowId,
+  disabled,
   children,
   onSubmit,
 }: {
@@ -29,10 +37,13 @@ function WorkflowNoteForm({
   noteTooltip: string;
   notePlaceholder: string;
   required: boolean;
+  attachmentsWorkflowId?: string;
+  disabled: boolean;
   children?: React.ReactNode;
-  onSubmit: (note: string) => void;
+  onSubmit: (note: string, attachments: string[]) => void;
 }) {
   const [note, setNote] = useState("");
+  const uploads = useWorkflowAttachmentUploads(attachmentsWorkflowId ?? "");
   const [showError, setShowError] = useState(false);
   const trimmed = note.trim();
   const error =
@@ -48,7 +59,11 @@ function WorkflowNoteForm({
       setShowError(true);
       return;
     }
-    onSubmit(trimmed);
+    if (uploads.isUploading) {
+      toast.info("Wait for the images to finish uploading");
+      return;
+    }
+    onSubmit(trimmed, uploads.keys);
   };
 
   return (
@@ -73,9 +88,20 @@ function WorkflowNoteForm({
                 showError && error ? `${formId}-error` : undefined
               }
               value={note}
+              disabled={disabled}
               onChange={(event) => setNote(event.target.value)}
+              onPaste={attachmentsWorkflowId ? uploads.onPaste : undefined}
             />
           </InputGroup>
+          {attachmentsWorkflowId ? (
+            <div className="flex flex-wrap items-start gap-2">
+              <WorkflowAttachButton uploads={uploads} disabled={disabled} />
+              <WorkflowAttachmentUploadList
+                uploads={uploads}
+                disabled={disabled}
+              />
+            </div>
+          ) : null}
           {showError && error ? (
             <FieldError id={`${formId}-error`} errors={[{ message: error }]} />
           ) : null}
@@ -103,6 +129,7 @@ export function WorkflowNoteDialog({
   submitVariant,
   submitDisabled = false,
   isPending,
+  attachmentsWorkflowId,
   children,
   onSubmit,
 }: {
@@ -123,8 +150,9 @@ export function WorkflowNoteDialog({
   submitVariant?: React.ComponentProps<typeof Button>["variant"];
   submitDisabled?: boolean;
   isPending: boolean;
+  attachmentsWorkflowId?: string;
   children?: React.ReactNode;
-  onSubmit: (note: string) => void;
+  onSubmit: (note: string, attachments: string[]) => void;
 }) {
   const formId = `workflow-note-form-${useId()}`;
 
@@ -163,6 +191,8 @@ export function WorkflowNoteDialog({
           noteTooltip={noteTooltip}
           notePlaceholder={notePlaceholder}
           required={required}
+          attachmentsWorkflowId={attachmentsWorkflowId}
+          disabled={isPending}
           onSubmit={onSubmit}
         >
           {children}
