@@ -2,6 +2,12 @@
 
 Uprevit is a medical device labeling documentation platform. This repository contains the frontend monorepo for the authenticated product app and the marketing site.
 
+## Current Release
+
+**0.8.0 (Beta)** introduces approval workflows, product ownership, lifecycle tracking, and in-app and email notifications. Submitting a product marks it Submitted; an approval workflow releases it. The app shows a Beta badge and marks Workflows as New in the sidebar.
+
+This release also includes documentation Ask AI, workflow image attachments, and product import/export improvements. See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.8.0` backend release.
+
 ## Monorepo Structure
 
 ```text
@@ -187,7 +193,7 @@ Typical flow:
 5. Tag the deployed `main` commit as `vx.y.z`.
 6. Merge `main` back into `develop` after the release.
 
-For the first production release, `v0.1.0` is the correct semantic version.
+Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.8.0` and create the `v0.8.0` tag after production verification.
 
 ## Changelog
 

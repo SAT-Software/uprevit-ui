@@ -7,12 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-10
+
 ### Added
 
-- Added approval workflows for every workspace: submitting a product marks it Submitted, and a workflow releases it.
+- Added approval workflows for every workspace, including multi-product drafts, approver assignments, automatic or Initiator-controlled completion, rejection, cancellation, and release history.
+- Added change requests, scoped discussions, image attachments, change notices, and Approve again for products edited during review.
+- Added approver replacement, unavailable-approver warnings, and manual reminders.
 - Added advanced workflow search with saved searches.
+- Added Product Owners and Contributors with product-team management and edit permissions.
+- Added an in-app notifications bell and notifications page, plus email notifications for product teams and workflows.
 - Added the released version and active workflow to product tables and the product header, and a Workflows list on the product page.
-- Added an Approval workflows help page.
+- Added Approval Workflows documentation and Ask AI for documentation questions.
+- Added multi-sheet Excel workbook import for product data grids.
+- Added Heardsy feedback in the sidebar with a Sentry fallback.
+
+### Updated
+
+- Updated the app stage from Alpha to Beta and marked Workflows as New in the sidebar.
+- Updated the product lifecycle to Draft, Submitted, In Review, Released, and Obsolete, with archiving tracked separately. Submit now marks a version Submitted; workflows release it.
+- Updated product version controls and hover cards to show working, released, and obsolete versions with their workflow links.
+- Updated user profiles with a Unit field and label components with Print Direction.
+- Updated documentation and release guidance for `0.8.0` Beta.
+- Updated monorepo package versions to `0.8.0`.
+
+### Fixed
+
+- Fixed release links and product metadata editing permissions.
+- Fixed non-admin users seeing the Invite users button.
+- Fixed Ask AI chat history being shared between accounts and Amplify builds failing without OpenRouter settings.
+- Fixed horizontal scrolling in product data grids and truncated analytics chart labels.
+- Fixed notification read state during in-flight saves, failed picker retries, and saved-search deletion errors.
 
 ### Removed
 
