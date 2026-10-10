@@ -6,7 +6,6 @@ import {
   ArrowMarker,
   FrameMarker,
   MarkerArea,
-  RectangularBoxMarkerBase,
 } from "@markerjs/markerjs3";
 import {
   ArrowUpRight01Icon,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Field, FieldGroup } from "@uprevit/ui/components/ui/field";
@@ -83,17 +83,6 @@ export function LegendDialog({
   }));
   const [textTouched, setTextTouched] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setValues({
-        ...DEFAULT_LEGEND_ITEM,
-        ...defaultValues,
-      });
-      setTextTouched(false);
-      setIsSaving(false);
-    }
-  }, [open, defaultValues]);
 
   const isTextValid = values.text.trim().length > 0;
   const fillOpacityPercent = Math.round((values.fillOpacity ?? 0.2) * 100);

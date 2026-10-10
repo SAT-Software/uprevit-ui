@@ -4,6 +4,7 @@ import { HeaderBackNav } from "@/components/common/HeaderBackNav";
 import { cn } from "@uprevit/ui/lib/utils";
 import { useParams, usePathname } from "next/navigation";
 import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
+import { NotificationsBell } from "./NotificationsBell";
 import { UserNav } from "./UserNav";
 
 const pathData = [
@@ -11,11 +12,13 @@ const pathData = [
   { title: "Departments", url: "/departments" },
   { title: "Projects", url: "/projects" },
   { title: "Products", url: "/products" },
+  { title: "Workflows", url: "/workflows" },
   { title: "Source Files", url: "/source-files" },
   { title: "Bookmarked Products", url: "/bookmarked-products" },
   { title: "Reports", url: "/reports" },
   { title: "Analytics", url: "/analytics" },
   { title: "Archive", url: "/archive" },
+  { title: "Notifications", url: "/notifications" },
   { title: "Settings", url: "/settings" },
   { title: "Feedback", url: "/feedback" },
   { title: "Help Center", url: "/help-center" },
@@ -24,7 +27,7 @@ const pathData = [
 ];
 
 const NESTED_ROUTE_PATTERN =
-  /^\/(departments|projects|source-files|bookmarked-products)\/.+|^\/platform-admin\/workspaces\/.+/;
+  /^\/(departments|projects|source-files|bookmarked-products|workflows)\/.+|^\/platform-admin\/workspaces\/.+/;
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -63,7 +66,10 @@ export function AppHeader() {
             <h1 className="text-sm font-medium">{pageTitle}</h1>
           ) : null}
         </div>
-        <UserNav />
+        <div className="flex shrink-0 items-center gap-2">
+          <NotificationsBell />
+          <UserNav />
+        </div>
       </div>
     </header>
   );

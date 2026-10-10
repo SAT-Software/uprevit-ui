@@ -86,7 +86,7 @@ type Item = {
 };
 
 type TableMeta = {
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
   getFieldDiff?: (row: Item, field: string, value?: unknown) => DiffItem | null;
   getRowStatus?: (row: Item) => "added" | "removed" | "modified" | null;
@@ -433,8 +433,8 @@ const columns: ColumnDef<Item>[] = [
     cell: ({ row, table }) => (
       <RowActions
         row={row}
-        isSubmitted={
-          (table.options.meta as { isSubmitted?: boolean })?.isSubmitted
+        isContentLocked={
+          (table.options.meta as { isContentLocked?: boolean })?.isContentLocked
         }
       />
     ),
@@ -446,12 +446,12 @@ const columns: ColumnDef<Item>[] = [
 export default function SymbolsGraphicsPageOtherComponentsTable({
   data: dataProp,
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
   isRedlineView = false,
 }: {
   data?: Item[];
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
 }) {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -512,7 +512,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
-    meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
+    meta: { isContentLocked, isRedlineView, getFieldDiff, getRowStatus },
   });
 
   const handleApplyFilters = (nextFilters: ListFilter[]) => {
@@ -556,7 +556,7 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
           />
           <AddOtherCompsDialog
             productId={productId}
-            isSubmitted={isSubmitted}
+            isContentLocked={isContentLocked}
           />
         </div>
       </div>
@@ -705,16 +705,16 @@ export default function SymbolsGraphicsPageOtherComponentsTable({
 
 function RowActions({
   row,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   row: Row<Item>;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const item = row.original;
   const itemId = getPersistentItemId(item);
-  const actionsDisabled = isSubmitted || item._redlineStatus === "removed";
+  const actionsDisabled = isContentLocked || item._redlineStatus === "removed";
   const pathname = usePathname();
   const getProductId = (): string => {
     if (!pathname) return "";
@@ -767,7 +767,7 @@ function RowActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <EditOtherComponentsDialog
-        key={`edit-${itemId}`}
+        key={`edit-${itemId}-${showEditDialog}`}
         productId={getProductId()}
         otherComponent={OtherComponentItem}
         open={showEditDialog}

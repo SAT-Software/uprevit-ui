@@ -3,7 +3,7 @@ title: Archives
 description: Archive and restore departments, projects, and products.
 ---
 
-The **Archive** page (`/archive`) is where you browse entities removed from active lists and restore them when appropriate. Archiving is different from **product version submit**—archive removes organizational units or marks products as archived status.
+The **Archive** page (`/archive`) is where you browse entities removed from active lists and restore them when appropriate. Archiving is different from the product lifecycle. Archiving a product hides the whole product from active work without changing the status of any of its versions.
 
 ## Archive tabs
 
@@ -11,7 +11,7 @@ The **Archive** page (`/archive`) is where you browse entities removed from acti
 |-----|----------------|
 | **Departments** | Departments with `isArchived` set. |
 | **Projects** | Archived projects. |
-| **Products** | Products with status **Archived**. |
+| **Products** | Archived products. |
 
 Any signed-in user can open `/archive` and browse tables. **Restore** and archive **creation** are admin-restricted (below).
 
@@ -42,7 +42,9 @@ Archiving a product requires **Admin** privileges.
 
 1. On `/products`, open the row menu.
 2. Choose **Archive** and confirm.
-3. Status becomes **archived**; the product moves to **Archive → Products**.
+3. The whole product, with every version, moves to **Archive → Products**. Each version keeps its status (Draft, Submitted, Released, or Obsolete).
+
+A product that is **In Review** can't be archived. End its [approval workflow](/docs/review-outputs/approval-workflows) first. Archived products can't be added to a new workflow.
 
 Non-admins may see the menu entry but receive an insufficient-privileges message when confirming.
 
@@ -60,7 +62,7 @@ Restoring departments, projects, or products requires **Admin** privileges.
 |--------|----------------|
 | **Department** | Active; `isArchived` cleared. |
 | **Project** | Active; `isArchived` cleared. |
-| **Product** | Status returns to **Draft** (editable again). |
+| **Product** | Back in active lists. Every version keeps the status it had. |
 
 ## Archive activity logs
 
@@ -80,4 +82,5 @@ For version comparison workflow, see [Redlines and Versions](/docs/review-output
 
 - [Departments](/docs/getting-started/departments) — create before archive.
 - [Projects](/docs/getting-started/projects)
-- [Products](/docs/getting-started/products) — archive vs submit.
+- [Products](/docs/getting-started/products) — archive vs lifecycle status.
+- [Approval Workflows](/docs/review-outputs/approval-workflows) — product lifecycle and release.

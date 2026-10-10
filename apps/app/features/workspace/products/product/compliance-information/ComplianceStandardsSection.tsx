@@ -30,14 +30,14 @@ type ComplianceStandard = {
 type ComplianceStandardsSectionProps = {
   productId: string;
   standards: WithRedlineMeta<ComplianceStandard>[];
-  isSubmitted: boolean;
+  isContentLocked: boolean;
   isRedlineView: boolean;
 };
 
 export function ComplianceStandardsSection({
   productId,
   standards,
-  isSubmitted,
+  isContentLocked,
   isRedlineView,
 }: ComplianceStandardsSectionProps) {
   const desktopFillerCount = (3 - (standards.length % 3)) % 3;
@@ -60,7 +60,7 @@ export function ComplianceStandardsSection({
           <p className="text-sm font-medium">Compliance Standards</p>
           <InfoTooltip content="Add and manage regulatory compliance standards and certifications for this product." />
         </div>
-        <AddStandardDialog productId={productId} isSubmitted={isSubmitted} />
+        <AddStandardDialog productId={productId} isContentLocked={isContentLocked} />
       </div>
 
       {standards.length === 0 ? (
@@ -80,7 +80,7 @@ export function ComplianceStandardsSection({
               requirements for this product.
             </p>
           </div>
-          <AddStandardDialog productId={productId} isSubmitted={isSubmitted} />
+          <AddStandardDialog productId={productId} isContentLocked={isContentLocked} />
         </div>
       ) : (
         <div className="grid grid-cols-1 overflow-hidden md:grid-cols-2 lg:grid-cols-3">
@@ -214,13 +214,13 @@ export function ComplianceStandardsSection({
                       <EditStandardDialog
                         productId={productId}
                         standards={item}
-                        isSubmitted={isSubmitted}
+                        isContentLocked={isContentLocked}
                       />
                       <DeleteStandardDialog
                         productId={productId}
                         standardId={item._id}
                         standardName={item.standard}
-                        isSubmitted={isSubmitted}
+                        isContentLocked={isContentLocked}
                       />
                     </div>
                   )}

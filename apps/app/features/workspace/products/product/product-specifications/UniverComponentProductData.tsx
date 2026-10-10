@@ -81,7 +81,6 @@ const UniverComponentOpsParams = forwardRef<
         ),
       },
       theme: defaultTheme,
-      darkMode: theme === "dark" ? true : false,
       presets: [
         UniverSheetsCorePreset({
           container: containerRef.current,
@@ -126,6 +125,10 @@ const UniverComponentOpsParams = forwardRef<
       univerAPI.dispose();
     };
   }, [productTabData]); // Re-create when data changes
+
+  useEffect(() => {
+    univerAPIRef.current?.toggleDarkMode(theme === "dark");
+  }, [theme, productTabData]);
 
   return <div ref={containerRef} className="w-full h-full overflow-hidden" />;
 });

@@ -1,4 +1,5 @@
 import { Operator } from "@/data/reports-config";
+import type { ProductStatus } from "@/types/product";
 
 export interface QueryCondition {
   id: string;
@@ -31,15 +32,15 @@ export interface ReportsProduct {
   department_name: string | null;
   project_id: string;
   project_name: string | null;
-  status: "draft" | "submitted" | "archived";
+  status: ProductStatus;
   target_date?: string | null;
   version?: number;
 }
 
-export interface SavedQuery {
+export interface SavedQuery<T = QueryCondition> {
   id: string;
   name: string;
-  conditions: QueryCondition[];
+  conditions: T[];
   conditionLogic?: "AND" | "OR";
   createdAt: string;
 }

@@ -17,7 +17,7 @@ interface UseProductWorkbookEditorOptions {
   productId: string;
   tab: ProductWorkbookTab;
   action: ProductWorkbookAction;
-  isSubmitted: boolean;
+  isContentLocked: boolean;
   serverWorkbookData: ProductDataTableSchema | undefined;
 }
 
@@ -31,7 +31,7 @@ export function useProductWorkbookEditor({
   productId,
   tab,
   action,
-  isSubmitted,
+  isContentLocked,
   serverWorkbookData,
 }: UseProductWorkbookEditorOptions) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -49,7 +49,21 @@ export function useProductWorkbookEditor({
     [serverWorkbookData],
   );
 
-  const hasEditableUnsavedChanges = hasUnsavedChanges && !isSubmitted;
+  const [previousSource, setPreviousSource] = useState({
+    productId,
+    tab,
+    serverBaseline,
+  });
+  if (
+    previousSource.productId !== productId ||
+    previousSource.tab !== tab ||
+    previousSource.serverBaseline !== serverBaseline
+  ) {
+    setPreviousSource({ productId, tab, serverBaseline });
+    setHasUnsavedChanges(false);
+  }
+
+  const hasEditableUnsavedChanges = hasUnsavedChanges && !isContentLocked;
 
   const registerClearHistoryOnSave = useCallback((clearHistory: () => void) => {
     onSaveSuccessRef.current = clearHistory;
@@ -58,12 +72,11 @@ export function useProductWorkbookEditor({
   useEffect(() => {
     savedBaselineRef.current = serverBaseline;
     pendingDataRef.current = null;
-    setHasUnsavedChanges(false);
   }, [productId, tab, tableResetKey, serverBaseline]);
 
   const saveDataToDB = useCallback(
     (data: ProductDataTableSchema): Promise<void> => {
-      if (isSubmitted) return Promise.resolve();
+      if (isContentLocked) return Promise.resolve();
 
       const payload = {
         id: productId,
@@ -89,25 +102,25 @@ export function useProductWorkbookEditor({
         });
       });
     },
-    [action, isSubmitted, productId, tab, updateTabData],
+    [action, isContentLocked, productId, tab, updateTabData],
   );
 
   const handleDataChange = useCallback(
     (data: ProductDataTableSchema) => {
-      if (isSubmitted) return;
+      if (isContentLocked) return;
 
       pendingDataRef.current = data;
       const currentSnapshot = serializeWorkbookForComparison(data);
       const baseline = savedBaselineRef.current ?? serverBaseline;
       setHasUnsavedChanges(currentSnapshot !== baseline);
     },
-    [isSubmitted, serverBaseline],
+    [isContentLocked, serverBaseline],
   );
 
   const handleManualSave = useCallback(() => {
-    if (isSubmitted || !pendingDataRef.current) return;
+    if (isContentLocked || !pendingDataRef.current) return;
     void saveDataToDB(pendingDataRef.current);
-  }, [isSubmitted, saveDataToDB]);
+  }, [isContentLocked, saveDataToDB]);
 
   const savePendingChanges = useCallback(async () => {
     if (!pendingDataRef.current) return;
@@ -123,9 +136,9 @@ export function useProductWorkbookEditor({
   }, [serverBaseline]);
 
   useEffect(() => {
-    if (!isSubmitted) return;
+    if (!isContentLocked) return;
     pendingDataRef.current = null;
-  }, [isSubmitted]);
+  }, [isContentLocked]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

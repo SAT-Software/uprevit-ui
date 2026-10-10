@@ -37,9 +37,11 @@ import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsI
 import { useGetProjectsInfinite } from "@/hooks/project/useGetProjectsInfinite";
 import { Department } from "@/types/department";
 import { Project } from "@/types/project";
+import type { ProductTeamMember } from "@/types/product";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
 import { useAuth } from "react-oidc-context";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import ProductMemberCombobox from "./ProductMemberCombobox";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Cancel01Icon,
@@ -73,6 +75,7 @@ export default function CreateProductDialog() {
   const [selectedProjectLabel, setSelectedProjectLabel] = useState<
     string | null
   >(null);
+  const [owner, setOwner] = useState<ProductTeamMember | null>(null);
   const auth = useAuth();
   const user = auth?.user?.profile;
 
@@ -97,7 +100,6 @@ export default function CreateProductDialog() {
     mode: "onSubmit",
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedDepartment = watch("department");
   const selectedProject = watch("project");
   const descriptionLength = (watch("description") || "").length;
@@ -196,7 +198,8 @@ export default function CreateProductDialog() {
         workspace_id: user?.workspaceId as string,
         project_id: data.project,
         version: data.version,
-        status: data.status.toLowerCase() as "draft" | "submitted" | "archived",
+        status: "draft" as const,
+        ...(owner ? { owner_user_id: owner._id } : {}),
       };
 
       createProduct(productData, {
@@ -208,6 +211,7 @@ export default function CreateProductDialog() {
           setDebouncedProjectSearch("");
           setSelectedDepartmentLabel(null);
           setSelectedProjectLabel(null);
+          setOwner(null);
           setOpen(false);
         },
         onError: (error) => {
@@ -541,6 +545,20 @@ export default function CreateProductDialog() {
                 <FieldError errors={[errors.project]} />
               </Field>
             </div>
+
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-owner`}
+                label="Product Owner"
+                tooltip="Accountable for this product. The owner, contributors, and admins can edit it."
+              />
+              <ProductMemberCombobox
+                id={`${id}-owner`}
+                value={owner}
+                placeholder={`${user?.name ?? "Me"} (Me)`}
+                onSelect={setOwner}
+              />
+            </Field>
 
             <div className="grid grid-cols-2 gap-4">
               <Field>

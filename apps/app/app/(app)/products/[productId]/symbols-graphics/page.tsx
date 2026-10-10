@@ -9,6 +9,8 @@ import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { cn } from "@uprevit/ui/lib/utils";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface SymbolGraphicItem {
   _id: string;
@@ -46,10 +48,11 @@ export default function Page() {
     compareVersionId,
   );
 
-  // Check if product is submitted - disable editing buttons
-  const isSubmitted =
-    data?.result?.data?.product_information?.product_data?.data?.status ===
-    "submitted";
+  const { canEdit } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(
+      data?.result?.data?.product_information?.product_data?.data?.status,
+    ) || !canEdit;
 
   if (isLoading) {
     return (
@@ -210,7 +213,7 @@ export default function Page() {
         otherComponentsData={otherComponentsData}
         symbolsData={symbolsData}
         productId={productId as string}
-        isSubmitted={isSubmitted}
+        isContentLocked={isContentLocked}
         isRedlineView={isRedlineView}
       />
     </div>

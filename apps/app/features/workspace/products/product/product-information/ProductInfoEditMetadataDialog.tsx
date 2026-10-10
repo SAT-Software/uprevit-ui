@@ -32,6 +32,8 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface FormValues {
   productName: string;
@@ -62,7 +64,9 @@ export default function ProductInfoEditMetadataDialog({
   const [open, setOpen] = useState(false);
   const [openTargetDate, setOpenTargetDate] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isSubmitted = productMetadata?.status === "submitted";
+  const { canEdit, lockedMessage } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(productMetadata?.status) || !canEdit;
 
   const initialValues: FormValues = {
     productName: productMetadata?.product_name || "",
@@ -88,7 +92,7 @@ export default function ProductInfoEditMetadataDialog({
   const targetDateValue = watch("targetDate");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (isSubmitted) return;
+    if (isContentLocked) return;
 
     const updateData = {
       id: productId,
@@ -108,27 +112,27 @@ export default function ProductInfoEditMetadataDialog({
         setOpen(false);
         reset();
       },
-      onError: (error) => {
-        console.error("Failed to update product metadata:", error);
-        setOpen(false);
-        reset();
-      },
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="outline" disabled={isSubmitted}>
-              <Icon icon={PropertyEditIcon} /> Update
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" disabled={isContentLocked}>
+                <Icon icon={PropertyEditIcon} /> Update
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? lockedMessage
             : "Edit product name, description, and target date"}
         </TooltipContent>
       </Tooltip>

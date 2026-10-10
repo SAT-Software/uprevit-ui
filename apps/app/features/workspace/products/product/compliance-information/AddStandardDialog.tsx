@@ -40,6 +40,7 @@ import {
 } from "@uprevit/ui/components/ui/command";
 import { cn } from "@uprevit/ui/lib/utils";
 import { COMPLIANCE_STANDARDS } from "@/data/compliance-standards";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface FormValues {
   standardSelect: string;
@@ -49,11 +50,12 @@ interface FormValues {
 
 export default function AddStandardDialog({
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
+  const { lockedMessage } = useProductAccess();
   const id = useId();
   const { mutate: addNewStandard, isPending } = useUpdateProductTabData();
   const [open, setOpen] = useState(false);
@@ -124,17 +126,22 @@ export default function AddStandardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="secondary" disabled={isSubmitted}>
-              <Icon icon={PlusSignSquareIcon} />
-              Add Standard
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="secondary" disabled={isContentLocked}>
+                <Icon icon={PlusSignSquareIcon} />
+                Add Standard
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? lockedMessage
             : "Add a new compliance standard"}
         </TooltipContent>
       </Tooltip>
@@ -149,7 +156,7 @@ export default function AddStandardDialog({
           form: `add-standard-form-${id}`,
           type: "submit",
           loading: isPending,
-          disabled: isPending || isSubmitted,
+          disabled: isPending || isContentLocked,
           icon: PlusSignSquareIcon,
         }}
         secondaryAction={{

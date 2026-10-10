@@ -21,7 +21,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { LegendDialog } from "./LegendDialog";
 import { LegendSwatch } from "./LegendSwatch";
 import { LegendFormValues, LegendItem } from "./legendTypes";
@@ -103,12 +103,6 @@ export function LegendPanel({
     setDialogOpen(true);
   };
 
-  const currentDefaults = useMemo(() => {
-    if (!editingItem) return null;
-    const { id: _id, ...rest } = editingItem;
-    return rest;
-  }, [editingItem]);
-
   const dialogKey = `${dialogMode}-${editingItem?.id ?? "new"}-${
     dialogOpen ? "open" : "closed"
   }`;
@@ -120,7 +114,7 @@ export function LegendPanel({
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         mode={dialogMode}
-        defaultValues={currentDefaults}
+        defaultValues={editingItem}
         onSave={dialogMode === "add" ? handleAdd : handleEdit}
         disabled={!canEdit}
       />

@@ -1,6 +1,12 @@
-import { AuditLog } from "@/types/product";
+import type {
+  AuditLog,
+  ProductActiveWorkflow,
+  ProductReleasedVersion,
+  ProductStatus,
+  ProductTeam,
+} from "@/types/product";
 
-export type ProductListItem = {
+export type ProductListItem = ProductTeam & {
   _id: string;
   productId?: string;
   product_description: string;
@@ -12,7 +18,7 @@ export type ProductListItem = {
   product_name: string;
   product_plan_number: string;
   project_id: string;
-  status: string;
+  status: ProductStatus;
   is_latest?: boolean;
   parent_id?: string | null;
   product_information?: { tab_completed?: boolean };
@@ -36,4 +42,6 @@ export type ProductListItem = {
     project_name: string;
   }>;
   complete_count: number;
+  active_workflow?: ProductActiveWorkflow | null;
+  released_version?: ProductReleasedVersion | null;
 };

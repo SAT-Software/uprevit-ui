@@ -1,11 +1,11 @@
 ---
 title: Redlines and Versions
-description: Submit product versions, compare changes across versions, and create new drafts.
+description: Submit product versions, compare changes across versions, and create new drafts after release.
 ---
 
 This page is the **canonical guide** for product versioning and redline (comparison) review in Uprevit. Other documentation pages link here instead of repeating the full workflow.
 
-Uprevit does not use a separate “approver” role in the UI. The lifecycle is: **Draft → Submit (lock) → New version (new draft)**.
+The lifecycle is: **Draft → Submitted → In Review → Released → Obsolete**. An [approval workflow](/docs/review-outputs/approval-workflows) is the only way a version becomes Released. To change a Released version, create a new version.
 
 <DocsVideo videoKey="product.compare-versions-redline-view" title="Compare versions redline view" />
 
@@ -13,9 +13,12 @@ Uprevit does not use a separate “approver” role in the UI. The lifecycle is:
 
 | Term | Meaning |
 |------|---------|
-| **Version** | Numeric revision on a product (`v1`, `v2`, …). New versions share lineage via `parent_id`. |
+| **Version** | Numeric revision on a product (`v1`, `v2`, …). All versions of a product share one lineage. |
 | **Draft** | Editable; new products and new versions start here. |
-| **Submitted** | Locked snapshot—all seven tabs read-only for that version ID. |
+| **Submitted** | Ready for an approval workflow. Still editable. |
+| **In Review** | Inside an active approval workflow. Still editable; approvers get a change notice when reviewed content changes. |
+| **Released** | Approved through a workflow. All seven tabs are read-only. |
+| **Obsolete** | An earlier release replaced by a newer one. Read-only history. |
 | **Redline / compare** | Read-only diff of an older version against the version you are viewing. |
 | **Tab completion** | Each of the seven tabs can be marked complete; **100%** (7/7) is required to submit. |
 
@@ -23,33 +26,35 @@ Uprevit does not use a separate “approver” role in the UI. The lifecycle is:
 
 1. Open each product tab and enter data.
 2. In the product header, toggle **Mark tab complete** when a tab is finished.
-3. When progress shows **100%**, **Submit** becomes available.
+3. When progress shows **100%**, **Submit for approval** becomes available.
 4. Confirm in the submit dialog.
 
 Submit:
 
 - Sets status to **Submitted**
 - Records **actual completion date** (today)
-- Disables editing on all tabs for that product ID
+- Keeps the version editable. While it is Submitted, you can **Return to draft**.
+
+The version is released when an [approval workflow](/docs/review-outputs/approval-workflows) that includes it completes. Any earlier release of the product becomes **Obsolete**.
 
 ## Creating a new version
 
-After submit, continue work by branching a new draft:
+After release, continue work by branching a new draft:
 
-1. On `/products`, open the row menu for a **Submitted** product.
+1. On `/products`, open the row menu for a **Released** product.
 2. Choose **New version** (also available from version dialogs on the product).
 3. Uprevit copies data into a new product record: **Draft** status, incremented version, tabs marked incomplete.
 4. You are navigated to the new version’s **Product Information** tab.
 
-Only **Submitted** versions can spawn a new version.
+Only the latest version, when it is **Released**, can spawn a new version. While the new version is being worked on, the products table and product header show both, for example **v4 In Review · Released v3**.
 
 ## Switching versions
 
-Use **View Versions** in the product header to jump between IDs in the same lineage. The current tab path is preserved (e.g. stay on Label Components when switching from v1 to v2).
+Use the version menu in the product header to jump between versions of the same product. Each version shows its status, its release or obsolete date, and the workflow that released it. When a newer version is being worked on, **Released vN** next to the menu opens the current release. The current tab path is preserved (e.g. stay on Label Components when switching from v1 to v2).
 
 ## Compare versions (redline)
 
-Redline is for **reviewing what changed** between an older submitted (or draft) version and the version open in the URL.
+Redline is for **reviewing what changed** between an older version and the version open in the URL.
 
 ### Start comparison
 
@@ -73,11 +78,12 @@ Click **Clear comparison** in the header (or remove the query parameter). The pa
 
 The client loads `all-tabs` data for both version IDs and computes a structural diff (`added`, `removed`, `modified`, `unchanged`). Redline is read-only—it does not write merged data.
 
-## Edit locks beyond submit
+## Edit locks
 
 | Condition | Effect |
 |-----------|--------|
-| **Submitted** | No tab edits. |
+| **Released** or **Obsolete** | No tab edits. |
+| **Not on the product team** | Only the Product Owner, Contributors, and admins can edit. |
 | **PDF export in progress** | Header may lock submit, tab completion, and further exports until the job finishes. |
 
 ## Where redline appears
@@ -90,6 +96,7 @@ Per-product change history lives at `/products/{productId}/logs`. Use it alongsi
 
 ## Related topics
 
+- [Approval Workflows](/docs/review-outputs/approval-workflows) — review and release versions.
 - [Products](/docs/getting-started/products) — status and row actions.
-- [Exports](/docs/review-outputs/exports) — export submitted snapshots.
+- [Exports](/docs/review-outputs/exports) — export product snapshots.
 - [Archives](/docs/review-outputs/archives) — archived products vs version lineage.
