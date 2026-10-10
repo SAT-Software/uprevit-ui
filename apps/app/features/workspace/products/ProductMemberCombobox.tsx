@@ -69,6 +69,7 @@ export default function ProductMemberCombobox({
     isFetchingNextPage,
     isPending,
     isError,
+    refetch,
   } = useGetUsersInfinite({
     enabled: open,
     search: debouncedSearch,
@@ -84,10 +85,16 @@ export default function ProductMemberCombobox({
   );
 
   useEffect(() => {
-    if (open && members.length < MIN_VISIBLE_MEMBERS && hasNextPage && !isFetching) {
+    if (
+      open &&
+      members.length < MIN_VISIBLE_MEMBERS &&
+      hasNextPage &&
+      !isFetching &&
+      !isError
+    ) {
       fetchNextPage();
     }
-  }, [open, members.length, hasNextPage, isFetching, fetchNextPage]);
+  }, [open, members.length, hasNextPage, isFetching, isError, fetchNextPage]);
 
   const handleListScroll = (event: UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
@@ -177,6 +184,18 @@ export default function ProductMemberCombobox({
                 </div>
               )}
             </CommandGroup>
+            {isError && !isFetching ? (
+              <div className="flex justify-center py-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => (data ? fetchNextPage() : refetch())}
+                >
+                  Retry
+                </Button>
+              </div>
+            ) : null}
           </CommandList>
         </Command>
       </PopoverContent>

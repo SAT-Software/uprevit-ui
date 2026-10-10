@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Ask AI chat history being shared between accounts and Amplify builds failing without OpenRouter settings.
 - Fixed horizontal scrolling in product data grids and truncated analytics chart labels.
 - Fixed notification read state during in-flight saves, failed picker retries, and saved-search deletion errors.
+- Fixed the product member picker retrying failed loads without stopping, and workflow image links expiring on closed workflows left open.
 
 ### Removed
 

@@ -195,6 +195,8 @@ Typical flow:
 
 Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.8.0` and create the `v0.8.0` tag after production verification.
 
+For `0.8.0`, run the backend data migrations after the backend deploys and before releasing the UI. See the backend README.
+
 ## Changelog
 
 Release history is tracked in [CHANGELOG.md](./CHANGELOG.md).

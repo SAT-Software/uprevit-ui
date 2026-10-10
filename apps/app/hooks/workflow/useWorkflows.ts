@@ -27,6 +27,7 @@ import type {
 const WORKFLOWS_QUERY_KEY = ["workflows"];
 const ACTIVE_POLL_INTERVAL_MS = 30_000;
 const LIST_POLL_INTERVAL_MS = 60_000;
+const ATTACHMENT_URL_REFRESH_MS = 60 * 60_000;
 
 const isActiveWorkflow = (status?: WorkflowStatus) =>
   status === "in_review" || status === "ready_to_complete";
@@ -404,7 +405,9 @@ export function useWorkflowDiscussion(
       ),
     placeholderData: keepPreviousData,
     enabled: auth.isAuthenticated && !!workflowId && status !== "draft",
-    refetchInterval: isActiveWorkflow(status) ? ACTIVE_POLL_INTERVAL_MS : false,
+    refetchInterval: isActiveWorkflow(status)
+      ? ACTIVE_POLL_INTERVAL_MS
+      : ATTACHMENT_URL_REFRESH_MS,
   });
 }
 
