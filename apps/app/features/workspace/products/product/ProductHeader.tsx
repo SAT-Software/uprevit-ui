@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type UIEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type UIEvent } from "react";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -668,15 +668,39 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 heading="Open version"
                 empty="No version found."
               >
-                {versions.map((v) => (
-                  <CommandItem
-                    key={v._id}
-                    value={versionSearchValue(v)}
-                    onSelect={() => handleVersionChange(v._id)}
-                  >
-                    <VersionRow version={v} selected={v._id === productId} />
-                  </CommandItem>
-                ))}
+                {versions.map((v) => {
+                  const releasedBy = v.released_by_workflow;
+                  return (
+                    <Fragment key={v._id}>
+                      <CommandItem
+                        value={versionSearchValue(v)}
+                        onSelect={() => handleVersionChange(v._id)}
+                      >
+                        <VersionRow
+                          version={v}
+                          selected={v._id === productId}
+                        />
+                      </CommandItem>
+                      {releasedBy ? (
+                        <CommandItem
+                          value={`${versionSearchValue(v)} released by ${releasedBy.numberLabel}`}
+                          onSelect={() =>
+                            navigateTo(`/workflows/${releasedBy.id}`)
+                          }
+                          className="gap-2 pl-6 text-xs text-muted-foreground"
+                        >
+                          <Icon icon={WorkflowIcon} size={14} />
+                          <span className="truncate">
+                            Open release workflow{" "}
+                            <span className="font-mono">
+                              {releasedBy.numberLabel}
+                            </span>
+                          </span>
+                        </CommandItem>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </VersionCommand>
             </PopoverContent>
           </Popover>
