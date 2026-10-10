@@ -26,6 +26,7 @@ import {
   useAddWorkflowComment,
   useWorkflowDiscussion,
 } from "@/hooks/workflow/useWorkflows";
+import { useWorkflowAttachmentUploads } from "@/hooks/workflow/useWorkflowAttachmentUploads";
 import type {
   WorkflowDetail,
   WorkflowDiscussionItem,
@@ -34,6 +35,11 @@ import type {
 } from "@/types/workflow";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import { AddressRequestDialog } from "./AddressRequestDialog";
+import {
+  WorkflowAttachButton,
+  WorkflowAttachmentGallery,
+  WorkflowAttachmentUploadList,
+} from "./WorkflowAttachments";
 import { WorkflowScopeChip, WorkflowScopeSelect } from "./WorkflowScope";
 
 const COMMENT_MAX_LENGTH = 1000;
@@ -118,6 +124,7 @@ function DiscussionItem({
             </Button>
           ) : null}
         </div>
+        <WorkflowAttachmentGallery attachments={item.attachments} />
         {addressed && item.addressedBySnapshot ? (
           <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-3 py-2">
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -153,12 +160,21 @@ function CommentComposer({ workflow }: { workflow: WorkflowDetail }) {
     type: "package",
   });
   const { mutate: addComment, isPending } = useAddWorkflowComment(workflow._id);
+  const uploads = useWorkflowAttachmentUploads(workflow._id);
   const trimmed = body.trim();
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!trimmed) return;
-    addComment({ body: trimmed, scope }, { onSuccess: () => setBody("") });
+    if (!trimmed || uploads.isUploading) return;
+    addComment(
+      { body: trimmed, scope, attachments: uploads.keys },
+      {
+        onSuccess: () => {
+          setBody("");
+          uploads.reset();
+        },
+      },
+    );
   };
 
   return (
@@ -166,25 +182,41 @@ function CommentComposer({ workflow }: { workflow: WorkflowDetail }) {
       <InputGroup size="md" className="bg-background">
         <InputGroupTextarea
           aria-label="Comment"
-          placeholder="Write a comment"
+          placeholder="Write a comment, or paste a screenshot"
           className="min-h-20 resize-none"
           maxLength={COMMENT_MAX_LENGTH}
           value={body}
           disabled={isPending}
           onChange={(event) => setBody(event.target.value)}
+          onPaste={uploads.onPaste}
         />
+        {uploads.attachments.length > 0 || uploads.isUploading ? (
+          <InputGroupAddon align="block-end" className="pt-0">
+            <WorkflowAttachmentUploadList
+              uploads={uploads}
+              disabled={isPending}
+            />
+          </InputGroupAddon>
+        ) : null}
         <InputGroupAddon
           align="block-end"
           className="justify-between gap-2 border-t border-border"
         >
-          <WorkflowScopeSelect
-            products={workflow.products}
-            value={scope}
-            disabled={isPending}
-            className="w-auto max-w-64"
-            onValueChange={setScope}
-          />
-          <Button type="submit" size="sm" disabled={!trimmed || isPending}>
+          <div className="flex min-w-0 items-center gap-1">
+            <WorkflowScopeSelect
+              products={workflow.products}
+              value={scope}
+              disabled={isPending}
+              className="w-auto max-w-64"
+              onValueChange={setScope}
+            />
+            <WorkflowAttachButton uploads={uploads} disabled={isPending} />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!trimmed || isPending || uploads.isUploading}
+          >
             <Icon icon={SentIcon} size={14} />
             {isPending ? "Posting…" : "Comment"}
           </Button>

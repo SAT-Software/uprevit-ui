@@ -177,10 +177,6 @@ export default function ProductInformationCustomFieldEditDialog({
         remove(fields.length - 1);
         append({ label: "", value: "" });
       },
-      onError: () => {
-        reset();
-        setOpen(false);
-      },
     });
   };
 
@@ -220,10 +216,6 @@ export default function ProductInformationCustomFieldEditDialog({
         reset();
         setOpen(false);
       },
-      onError: () => {
-        reset();
-        setOpen(false);
-      },
     });
   };
 
@@ -255,8 +247,6 @@ export default function ProductInformationCustomFieldEditDialog({
         setDeleteFieldId(null);
       },
       onError: () => {
-        reset();
-        setOpen(false);
         setDeleteFieldOpen(false);
         setDeleteFieldId(null);
       },

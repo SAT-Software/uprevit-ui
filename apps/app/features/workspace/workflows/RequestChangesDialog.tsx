@@ -55,13 +55,15 @@ export function RequestChangesDialog({
       submitLoadingLabel="Requesting…"
       submitIcon={MessageEdit01Icon}
       isPending={isPending}
-      onSubmit={(reason) =>
+      attachmentsWorkflowId={workflow._id}
+      onSubmit={(reason, attachments) =>
         decide(
           {
             assignmentId: assignment._id,
             decision: "request_changes",
             reason,
             scope,
+            attachments,
           },
           { onSuccess: () => onOpenChange(false) },
         )
