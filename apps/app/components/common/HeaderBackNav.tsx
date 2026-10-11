@@ -26,6 +26,9 @@ function getStaticBackNav(pathname: string): BackNav | null {
   if (/^\/projects\/[^/]+$/.test(pathname)) {
     return { href: "/projects", label: "All projects" };
   }
+  if (/^\/workflows\/[^/]+$/.test(pathname)) {
+    return { href: "/workflows", label: "All workflows" };
+  }
   if (/^\/bookmarked-products\/[^/]+$/.test(pathname)) {
     return { href: "/bookmarked-products", label: "Bookmarked products" };
   }

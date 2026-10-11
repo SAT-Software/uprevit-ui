@@ -27,7 +27,7 @@ type ComplianceLanguagesSectionProps = {
   productId: string;
   languages: WithRedlineMeta<Language>[];
   currentLanguages: Language[];
-  isSubmitted: boolean;
+  isContentLocked: boolean;
   isRedlineView: boolean;
 };
 
@@ -35,7 +35,7 @@ export function ComplianceLanguagesSection({
   productId,
   languages,
   currentLanguages,
-  isSubmitted,
+  isContentLocked,
   isRedlineView,
 }: ComplianceLanguagesSectionProps) {
   const desktopFillerCount = (4 - (languages.length % 4)) % 4;
@@ -61,7 +61,7 @@ export function ComplianceLanguagesSection({
         <ManageLanguagesDialog
           productId={productId}
           selectedLanguages={currentLanguages}
-          isSubmitted={isSubmitted}
+          isContentLocked={isContentLocked}
         />
       </div>
 
@@ -85,7 +85,7 @@ export function ComplianceLanguagesSection({
           <ManageLanguagesDialog
             productId={productId}
             selectedLanguages={currentLanguages}
-            isSubmitted={isSubmitted}
+            isContentLocked={isContentLocked}
           />
         </div>
       ) : (

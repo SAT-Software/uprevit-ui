@@ -62,7 +62,6 @@ export default function DialogBookmarkProduct({
     mode: "onSubmit",
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedFolderId = watch("folderId");
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {

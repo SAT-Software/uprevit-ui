@@ -60,11 +60,11 @@ const normalizeSymbolText = (value: string) =>
 
 export default function AddSymbolsDialog({
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
   existingSymbols = [],
 }: {
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   existingSymbols?: ExistingSymbol[];
 }) {
   const id = useId();
@@ -291,7 +291,7 @@ export default function AddSymbolsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" disabled={isSubmitted}>
+        <Button size="sm" variant="secondary" disabled={isContentLocked}>
           <Icon icon={PlusSignSquareIcon} />
           Add Symbol
         </Button>
@@ -336,7 +336,7 @@ export default function AddSymbolsDialog({
                 form={customFormId}
                 type="submit"
                 size="sm"
-                disabled={isCustomSaving || isSubmitted}
+                disabled={isCustomSaving || isContentLocked}
                 aria-busy={isCustomSaving}
               >
                 {isCustomSaving ? (

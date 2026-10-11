@@ -30,10 +30,10 @@ type FormData = {
 
 export default function AddSchematicsDialog({
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const id = useId();
   const formId = `add-schematics-form-${id}`;
@@ -127,7 +127,7 @@ export default function AddSchematicsDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" disabled={isSubmitted}>
+        <Button size="sm" variant="secondary" disabled={isContentLocked}>
           <Icon icon={PlusSignSquareIcon} />
           Add Schematic
         </Button>
@@ -143,7 +143,7 @@ export default function AddSchematicsDialog({
           form: formId,
           type: "submit",
           loading: isSaving,
-          disabled: isSaving || isSubmitted,
+          disabled: isSaving || isContentLocked,
           icon: PlusSignSquareIcon,
         }}
         secondaryAction={{

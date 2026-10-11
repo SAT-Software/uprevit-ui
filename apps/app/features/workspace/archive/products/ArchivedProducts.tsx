@@ -76,13 +76,7 @@ export function ArchivedProducts() {
     if (!selectedItemToRestore) return;
 
     updateProductStatus(
-      {
-        _id: selectedItemToRestore._id,
-        action: "update-status",
-        data: {
-          status: "draft",
-        },
-      },
+      { _id: selectedItemToRestore._id, action: "restore" },
       {
         onSuccess: () => setRestoreDialogOpen(false),
         onError: () => setRestoreDialogOpen(false),
@@ -113,7 +107,7 @@ export function ArchivedProducts() {
     if (listState.query.page > pagination.totalPages) {
       listState.setPage(1);
     }
-  }, [listState.query.page, listState.setPage, pagination?.totalPages]);
+  }, [listState, pagination]);
 
   return (
     <>

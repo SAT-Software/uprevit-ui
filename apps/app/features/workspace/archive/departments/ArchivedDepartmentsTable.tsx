@@ -13,7 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
@@ -155,13 +155,13 @@ export function ArchivedDepartmentsTable({
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
-  const handleRestore = (item: DepartmentArchiveRow) => {
+  const handleRestore = useCallback((item: DepartmentArchiveRow) => {
     if (!isAdmin) {
       toast.warning("Insufficient privileges, contact Admin");
       return;
     }
     onRestore(item);
-  };
+  }, [isAdmin, onRestore]);
 
   const columns: ColumnDef<DepartmentArchiveRow>[] = useMemo(() => {
     return [
@@ -264,7 +264,7 @@ export function ArchivedDepartmentsTable({
         },
       },
     ];
-  }, [loadingRowId, onRestore]);
+  }, [loadingRowId, handleRestore]);
 
   const table = useReactTable({
     data,

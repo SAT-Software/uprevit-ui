@@ -1329,32 +1329,13 @@ export function ProductSpecificationDataTable({
     useSensor(KeyboardSensor, {}),
   );
 
-  useEffect(() => {
-    const el = parentRef.current;
-    if (!el) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      const atLeft = el.scrollLeft === 0;
-      const atRight = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
-      const scrollingLeft = e.deltaX < 0;
-      const scrollingRight = e.deltaX > 0;
-
-      if ((atLeft && scrollingLeft) || (atRight && scrollingRight)) {
-        e.preventDefault();
-      }
-    };
-
-    el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => el.removeEventListener("wheel", handleWheel);
-  }, []);
-
   const tableRows = table.getRowModel().rows;
 
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT,
-    overscan: 10,
+    overscan: 5,
   });
 
   const visibleColumns = table.getVisibleLeafColumns();
@@ -1364,7 +1345,7 @@ export function ProductSpecificationDataTable({
     getScrollElement: () => parentRef.current,
     estimateSize: (index) => columnSizes[index] ?? COL_WIDTH,
     horizontal: true,
-    overscan: 5,
+    overscan: 2,
   });
 
   useEffect(() => {
@@ -2036,7 +2017,10 @@ export function ProductSpecificationDataTable({
               })}
             </table>
           </ScrollAreaPrimitive.Viewport>
-          <ScrollBar orientation="horizontal" className="z-40" />
+          <ScrollBar
+            orientation="horizontal"
+            className="z-40 [&>[data-slot=scroll-area-thumb]]:bg-foreground/40 hover:[&>[data-slot=scroll-area-thumb]]:bg-foreground/60"
+          />
           <ScrollBar orientation="vertical" className="z-40" />
           <ScrollAreaPrimitive.Corner />
         </ScrollAreaPrimitive.Root>

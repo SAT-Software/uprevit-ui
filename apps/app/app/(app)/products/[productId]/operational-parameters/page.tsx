@@ -5,6 +5,8 @@ import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline"
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { type ProductDataTableSchema } from "@/types/product-data-table";
 import { useParams, useSearchParams } from "next/navigation";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 export default function Page() {
   const params = useParams<{ productId: string }>();
@@ -26,9 +28,11 @@ export default function Page() {
 
   const workbookData = operationalTabData?.result?.data?.data
     ?.workbook_data as ProductDataTableSchema | undefined;
-  const isSubmitted =
-    operationalTabData?.result?.data?.product_data?.data?.status ===
-    "submitted";
+  const { canEdit } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(
+      operationalTabData?.result?.data?.product_data?.data?.status,
+    ) || !canEdit;
   const baseVersionWorkbook =
     diffData?.result?.base_version?.operational_parameters?.data
       ?.workbook_data as ProductDataTableSchema | undefined;
@@ -48,7 +52,7 @@ export default function Page() {
       isLoading={isLoading}
       error={error}
       workbookData={workbookData}
-      isSubmitted={isSubmitted}
+      isContentLocked={isContentLocked}
       isRedlineView={isRedlineView}
       isLoadingDiff={isLoadingDiff}
       baseVersionWorkbook={baseVersionWorkbook}

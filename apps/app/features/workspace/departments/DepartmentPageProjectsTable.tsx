@@ -47,9 +47,7 @@ import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
-  Blockchain03Icon,
   KanbanIcon,
-  NewOfficeIcon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 

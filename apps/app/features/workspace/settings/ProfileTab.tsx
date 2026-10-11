@@ -27,6 +27,12 @@ import { UserTypeBadge } from "./UserTypeBadge";
 
 const PROFILE_FIELDS = [
   {
+    id: "unit",
+    label: "Unit",
+    icon: Briefcase01Icon,
+    key: "unit" as const,
+  },
+  {
     id: "designation",
     label: "Role / Designation",
     icon: Briefcase01Icon,
@@ -55,7 +61,7 @@ const PROFILE_FIELDS = [
 const profileFieldCellClassName = (index: number) =>
   cn(
     "group flex items-center gap-4 p-4",
-    "border-b border-border md:[&:nth-last-child(-n+2)]:border-b-0 [&:last-child]:border-b-0",
+    "border-b border-border md:[&:nth-last-child(2):nth-child(odd)]:border-b-0 [&:last-child]:border-b-0",
     index % 2 === 0 && "md:border-r",
   );
 

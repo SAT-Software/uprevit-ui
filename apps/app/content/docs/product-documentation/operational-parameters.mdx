@@ -19,7 +19,13 @@ Identical model to Product Specifications:
 - **Save** persists to the `operational-parameters` tab (`add_operational_parameters`). Use the toolbar **Save** button when you are done editing; **Unsaved changes** appears until data is stored.
 - Changes are **not** saved automatically. Leaving this tab or another part of the app without saving opens an **Unsaved Changes** dialog (save, discard, or stay). Closing the browser tab with unsaved edits shows the browser leave warning.
 
-Submitted products lock the grid to read-only.
+Released and Obsolete versions lock the grid to read-only.
+
+## Importing Excel workbooks
+
+Import uses the [same rules as Product Specifications](/docs/product-documentation/product-specifications#importing-excel-workbooks). Multi-sheet files are stacked vertically in workbook order, with sheet names, original headers, and a blank separator row preserved in one grid. Empty sheets are skipped. The combined result must fit within 5,000 rows and 150 columns, and the file must be at most 5 MB.
+
+Confirm replacement when the grid already contains data, then **Save** the imported result. Export produces one stacked sheet; separate sheet tabs and original Excel formatting are not retained.
 
 ## Tab completion
 

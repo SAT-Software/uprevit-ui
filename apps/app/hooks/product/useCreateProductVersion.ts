@@ -47,6 +47,7 @@ export function useCreateProductVersion() {
     onSuccess: (data) => {
       toast.success(`Version ${data.product.version} created successfully`);
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
+      queryClient.invalidateQueries({ queryKey: ["product-versions-infinite"] });
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to create new version");

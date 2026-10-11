@@ -8,9 +8,14 @@ interface S3SignedUrlRequest {
   contentType?: string;
   uploadScope?: S3UploadScope;
   productId?: string;
+  workflowId?: string;
 }
 
-type S3UploadScope = "workspace-assets" | "product-assets" | "source-files";
+type S3UploadScope =
+  | "workspace-assets"
+  | "product-assets"
+  | "source-files"
+  | "workflow-attachments";
 
 const PRODUCT_ASSET_CONTENT_TYPES = new Set([
   "image/png",
@@ -86,6 +91,7 @@ export function useUploadFilesToS3() {
       contentType,
       uploadScope = "workspace-assets",
       productId,
+      workflowId,
     }: S3SignedUrlRequest) => {
       const accessToken = auth.user?.access_token;
       if (!accessToken) {
@@ -104,6 +110,7 @@ export function useUploadFilesToS3() {
         uploadScope,
         sizeBytes: file.size,
         ...(productId ? { productId } : {}),
+        ...(workflowId ? { workflowId } : {}),
       };
 
       const res = await fetch(`/api/s3-storage/presign-upload`, {
@@ -160,6 +167,10 @@ export function useUploadFilesToS3() {
         body: file,
         headers: {
           "Content-Type": resolvedContentType,
+          // Workflow attachment URLs are signed as create-only.
+          ...(uploadScope === "workflow-attachments"
+            ? { "If-None-Match": "*" }
+            : {}),
         },
       });
 

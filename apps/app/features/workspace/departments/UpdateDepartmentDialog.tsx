@@ -138,7 +138,6 @@ export default function UpdateDepartmentDialog({
     mode: "onSubmit",
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const descriptionLength = (watch("department_description") || "").length;
 
   const handleAddUser = (user: User) => {

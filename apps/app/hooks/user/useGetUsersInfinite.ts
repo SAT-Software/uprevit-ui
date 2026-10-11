@@ -12,20 +12,31 @@ export type UseGetUsersInfiniteOptions = {
   sort?: string;
   order?: ListOrder;
   search?: string;
+  activeOnly?: boolean;
   enabled?: boolean;
 };
 
-function buildUserSearchFilters(search?: string): ListFilter[] | undefined {
+function buildUserSearchFilters(
+  search?: string,
+  activeOnly?: boolean,
+): ListFilter[] | undefined {
   const trimmed = search?.trim();
-  if (!trimmed) return undefined;
-
-  return [
-    {
-      field: "name",
-      operator: "contains",
-      value: trimmed,
-    },
+  const filters: ListFilter[] = [
+    ...(trimmed
+      ? [
+          {
+            field: trimmed.includes("@") ? "email" : "name",
+            operator: "contains" as const,
+            value: trimmed,
+          },
+        ]
+      : []),
+    ...(activeOnly
+      ? [{ field: "status", operator: "eq" as const, value: "active" }]
+      : []),
   ];
+
+  return filters.length ? filters : undefined;
 }
 
 export function useGetUsersInfinite(options?: UseGetUsersInfiniteOptions) {
@@ -35,9 +46,18 @@ export function useGetUsersInfinite(options?: UseGetUsersInfiniteOptions) {
   const sort = options?.sort ?? "name";
   const order = options?.order ?? "asc";
   const search = options?.search?.trim() ?? "";
+  const activeOnly = options?.activeOnly ?? false;
 
   return useInfiniteQuery({
-    queryKey: ["users-infinite", workspaceId, limit, sort, order, search],
+    queryKey: [
+      "users-infinite",
+      workspaceId,
+      limit,
+      sort,
+      order,
+      search,
+      activeOnly,
+    ],
     queryFn: ({ pageParam, signal }) =>
       getAllUsersByWorkspace({
         signal,
@@ -47,7 +67,7 @@ export function useGetUsersInfinite(options?: UseGetUsersInfiniteOptions) {
           limit,
           sort,
           order,
-          filters: buildUserSearchFilters(search),
+          filters: buildUserSearchFilters(search, activeOnly),
         },
       }),
     initialPageParam: 1,

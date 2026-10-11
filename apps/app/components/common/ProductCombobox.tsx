@@ -8,7 +8,6 @@ import {
 } from "react";
 
 import { cn } from "@uprevit/ui/lib/utils";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   Command,
@@ -27,12 +26,15 @@ import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Tick01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useGetProductsInfinite } from "@/hooks/product/useGetProductsInfinite";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import type { ProductStatus } from "@/types/product";
 
 export type ProductComboboxItem = {
   _id: string;
   product_name?: string;
   product_plan_number?: string;
-  status?: string;
+  product_lineage_id?: string;
+  status?: ProductStatus;
 };
 
 export type ProductComboboxProps = {
@@ -43,6 +45,8 @@ export type ProductComboboxProps = {
   ) => void;
   allowNone?: boolean;
   enabled?: boolean;
+  statuses?: ProductStatus[];
+  excludeIds?: string[];
   placeholder?: string;
   noneLabel?: string;
   initialSelectedLabel?: string;
@@ -51,37 +55,13 @@ export type ProductComboboxProps = {
   className?: string;
 };
 
-function ProductStatusBadge({ status }: { status?: string }) {
-  if (!status) return null;
-
-  return (
-    <Badge
-      variant={
-        status === "submitted"
-          ? "green"
-          : status === "draft"
-            ? "blue"
-            : "gray"
-      }
-      className="ml-2 shrink-0 font-normal capitalize"
-    >
-      <div
-        className={cn("h-2 w-2 rounded-full", {
-          "bg-green-500 dark:bg-green-400": status === "submitted",
-          "bg-blue-500 dark:bg-blue-400": status === "draft",
-          "bg-gray-500 dark:bg-gray-400": status === "archived",
-        })}
-      />
-      {status}
-    </Badge>
-  );
-}
-
 export function ProductCombobox({
   value,
   onValueChange,
   allowNone = false,
   enabled = true,
+  statuses,
+  excludeIds,
   placeholder = "Select a product",
   noneLabel = "No product",
   initialSelectedLabel,
@@ -113,18 +93,31 @@ export function ProductCombobox({
   } = useGetProductsInfinite({
     enabled: enabled && open,
     search: debouncedSearch,
+    status: statuses,
   });
 
   const products = useMemo(
     () =>
-      productsData?.pages.flatMap(
-        (page) => (page.result?.products as ProductComboboxItem[]) ?? [],
-      ) ?? [],
-    [productsData],
+      (
+        productsData?.pages.flatMap(
+          (page) => (page.result?.products as ProductComboboxItem[]) ?? [],
+        ) ?? []
+      ).filter(
+        (product) =>
+          !excludeIds?.includes(product._id) &&
+          !excludeIds?.includes(product.product_lineage_id ?? ""),
+      ),
+    [productsData, excludeIds],
   );
 
   const isLoadingProducts =
     isPending || (isFetching && !isFetchingNextPage && products.length === 0);
+
+  useEffect(() => {
+    if (open && products.length < 5 && hasNextPage && !isFetching && !isError) {
+      fetchNextPage();
+    }
+  }, [open, products.length, hasNextPage, isFetching, isError, fetchNextPage]);
 
   const selectedProduct = products.find((product) => product._id === value);
 
@@ -235,7 +228,10 @@ export function ProductCombobox({
                       <span className="min-w-0 flex-1 truncate">
                         {product.product_name || "Unnamed Product"}
                       </span>
-                      <ProductStatusBadge status={product.status} />
+                      <ProductStatusBadge
+                        status={product.status}
+                        className="ml-2 shrink-0"
+                      />
                       <Icon
                         icon={Tick01Icon}
                         size={16}

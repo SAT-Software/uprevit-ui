@@ -11,6 +11,7 @@ import {
 
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
 import { BarChartLoadingSkeleton } from "@/features/workspace/analytics/ChartLoadingSkeleton";
+import { TruncatedBarLabel } from "@/features/workspace/analytics/TruncatedBarLabel";
 import {
   ChartContainer,
   ChartTooltip,
@@ -95,7 +96,7 @@ export function ProductsByProjectChart({
             <XAxis dataKey="products" type="number" hide />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent />}
             />
             <Bar
               dataKey="products"
@@ -105,10 +106,7 @@ export function ProductsByProjectChart({
             >
               <LabelList
                 dataKey="project"
-                position="insideLeft"
-                offset={8}
-                className="fill-background dark:fill-foreground"
-                fontSize={12}
+                content={TruncatedBarLabel}
               />
               <LabelList
                 dataKey="products"

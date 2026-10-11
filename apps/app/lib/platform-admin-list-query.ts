@@ -17,9 +17,11 @@ export function usePlatformAdminUrlSearch() {
 
   const [draft, setDraft] = useState(committedSearch);
 
-  useEffect(() => {
+  const [previousSearch, setPreviousSearch] = useState(committedSearch);
+  if (previousSearch !== committedSearch) {
+    setPreviousSearch(committedSearch);
     setDraft(committedSearch);
-  }, [committedSearch]);
+  }
 
   const replaceParams = useCallback(
     (update: (params: URLSearchParams) => void) => {

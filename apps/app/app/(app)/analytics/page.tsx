@@ -11,11 +11,12 @@ import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import type { Department } from "@/types/department";
+import type { ProductStatus } from "@/types/product";
 import type { Project } from "@/types/project";
 
 type ProductAnalyticsItem = {
   _id?: string;
-  status?: "draft" | "submitted" | "archived";
+  status?: ProductStatus;
   target_date?: string | null;
   department_id?: string;
   project_id?: string;
@@ -25,11 +26,13 @@ type ProductAnalyticsItem = {
   project?: Array<{ project_name?: string }>;
 };
 
+const ANALYTICS_PRODUCT_LIMIT = 100;
+
 export default function AnalyticsPage() {
   const { data: productsData, isLoading: productsLoading } =
-    useGetAllProducts();
+    useGetAllProducts({ limit: ANALYTICS_PRODUCT_LIMIT });
   const { data: archivedProductsData, isLoading: archivedLoading } =
-    useGetArchivedProducts();
+    useGetArchivedProducts({ limit: 1 });
   const { data: departmentsData, isLoading: departmentsLoading } =
     useGetAllDepartments();
   const { data: projectsData, isLoading: projectsLoading } =
@@ -41,37 +44,23 @@ export default function AnalyticsPage() {
   const analytics = useMemo(() => {
     const products =
       (productsData?.result?.products as ProductAnalyticsItem[]) || [];
-    const archivedProducts =
-      (archivedProductsData?.result?.products as ProductAnalyticsItem[]) || [];
     const departments = (departmentsData?.data as Department[]) || [];
     const projects = (projectsData?.data as Project[]) || [];
 
-    const totalProducts = products.length;
+    const totalProducts =
+      productsData?.result?.pagination?.totalCount ?? products.length;
     const draftCount = products.filter((p) => p.status === "draft").length;
-    const submittedCount = products.filter((p) => p.status === "submitted")
+    const releasedCount = products.filter((p) => p.status === "released")
       .length;
-    const archivedCount = archivedProducts.length;
+    const archivedCount =
+      archivedProductsData?.result?.pagination?.totalCount ?? 0;
 
     const today = new Date();
     const overdueCount = products.filter((p) => {
-      if (p.status === "archived" || p.status === "submitted") return false;
+      if (p.status !== "draft") return false;
       if (!p.target_date) return false;
       return new Date(p.target_date) < today;
     }).length;
-
-    const statusData = [
-      { status: "draft", count: draftCount, fill: "var(--color-draft)" },
-      {
-        status: "submitted",
-        count: submittedCount,
-        fill: "var(--color-submitted)",
-      },
-      {
-        status: "archived",
-        count: archivedCount,
-        fill: "var(--color-archived)",
-      },
-    ].filter((item) => item.count > 0);
 
     const departmentCounts: Record<string, { name: string; count: number }> =
       {};
@@ -117,11 +106,10 @@ export default function AnalyticsPage() {
       kpi: {
         totalProducts,
         draftCount,
-        submittedCount,
+        releasedCount,
         archivedCount,
         overdueCount,
       },
-      statusData,
       departmentData,
       projectData,
       timeData,

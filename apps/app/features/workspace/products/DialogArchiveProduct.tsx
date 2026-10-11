@@ -41,15 +41,7 @@ export default function DialogArchiveProduct({
     if (!product?._id) return;
 
     try {
-      const updatedProductStatus = {
-        ...product,
-        action: "update-status",
-        data: {
-          status: "archived",
-        },
-      };
-
-      archiveProduct(updatedProductStatus, {
+      archiveProduct({ _id: product._id, action: "archive" }, {
         onSuccess: () => {
           onOpenChange?.(false);
           setInternalOpen(false);

@@ -13,6 +13,8 @@ import { cn } from "@uprevit/ui/lib/utils";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface LabelTagItem {
   _id: string;
@@ -61,7 +63,11 @@ export default function Page() {
 
   const productInfo = (productInfoData as ProductInfoResponse | undefined)
     ?.result?.data;
-  const isSubmitted = productInfo?.product_data?.data?.status === "submitted";
+  const { canEdit } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(
+      productInfo?.product_data?.data?.status,
+    ) || !canEdit;
 
   if (isLoading) {
     return (
@@ -183,7 +189,7 @@ export default function Page() {
       <LabelTagsTabs
         labelTagsData={labelTagsData}
         productId={productId}
-        isSubmitted={isSubmitted}
+        isContentLocked={isContentLocked}
         isRedlineView={isRedlineView}
       />
     </div>

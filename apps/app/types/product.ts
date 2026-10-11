@@ -1,4 +1,25 @@
-export interface Product {
+export type ProductStatus =
+  | "draft"
+  | "submitted"
+  | "in_review"
+  | "released"
+  | "obsolete";
+
+export interface ProductTeamMember {
+  _id: string;
+  name: string;
+  email: string;
+  profileAvatar?: string;
+}
+
+export interface ProductTeam {
+  owner_user_id?: string;
+  contributor_user_ids?: string[];
+  owner?: ProductTeamMember | null;
+  contributors?: ProductTeamMember[];
+}
+
+export interface Product extends ProductTeam {
   _id?: string;
   workspace_id?: string;
   product_plan_number: string;
@@ -6,7 +27,7 @@ export interface Product {
   product_description: string;
   department_id: string;
   project_id: string;
-  status?: "draft" | "submitted" | "archived";
+  status?: ProductStatus;
   target_date?: string | null;
   actual_completion_date?: string | null;
   complete_count?: number;
@@ -15,6 +36,12 @@ export interface Product {
   version?: number;
   is_latest?: boolean;
   parent_id?: string | null;
+  product_lineage_id?: string;
+  is_archived?: boolean;
+  released_at?: string | null;
+  obsoleted_at?: string | null;
+  legacy_release?: boolean;
+  released_by_workflow?: { id: string; numberLabel: string } | null;
 
   auditLogs?: Array<AuditLog>;
   createdBy?: string;
@@ -62,6 +89,7 @@ export interface Product {
       component_number: string;
       component_type: string;
       component_description: string;
+      print_direction?: string;
       image?: string;
       key?: string;
     }>;
@@ -129,7 +157,7 @@ export interface ProductApiResponse {
   product_name?: string;
   project_id?: string;
   department_id?: string;
-  status?: "draft" | "submitted" | "archived";
+  status?: ProductStatus;
   version?: number;
   is_latest?: boolean;
   parent_id?: string | null;
@@ -145,10 +173,11 @@ export interface ProductMetadata {
   product_name: string;
   product_plan_number: string;
   project_id: string;
-  status: "submitted";
+  status: ProductStatus;
   target_date: string;
   version: number;
   workspace_id: string;
+  product_lineage_id?: string;
   _id: string;
 }
 
@@ -167,7 +196,7 @@ export interface AuditLog {
 // =====================================
 
 /** Core product data included in every tab response */
-export interface ProductDataContent {
+export interface ProductDataContent extends ProductTeam {
   _id: string;
   workspace_id: string;
   project_id: string;
@@ -177,15 +206,22 @@ export interface ProductDataContent {
   product_description: string;
 
   // Versioning fields
+  product_lineage_id?: string;
   is_latest: boolean;
   parent_id: string | null;
 
   target_date: string | null;
   actual_completion_date: string | null;
-  status: "draft" | "submitted" | "archived";
+  status: ProductStatus;
   complete_count?: number;
   version?: string;
+  active_workflow?: ProductActiveWorkflow | null;
+  released_version?: ProductReleasedVersion | null;
 }
+
+export type ProductActiveWorkflow = { id: string; numberLabel: string };
+
+export type ProductReleasedVersion = { id: string; version: number };
 
 /** Wrapper for product_data in tab responses */
 export interface ProductDataWrapper {
@@ -261,6 +297,7 @@ export interface AllTabsData {
     component_number: string;
     component_type: string;
     component_description: string;
+    print_direction?: string;
     image?: string;
     key?: string;
   }>;

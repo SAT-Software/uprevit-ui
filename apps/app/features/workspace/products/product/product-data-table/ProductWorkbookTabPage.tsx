@@ -2,6 +2,12 @@
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import {
@@ -35,7 +41,7 @@ interface ProductWorkbookTabPageProps {
   isLoading: boolean;
   error: Error | null;
   workbookData: ProductDataTableSchema | undefined;
-  isSubmitted: boolean;
+  isContentLocked: boolean;
   isRedlineView: boolean;
   isLoadingDiff: boolean;
   baseVersionWorkbook?: ProductDataTableSchema;
@@ -53,12 +59,13 @@ export function ProductWorkbookTabPage({
   isLoading,
   error,
   workbookData,
-  isSubmitted,
+  isContentLocked,
   isRedlineView,
   isLoadingDiff,
   baseVersionWorkbook,
   nextVersionWorkbook,
 }: ProductWorkbookTabPageProps) {
+  const { lockedMessage } = useProductAccess();
   const [redlineMode, setRedlineMode] = useState<"highlight" | "inline">(
     "inline",
   );
@@ -67,7 +74,7 @@ export function ProductWorkbookTabPage({
     productId,
     tab,
     action,
-    isSubmitted,
+    isContentLocked,
     serverWorkbookData: workbookData,
   });
 
@@ -100,7 +107,7 @@ export function ProductWorkbookTabPage({
 
   useRegisterProductWorkbookGuard(
     workbookGuardRegistration,
-    !isRedlineView && !isSubmitted,
+    !isRedlineView && !isContentLocked,
   );
 
   if (isLoading) {
@@ -215,24 +222,36 @@ export function ProductWorkbookTabPage({
             </div>
           ) : null}
 
-          <Button
-            size="sm"
-            variant={editor.hasEditableUnsavedChanges ? "default" : "outline"}
-            onClick={editor.handleManualSave}
-            disabled={
-              editor.isSaving ||
-              !editor.hasEditableUnsavedChanges ||
-              isSubmitted
-            }
-            className="gap-1.5"
-          >
-            {editor.isSaving ? (
-              <Spinner className="w-4 h-4" />
-            ) : (
-              <Icon icon={SaveIcon} size={14} strokeWidth={2} />
-            )}
-            {editor.isSaving ? "Saving" : "Save"}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="inline-flex"
+                tabIndex={isContentLocked ? 0 : undefined}
+              >
+              <Button
+                size="sm"
+                variant={editor.hasEditableUnsavedChanges ? "default" : "outline"}
+                onClick={editor.handleManualSave}
+                disabled={
+                  editor.isSaving ||
+                  !editor.hasEditableUnsavedChanges ||
+                  isContentLocked
+                }
+                className="gap-1.5"
+              >
+                {editor.isSaving ? (
+                  <Spinner className="w-4 h-4" />
+                ) : (
+                  <Icon icon={SaveIcon} size={14} strokeWidth={2} />
+                )}
+                {editor.isSaving ? "Saving" : "Save"}
+              </Button>
+              </span>
+            </TooltipTrigger>
+            {isContentLocked ? (
+              <TooltipContent side="bottom">{lockedMessage}</TooltipContent>
+            ) : null}
+          </Tooltip>
         </div>
       </div>
 
@@ -240,11 +259,11 @@ export function ProductWorkbookTabPage({
         resetKey={editor.tableResetKey}
         initialData={initialData}
         onDataChange={
-          isSubmitted || isRedlineView ? undefined : editor.handleDataChange
+          isContentLocked || isRedlineView ? undefined : editor.handleDataChange
         }
         onSaveSuccess={editor.registerClearHistoryOnSave}
         isRedlineView={isRedlineView}
-        isReadOnly={isSubmitted || isRedlineView}
+        isReadOnly={isContentLocked || isRedlineView}
         redlineMode={redlineMode}
         redlineBaseData={redlineBaseData}
       />

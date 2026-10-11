@@ -47,6 +47,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ProductData {
   id?: string;
@@ -85,7 +87,9 @@ export default function EditProductDialog({
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const [classComboboxOpen, setClassComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
-  const isSubmitted = productMetadata?.status === "submitted";
+  const { canEdit, lockedMessage } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(productMetadata?.status) || !canEdit;
 
   const initialValues: FormValues = {
     marketGeographySelect:
@@ -145,7 +149,7 @@ export default function EditProductDialog({
   const selectedDeviceClass = findDeviceClassOption(classOfDeviceSelect);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (isSubmitted) return;
+    if (isContentLocked) return;
 
     if (!product?.id) {
       console.error("Product ID is missing");
@@ -174,27 +178,27 @@ export default function EditProductDialog({
         setOpen(false);
         reset();
       },
-      onError: (error) => {
-        console.error("Failed to update product information:", error);
-        setOpen(false);
-        reset();
-      },
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button size="sm" variant="outline" disabled={isSubmitted}>
-              <Icon icon={TaskEdit01Icon} /> Update Product Info
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" disabled={isContentLocked}>
+                <Icon icon={TaskEdit01Icon} /> Update Product Info
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? lockedMessage
             : "Edit product information fields"}
         </TooltipContent>
       </Tooltip>

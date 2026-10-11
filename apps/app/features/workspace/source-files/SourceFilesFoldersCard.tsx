@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 
@@ -128,8 +129,10 @@ function SourceFilesFoldersCard({
                   isLarge ? "h-[78px] w-[92px]" : "h-14 w-16",
                 )}
               >
-                <img
+                <Image
                   src="/Source-Files-Light-Folder.svg"
+                  width={92}
+                  height={78}
                   alt=""
                   className={cn(
                     "select-none object-contain dark:hidden",
@@ -137,8 +140,10 @@ function SourceFilesFoldersCard({
                   )}
                   draggable={false}
                 />
-                <img
+                <Image
                   src="/Source-Files-Dark-Folder.svg"
+                  width={92}
+                  height={78}
                   alt=""
                   className={cn(
                     "hidden select-none object-contain dark:block",

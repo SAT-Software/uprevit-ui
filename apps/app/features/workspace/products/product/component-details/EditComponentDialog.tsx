@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
@@ -37,6 +37,7 @@ type ComponentItem = {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
 };
 
 type FormData = {
@@ -45,6 +46,7 @@ type FormData = {
   labelType: Tag[];
   dimensions: string;
   componentType: string;
+  printDirection: string;
 };
 
 export default function EditComponentDialog({
@@ -75,6 +77,7 @@ export default function EditComponentDialog({
       labelType: buildTags(component.label_type || []),
       dimensions: component.dimensions || "",
       componentType: component.component_type || "",
+      printDirection: component.print_direction || "",
     }),
     [
       component.component_description,
@@ -82,6 +85,7 @@ export default function EditComponentDialog({
       component.component_type,
       component.dimensions,
       component.label_type,
+      component.print_direction,
     ],
   );
   const {
@@ -96,13 +100,6 @@ export default function EditComponentDialog({
   const { mutate: updateComponent, isPending } = useUpdateProductTabData();
   const { mutateAsync: uploadImage, isPending: isUploadingImage } =
     useUploadFilesToS3();
-
-  useEffect(() => {
-    if (!open) return;
-    reset(formDefaults);
-    setNewComponentImage(null);
-    setRemoveComponentImage(false);
-  }, [formDefaults, open, reset]);
 
   const isSaving = isPending || isUploadingImage || uploadingImage;
 
@@ -149,6 +146,7 @@ export default function EditComponentDialog({
           label_type: (data.labelType || []).map((tag: Tag) => tag.text),
           dimensions: data.dimensions,
           component_type: data.componentType,
+          print_direction: data.printDirection,
         },
       };
 
@@ -307,6 +305,21 @@ export default function EditComponentDialog({
                   placeholder="Enter dimensions"
                   type="text"
                   {...register("dimensions")}
+                />
+              </InputGroup>
+            </Field>
+
+            <Field>
+              <FormFieldLabel
+                htmlFor={`${id}-print-direction`}
+                label="Print Direction"
+                optional
+              />
+              <InputGroup size="md" className="bg-background">
+                <InputGroupInput
+                  id={`${id}-print-direction`}
+                  placeholder="Enter print direction"
+                  {...register("printDirection")}
                 />
               </InputGroup>
             </Field>

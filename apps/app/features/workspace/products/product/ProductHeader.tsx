@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type UIEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type UIEvent } from "react";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -26,7 +26,20 @@ import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { cn } from "@uprevit/ui/lib/utils";
-import { Product } from "@/types/product";
+import type { Product, ProductStatus } from "@/types/product";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
+import {
+  PRODUCT_EDIT_FORBIDDEN_MESSAGE,
+  PRODUCT_STATUS_LABELS,
+  getProductInReviewMessage,
+  getProductLockedMessage,
+  isProductContentLocked,
+} from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
+import ProductTeamMenu from "./ProductTeamMenu";
+import { GuardedLink } from "@/components/common/GuardedLink";
+import { NotificationsBell } from "@/components/common/NotificationsBell";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
@@ -44,8 +57,9 @@ import {
   Pdf01Icon,
   SentIcon,
   Tick02Icon,
+  Undo02Icon,
+  WorkflowIcon,
 } from "@hugeicons/core-free-icons";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -65,7 +79,7 @@ export type Item = {
   version: number;
   isLatest: boolean;
   parentId: string | null;
-  status: "submitted" | "draft" | "archived";
+  status: ProductStatus;
   targetDate: string | null;
   completionDate: string | null;
   delayReason: string | null;
@@ -121,6 +135,121 @@ const getProgressState = (value: number) => {
   return PROGRESS_STATES[PROGRESS_STATES.length - 1];
 };
 
+type ProductVersion = Product & { _id: string };
+
+const getVersionLifecycleNote = (version: ProductVersion) =>
+  [
+    version.is_latest && "Latest",
+    version.released_at &&
+      `Released ${formatToLocalDate(version.released_at)}${version.released_by_workflow ? ` via ${version.released_by_workflow.numberLabel}` : ""}`,
+    version.obsoleted_at &&
+      `Obsolete since ${formatToLocalDate(version.obsoleted_at)}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+const versionSearchValue = (version: ProductVersion) =>
+  [
+    `version ${version.version} v${version.version}`,
+    version.status && PRODUCT_STATUS_LABELS[version.status],
+    getVersionLifecycleNote(version),
+  ].join(" ");
+
+function VersionRow({
+  version,
+  selected,
+}: {
+  version: ProductVersion;
+  selected: boolean;
+}) {
+  const note = getVersionLifecycleNote(version);
+
+  return (
+    <div className="flex w-full min-w-0 items-center gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Version {version.version}</span>
+          <ProductStatusBadge status={version.status} />
+        </div>
+        {note ? (
+          <span className="truncate text-xs text-muted-foreground">{note}</span>
+        ) : null}
+      </div>
+      {selected ? (
+        <Icon
+          icon={Tick02Icon}
+          size={14}
+          className="shrink-0 text-muted-foreground"
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function VersionCommand({
+  heading,
+  empty,
+  before,
+  isPending,
+  isError,
+  isFetchingNextPage,
+  hasNextPage,
+  onScroll,
+  onLoadMore,
+  children,
+}: {
+  heading: string;
+  empty: string;
+  before?: React.ReactNode;
+  isPending: boolean;
+  isError: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  onScroll: (event: UIEvent<HTMLDivElement>) => void;
+  onLoadMore: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <Command>
+        <CommandInput placeholder="Search versions…" className="h-9" />
+        <CommandList onScroll={onScroll}>
+          <CommandEmpty>
+            {isPending
+              ? "Loading versions…"
+              : isError
+                ? "Failed to load versions."
+                : hasNextPage
+                  ? "No match in the loaded versions."
+                  : empty}
+          </CommandEmpty>
+          {before}
+          <CommandGroup heading={heading}>{children}</CommandGroup>
+          {isFetchingNextPage ? (
+            <div className="flex items-center justify-center py-2">
+              <Spinner className="size-4" />
+            </div>
+          ) : null}
+        </CommandList>
+      </Command>
+      {hasNextPage && !isFetchingNextPage ? (
+        // Outside Command so search and the Compare filter can't hide it, and cmdk doesn't swallow Enter.
+        <div className="border-t border-border p-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full font-normal text-muted-foreground"
+            onClick={onLoadMore}
+          >
+            Load older versions
+          </Button>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 interface ProductHeaderProps {
   isExportLocked?: boolean;
 }
@@ -132,6 +261,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const router = useRouter();
   const productId = params.productId as string;
   const [versionPopoverOpen, setVersionPopoverOpen] = useState(false);
+  const [comparePopoverOpen, setComparePopoverOpen] = useState(false);
 
   const { data: productData } = useGetProductTabData(productId, "all-tabs");
   const {
@@ -153,6 +283,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
   const workbookGuard = useProductWorkbookUnsavedGuardOptional();
+  const { canEdit, canManageTeam } = useProductAccess();
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -198,32 +329,38 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const allTabsData = productData?.result?.data;
   const productCoreData = allTabsData?.product_information?.product_data?.data;
 
+  const status: ProductStatus = productCoreData?.status ?? "draft";
+  const statusLabel = PRODUCT_STATUS_LABELS[status];
   const isProductComplete = productCoreData?.complete_count === 100;
-  const isReadOnly = productCoreData?.status === "submitted";
-  const isEditLocked = isReadOnly || isExportLocked;
+  const isReadOnly = isProductContentLocked(status);
+  const activeWorkflow =
+    status === "in_review" ? productCoreData?.active_workflow : null;
+  const isEditLocked = isReadOnly || isExportLocked || !canEdit;
+  const isSubmittable = status === "draft";
+  const canSubmit =
+    isSubmittable && isProductComplete && !isExportLocked && canEdit;
+  const submitLabel = "Submit for approval";
+  const releasedVersion =
+    productCoreData?.released_version &&
+    productCoreData.released_version.id !== productId
+      ? productCoreData.released_version
+      : null;
+
+  const canReturnToDraft =
+    status === "submitted" && canEdit && !isExportLocked && !isUpdatingProduct;
+
+  const handleReturnToDraft = async () => {
+    if (!productId || !canReturnToDraft) return;
+    await updateProduct({ _id: productId, action: "return-to-draft" });
+  };
 
   const handleSubmit = async () => {
-    if (!productId || isEditLocked) return;
-
-    const today = new Date().toISOString();
-
-    await Promise.all([
-      updateProduct({
-        _id: productId,
-        action: "update-status",
-        data: {
-          status: "submitted",
-        },
-      }),
-      updateProduct({
-        _id: productId,
-        action: "update-product",
-        data: {
-          _id: productId,
-          actual_completion_date: today,
-        },
-      }),
-    ]);
+    if (!productId || !canSubmit) return;
+    if (workbookGuard?.isNavigationBlocked()) {
+      toast.warning("Save your changes before submitting");
+      return;
+    }
+    await updateProduct({ _id: productId, action: "submit" });
   };
 
   const tabsCompleted = useMemo(() => {
@@ -259,7 +396,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         version: productCoreData.version || 1,
         isLatest: productCoreData.is_latest ?? true,
         parentId: productCoreData.parent_id || null,
-        status: productCoreData.status || "draft",
+        status,
         targetDate: productCoreData.target_date || null,
         completionDate: productCoreData.actual_completion_date || null,
         delayReason: null,
@@ -274,27 +411,35 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     Math.min(100, Math.round(completionPercentage || 0)),
   );
   const progressState =
-    productCoreData?.status === "submitted"
-      ? SUBMITTED_STATE
-      : getProgressState(clampedPercentage);
+    status === "draft"
+      ? getProgressState(clampedPercentage)
+      : { ...SUBMITTED_STATE, label: statusLabel };
 
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
     : false;
+  const isCompletionLocked =
+    (status === "submitted" || status === "in_review") && isCurrentTabCompleted;
 
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
 
-  const handleVersionChange = (versionId: string) => {
+  const navigateTo = (href: string) => {
     setVersionPopoverOpen(false);
-    if (versionId !== productId) {
-      const href = `/products/${versionId}/${currentTab}`;
-      if (workbookGuard) {
-        workbookGuard.tryNavigate(href);
-        return;
-      }
-      router.push(href);
+    setComparePopoverOpen(false);
+    if (workbookGuard) {
+      workbookGuard.tryNavigate(href);
+      return;
     }
+    router.push(href);
+  };
+
+  const handleVersionChange = (versionId: string) => {
+    if (versionId === productId) {
+      setVersionPopoverOpen(false);
+      return;
+    }
+    navigateTo(`/products/${versionId}/${currentTab}`);
   };
 
   const toggleButtonTitle = isSyncingStatus
@@ -304,7 +449,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     : isExportLocked
       ? "Export in progress"
       : isReadOnly
-        ? "Submitted"
+        ? statusLabel
         : isCurrentTabCompleted
           ? "Mark Incomplete"
           : "Mark Complete";
@@ -322,76 +467,53 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
       !currentTabConfig ||
       !isTabCompletionEnabled ||
       isSyncingStatus ||
-      isEditLocked
+      isEditLocked ||
+      isCompletionLocked
     ) {
       return;
     }
 
-    const updatedTabsCompleted = isCurrentTabCompleted
-      ? tabsCompleted.filter((tab: string) => tab !== currentTab)
-      : [...tabsCompleted, currentTab];
-
-    const newCompletionPercentage = Math.round(
-      (updatedTabsCompleted.length / TOTAL_TABS) * 100,
-    );
-
-    const results = await Promise.allSettled([
-      updateProductTabData({
+    try {
+      await updateProductTabData({
         id: productId,
         action: currentTabConfig.action,
         tab: currentTabConfig.tab,
         data: {
           tab_completed: !isCurrentTabCompleted,
         },
-      }),
-      updateProduct({
-        _id: productId,
-        action: "update-product",
-        data: {
-          _id: productId,
-          complete_count: newCompletionPercentage,
-        },
-      }),
-    ]);
-
-    const hasFailure = results.some((result) => result.status === "rejected");
-
-    if (hasFailure) {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
-        queryClient.invalidateQueries({ queryKey: ["all-products"] }),
-        queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
-      ]);
-      toast.error("Failed to update tab completion. Please try again.");
+      });
+    } finally {
+      await queryClient.invalidateQueries({ queryKey: ["all-products"] });
     }
   };
 
-  const versions = useMemo(
+  const versions: ProductVersion[] = useMemo(
     () =>
       versionsData?.pages.flatMap((page) => page.result?.versions ?? []) ?? [],
     [versionsData],
   );
+
+  const loadOlderVersions = () => {
+    if (hasNextVersionsPage && !isVersionsFetching) {
+      fetchNextVersionsPage();
+    }
+  };
 
   const handleVersionListScroll = (event: UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     const nearBottom =
       target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
 
-    if (nearBottom && hasNextVersionsPage && !isVersionsFetching) {
-      fetchNextVersionsPage();
-    }
+    if (nearBottom) loadOlderVersions();
   };
 
-  // Get previous versions for redline comparison (versions with lower version number)
   const currentVersion = product?.version ?? 1;
   const previousVersions = useMemo(() => {
     return versions.filter(
-      (v: Product & { _id: string }) =>
-        v.version !== undefined && v.version < currentVersion,
+      (v) => v.version !== undefined && v.version < currentVersion,
     );
   }, [versions, currentVersion]);
 
-  // Handle redline version selection
   const handleRedlineVersionChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value === "clear") {
@@ -399,21 +521,12 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     } else {
       params.set("compareVersion", value);
     }
-    const href = `${pathname}?${params.toString()}`;
-    if (workbookGuard) {
-      workbookGuard.tryNavigate(href);
-      return;
-    }
-    router.push(href);
-    setVersionPopoverOpen(false);
+    navigateTo(`${pathname}?${params.toString()}`);
   };
 
-  // Get selected version info for display
   const selectedCompareVersion = useMemo(() => {
     if (!compareVersionId) return null;
-    return versions.find(
-      (v: Product & { _id: string }) => v._id === compareVersionId,
-    );
+    return versions.find((v) => v._id === compareVersionId);
   }, [compareVersionId, versions]);
 
   useEffect(() => {
@@ -435,16 +548,16 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     fetchNextVersionsPage,
   ]);
 
-  const versionTriggerLabel =
-    isRedlineView && selectedCompareVersion
-      ? `v${currentVersion} vs v${selectedCompareVersion.version}`
-      : isRedlineView
-        ? `v${currentVersion} vs …`
-        : product?.version
-          ? product.isLatest
-            ? `v${product.version} `
-            : `v${product.version}`
-          : "Versions";
+  const canCompare =
+    isRedlineView || previousVersions.length > 0 || !!hasNextVersionsPage;
+  const versionListState = {
+    isPending: isVersionsPending,
+    isError: isVersionsError,
+    isFetchingNextPage: isFetchingNextVersionsPage,
+    hasNextPage: !!hasNextVersionsPage,
+    onScroll: handleVersionListScroll,
+    onLoadMore: loadOlderVersions,
+  };
 
   return (
     <header
@@ -520,162 +633,198 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
             open={versionPopoverOpen}
             onOpenChange={setVersionPopoverOpen}
           >
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                role="combobox"
-                aria-expanded={versionPopoverOpen}
-                disabled={!product || isVersionsPending}
-                className={cn(
-                  "group h-7 gap-1.5 px-2 font-normal whitespace-nowrap",
-                  isRedlineView &&
-                    "bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/20 dark:text-amber-300",
-                )}
-              >
-                <Icon
-                  icon={isRedlineView ? GitCompareIcon : GitBranchIcon}
-                  size={14}
-                  className={cn(
-                    "shrink-0",
-                    isRedlineView &&
-                      "text-amber-700/60! group-hover:text-amber-700! dark:text-amber-300/60! group-hover:dark:text-amber-300!",
-                  )}
-                />
-                <p className="truncate">{versionTriggerLabel}</p>
-                <Icon
-                  icon={ArrowDown01Icon}
-                  size={12}
-                  className="shrink-0 opacity-50"
-                />
-              </Button>
-            </PopoverTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    role="combobox"
+                    aria-label="Switch version"
+                    aria-expanded={versionPopoverOpen}
+                    disabled={!product}
+                    className="h-7 gap-1.5 px-2 font-normal whitespace-nowrap"
+                  >
+                    <Icon icon={GitBranchIcon} size={14} className="shrink-0" />
+                    v{currentVersion}
+                    <Icon
+                      icon={ArrowDown01Icon}
+                      size={12}
+                      className="shrink-0 opacity-50"
+                    />
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Switch version</TooltipContent>
+            </Tooltip>
             <PopoverContent
-              className="w-72 p-0"
+              className="w-80 p-0"
               align="start"
               onWheel={(event) => event.stopPropagation()}
             >
-              <Command>
-                <CommandInput
-                  placeholder="Search versions…"
-                  className="h-9"
-                />
-                <CommandList onScroll={handleVersionListScroll}>
-                  <CommandEmpty>
-                    {isVersionsPending
-                      ? "Loading versions…"
-                      : isVersionsError
-                        ? "Failed to load versions."
-                        : "No version found."}
-                  </CommandEmpty>
+              <VersionCommand
+                {...versionListState}
+                heading="Open version"
+                empty="No version found."
+              >
+                {versions.map((v) => {
+                  const releasedBy = v.released_by_workflow;
+                  return (
+                    <Fragment key={v._id}>
+                      <CommandItem
+                        value={versionSearchValue(v)}
+                        onSelect={() => handleVersionChange(v._id)}
+                      >
+                        <VersionRow
+                          version={v}
+                          selected={v._id === productId}
+                        />
+                      </CommandItem>
+                      {releasedBy ? (
+                        <CommandItem
+                          value={`${versionSearchValue(v)} released by ${releasedBy.numberLabel}`}
+                          onSelect={() =>
+                            navigateTo(`/workflows/${releasedBy.id}`)
+                          }
+                          className="gap-2 pl-6 text-xs text-muted-foreground"
+                        >
+                          <Icon icon={WorkflowIcon} size={14} />
+                          <span className="truncate">
+                            Open release workflow{" "}
+                            <span className="font-mono">
+                              {releasedBy.numberLabel}
+                            </span>
+                          </span>
+                        </CommandItem>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </VersionCommand>
+            </PopoverContent>
+          </Popover>
 
-                  {isRedlineView && (
+          <Popover
+            open={comparePopoverOpen}
+            onOpenChange={setComparePopoverOpen}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      role="combobox"
+                      aria-expanded={comparePopoverOpen}
+                      disabled={!product || !canCompare}
+                      className={cn(
+                        "group h-7 gap-1.5 px-2 font-normal whitespace-nowrap",
+                        isRedlineView &&
+                          "bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/20 dark:text-amber-300",
+                      )}
+                    >
+                      <Icon
+                        icon={GitCompareIcon}
+                        size={14}
+                        className={cn(
+                          "shrink-0",
+                          isRedlineView &&
+                            "text-amber-700/60! group-hover:text-amber-700! dark:text-amber-300/60! group-hover:dark:text-amber-300!",
+                        )}
+                      />
+                      {isRedlineView
+                        ? `Comparing with v${selectedCompareVersion?.version ?? "…"}`
+                        : "Compare"}
+                      <Icon
+                        icon={ArrowDown01Icon}
+                        size={12}
+                        className="shrink-0 opacity-50"
+                      />
+                    </Button>
+                  </PopoverTrigger>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {canCompare
+                  ? `Highlight changes in v${currentVersion} against an earlier version`
+                  : "There are no earlier versions to compare with"}
+              </TooltipContent>
+            </Tooltip>
+            <PopoverContent
+              className="w-80 p-0"
+              align="start"
+              onWheel={(event) => event.stopPropagation()}
+            >
+              <VersionCommand
+                {...versionListState}
+                heading={`Compare v${currentVersion} with`}
+                empty="No earlier version found."
+                before={
+                  isRedlineView ? (
                     <>
                       <CommandGroup>
                         <CommandItem
                           value="clear comparison"
                           onSelect={() => handleRedlineVersionChange("clear")}
-                          className="text-muted-foreground"
                         >
                           <Icon icon={CancelCircleIcon} size={14} />
-                          <span>Clear comparison</span>
+                          Clear comparison
                         </CommandItem>
                       </CommandGroup>
                       <CommandSeparator />
                     </>
-                  )}
-
-                  <CommandGroup heading="Product Versions">
-                    {versions.length > 0 ? (
-                      versions.map((v: Product & { _id: string }) => (
-                        <CommandItem
-                          key={`switch-${v._id}`}
-                          value={`version ${v.version} ${v.status ?? "draft"}`}
-                          onSelect={() => handleVersionChange(v._id)}
-                          className="flex items-center justify-between gap-2"
-                        >
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span>Version {v.version}</span>
-                            {v.is_latest && (
-                              <Badge variant="green" className="text-xs">
-                                Latest
-                              </Badge>
-                            )}
-                          </div>
-                          {v._id === productId && (
-                            <Icon
-                              icon={Tick02Icon}
-                              size={14}
-                              className="shrink-0 text-muted-foreground"
-                            />
-                          )}
-                        </CommandItem>
-                      ))
-                    ) : product?.version ? (
-                      <CommandItem
-                        value={`version ${product.version}`}
-                        onSelect={() => handleVersionChange(productId)}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <span>
-                          Version {product.version}
-                          {product.isLatest ? " · Latest" : ""}
-                        </span>
-                        <Icon
-                          icon={Tick02Icon}
-                          size={14}
-                          className="shrink-0 text-muted-foreground"
-                        />
-                      </CommandItem>
-                    ) : null}
-                  </CommandGroup>
-
-                  <CommandSeparator />
-
-                  <CommandGroup heading="Compare with">
-                    {previousVersions.length > 0 ? (
-                      previousVersions.map((v: Product & { _id: string }) => (
-                        <CommandItem
-                          key={`compare-${v._id}`}
-                          value={`compare version ${v.version} ${v.status ?? "draft"}`}
-                          onSelect={() => handleRedlineVersionChange(v._id)}
-                          className="flex items-center justify-between gap-2"
-                        >
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span>Version {v.version}</span>
-                            <span className="text-xs text-muted-foreground capitalize">
-                              {v.status}
-                            </span>
-                          </div>
-                          {compareVersionId === v._id && (
-                            <Icon
-                              icon={Tick02Icon}
-                              size={14}
-                              className="shrink-0 text-muted-foreground"
-                            />
-                          )}
-                        </CommandItem>
-                      ))
-                    ) : (
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        No previous versions
-                      </div>
-                    )}
-                  </CommandGroup>
-
-                  {isFetchingNextVersionsPage && (
-                    <div className="flex items-center justify-center py-2">
-                      <Spinner className="size-4" />
-                    </div>
-                  )}
-                </CommandList>
-              </Command>
+                  ) : null
+                }
+              >
+                {previousVersions.map((v) => (
+                  <CommandItem
+                    key={v._id}
+                    value={versionSearchValue(v)}
+                    onSelect={() => handleRedlineVersionChange(v._id)}
+                  >
+                    <VersionRow
+                      version={v}
+                      selected={compareVersionId === v._id}
+                    />
+                  </CommandItem>
+                ))}
+              </VersionCommand>
             </PopoverContent>
           </Popover>
+          {releasedVersion ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-xs font-normal text-muted-foreground"
+                  asChild
+                >
+                  <GuardedLink
+                    href={`/products/${releasedVersion.id}/${currentTab}`}
+                  >
+                    Released v{releasedVersion.version}
+                  </GuardedLink>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Open the released version
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+        {productCoreData ? (
+          <ProductTeamMenu
+            productId={productId}
+            team={productCoreData}
+            canManageTeam={canManageTeam}
+          />
+        ) : null}
         <ProductProgressHoverCard
           // variant="secondary"
           percentage={clampedPercentage}
@@ -691,7 +840,12 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 tabName={currentTab}
                 isCompleted={isCurrentTabCompleted}
                 onConfirm={handleToggleTab}
-                disabled={!product || isSyncingStatus || isEditLocked}
+                disabled={
+                  !product ||
+                  isSyncingStatus ||
+                  isEditLocked ||
+                  isCompletionLocked
+                }
               >
                 <Button
                   variant="secondary"
@@ -700,13 +854,24 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                     toggleButtonClasses,
                     "[&_svg]:text-muted-foreground/60 hover:[&_svg]:text-foreground ",
                   )}
-                  disabled={!product || isSyncingStatus || isEditLocked}
+                  disabled={
+                    !product ||
+                    isSyncingStatus ||
+                    isEditLocked ||
+                    isCompletionLocked
+                  }
                   title={
                     isExportLocked
                       ? "Editing is disabled while export is in progress"
                       : isReadOnly
-                        ? "Cannot edit submitted product"
-                        : undefined
+                        ? getProductLockedMessage(productCoreData)
+                        : !canEdit
+                          ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                          : isCompletionLocked
+                            ? status === "in_review"
+                              ? "Tabs can't be marked incomplete while in review"
+                              : "Return to draft to mark a tab incomplete"
+                            : undefined
                   }
                 >
                   {isCurrentTabCompleted ? (
@@ -722,41 +887,86 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         />
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span
-                  className="inline-flex rounded-lg"
-                  tabIndex={
-                    !isProductComplete || isEditLocked ? 0 : undefined
-                  }
-                >
-                  <ConfirmSubmitProductDialog
-                    productName={product?.productName}
-                    onConfirm={handleSubmit}
-                    disabled={!isProductComplete || isEditLocked}
+            {status === "submitted" ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="inline-flex rounded-lg"
+                    tabIndex={canReturnToDraft ? undefined : 0}
                   >
                     <Button
                       size="sm"
-                      disabled={!isProductComplete || isEditLocked}
+                      variant="outline"
+                      disabled={!canReturnToDraft}
+                      onClick={handleReturnToDraft}
                     >
-                      <Icon icon={SentIcon} size={14} />
-                      {isReadOnly ? "Submitted" : "Submit"}
+                      <Icon icon={Undo02Icon} size={14} />
+                      Return to draft
                     </Button>
-                  </ConfirmSubmitProductDialog>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="end">
-                {isExportLocked
-                  ? "Cannot submit while an export is in progress"
-                  : isReadOnly
-                    ? "Product is already submitted"
-                    : !isProductComplete
-                      ? "Complete all tabs to enable submission"
-                      : "Submit product for review"}
-              </TooltipContent>
-            </Tooltip>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  {!canEdit
+                    ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                    : isExportLocked
+                      ? "Cannot change status while an export is in progress"
+                      : "Move this version back to Draft"}
+                </TooltipContent>
+              </Tooltip>
+            ) : null}
+            {activeWorkflow ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="outline" asChild>
+                    <GuardedLink href={`/workflows/${activeWorkflow.id}`}>
+                      <Icon icon={WorkflowIcon} size={14} />
+                      {statusLabel} ·{" "}
+                      <span className="font-mono">
+                        {activeWorkflow.numberLabel}
+                      </span>
+                    </GuardedLink>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  {getProductInReviewMessage(productCoreData)}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="inline-flex rounded-lg"
+                    tabIndex={canSubmit ? undefined : 0}
+                  >
+                    <ConfirmSubmitProductDialog
+                      productName={product?.productName}
+                      title={submitLabel}
+                      onConfirm={handleSubmit}
+                      disabled={!canSubmit}
+                    >
+                      <Button size="sm" disabled={!canSubmit}>
+                        <Icon icon={SentIcon} size={14} />
+                        {isSubmittable ? submitLabel : statusLabel}
+                      </Button>
+                    </ConfirmSubmitProductDialog>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="end">
+                  {!isSubmittable
+                    ? `This version is ${statusLabel.toLowerCase()}`
+                    : !canEdit
+                      ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                      : isExportLocked
+                        ? "Cannot submit while an export is in progress"
+                        : !isProductComplete
+                          ? "Complete all tabs to enable submission"
+                          : "An approval workflow will release this version"}
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </div>
+        <NotificationsBell />
       </div>
     </header>
   );

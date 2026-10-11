@@ -1,3 +1,5 @@
+import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
+
 export type FieldType = "text" | "select" | "multiselect" | "boolean" | "array";
 export type Operator =
   | "equals"
@@ -34,10 +36,13 @@ export const OPERATORS: { value: Operator; label: string }[] = [
   { value: "contains_all", label: "Contains all" },
 ];
 
-const STATUS_OPTIONS = [
-  { value: "draft", label: "Draft" },
-  { value: "submitted", label: "Submitted" },
-  { value: "archived", label: "Archived" },
+const STATUS_OPTIONS = Object.entries(PRODUCT_STATUS_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
+
+const ARCHIVED_OPTIONS = [
+  { value: "true", label: "Yes" },
+  { value: "false", label: "No" },
 ];
 
 const COMMERCIAL_CLINICAL_OPTIONS = [
@@ -63,6 +68,12 @@ export const QUERYABLE_TABS: TabConfig[] = [
         label: "Status",
         type: "select",
         options: STATUS_OPTIONS,
+      },
+      {
+        key: "is_archived",
+        label: "Archived",
+        type: "boolean",
+        options: ARCHIVED_OPTIONS,
       },
       { key: "product_name", label: "Product Name", type: "text" },
       { key: "product_description", label: "Product Description", type: "text" },

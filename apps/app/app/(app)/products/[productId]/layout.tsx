@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductHeader } from "@/features/workspace/products/product/ProductHeader";
+import { ProductInReviewBanner } from "@/features/workspace/products/product/ProductInReviewBanner";
 import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
 import { ExportJobStatus } from "@/types/export-job";
 import { Button } from "@uprevit/ui/components/ui/button";
@@ -48,6 +49,7 @@ export default function ProductLayout({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <ProductHeader isExportLocked={hasActiveExport} />
+      <ProductInReviewBanner />
       <ProductExportsSheet
         open={exportsOpen}
         onOpenChange={setExportsOpen}

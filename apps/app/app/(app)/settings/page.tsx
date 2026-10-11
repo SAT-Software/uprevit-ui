@@ -7,16 +7,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@uprevit/ui/components/ui/tabs";
-import SecurityTab from "@/features/workspace/settings/SecurityTab";
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
 import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
 import UsageTab from "@/features/workspace/settings/UsageTab";
-import BillingTab from "@/features/workspace/settings/BillingTab";
 import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
 import {
-  CreditCardIcon,
   Timer01Icon,
   DashboardSquare01Icon,
   UserIcon,

@@ -90,15 +90,19 @@ export default function MarketingHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  React.useEffect(() => {
-    setIsMobileNavOpen(false);
-  }, [pathname]);
-
-  React.useEffect(() => {
-    if (!isMobile) {
+  const [previousNavState, setPreviousNavState] = React.useState({
+    pathname,
+    isMobile,
+  });
+  if (
+    previousNavState.pathname !== pathname ||
+    previousNavState.isMobile !== isMobile
+  ) {
+    setPreviousNavState({ pathname, isMobile });
+    if (previousNavState.pathname !== pathname || !isMobile) {
       setIsMobileNavOpen(false);
     }
-  }, [isMobile]);
+  }
 
   return (
     <>

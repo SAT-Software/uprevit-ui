@@ -114,9 +114,11 @@ export function useUpdateProductTabData() {
     },
     onSuccess: () => {
       toast.success("Changes were saved successfully");
-      queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
-      queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] });
       invalidateBillingSummary(queryClient);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["product-tab-data"] }),
+        queryClient.invalidateQueries({ queryKey: ["product-diff-redline"] }),
+      ]);
     },
     onError: (error, _params, context) => {
       const message = getErrorMessage(error, "Failed to make changes");

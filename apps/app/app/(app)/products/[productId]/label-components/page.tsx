@@ -9,6 +9,8 @@ import { countChangedRedlineItems } from "@/utils/redlineCounts";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { cn } from "@uprevit/ui/lib/utils";
+import { isProductContentLocked } from "@/utils/product/product-lifecycle";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ComponentItem {
   _id: string;
@@ -19,6 +21,7 @@ interface ComponentItem {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
   _redlineStatus?: RedlineStatus;
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
@@ -33,6 +36,7 @@ interface LabelComponentItem {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
 }
 
 const mapComponentItem = (item: LabelComponentItem): ComponentItem => ({
@@ -44,6 +48,7 @@ const mapComponentItem = (item: LabelComponentItem): ComponentItem => ({
   label_type: item.label_type || [],
   dimensions: item.dimensions || "",
   component_type: item.component_type || "",
+  print_direction: item.print_direction || "",
 });
 
 export default function Page() {
@@ -63,8 +68,11 @@ export default function Page() {
     compareVersionId,
   );
 
-  const isSubmitted =
-    componentsData?.result?.data?.product_data?.data?.status === "submitted";
+  const { canEdit } = useProductAccess();
+  const isContentLocked =
+    isProductContentLocked(
+      componentsData?.result?.data?.product_data?.data?.status,
+    ) || !canEdit;
 
   if (isLoading) {
     return (
@@ -152,7 +160,7 @@ export default function Page() {
       <ProductComponentDetailsTable
         data={components}
         productId={productId as string}
-        isSubmitted={isSubmitted}
+        isContentLocked={isContentLocked}
         isRedlineView={isRedlineView}
       />
     </div>

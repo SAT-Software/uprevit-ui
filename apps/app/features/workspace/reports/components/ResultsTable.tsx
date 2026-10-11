@@ -15,6 +15,7 @@ import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { ReportsProduct } from "@/types/reports";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { useRouter } from "next/navigation";
 import { cn } from "@uprevit/ui/lib/utils";
 
@@ -39,19 +40,6 @@ const reportResultColumns = [
   { title: "Status", width: 100 },
   { title: "Version", width: 80 },
 ] as const;
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case "draft":
-      return "bg-blue-500";
-    case "submitted":
-      return "bg-emerald-500";
-    case "archived":
-      return "bg-muted-foreground";
-    default:
-      return "bg-muted-foreground";
-  }
-}
 
 export function ResultsTable({
   products,
@@ -141,15 +129,7 @@ export function ResultsTable({
               {product.department_name || "—"}
             </TableCell>
             <TableCell className="border-r border-border">
-              <Badge variant="outline" className="gap-1.5 font-normal">
-                <span
-                  className={cn(
-                    "size-1.5 rounded-full",
-                    getStatusColor(product.status),
-                  )}
-                />
-                <span className="capitalize">{product.status}</span>
-              </Badge>
+              <ProductStatusBadge status={product.status} />
             </TableCell>
             <TableCell className="border-r border-border">
               <Badge variant="secondary" className="font-mono text-xs">

@@ -77,13 +77,14 @@ type ComponentItem = {
   label_type: string[];
   dimensions: string;
   component_type: string;
+  print_direction?: string;
   _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
   _redlineDiffs?: DiffItem[];
   _redlineId?: string;
 };
 
 type TableMeta = {
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
   getFieldDiff?: (
     row: ComponentItem,
@@ -101,6 +102,7 @@ const FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "label_type", label: "Label Type", type: "text" },
   { name: "dimensions", label: "Dimensions", type: "text" },
   { name: "component_type", label: "Component Type", type: "text" },
+  { name: "print_direction", label: "Print Direction", type: "text" },
 ];
 
 const getPersistentComponentId = (item: ComponentItem): string =>
@@ -520,14 +522,35 @@ const columns: ColumnDef<ComponentItem>[] = [
     },
   },
   {
+    accessorKey: "print_direction",
+    enableSorting: true,
+    meta: { label: "Print Direction" },
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Print Direction" />
+    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta | undefined;
+      const value = row.original.print_direction;
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, "print_direction", value)
+        : null;
+
+      return (
+        <div className="text-sm">
+          {diff ? <RedlineCell value={value} diff={diff} /> : value || "-"}
+        </div>
+      );
+    },
+  },
+  {
     id: "actions",
     meta: { label: "Actions" },
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row, table }) => (
       <RowActions
         row={row}
-        isSubmitted={
-          (table.options.meta as { isSubmitted?: boolean })?.isSubmitted
+        isContentLocked={
+          (table.options.meta as { isContentLocked?: boolean })?.isContentLocked
         }
       />
     ),
@@ -539,12 +562,12 @@ const columns: ColumnDef<ComponentItem>[] = [
 export default function ProductComponentDetailsTable({
   data,
   productId,
-  isSubmitted = false,
+  isContentLocked = false,
   isRedlineView = false,
 }: {
   data: ComponentItem[];
   productId: string;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
   isRedlineView?: boolean;
 }) {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -612,7 +635,7 @@ export default function ProductComponentDetailsTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting, pagination, columnFilters, columnVisibility },
-    meta: { isSubmitted, isRedlineView, getFieldDiff, getRowStatus },
+    meta: { isContentLocked, isRedlineView, getFieldDiff, getRowStatus },
   });
 
   const handleApplyFilters = (nextFilters: ListFilter[]) => {
@@ -654,7 +677,7 @@ export default function ProductComponentDetailsTable({
             onApplyFilters={handleApplyFilters}
             onClearFilters={handleClearFilters}
           />
-          <AddComponentDialog productId={productId} isSubmitted={isSubmitted} />
+          <AddComponentDialog productId={productId} isContentLocked={isContentLocked} />
         </div>
       </div>
 
@@ -805,16 +828,16 @@ export default function ProductComponentDetailsTable({
 
 function RowActions({
   row,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   row: Row<ComponentItem>;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const componentId = getPersistentComponentId(row.original);
   const actionsDisabled =
-    isSubmitted || row.original._redlineStatus === "removed";
+    isContentLocked || row.original._redlineStatus === "removed";
 
   const pathname = usePathname();
   const getProductId = (): string => {
@@ -864,7 +887,7 @@ function RowActions({
       </DropdownMenu>
 
       <EditComponentDialog
-        key={`edit-${componentId}`}
+        key={`edit-${componentId}-${showEditDialog}`}
         productId={getProductId()}
         component={row.original}
         open={showEditDialog}

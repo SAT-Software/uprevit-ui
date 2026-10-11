@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
+import { AuditMetaCell } from "@/components/table/AuditMetaCell";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
@@ -32,6 +33,8 @@ import { ProductBookmarkMenuItem } from "@/features/workspace/products/ProductBo
 import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
 import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductListItem } from "@/features/workspace/products/productListItem";
+import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
+import { useProductRole } from "@/hooks/product/useProductAccess";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useGetAllBookmarkedProducts } from "@/hooks/product/useGetAllBookmarkedProducts";
@@ -40,7 +43,6 @@ import {
   useWorkspaceListQuery,
 } from "@/lib/workspace-list-query";
 import { AuditLog } from "@/types/product";
-import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import {
   ArchiveIcon,
   ArrowDown01Icon,
@@ -54,7 +56,6 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -79,6 +80,15 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import { cn } from "@uprevit/ui/lib/utils";
+import {
+  ProductStatusCell,
+  ProductVersionCell,
+} from "@/features/workspace/products/ProductLifecycleCells";
+import {
+  PRODUCT_STATUS_LABELS,
+  canCreateProductVersion,
+  isProductContentLocked,
+} from "@/utils/product/product-lifecycle";
 
 const PRODUCTS_TABS = ["all", "bookmarked"] as const;
 type ProductsTab = (typeof PRODUCTS_TABS)[number];
@@ -120,26 +130,12 @@ const getAuditActionAt = (
   return typeof actionAt === "string" ? actionAt : actionAt.toISOString();
 };
 
-function AuditMetaCell({ name, date }: { name: string; date?: string | null }) {
-  const formattedDate = formatToLocalDateTime(date);
-
-  return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <span className="truncate text-sm font-medium">{name || "—"}</span>
-      {formattedDate ? (
-        <span className="truncate text-xs text-muted-foreground/60">
-          {formattedDate}
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
 const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "product_name", label: "Product Name", type: "text" },
   { name: "product_plan_number", label: "Product Plan Number", type: "text" },
   { name: "project_name", label: "Project", type: "text" },
   { name: "department_name", label: "Department", type: "text" },
+  { name: "owner_name", label: "Owner", type: "text" },
   { name: "status", label: "Status", type: "text" },
   { name: "version", label: "Version", type: "number" },
   { name: "complete_count", label: "Progress", type: "number" },
@@ -151,7 +147,7 @@ const PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
 
 const PRODUCT_SORT_FIELDS = PRODUCT_FILTER_COLUMNS.map((column) => column.name);
 
-const PRODUCT_TABLE_COLUMN_COUNT = 8;
+const PRODUCT_TABLE_COLUMN_COUNT = 9;
 
 const columnHeaderMap = [
   {
@@ -164,9 +160,10 @@ const columnHeaderMap = [
     title: "Department",
     info: "Name of the department this product belongs to",
   },
+  { title: "Owner", info: "Product Owner accountable for this product" },
   {
     title: "Status",
-    info: "Current status of the product. Draft, Submitted or Archived",
+    info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
   },
   { title: "Version", info: "Latest version number of the product" },
   {
@@ -276,44 +273,37 @@ const columns: ColumnDef<ProductListItem>[] = [
     ),
   },
   {
+    id: "owner_name",
+    accessorFn: (row) => row.owner?.name ?? "",
+    size: 150,
+    header: ({ column }) => <SortableHeader column={column} title="Owner" />,
+    cell: ({ row }) => <ProductOwnerCell owner={row.original.owner} />,
+  },
+  {
     accessorKey: "status",
-    size: 90,
-    minSize: 80,
-    maxSize: 100,
+    size: 140,
+    minSize: 120,
+    maxSize: 170,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <Badge
-        variant={
-          row.original?.status === "submitted"
-            ? "green"
-            : row.original?.status === "draft"
-              ? "blue"
-              : "gray"
-        }
-        className="font-normal capitalize"
-      >
-        <div
-          className={cn("w-2 h-2 rounded-full", {
-            "bg-green-500 dark:bg-green-400":
-              row.original?.status === "submitted",
-            "bg-blue-500 dark:bg-blue-400": row.original?.status === "draft",
-            "bg-gray-500 dark:bg-gray-400": row.original?.status === "archived",
-          })}
-        />
-        {row.getValue("status")}
-      </Badge>
+      <ProductStatusCell
+        status={row.original?.status}
+        activeWorkflow={row.original?.active_workflow}
+      />
     ),
   },
   {
     accessorKey: "version",
-    size: 80,
+    size: 90,
     minSize: 80,
-    maxSize: 90,
+    maxSize: 110,
     header: ({ column }) => <SortableHeader column={column} title="Version" />,
     cell: ({ row }) => (
-      <Badge variant="secondary" className="font-mono text-xs">
-        v{row.getValue("version")}
-      </Badge>
+      <ProductVersionCell
+        productId={row.original._id}
+        version={row.original.version}
+        releasedVersion={row.original?.released_version}
+      />
     ),
   },
   {
@@ -394,9 +384,10 @@ const columns: ColumnDef<ProductListItem>[] = [
         Math.min(100, Math.round(progress || 0)),
       );
 
+      const status = row.original.status;
       const progressState =
-        row.original.status === "submitted"
-          ? SUBMITTED_STATE
+        status && status !== "draft"
+          ? { ...SUBMITTED_STATE, label: PRODUCT_STATUS_LABELS[status] }
           : getProgressState(clampedPercentage);
 
       return (
@@ -807,7 +798,10 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
-  const canCreateVersion = row.original.status === "submitted";
+  const { canEdit } = useProductRole(row.original);
+  const canCreateVersion = canCreateProductVersion(row.original) && canEdit;
+  const isContentLocked =
+    isProductContentLocked(row.original.status) || !canEdit;
 
   return (
     <div
@@ -833,23 +827,22 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
               onSelect={() => {
                 setTimeout(() => setShowUpdateDialog(true), 100);
               }}
+              disabled={isContentLocked}
             >
               <Icon icon={PropertyEditIcon} />
               <span>Edit</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => {
-                setTimeout(() => setShowVersionDialog(true), 100);
-              }}
-              disabled={!canCreateVersion}
-              className={cn(
-                !canCreateVersion && "opacity-50 cursor-not-allowed",
-              )}
-            >
-              <Icon icon={PropertyAddIcon} />
-              New version
-            </DropdownMenuItem>
+            {canCreateVersion ? (
+              <DropdownMenuItem
+                onClick={(e) => e.stopPropagation()}
+                onSelect={() => {
+                  setTimeout(() => setShowVersionDialog(true), 100);
+                }}
+              >
+                <Icon icon={PropertyAddIcon} />
+                New version
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem
               onClick={(e) => e.stopPropagation()}
               onSelect={() => {

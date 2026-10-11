@@ -14,6 +14,7 @@ import {
 interface ConfirmSubmitProductDialogProps {
   children: React.ReactNode;
   productName?: string;
+  title: string;
   onConfirm: () => Promise<void>;
   disabled?: boolean;
 }
@@ -21,6 +22,7 @@ interface ConfirmSubmitProductDialogProps {
 export default function ConfirmSubmitProductDialog({
   children,
   productName,
+  title,
   onConfirm,
   disabled = false,
 }: ConfirmSubmitProductDialogProps) {
@@ -46,8 +48,8 @@ export default function ConfirmSubmitProductDialog({
         {children}
       </DialogTrigger>
       <AppDialogContent
-        title="Submit Product"
-        description="Submit this product for review. This action is irreversible and will lock the product from further editing."
+        title={title}
+        description="Mark this version as ready for an approval workflow."
         variant="confirm"
         size="md"
         confirmContent={{
@@ -58,13 +60,13 @@ export default function ConfirmSubmitProductDialog({
               <span className="font-medium text-foreground">
                 {productName || "this product"}
               </span>{" "}
-              for review.
+              for approval.
             </>
           ),
           icon: Alert01Icon,
         }}
         primaryAction={{
-          label: "Yes, Submit Product",
+          label: `Yes, ${title.toLowerCase()}`,
           loadingLabel: "Submitting…",
           onClick: handleConfirm,
           loading: isSubmitting,
@@ -87,20 +89,15 @@ export default function ConfirmSubmitProductDialog({
                 className="text-muted-foreground"
               />
               <span className="font-medium text-muted-foreground">
-                Important: This action is irreversible
+                What happens next
               </span>
             </div>
             <ul className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
               <li>
-                Once submitted, you <strong>cannot edit</strong> this version
+                The version <strong>stays editable</strong> until it is released
               </li>
               <li>
-                To make changes, you will need to{" "}
-                <strong>create a new version</strong>
-              </li>
-              <li>
-                All tabs and data will be <strong>locked</strong> after
-                submission
+                An <strong>approval workflow</strong> will release it
               </li>
               <li>
                 The completion date will be set to <strong>today</strong>

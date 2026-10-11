@@ -16,11 +16,15 @@ import {
   ExportReportDialog,
 } from "@/features/workspace/reports/components/ExportReportDialog";
 import { LoadQueryDialog } from "@/features/workspace/reports/components/LoadQueryDialog";
+import { ConditionRow } from "@/features/workspace/reports/components/QueryBuilder/ConditionRow";
 import { QueryBuilder } from "@/features/workspace/reports/components/QueryBuilder/QueryBuilder";
 import ReportExportsSheet from "@/features/workspace/reports/components/ReportExportsSheet";
 import { ResultsTable } from "@/features/workspace/reports/components/ResultsTable";
 import { SaveQueryDialog } from "@/features/workspace/reports/components/SaveQueryDialog";
-import { useQueryBuilderState } from "@/features/workspace/reports/hooks/useQueryBuilderState";
+import {
+  REPORTS_QUERY_BUILDER_OPTIONS,
+  useQueryBuilderState,
+} from "@/features/workspace/reports/hooks/useQueryBuilderState";
 import { useExportExcel, useExportPDF } from "@/hooks/reports/useExportReports";
 import { useReportsQuery } from "@/hooks/reports/useReportsQuery";
 import { useSavedQueries } from "@/hooks/reports/useSavedQueries";
@@ -46,7 +50,7 @@ export default function Page() {
     loadConditions,
     validateConditions,
     getApiConditions,
-  } = useQueryBuilderState();
+  } = useQueryBuilderState(REPORTS_QUERY_BUILDER_OPTIONS);
 
   const reportsQuery = useReportsQuery();
   const exportPDF = useExportPDF();
@@ -243,6 +247,9 @@ export default function Page() {
             onUpdateCondition={updateCondition}
             onRemoveCondition={removeCondition}
             onConditionLogicChange={updateConditionLogic}
+            renderCondition={(condition, rowProps) => (
+              <ConditionRow condition={condition} {...rowProps} />
+            )}
           />
 
           <div className="flex flex-col gap-2">

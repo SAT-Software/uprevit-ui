@@ -28,7 +28,14 @@ import {
   ListFilterColumn,
   useWorkspaceListQuery,
 } from "@/lib/workspace-list-query";
-import { AuditLog } from "@/types/product";
+import type {
+  AuditLog,
+  ProductActiveWorkflow,
+  ProductReleasedVersion,
+  ProductStatus,
+  ProductTeam,
+} from "@/types/product";
+import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
@@ -36,7 +43,6 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Badge } from "@uprevit/ui/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -50,11 +56,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { cn } from "@uprevit/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import {
+  ProductStatusCell,
+  ProductVersionCell,
+} from "@/features/workspace/products/ProductLifecycleCells";
+import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
-export type Item = {
+export type Item = ProductTeam & {
   _id: string;
   productId?: string;
   auditLogs?: Array<AuditLog>;
@@ -66,7 +76,9 @@ export type Item = {
   product_name: string;
   product_plan_number: string;
   project_id: string;
-  status: string;
+  status: ProductStatus;
+  active_workflow?: ProductActiveWorkflow | null;
+  released_version?: ProductReleasedVersion | null;
   product_information?: { tab_completed?: boolean };
   compliance_information?: { tab_completed?: boolean };
   label_components?: { tab_completed?: boolean };
@@ -89,6 +101,7 @@ const PROJECT_PRODUCT_FILTER_COLUMNS: ListFilterColumn[] = [
   { name: "product_plan_number", label: "PPN", type: "text" },
   { name: "product_name", label: "Product Name", type: "text" },
   { name: "department_name", label: "Department Name", type: "text" },
+  { name: "owner_name", label: "Owner", type: "text" },
   { name: "status", label: "Status", type: "text" },
   { name: "version", label: "Version", type: "number" },
   { name: "complete_count", label: "Progress", type: "number" },
@@ -102,6 +115,7 @@ const PROJECT_PRODUCT_SORT_FIELDS = [
   "product_name",
   "product_plan_number",
   "department_name",
+  "owner_name",
   "version",
   "status",
   "complete_count",
@@ -123,9 +137,10 @@ const columnHeaderMap = [
     title: "Department",
     info: "Name of the department this product belongs to",
   },
+  { title: "Owner", info: "Product Owner accountable for this product" },
   {
     title: "Status",
-    info: "Current status of the product. Draft, Submitted or Archived",
+    info: "Lifecycle status of the product: Draft, Submitted, In Review, Released or Obsolete",
   },
   { title: "Version", info: "Latest version number of the product" },
   {
@@ -215,44 +230,37 @@ const columns: ColumnDef<Item>[] = [
     ),
   },
   {
+    id: "owner_name",
+    accessorFn: (row) => row.owner?.name ?? "",
+    size: 150,
+    header: ({ column }) => <SortableHeader column={column} title="Owner" />,
+    cell: ({ row }) => <ProductOwnerCell owner={row.original.owner} />,
+  },
+  {
     accessorKey: "status",
-    size: 80,
-    minSize: 80,
-    maxSize: 90,
+    size: 140,
+    minSize: 120,
+    maxSize: 170,
     header: ({ column }) => <SortableHeader column={column} title="Status" />,
     cell: ({ row }) => (
-      <Badge
-        variant={
-          row.original?.status === "submitted"
-            ? "green"
-            : row.original?.status === "draft"
-              ? "blue"
-              : "gray"
-        }
-        className="font-normal capitalize"
-      >
-        <div
-          className={cn("w-2 h-2 rounded-full", {
-            "bg-green-500 dark:bg-green-400":
-              row.original?.status === "submitted",
-            "bg-blue-500 dark:bg-blue-400": row.original?.status === "draft",
-            "bg-gray-500 dark:bg-gray-400": row.original?.status === "archived",
-          })}
-        />
-        {row.original?.status}
-      </Badge>
+      <ProductStatusCell
+        status={row.original?.status}
+        activeWorkflow={row.original?.active_workflow}
+      />
     ),
   },
   {
     accessorKey: "version",
-    size: 80,
+    size: 90,
     minSize: 80,
-    maxSize: 90,
+    maxSize: 110,
     header: ({ column }) => <SortableHeader column={column} title="Version" />,
     cell: ({ row }) => (
-      <Badge variant="secondary" className="font-mono text-xs">
-        v{row.getValue("version")}
-      </Badge>
+      <ProductVersionCell
+        productId={row.original._id}
+        version={row.original.version}
+        releasedVersion={row.original?.released_version}
+      />
     ),
   },
   {
@@ -333,9 +341,10 @@ const columns: ColumnDef<Item>[] = [
         Math.min(100, Math.round(progress || 0)),
       );
 
+      const status = row.original.status;
       const progressState =
-        row.original.status === "submitted"
-          ? SUBMITTED_STATE
+        status && status !== "draft"
+          ? { ...SUBMITTED_STATE, label: PRODUCT_STATUS_LABELS[status] }
           : getProgressState(clampedPercentage);
 
       return (
@@ -354,7 +363,7 @@ const columns: ColumnDef<Item>[] = [
   },
 ];
 
-const PROJECT_PRODUCT_TABLE_COLUMN_COUNT = 6;
+const PROJECT_PRODUCT_TABLE_COLUMN_COUNT = 7;
 
 export default function ProjectPageProductsTable({
   projectId,

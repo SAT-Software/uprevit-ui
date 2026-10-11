@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 import { cn } from "@uprevit/ui/lib/utils";
 
@@ -35,14 +36,18 @@ export function BookmarkedProductsFoldersCard({
         >
           <div className="relative flex flex-col items-center px-2 pb-4 pt-4 text-center">
             <div className="relative flex h-[78px] w-[92px] items-center justify-center">
-              <img
+              <Image
                 src="/Source-Files-Light-Folder.svg"
+                width={92}
+                height={78}
                 alt=""
                 className="h-[78px] w-[92px] select-none object-contain dark:hidden"
                 draggable={false}
               />
-              <img
+              <Image
                 src="/Source-Files-Dark-Folder.svg"
+                width={92}
+                height={78}
                 alt=""
                 className="hidden h-[78px] w-[92px] select-none object-contain dark:block"
                 draggable={false}

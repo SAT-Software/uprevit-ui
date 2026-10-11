@@ -22,7 +22,7 @@ export type ProductWorkbookGuard = {
 
 type ProductWorkbookUnsavedGuardContextValue = {
   setActiveGuard: (guard: ProductWorkbookGuard | null) => void;
-  tryNavigate: (href: string) => boolean;
+  tryNavigate: (href: string, onNavigate?: () => void) => boolean;
   isNavigationBlocked: () => boolean;
 };
 
@@ -58,6 +58,7 @@ export function ProductWorkbookUnsavedGuardProvider({
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogTabLabel, setDialogTabLabel] = useState("this tab");
+  const pendingOnNavigateRef = useRef<(() => void) | undefined>(undefined);
 
   const setActiveGuard = useCallback((guard: ProductWorkbookGuard | null) => {
     guardRef.current = guard;
@@ -68,9 +69,11 @@ export function ProductWorkbookUnsavedGuardProvider({
   }, []);
 
   const completeNavigation = useCallback(
-    (href: string) => {
+    (href: string, onNavigate?: () => void) => {
       setDialogOpen(false);
       setPendingHref(null);
+      pendingOnNavigateRef.current = undefined;
+      onNavigate?.();
       if (!isSameLocation(href)) {
         router.push(href);
       }
@@ -79,17 +82,20 @@ export function ProductWorkbookUnsavedGuardProvider({
   );
 
   const tryNavigate = useCallback(
-    (href: string): boolean => {
+    (href: string, onNavigate?: () => void): boolean => {
       if (isSameLocation(href)) {
+        onNavigate?.();
         return true;
       }
 
       const guard = guardRef.current;
       if (!guard?.isDirty()) {
+        onNavigate?.();
         router.push(href);
         return true;
       }
 
+      pendingOnNavigateRef.current = onNavigate;
       setDialogTabLabel(guard.tabLabel);
       setPendingHref(href);
       setDialogOpen(true);
@@ -101,12 +107,13 @@ export function ProductWorkbookUnsavedGuardProvider({
   const handleDialogSave = useCallback(async () => {
     const guard = guardRef.current;
     const href = pendingHref;
+    const onNavigate = pendingOnNavigateRef.current;
     if (!guard || !href) return;
 
     setIsSaving(true);
     try {
       await guard.save();
-      completeNavigation(href);
+      completeNavigation(href, onNavigate);
     } finally {
       setIsSaving(false);
     }
@@ -118,12 +125,13 @@ export function ProductWorkbookUnsavedGuardProvider({
     if (!guard || !href) return;
 
     guard.discard();
-    completeNavigation(href);
+    completeNavigation(href, pendingOnNavigateRef.current);
   }, [completeNavigation, pendingHref]);
 
   const handleDialogCancel = useCallback(() => {
     setDialogOpen(false);
     setPendingHref(null);
+    pendingOnNavigateRef.current = undefined;
   }, []);
 
   const value = useMemo(

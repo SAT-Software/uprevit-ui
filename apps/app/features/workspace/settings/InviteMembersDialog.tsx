@@ -69,19 +69,13 @@ export function InviteMembersDialog() {
     });
   }
 
+  if (!isAdmin) return null;
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
           size="sm"
-          onClick={(e) => {
-            if (!isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.warning("Insufficient privileges, contact Admin");
-              return;
-            }
-          }}
         >
           <Icon icon={MailAccount01Icon} size={14} strokeWidth={2} />
           Invite Users

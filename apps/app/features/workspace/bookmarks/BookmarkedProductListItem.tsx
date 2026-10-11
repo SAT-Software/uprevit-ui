@@ -5,42 +5,14 @@ import { Blockchain03Icon } from "@hugeicons/core-free-icons";
 
 import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Badge } from "@uprevit/ui/components/ui/badge";
-import { cn } from "@uprevit/ui/lib/utils";
+import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import type { ProductStatus } from "@/types/product";
 
 export interface BookmarkedProduct {
   _id: string;
   product_name: string;
   version: number;
-  status: string;
-}
-
-function getStatusBadgeVariant(status: string | undefined) {
-  const normalized = status?.toLowerCase();
-
-  if (normalized === "submitted" || normalized === "published") {
-    return "green" as const;
-  }
-
-  if (normalized === "draft") {
-    return "blue" as const;
-  }
-
-  return "gray" as const;
-}
-
-function getStatusDotClass(status: string | undefined) {
-  const normalized = status?.toLowerCase();
-
-  if (normalized === "submitted" || normalized === "published") {
-    return "bg-green-500 dark:bg-green-400";
-  }
-
-  if (normalized === "draft") {
-    return "bg-blue-500 dark:bg-blue-400";
-  }
-
-  return "bg-gray-500 dark:bg-gray-400";
+  status: ProductStatus;
 }
 
 interface BookmarkedProductListItemProps {
@@ -74,18 +46,7 @@ export function BookmarkedProductListItem({
               >
                 {product.product_name}
               </Link>
-              <Badge
-                variant={getStatusBadgeVariant(product.status)}
-                className="shrink-0 font-normal capitalize"
-              >
-                <div
-                  className={cn(
-                    "h-2 w-2 rounded-full",
-                    getStatusDotClass(product.status),
-                  )}
-                />
-                {product.status || "N/A"}
-              </Badge>
+              <ProductStatusBadge status={product.status} className="shrink-0" />
             </div>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Version {product.version}

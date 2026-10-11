@@ -40,6 +40,7 @@ export function useUpdateProduct() {
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
       queryClient.invalidateQueries({ queryKey: ["archived-products"] });
       queryClient.invalidateQueries({ queryKey: ["product-tab-data"] });
+      queryClient.invalidateQueries({ queryKey: ["product-versions-infinite"] });
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to update product");

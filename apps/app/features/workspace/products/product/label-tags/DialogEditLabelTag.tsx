@@ -26,6 +26,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { LabelTagImageUpload } from "./LabelTagImageUpload";
+import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 type FormData = {
   name: string;
@@ -46,12 +47,13 @@ interface LabelTagItem {
 export default function DialogEditLabelTag({
   productId,
   labelTag,
-  isSubmitted = false,
+  isContentLocked = false,
 }: {
   productId: string;
   labelTag: LabelTagItem;
-  isSubmitted?: boolean;
+  isContentLocked?: boolean;
 }) {
+  const { lockedMessage } = useProductAccess();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -155,21 +157,26 @@ export default function DialogEditLabelTag({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon-xs"
-              variant="outline"
-              disabled={isSubmitted}
-              aria-label="Edit label"
-            >
-              <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <span
+            className="inline-flex"
+            tabIndex={isContentLocked ? 0 : undefined}
+          >
+            <DialogTrigger asChild>
+              <Button
+                size="icon-xs"
+                variant="outline"
+                disabled={isContentLocked}
+                aria-label="Edit label"
+              >
+                <Icon icon={PropertyEditIcon} size={14} strokeWidth={2} />
+              </Button>
+            </DialogTrigger>
+          </span>
+        </TooltipTrigger>
         <TooltipContent side="bottom">
-          {isSubmitted
-            ? "Submitted products can't be edited"
+          {isContentLocked
+            ? lockedMessage
             : "Edit label"}
         </TooltipContent>
       </Tooltip>
@@ -184,7 +191,7 @@ export default function DialogEditLabelTag({
           form: `edit-label-tag-form-${id}`,
           type: "submit",
           loading: isSaving,
-          disabled: isSaving || isSubmitted,
+          disabled: isSaving || isContentLocked,
           icon: CheckmarkCircle01Icon,
         }}
         secondaryAction={{

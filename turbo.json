@@ -3,6 +3,8 @@
   "globalDependencies": ["apps/*/.env*"],
   "globalEnv": [
     "API_PROXY_TARGET",
+    "OPENROUTER_API_KEY",
+    "OPENROUTER_MODEL",
     "NEXT_PUBLIC_API_PROXY_TARGET",
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_CLIENT_ID",

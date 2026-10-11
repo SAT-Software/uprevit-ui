@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useProductWorkbookUnsavedGuardOptional } from "@/lib/product-workbook-unsaved-guard";
 import type { ComponentProps } from "react";
 
-type GuardedLinkProps = ComponentProps<typeof Link>;
+type GuardedLinkProps = ComponentProps<typeof Link> & {
+  /** Runs only when navigation goes ahead, after any unsaved-changes prompt is accepted. */
+  onNavigateAccepted?: () => void;
+};
 
 function resolveHrefString(href: GuardedLinkProps["href"]): string {
   if (typeof href === "string") return href;
@@ -24,7 +27,12 @@ function resolveHrefString(href: GuardedLinkProps["href"]): string {
   return pathname;
 }
 
-export function GuardedLink({ href, onClick, ...props }: GuardedLinkProps) {
+export function GuardedLink({
+  href,
+  onClick,
+  onNavigateAccepted,
+  ...props
+}: GuardedLinkProps) {
   const guardContext = useProductWorkbookUnsavedGuardOptional();
   const hrefString = resolveHrefString(href);
 
@@ -35,14 +43,21 @@ export function GuardedLink({ href, onClick, ...props }: GuardedLinkProps) {
       onClick={(event) => {
         onClick?.(event);
         if (event.defaultPrevented) return;
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        if (
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          !guardContext ||
+          !hrefString ||
+          !guardContext.isNavigationBlocked()
+        ) {
+          onNavigateAccepted?.();
           return;
         }
-        if (!guardContext || !hrefString) return;
-        if (!guardContext.isNavigationBlocked()) return;
 
         event.preventDefault();
-        guardContext.tryNavigate(hrefString);
+        guardContext.tryNavigate(hrefString, onNavigateAccepted);
       }}
     />
   );

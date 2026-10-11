@@ -16,11 +16,23 @@ import {
   NewOfficeIcon,
   Presentation01Icon,
   Blockchain03Icon,
+  WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 
 Uprevit helps teams document medical device labeling in one place—from workspace setup through reviewed outputs.
 
+Have a question? Click **Ask AI** on any page. It only reads this documentation and never sees your workspace data. See [Ask AI and Privacy](/docs/ask-ai).
+
 <DocsVideo videoKey="getting-started.welcome-dashboard" title="Welcome dashboard overview" />
+
+## What's new in 0.8.0 Beta
+
+Uprevit is now in **Beta**, and **Workflows** is marked **New** in the app sidebar.
+
+- [Approval workflows](/docs/review-outputs/approval-workflows) let you review and release one or more products together, request changes, attach images, and keep the decision history.
+- [Product ownership and lifecycle](/docs/getting-started/products) define who can edit a product and distinguish working, released, and obsolete versions. Submitting a product prepares it for review; the workflow releases it.
+- In-app and email notifications keep product teams and approvers informed about assignments, decisions, changes, and reminders.
+- [Ask AI](/docs/ask-ai) answers questions using these documentation pages.
 
 ## How it fits together
 
@@ -72,6 +84,12 @@ Each card below opens a guide for that part of Uprevit. Jump to whatever you nee
     icon={<DocsIcon icon={GitBranchIcon} />}
   />
   <Card
+    title="Approval workflows"
+    href="/docs/review-outputs/approval-workflows"
+    description="Send versions for review, approve or request changes, and release them together."
+    icon={<DocsIcon icon={WorkflowIcon} />}
+  />
+  <Card
     title="Source files"
     href="/docs/source-files-bookmarks/source-files"
     description="Store and browse reference folders linked to products."
@@ -115,7 +133,7 @@ Everyone in a workspace signs in with one of two roles. Your organization assign
 
     - Browse departments, projects, and products
     - Create products and complete all seven documentation tabs
-    - Submit versions, compare redlines, and export outputs
+    - Submit versions, review them in approval workflows, compare redlines, and export outputs
     - Use source files, bookmarks, and reports
 
   </Card>

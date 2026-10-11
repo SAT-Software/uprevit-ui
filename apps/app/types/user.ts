@@ -6,6 +6,7 @@ export interface User {
   profileAvatarKey?: string;
   profileAvatarSizeBytes?: number;
   designation: string;
+  unit?: string;
   phone?: string;
   userType?: "user" | "admin";
   location?: string;
