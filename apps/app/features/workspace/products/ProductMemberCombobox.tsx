@@ -69,6 +69,7 @@ export default function ProductMemberCombobox({
     isFetchingNextPage,
     isPending,
     isError,
+    isFetchNextPageError,
     refetch,
   } = useGetUsersInfinite({
     enabled: open,
@@ -100,7 +101,7 @@ export default function ProductMemberCombobox({
     const target = event.currentTarget;
     const nearBottom =
       target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
-    if (nearBottom && hasNextPage && !isFetching) fetchNextPage();
+    if (nearBottom && hasNextPage && !isFetching && !isError) fetchNextPage();
   };
 
   return (
@@ -190,7 +191,9 @@ export default function ProductMemberCombobox({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => (data ? fetchNextPage() : refetch())}
+                  onClick={() =>
+                    isFetchNextPageError ? fetchNextPage() : refetch()
+                  }
                 >
                   Retry
                 </Button>
