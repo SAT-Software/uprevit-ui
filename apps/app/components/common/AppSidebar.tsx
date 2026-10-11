@@ -56,6 +56,7 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
+import { version } from "../../package.json";
 import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
 import { SidebarHeardsyButton } from "./AppSidebarHeardsyButton";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
@@ -400,10 +401,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="secondary">alpha</Badge>
+                  <Badge variant="secondary">Beta</Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  Early preview. Active updates are in progress.
+                  Uprevit {version} Beta. Active updates and improvements are in
+                  progress.
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -451,6 +453,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         >
                           {item.title}
                         </span>
+                        {item.url === "/workflows" && (
+                          <Badge
+                            variant="secondary"
+                            className="ml-auto group-data-[collapsible=icon]:hidden"
+                          >
+                            New
+                          </Badge>
+                        )}
                       </GuardedLink>
                     </SidebarMenuButton>
                     {item.title === "Products" && showProductSubNavigation && (
