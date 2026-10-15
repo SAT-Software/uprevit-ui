@@ -4,9 +4,9 @@ Uprevit is a medical device labeling documentation platform. This repository con
 
 ## Current Release
 
-**0.8.0 (Beta)** introduces approval workflows, product ownership, lifecycle tracking, and in-app and email notifications. Submitting a product marks it Submitted; an approval workflow releases it. The app shows a Beta badge and marks Workflows as New in the sidebar.
+**0.9.0 (Beta)** adds Support conversations powered by PostHog, an opt-in session replay setting, and an expanded compliance catalog. It also fixes workbook save and import issues.
 
-This release also includes documentation Ask AI, workflow image attachments, and product import/export improvements. See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.8.0` backend release.
+See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.9.0` backend release.
 
 ## Monorepo Structure
 
@@ -193,9 +193,9 @@ Typical flow:
 5. Tag the deployed `main` commit as `vx.y.z`.
 6. Merge `main` back into `develop` after the release.
 
-Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.8.0` and create the `v0.8.0` tag after production verification.
+Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.9.0` and create the `v0.9.0` tag after production verification.
 
-For `0.8.0`, run the backend data migrations after the backend deploys and before releasing the UI. See [0.8.0 data migrations](https://github.com/SAT-Software/uprevit-backend/blob/main/README.md#080-data-migrations) in the backend README.
+After `main` deploys, fast-forward `demo` to the same `main` commit so both environments run the same SHA.
 
 ## Changelog
 
