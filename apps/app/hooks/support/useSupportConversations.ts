@@ -73,7 +73,12 @@ export function useSupportTicketMessages(
     queryKey: ["support", "messages", principal, ticketId],
     queryFn: async () => {
       const conversations = getConversations();
-      const result = await conversations.getMessages(ticketId!);
+      let result = await conversations.getMessages(ticketId!);
+      const messages = result?.messages ?? [];
+      while (result?.has_more && result.messages.length) {
+        result = await conversations.getMessages(ticketId!, result.messages.at(-1)!.created_at);
+        messages.push(...(result?.messages ?? []));
+      }
       getConversations();
       if (!result) throw new Error(UNAVAILABLE_MESSAGE);
       if (result.unread_count > 0) {
@@ -84,7 +89,9 @@ export function useSupportTicketMessages(
           })
           .catch(() => undefined);
       }
-      return result.messages.filter((message) => !message.is_private);
+      return [...new Map(messages.map((message) => [message.id, message])).values()].filter(
+        (message) => !message.is_private,
+      );
     },
     enabled: Boolean(ticketId && config?.identityHash),
     staleTime: 0,
