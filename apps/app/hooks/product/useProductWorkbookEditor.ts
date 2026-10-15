@@ -2,7 +2,10 @@
 
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { type ProductDataTableSchema } from "@/types/product-data-table";
-import { normalizeWorkbookForComparison } from "@/utils/product/product-spec";
+import {
+  normalizeWorkbookForComparison,
+  serializeWorkbookForComparison,
+} from "@/utils/product/product-spec";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type ProductWorkbookTab =
@@ -21,12 +24,6 @@ interface UseProductWorkbookEditorOptions {
   serverWorkbookData: ProductDataTableSchema | undefined;
 }
 
-function serializeWorkbookForComparison(
-  data: ProductDataTableSchema,
-): string {
-  return JSON.stringify(data);
-}
-
 export function useProductWorkbookEditor({
   productId,
   tab,
@@ -39,7 +36,6 @@ export function useProductWorkbookEditor({
   const [tableResetKey, setTableResetKey] = useState(0);
   const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
   const onSaveSuccessRef = useRef<() => void>(() => {});
-  const savedBaselineRef = useRef<string | null>(null);
 
   const { mutate: updateTabData, isPending: isSaving } =
     useUpdateProductTabData();
@@ -49,6 +45,7 @@ export function useProductWorkbookEditor({
     [serverWorkbookData],
   );
 
+  const [savedBaseline, setSavedBaseline] = useState(serverBaseline);
   const [previousSource, setPreviousSource] = useState({
     productId,
     tab,
@@ -60,6 +57,7 @@ export function useProductWorkbookEditor({
     previousSource.serverBaseline !== serverBaseline
   ) {
     setPreviousSource({ productId, tab, serverBaseline });
+    setSavedBaseline(serverBaseline);
     setHasUnsavedChanges(false);
   }
 
@@ -70,7 +68,6 @@ export function useProductWorkbookEditor({
   }, []);
 
   useEffect(() => {
-    savedBaselineRef.current = serverBaseline;
     pendingDataRef.current = null;
   }, [productId, tab, tableResetKey, serverBaseline]);
 
@@ -88,8 +85,7 @@ export function useProductWorkbookEditor({
       return new Promise((resolve, reject) => {
         updateTabData(payload, {
           onSuccess: () => {
-            const savedSnapshot = serializeWorkbookForComparison(data);
-            savedBaselineRef.current = savedSnapshot;
+            setSavedBaseline(serializeWorkbookForComparison(data));
             setHasUnsavedChanges(false);
             setLastSavedAt(new Date());
             onSaveSuccessRef.current();
@@ -110,11 +106,11 @@ export function useProductWorkbookEditor({
       if (isContentLocked) return;
 
       pendingDataRef.current = data;
-      const currentSnapshot = serializeWorkbookForComparison(data);
-      const baseline = savedBaselineRef.current ?? serverBaseline;
-      setHasUnsavedChanges(currentSnapshot !== baseline);
+      setHasUnsavedChanges(
+        serializeWorkbookForComparison(data) !== savedBaseline,
+      );
     },
-    [isContentLocked, serverBaseline],
+    [isContentLocked, savedBaseline],
   );
 
   const handleManualSave = useCallback(() => {
@@ -129,7 +125,7 @@ export function useProductWorkbookEditor({
 
   const discardChanges = useCallback(() => {
     pendingDataRef.current = null;
-    savedBaselineRef.current = serverBaseline;
+    setSavedBaseline(serverBaseline);
     setHasUnsavedChanges(false);
     setLastSavedAt(null);
     setTableResetKey((key) => key + 1);
