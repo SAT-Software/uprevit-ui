@@ -1,9 +1,12 @@
 import { useLayoutEffect, useRef } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
 import { isSupportIdentityCurrent } from "@/lib/posthog/support";
 import { useSupportPrincipal } from "@/hooks/support/useSupportPrincipal";
 import type { SupportConfig } from "@/types/support";
+
+const POLL_INTERVAL = 15_000;
+const TICKETS_PAGE_SIZE = 20;
 
 const UNAVAILABLE_MESSAGE =
   "Your conversations are unavailable right now. Please try again in a moment.";
@@ -35,16 +38,28 @@ export function useSupportConversationsClient(config: SupportConfig | undefined)
 
 export function useSupportTickets(config: SupportConfig | undefined, enabled: boolean) {
   const { principal, getConversations } = useSupportConversationsClient(config);
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["support", "tickets", principal],
-    queryFn: async () => {
-      const result = await getConversations().getTickets({ limit: 20 });
+    queryFn: async ({ pageParam }) => {
+      const result = await getConversations().getTickets({
+        limit: TICKETS_PAGE_SIZE,
+        offset: pageParam,
+      });
       getConversations();
       if (!result) throw new Error(UNAVAILABLE_MESSAGE);
-      return result.results;
+      return result;
     },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _pages, lastOffset) => {
+      const nextOffset = lastOffset + lastPage.results.length;
+      return lastPage.results.length && nextOffset < lastPage.count ? nextOffset : undefined;
+    },
+    select: (data) => [
+      ...new Map(data.pages.flatMap((page) => page.results).map((ticket) => [ticket.id, ticket])).values(),
+    ],
     enabled: enabled && Boolean(config?.identityHash),
     staleTime: 0,
+    refetchInterval: POLL_INTERVAL,
   });
 }
 
@@ -53,6 +68,7 @@ export function useSupportTicketMessages(
   ticketId: string | null,
 ) {
   const { principal, getConversations } = useSupportConversationsClient(config);
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["support", "messages", principal, ticketId],
     queryFn: async () => {
@@ -61,12 +77,18 @@ export function useSupportTicketMessages(
       getConversations();
       if (!result) throw new Error(UNAVAILABLE_MESSAGE);
       if (result.unread_count > 0) {
-        void conversations.markAsRead(ticketId!).catch(() => undefined);
+        void conversations
+          .markAsRead(ticketId!)
+          .then((response) => {
+            if (response) void queryClient.invalidateQueries({ queryKey: ["support", "tickets", principal] });
+          })
+          .catch(() => undefined);
       }
       return result.messages.filter((message) => !message.is_private);
     },
     enabled: Boolean(ticketId && config?.identityHash),
     staleTime: 0,
+    refetchInterval: POLL_INTERVAL,
   });
 }
 

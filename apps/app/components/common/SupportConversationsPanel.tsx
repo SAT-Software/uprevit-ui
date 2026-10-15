@@ -76,12 +76,13 @@ function SupportTicketThread({
   resolved: boolean;
   onBack: () => void;
 }) {
-  const { data: messages, isLoading, isFetching, error, refetch } =
+  const { data: messages, isLoading, error: queryError, refetch } =
     useSupportTicketMessages(config, ticketId);
+  const error = messages ? null : queryError;
   const [reply, setReply] = useState("");
   const sendReply = useReplySupportMessage(config, ticketId);
   const { isCurrent } = useSupportPrincipal();
-  const busy = isFetching || sendReply.isPending || !config?.identityHash;
+  const busy = isLoading || sendReply.isPending || !config?.identityHash;
 
   return (
     <div className="flex flex-col">
@@ -167,7 +168,16 @@ export function SupportConversationsPanel({
   enabled: boolean;
 }) {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const { data: tickets, isLoading, error, refetch } = useSupportTickets(config, enabled);
+  const {
+    data: tickets,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+  } = useSupportTickets(config, enabled);
 
   if (selectedTicketId) {
     return (
@@ -200,7 +210,7 @@ export function SupportConversationsPanel({
     );
   }
 
-  if (error) {
+  if (error && !tickets) {
     return <PanelMessage title="Could not load conversations" description={error.message} onRetry={() => refetch()} />;
   }
 
@@ -243,6 +253,22 @@ export function SupportConversationsPanel({
           </li>
         );
       })}
+      {hasNextPage ? (
+        <li className="flex flex-col items-center gap-1">
+          {isFetchNextPageError ? (
+            <p role="alert" className="text-sm text-destructive">Could not load older conversations.</p>
+          ) : null}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : isFetchNextPageError ? "Try again" : "Load older conversations"}
+          </Button>
+        </li>
+      ) : null}
     </ul>
   );
 }
