@@ -67,6 +67,7 @@
     "next-video": "^2.8.0",
     "oidc-client-ts": "^3.3.0",
     "path2d-polyfill": "^3.2.1",
+    "posthog-js": "^1.438.9",
     "radix-ui": "^1.4.3",
     "react": "19.2.1",
     "react-dom": "19.2.1",

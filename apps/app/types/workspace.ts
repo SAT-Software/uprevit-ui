@@ -20,4 +20,5 @@ export interface Workspace {
   memberListIncludeInactive?: boolean;
   workflowPrefix?: string;
   defaultWorkflowCompletionMode?: WorkflowCompletionMode;
+  supportReplayEnabled?: boolean;
 }

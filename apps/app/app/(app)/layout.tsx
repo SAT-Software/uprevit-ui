@@ -11,12 +11,14 @@ import { AppSidebar } from "@/components/common/AppSidebar";
 import { ProductExportJobNotifier } from "@/components/common/ProductExportJobNotifier";
 import { ReportExportJobNotifier } from "@/components/common/ReportExportJobNotifier";
 import { SentryUserSync } from "@/components/common/SentryUserSync";
+import { PostHogSupportSync } from "@/components/common/PostHogSupportSync";
 import { ProductWorkbookUnsavedGuardProvider } from "@/lib/product-workbook-unsaved-guard";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AccessEligibilityGuard>
       <SentryUserSync />
+      <PostHogSupportSync />
       <ProductWorkbookUnsavedGuardProvider>
       <SidebarProvider>
         <AppSidebar />

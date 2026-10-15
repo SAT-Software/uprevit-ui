@@ -45,12 +45,14 @@ const nextConfig = {
 
     if (!target) return [];
 
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${target}/:path*`,
-      },
-    ];
+    return {
+      fallback: [
+        {
+          source: "/api/:path*",
+          destination: `${target}/:path*`,
+        },
+      ],
+    };
   },
 };
 

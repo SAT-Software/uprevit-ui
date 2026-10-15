@@ -4,6 +4,7 @@ import { CloudSnowIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useAuth } from "react-oidc-context";
+import { clearSupportSession } from "@/lib/posthog/support";
 
 export function WorkspaceAccessFrozenScreen() {
   const auth = useAuth();
@@ -25,11 +26,12 @@ export function WorkspaceAccessFrozenScreen() {
         <Button
           variant="outline"
           className="mt-5 border-amber-300 bg-background/80 dark:border-amber-800"
-          onClick={() =>
+          onClick={() => {
+            clearSupportSession();
             auth.signoutRedirect({
               post_logout_redirect_uri: window.location.origin,
-            })
-          }
+            });
+          }}
         >
           Sign out
         </Button>
