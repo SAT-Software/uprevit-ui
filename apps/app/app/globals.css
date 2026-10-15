@@ -326,15 +326,6 @@
   scrollbar-color: var(--fg-quaternary) transparent;
 }
 
-#sentry-feedback {
-  --accent-background: var(--primary);
-  --accent-foreground: var(--primary-foreground);
-  --outline: 1px auto var(--primary);
-  /* Default inset is auto 0 0 auto (bottom-right); this pins the form to bottom-left */
-  --inset: auto auto 0 0;
-  --page-margin: 16px;
-}
-
 /* Docs: the header spans the content and "On this page" columns, so the TOC starts below it */
 #nd-docs-layout #nd-toc {
   grid-row: 2 / -1;

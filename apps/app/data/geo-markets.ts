@@ -69,7 +69,7 @@ export const GEO_MARKETS: GeoMarket[] = [
     category: "Sub-Region",
     regulatoryBody: "AMDD (ASEAN Medical Device Directive)",
     description:
-      "10 SE Asian countries (Singapore, Vietnam, Thailand, etc.) moving toward harmonized regulations (AMDD).",
+      "11 SE Asian countries (Singapore, Vietnam, Thailand, etc.; Timor-Leste joined in 2025) moving toward harmonized regulations (AMDD).",
   },
   {
     regionAcronym: "MENA",

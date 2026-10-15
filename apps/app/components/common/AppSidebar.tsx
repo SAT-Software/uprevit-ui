@@ -57,8 +57,7 @@ import {
 import { cn } from "@uprevit/ui/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
 import { version } from "../../package.json";
-import { SidebarFeedbackButton } from "./AppSidebarFeedbackButton";
-import { SidebarHeardsyButton } from "./AppSidebarHeardsyButton";
+import { SidebarSupportButton } from "./AppSidebarSupportButton";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
 const data = {
@@ -526,14 +525,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuItem>
                 ))}
                 {item.title === "Help" && (
-                  <>
-                    <SidebarMenuItem>
-                      <SidebarFeedbackButton />
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarHeardsyButton />
-                    </SidebarMenuItem>
-                  </>
+                  <SidebarMenuItem>
+                    <SidebarSupportButton />
+                  </SidebarMenuItem>
                 )}
               </SidebarMenu>
             </SidebarGroupContent>

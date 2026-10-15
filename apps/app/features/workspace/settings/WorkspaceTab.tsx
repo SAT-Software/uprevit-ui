@@ -27,6 +27,7 @@ import { cn } from "@uprevit/ui/lib/utils";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { WorkflowSettingsCard } from "./WorkflowSettingsCard";
+import { SupportSettingsCard } from "./SupportSettingsCard";
 
 const WORKSPACE_FIELDS = [
   {
@@ -260,6 +261,10 @@ function WorkspaceTab() {
 
       {isAdmin && workspaceData ? (
         <WorkflowSettingsCard workspace={workspaceData} />
+      ) : null}
+
+      {workspaceData ? (
+        <SupportSettingsCard workspace={workspaceData} isAdmin={isAdmin} />
       ) : null}
     </div>
   );

@@ -28,6 +28,7 @@ export interface ProductSpecificationDataTableProps {
   resetKey?: number;
   isRedlineView?: boolean;
   isReadOnly?: boolean;
+  isSavePending?: () => boolean;
   redlineMode?: "inline" | "highlight";
   redlineBaseData?: {
     headerData: Record<number, string>;

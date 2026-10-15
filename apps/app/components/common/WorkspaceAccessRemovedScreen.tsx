@@ -4,6 +4,7 @@ import { UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { useAuth } from "react-oidc-context";
+import { clearSupportSession } from "@/lib/posthog/support";
 
 export function WorkspaceAccessRemovedScreen() {
   const auth = useAuth();
@@ -27,11 +28,12 @@ export function WorkspaceAccessRemovedScreen() {
         <Button
           variant="outline"
           className="mt-5"
-          onClick={() =>
+          onClick={() => {
+            clearSupportSession();
             auth.signoutRedirect({
               post_logout_redirect_uri: window.location.origin,
-            })
-          }
+            });
+          }}
         >
           Sign out
         </Button>
