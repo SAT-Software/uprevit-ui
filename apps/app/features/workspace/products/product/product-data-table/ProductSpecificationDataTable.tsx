@@ -522,6 +522,7 @@ export function ProductSpecificationDataTable({
   resetKey = 0,
   isRedlineView = false,
   isReadOnly = false,
+  isSavePending,
   redlineMode = "inline",
   redlineBaseData,
 }: ProductSpecificationDataTableProps) {
@@ -597,6 +598,8 @@ export function ProductSpecificationDataTable({
     Record<number, ColumnFilter>
   >({});
   const pendingFileRef = useRef<File | null>(null);
+  const importGuardRef = useRef({ isReadOnly, resetKey, initialData });
+  importGuardRef.current = { isReadOnly, resetKey, initialData };
 
   // History state
   const [history, setHistory] = useState<HistoryState>({
@@ -1272,6 +1275,18 @@ export function ProductSpecificationDataTable({
 
     try {
       const buffer = await file.arrayBuffer();
+      const guard = importGuardRef.current;
+      if (
+        guard.isReadOnly ||
+        isSavePending?.() ||
+        guard.resetKey !== resetKey ||
+        guard.initialData !== initialData
+      ) {
+        toast.error(
+          "The workbook changed while the file was loading. Please import it again.",
+        );
+        return;
+      }
       const { headers, columnTypes, cells } = parseWorkbookToTableData(buffer);
 
       setHeaderData(headers);

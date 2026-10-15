@@ -36,6 +36,7 @@ export function useProductWorkbookEditor({
   const [tableResetKey, setTableResetKey] = useState(0);
   const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
   const onSaveSuccessRef = useRef<() => void>(() => {});
+  const savePromiseRef = useRef<Promise<void> | null>(null);
 
   const { mutate: updateTabData, isPending: isSaving } =
     useUpdateProductTabData();
@@ -74,6 +75,7 @@ export function useProductWorkbookEditor({
   const saveDataToDB = useCallback(
     (data: ProductDataTableSchema): Promise<void> => {
       if (isContentLocked) return Promise.resolve();
+      if (savePromiseRef.current) return savePromiseRef.current;
 
       const payload = {
         id: productId,
@@ -82,7 +84,7 @@ export function useProductWorkbookEditor({
         data: { workbook_data: data },
       };
 
-      return new Promise((resolve, reject) => {
+      const savePromise = new Promise<void>((resolve, reject) => {
         updateTabData(payload, {
           onSuccess: () => {
             setSavedBaseline(serializeWorkbookForComparison(data));
@@ -96,10 +98,16 @@ export function useProductWorkbookEditor({
             reject(error);
           },
         });
+      }).finally(() => {
+        savePromiseRef.current = null;
       });
+      savePromiseRef.current = savePromise;
+      return savePromise;
     },
     [action, isContentLocked, productId, tab, updateTabData],
   );
+
+  const isSavePending = useCallback(() => savePromiseRef.current !== null, []);
 
   const handleDataChange = useCallback(
     (data: ProductDataTableSchema) => {
@@ -151,6 +159,7 @@ export function useProductWorkbookEditor({
   return {
     hasEditableUnsavedChanges,
     isSaving,
+    isSavePending,
     lastSavedAt,
     tableResetKey,
     handleDataChange,
