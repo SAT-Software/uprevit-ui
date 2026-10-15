@@ -62,12 +62,29 @@ export function sparseProductSpecDataForDatabase(
   };
 }
 
-/** Stable JSON for dirty-checking against grid serialization. */
+function sortKeysDeep(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortKeysDeep);
+  if (!value || typeof value !== "object") return value;
+  const record = value as Record<string, unknown>;
+  return Object.fromEntries(
+    Object.keys(record)
+      .sort()
+      .map((key) => [key, sortKeysDeep(record[key])]),
+  );
+}
+
+/** Key-order independent JSON for dirty-checking workbook data. */
+export function serializeWorkbookForComparison(
+  data: ProductDataTableSchema,
+): string {
+  return JSON.stringify(sortKeysDeep(data));
+}
+
 export function normalizeWorkbookForComparison(
   schema: ProductDataTableSchema | undefined,
 ): string {
   const parsed = parseProductSpecDataFromDatabase(schema);
-  return JSON.stringify(
+  return serializeWorkbookForComparison(
     sparseProductSpecDataForDatabase(
       parsed.headerData,
       parsed.columnTypeData,

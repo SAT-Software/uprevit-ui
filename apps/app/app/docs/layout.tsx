@@ -32,6 +32,7 @@ import { AskAIPanel, AskAITrigger } from "@/components/glossen";
 import { DocsAskAIProvider } from "@/components/docs/DocsAskAIProvider";
 
 import { SentryUserSync } from "@/components/common/SentryUserSync";
+import { PostHogSupportSync } from "@/components/common/PostHogSupportSync";
 import { DocsSearchDialog } from "@/components/docs/DocsSearchDialog";
 import { DocsSidebarFooter } from "@/components/docs/DocsSidebarFooter";
 import { RootProvider } from "fumadocs-ui/provider/next";
@@ -45,6 +46,7 @@ export default function DocsRootLayout({
   return (
     <AccessEligibilityGuard>
       <SentryUserSync />
+      <PostHogSupportSync />
       <RootProvider search={{ SearchDialog: DocsSearchDialog }}>
         <DocsAskAIProvider>
           <DocsLayout

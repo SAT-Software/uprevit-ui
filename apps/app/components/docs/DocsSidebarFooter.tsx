@@ -1,11 +1,11 @@
 "use client";
 
-import { DocsSidebarFeedbackButton } from "./DocsSidebarFeedbackButton";
+import { DocsSidebarSupportButton } from "./DocsSidebarSupportButton";
 
 export function DocsSidebarFooter() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-2">
-      <DocsSidebarFeedbackButton />
+      <DocsSidebarSupportButton />
     </div>
   );
 }

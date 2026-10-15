@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useAuth } from "react-oidc-context";
 import * as Sentry from "@sentry/nextjs";
+import { clearSupportSession } from "@/lib/posthog/support";
 
 export function useSignOut() {
   const auth = useAuth();
@@ -18,6 +19,7 @@ export function useSignOut() {
 
     await auth.removeUser();
     Sentry.setUser(null);
+    clearSupportSession();
 
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
       logoutUri,

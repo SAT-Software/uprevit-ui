@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-15
+
+### Added
+
+- Added Support conversations powered by PostHog, with screenshot attachments, unread replies, and paged history.
+- Added an opt-in session replay setting for workspace admins.
+- Added more standards to the compliance catalog.
+
+### Updated
+
+- Updated the sidebar feedback to use Support in place of Heardsy and Sentry.
+
+### Fixed
+
+- Fixed workbook unsaved-change tracking across edits and saves.
+- Fixed workbook imports that finish while a save is in progress.
+
 ## [0.8.0] - 2026-10-10
 
 ### Added

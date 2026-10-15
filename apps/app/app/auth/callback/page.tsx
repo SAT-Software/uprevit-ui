@@ -7,6 +7,7 @@ import { WorkspaceAccessFrozenScreen } from "@/components/common/WorkspaceAccess
 import { WorkspaceAccessRemovedScreen } from "@/components/common/WorkspaceAccessRemovedScreen";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import { getProfileValue } from "@/utils/authProfile";
+import { getSupportReturnPath } from "@/utils/supportReturnPath";
 import { isWorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
 
 export default function AuthCallbackPage() {
@@ -21,10 +22,18 @@ export default function AuthCallbackPage() {
     error: userError,
   } = useGetUser();
   const isAccessFrozen = isWorkspaceAccessFrozenError(userError);
+  const supportReturnPath = getSupportReturnPath(auth.user?.state);
 
   useEffect(() => {
-    if (hasRedirectedRef.current || isAccessFrozen) return;
-    if (auth.isLoading) return;
+    if (hasRedirectedRef.current || auth.isLoading) return;
+
+    if (auth.isAuthenticated && supportReturnPath) {
+      hasRedirectedRef.current = true;
+      router.replace(supportReturnPath);
+      return;
+    }
+
+    if (isAccessFrozen) return;
 
     if (!auth.isAuthenticated) {
       hasRedirectedRef.current = true;
@@ -63,11 +72,12 @@ export default function AuthCallbackPage() {
     isUserError,
     isUserFetching,
     router,
+    supportReturnPath,
     userProfileData?.user?.status,
     userProfileData?.user?.workspaceId,
   ]);
 
-  if (isAccessFrozen) {
+  if (isAccessFrozen && !supportReturnPath) {
     return <WorkspaceAccessFrozenScreen />;
   }
 
@@ -75,7 +85,7 @@ export default function AuthCallbackPage() {
   const tokenStatus = getProfileValue(profile, "status");
   const status = userProfileData?.user?.status || tokenStatus;
 
-  if (status === "inactive") {
+  if (status === "inactive" && !supportReturnPath) {
     return <WorkspaceAccessRemovedScreen />;
   }
 
