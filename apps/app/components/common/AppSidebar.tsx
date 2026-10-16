@@ -24,7 +24,6 @@ import {
   LayerIcon,
   Layout01Icon,
   NewOfficeIcon,
-  Settings01Icon,
   WorkflowIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -58,6 +57,7 @@ import { cn } from "@uprevit/ui/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
 import { version } from "../../package.json";
 import { SidebarSupportButton } from "./AppSidebarSupportButton";
+import { SidebarSystemStatusButton } from "./AppSidebarSystemStatusButton";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
 
 const data = {
@@ -199,20 +199,7 @@ const data = {
     },
     {
       title: "Help",
-
       items: [
-        {
-          title: "Settings",
-          url: "/settings",
-          icon: (
-            <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
-              icon={Settings01Icon}
-              size={16}
-              strokeWidth={2}
-            />
-          ),
-        },
         {
           title: "Documentation",
           url: "/docs",
@@ -525,9 +512,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuItem>
                 ))}
                 {item.title === "Help" && (
-                  <SidebarMenuItem>
-                    <SidebarSupportButton />
-                  </SidebarMenuItem>
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarSupportButton />
+                    </SidebarMenuItem>
+                    <SidebarSystemStatusButton />
+                  </>
                 )}
               </SidebarMenu>
             </SidebarGroupContent>
