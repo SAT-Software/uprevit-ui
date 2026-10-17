@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-10-17
+
+### Added
+
+- Added a System Status sidebar link when a status page URL is configured.
+- Added a client health endpoint for uptime monitoring.
+
+### Updated
+
+- Renamed Send feedback to Contact Support and updated its icon.
+- Simplified the Help sidebar navigation.
+
+### Removed
+
+- Removed the unused Feedback and Help Center placeholder pages.
+
 ## [0.9.0] - 2026-10-15
 
 ### Added
