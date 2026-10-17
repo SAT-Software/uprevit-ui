@@ -20,8 +20,6 @@ const pathData = [
   { title: "Archive", url: "/archive" },
   { title: "Notifications", url: "/notifications" },
   { title: "Settings", url: "/settings" },
-  { title: "Feedback", url: "/feedback" },
-  { title: "Help Center", url: "/help-center" },
   { title: "Platform admin", url: "/platform-admin" },
   { title: "Workspaces", url: "/platform-admin/workspaces" },
 ];

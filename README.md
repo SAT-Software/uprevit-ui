@@ -4,9 +4,9 @@ Uprevit is a medical device labeling documentation platform. This repository con
 
 ## Current Release
 
-**0.9.0 (Beta)** adds Support conversations powered by PostHog, an opt-in session replay setting, and an expanded compliance catalog. It also fixes workbook save and import issues.
+**0.9.1 (Beta)** adds a System Status link and a client health endpoint, and updates the sidebar support navigation.
 
-See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.9.0` backend release.
+See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.9.1` backend release.
 
 ## Monorepo Structure
 
@@ -193,7 +193,7 @@ Typical flow:
 5. Tag the deployed `main` commit as `vx.y.z`.
 6. Merge `main` back into `develop` after the release.
 
-Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.9.0` and create the `v0.9.0` tag after production verification.
+Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.9.1` and create the `v0.9.1` tag after production verification.
 
 After `main` deploys, fast-forward `demo` to the same `main` commit so both environments run the same SHA.
 
