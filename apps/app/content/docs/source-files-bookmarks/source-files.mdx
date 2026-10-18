@@ -5,53 +5,74 @@ description: Workspace folder tree for reference documents linked to products.
 
 **Source Files** (`/source-files`) is a workspace-wide file library organized as folders and files. Use it to store reference PDFs, artwork, standards extracts, and other materials—not the structured product tabs themselves.
 
-Folders can nest under parents and may optionally link to a **product** so teammates can open related assets from [Product Information](/docs/product-documentation/product-information).
+Folders can nest inside other folders. A top-level folder can also link to one **product**, so teammates can open related files from [Product Information](/docs/product-documentation/product-information).
 
 <DocsVideo videoKey="working-with-files.source-files-archive-bookmarks" title="Source Files, Archive, and Bookmarks tabs" />
 
 ## Browsing
 
-| Route | Purpose |
-|-------|---------|
-| `/source-files` | Root folders plus **Bookmarked Folders** section. |
-| `/source-files/view/{folderId}` | Contents of one folder: subfolders, files, uploads. |
+`/source-files` has two tabs:
 
-Switch **card**, **list**, or **big grid** view on folder pages for different density.
+| Tab | What it shows |
+|-----|---------------|
+| **Bookmarked** | Top-level folders you bookmarked. This tab opens by default. |
+| **All Folders** | Every top-level folder. Sort by **Folder Name** or **Date Created**, switch the sort direction, or filter by folder name. More folders load as you scroll. |
+
+Open a folder to see its subfolders and files. A folder linked to a product shows the product name and a **Back to product** button. Unlinked top-level folders show **Not linked**.
 
 ## Folder actions
 
-| Action | Description |
-|--------|-------------|
-| **Create folder** | Add a folder at root or inside another folder; optionally associate with a product. |
-| **Edit folder** | Rename or update folder metadata. |
-| **Delete folder** | Remove folder (confirm dialog). |
-| **Upload files** | Add one or more files into the current folder. |
+| Action | How |
+|--------|-----|
+| **Create a folder** | Click **Create Folder**. At the top level you can also pick a product in **Link to Product**. Folders inside another folder can't link to a product. |
+| **Edit a folder** | Click the edit icon on the folder page to change its name. Top-level folders can also change **Linked Product**. |
+| **Delete a folder** | Click **Delete**, type the folder name, then click **Delete Folder**. |
+| **Upload files** | Click **Upload Files** inside a folder, then drag files in or browse for them. |
+
+<Callout type="warn" title="Deleting a folder deletes everything in it">
+  Deleting a folder also deletes all of its subfolders and files. You can't undo this.
+</Callout>
+
+Two items in the same folder can't share a name.
+
+If you link a product that already has a source file folder, Uprevit warns you before saving. You can still link it.
+
+## Supported files and limits
+
+- **Types:** PNG, JPG, JPEG, WebP, GIF, PDF, XLS, XLSX, DOC, DOCX, PPT, PPTX, PSD, and AI.
+- **Size:** up to 4 MB per file.
+- **Count:** up to 50 files per upload.
+
+Uploads can also be blocked when your workspace reaches its upload limit for the current billing period. Ask your workspace admin if an upload is refused. See [Usage and limits](/docs/getting-started/workspace#usage-and-limits-admins).
 
 ## File actions
 
-On each file:
+Open the **File actions** menu (**⋮**) on a file:
 
-- **Preview** — images open in a preview dialog.
-- **Download** — save a copy locally.
-- **Delete** — remove the file with confirmation.
+- **Download** — save a copy to your computer.
+- **Delete** — remove the file after you confirm.
+
+Click an image to preview it. The preview has a **Download image** button. Other file types can only be downloaded.
+
+You can't rename or move files. To change one, upload a new copy and delete the old one.
 
 ## Bookmarking folders
 
-Toggle the bookmark icon on a folder card to add it to your personal **Bookmarked Folders** list. Bookmarked folders appear on `/source-files` filtered by context (root vs inside a parent folder).
+Click the bookmark icon on a folder card to add it to your **Bookmarked** tab. Click it again to remove it.
 
-Bookmarks are per user and do not change folder permissions for others.
+Bookmarks are personal. They don't change what other people see.
 
 ## Activity logs
 
-On `/source-files`, toggle **Logs** to open the activity panel (`scopeType: source-files`). Any signed-in user can view these logs in the current application—unlike archive logs, this is not admin-restricted.
+Workspace admins can click **Logs** on `/source-files` to see who created, updated, or deleted folders and files, and when.
 
 ## Linking from products
 
-On **Product Information**, **Linked source files** shows folders tied to the product. Links open the folder in Source Files.
+On **Product Information**, hover the status badge at the top of the page to see the folders linked to the product. Click a folder to open it in Source Files. If no folder is linked, it shows **None linked**.
 
 ## Permissions
 
-Source file and folder CRUD is available to authenticated workspace members. There is no separate admin gate on these actions in the UI.
+Every workspace member can create, edit, and delete folders and files. Only the **Logs** button is limited to workspace admins.
 
 ## Related topics
 

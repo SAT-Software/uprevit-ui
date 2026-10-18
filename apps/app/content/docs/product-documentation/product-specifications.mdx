@@ -3,7 +3,7 @@ title: Product Specifications
 description: Spreadsheet-style specification data with save, filters, and export.
 ---
 
-**Product Specifications** (`/products/{productId}/product-specifications`) is a workbook-style grid for structured specification data: column headers, column types (constant, variable, N/A), and cell values.
+**Product Specifications** is a workbook-style grid for structured specification data: column headers, column types, and cell values.
 
 <DocsVideo videoKey="product.product-specifications" title="Product Specifications tab walkthrough" />
 
@@ -12,52 +12,53 @@ description: Spreadsheet-style specification data with save, filters, and export
 | Part | Description |
 |------|-------------|
 | **Headers** | Column names you define. |
-| **Column types** | Per column: `constant`, `variable`, or `na`. |
+| **Column types** | Per column: **Blank** (default), **Constant Data**, **Variable Data**, or **NA**. |
 | **Cells** | Values at row/column intersections. |
-| **Column order / widths / formats** | Layout and display preferences. |
+| **Column order / widths / colors** | Drag a column header to reorder it, drag its edge to resize it, and set fill and text colors. These are saved with the workbook. |
+
+The grid has 150 columns and 5,000 rows.
 
 There is no per-cell required validation—the grid is free-form for your specification template.
 
 ## Editing
 
 - Click cells to edit values inline.
-- Add or remove **rows** and **columns** from toolbar actions.
-- Use **Find & Replace** (Ctrl+R) for bulk text updates.
-- **Undo / Redo** for recent grid changes.
+- Use **Find and replace** (Ctrl+R or ⌘R) for bulk text updates.
+- **Undo** (Ctrl+Z or ⌘Z) and **Redo** (Ctrl+Shift+Z or ⌘⇧Z) recent grid changes.
 
 ### Saving
 
-- **Save** — writes the workbook to the server (`add_product_data` on the product-specifications tab). Click **Save** after editing; the toolbar shows **Unsaved changes** until the server confirms.
+- **Save** — saves the workbook. The toolbar shows **Unsaved changes** until it's saved, then **Saved**.
 - Changes are **not** saved automatically. If you navigate to another tab or page without saving, Uprevit shows an **Unsaved Changes** dialog so you can save, discard, or stay on the page.
 - Closing or refreshing the browser tab with unsaved edits triggers the browser’s leave warning.
 
 ### Released products
 
-When status is **Released** or **Obsolete**, the grid is **read-only**: no edits or save.
+When status is **Released** or **Obsolete**, the grid is **read-only**: no edits or save. It's also read-only if you aren't the Product Owner, a Contributor, or an admin, and while a save is in progress.
 
 ## Toolbar extras
 
-- **Filters** — narrow visible rows.
-- **Page info** — keyboard shortcuts and grid help.
-- **Export** — download the current grid immediately as an Excel workbook (local export, not the async jobs queue).
+- **Search table** — find text anywhere in the grid.
+- **Column filters and sorting** — use a column header's filter and sort buttons to narrow or order rows.
+- **Export this table** — download the current grid immediately as an Excel workbook (local export, not the background queue).
 
 For workspace-wide PDF/Excel jobs, see [Exports](/docs/review-outputs/exports).
 
 ## Importing Excel workbooks
 
-Use **Import** to load an Excel workbook. Import replaces the current grid; if it already contains data, confirm the replacement first. Click **Save** after importing to keep the result.
+Click **Import file** to load a CSV, XLSX, XLS, or Numbers file. Import replaces the current grid; if it already contains data, confirm the replacement first. Click **Save** after importing to keep the result.
 
 - **One sheet:** the first row becomes column headers. An optional second row containing only `constant`, `variable`, `na`, or `blank` values becomes column types. The remaining rows become cell values.
 - **Multiple sheets:** all sheets are stacked vertically in workbook order inside the existing single grid. Each non-empty sheet starts with its name, followed by its original rows, including headers and any type row. A blank row separates sheets. Headers and type rows stay as ordinary cells because different sheets can have different layouts; global column headers and types start blank.
 - Empty sheets are skipped. Import keeps cell values, including cached formula results, but does not preserve formulas, images, merged cells, or Excel formatting.
-- The file must be at most **5 MB**, with at most **150 columns** and **5,000 combined rows**, including sheet names and separators. Files exceeding these limits are rejected without replacing the current grid.
+- The file must be at most **5 MB**, with at most **150 columns**, **5,000 combined rows** (including sheet names and separators), and **750,000 cells**. Files exceeding these limits are rejected without replacing the current grid.
 - Export downloads the stacked result as **one Excel sheet**. It does not recreate the original sheet tabs.
 
 These import rules also apply to [Operational Parameters](/docs/product-documentation/operational-parameters). Separate editable sheet tabs are planned for a future version.
 
 ## Tab completion
 
-Mark **Product Specifications** complete in the header when the workbook is finalized for this version.
+Hover the progress in the product header and click **Mark Complete** when the workbook is finalized for this version.
 
 ## Version comparison (redline)
 
@@ -68,11 +69,7 @@ In compare mode the grid shows the **current** version’s data with differences
 
 Header and column-type changes are diffed as well.
 
-This tab participates in redline display but does not define the workflow—see **[Redlines and Versions](/docs/review-outputs/redlines-versions)** for Compare Versions, clearing comparison, and switching tabs while comparing.
-
-## Legacy spec archive route
-
-A separate read-only route (`/products/{productId}/product-spec-archive`) exists for historical Univer-based viewers and side-by-side spreadsheet comparison. Day-to-day editing uses this **Product Specifications** tab.
+This tab participates in redline display but does not define the workflow—see **[Redlines and Versions](/docs/review-outputs/redlines-versions)** for **Compare**, clearing comparison, and switching tabs while comparing.
 
 ## Related topics
 

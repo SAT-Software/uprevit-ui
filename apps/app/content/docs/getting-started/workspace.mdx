@@ -1,6 +1,6 @@
 ---
 title: Workspace
-description: Your organization container—departments, projects, products, and workspace settings.
+description: Your organization container—departments, projects, products, members, and workspace settings.
 ---
 
 A **workspace** is the top-level container for everything in Uprevit. One workspace represents your company or organization. All departments, projects, products, users, and source files belong to a single workspace.
@@ -15,64 +15,142 @@ A **workspace** is the top-level container for everything in Uprevit. One worksp
 | **Users** | Members invited to collaborate in the workspace. |
 | **Source files** | Shared folder tree for reference documents. |
 
-The **Dashboard** (`/dashboard`) summarizes activity: department and project cards, plus a table of recent products.
+## Dashboard
 
-## Workspace information
+The **Dashboard** (`/dashboard`) gives you a quick view of the workspace:
 
-Open **Settings** (`/settings`) and select the **Workspace** tab to view:
-
-| Field | Description |
-|-------|-------------|
-| **Workspace name** | Display name for your organization in Uprevit. |
-| **Company name** | Legal or commercial company name. |
-| **Description** | Short summary of the workspace. |
-| **Workspace ID** | System identifier (copyable from the tab). |
-| **Logo** | Optional branding image (PNG, JPG, JPEG, GIF, or WebP). |
-| **User count** | Number of members in the workspace. |
-
-Billing and plan fields may appear as placeholders depending on your deployment; plan management is not covered in this guide.
-
-## Updating workspace details
-
-<Callout type="warn" title="Admin only">
-Only **Admin** users can edit workspace details. Non-admins can view the Workspace tab but receive an insufficient-privileges message if they try to open the edit dialog.
-</Callout>
-
-1. Go to **Settings → Workspace**.
-2. Click **Edit Workspace**.
-3. Update **Workspace name**, **Company name**, or **Description** (all required).
-4. Optionally upload or replace the **logo** (uploaded to secure storage).
-5. Save changes.
-
-Workspace creation happens during **admin onboarding** (first-time setup) with the same core fields plus admin contact details.
-
-## Members and admins
-
-From **Settings** you can also:
-
-- **Profile** — Any user can update their own profile.
-- **Users** — View workspace members.
-- **Admins** — View users with admin privileges.
-
-<Callout type="warn" title="Admin only">
-**Invite members** (name and email rows) is restricted to admins. Invited users receive access to the workspace according to your identity provider configuration.
-</Callout>
-
-Admins are determined by membership in the `admin` group on your sign-in token. If you need admin access, contact an existing workspace administrator.
+- **Stat cards** for Departments, Projects, Products, Source Files, and Archives. Each card also shows how many were active, or archived, in the last 30 days.
+- **Departments** and **Projects** cards with the most recent items, and **Show all** links to the full lists.
+- A **products table** with the most recently changed products. Switch between **Show all products** and **Show products owned by me**.
 
 ## Navigation
 
-The **Workspace** section of the sidebar includes:
+The app sidebar is grouped into sections:
 
-- **Dashboard** — Overview and recent products.
-- **Departments** — List and detail pages.
-- **Projects** — List and detail pages.
-- **Products** — Product list and entry into documentation tabs.
+| Section | Pages |
+|---------|-------|
+| **Workspace** | Dashboard, Departments, Projects, Products, Workflows |
+| **Library** | Source Files, Bookmarked Products, Archive |
+| **Insights** | Reports, Analytics |
+| **Help** | Documentation, Contact Support, System Status |
+
+The bell in the top bar opens your [notifications](/docs/review-outputs/notifications).
+
+## Open Settings
+
+Open **Settings** from the workspace menu at the bottom of the sidebar, or from your avatar menu.
+
+The tabs you see depend on your role:
+
+| Tab | Who sees it | What it's for |
+|-----|-------------|---------------|
+| **Profile** | Everyone | Your own details and sign out. |
+| **Workspace** | Admins | Workspace details, approval workflow defaults, and support settings. |
+| **Users** | Everyone | Everyone in the workspace. |
+| **Admins** | Admins | Workspace admins. |
+| **Usage** | Admins | Usage this billing period and usage limits. |
+
+If you aren't an admin and open a link to an admin-only tab, Uprevit shows your **Profile** tab instead.
+
+You can also switch between light and dark themes from the Settings header.
+
+## Your profile
+
+The **Profile** tab shows your **Personal Information**.
+
+1. Click **Edit Profile**.
+2. Update **Full Name**, **Email Address**, or **Role / Designation** (all required), and **Unit**, **Location**, or **Phone Number** (optional).
+3. Optionally click **Upload Image** to add a profile picture: PNG, JPEG, JPG, GIF, or WebP, under 500 KB.
+4. Click **Save Changes**.
+
+Click **Sign Out** to sign out of Uprevit.
+
+## Workspace details (admins)
+
+<Callout type="warn" title="Admin only">
+  Only admins can see the **Workspace** tab and edit workspace details.
+</Callout>
+
+The **Workspace** tab shows:
+
+| Field | Description |
+|-------|-------------|
+| **Workspace ID** | System identifier. Click the copy button to copy it. |
+| **Workspace Name** | Display name for your organization in Uprevit. |
+| **Company Name** | Legal or commercial company name. |
+| **Plan** | Shows **NA** for now. |
+| **User Count** | Number of members in the workspace. |
+| **Workspace Description** | Short summary of the workspace. |
+
+The workspace logo appears next to the workspace name.
+
+To update workspace details:
+
+1. Go to **Settings → Workspace**.
+2. Click **Edit Workspace**.
+3. Update **Workspace Name**, **Company Name**, or **Workspace Description**. All three are required. The description can be up to 220 characters.
+4. Optionally upload or replace the **Workspace Logo**: PNG, JPEG, JPG, GIF, or WebP, under 500 KB.
+5. Click **Save Changes**.
+
+The **Workspace** tab also has two admin settings cards:
+
+- **Approval Workflows**: choose the **Default workflow completion** for new workflows, **Automatic** or **Initiator-controlled**. See [Approval workflows](/docs/review-outputs/approval-workflows).
+- **Support**: turn **Session replay for support** on or off. See [Contact Support](/docs/support#session-replay).
+
+The workspace is created during first-time setup. The admin who sets it up enters the workspace name, their full name, company name, and an optional logo and description.
+
+## Members
+
+The **Users** tab lists everyone in the workspace, with their **User Type** (**Admin** or **User**) and **Status**:
+
+| Status | Meaning |
+|--------|---------|
+| **Active** | Has joined the workspace. |
+| **Invited** | Has been invited but hasn't finished setting up their profile. |
+| **Removed** | No longer has access. |
+
+Use the filter and sort controls to find people by name, email, designation, location, status, or user type.
+
+Admins also see the **Admins** tab, which lists only workspace admins. On both tabs, admins can turn on **Show removed** to include removed members.
+
+## Invite members (admins)
+
+1. In **Settings**, click **Invite Users**.
+2. Enter a **Name** and **Email** for each person. Click **Add Another User** to add more, up to 10 at a time.
+3. Click **Send Invitations**.
+
+Invited people sign in and complete their profile before they can use the workspace. Inviting someone who was removed gives them access again.
+
+## Remove members (admins)
+
+1. On the **Users** or **Admins** tab, click the remove icon next to the person.
+2. Type their name to confirm.
+3. Click **Remove**.
+
+They lose access immediately. Their past activity in the workspace is kept. If they owned products, ownership moves to you.
+
+## Usage and limits (admins)
+
+The **Usage** tab shows **Usage & limits** for the current billing period:
+
+- **Active members**, **Exports**, and **Upload volume**, compared with your limits.
+- Whether the **SSO add-on** (single sign-on) is enabled.
+
+Under **Limit enforcement**, choose what happens to exports and uploads when the workspace reaches a limit:
+
+- **Allow overage**: exports and uploads keep working past the limit.
+- **Block when over limit**: exports and uploads that go over the limit are blocked.
+
+You can also set an **Export limit** and an **Upload limit (GB)**, then click **Save preferences**. Seat limits come from your subscription and can't be changed here.
+
+## Admin role
+
+Your organization decides who is an admin when it sets up your sign-in account. There's no setting in Uprevit to make someone an admin. If you need admin access, ask an existing workspace admin.
 
 ## Typical setup flow (admins)
 
-1. Create or complete the workspace during onboarding.
-2. Invite team members from Settings.
+1. Create the workspace during first-time setup.
+2. Invite team members from **Settings**.
 3. Create **departments**, then **projects** under each department.
 4. Team members create **products** under the appropriate project.
 

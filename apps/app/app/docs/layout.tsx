@@ -26,6 +26,11 @@ import {
   InformationCircleIcon,
   BookOpen01Icon,
   WorkflowIcon,
+  BellIcon,
+  CustomerSupportIcon,
+  Activity01Icon,
+  Chart02Icon,
+  NewReleasesIcon,
 } from "@hugeicons/core-free-icons";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { AskAIPanel, AskAITrigger } from "@/components/glossen";
@@ -189,6 +194,12 @@ export default function DocsRootLayout({
                       icon: <DocsIcon icon={WorkflowIcon} />,
                     },
                     {
+                      name: "Notifications",
+                      type: "page",
+                      url: "/docs/review-outputs/notifications",
+                      icon: <DocsIcon icon={BellIcon} />,
+                    },
+                    {
                       name: "Redlines and Versions",
                       type: "page",
                       url: "/docs/review-outputs/redlines-versions",
@@ -199,6 +210,12 @@ export default function DocsRootLayout({
                       type: "page",
                       url: "/docs/review-outputs/reports",
                       icon: <DocsIcon icon={Archive01Icon} />,
+                    },
+                    {
+                      name: "Analytics",
+                      type: "page",
+                      url: "/docs/review-outputs/analytics",
+                      icon: <DocsIcon icon={Chart02Icon} />,
                     },
                     {
                       name: "Exports",
@@ -226,6 +243,24 @@ export default function DocsRootLayout({
                       type: "page",
                       url: "/docs/ask-ai",
                       icon: <DocsIcon icon={AiChat02Icon} />,
+                    },
+                    {
+                      name: "Contact Support",
+                      type: "page",
+                      url: "/docs/support",
+                      icon: <DocsIcon icon={CustomerSupportIcon} />,
+                    },
+                    {
+                      name: "System Status",
+                      type: "page",
+                      url: "/docs/system-status",
+                      icon: <DocsIcon icon={Activity01Icon} />,
+                    },
+                    {
+                      name: "Changelog",
+                      type: "page",
+                      url: "/docs/changelog",
+                      icon: <DocsIcon icon={NewReleasesIcon} />,
                     },
                   ],
                 },

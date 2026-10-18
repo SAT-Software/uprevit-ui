@@ -6,7 +6,10 @@ description: Learn how to organize your workspace, document medical device label
 import { DocsIcon } from "@/components/docs/DocsIcon";
 import {
   ArchiveIcon,
+  BellIcon,
   Bookmark01Icon,
+  CustomerSupportIcon,
+  Activity01Icon,
   Download01Icon,
   Folder02Icon,
   GitBranchIcon,
@@ -25,25 +28,7 @@ Have a question? Click **Ask AI** on any page. It only reads this documentation 
 
 <DocsVideo videoKey="getting-started.welcome-dashboard" title="Welcome dashboard overview" />
 
-## What's new in 0.9.1 Beta
-
-- **System Status** in the sidebar opens the public status page when configured.
-- **Contact Support** lets you send feedback with screenshots and read replies in the app.
-
-## What's new in 0.9.0 Beta
-
-- **Support** in the sidebar lets you send feedback with screenshots and read replies in the app.
-- Workspace admins can turn on session replay to help Support investigate issues.
-- The compliance catalog includes more standards.
-
-## What's new in 0.8.0 Beta
-
-Uprevit is now in **Beta**, and **Workflows** is marked **New** in the app sidebar.
-
-- [Approval workflows](/docs/review-outputs/approval-workflows) let you review and release one or more products together, request changes, attach images, and keep the decision history.
-- [Product ownership and lifecycle](/docs/getting-started/products) define who can edit a product and distinguish working, released, and obsolete versions. Submitting a product prepares it for review; the workflow releases it.
-- In-app and email notifications keep product teams and approvers informed about assignments, decisions, changes, and reminders.
-- [Ask AI](/docs/ask-ai) answers questions using these documentation pages.
+See what changed in each release in the [Changelog](/docs/changelog).
 
 ## How it fits together
 
@@ -101,6 +86,12 @@ Each card below opens a guide for that part of Uprevit. Jump to whatever you nee
     icon={<DocsIcon icon={WorkflowIcon} />}
   />
   <Card
+    title="Notifications"
+    href="/docs/review-outputs/notifications"
+    description="See what needs your attention, in the app and by email."
+    icon={<DocsIcon icon={BellIcon} />}
+  />
+  <Card
     title="Source files"
     href="/docs/source-files-bookmarks/source-files"
     description="Store and browse reference folders linked to products."
@@ -130,22 +121,35 @@ Each card below opens a guide for that part of Uprevit. Jump to whatever you nee
     description="Archive and restore departments, projects, and products."
     icon={<DocsIcon icon={ArchiveIcon} />}
   />
+  <Card
+    title="Contact Support"
+    href="/docs/support"
+    description="Send a message to the Uprevit team and follow the replies."
+    icon={<DocsIcon icon={CustomerSupportIcon} />}
+  />
+  <Card
+    title="System Status"
+    href="/docs/system-status"
+    description="Check whether Uprevit is running normally."
+    icon={<DocsIcon icon={Activity01Icon} />}
+  />
 </Cards>
 
 ## Roles
 
-Everyone in a workspace signs in with one of two roles. Your organization assigns which role you have.
+Everyone in a workspace signs in with one of two roles. Your organization assigns which role you have when it sets up your sign-in account.
 
 <Cards>
   <Card
-    title="Member"
+    title="User"
     description="The default role for people doing labeling work day to day."
   >
 
     - Browse departments, projects, and products
-    - Create products and complete all seven documentation tabs
-    - Submit versions, review them in approval workflows, compare redlines, and export outputs
-    - Use source files, bookmarks, and reports
+    - Create products, and edit the ones you own or contribute to
+    - Submit versions, start and review approval workflows, compare redlines, and export outputs
+    - Use source files, bookmarks, reports, and analytics
+    - Update your profile, see workspace members, and contact support
 
   </Card>
   <Card
@@ -153,13 +157,17 @@ Everyone in a workspace signs in with one of two roles. Your organization assign
     description="Additional control over workspace structure and lifecycle."
   >
 
-    - Everything a member can do
-    - Edit workspace details and invite people
+    - Everything a user can do
+    - Edit any product and manage any product team
+    - See the Workspace, Admins, and Usage tabs in Settings
+    - Edit workspace details, approval workflow defaults, and session replay
+    - Invite and remove members
     - Create, update, archive, and restore departments and projects
-    - Archive products and view archive activity logs
+    - Archive and restore products
+    - View activity logs for departments, projects, products, source files, and the archive
     - Assign members to departments and projects
 
   </Card>
 </Cards>
 
-If an action is restricted, please contact your organization's workspace admin.
+If an action is restricted, contact your organization's workspace admin.

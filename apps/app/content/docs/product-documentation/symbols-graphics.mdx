@@ -3,7 +3,7 @@ title: Symbols & Graphics
 description: Symbols, schematics, barcodes, and other graphical assets.
 ---
 
-**Symbols & Graphics** (`/products/{productId}/symbols-graphics`) organizes graphical assets into four internal categories. Each item can include text, descriptions, label-presence tags, and optional images.
+**Symbols & Graphics** organizes graphical assets into four categories. Each item can include text, label-presence tags, and an optional image.
 
 <DocsVideo videoKey="product.symbols-graphics" title="Symbols and Graphics tab walkthrough" />
 
@@ -16,61 +16,71 @@ description: Symbols, schematics, barcodes, and other graphical assets.
 | **Barcodes** | Barcodes | Barcode data and counts |
 | **Other Components** | Other Components | Additional graphical elements |
 
-Switch sub-tabs at the top of the page; each has its own table and **Add** action.
+Switch sub-tabs at the top of the page. Each has its own table and add button: **Add Symbol**, **Add Schematic**, **Add Barcode**, or **Add Other Component**.
 
 ## Fields by type
 
 ### Symbols
 
+**Add Symbol** has two tabs:
+
+- **Library**: search the standard symbol library and select one or more symbols. Symbols already on the product are marked **Already added to this product**. Set **Symbol text present** and **Presence on labels** once for all selected symbols, then click **Add Selected**.
+- **Custom**: add your own symbol with the fields below.
+
 | Field | Required |
 |-------|----------|
-| **Symbol text** | Yes |
-| **Text present** | Yes (yes/no) |
-| **Label presence** | No (tags) |
-| **Image** | No |
-| **Standard symbol** | No | When picked from the standard library |
+| **Symbol Text** | Yes (custom symbols) |
+| **Symbol text present** | Yes (Yes/No) |
+| **Presence on labels** | No (tags) |
+| **Symbol Image** | No |
+
+If you change the text or image of a library symbol, it becomes a custom symbol and loses its link to the library.
 
 ### Schematics
 
 | Field | Required |
 |-------|----------|
-| **Name** | Yes |
+| **Schematic Name** | Yes |
 | **Description** | No |
-| **Label presence** | No |
-| **Image** | No |
+| **Presence on labels** | No |
+| **Schematic Image** | No |
 
 ### Barcodes
 
 | Field | Required |
 |-------|----------|
-| **Barcode data** | Yes |
-| **Count** | Yes |
-| **Description** | No |
-| **Label presence** | No |
+| **Barcode Type** | Yes (pick a barcode standard or enter one) |
+| **Barcode Data** | Yes |
+| **Presence on labels** | No |
+| **Count** | Yes (1 or more) |
 | **Image** | No |
 
 ### Other components
 
 | Field | Required |
 |-------|----------|
-| **Component name** | Yes |
+| **Component Name** | Yes |
 | **Description** | No |
-| **Label presence** | No |
+| **Presence on labels** | No |
 | **Image** | No |
 
-Images upload to **product-assets** storage.
+Images can be PNG, JPEG, JPG, GIF, or WebP.
 
 ## Editing
 
-Use the sub-tab **Add** button and row **Edit** / **Delete** actions. All changes are blocked when the version is **Released** or **Obsolete**.
+Use the sub-tab's add button. To change or remove an item, open its **More actions** menu (**⋮**) and choose **Edit** or **Delete**. Deleting asks you to confirm.
+
+Each table can be sorted, filtered, and expanded to preview images, with 10 items per page.
+
+All changes are blocked when the version is **Released** or **Obsolete**. Only the Product Owner, Contributors, and admins can edit.
 
 ## Tab completion
 
-Mark **Symbols & Graphics** complete in the header after all required assets are entered.
+Hover the progress in the product header and click **Mark Complete** after all required assets are entered.
 
 ## Version comparison (redline)
 
-Redline groups changes across all entities, then filters into each sub-tab. Tables use highlighted cells; images show side-by-side OLD/NEW previews.
+A **Redline View** banner shows the number of changes. Each sub-tab marks added, removed, and changed items with **NEW**, **DEL**, and **MOD** badges. Removed items can't be edited.
 
 See **[Redlines and Versions](/docs/review-outputs/redlines-versions)** for enabling compare mode and clearing it.
 

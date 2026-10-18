@@ -7,39 +7,52 @@ description: Personal folders of bookmarked products for quick access.
 
 ## Pages
 
-| Route | Purpose |
+| Page | Purpose |
 |-------|---------|
-| `/bookmarked-products` | Your bookmark folders. |
-| `/bookmarked-products/{folderId}` | Products saved inside one folder. |
+| `/bookmarked-products` | Your bookmark folders, each with its product count. |
+| A bookmark folder | Products saved inside one folder, with their version and status. |
 
 ## Folder actions
 
 | Action | How |
 |--------|-----|
-| **Create folder** | **Create Folder** on the main bookmarked products page. |
-| **Rename folder** | Edit action on a folder card. |
-| **Delete folder** | Delete action with confirmation. |
+| **Create a folder** | Click **Create Folder** on `/bookmarked-products`. |
+| **Rename a folder** | Open the folder, click **Edit**, change the name, then click **Save Changes**. |
+| **Delete a folder** | Open the folder, click **Delete**, type the folder name, then confirm. |
+
+Folder names are required, can be up to 50 characters, and must be unique among your folders.
+
+Deleting a folder only removes the folder and its bookmarks. The products themselves don't change.
 
 ## Adding products
+
+Create a bookmark folder first. You can't create one while adding a product.
 
 **From the products table**
 
 1. Open the row menu on `/products`.
 2. Choose **Add to Bookmarks**.
-3. Pick an existing folder or create one in the dialog.
+3. Choose a folder in **Select Bookmark Folder**, then confirm.
+
+Once a product is bookmarked, the same menu item changes to **Remove Bookmark**.
 
 **From inside a folder**
 
-1. Open `/bookmarked-products/{folderId}`.
-2. Use **Add products** to search and select products.
+1. Open the folder.
+2. Click **Add Products**.
+3. Search for a product, select it, then click **Add Product**.
+
+You add one product at a time. A product can be in several folders, but only once per folder.
 
 ## Removing products
 
-Inside a folder, remove a product with **Remove from folder** (confirm dialog). This only removes the bookmark reference—the product itself is unchanged.
+Inside a folder, click the remove icon next to a product, then click **Remove**. You can also choose **Remove Bookmark** from the row menu on `/products`.
+
+Removing a bookmark doesn't change the product.
 
 ## Permissions
 
-Any signed-in user manages their own bookmark folders and product membership. Admins have no special bookmark UI beyond normal access.
+Bookmark folders are personal. Every user manages their own folders, and nobody else can see them, including admins.
 
 ## Source file bookmarks vs product bookmarks
 
