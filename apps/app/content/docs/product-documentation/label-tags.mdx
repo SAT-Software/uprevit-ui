@@ -3,51 +3,53 @@ title: Label Tags
 description: Label images by type with annotations, legends, and tagged exports.
 ---
 
-**Label Tags** (`/products/{productId}/label-tags`) manages label artwork grouped by **type** (e.g. primary label, IFU panel). You can upload images, annotate them with callouts and shapes, define a legend, and save a flattened **tagged image** for documentation outputs.
+**Label Tags** manages label artwork grouped by **type** (e.g. primary label, IFU panel). You can upload images, annotate them with callouts and shapes, define a legend, and save a flattened **tagged image** for documentation outputs.
 
 <DocsVideo videoKey="product.label-tags" title="Label Tags tab walkthrough" />
 
 ## Structure
 
 - **Type tabs** — One tab per distinct label type on this product.
-- **Label entries** — Each has name, optional description, optional type override, base image, annotation state, legend items, and optional tagged PNG output.
+- **Label entries** — Each has a name, type, optional description, base image, annotations, legend items, and an optional saved tagged image.
 
 ## Fields
 
 | Field | Required | Notes |
 |-------|----------|-------|
 | **Name** | Yes | |
-| **Type** | No | Drives top-level grouping tabs. |
+| **Type** | Recommended | Free text. Labels are grouped into tabs by type, so a label without a type doesn't appear in any tab. |
 | **Description** | No | |
-| **Image** | No | Base label artwork (S3). |
-| **Legend items** | Optional | Color, shape, and text per legend entry; text required per item when defined. |
-| **Tagged image** | Via save flow | Rendered PNG after annotation, uploaded on confirm. |
+| **Label Image** | No | Base label artwork. You need an image to annotate and save a tagged image. |
+| **Legend items** | Optional | Text (required, up to 80 characters), shape, line style, border, and fill per legend entry. |
+| **Tagged image** | Via save flow | The annotated image, saved when you click **Save**. |
 
 ## Adding and editing labels
 
-1. Click **Add Label** and fill metadata; upload an image if needed.
+1. Click **Add Label**, enter a **Name** and **Type**, and upload an image.
 2. Select a **type** tab to work on that group’s artwork.
-3. Open the **annotation editor** on the image (marker.js tools: callouts, arrows, shapes, text).
-4. Define **Legend** entries that explain annotations.
-5. **Save tagged image** — confirm dialog renders the annotated PNG, uploads it, and stores annotation state.
+3. Annotate the image in the editor. Tools include shapes, highlights, lines, arrows, measurements, text, callouts, and freehand drawing. Use **Select**, **Delete Selected**, or **Clear All Annotations**, plus undo, redo, and zoom.
+4. In **Legend**, click **Add legend item** to explain your annotations. Turn on **Overlay** to show the legend on the image. Legend changes save straight away.
+5. Click the label's **Save** button, then **Yes, Save Image**, to save the tagged image and annotations.
+
+Use the edit and delete buttons on a label to change its details or remove it. Deleting asks you to confirm.
 
 ### Unsaved changes
 
-Tagged images are saved **manually** via **Save tagged image** (confirm dialog renders the annotated PNG, uploads it, and stores annotation state).
+Annotations are saved **manually** with each label's **Save** button.
 
 If you have unsaved annotation edits:
 
 - The page header shows **Unsaved changes** (amber), **Saving**, or **Saved**, matching Product Specifications and Operational Parameters.
-- **Switching type tabs** (e.g. primary label ↔ carton) or **leaving Label Tags** (sidebar, header, another product tab, version/redline) opens the same unsaved-changes dialog: **Save & Continue**, **Discard & Continue**, or **Stay on page**. Save each label’s tagged image from the editor toolbar before leaving, or use **Save & Continue** in the dialog. All dirty labels in the current type tab are saved or discarded together when switching tabs; all dirty label tags across types when leaving the page.
-- **Closing or refreshing the browser tab** with unsaved edits triggers the browser’s native leave confirmation (`beforeunload`).
+- **Switching type tabs** (e.g. primary label ↔ carton) or **leaving Label Tags** (sidebar, header, another product tab, version/redline) opens the same unsaved-changes dialog: **Save & Continue**, **Discard & Continue**, or **Stay on page**. Save each label's tagged image with its **Save** button before leaving, or use **Save & Continue** in the dialog. All dirty labels in the current type tab are saved or discarded together when switching tabs; all dirty label tags across types when leaving the page.
+- **Closing or refreshing the browser tab** with unsaved edits triggers the browser’s leave warning.
 
 ## Released products
 
-Add, edit, annotate, and delete are disabled when status is **Released** or **Obsolete**.
+Adding, editing, deleting, and saving annotations are disabled when status is **Released** or **Obsolete**. Only the Product Owner, Contributors, and admins can edit.
 
 ## Tab completion
 
-Mark **Label Tags** complete in the header when all required label types are documented and tagged images are saved as needed.
+Hover the progress in the product header and click **Mark Complete** when all required label types are documented and tagged images are saved.
 
 ## Version comparison (redline)
 

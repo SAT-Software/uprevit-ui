@@ -9,9 +9,11 @@ The **Archive** page (`/archive`) is where you browse entities removed from acti
 
 | Tab | What it lists |
 |-----|----------------|
-| **Departments** | Departments with `isArchived` set. |
+| **Departments** | Archived departments. |
 | **Projects** | Archived projects. |
 | **Products** | Archived products. |
+
+Each table shows who archived each item and when, and you can filter and sort by **Archived By** and **Archived On**.
 
 Any signed-in user can open `/archive` and browse tables. **Restore** and archive **creation** are admin-restricted (below).
 
@@ -21,10 +23,12 @@ Any signed-in user can open `/archive` and browse tables. **Restore** and archiv
 Archiving a department requires **Admin** privileges.
 </Callout>
 
-1. Open `/departments/{departmentId}`.
+1. Open the department.
 2. Choose **Archive**.
-3. Type the **exact department name** to confirm.
-4. The department disappears from active lists and appears under **Archive → Departments**.
+3. Type the **exact department name** to confirm, then click **Archive**.
+4. The department disappears from active lists and appears under **Archive → Departments**. Uprevit takes you to the Archive page.
+
+Archiving a department doesn't archive its projects.
 
 ## Archiving projects
 
@@ -32,7 +36,7 @@ Archiving a department requires **Admin** privileges.
 Archiving a project requires **Admin** privileges.
 </Callout>
 
-Same flow on `/projects/{projectId}` with exact **project name** confirmation.
+Same flow on the project's page, with exact **project name** confirmation.
 
 ## Archiving products
 
@@ -41,12 +45,12 @@ Archiving a product requires **Admin** privileges.
 </Callout>
 
 1. On `/products`, open the row menu.
-2. Choose **Archive** and confirm.
+2. Choose **Archive**, then click **Archive Product**. Products don't need a typed confirmation.
 3. The whole product, with every version, moves to **Archive → Products**. Each version keeps its status (Draft, Submitted, Released, or Obsolete).
 
 A product that is **In Review** can't be archived. End its [approval workflow](/docs/review-outputs/approval-workflows) first. Archived products can't be added to a new workflow.
 
-Non-admins may see the menu entry but receive an insufficient-privileges message when confirming.
+Everyone sees the **Archive** action. If you aren't an admin, Uprevit asks you to contact an admin.
 
 ## Restoring entities
 
@@ -60,23 +64,19 @@ Restoring departments, projects, or products requires **Admin** privileges.
 
 | Entity | After restore |
 |--------|----------------|
-| **Department** | Active; `isArchived` cleared. |
-| **Project** | Active; `isArchived` cleared. |
+| **Department** | Back in active lists. |
+| **Project** | Back in active lists. |
 | **Product** | Back in active lists. Every version keeps the status it had. |
 
 ## Archive activity logs
 
 <Callout type="warn" title="Admin only">
-The **Logs** toggle on `/archive` is visible only to admins. It opens the activity panel with `scopeType: archive`.
+Only admins see the **Logs** button on `/archive`.
 </Callout>
 
-Use archive logs to review who archived or restored entities and when.
+Click **Logs** to open **Archive Logs** and see who archived or restored departments, projects, and products, and when.
 
-## Product spec archive route (not workspace archive)
-
-`/products/{productId}/product-spec-archive` is a **read-only historical specification viewer** (legacy Univer layout), sometimes used with `?compareVersion=` for side-by-side spreadsheets. It is **not** the same as archiving a product on `/archive`.
-
-For version comparison workflow, see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+To compare versions of a product, see [Redlines and Versions](/docs/review-outputs/redlines-versions).
 
 ## Related topics
 

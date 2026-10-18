@@ -13,15 +13,13 @@ After opening a product, the sidebar shows seven documentation tabs:
 
 | Tab | What it covers | Guide |
 |-----|----------------|-------|
-| **Product Information** | Core metadata (name, markets, UDI-DI, device class), custom fields, dates, status, and links to source file folders. | [Product Information](/docs/product-documentation/product-information) |
+| **Product Information** | Core metadata (name, markets, Basic UDI, device class), custom fields, dates, status, and links to source file folders. | [Product Information](/docs/product-documentation/product-information) |
 | **Compliance Information** | Regulatory standards and languages used on packaging or labeling. | [Compliance Information](/docs/product-documentation/compliance-information) |
 | **Label Components** | Physical labeling elements—labels, tags, stickers, panels—with images, dimensions, and types. | [Label Components](/docs/product-documentation/label-components) |
 | **Symbols & Graphics** | Symbols, schematics, barcodes, and other graphical assets (four sub-categories on one tab). | [Symbols & Graphics](/docs/product-documentation/symbols-graphics) |
 | **Product Specifications** | Spreadsheet-style specification data: headers, column types, cell values, filters, and export. | [Product Specifications](/docs/product-documentation/product-specifications) |
 | **Operational Parameters** | A separate workbook for operational, environmental, or process parameters (same grid model as specifications). | [Operational Parameters](/docs/product-documentation/operational-parameters) |
 | **Label Tags** | Label artwork by type, annotations, legends, and tagged images for documentation outputs. | [Label Tags](/docs/product-documentation/label-tags) |
-
-In the app, each tab maps to a route under `/products/{productId}/…` (for example `/products/{productId}/product-information`).
 
 Click a row in the [products table](/docs/getting-started/products#product-list) to open **Product Information**, or jump to any tab from the product sidebar.
 
@@ -36,28 +34,32 @@ Teams usually work top to bottom, but you can jump between tabs at any time whil
 5. **Product Specifications** and **Operational Parameters** — structured tables (spec vs. operational data).
 6. **Label Tags** — annotated label images and legends, often after supporting data is in place.
 
-For full metadata (markets, UDI-DI, custom fields, etc.), use **Product Information** rather than the products table **Edit** dialog (name and description only).
+For full metadata (markets, Basic UDI, custom fields, etc.), use **Product Information** rather than the products table **Edit** dialog (name and description only).
 
 ## Tab completion and submit
 
 1. Open each product tab and enter data.
-2. In the product header, toggle **Mark tab complete** when a tab is finished.
-3. Progress is **0–7** tabs; **Submit for approval** requires all seven complete (**100%**).
+2. When a tab is finished, hover the progress in the product header and click **Mark Complete**. Uprevit doesn't check the tab's content, so review it before you mark it complete.
+3. Progress is **0–7** tabs; **Submit for approval** requires all seven complete (**100%**). While a version is Submitted or In Review, completed tabs can't be marked incomplete.
 4. Confirm in the submit dialog.
 
 **Submit** marks the version ready for an [approval workflow](/docs/review-outputs/approval-workflows). It stays editable until a workflow releases it. **Released** versions cannot be edited on any tab until you create a [new version](/docs/review-outputs/redlines-versions). For the full versioning and redline workflow, see [Redlines and Versions](/docs/review-outputs/redlines-versions).
 
-While a PDF export is in progress, editing and submit may be temporarily locked.
+Only the Product Owner, Contributors, and admins can edit a product's tabs. Everyone else sees them read-only. See [Product team](/docs/getting-started/products#product-team).
+
+While your PDF export is in progress, you can't edit the product.
 
 ## Product header tools
 
 On any product tab, the header provides:
 
-- **Version** switcher — jump between versions of the same product lineage.
-- **Compare versions** — redline view; see [Redlines and Versions](/docs/review-outputs/redlines-versions).
-- **Tab completion** toggle — mark current tab complete or incomplete.
-- **Submit for approval** — mark the version ready for an approval workflow when all tabs are complete.
-- **Export PDF** — queue a PDF export job; see [Exports](/docs/review-outputs/exports).
+- **Version** switcher — jump between versions of the same product lineage. **Released vN** opens the current release when a newer version is being worked on.
+- **Compare** — redline view; see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+- **Product team** — the owner's name; shows the team, and **Manage team** changes the owner and contributors. See [Product team](/docs/getting-started/products#product-team).
+- **Progress** — hover it to see how many of the 7 tabs are complete and the percentage, and to **Mark Complete** or **Mark Incomplete** the current tab.
+- **Submit for approval** — mark the version ready for an approval workflow when all tabs are complete. On a Submitted version, **Return to draft** moves it back to Draft.
+- **Workflow** — while a version is in review, its workflow number opens the workflow.
+- **Export product as PDF** — queue a PDF export; see [Exports](/docs/review-outputs/exports).
 
 ## Related topics
 

@@ -25,7 +25,7 @@ The lifecycle is: **Draft → Submitted → In Review → Released → Obsolete*
 ## Tab completion and submit
 
 1. Open each product tab and enter data.
-2. In the product header, toggle **Mark tab complete** when a tab is finished.
+2. When a tab is finished, hover the progress in the product header and click **Mark Complete**.
 3. When progress shows **100%**, **Submit for approval** becomes available.
 4. Confirm in the submit dialog.
 
@@ -33,7 +33,9 @@ Submit:
 
 - Sets status to **Submitted**
 - Records **actual completion date** (today)
-- Keeps the version editable. While it is Submitted, you can **Return to draft**.
+- Keeps the version editable. While it is Submitted, you can **Return to draft**. If someone else returns your version to Draft, you're notified.
+
+While a version is Submitted or In Review, completed tabs can't be marked incomplete.
 
 The version is released when an [approval workflow](/docs/review-outputs/approval-workflows) that includes it completes. Any earlier release of the product becomes **Obsolete**.
 
@@ -42,11 +44,11 @@ The version is released when an [approval workflow](/docs/review-outputs/approva
 After release, continue work by branching a new draft:
 
 1. On `/products`, open the row menu for a **Released** product.
-2. Choose **New version** (also available from version dialogs on the product).
-3. Uprevit copies data into a new product record: **Draft** status, incremented version, tabs marked incomplete.
+2. Choose **New version**, then confirm **Create Version N**.
+3. Uprevit copies the data and the product team into a new version: **Draft** status, incremented version, all tabs incomplete, and no target or completion date.
 4. You are navigated to the new version’s **Product Information** tab.
 
-Only the latest version, when it is **Released**, can spawn a new version. While the new version is being worked on, the products table and product header show both, for example **v4 In Review · Released v3**.
+Only the latest version, when it is **Released**, can spawn a new version. While the new version is being worked on, the product header shows a **Released vN** link to the current release.
 
 ## Switching versions
 
@@ -59,24 +61,22 @@ Redline is for **reviewing what changed** between an older version and the versi
 ### Start comparison
 
 1. Open any product tab for the **newer** version you want as the “current” side.
-2. In the header, open **Compare Versions**.
+2. In the header, click **Compare**.
 3. Select an older version (only versions with a lower version number appear).
-4. The URL gains `?compareVersion={olderProductId}`.
 
 ### While comparing
 
-- A banner summarizes change counts on tabs that support counts (e.g. Product Information, Compliance, Label Components).
+- A **Redline View** banner shows the number of changes on the tab.
 - **Product Specifications** and **Operational Parameters** offer **Highlight** vs **Inline** diff modes on the grid.
-- **Label Tags** and **Symbols & Graphics** show image and field-level OLD/NEW styling.
-- Sidebar links to other product tabs **keep** `compareVersion` so you can review the full product diff without re-selecting.
+- **Label Tags** shows OLD and NEW images side by side.
+- Tables mark added, removed, and changed rows with **NEW**, **DEL**, and **MOD** badges.
+- The comparison stays on when you switch to another product tab, so you can review the whole product without selecting the version again.
 
 ### End comparison
 
-Click **Clear comparison** in the header (or remove the query parameter). The page returns to normal edit or read-only mode based on status.
+Click **Clear comparison** in the header. The page returns to normal edit or read-only mode based on status.
 
-### Technical note
-
-The client loads `all-tabs` data for both version IDs and computes a structural diff (`added`, `removed`, `modified`, `unchanged`). Redline is read-only—it does not write merged data.
+Comparing never changes either version's data.
 
 ## Edit locks
 
@@ -84,7 +84,7 @@ The client loads `all-tabs` data for both version IDs and computes a structural 
 |-----------|--------|
 | **Released** or **Obsolete** | No tab edits. |
 | **Not on the product team** | Only the Product Owner, Contributors, and admins can edit. |
-| **PDF export in progress** | Header may lock submit, tab completion, and further exports until the job finishes. |
+| **Your PDF export in progress** | The product shows **Export in progress** and can't be edited until the export finishes. |
 
 ## Where redline appears
 
@@ -92,7 +92,7 @@ All seven documentation tabs participate. Product tab docs describe tab-specific
 
 ## Product logs
 
-Per-product change history lives at `/products/{productId}/logs`. Use it alongside redline when you need audit timestamps and actors, not field-level diffs.
+Admins can click **Logs** on **Product Information** to see who changed the product and when. Use it alongside redline when you need timestamps and people, not field-level diffs.
 
 ## Related topics
 

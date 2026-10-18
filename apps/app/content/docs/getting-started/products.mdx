@@ -3,48 +3,71 @@ title: Products
 description: Create products, track status and versions, and open the seven documentation tabs.
 ---
 
-A **product** in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and outputs (PDF, Excel, reports). Products always belong to a **department** and **project** in your workspace hierarchy.
+A **product** in Uprevit is a labeling documentation record: metadata, seven structured tabs, versions, and outputs (PDFs, spreadsheets, and reports). Products always belong to a **department** and **project** in your workspace hierarchy.
 
 <DocsVideo videoKey="product.products-intro" title="Products tab introduction" />
 
 ## Product list
 
-Open **Products** (`/products`) to see all products you can access. The table includes:
+Open **Products** (`/products`) to see the latest version of every product in your workspace. The **All Products** tab lists everything; the **Bookmarked** tab lists products you bookmarked. The table includes:
 
 | Column | Meaning |
 |--------|---------|
-| **Product name** | Display name. |
 | **PPN** | Product Plan Number (unique identifier). |
-| **Project / Department** | Structural placement. |
+| **Product Name** | Display name. |
+| **Project** | The project the product is filed under. |
+| **Department** | The project's department. |
 | **Owner** | Product Owner accountable for the product. |
-| **Status** | `Draft`, `Submitted`, `In Review`, `Released`, or `Obsolete`, with a link to the active workflow when In Review. |
-| **Version** | Numeric version (e.g. v4), plus the released version when a newer one is being worked on (e.g. **Released v3**). |
-| **Progress** | Tab completion percentage (0–7 tabs). |
+| **Status** | `Draft`, `Submitted`, `In Review`, `Released`, or `Obsolete`. While a version is in review, hover the status to open its workflow. |
+| **Version** | Version number (e.g. v4). When an earlier version is released, hover the version to open it. |
+| **Progress** | Tab completion percentage. Hover it to see how many of the 7 tabs are complete. |
 
-Click a row to open **Product Information** for that product. Use the row menu for shortcuts without navigating away.
+**Created** and **Modified** columns are hidden by default. Use the column menu to show or hide columns, and the filter control to filter by fields such as product name, PPN, project, department, owner, status, or dates. Click a column header to sort.
+
+Click a row to open **Product Information** for that product. Use the row menu for shortcuts without navigating away. To open an older version, use the version switcher in the product header.
 
 ## Creating a product
 
 Any signed-in workspace member can create a product.
 
-1. Click **Create New Product**.
+1. Click **Create Product**.
 2. Complete the form:
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| **Product name** | Yes | |
-| **PPN (Product Plan Number)** | Yes | Minimum **10** characters; must start with a letter or digit; use alphanumeric characters for the full identifier. |
+| **Product Name** | Yes | |
+| **Product Plan Number (PPN)** | Yes | Minimum **10** characters; must start with a letter or digit; use alphanumeric characters for the full identifier. |
 | **Description** | Yes | Non-empty; max **220** characters. |
 | **Department** | Yes | Searchable selector. |
 | **Project** | Yes | Enabled after department is chosen; lists projects in that department only. |
+| **Product Owner** | Yes | You by default. Choose someone else to make them the owner. |
 | **Version** | Fixed | New products start at version **1** (displayed as 1.0). |
 | **Status** | Fixed | New products start as **Draft**. |
 
-3. Submit. Uprevit opens the product documentation workflow starting at **Product Information**.
+3. Click **Create Product**. The new product appears in the products list. Click it to start on **Product Information**.
 
 ## Editing basic product fields
 
-From the products table menu, **Edit** updates **product name** and **description** only. PPN, department, project, version, and status are not changed from this dialog.
+From the products table menu, **Edit** updates **Product Name** and **Description** only. PPN, department, project, version, and status can't be changed.
+
+On **Product Information**, **Update** also lets you change the product name, description, and **Target Date**.
+
+## Product team
+
+Each product has a **Product Owner** and optional **Contributors**:
+
+| Role | What they can do |
+|------|------------------|
+| **Product Owner** | Edit and submit the product, and manage its team. Accountable for the product across all versions. |
+| **Contributors** | Edit and submit the product's versions. |
+| **Admins** | Edit any product and manage any product team. |
+| **Everyone else** | View the product. Tabs are read-only. |
+
+Click the owner's name in the product header to see the team. To change it, choose **Manage team** to open **Product Team**. Pick a new **Product Owner** in **Select owner**, or add people in **Add contributor**. Only the Product Owner and admins can manage the team. Changes apply to every version of the product.
+
+If you choose someone else as owner when you create a product, you aren't added as a contributor automatically.
+
+People you add are [notified](/docs/review-outputs/notifications) in the app and by email.
 
 ## Product documentation
 
@@ -60,9 +83,9 @@ After creating a product, open the seven documentation tabs from the product sid
 | **Released** | Approved and frozen; editing disabled on all tabs. |
 | **Obsolete** | An earlier release replaced by a newer one. |
 
-**Submit for approval** (product header) is available at 100% tab completion. An [approval workflow](/docs/review-outputs/approval-workflows) releases the version. To continue work after release, create a **New version** from the products table—see [Redlines and Versions](/docs/review-outputs/redlines-versions).
+**Submit for approval** (product header) is available on a Draft version at 100% tab completion. While a version is **Submitted**, **Return to draft** moves it back to Draft. An [approval workflow](/docs/review-outputs/approval-workflows) releases the version. To continue work after release, create a **New version** from the products table—see [Redlines and Versions](/docs/review-outputs/redlines-versions).
 
-Archiving is separate from status: an archived product is hidden from active work, and its versions keep their status.
+Archiving is separate from status: an archived product is hidden from active work, and its versions keep their status. Archiving applies to every version of the product. You can't archive a product while one of its versions is in review.
 
 ## Row actions
 
@@ -72,16 +95,16 @@ Archiving is separate from status: an archived product is hidden from active wor
 | New version | Product Owner, Contributors, or admins | Only when the latest version is **Released** and the product is not archived. |
 | Share | All users | Copies product URL. |
 | Bookmark | All users | Adds to bookmark folders; see [Bookmarks](/docs/source-files-bookmarks/bookmarks). |
-| Export PDF | All users | Queues async job; see [Exports](/docs/review-outputs/exports). |
+| Export to PDF | All users | Queues a background export; see [Exports](/docs/review-outputs/exports). |
 | Archive | **Admin only** | Moves the product to Archive. |
 
 <Callout type="warn" title="Admin only">
-**Archive** on the products table moves the product to Archive and is restricted to admins.
+Everyone sees **Archive** in the row menu, but only admins can archive. Other users see a message asking them to contact an admin.
 </Callout>
 
 ## Archiving and restoring products
 
-Admins archive products from the table menu. Restore archived products from **Archive → Products** (`/archive`). Restored products keep the status each version had.
+Admins archive products from the table menu. Admins restore archived products from **Archive → Products** (`/archive`). Restored products keep the status each version had.
 
 ## Related topics
 

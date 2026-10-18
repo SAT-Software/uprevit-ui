@@ -3,42 +3,41 @@ title: Operational Parameters
 description: Spreadsheet workbook for operational and environmental parameters.
 ---
 
-**Operational Parameters** (`/products/{productId}/operational-parameters`) uses the same spreadsheet interface as [Product Specifications](/docs/product-documentation/product-specifications), but stores a **separate workbook** for operational, environmental, or process parameters distinct from the main specification table.
+**Operational Parameters** uses the same spreadsheet interface as [Product Specifications](/docs/product-documentation/product-specifications), but stores a **separate workbook** for operational, environmental, or process parameters distinct from the main specification table.
 
 ## Workbook structure
 
 Identical model to Product Specifications:
 
 - User-defined **headers**
-- **Column types** (`constant`, `variable`, `na`)
-- **Cell** grid with optional formats, order, and widths
+- **Column types**: **Blank**, **Constant Data**, **Variable Data**, or **NA**
+- **Cell** grid with colors, column order, and widths
 
 ## Editing and saving
 
-- Inline cell editing, add/remove rows and columns, find & replace, undo/redo.
-- **Save** persists to the `operational-parameters` tab (`add_operational_parameters`). Use the toolbar **Save** button when you are done editing; **Unsaved changes** appears until data is stored.
+- Inline cell editing, search, column filters and sorting, find and replace, and undo/redo.
+- Click **Save** when you are done editing. **Unsaved changes** appears until the workbook is saved.
 - Changes are **not** saved automatically. Leaving this tab or another part of the app without saving opens an **Unsaved Changes** dialog (save, discard, or stay). Closing the browser tab with unsaved edits shows the browser leave warning.
 
-Released and Obsolete versions lock the grid to read-only.
+Released and Obsolete versions lock the grid to read-only. Only the Product Owner, Contributors, and admins can edit.
 
 ## Importing Excel workbooks
 
-Import uses the [same rules as Product Specifications](/docs/product-documentation/product-specifications#importing-excel-workbooks). Multi-sheet files are stacked vertically in workbook order, with sheet names, original headers, and a blank separator row preserved in one grid. Empty sheets are skipped. The combined result must fit within 5,000 rows and 150 columns, and the file must be at most 5 MB.
+Import uses the [same rules as Product Specifications](/docs/product-documentation/product-specifications#importing-excel-workbooks). Multi-sheet files are stacked vertically in workbook order, with sheet names, original headers, and a blank separator row preserved in one grid. Empty sheets are skipped. The combined result must fit within 5,000 rows, 150 columns, and 750,000 cells, and the file must be at most 5 MB.
 
-Confirm replacement when the grid already contains data, then **Save** the imported result. Export produces one stacked sheet; separate sheet tabs and original Excel formatting are not retained.
+Confirm replacement when the grid already contains data, then **Save** the imported result. **Export this table** produces one stacked sheet; separate sheet tabs and original Excel formatting are not retained.
 
 ## Tab completion
 
-Mark **Operational Parameters** complete from the product header when finished.
+Hover the progress in the product header and click **Mark Complete** when finished.
 
 ## Version comparison (redline)
 
-Compare mode diffs `operational_parameters` workbook data with the same **Highlight** and **Inline** display modes as Product Specifications.
+Compare mode shows changes to the workbook with the same **Highlight** and **Inline** display modes as Product Specifications.
 
 For how to start and end a comparison session, see **[Redlines and Versions](/docs/review-outputs/redlines-versions)**.
 
 ## Related topics
 
 - [Product Specifications](/docs/product-documentation/product-specifications)
-- [Reports](/docs/review-outputs/reports) — query operational parameter fields when configured in report categories
 - [Exports](/docs/review-outputs/exports)
