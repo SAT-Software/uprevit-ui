@@ -3,7 +3,7 @@ title: Compliance Information
 description: Regulatory standards and packaging or labeling languages.
 ---
 
-The **Compliance Information** tab (`/products/{productId}/compliance-information`) documents regulatory standards and the languages used on packaging or labeling for this product version.
+The **Compliance Information** tab documents regulatory standards and the languages used on packaging or labeling for this product version.
 
 <DocsVideo videoKey="product.compliance-tab" title="Compliance Information tab walkthrough" />
 
@@ -15,10 +15,12 @@ Each standard is a card with:
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| **Standard / Regulation** | Yes | Pick from the preset library (`COMPLIANCE_STANDARDS`) or enter a custom standard name. |
-| **Standard description** | Auto or manual | Filled automatically for presets; enter manually for custom standards. |
+| **Standard Number / Regulation** | Yes | Choose **Select from list** to search the built-in catalog of standards, regulations, and audit programs, or **Enter custom** to type one (at least 3 characters). |
+| **Description** | No | Filled in for you when you pick from the list, and you can still edit it. Up to 500 characters. |
 
-**Actions:** Add, edit, or delete standards while the product is in **Draft**.
+When you pick from the list, **Selected Details** shows the standard's type, category, and scope.
+
+**Actions:** Add, edit, or delete standards while the version is in **Draft**, **Submitted**, or **In Review**.
 
 ### Languages
 
@@ -26,22 +28,29 @@ Manage the set of languages for labeling:
 
 | Field | Notes |
 |-------|-------|
-| **Language code, name, country** | Selected in bulk via **Manage Languages**; supports presets and individual picks. |
+| **Language code, name, country** | Selected in **Manage Product Languages**. |
 
-One dialog updates the full language list for the product.
+In **Manage Product Languages** you can:
+
+- Search by code, language, or country.
+- Pick languages one by one.
+- Add a whole market group at once, such as Pan-European, DACH, Nordics, Latin America, or Gulf / Arabic.
+- Use **Select Visible**, **Clear Visible**, or **Clear All**.
+
+Click **Save Languages** to replace the product's language list with your selection.
 
 ## Editing workflow
 
 1. Open **Compliance Information** from the product sidebar.
-2. Under **Compliance Standards**, click **Add Standard** or use row actions on existing cards.
-3. Under **Languages**, open **Manage Languages**, select languages, and save.
-4. Mark the tab complete in the header when finished.
+2. Under **Compliance Standards**, click **Add Standard**. On an existing standard, use the edit or delete icon. Deleting asks you to confirm.
+3. Under **Languages**, click **Manage Languages**, select languages, then click **Save Languages**.
+4. When finished, hover the progress in the product header and click **Mark Complete**.
 
-Released and Obsolete versions cannot add, edit, or delete standards or languages until a new draft version exists.
+Released and Obsolete versions cannot add, edit, or delete standards or languages until a new draft version exists. Only the Product Owner, Contributors, and admins can edit.
 
 ## Tab completion
 
-Use the header toggle to mark **Compliance Information** complete (`update_compliance_tab_completion`).
+Hover the progress in the product header and click **Mark Complete** to mark **Compliance Information** complete.
 
 ## Version comparison (redline)
 

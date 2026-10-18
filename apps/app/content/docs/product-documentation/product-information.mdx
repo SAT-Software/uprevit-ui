@@ -3,7 +3,7 @@ title: Product Information
 description: Core product metadata, custom fields, dates, and linked source files.
 ---
 
-**Product Information** is the first documentation tab in the product workflow (`/products/{productId}/product-information`). It holds identifying metadata, scheduling dates, regulatory geography, device classification, custom fields, and links to related **source file** folders. For all seven tabs and the shared header tools, start with [Product Overview](/docs/product-documentation/product-overview).
+**Product Information** is the first documentation tab in the product workflow. It holds identifying metadata, scheduling dates, regulatory geography, device classification, custom fields, and links to related **source file** folders. For all seven tabs and the shared header tools, start with [Product Overview](/docs/product-documentation/product-overview).
 
 <DocsVideo videoKey="product.product-information" title="Product Information tab walkthrough" />
 
@@ -13,60 +13,67 @@ From the product list, click a product row—or use the sidebar **Product Inform
 
 ## Fields on the page
 
-### Standard fields (edit dialog)
+### Product details
+
+Click **Update** at the top of the page to open **Edit Product Details**:
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| **Product name** | Yes | Also shown in the product header. |
+| **Product Name** | Yes | Also shown in the product header. |
 | **Description** | No | Longer narrative than the list description. |
-| **Target date** | No | Planned completion date. |
+| **Target Date** | No | Planned completion date. |
+
+### Product information
+
+Click **Update Product Info** to open **Edit Product Information**:
+
+| Field | Required | Notes |
+|-------|----------|-------|
 | **Market / Geography** | Yes* | Choose from preset markets or enter a custom value. |
-| **Country of origin** | Yes* | Preset country or custom entry. |
+| **Country of Origin** | Yes* | Preset country or custom entry. |
 | **OEM / Contract manufacturer** | Yes | |
-| **Commercial / Clinical** | Yes | Commercial or Clinical use. |
-| **Manufacturing location** | No | |
-| **Class of device** | No | Preset device class groups or custom. |
+| **Commercial / Clinical** | Yes | Free text, for example Commercial or Clinical. |
+| **Manufacturing Location** | No | |
+| **Class of Device** | No | Preset device classes grouped by regulation, or custom. |
 | **Basic UDI** | No | Unique Device Identification (when applicable). |
 
 \*Required means you must provide either a preset selection or custom text.
 
-### Read-only on this tab
+Click **Save Changes** to save. Changes apply to this product version.
+
+### Status and dates
+
+Hover the status badge at the top of the page to see:
 
 - **Status** — Draft, Submitted, In Review, Released, or Obsolete.
-- **Actual completion date** — Set automatically when you **Submit** the product version.
-- **Created / Modified** — Audit metadata.
-- **Linked source files** — Links to folders in **Source Files** tied to this product.
+- **Target date** and **actual completion date**. The actual date is set when you submit the version.
+- **Created by** and **Updated by**, with dates.
+- **Linked source files** — folders in **Source Files** tied to this product. Click one to open it.
 
 ### Custom fields
 
-Add organization-specific label/value pairs:
+Add organization-specific label/value pairs. Click **Manage Custom Fields**:
 
-| Field | Required |
-|-------|----------|
-| **Label** | Yes (when editing a custom field) |
-| **Value** | Yes |
+- On **Add New Field**, enter a **Label** and **Value** (both required), then click **Add Field(s)**.
+- On **Manage Existing Fields**, change a field and click **Update**, or click **Delete** and confirm.
 
-Use **Add custom field**, **Edit**, or **Delete** from the custom fields section.
+## Who can edit
 
-## Editing
+Only the Product Owner, Contributors, and admins can edit. When status is **Released** or **Obsolete**, edit actions are disabled until you create a [new version](/docs/review-outputs/redlines-versions).
 
-1. Click **Edit Product** for standard fields.
-2. Use the custom field actions for additional rows.
-3. Save—changes persist immediately to this product version.
-
-When status is **Released** or **Obsolete**, edit actions are disabled until you create a [new version](/docs/review-outputs/redlines-versions). Use **Workflows** to see every approval workflow this product was in.
+Click **Workflows** to see every approval workflow this product was in.
 
 ## Tab completion
 
-Toggle **Mark tab complete** in the product header when Product Information is finished. This counts toward the seven-tab progress bar required for submit.
+Hover the progress in the product header and click **Mark Complete** when Product Information is finished. This counts toward the seven-tab progress bar required for submit.
 
 ## Activity logs
 
-Use **View logs** (or navigate to `/products/{productId}/logs`) for a detailed change history on this product.
+Admins can click **Logs** to see a detailed change history for this product.
 
 ## Version comparison (redline)
 
-To see what changed in Product Information between versions, use **Compare Versions** in the product header. Field-level highlights and custom-field badges (NEW / DEL / MOD) appear on this tab.
+To see what changed in Product Information between versions, click **Compare** in the product header. Field-level highlights and custom-field badges (NEW / DEL / MOD) appear on this tab.
 
 For the full comparison workflow, see **[Redlines and Versions](/docs/review-outputs/redlines-versions)**—that page is the canonical guide; this tab does not duplicate those steps.
 

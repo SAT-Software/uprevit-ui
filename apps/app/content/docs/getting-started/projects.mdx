@@ -9,8 +9,8 @@ description: Create projects under departments, assign members, and manage produ
 
 ## Viewing projects
 
-- **List:** `/projects` — searchable cards across the workspace.
-- **Detail:** `/projects/{projectId}` — project profile, members, and a filterable **products** table for that project only.
+- **List:** `/projects`: cards for every project in the workspace. Filter by name, description, project manager, or last change, and sort by **Project Name**, **Description**, **Project Manager**, or **Last Changed**.
+- **Detail:** open a project to see its manager, members, and a filterable **products** table for that project only.
 
 All signed-in users can view and share project links. Row actions on the products table link into product documentation.
 
@@ -20,20 +20,22 @@ All signed-in users can view and share project links. Row actions on the product
 Creating a project requires **Admin** privileges.
 </Callout>
 
-1. Open **Projects** and click **Create Project** (or use the control on the list page).
+Everyone sees the **Create Project**, **Update**, and **Archive** buttons, but only admins can use them. Other users see a message asking them to contact an admin.
+
+1. Open **Projects** and click **Create Project**.
 2. Fill in the form:
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| **Project name** | Yes | Display name. |
-| **Project number** | Yes | Internal or regulatory reference number. |
-| **Description** | Yes | Max **220** characters. |
+| **Project Name** | Yes | Display name. |
+| **Project Number** | Yes | Internal or regulatory reference number. Must be unique among active projects. |
 | **Department** | Yes | Searchable list; projects are always scoped to one department. |
-| **Project manager** | No | Free-text name. |
-| **Image** | No | Optional project image. |
-| **Members** | No | Workspace users assigned to the project. |
+| **Project Manager** | No | Free-text name. |
+| **Project Description** | Yes | Max **220** characters. |
+| **Members** | No | Click **Add Users** to search and add workspace users. |
+| **Project Image** | No | PNG, JPEG, JPG, GIF, or WebP, under 500 KB. |
 
-3. Submit. The project appears under its department and in the global projects list.
+3. Click **Create Project**. The project appears under its department and in the global projects list.
 
 ## Updating a project
 
@@ -44,8 +46,8 @@ Updating a project or changing members requires **Admin** privileges.
 On the project detail page:
 
 1. Click **Update**.
-2. Edit fields (department can be changed via searchable selector on update).
-3. Save.
+2. Edit any field, including the department.
+3. Save your changes.
 
 ## Assigning members
 
@@ -53,7 +55,7 @@ Same pattern as departments: admins manage members on create/update; everyone ca
 
 ## Products on a project
 
-The project detail page shows all products where `project_id` matches this project. Use list controls to filter and sort, then open a product row to enter the seven documentation tabs.
+The project detail page shows all products filed under this project. Use list controls to filter and sort, then open a product row to enter the seven documentation tabs.
 
 When **creating a product**, you must pick a department first; the **project** dropdown then lists only projects in that department.
 
@@ -65,9 +67,9 @@ Archiving a project requires **Admin** privileges.
 
 1. On the project detail page, choose **Archive**.
 2. Type the **exact project name** to confirm.
-3. The project moves to **Archive → Projects**.
+3. Click **Archive**. The project moves to **Archive → Projects**.
 
-Products already tied to the project remain in the database; archive behavior for products is separate (see [Archives](/docs/review-outputs/archives)).
+Archiving a project doesn't archive its products. Products are archived separately (see [Archives](/docs/review-outputs/archives)).
 
 ## Restoring a project
 
@@ -80,7 +82,7 @@ Restoring an archived project requires **Admin** privileges.
 
 ## Activity logs
 
-Admins can view the **Logs** tab on the project detail page for audit entries.
+On the project detail page, admins can click **Logs** to open the project's activity history in a side panel. Other users don't see the **Logs** button.
 
 ## Related topics
 
