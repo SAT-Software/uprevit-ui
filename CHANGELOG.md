@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-10-18
+
+### Added
+
+- Added a Changelog page to the documentation.
+- Added documentation for Analytics, Notifications, Support, and System Status.
+
+### Updated
+
+- Updated the documentation to match the current app.
+- Updated monorepo package versions to `0.9.2`.
+
 ## [0.9.1] - 2026-10-17
 
 ### Added
