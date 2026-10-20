@@ -562,7 +562,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 bg-background flex w-full shrink-0 flex-wrap items-center justify-between gap-3 border-b border-sidebar-border px-2 py-2 transition-[width,height,left] ease-linear duration-200 md:flex-nowrap md:py-0",
+        "relative z-50 bg-background flex w-full shrink-0 flex-wrap md:fixed md:top-0 items-center justify-between gap-3 border-b border-sidebar-border px-2 py-2 transition-[width,height,left] ease-linear duration-200 md:flex-nowrap md:py-0",
         // Width and positioning that accounts for sidebar
         "left-0 right-0",
         "md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]",

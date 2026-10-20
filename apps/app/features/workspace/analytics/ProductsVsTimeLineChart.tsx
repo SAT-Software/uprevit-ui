@@ -25,20 +25,8 @@ interface TimeData {
   products: number;
 }
 
-interface Department {
-  _id?: string;
-  department_name: string;
-}
-
-interface Project {
-  _id?: string;
-  project_name: string;
-}
-
 interface ProductsOverTimeChartProps {
   data: TimeData[];
-  departments?: Department[];
-  projects?: Project[];
   isLoading?: boolean;
 }
 

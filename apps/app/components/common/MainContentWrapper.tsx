@@ -25,7 +25,7 @@ export function MainContentWrapper({ children }: MainContentWrapperProps) {
         "flex flex-1 flex-col bg-background min-h-0 overflow-auto",
         // Dynamic top padding based on header height
         isProductPage
-          ? "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-0"
+          ? "md:pt-12 gap-0"
           : "pt-12 group-has-[data-collapsible=icon]/sidebar-wrapper:pt-12 gap-2",
       )}
     >
