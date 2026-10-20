@@ -91,9 +91,16 @@ export function AccessEligibilityGuard({
     return <WorkspaceAccessFrozenScreen />;
   }
 
+  const isActiveMemberFromToken =
+    tokenStatus === "active" && Boolean(tokenWorkspaceId);
+
   if (
     auth.isLoading ||
-    (userIdFromToken && isUserFetching && !isUserError && !userProfileData)
+    (userIdFromToken &&
+      isUserFetching &&
+      !isUserError &&
+      !userProfileData &&
+      !isActiveMemberFromToken)
   ) {
     return (
       <div className="flex h-screen w-full items-center justify-center">

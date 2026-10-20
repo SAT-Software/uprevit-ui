@@ -22,10 +22,6 @@ import {
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
 import {
-  exportTableToWorkbook,
-  parseWorkbookToTableData,
-} from "@/lib/import-export";
-import {
   ProductSpecificationDataTableProps,
   type CellFormat,
   type ColumnFilter,
@@ -1274,7 +1270,10 @@ export function ProductSpecificationDataTable({
     if (isReadOnly) return;
 
     try {
-      const buffer = await file.arrayBuffer();
+      const [buffer, { parseWorkbookToTableData }] = await Promise.all([
+        file.arrayBuffer(),
+        import("@/lib/import-export"),
+      ]);
       const guard = importGuardRef.current;
       if (
         guard.isReadOnly ||
@@ -1309,8 +1308,9 @@ export function ProductSpecificationDataTable({
     }
   }
 
-  function handleExport() {
+  async function handleExport() {
     try {
+      const { exportTableToWorkbook } = await import("@/lib/import-export");
       const filename = `product-data-${
         new Date().toISOString().split("T")[0]
       }.xlsx`;

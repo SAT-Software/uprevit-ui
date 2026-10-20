@@ -7,12 +7,8 @@ import { ProductsByDepartmentChart } from "@/features/workspace/analytics/Produc
 import { ProductsByProjectChart } from "@/features/workspace/analytics/ProductsByProjectBarChart";
 import { ProductsOverTimeChart } from "@/features/workspace/analytics/ProductsVsTimeLineChart";
 import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
-import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
-import type { Department } from "@/types/department";
 import type { ProductStatus } from "@/types/product";
-import type { Project } from "@/types/project";
 
 type ProductAnalyticsItem = {
   _id?: string;
@@ -33,19 +29,11 @@ export default function AnalyticsPage() {
     useGetAllProducts({ limit: ANALYTICS_PRODUCT_LIMIT });
   const { data: archivedProductsData, isLoading: archivedLoading } =
     useGetArchivedProducts({ limit: 1 });
-  const { data: departmentsData, isLoading: departmentsLoading } =
-    useGetAllDepartments();
-  const { data: projectsData, isLoading: projectsLoading } =
-    useGetAllProjects();
-
-  const isLoading =
-    productsLoading || archivedLoading || departmentsLoading || projectsLoading;
+  const isLoading = productsLoading || archivedLoading;
 
   const analytics = useMemo(() => {
     const products =
       (productsData?.result?.products as ProductAnalyticsItem[]) || [];
-    const departments = (departmentsData?.data as Department[]) || [];
-    const projects = (projectsData?.data as Project[]) || [];
 
     const totalProducts =
       productsData?.result?.pagination?.totalCount ?? products.length;
@@ -113,10 +101,8 @@ export default function AnalyticsPage() {
       departmentData,
       projectData,
       timeData,
-      departments,
-      projects,
     };
-  }, [productsData, archivedProductsData, departmentsData, projectsData]);
+  }, [productsData, archivedProductsData]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -133,8 +119,6 @@ export default function AnalyticsPage() {
         <div className="flex flex-col gap-2 p-2">
           <ProductsOverTimeChart
             data={analytics.timeData}
-            departments={analytics.departments}
-            projects={analytics.projects}
             isLoading={isLoading}
           />
 
