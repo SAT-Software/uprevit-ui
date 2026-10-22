@@ -17,7 +17,7 @@ export function DocsHeader() {
   return (
     <header
       id="nd-subnav"
-      className="[grid-row:1] [grid-column:3/5] min-w-0 sticky top-(--fd-docs-row-1) z-30 flex h-(--fd-header-height) items-center gap-2 border-b bg-fd-background/80 px-4 backdrop-blur-sm layout:[--fd-header-height:--spacing(14)] md:px-6"
+      className="[grid-row:1] [grid-column:3/5] md:[grid-column:3/-1] md:in-data-[sidebar-collapsed=true]:[grid-column:1/-1] min-w-0 sticky top-(--fd-docs-row-1) z-30 flex h-(--fd-header-height) items-center gap-2 border-b bg-fd-background/80 px-4 backdrop-blur-sm layout:[--fd-header-height:--spacing(14)] md:px-6"
     >
       <Link
         href="/dashboard"
