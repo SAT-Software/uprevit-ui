@@ -9,6 +9,7 @@ export type DocumentationVideoSignedUrlResponse = {
 export type DocumentationVideoKey =
   | "department.departments-tab"
   | "getting-started.welcome-dashboard"
+  | "getting-started.workspace"
   | "product.compare-versions-redline-view"
   | "product.compliance-tab"
   | "product.label-components"

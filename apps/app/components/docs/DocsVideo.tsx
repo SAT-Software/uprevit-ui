@@ -10,6 +10,7 @@ type DocsVideoProps = {
   title?: string;
   caption?: string;
   className?: string;
+  cropPadding?: boolean;
 };
 
 export function DocsVideo({
@@ -17,6 +18,7 @@ export function DocsVideo({
   title,
   caption,
   className,
+  cropPadding,
 }: DocsVideoProps) {
   const { data, isLoading, isError, error, isFetching } =
     useDocumentationVideoUrl(videoKey);
@@ -59,7 +61,10 @@ export function DocsVideo({
             width: "100%",
             height: "100%",
           }}
-          className="h-full w-full scale-[1.08] object-cover [object-position:center_58%]"
+          className={cn(
+            "h-full w-full object-cover",
+            cropPadding && "scale-[1.08] [object-position:center_58%]",
+          )}
         />
       </div>
       {caption ? (
