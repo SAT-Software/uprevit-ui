@@ -16,7 +16,7 @@ import {
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { ArrowDown01Icon, UserSettings01Icon } from "@hugeicons/core-free-icons";
 import type { ProductTeam, ProductTeamMember } from "@/types/product";
-import { ProductMemberAvatar } from "../ProductMemberAvatar";
+import { ProductMemberAvatar, RemovedMemberIcon } from "../ProductMemberAvatar";
 import ProductTeamDialog from "../ProductTeamDialog";
 
 const MAX_CONTRIBUTOR_AVATARS = 3;
@@ -26,7 +26,10 @@ function ProductTeamMenuMember({ member }: { member: ProductTeamMember }) {
     <div className="flex items-center gap-2 px-2 py-1.5">
       <ProductMemberAvatar member={member} />
       <div className="min-w-0">
-        <p className="truncate text-sm">{member.name}</p>
+        <p className="flex items-center gap-1 text-sm">
+          <span className="truncate">{member.name}</span>
+          <RemovedMemberIcon member={member} />
+        </p>
         <p className="truncate text-xs text-muted-foreground">{member.email}</p>
       </div>
     </div>
@@ -64,6 +67,7 @@ export default function ProductTeamMenu({
             <span className="truncate text-xs">
               {team.owner?.name ?? "No owner"}
             </span>
+            {team.owner ? <RemovedMemberIcon member={team.owner} /> : null}
             {contributors.length > 0 ? (
               <span className="flex -space-x-1.5">
                 {contributors.slice(0, MAX_CONTRIBUTOR_AVATARS).map((member) => (
