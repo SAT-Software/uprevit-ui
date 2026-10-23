@@ -48,7 +48,7 @@ export function DocsVideo({
 
   return (
     <figure className={cn("my-6", className)}>
-      <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black outline-1 outline-border outline-offset-0">
+      <div className="not-prose aspect-video w-full overflow-hidden rounded-2xl bg-black outline-1 outline-border outline-offset-0">
         <Player
           key={data.url}
           src={data.url}
@@ -62,7 +62,7 @@ export function DocsVideo({
             height: "100%",
           }}
           className={cn(
-            "h-full w-full object-cover",
+            "h-full w-full object-contain",
             cropPadding && "scale-[1.08] [object-position:center_58%]",
           )}
         />
