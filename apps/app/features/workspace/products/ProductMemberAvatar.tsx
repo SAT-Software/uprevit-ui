@@ -3,6 +3,13 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@uprevit/ui/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import { UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@uprevit/ui/lib/utils";
 import type { ProductTeamMember } from "@/types/product";
 
@@ -22,6 +29,25 @@ export function ProductMemberAvatar({
         {member.name?.charAt(0).toUpperCase()}
       </AvatarFallback>
     </Avatar>
+  );
+}
+
+export function RemovedMemberIcon({
+  member,
+}: {
+  member: Pick<ProductTeamMember, "status">;
+}) {
+  if (member.status !== "inactive") return null;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex shrink-0 text-destructive">
+          <Icon icon={UserRemove01Icon} size={14} aria-label="Removed from workspace" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>Removed from workspace</TooltipContent>
+    </Tooltip>
   );
 }
 

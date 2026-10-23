@@ -822,7 +822,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
           <ProductTeamMenu
             productId={productId}
             team={productCoreData}
-            canManageTeam={canManageTeam}
+            canManageTeam={canManageTeam && productCoreData.is_latest !== false}
           />
         ) : null}
         <ProductProgressHoverCard
