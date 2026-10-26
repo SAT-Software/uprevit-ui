@@ -363,7 +363,7 @@ export default function Page() {
         diffKey: "countryOfOrigin",
       },
       {
-        label: "OEM / Contract manufactured",
+        label: "OEM / Contract manufacturer",
         value: productData.oem_contract_manufacturer || "N/A",
         icon: Building03Icon,
         diffKey: "oemContractManufacturer",

@@ -77,9 +77,13 @@ function ShowOrHideTableColumnsDropdown<TData>({
                   className="mx-auto w-56 flex-flex-col focus:bg-accent focus:text-accent-foreground text-foreground relative flex cursor-default items-center gap-1 rounded-md py-1.5 pr-2 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                 >
                   <Field orientation="horizontal">
-                    <Checkbox checked={column.getIsVisible()} disabled />
+                    <Checkbox
+                      id={`column-visibility-${column.id}`}
+                      checked={column.getIsVisible()}
+                      disabled
+                    />
                     <FieldLabel
-                      htmlFor="terms-checkbox-basic"
+                      htmlFor={`column-visibility-${column.id}`}
                       className="font-normal"
                     >
                       {getColumnLabel(column)}
@@ -105,6 +109,7 @@ function ShowOrHideTableColumnsDropdown<TData>({
                 >
                   <Field orientation="horizontal">
                     <Checkbox
+                      id={`column-visibility-${column.id}`}
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
@@ -112,7 +117,7 @@ function ShowOrHideTableColumnsDropdown<TData>({
                       onSelect={(event) => event.preventDefault()}
                     />
                     <FieldLabel
-                      htmlFor="terms-checkbox-basic"
+                      htmlFor={`column-visibility-${column.id}`}
                       className="font-normal"
                     >
                       {getColumnLabel(column)}

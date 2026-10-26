@@ -56,7 +56,7 @@ type ActivityLogsTimelineProps = {
   errorMessage?: string;
 };
 
-const formatChangeValue = (value: unknown) => {
+const formatChangeValue = (value: unknown): string => {
   if (value === null || value === undefined) return "-";
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean") {
@@ -64,7 +64,15 @@ const formatChangeValue = (value: unknown) => {
   }
 
   if (Array.isArray(value)) {
-    return value.length ? value.join(", ") : "-";
+    return value.length ? value.map(formatChangeValue).join(", ") : "-";
+  }
+
+  if (typeof value === "object" && "label" in value) {
+    const { label, value: fieldValue } = value as {
+      label: unknown;
+      value?: unknown;
+    };
+    return `${formatChangeValue(label)}: ${formatChangeValue(fieldValue)}`;
   }
 
   try {

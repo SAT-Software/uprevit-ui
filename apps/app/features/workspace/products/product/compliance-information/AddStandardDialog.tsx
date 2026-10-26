@@ -88,10 +88,7 @@ export default function AddStandardDialog({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       const standardName = data.standardSelect || data.standardInput;
-      const standardDescription =
-        data.standardSelect && selectedStandardData
-          ? selectedStandardData.description
-          : data.description;
+      const standardDescription = data.description;
 
       const addNewStandardData = {
         id: productId,

@@ -14,6 +14,7 @@ export type DocumentationVideoKey =
   | "product.compliance-tab"
   | "product.label-components"
   | "product.label-tags"
+  | "product.operational-parameters"
   | "product.product-information"
   | "product.product-plan-review-overview"
   | "product.product-specifications"

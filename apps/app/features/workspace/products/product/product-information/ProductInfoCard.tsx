@@ -27,7 +27,7 @@ export default function ProductInformationCard({
       { label: "Market / Geography", value: marketGeography || "N/A" },
       { label: "Country of Origin", value: countryOfOrigin || "N/A" },
       {
-        label: "OEM / Contract manufactured",
+        label: "OEM / Contract manufacturer",
         value: oemContractManufacturer || "N/A",
       },
       { label: "Commercial / Clinical", value: commercialClinical || "N/A" },
