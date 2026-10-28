@@ -1,6 +1,12 @@
 export interface CellFormat {
   bgColor?: string;
   textColor?: string;
+  decimalPlaces?: number;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  fontSize?: number;
+  alignment?: "left" | "center" | "right";
 }
 
 export type DataType = "blank" | "constant" | "variable" | "na";

@@ -29,6 +29,15 @@ import {
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
 import {
+  formatWorkbookValue,
+  MAX_DECIMAL_PLACES,
+  parseWorkbookClipboard,
+  workbookDecimalPlaces,
+  createWorkbookFill,
+  workbookNumber,
+} from "@/utils/product/workbook-cell-utils";
+import { WorkbookTextFormatToolbar } from "./WorkbookTextFormatToolbar";
+import {
   getRedlineHighlightInsetShadow,
   redlineHighlightBorder,
   redlineHighlightRing,
@@ -86,6 +95,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -564,6 +574,11 @@ export function ProductSpecificationDataTable({
     row: number;
     col: number;
   } | null>(null);
+  const [editingCell, setEditingCell] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const editingCellRef = useRef<string | null>(null);
+  const composingRef = useRef(false);
+  const pendingFocusRef = useRef<string | null>(null);
 
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
     initialData?.columnSizing ?? {},
@@ -590,6 +605,7 @@ export function ProductSpecificationDataTable({
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [activeSearchKey, setActiveSearchKey] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] = useState<
     Record<number, ColumnFilter>
   >({});
@@ -740,7 +756,7 @@ export function ProductSpecificationDataTable({
       const data = sparseProductSpecDataForDatabase(
         headerData,
         columnTypeData,
-        cellData,
+        editingCell ? { ...cellData, [editingCell]: editValue } : cellData,
         cellFormats,
         columnOrder,
         columnSizing,
@@ -752,6 +768,8 @@ export function ProductSpecificationDataTable({
     headerData,
     columnTypeData,
     cellData,
+    editingCell,
+    editValue,
     cellFormats,
     columnOrder,
     columnSizing,
@@ -772,9 +790,13 @@ export function ProductSpecificationDataTable({
       const isUndo = direction === "undo";
       switch (entry.type) {
         case "cell":
-          entry.changes.forEach(({ key, prev, next }) => {
-            const value = isUndo ? prev : next;
-            setCellData((d) => ({ ...d, [key]: value ?? "" }));
+        case "findReplace":
+          setCellData((data) => {
+            const updated = { ...data };
+            entry.changes.forEach(({ key, prev, next }) => {
+              updated[key] = (isUndo ? prev : next) ?? "";
+            });
+            return updated;
           });
           break;
         case "header":
@@ -799,20 +821,14 @@ export function ProductSpecificationDataTable({
           setColumnOrder(isUndo ? entry.prev : entry.next);
           break;
         case "cellFormat":
-          entry.changes.forEach(({ key, prev, next }) => {
-            const value = isUndo ? prev : next;
-            setCellFormats((d) => {
-              const updated = { ...d };
+          setCellFormats((data) => {
+            const updated = { ...data };
+            entry.changes.forEach(({ key, prev, next }) => {
+              const value = isUndo ? prev : next;
               if (value === undefined) delete updated[key];
               else updated[key] = value;
-              return updated;
             });
-          });
-          break;
-        case "findReplace":
-          entry.changes.forEach(({ key, prev, next }) => {
-            const value = isUndo ? prev : next;
-            setCellData((d) => ({ ...d, [key]: value ?? "" }));
+            return updated;
           });
           break;
       }
@@ -858,7 +874,15 @@ export function ProductSpecificationDataTable({
         Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
     );
     setCellFormats(initialData.cellFormats ?? {});
+    editingCellRef.current = null;
+    setEditingCell(null);
+    cellDraftRef.current = {};
+    cellInitialValueRef.current = {};
+    setSelectedCells(new Set());
+    setActiveCell(null);
+    setSelectionStartVisual(null);
     setSearchQuery("");
+    setDebouncedSearch("");
     clearHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when parent discards unsaved edits
   }, [resetKey]);
@@ -918,30 +942,95 @@ export function ProductSpecificationDataTable({
   // Ref for table container to manage cell focus
   const tableRef = useRef<HTMLTableElement>(null);
 
+  const finishEdit = useCallback(
+    (cancel = false) => {
+      const key = editingCellRef.current;
+      if (!key) return;
+      const prev = cellInitialValueRef.current[key];
+      const next = cellDraftRef.current[key] ?? cellDataRef.current[key];
+      if (!cancel && !isReadOnly && !isSavePending?.() && prev !== next) {
+        record({ type: "cell", changes: [{ key, prev, next }] });
+        setCellData((data) => ({ ...data, [key]: next ?? "" }));
+      }
+      delete cellDraftRef.current[key];
+      delete cellInitialValueRef.current[key];
+      editingCellRef.current = null;
+      setEditingCell(null);
+    },
+    [record, isReadOnly, isSavePending],
+  );
+
+  const startEdit = useCallback(
+    (key: string, value?: string) => {
+      if (isReadOnly || isSavePending?.()) return;
+      if (editingCellRef.current !== key) {
+        finishEdit();
+        cellInitialValueRef.current[key] = cellDataRef.current[key];
+        editingCellRef.current = key;
+        setEditingCell(key);
+        setEditValue(cellDataRef.current[key] ?? "");
+      }
+      if (value !== undefined) {
+        cellDraftRef.current[key] = value;
+        setEditValue(value);
+      }
+    },
+    [finishEdit, isReadOnly, isSavePending],
+  );
+
+  const applyValues = useCallback(
+    (values: Record<string, string>) => {
+      if (isReadOnly || isSavePending?.()) return;
+      finishEdit(true);
+      const changes = Object.entries(values).flatMap(([key, next]) => {
+        const prev = cellDataRef.current[key];
+        return (prev ?? "") === next ? [] : [{ key, prev, next }];
+      });
+      if (!changes.length) return;
+      record({ type: "cell", changes });
+      setCellData((data) => ({ ...data, ...values }));
+    },
+    [finishEdit, isReadOnly, isSavePending, record],
+  );
+
   // Keyboard shortcuts (global - for undo/redo/find-replace)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.isComposing ||
+        composingRef.current ||
+        !(e.target instanceof HTMLElement) ||
+        !tableRef.current?.contains(e.target)
+      )
+        return;
       // Allow Ctrl/Cmd combinations
       const isCtrlCombo = (e.metaKey || e.ctrlKey) && !e.altKey;
+      const key = e.key.toLowerCase();
 
       if (isCtrlCombo) {
-        if (e.key === "z") {
+        if (key === "z") {
           if (isReadOnly) return;
           e.preventDefault();
+          if (editingCellRef.current) {
+            finishEdit(true);
+            return;
+          }
           if (e.shiftKey) {
             redo();
           } else {
             undo();
           }
           return;
-        } else if (e.key === "y") {
+        } else if (key === "y") {
           if (isReadOnly) return;
+          if (editingCellRef.current) return;
           e.preventDefault();
           redo();
           return;
-        } else if (e.key === "r") {
+        } else if (key === "r") {
           if (isReadOnly) return;
           e.preventDefault();
+          finishEdit();
           setShowFindReplace(true);
           return;
         }
@@ -950,7 +1039,7 @@ export function ProductSpecificationDataTable({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo, isReadOnly]);
+  }, [undo, redo, isReadOnly, finishEdit]);
 
   // Handle onSaveSuccess callback - register clearHistory with parent
   useEffect(() => {
@@ -958,96 +1047,6 @@ export function ProductSpecificationDataTable({
       onSaveSuccess(clearHistory);
     }
   }, [onSaveSuccess, clearHistory]);
-
-  const applyBgColor = useCallback(
-    (color: string) => {
-      if (isReadOnly) return;
-
-      const changes: Array<{
-        key: string;
-        prev: CellFormat | undefined;
-        next: CellFormat;
-      }> = [];
-      if (selectedCells.size === 0 && activeCell) {
-        const key = `${activeCell.row},${activeCell.col}`;
-        const prev = cellFormats[key];
-        const next = {
-          ...prev,
-          bgColor: color === NO_FILL_COLOR ? undefined : color,
-        };
-        changes.push({ key, prev, next });
-        setCellFormats((f) => ({ ...f, [key]: next }));
-      } else {
-        selectedCells.forEach((key) => {
-          const prev = cellFormats[key];
-          const next = {
-            ...prev,
-            bgColor: color === NO_FILL_COLOR ? undefined : color,
-          };
-          changes.push({ key, prev, next });
-        });
-        setCellFormats((f) => {
-          const updated = { ...f };
-          selectedCells.forEach((key) => {
-            updated[key] = {
-              ...updated[key],
-              bgColor: color === NO_FILL_COLOR ? undefined : color,
-            };
-          });
-          return updated;
-        });
-      }
-      if (changes.length > 0) {
-        record({ type: "cellFormat", changes });
-      }
-    },
-    [selectedCells, activeCell, cellFormats, isReadOnly, record],
-  );
-
-  const applyTextColor = useCallback(
-    (color: string) => {
-      if (isReadOnly) return;
-
-      const changes: Array<{
-        key: string;
-        prev: CellFormat | undefined;
-        next: CellFormat;
-      }> = [];
-      if (selectedCells.size === 0 && activeCell) {
-        const key = `${activeCell.row},${activeCell.col}`;
-        const prev = cellFormats[key];
-        const next = {
-          ...prev,
-          textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
-        };
-        changes.push({ key, prev, next });
-        setCellFormats((f) => ({ ...f, [key]: next }));
-      } else {
-        selectedCells.forEach((key) => {
-          const prev = cellFormats[key];
-          const next = {
-            ...prev,
-            textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
-          };
-          changes.push({ key, prev, next });
-        });
-        setCellFormats((f) => {
-          const updated = { ...f };
-          selectedCells.forEach((key) => {
-            updated[key] = {
-              ...updated[key],
-              textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
-            };
-          });
-          return updated;
-        });
-      }
-      if (changes.length > 0) {
-        record({ type: "cellFormat", changes });
-      }
-    },
-    [selectedCells, activeCell, cellFormats, isReadOnly, record],
-  );
 
   const selectionKeys = useMemo(
     () => getWorkbookSelectionKeys(selectedCells, activeCell),
@@ -1071,11 +1070,33 @@ export function ProductSpecificationDataTable({
     [selectionKeys, cellFormats, workbookTheme, textColors],
   );
 
-  const rows: { rowIndex: number }[] = useMemo(() => {
-    return Array.from({ length: ROW_COUNT }, (_, i) => ({
-      rowIndex: i,
+  const applyCellFormat = (getFormat: (key: string) => Partial<CellFormat>) => {
+    if (isReadOnly || isSavePending?.()) return;
+    finishEdit();
+    const changes = selectionKeys.flatMap((key) => {
+      const prev = cellFormats[key];
+      const next = { ...prev, ...getFormat(key) };
+      return JSON.stringify(prev ?? {}) === JSON.stringify(next)
+        ? []
+        : [{ key, prev, next }];
+    });
+    if (!changes.length) return;
+    record({ type: "cellFormat", changes });
+    setCellFormats((data) => ({
+      ...data,
+      ...Object.fromEntries(changes.map(({ key, next }) => [key, next])),
     }));
-  }, []);
+  };
+
+  // Refresh TanStack's cached accessor values after a committed value change.
+  const rows = useMemo(
+    () =>
+      Array.from({ length: ROW_COUNT }, (_, rowIndex) => ({
+        rowIndex,
+        values: cellData,
+      })),
+    [cellData],
+  );
 
   const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
     return Array.from({ length: COLUMN_COUNT }, (_, colIndex) => ({
@@ -1106,15 +1127,11 @@ export function ProductSpecificationDataTable({
       row: Row<{ rowIndex: number }>,
       _columnId: string,
       filterValue: {
-        search: string;
         columnFilters: Record<number, ColumnFilter>;
       },
     ) => {
       const rowIndex = row.original.rowIndex;
-      const { search, columnFilters: filters } = filterValue || {
-        search: "",
-        columnFilters: {},
-      };
+      const { columnFilters: filters } = filterValue || { columnFilters: {} };
 
       for (const [colIndexStr, filter] of Object.entries(filters)) {
         const colIndex = parseInt(colIndexStr);
@@ -1122,20 +1139,14 @@ export function ProductSpecificationDataTable({
         if (!applyFilter(cellValue, filter)) return false;
       }
 
-      if (!search) return true;
-      const searchTerm = search.toLowerCase();
-      for (let col = 0; col < COLUMN_COUNT; col++) {
-        const cellValue = cellData[`${rowIndex},${col}`];
-        if (cellValue?.toLowerCase().includes(searchTerm)) return true;
-      }
-      return false;
+      return true;
     },
     [cellData],
   );
 
   const globalFilterValue = useMemo(
-    () => ({ search: debouncedSearch, columnFilters }),
-    [debouncedSearch, columnFilters],
+    () => ({ columnFilters, cellData }),
+    [columnFilters, cellData],
   );
 
   const table = useReactTable({
@@ -1199,38 +1210,46 @@ export function ProductSpecificationDataTable({
 
   const columnSizes = table.getVisibleLeafColumns().map((col) => col.getSize());
 
-  const handlePaste = useCallback(
-    (e: React.ClipboardEvent, rowIndex: number, colIndex: number) => {
-      if (isReadOnly) return;
+  const handlePaste = (e: React.ClipboardEvent, vRow: number, vCol: number) => {
+    if (isReadOnly || isSavePending?.()) {
       e.preventDefault();
+      return;
+    }
+    try {
+      const html = e.clipboardData.getData("text/html");
       const text = e.clipboardData.getData("text/plain");
-      const pastedRows = text.split("\n").map((r) => r.split("\t"));
-
-      const changes: Array<{
-        key: string;
-        prev: string | undefined;
-        next: string;
-      }> = [];
-      setCellData((d) => {
-        const updated = { ...d };
-        pastedRows.forEach((cols, ri) => {
-          cols.forEach((val, ci) => {
-            const key = `${rowIndex + ri},${colIndex + ci}`;
-            if (d[key] !== val) {
-              changes.push({ key, prev: d[key], next: val });
-              updated[key] = val;
-            }
-          });
-        });
-        return updated;
-      });
-
-      if (changes.length > 0) {
-        record({ type: "cell", changes });
+      const pastedRows = parseWorkbookClipboard(html, text);
+      if (
+        editingCellRef.current &&
+        pastedRows.length === 1 &&
+        pastedRows[0]?.length === 1
+      )
+        return;
+      e.preventDefault();
+      if (
+        vRow + pastedRows.length > tableRows.length ||
+        vCol + (pastedRows[0]?.length ?? 0) > visibleColumns.length
+      ) {
+        toast.error(
+          "The pasted cells exceed the visible grid. Choose a smaller range or clear column filters.",
+        );
+        return;
       }
-    },
-    [isReadOnly, record],
-  );
+      const values: Record<string, string> = {};
+      pastedRows.forEach((row, r) =>
+        row.forEach((value, c) => {
+          values[visualCellKey(vRow + r, vCol + c)] = value;
+        }),
+      );
+      applyValues(values);
+      setSelectedCells(new Set(Object.keys(values)));
+    } catch (error) {
+      e.preventDefault();
+      toast.error(
+        error instanceof Error ? error.message : "Could not paste cells",
+      );
+    }
+  };
 
   function handleDragEnd(event: DragEndEvent) {
     if (isReadOnly) return;
@@ -1286,12 +1305,24 @@ export function ProductSpecificationDataTable({
         );
         return;
       }
-      const { headers, columnTypes, cells } = parseWorkbookToTableData(buffer);
+      const {
+        headers,
+        columnTypes,
+        cells,
+        cellFormats: formats,
+      } = parseWorkbookToTableData(buffer);
 
       setHeaderData(headers);
       setColumnTypeData(columnTypes);
       setCellData(cells);
-      setCellFormats({});
+      setCellFormats(formats ?? {});
+      setColumnOrder(
+        Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
+      );
+      setSelectedCells(new Set());
+      setActiveCell(null);
+      setSelectionStartVisual(null);
+      clearHistory();
     } catch (err) {
       console.error("Import failed:", err);
       toast.error(err instanceof Error ? err.message : "Failed to import file");
@@ -1319,6 +1350,8 @@ export function ProductSpecificationDataTable({
           headers: headerData,
           columnTypes: columnTypeData,
           cells: cellData,
+          cellFormats,
+          columnOrder,
           columnCount: COLUMN_COUNT,
         },
         filename,
@@ -1380,6 +1413,14 @@ export function ProductSpecificationDataTable({
       const rowIndex = row.original.rowIndex;
       const colIndex = parseInt(col.id.split("-")[1]);
       const cellKey = `${rowIndex},${colIndex}`;
+      if (
+        editingCellRef.current === cellKey &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey
+      )
+        return;
+      finishEdit();
 
       if (e.ctrlKey || e.metaKey) {
         // Prevent default to avoid context menu on Mac with Ctrl+Click
@@ -1393,6 +1434,7 @@ export function ProductSpecificationDataTable({
         setSelectedCells(newSelected);
         setSelectionStartVisual({ row: vRow, col: vCol });
         setActiveCell({ row: rowIndex, col: colIndex });
+        pendingFocusRef.current = cellKey;
       } else if (e.shiftKey && selectionStartVisual) {
         e.preventDefault();
         const minVRow = Math.min(selectionStartVisual.row, vRow);
@@ -1410,6 +1452,7 @@ export function ProductSpecificationDataTable({
         }
         setSelectedCells(newSelection);
         setActiveCell({ row: rowIndex, col: colIndex });
+        pendingFocusRef.current = cellKey;
       } else {
         // Normal click - single selection (let default focus behavior proceed)
         setSelectedCells(new Set([cellKey]));
@@ -1417,77 +1460,329 @@ export function ProductSpecificationDataTable({
         setActiveCell({ row: rowIndex, col: colIndex });
       }
     },
-    [selectionStartVisual, selectedCells, tableRows, visibleColumns],
+    [
+      selectionStartVisual,
+      selectedCells,
+      tableRows,
+      visibleColumns,
+      finishEdit,
+    ],
   );
 
-  // Move to adjacent cell and focus it (using visual indices)
-  const moveToCellAndFocus = useCallback(
-    (
-      currentVRow: number,
-      currentVCol: number,
-      direction: "up" | "down" | "left" | "right",
-    ) => {
-      let newVRow = currentVRow;
-      let newVCol = currentVCol;
+  function visualCellKey(row: number, col: number) {
+    return `${tableRows[row].original.rowIndex},${visibleColumns[col].id.split("-")[1]}`;
+  }
 
-      switch (direction) {
-        case "up":
-          newVRow = Math.max(0, currentVRow - 1);
-          break;
-        case "down":
-          newVRow = Math.min(tableRows.length - 1, currentVRow + 1);
-          break;
-        case "left":
-          newVCol = Math.max(0, currentVCol - 1);
-          break;
-        case "right":
-          newVCol = Math.min(visibleColumns.length - 1, currentVCol + 1);
-          break;
+  const focusVisualCell = (row: number, col: number, extend = false) => {
+    if (!tableRows.length || !visibleColumns.length) return;
+    row = Math.max(0, Math.min(row, tableRows.length - 1));
+    col = Math.max(0, Math.min(col, visibleColumns.length - 1));
+    const key = visualCellKey(row, col);
+    const [originalRow, originalCol] = key.split(",").map(Number);
+    const anchor =
+      selectionStartVisual ??
+      (activeCell
+        ? {
+            row: rowPositions.get(activeCell.row) ?? row,
+            col: colPositions.get(activeCell.col) ?? col,
+          }
+        : null);
+    if (extend && anchor) {
+      setSelectionStartVisual(anchor);
+      const keys = new Set<string>();
+      for (
+        let r = Math.min(row, anchor.row);
+        r <= Math.max(row, anchor.row);
+        r++
+      ) {
+        for (
+          let c = Math.min(col, anchor.col);
+          c <= Math.max(col, anchor.col);
+          c++
+        )
+          keys.add(visualCellKey(r, c));
       }
+      setSelectedCells(keys);
+    } else {
+      setSelectedCells(new Set([key]));
+      setSelectionStartVisual({ row, col });
+    }
+    setActiveCell({ row: originalRow, col: originalCol });
+    pendingFocusRef.current = key;
+    const viewport = parentRef.current;
+    if (viewport) {
+      const top = row * ROW_HEIGHT + ROW_HEIGHT * 2;
+      const left = columnSizes
+        .slice(0, col)
+        .reduce((sum, size) => sum + size, ROW_NUMBER_WIDTH);
+      if (top < viewport.scrollTop + ROW_HEIGHT * 2)
+        viewport.scrollTop = top - ROW_HEIGHT * 2;
+      else if (top + ROW_HEIGHT > viewport.scrollTop + viewport.clientHeight)
+        viewport.scrollTop = top + ROW_HEIGHT - viewport.clientHeight;
+      if (left < viewport.scrollLeft + ROW_NUMBER_WIDTH)
+        viewport.scrollLeft = left - ROW_NUMBER_WIDTH;
+      else if (
+        left + columnSizes[col] >
+        viewport.scrollLeft + viewport.clientWidth
+      )
+        viewport.scrollLeft = left + columnSizes[col] - viewport.clientWidth;
+    }
+  };
 
-      if (newVRow !== currentVRow || newVCol !== currentVCol) {
-        const row = tableRows[newVRow];
-        const col = visibleColumns[newVCol];
-        const rowIndex = row.original.rowIndex;
-        const colIndex = parseInt(col.id.split("-")[1]);
-        const cellKey = `${rowIndex},${colIndex}`;
+  // Virtualizers render synchronously. Retry focus after scrolling mounts the target.
+  useLayoutEffect(() => {
+    let frame = 0;
+    let attempts = 0;
+    const focus = () => {
+      const key = pendingFocusRef.current;
+      if (!key) return;
+      const input = tableRef.current?.querySelector<HTMLInputElement>(
+        `input[data-cell-key="${key}"]`,
+      );
+      if (input) {
+        input.focus({ preventScroll: true });
+        pendingFocusRef.current = null;
+      } else if (++attempts < 8) frame = requestAnimationFrame(focus);
+    };
+    focus();
+    return () => cancelAnimationFrame(frame);
+  });
 
-        setSelectedCells(new Set([cellKey]));
-        setSelectionStartVisual({ row: newVRow, col: newVCol });
-        setActiveCell({ row: rowIndex, col: colIndex });
-
-        // Only scroll if the target cell is not currently visible/rendered
-        const isRowVisible = rowVirtualizer
-          .getVirtualItems()
-          .some((item) => item.index === newVRow);
-        const isColVisible = colVirtualizer
-          .getVirtualItems()
-          .some((item) => item.index === newVCol);
-
-        if (!isRowVisible) {
-          rowVirtualizer.scrollToIndex(newVRow, { align: "auto" });
-        }
-        if (!isColVisible) {
-          colVirtualizer.scrollToIndex(newVCol, { align: "auto" });
-        }
-
-        // Focus the new cell input after state update and potential scroll
-        requestAnimationFrame(() => {
-          const newCellInput = tableRef.current?.querySelector(
-            `input[data-cell-key="${cellKey}"]`,
-          ) as HTMLInputElement | null;
-          // preventScroll: true is critical to stop browser-native jumpy scrolling
-          newCellInput?.focus({ preventScroll: true });
-        });
-      }
-    },
-    [tableRows, visibleColumns, rowVirtualizer, colVirtualizer],
+  const rowPositions = useMemo(
+    () =>
+      new Map(tableRows.map((row, index) => [row.original.rowIndex, index])),
+    [tableRows],
   );
+  const colPositions = useMemo(
+    () =>
+      new Map(
+        visibleColumns.map((col, index) => [
+          Number(col.id.split("-")[1]),
+          index,
+        ]),
+      ),
+    [visibleColumns],
+  );
+  const searchMatches = useMemo(() => {
+    if (!debouncedSearch) return [];
+    const query = debouncedSearch.toLowerCase();
+    return Object.entries(cellData)
+      .flatMap(([key, value]) => {
+        if (!value.toLowerCase().includes(query)) return [];
+        const [row, col] = key.split(",").map(Number);
+        const r = rowPositions.get(row);
+        const c = colPositions.get(col);
+        return r === undefined || c === undefined
+          ? []
+          : [{ key, row: r, col: c }];
+      })
+      .sort((a, b) => a.row - b.row || a.col - b.col);
+  }, [debouncedSearch, cellData, rowPositions, colPositions]);
+  const searchMatchKeys = useMemo(
+    () => new Set(searchMatches.map(({ key }) => key)),
+    [searchMatches],
+  );
+  const activeMatchIndex = searchMatches.findIndex(
+    ({ key }) => key === activeSearchKey,
+  );
+  const navigateSearch = (step: number) => {
+    if (!searchMatches.length) return;
+    finishEdit();
+    const index =
+      activeMatchIndex < 0
+        ? step > 0
+          ? 0
+          : searchMatches.length - 1
+        : (activeMatchIndex + step + searchMatches.length) %
+          searchMatches.length;
+    const match = searchMatches[index];
+    setActiveSearchKey(match.key);
+    focusVisualCell(match.row, match.col);
+  };
+
+  useEffect(() => {
+    const isVisible = (key: string) => {
+      const [row, col] = key.split(",").map(Number);
+      return rowPositions.has(row) && colPositions.has(col);
+    };
+    setActiveCell((cell) =>
+      cell && !isVisible(`${cell.row},${cell.col}`) ? null : cell,
+    );
+    setSelectedCells((keys) => {
+      const next = new Set([...keys].filter(isVisible));
+      return next.size === keys.size ? keys : next;
+    });
+  }, [rowPositions, colPositions]);
+
+  useEffect(() => {
+    setSelectionStartVisual(null);
+  }, [columnFilters, columnOrder, sorting]);
+
+  type FillRange = { top: number; bottom: number; left: number; right: number };
+  const selectionBounds = useMemo<FillRange | null>(() => {
+    if (!selectedCells.size) return null;
+    let top = Infinity,
+      bottom = -1,
+      left = Infinity,
+      right = -1;
+    for (const key of selectedCells) {
+      const [r, c] = key.split(",").map(Number);
+      const row = rowPositions.get(r),
+        col = colPositions.get(c);
+      if (row === undefined || col === undefined) return null;
+      top = Math.min(top, row);
+      bottom = Math.max(bottom, row);
+      left = Math.min(left, col);
+      right = Math.max(right, col);
+    }
+    return (bottom - top + 1) * (right - left + 1) === selectedCells.size
+      ? { top, bottom, left, right }
+      : null;
+  }, [selectedCells, rowPositions, colPositions]);
+  const [fillSource, setFillSource] = useState<FillRange | null>(null);
+  const [fillPreview, setFillPreview] = useState<FillRange | null>(null);
+  const fillContextRef = useRef<{
+    pointerId: number;
+    rows: number[];
+    cols: number[];
+    values: Record<string, string>;
+    widths: number[];
+  } | null>(null);
+
+  useEffect(() => {
+    if (!fillSource || !fillContextRef.current || isReadOnly) return;
+    const context = fillContextRef.current;
+    const keyAt = (r: number, c: number) =>
+      `${context.rows[r]},${context.cols[c]}`;
+    const viewport = parentRef.current;
+    if (!viewport) return;
+    let preview = fillSource;
+    let axis: "row" | "col" = "row";
+    let pointer: { x: number; y: number } | null = null;
+    let frame = 0;
+    const update = () => {
+      if (!pointer) return;
+      const rect = viewport.getBoundingClientRect();
+      const x = pointer.x - rect.left;
+      const y = pointer.y - rect.top;
+      if (y > rect.height - 28) viewport.scrollTop += 18;
+      else if (y < ROW_HEIGHT * 2 + 20) viewport.scrollTop -= 18;
+      if (x > rect.width - 28) viewport.scrollLeft += 18;
+      else if (x < ROW_NUMBER_WIDTH + 20) viewport.scrollLeft -= 18;
+      const row = Math.max(
+        fillSource.bottom,
+        Math.min(
+          context.rows.length - 1,
+          Math.floor((y + viewport.scrollTop - ROW_HEIGHT * 2) / ROW_HEIGHT),
+        ),
+      );
+      let offset = ROW_NUMBER_WIDTH;
+      let col = context.widths.findIndex((width) => {
+        offset += width;
+        return x + viewport.scrollLeft < offset;
+      });
+      if (col < 0) col = context.widths.length - 1;
+      col = Math.max(fillSource.right, col);
+      axis = row - fillSource.bottom >= col - fillSource.right ? "row" : "col";
+      const next = {
+        ...fillSource,
+        bottom: axis === "row" ? row : fillSource.bottom,
+        right: axis === "col" ? col : fillSource.right,
+      };
+      if (preview.bottom !== next.bottom || preview.right !== next.right) {
+        preview = next;
+        setFillPreview(next);
+      }
+    };
+    const tick = () => {
+      update();
+      frame = requestAnimationFrame(tick);
+    };
+    const move = (event: PointerEvent) => {
+      if (event.pointerId !== context.pointerId) return;
+      pointer = { x: event.clientX, y: event.clientY };
+      update();
+    };
+    const cleanup = () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", complete);
+      window.removeEventListener("pointercancel", cancel);
+      window.removeEventListener("blur", cancel);
+      window.removeEventListener("keydown", cancelOnKey);
+    };
+    const cancel = () => {
+      cleanup();
+      setFillSource(null);
+      setFillPreview(null);
+    };
+    const cancelOnKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancel();
+      }
+    };
+    const complete = (event: PointerEvent) => {
+      if (event.pointerId !== context.pointerId) return;
+      cleanup();
+      if (!importGuardRef.current.isReadOnly && !isSavePending?.()) {
+        const values: Record<string, string> = {};
+        const keys = new Set<string>();
+        const lanes = new Map<number, (index: number) => string>();
+        for (let r = preview.top; r <= preview.bottom; r++) {
+          for (let c = preview.left; c <= preview.right; c++) {
+            const key = keyAt(r, c);
+            keys.add(key);
+            if (r <= fillSource.bottom && c <= fillSource.right) continue;
+            const lane = axis === "row" ? c : r;
+            if (!lanes.has(lane)) {
+              const seeds =
+                axis === "row"
+                  ? context.rows
+                      .slice(fillSource.top, fillSource.bottom + 1)
+                      .map(
+                        (_, i) =>
+                          context.values[keyAt(fillSource.top + i, c)] ?? "",
+                      )
+                  : context.cols
+                      .slice(fillSource.left, fillSource.right + 1)
+                      .map(
+                        (_, i) =>
+                          context.values[keyAt(r, fillSource.left + i)] ?? "",
+                      );
+              lanes.set(lane, createWorkbookFill(seeds));
+            }
+            values[key] = lanes.get(lane)!(
+              axis === "row" ? r - fillSource.top : c - fillSource.left,
+            );
+          }
+        }
+        applyValues(values);
+        setSelectedCells(keys);
+      }
+      setFillSource(null);
+      setFillPreview(null);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", complete);
+    window.addEventListener("pointercancel", cancel);
+    window.addEventListener("blur", cancel);
+    window.addEventListener("keydown", cancelOnKey);
+    frame = requestAnimationFrame(tick);
+    return cleanup;
+    // Keep the visible-coordinate snapshot stable for this drag.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fillSource, isReadOnly, resetKey]);
+
+  useEffect(() => {
+    setFillSource(null);
+    setFillPreview(null);
+  }, [sorting, columnFilters, columnOrder, resetKey, isReadOnly]);
 
   return (
     <div className="flex flex-col flex-1 min-h-0 min-w-0">
       {/* Formatting Toolbar */}
-      <div className="flex items-center gap-2 px-2 h-10 border-b border-border bg-muted/50 shrink-0">
+      <div className="flex flex-wrap items-center gap-2 p-2 border-b border-border bg-muted/50 shrink-0">
         <WorkbookColorPopover
           icon={PaintBucketIcon}
           label="Fill color"
@@ -1496,7 +1791,11 @@ export function ProductSpecificationDataTable({
           isMixed={selectionFillState.isMixed}
           disabled={isReadOnly}
           variant="fill"
-          onSelect={applyBgColor}
+          onSelect={(color) =>
+            applyCellFormat(() => ({
+              bgColor: color === NO_FILL_COLOR ? undefined : color,
+            }))
+          }
         />
         <WorkbookColorPopover
           icon={TextSquareIcon}
@@ -1506,7 +1805,32 @@ export function ProductSpecificationDataTable({
           isMixed={selectionTextState.isMixed}
           disabled={isReadOnly}
           variant="text"
-          onSelect={applyTextColor}
+          onSelect={(color) =>
+            applyCellFormat(() => ({
+              textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
+            }))
+          }
+        />
+        <WorkbookTextFormatToolbar
+          formats={selectionKeys.map((key) => cellFormats[key] ?? {})}
+          disabled={isReadOnly || !selectionKeys.length}
+          onFormat={(format) => applyCellFormat(() => format)}
+          onDecimals={(change) =>
+            applyCellFormat((key) => {
+              const raw = cellData[key] ?? "";
+              if (workbookNumber(raw) === undefined) return {};
+              return {
+                decimalPlaces: Math.max(
+                  0,
+                  Math.min(
+                    MAX_DECIMAL_PLACES,
+                    (cellFormats[key]?.decimalPlaces ??
+                      workbookDecimalPlaces(raw)) + change,
+                  ),
+                ),
+              };
+            })
+          }
         />
         {selectedCells.size > 1 && (
           <>
@@ -1558,7 +1882,16 @@ export function ProductSpecificationDataTable({
             aria-label="Search table"
             placeholder="Search…"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setActiveSearchKey(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                navigateSearch(e.shiftKey ? -1 : 1);
+              }
+            }}
             className=" text-xs"
           />
           <InputGroupAddon className="pl-2">
@@ -1580,6 +1913,33 @@ export function ProductSpecificationDataTable({
           )}
         </InputGroup>
 
+        <span
+          className="text-xs text-muted-foreground whitespace-nowrap"
+          role="status"
+          aria-live="polite"
+        >
+          {debouncedSearch
+            ? `${activeMatchIndex < 0 ? 0 : activeMatchIndex + 1} / ${searchMatches.length} matches`
+            : ""}
+        </span>
+        <Button
+          variant="outline"
+          size="icon-xs"
+          aria-label="Previous search match"
+          disabled={!searchMatches.length}
+          onClick={() => navigateSearch(-1)}
+        >
+          <Icon icon={ArrowUp01Icon} size={14} strokeWidth={2} />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon-xs"
+          aria-label="Next search match"
+          disabled={!searchMatches.length}
+          onClick={() => navigateSearch(1)}
+        >
+          <Icon icon={ArrowDown01Icon} size={14} strokeWidth={2} />
+        </Button>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -1723,7 +2083,9 @@ export function ProductSpecificationDataTable({
                   >
                     {colVirtualizer.getVirtualItems().map((virtualCol) => {
                       const column = visibleColumns[virtualCol.index];
-                      const originalColIndex = parseInt(column.id.split("-")[1]);
+                      const originalColIndex = parseInt(
+                        column.id.split("-")[1],
+                      );
                       const diff = isRedlineView
                         ? redlineDiffs.columnTypeDiffs[originalColIndex]
                         : undefined;
@@ -1874,6 +2236,14 @@ export function ProductSpecificationDataTable({
                             data-cell-key={cellKey}
                             aria-label={`Row ${rowIndex + 1}, column ${originalColIndex + 1}`}
                             readOnly={isReadOnly}
+                            onDoubleClick={() => startEdit(cellKey)}
+                            onCompositionStart={() => {
+                              composingRef.current = true;
+                              startEdit(cellKey);
+                            }}
+                            onCompositionEnd={() => {
+                              composingRef.current = false;
+                            }}
                             className={cn(
                               "h-full w-full border border-border/60 outline-none px-2 text-sm",
                               isSelected
@@ -1881,9 +2251,27 @@ export function ProductSpecificationDataTable({
                                 : "border-border",
                               showHighlightDiff && redlineHighlightBorder,
                               showInlineDiff && "caret-transparent",
+                              editingCell !== cellKey && "caret-transparent",
                             )}
                             style={{
-                              backgroundColor: resolvedBg || "var(--background)",
+                              backgroundColor:
+                                resolvedBg || "var(--background)",
+                              backgroundImage: searchMatchKeys.has(cellKey)
+                                ? "linear-gradient(hsl(45 95% 55% / 0.35), hsl(45 95% 55% / 0.35))"
+                                : undefined,
+                              outline:
+                                activeSearchKey === cellKey &&
+                                searchMatchKeys.has(cellKey)
+                                  ? "2px solid var(--primary)"
+                                  : undefined,
+                              outlineOffset: -2,
+                              fontWeight: format?.bold ? "bold" : undefined,
+                              fontStyle: format?.italic ? "italic" : undefined,
+                              textDecoration: format?.underline
+                                ? "underline"
+                                : undefined,
+                              fontSize: format?.fontSize,
+                              textAlign: format?.alignment,
                               boxShadow: showHighlightDiff
                                 ? getRedlineHighlightInsetShadow(workbookTheme)
                                 : undefined,
@@ -1895,17 +2283,18 @@ export function ProductSpecificationDataTable({
                                 : undefined,
                             }}
                             value={
-                              cellDraftRef.current[cellKey] ??
-                              cellData[cellKey] ??
-                              ""
+                              editingCell === cellKey
+                                ? editValue
+                                : formatWorkbookValue(
+                                    cellData[cellKey] ?? "",
+                                    format,
+                                  )
                             }
                             onChange={(e) => {
                               if (isReadOnly) return;
+                              startEdit(cellKey);
                               cellDraftRef.current[cellKey] = e.target.value;
-                              setCellData((d) => ({
-                                ...d,
-                                [cellKey]: e.target.value,
-                              }));
+                              setEditValue(e.target.value);
                             }}
                             onMouseDown={(e) =>
                               handleCellMouseDown(
@@ -1918,74 +2307,113 @@ export function ProductSpecificationDataTable({
                               if (e.ctrlKey || e.metaKey) e.preventDefault();
                             }}
                             onFocus={() => {
-                              cellInitialValueRef.current[cellKey] =
-                                cellData[cellKey];
                               setActiveCell({
                                 row: rowIndex,
                                 col: originalColIndex,
                               });
                             }}
                             onBlur={() => {
-                              if (isReadOnly) return;
-                              const prev = cellInitialValueRef.current[cellKey];
-                              const next =
-                                cellDraftRef.current[cellKey] ??
-                                cellData[cellKey];
-                              if (prev !== next) {
-                                record({
-                                  type: "cell",
-                                  changes: [{ key: cellKey, prev, next }],
-                                });
-                              }
-                              delete cellDraftRef.current[cellKey];
-                              delete cellInitialValueRef.current[cellKey];
+                              if (editingCellRef.current === cellKey)
+                                finishEdit();
                             }}
                             onKeyDown={(e) => {
-                              // Arrow key cell navigation
+                              if (
+                                e.nativeEvent.isComposing ||
+                                composingRef.current ||
+                                e.keyCode === 229
+                              )
+                                return;
+                              const editing =
+                                editingCellRef.current === cellKey;
+                              if (e.key === "Escape" && editing) {
+                                e.preventDefault();
+                                finishEdit(true);
+                                return;
+                              }
+                              if (e.key === "F2") {
+                                e.preventDefault();
+                                startEdit(cellKey);
+                                return;
+                              }
+                              if (e.key === "Enter" || e.key === "Tab") {
+                                e.preventDefault();
+                                finishEdit();
+                                let r = virtualRow.index;
+                                let c = virtualCol.index;
+                                const step = e.shiftKey ? -1 : 1;
+                                if (e.key === "Enter") r += step;
+                                else {
+                                  c += step;
+                                  if (
+                                    c >= visibleColumns.length &&
+                                    r < tableRows.length - 1
+                                  ) {
+                                    c = 0;
+                                    r++;
+                                  } else if (c < 0 && r > 0) {
+                                    c = visibleColumns.length - 1;
+                                    r--;
+                                  }
+                                }
+                                focusVisualCell(r, c);
+                                return;
+                              }
+                              if (editing) return;
                               if (
                                 [
                                   "ArrowUp",
                                   "ArrowDown",
                                   "ArrowLeft",
                                   "ArrowRight",
-                                ].includes(e.key)
+                                ].includes(e.key) &&
+                                !e.ctrlKey &&
+                                !e.metaKey &&
+                                !e.altKey
                               ) {
                                 e.preventDefault();
-                                const direction = e.key
-                                  .replace("Arrow", "")
-                                  .toLowerCase() as
-                                  | "up"
-                                  | "down"
-                                  | "left"
-                                  | "right";
-                                moveToCellAndFocus(
-                                  virtualRow.index,
-                                  virtualCol.index,
-                                  direction,
+                                focusVisualCell(
+                                  virtualRow.index +
+                                    (e.key === "ArrowUp"
+                                      ? -1
+                                      : e.key === "ArrowDown"
+                                        ? 1
+                                        : 0),
+                                  virtualCol.index +
+                                    (e.key === "ArrowLeft"
+                                      ? -1
+                                      : e.key === "ArrowRight"
+                                        ? 1
+                                        : 0),
+                                  e.shiftKey,
                                 );
                                 return;
                               }
-
-                              if (isReadOnly) return;
-
-                              if (e.key === "Enter") {
-                                const prev = cellInitialValueRef.current[cellKey];
-                                const next =
-                                  cellDraftRef.current[cellKey] ??
-                                  cellData[cellKey];
-                                if (prev !== next) {
-                                  record({
-                                    type: "cell",
-                                    changes: [{ key: cellKey, prev, next }],
-                                  });
-                                }
-                                delete cellDraftRef.current[cellKey];
-                                // Re-capture initial value for subsequent edits
-                                cellInitialValueRef.current[cellKey] = next;
+                              if (isReadOnly || isSavePending?.()) return;
+                              if (e.key === "Delete" || e.key === "Backspace") {
+                                e.preventDefault();
+                                const keys = selectionKeys.filter((key) => {
+                                  const [r, c] = key.split(",").map(Number);
+                                  return (
+                                    rowPositions.has(r) && colPositions.has(c)
+                                  );
+                                });
+                                applyValues(
+                                  Object.fromEntries(
+                                    keys.map((key) => [key, ""]),
+                                  ),
+                                );
+                              } else if (
+                                e.key.length === 1 &&
+                                !e.ctrlKey &&
+                                !e.metaKey &&
+                                !e.altKey
+                              ) {
+                                e.preventDefault();
+                                startEdit(cellKey, e.key);
                               }
                             }}
                             onPaste={(e) =>
-                              handlePaste(e, rowIndex, originalColIndex)
+                              handlePaste(e, virtualRow.index, virtualCol.index)
                             }
                           />
                         );
@@ -2015,6 +2443,44 @@ export function ProductSpecificationDataTable({
                               input
                             )}
 
+                            {fillPreview &&
+                              virtualRow.index >= fillPreview.top &&
+                              virtualRow.index <= fillPreview.bottom &&
+                              virtualCol.index >= fillPreview.left &&
+                              virtualCol.index <= fillPreview.right && (
+                                <div className="pointer-events-none absolute inset-0 border border-primary bg-primary/15" />
+                              )}
+                            {!isReadOnly &&
+                              !editingCell &&
+                              selectionBounds?.bottom === virtualRow.index &&
+                              selectionBounds.right === virtualCol.index && (
+                                <button
+                                  type="button"
+                                  aria-label="Drag to autofill selected cells"
+                                  title="Drag down or right to fill"
+                                  className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 touch-none cursor-crosshair border border-background bg-primary"
+                                  onPointerDown={(e) => {
+                                    if (e.button !== 0 || isSavePending?.())
+                                      return;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    finishEdit();
+                                    fillContextRef.current = {
+                                      pointerId: e.pointerId,
+                                      rows: tableRows.map(
+                                        (row) => row.original.rowIndex,
+                                      ),
+                                      cols: visibleColumns.map((col) =>
+                                        Number(col.id.split("-")[1]),
+                                      ),
+                                      values: cellDataRef.current,
+                                      widths: columnSizes,
+                                    };
+                                    setFillSource(selectionBounds);
+                                    setFillPreview(selectionBounds);
+                                  }}
+                                />
+                              )}
                             {showInlineDiff && diff && (
                               <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
                                 <DiffValueDisplay

@@ -10,7 +10,7 @@ export function sparseProductSpecDataForDatabase(
   cellData: Record<string, string>,
   cellFormats: Record<string, CellFormat>,
   columnOrder: string[],
-  columnSizing: Record<string, number>
+  columnSizing: Record<string, number>,
 ): ProductDataTableSchema {
   const headers: Record<number, string> = {};
   Object.entries(headerData).forEach(([key, value]) => {
@@ -35,7 +35,7 @@ export function sparseProductSpecDataForDatabase(
 
   const formats: Record<string, CellFormat> = {};
   Object.entries(cellFormats).forEach(([key, value]) => {
-    if (value.bgColor || value.textColor) {
+    if (Object.values(value).some((property) => property !== undefined)) {
       formats[key] = value;
     }
   });
@@ -97,7 +97,7 @@ export function normalizeWorkbookForComparison(
 }
 
 export function parseProductSpecDataFromDatabase(
-  schema: ProductDataTableSchema | undefined
+  schema: ProductDataTableSchema | undefined,
 ): {
   headerData: Record<number, string>;
   columnTypeData: Record<number, DataType>;
