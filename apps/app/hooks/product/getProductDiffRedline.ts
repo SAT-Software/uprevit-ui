@@ -17,13 +17,15 @@ async function fetchProductData(
   {
     signal,
     auth,
+    workbooks = true,
   }: {
     signal: AbortSignal;
     auth: AuthContextProps;
+    workbooks?: boolean;
   }
 ) {
   const response = await fetch(
-    `/api/products/productData?id=${productId}&tab=all-tabs`,
+    `/api/products/productData?id=${productId}&tab=all-tabs${workbooks ? "" : "&workbooks=false"}`,
     {
       headers: {
         Authorization: `Bearer ${auth?.user?.access_token}`,
@@ -37,7 +39,56 @@ async function fetchProductData(
     throw new Error(text || "Failed to fetch product data");
   }
   const data = (await response.json()) as { result?: { data?: AllTabsData } };
-  return data?.result?.data ?? null;
+  if (!data.result?.data) throw new Error("This product version is unavailable");
+  return data.result.data;
+}
+
+const imageTabs = ["symbols_graphics", "label_components", "label_tags"] as const;
+
+async function resolveImageRowParents(
+  current: AllTabsData,
+  base: AllTabsData,
+  compareVersionId: string,
+  signal: AbortSignal,
+  auth: AuthContextProps,
+): Promise<AllTabsData> {
+  const parents = new Map<string, string>();
+  const rememberParents = (version: AllTabsData) => {
+    for (const tab of imageTabs) {
+      for (const row of version[tab].data) {
+        const parentId = (row as { parent_id?: string }).parent_id;
+        if (row._id && parentId) parents.set(row._id, parentId);
+      }
+    }
+  };
+  rememberParents(current);
+
+  let parentId = current.product_information.product_data.data.parent_id;
+  const visited = new Set<string>();
+  while (parentId && parentId !== compareVersionId && !visited.has(parentId)) {
+    visited.add(parentId);
+    const version = await fetchProductData(parentId, { signal, auth, workbooks: false });
+    rememberParents(version);
+    parentId = version.product_information.product_data.data.parent_id;
+  }
+  if (parentId !== compareVersionId) return current;
+
+  const result = { ...current };
+  for (const tab of imageTabs) {
+    const baseIds = new Set(base[tab].data.map((row) => row._id));
+    const data = current[tab].data.map((row) => {
+      let ancestor = row._id;
+      const seen = new Set<string>();
+      while (ancestor && !baseIds.has(ancestor) && !seen.has(ancestor)) {
+        seen.add(ancestor);
+        ancestor = parents.get(ancestor);
+      }
+      return ancestor && baseIds.has(ancestor) ? { ...row, parent_id: ancestor } : row;
+    });
+    // Each tab retains its own row shape; only comparison ancestry changes.
+    Object.assign(result, { [tab]: { ...current[tab], data } });
+  }
+  return result;
 }
 
 async function getProductDiffRedline({
@@ -60,12 +111,13 @@ async function getProductDiffRedline({
   // Compute diffs on the frontend
   // base_version = older version (compareVersion)
   // next_version = current/newer version
-  const diffs = deepDiff(compareData, currentData);
+  const nextData = await resolveImageRowParents(currentData, compareData, compareVersionId, signal, auth);
+  const diffs = deepDiff(compareData, nextData);
 
   return {
     result: {
       base_version: compareData,
-      next_version: currentData,
+      next_version: nextData,
       total_changes: diffs.length,
       diffs,
     },
@@ -100,5 +152,6 @@ export function useGetProductDiffRedline(
         compareVersionId: compareVersionId!,
       }),
     enabled: isEnabled,
+    retry: false,
   });
 }
