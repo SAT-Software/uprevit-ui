@@ -52,6 +52,8 @@ async function resolveImageRowParents(
   signal: AbortSignal,
   auth: AuthContextProps,
 ): Promise<AllTabsData> {
+  if (imageTabs.every((tab) => current[tab].data.length === 0)) return current;
+
   const parents = new Map<string, string>();
   const rememberParents = (version: AllTabsData) => {
     for (const tab of imageTabs) {
