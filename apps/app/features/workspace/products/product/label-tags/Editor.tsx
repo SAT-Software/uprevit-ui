@@ -536,6 +536,15 @@ const Editor = ({
       <div className="relative min-h-0 min-w-0">
         <div
           ref={editorContainer}
+          onWheelCapture={(event) => {
+            if (
+              !event.ctrlKey &&
+              !event.metaKey &&
+              Math.abs(event.deltaY) >= Math.abs(event.deltaX)
+            ) {
+              event.stopPropagation();
+            }
+          }}
           className="flex h-full min-h-0 min-w-0 overflow-hidden bg-muted/20 **:bg-no-repeat"
         ></div>
         {showLegendOverlay && legendItems.length > 0 && (
