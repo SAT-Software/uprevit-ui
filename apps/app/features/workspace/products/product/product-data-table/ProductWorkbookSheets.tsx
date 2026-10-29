@@ -67,7 +67,7 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
   const [rename, setRename] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [deleteSheet, setDeleteSheet] = useState<string | null>(null);
-  const canEdit = !props.isReadOnly && !props.isSavePending?.();
+  const canEdit = !props.isReadOnly && !props.isRedlineView && !props.isSavePending?.();
   const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }));
   const clearers = useRef(new Map<string, () => void>());
   const loaded = useRef(!!props.initialData);
@@ -107,16 +107,25 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
   useEffect(() => {
     onSaveSuccess?.(() => clearers.current.forEach((clear) => clear()));
   }, [onSaveSuccess]);
+  const baseSheets: WorkbookSheet[] = props.redlineBaseData?.sheets ?? (props.redlineBaseData ? [{
+    id: "sheet-1", name: "Sheet1", data: {
+      headers: props.redlineBaseData.headerData,
+      columnTypes: Object.fromEntries(Object.entries(props.redlineBaseData.columnTypeData).filter(([, value]) => value !== "blank")) as ProductDataTableSchema["columnTypes"],
+      cells: props.redlineBaseData.cellData,
+    },
+  }] : []);
+  const displaySheets = props.isRedlineView ? [...sheets, ...baseSheets.filter((base) => !sheets.some((sheet) => sheet.id === base.id)).map((base) => ({ ...base, data: emptySheet() }))] : sheets;
   const candidate = name.trim();
   const error = !candidate ? "Enter a sheet name." : candidate.length > 31 ? "Use 31 characters or fewer." : /[\\/?:*\[\]]/.test(candidate) || candidate.startsWith("'") || candidate.endsWith("'") ? "Avoid \\ / ? : * [ ] and leading or trailing apostrophes." : sheets.some((sheet) => sheet.id !== rename && sheet.name.toLowerCase() === name.trim().toLowerCase()) ? "A sheet already uses this name." : null;
   return <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-    {sheets.map((sheet) => <div key={`${generation}-${sheet.id}`} className={sheet.id === active ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+    {displaySheets.map((sheet) => <div key={`${generation}-${sheet.id}`} className={sheet.id === active ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
       <StableWorkbookSheetGrid {...props}
+        isReadOnly={props.isReadOnly || props.isRedlineView}
         hasOtherSheets={sheets.length > 1}
         getWorkbookRevision={getWorkbookRevision}
         sheetData={sheet.data}
         onSelectionCountChange={(count) => setSelectionCounts((current) => current[sheet.id] === count ? current : { ...current, [sheet.id]: count })}
-        redlineBaseData={props.redlineBaseData?.sheets ? parseProductSpecDataFromDatabase(props.redlineBaseData.sheets.find((base) => base.id === sheet.id)?.data) : sheet.id === sheets[0].id ? props.redlineBaseData : undefined}
+        redlineBaseData={props.isRedlineView ? parseProductSpecDataFromDatabase(baseSheets.find((base) => base.id === sheet.id)?.data ?? emptySheet()) : undefined}
         onSaveSuccess={(clear) => clearers.current.set(sheet.id, clear)}
         onDataChange={(data) => {
           const cellFormats = Object.fromEntries(Object.entries(data.cellFormats ?? {}).map(([key, format]) => {
@@ -143,12 +152,12 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
     {scrollState.overflow && <Button size="icon-xs" variant="outline" className="shrink-0" aria-label="Scroll sheets left" disabled={!scrollState.left} onClick={() => scrollSheets(-1)}><Icon icon={ArrowLeft01Icon} size={14} /></Button>}
     <div ref={sheetScrollRef} onScroll={updateSheetScroll} className="min-w-0 flex-1 overflow-x-auto" aria-label="Workbook sheets">
     <div ref={sheetContentsRef} className="flex w-max items-center gap-1">
-      <SortableContext items={sheets.map((sheet) => sheet.id)} strategy={horizontalListSortingStrategy}>
-      {sheets.map((sheet, index) => <WorkbookSheetTab key={sheet.id} sheet={sheet} active={active === sheet.id} disabled={!canEdit} canDelete={sheets.length > 1} canMoveLeft={index > 0} canMoveRight={index < sheets.length - 1}
+      <SortableContext items={displaySheets.map((sheet) => sheet.id)} strategy={horizontalListSortingStrategy}>
+      {displaySheets.map((sheet, index) => <WorkbookSheetTab key={sheet.id} sheet={sheet} status={props.isRedlineView ? !sheets.some((current) => current.id === sheet.id) ? "Deleted" : !baseSheets.some((base) => base.id === sheet.id) ? "Added" : undefined : undefined} active={active === sheet.id} disabled={!canEdit} canDelete={sheets.length > 1} canMoveLeft={index > 0} canMoveRight={index < sheets.length - 1}
         onSelect={() => setActive(sheet.id)} onRename={() => openRename(sheet)} onDelete={() => setDeleteSheet(sheet.id)}
         onMove={(direction) => reorder(sheet.id, sheets[index + direction].id)} />)}
       </SortableContext>
-      {!props.isReadOnly && <>
+      {!props.isReadOnly && !props.isRedlineView && <>
         <Tooltip><TooltipTrigger asChild><Button size="icon-sm" variant="ghost" aria-label="Add sheet" disabled={props.isSavePending?.()} onClick={() => {
           let index = sheets.length + 1;
           while (sheets.some((sheet) => sheet.name.toLowerCase() === `sheet${index}`)) index++;
@@ -192,8 +201,8 @@ function StableWorkbookSheetGrid({ sheetData, ...props }: Omit<Parameters<typeof
   return <WorkbookSheetGrid {...props} initialData={initialData} />;
 }
 
-function WorkbookSheetTab({ sheet, active, disabled, canDelete, canMoveLeft, canMoveRight, onSelect, onRename, onDelete, onMove }: {
-  sheet: WorkbookSheet; active: boolean; disabled: boolean; canDelete: boolean; canMoveLeft: boolean; canMoveRight: boolean;
+function WorkbookSheetTab({ sheet, status, active, disabled, canDelete, canMoveLeft, canMoveRight, onSelect, onRename, onDelete, onMove }: {
+  sheet: WorkbookSheet; status?: "Added" | "Deleted"; active: boolean; disabled: boolean; canDelete: boolean; canMoveLeft: boolean; canMoveRight: boolean;
   onSelect: () => void; onRename: () => void; onDelete: () => void; onMove: (direction: -1 | 1) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sheet.id, disabled });
@@ -203,7 +212,7 @@ function WorkbookSheetTab({ sheet, active, disabled, canDelete, canMoveLeft, can
         style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : undefined }}
         {...attributes} {...listeners} aria-pressed={active} onClick={onSelect} onDoubleClick={onRename}
         onKeyDown={(event) => { if (event.key === "F2" && !disabled) { event.preventDefault(); onRename(); } }}>
-        {sheet.name}
+        {sheet.name}{status && <span className="text-xs text-muted-foreground">({status})</span>}
       </Button>
     </ContextMenuTrigger>
     <ContextMenuContent>

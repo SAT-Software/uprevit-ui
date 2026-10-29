@@ -185,9 +185,14 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
       const { r, c } = XLSX.utils.decode_cell(address);
       validateDataBoundaries(Math.max(0, r + 1 - offset), c + 1);
       maxRow = Math.max(maxRow, r); maxCol = Math.max(maxCol, c);
-      if (cell.c?.some((comment: XLSX.Comment) => comment.t?.includes("uprevit:date1904"))) format.date1904 = true;
-      const original = cell.c?.find((comment: XLSX.Comment) => comment.t?.startsWith(RAW_VALUE_NOTE_PREFIX))?.t?.slice(RAW_VALUE_NOTE_PREFIX.length).split("\nuprevit:")[0];
-      const value = original !== undefined && (format.dateFormat ? (workbookDateSerial(original, format.date1904) ?? NaN) + (format.date1904 ? 1462 : 0) === cell.v : workbookNumber(original) === cell.v) ? original : /^0{2,}$/.test(cell.z ?? "") ? cell.w ?? String(cell.v ?? "") : String(cell.v ?? "");
+      const workbookDate1904 = !!workbook.Workbook?.WBProps?.date1904;
+      const originalDate1904 = cell.c?.some((comment: XLSX.Comment) => comment.t?.includes("uprevit:date1904")) || workbookDate1904;
+      const original = cell.c?.map((comment: XLSX.Comment) => comment.t?.match(/(?:^|\n)[ \t]*uprevit:raw:([^\r\n]*)/)?.[1]).find((value: string | undefined) => value !== undefined);
+      const matchesOriginal = original !== undefined && (format.dateFormat
+        ? (workbookDateSerial(original, originalDate1904) ?? NaN) + (originalDate1904 ? 1462 : 0) === Number(cell.v) + (workbookDate1904 ? 1462 : 0)
+        : workbookNumber(original) === cell.v);
+      if (format.dateFormat) format.date1904 = matchesOriginal ? originalDate1904 : workbookDate1904;
+      const value = matchesOriginal ? original! : /^0{2,}$/.test(cell.z ?? "") ? cell.w ?? String(cell.v ?? "") : String(cell.v ?? "");
       if (r < offset) {
         if (Object.keys(format).length) headerRows.formats[`${r},${c}`] = format;
         if (r === 0 && value) headers[c] = value;
