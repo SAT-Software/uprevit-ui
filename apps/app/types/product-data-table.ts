@@ -1,4 +1,8 @@
 export interface CellFormat {
+  dateFormat?: string;
+  dateDisplay?: string;
+  dateRaw?: string;
+  date1904?: boolean;
   bgColor?: string;
   textColor?: string;
   decimalPlaces?: number;
@@ -7,11 +11,37 @@ export interface CellFormat {
   underline?: boolean;
   fontSize?: number;
   alignment?: "left" | "center" | "right";
+  verticalAlignment?: "top" | "middle" | "bottom";
 }
 
 export type DataType = "blank" | "constant" | "variable" | "na";
 
-export interface ProductDataTableSchema {
+export interface WorkbookConditionalRule {
+  id: string;
+  rows: number[];
+  columns: number[];
+  operator: "gt" | "lt" | "eq" | "contains";
+  value: string;
+  bgColor?: string;
+  textColor?: string;
+}
+
+export interface WorkbookMetadata {
+  sheetLayout?: "cells";
+  headerRows?: { count: 1 | 2; formats: Record<string, CellFormat>; heights: Record<number, number> };
+  rowOrder?: number[];
+  rowHeights?: Record<number, number>;
+  conditionalRules?: WorkbookConditionalRule[];
+}
+
+export interface WorkbookSheet {
+  id: string;
+  name: string;
+  data: ProductDataTableSchema;
+}
+
+export interface ProductDataTableSchema extends WorkbookMetadata {
+  sheets?: WorkbookSheet[];
   headers: Record<number, string>;
   columnTypes: Record<number, "constant" | "variable" | "na">;
   cells: Record<string, string>;
@@ -21,7 +51,8 @@ export interface ProductDataTableSchema {
 }
 
 export interface ProductSpecificationDataTableProps {
-  initialData?: {
+  initialData?: WorkbookMetadata & {
+    sheets?: WorkbookSheet[];
     headerData: Record<number, string>;
     columnTypeData: Record<number, DataType>;
     cellData: Record<string, string>;
@@ -32,11 +63,13 @@ export interface ProductSpecificationDataTableProps {
   onDataChange?: (data: ProductDataTableSchema) => void;
   onSaveSuccess?: (clearHistory: () => void) => void;
   resetKey?: number;
+  sourceRevision?: unknown;
   isRedlineView?: boolean;
   isReadOnly?: boolean;
   isSavePending?: () => boolean;
   redlineMode?: "inline" | "highlight";
   redlineBaseData?: {
+    sheets?: WorkbookSheet[];
     headerData: Record<number, string>;
     columnTypeData: Record<number, DataType>;
     cellData: Record<string, string>;

@@ -2,6 +2,7 @@ import {
   CellFormat,
   DataType,
   ProductDataTableSchema,
+  WorkbookMetadata,
 } from "@/types/product-data-table";
 
 export function sparseProductSpecDataForDatabase(
@@ -11,6 +12,7 @@ export function sparseProductSpecDataForDatabase(
   cellFormats: Record<string, CellFormat>,
   columnOrder: string[],
   columnSizing: Record<string, number>,
+  metadata: WorkbookMetadata = {},
 ): ProductDataTableSchema {
   const headers: Record<number, string> = {};
   Object.entries(headerData).forEach(([key, value]) => {
@@ -49,6 +51,17 @@ export function sparseProductSpecDataForDatabase(
   });
 
   return {
+    sheetLayout: metadata.sheetLayout,
+    headerRows: metadata.headerRows,
+    rowOrder: metadata.rowOrder?.some((row, index) => row !== index)
+      ? metadata.rowOrder
+      : undefined,
+    rowHeights: Object.keys(metadata.rowHeights ?? {}).length
+      ? metadata.rowHeights
+      : undefined,
+    conditionalRules: metadata.conditionalRules?.length
+      ? metadata.conditionalRules
+      : undefined,
     headers,
     columnTypes,
     cells,
@@ -83,6 +96,10 @@ export function serializeWorkbookForComparison(
 export function normalizeWorkbookForComparison(
   schema: ProductDataTableSchema | undefined,
 ): string {
+  if (schema?.sheets) return serializeWorkbookForComparison({
+    headers: {}, columnTypes: {}, cells: {},
+    sheets: schema.sheets.map((sheet) => ({ ...sheet, data: JSON.parse(normalizeWorkbookForComparison(sheet.data)) })),
+  });
   const parsed = parseProductSpecDataFromDatabase(schema);
   return serializeWorkbookForComparison(
     sparseProductSpecDataForDatabase(
@@ -92,13 +109,15 @@ export function normalizeWorkbookForComparison(
       parsed.cellFormats,
       parsed.columnOrder,
       parsed.columnSizing,
+      parsed,
     ),
   );
 }
 
 export function parseProductSpecDataFromDatabase(
   schema: ProductDataTableSchema | undefined,
-): {
+): WorkbookMetadata & {
+  sheets?: ProductDataTableSchema["sheets"];
   headerData: Record<number, string>;
   columnTypeData: Record<number, DataType>;
   cellData: Record<string, string>;
@@ -125,6 +144,12 @@ export function parseProductSpecDataFromDatabase(
   }
 
   return {
+    sheets: schema.sheets,
+    sheetLayout: schema.sheetLayout,
+    headerRows: schema.headerRows,
+    rowOrder: schema.rowOrder,
+    rowHeights: schema.rowHeights,
+    conditionalRules: schema.conditionalRules,
     headerData: schema.headers || {},
     columnTypeData: (schema.columnTypes as Record<number, DataType>) || {},
     cellData: schema.cells || {},

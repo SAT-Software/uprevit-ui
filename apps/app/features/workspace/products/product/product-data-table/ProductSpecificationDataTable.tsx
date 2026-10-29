@@ -24,18 +24,32 @@ import {
 import {
   ProductSpecificationDataTableProps,
   type CellFormat,
+  type WorkbookConditionalRule,
   type ColumnFilter,
   type DataType,
 } from "@/types/product-data-table";
 import { sparseProductSpecDataForDatabase } from "@/utils/product/product-spec";
 import {
   formatWorkbookValue,
+  createWorkbookFormatResolver,
   MAX_DECIMAL_PLACES,
   parseWorkbookClipboard,
   workbookDecimalPlaces,
   createWorkbookFill,
   workbookNumber,
 } from "@/utils/product/workbook-cell-utils";
+import { WorkbookConditionalFormatDialog } from "./WorkbookConditionalFormatDialog";
+import { WorkbookHeaderMenu } from "./WorkbookHeaderMenu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@uprevit/ui/components/ui/dialog";
+import { Input } from "@uprevit/ui/components/ui/input";
+import { Label } from "@uprevit/ui/components/ui/label";
 import { WorkbookTextFormatToolbar } from "./WorkbookTextFormatToolbar";
 import {
   getRedlineHighlightInsetShadow,
@@ -121,6 +135,7 @@ import { cn } from "@uprevit/ui/lib/utils";
 import { toast } from "sonner";
 import { applyFilter, detectColumnDataType } from "./column-filter-utils";
 import { ColumnFilterPopover } from "./ColumnFilterPopover";
+import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { ConfirmFileImportAlertDialog } from "./ConfirmFileImportAlertDialog";
 import { FindReplaceDialog } from "./FindReplaceDialog";
 import { WorkbookColorPopover } from "./WorkbookColorPopover";
@@ -180,7 +195,34 @@ type FindReplaceEntry = {
   replaceAll: boolean;
 };
 
+type StructureState = {
+  cellData: Record<string, string>;
+  cellFormats: Record<string, CellFormat>;
+  headerData: Record<number, string>;
+  columnTypeData: Record<number, DataType>;
+  columnSizing: ColumnSizingState;
+  columnOrder: string[];
+  rowOrder: number[];
+  rowHeights: Record<number, number>;
+  conditionalRules: WorkbookConditionalRule[];
+  selectedCells: string[];
+  activeCell: { row: number; col: number } | null;
+  columnFilters: Record<number, ColumnFilter>;
+  sorting: SortingState;
+};
+
 type HistoryEntry =
+  | { type: "structure"; prev: StructureState; next: StructureState }
+  | {
+      type: "rowHeights";
+      prev: Record<number, number>;
+      next: Record<number, number>;
+    }
+  | {
+      type: "conditionalRules";
+      prev: WorkbookConditionalRule[];
+      next: WorkbookConditionalRule[];
+    }
   | CellEditEntry
   | HeaderEditEntry
   | ColumnTypeEntry
@@ -200,7 +242,7 @@ const COLUMN_COUNT = 150;
 const ROW_COUNT = 5000;
 const COL_WIDTH = 150;
 const ROW_HEIGHT = 34;
-const ROW_NUMBER_WIDTH = 60;
+const ROW_NUMBER_WIDTH = 56;
 const MIN_COL_WIDTH = 50;
 const MAX_COL_WIDTH = 500;
 
@@ -227,6 +269,8 @@ interface TableMeta {
   >;
   isReadOnly?: boolean;
   workbookTheme: WorkbookTheme;
+  onColumnInsert: (column: number, after: boolean) => void;
+  onColumnDelete: (column: number) => void;
 }
 
 function DiffValueDisplay<T extends string>({
@@ -299,8 +343,8 @@ const EditableHeaderContent = ({
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        placeholder={`Column ${colIndex + 1}`}
-        aria-label={`Column ${colIndex + 1} name`}
+        placeholder={`Column ${table.getVisibleLeafColumns().findIndex((item) => item.id === column.id) + 1}`}
+        aria-label={`Column ${table.getVisibleLeafColumns().findIndex((item) => item.id === column.id) + 1} name`}
       />
       {showInlineDiff && diff && (
         <div className="absolute inset-0 pointer-events-none px-1 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
@@ -362,6 +406,14 @@ const EditableHeaderContent = ({
             />
           )}
         </Button>
+        {!meta.isReadOnly && (
+          <WorkbookHeaderMenu
+            label={`Column ${table.getVisibleLeafColumns().findIndex((col) => col.id === column.id) + 1} options`}
+            axis="column"
+            onInsert={(after) => meta.onColumnInsert(colIndex, after)}
+            onDelete={() => meta.onColumnDelete(colIndex)}
+          />
+        )}
         <ColumnFilterPopover
           dataType={dataType}
           filter={meta.columnFilters[colIndex]}
@@ -491,11 +543,13 @@ const DATA_TYPE_LABELS = DATA_TYPE_OPTIONS.reduce(
 
 const DataTypeSelect = ({
   colIndex,
+  visibleIndex,
   value,
   onChange,
   isReadOnly = false,
 }: {
   colIndex: number;
+  visibleIndex: number;
   value: DataType | undefined;
   onChange: (colIndex: number, value: DataType) => void;
   isReadOnly?: boolean;
@@ -506,7 +560,7 @@ const DataTypeSelect = ({
     onValueChange={(val) => onChange(colIndex, val as DataType)}
   >
     <SelectTrigger
-      aria-label={`Column ${colIndex + 1} data type`}
+      aria-label={`Column ${visibleIndex + 1} data type`}
       className="h-full w-full border-0 rounded-none shadow-none text-xs text-muted-foreground/90 focus:ring-0 py-1 pl-1 pr-2 [&_svg]:size-2.5!"
     >
       <SelectValue placeholder="" />
@@ -521,7 +575,7 @@ const DataTypeSelect = ({
   </Select>
 );
 
-export function ProductSpecificationDataTable({
+export function WorkbookSheetGrid({
   initialData,
   onDataChange,
   onSaveSuccess,
@@ -531,7 +585,18 @@ export function ProductSpecificationDataTable({
   isSavePending,
   redlineMode = "inline",
   redlineBaseData,
-}: ProductSpecificationDataTableProps) {
+  onWorkbookImport,
+  onWorkbookExport,
+  hasOtherSheets = false,
+  getWorkbookRevision,
+  onSelectionCountChange,
+}: ProductSpecificationDataTableProps & {
+  onWorkbookImport?: (data: import("@/types/product-data-table").ProductDataTableSchema) => void;
+  onWorkbookExport?: () => void;
+  hasOtherSheets?: boolean;
+  getWorkbookRevision?: () => number;
+  onSelectionCountChange?: (count: number) => void;
+}) {
   const { resolvedTheme } = useTheme();
   const parentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -552,6 +617,11 @@ export function ProductSpecificationDataTable({
           Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
       );
       setCellFormats(initialData.cellFormats ?? {});
+      setRowOrder(
+        initialData.rowOrder ?? Array.from({ length: ROW_COUNT }, (_, i) => i),
+      );
+      setRowHeights(initialData.rowHeights ?? {});
+      setConditionalRules(initialData.conditionalRules ?? []);
       hasLoadedData.current = true;
     }
   }, [initialData]);
@@ -595,7 +665,28 @@ export function ProductSpecificationDataTable({
     initialData?.cellFormats ?? {},
   );
 
+  const [rowOrder, setRowOrder] = useState<number[]>(
+    initialData?.rowOrder ?? Array.from({ length: ROW_COUNT }, (_, i) => i),
+  );
+  const [rowHeights, setRowHeights] = useState<Record<number, number>>(
+    initialData?.rowHeights ?? {},
+  );
+  const [conditionalRules, setConditionalRules] = useState<
+    WorkbookConditionalRule[]
+  >(initialData?.conditionalRules ?? []);
+  const resolveCellFormat = useMemo(
+    () => createWorkbookFormatResolver(conditionalRules),
+    [conditionalRules],
+  );
+  const [heightEditor, setHeightEditor] = useState<{
+    row: number;
+    value: string;
+  } | null>(null);
+  const gestureCleanupRef = useRef<(() => void) | null>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
+
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  useEffect(() => { onSelectionCountChange?.(selectedCells.size); }, [selectedCells.size, onSelectionCountChange]);
   const [selectionStartVisual, setSelectionStartVisual] = useState<{
     row: number;
     col: number;
@@ -609,9 +700,20 @@ export function ProductSpecificationDataTable({
   const [columnFilters, setColumnFilters] = useState<
     Record<number, ColumnFilter>
   >({});
+  useEffect(
+    () => () => {
+      gestureCleanupRef.current?.();
+      resizeCleanupRef.current?.();
+    },
+    [resetKey, isReadOnly, sorting, columnFilters, columnOrder, rowOrder],
+  );
+
   const pendingFileRef = useRef<File | null>(null);
-  const importGuardRef = useRef({ isReadOnly, resetKey, initialData });
-  importGuardRef.current = { isReadOnly, resetKey, initialData };
+  const [importLayout, setImportLayout] = useState<{ file: File; sheets: { name: string; rows: number; offset: number; known: boolean }[] } | null>(null);
+  const importRevision = useMemo(() => ({ cellData, headerData, columnTypeData, cellFormats, columnOrder, columnSizing, rowOrder, rowHeights, conditionalRules, editingCell, editValue }), [cellData, headerData, columnTypeData, cellFormats, columnOrder, columnSizing, rowOrder, rowHeights, conditionalRules, editingCell, editValue]);
+  const importGuardRef = useRef({ isReadOnly, resetKey, importRevision });
+  importGuardRef.current = { isReadOnly, resetKey, importRevision };
+  useEffect(() => () => { importGuardRef.current.isReadOnly = true; }, []);
 
   // History state
   const [history, setHistory] = useState<HistoryState>({
@@ -760,6 +862,7 @@ export function ProductSpecificationDataTable({
         cellFormats,
         columnOrder,
         columnSizing,
+        { rowOrder, rowHeights, conditionalRules },
       );
       onDataChange(data);
     }
@@ -773,6 +876,9 @@ export function ProductSpecificationDataTable({
     cellFormats,
     columnOrder,
     columnSizing,
+    rowOrder,
+    rowHeights,
+    conditionalRules,
   ]);
 
   // History API functions
@@ -789,6 +895,30 @@ export function ProductSpecificationDataTable({
     (entry: HistoryEntry, direction: "undo" | "redo") => {
       const isUndo = direction === "undo";
       switch (entry.type) {
+        case "structure": {
+          const state = isUndo ? entry.prev : entry.next;
+          setCellData(state.cellData);
+          setCellFormats(state.cellFormats);
+          setHeaderData(state.headerData);
+          setColumnTypeData(state.columnTypeData);
+          setColumnSizing(state.columnSizing);
+          setColumnOrder(state.columnOrder);
+          setRowOrder(state.rowOrder);
+          setRowHeights(state.rowHeights);
+          setConditionalRules(state.conditionalRules);
+          setSelectedCells(new Set(state.selectedCells));
+          setActiveCell(state.activeCell);
+          setColumnFilters(state.columnFilters);
+          setSorting(state.sorting);
+          setSelectionStartVisual(null);
+          break;
+        }
+        case "rowHeights":
+          setRowHeights(isUndo ? entry.prev : entry.next);
+          break;
+        case "conditionalRules":
+          setConditionalRules(isUndo ? entry.prev : entry.next);
+          break;
         case "cell":
         case "findReplace":
           setCellData((data) => {
@@ -874,6 +1004,12 @@ export function ProductSpecificationDataTable({
         Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
     );
     setCellFormats(initialData.cellFormats ?? {});
+    setRowOrder(
+      initialData.rowOrder ?? Array.from({ length: ROW_COUNT }, (_, i) => i),
+    );
+    setRowHeights(initialData.rowHeights ?? {});
+    setConditionalRules(initialData.conditionalRules ?? []);
+    setHeightEditor(null);
     editingCellRef.current = null;
     setEditingCell(null);
     cellDraftRef.current = {};
@@ -978,6 +1114,15 @@ export function ProductSpecificationDataTable({
     [finishEdit, isReadOnly, isSavePending],
   );
 
+  useLayoutEffect(() => {
+    if (!editingCell) return;
+    const input = tableRef.current?.querySelector<HTMLTextAreaElement>(
+      `textarea[data-cell-key="${editingCell}"]`,
+    );
+    input?.focus({ preventScroll: true });
+    input?.setSelectionRange(input.value.length, input.value.length);
+  }, [editingCell]);
+
   const applyValues = useCallback(
     (values: Record<string, string>) => {
       if (isReadOnly || isSavePending?.()) return;
@@ -992,6 +1137,181 @@ export function ProductSpecificationDataTable({
     },
     [finishEdit, isReadOnly, isSavePending, record],
   );
+
+  function changeStructure(
+    axis: "row" | "column",
+    target: number,
+    after: boolean | null,
+  ) {
+    if (isReadOnly || isSavePending?.()) return;
+    finishEdit(true);
+    gestureCleanupRef.current?.();
+    resizeCleanupRef.current?.();
+    const prev: StructureState = {
+      cellData,
+      cellFormats,
+      headerData,
+      columnTypeData,
+      columnSizing,
+      columnOrder,
+      rowOrder,
+      rowHeights,
+      conditionalRules,
+      selectedCells: [...selectedCells],
+      activeCell,
+      columnFilters,
+      sorting,
+    };
+    const next: StructureState = { ...prev };
+    const order =
+      axis === "row"
+        ? [...rowOrder]
+        : columnOrder.map((id) => Number(id.split("-")[1]));
+    const at = order.indexOf(target);
+    if (at < 0) return;
+    const affected = (key: string, id: number) =>
+      Number(key.split(",")[axis === "row" ? 0 : 1]) === id;
+    if (after !== null) {
+      const spare = order[order.length - 1];
+      const occupied =
+        Object.entries(cellData).some(
+          ([key, value]) => value !== "" && affected(key, spare),
+        ) ||
+        Object.keys(cellFormats).some((key) => affected(key, spare)) ||
+        conditionalRules.some((rule) =>
+          (axis === "row" ? rule.rows : rule.columns).includes(spare),
+        ) ||
+        (axis === "row"
+          ? rowHeights[spare] !== undefined
+          : Boolean(
+              headerData[spare] ||
+                (columnTypeData[spare] && columnTypeData[spare] !== "blank") ||
+                columnSizing[`col-${spare}`] !== undefined,
+            ));
+      if (occupied || spare === target) {
+        toast.error(
+          `Cannot insert: the final ${axis} must be empty and have no formatting, sizing or rule targets. The grid limit is ${axis === "row" ? ROW_COUNT : COLUMN_COUNT} ${axis}s.`,
+        );
+        return;
+      }
+      order.pop();
+      order.splice(at + (after ? 1 : 0), 0, spare);
+      if (
+        axis === "row" &&
+        (sorting.length || Object.keys(columnFilters).length)
+      )
+        toast.info(
+          "Row inserted beside the original row. Sorting or column filters may move or hide the new blank row.",
+        );
+    } else {
+      order.splice(at, 1);
+      order.push(target);
+      next.cellData = Object.fromEntries(
+        Object.entries(cellData).filter(([key]) => !affected(key, target)),
+      );
+      next.cellFormats = Object.fromEntries(
+        Object.entries(cellFormats).filter(([key]) => !affected(key, target)),
+      );
+      next.selectedCells = prev.selectedCells.filter(
+        (key) => !affected(key, target),
+      );
+      if (
+        activeCell &&
+        (axis === "row" ? activeCell.row : activeCell.col) === target
+      )
+        next.activeCell = null;
+      next.conditionalRules = conditionalRules
+        .map((rule) => ({
+          ...rule,
+          ...(axis === "row"
+            ? { rows: rule.rows.filter((id) => id !== target) }
+            : { columns: rule.columns.filter((id) => id !== target) }),
+        }))
+        .filter((rule) => rule.rows.length && rule.columns.length);
+      if (axis === "row") {
+        next.rowHeights = { ...rowHeights };
+        delete next.rowHeights[target];
+      } else {
+        next.headerData = { ...headerData };
+        next.columnTypeData = { ...columnTypeData };
+        next.columnSizing = { ...columnSizing };
+        next.columnFilters = { ...columnFilters };
+        delete next.headerData[target];
+        delete next.columnTypeData[target];
+        delete next.columnSizing[`col-${target}`];
+        delete next.columnFilters[target];
+        next.sorting = sorting.filter((sort) => sort.id !== `col-${target}`);
+      }
+    }
+    if (axis === "row") next.rowOrder = order;
+    else next.columnOrder = order.map((id) => `col-${id}`);
+    const entry: HistoryEntry = { type: "structure", prev, next };
+    applyEntry(entry, "redo");
+    record(entry);
+  }
+
+  function setRowHeight(row: number, height?: number) {
+    if (isReadOnly || isSavePending?.()) return;
+    const next = { ...rowHeights };
+    if (height === undefined || height === ROW_HEIGHT) delete next[row];
+    else next[row] = Math.max(24, Math.min(300, Math.round(height)));
+    if (JSON.stringify(next) === JSON.stringify(rowHeights)) return;
+    record({ type: "rowHeights", prev: rowHeights, next });
+    setRowHeights(next);
+  }
+
+  function startRowResize(row: number, event: React.PointerEvent) {
+    if (event.button !== 0 || isReadOnly || isSavePending?.()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    resizeCleanupRef.current?.();
+    const prev = rowHeights;
+    const initial = rowHeights[row] ?? ROW_HEIGHT;
+    const y = event.clientY;
+    const pointerId = event.pointerId;
+    let next = prev;
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      const height = Math.max(
+        24,
+        Math.min(300, Math.round(initial + e.clientY - y)),
+      );
+      next = { ...prev };
+      if (height === ROW_HEIGHT) delete next[row];
+      else next[row] = height;
+      setRowHeights(next);
+    };
+    const cleanup = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", complete);
+      window.removeEventListener("pointercancel", cancel);
+      window.removeEventListener("keydown", keydown);
+      window.removeEventListener("blur", cancel);
+      resizeCleanupRef.current = null;
+    };
+    const complete = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
+      if (JSON.stringify(prev) !== JSON.stringify(next))
+        record({ type: "rowHeights", prev, next });
+    };
+    const cancel = () => {
+      cleanup();
+      setRowHeights(prev);
+    };
+    const keydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancel();
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", complete);
+    window.addEventListener("pointercancel", cancel);
+    window.addEventListener("keydown", keydown);
+    window.addEventListener("blur", cancel);
+    resizeCleanupRef.current = cancel;
+  }
 
   // Keyboard shortcuts (global - for undo/redo/find-replace)
   useEffect(() => {
@@ -1009,12 +1329,8 @@ export function ProductSpecificationDataTable({
 
       if (isCtrlCombo) {
         if (key === "z") {
-          if (isReadOnly) return;
+          if (isReadOnly || editingCellRef.current) return;
           e.preventDefault();
-          if (editingCellRef.current) {
-            finishEdit(true);
-            return;
-          }
           if (e.shiftKey) {
             redo();
           } else {
@@ -1091,11 +1407,11 @@ export function ProductSpecificationDataTable({
   // Refresh TanStack's cached accessor values after a committed value change.
   const rows = useMemo(
     () =>
-      Array.from({ length: ROW_COUNT }, (_, rowIndex) => ({
+      rowOrder.map((rowIndex) => ({
         rowIndex,
         values: cellData,
       })),
-    [cellData],
+    [cellData, rowOrder],
   );
 
   const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
@@ -1152,6 +1468,7 @@ export function ProductSpecificationDataTable({
   const table = useReactTable({
     data: rows,
     columns,
+    getRowId: (row) => String(row.rowIndex),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -1174,6 +1491,10 @@ export function ProductSpecificationDataTable({
       setColumnFilters,
       isReadOnly,
       workbookTheme,
+      onColumnInsert: (column: number, after: boolean) =>
+        changeStructure("column", column, after),
+      onColumnDelete: (column: number) =>
+        changeStructure("column", column, null),
     },
     state: {
       columnSizing,
@@ -1218,6 +1539,7 @@ export function ProductSpecificationDataTable({
     try {
       const html = e.clipboardData.getData("text/html");
       const text = e.clipboardData.getData("text/plain");
+      if (editingCellRef.current && !/<table[\s>]/i.test(html) && !text.includes("\t")) return;
       const pastedRows = parseWorkbookClipboard(html, text);
       if (
         editingCellRef.current &&
@@ -1274,10 +1596,20 @@ export function ProductSpecificationDataTable({
 
     e.target.value = "";
 
-    const hasData =
-      Object.keys(cellData).length > 0 || Object.keys(headerData).length > 0;
+    const workbook = sparseProductSpecDataForDatabase(
+      headerData,
+      columnTypeData,
+      editingCell ? { ...cellData, [editingCell]: editValue } : cellData,
+      cellFormats,
+      columnOrder,
+      columnSizing,
+      { rowOrder, rowHeights, conditionalRules },
+    );
+    const hasData = Object.values(workbook).some(
+      (value) => value && Object.keys(value).length > 0,
+    );
 
-    if (hasData) {
+    if (hasData || hasOtherSheets) {
       pendingFileRef.current = file;
       setShowImportConfirm(true);
     } else {
@@ -1285,11 +1617,12 @@ export function ProductSpecificationDataTable({
     }
   }
 
-  async function processImport(file: File) {
+  async function processImport(file: File, layouts?: Record<string, number>) {
     if (isReadOnly) return;
+    const workbookRevision = getWorkbookRevision?.();
 
     try {
-      const [buffer, { parseWorkbookToTableData }] = await Promise.all([
+      const [buffer, { parseWorkbookToTableData, inspectWorkbookLayouts }] = await Promise.all([
         file.arrayBuffer(),
         import("@/lib/import-export"),
       ]);
@@ -1298,24 +1631,37 @@ export function ProductSpecificationDataTable({
         guard.isReadOnly ||
         isSavePending?.() ||
         guard.resetKey !== resetKey ||
-        guard.initialData !== initialData
+        guard.importRevision !== importRevision ||
+        getWorkbookRevision?.() !== workbookRevision
       ) {
         toast.error(
           "The workbook changed while the file was loading. Please import it again.",
         );
         return;
       }
-      const {
-        headers,
-        columnTypes,
-        cells,
-        cellFormats: formats,
-      } = parseWorkbookToTableData(buffer);
+      if (!layouts) {
+        const sheets = inspectWorkbookLayouts(buffer);
+        if (sheets.some((sheet) => !sheet.known)) { setImportLayout({ file, sheets }); return; }
+      }
+      const imported = parseWorkbookToTableData(buffer, layouts);
+      if (onWorkbookImport) {
+        finishEdit(true);
+        onWorkbookImport(imported);
+        return;
+      }
+      const { headers, columnTypes, cells, cellFormats: formats } = imported;
 
       setHeaderData(headers);
       setColumnTypeData(columnTypes);
       setCellData(cells);
       setCellFormats(formats ?? {});
+      setRowOrder(Array.from({ length: ROW_COUNT }, (_, i) => i));
+      setRowHeights(imported.rowHeights ?? {});
+      setConditionalRules([]);
+      setColumnSizing({});
+      setColumnFilters({});
+      setSorting([]);
+      finishEdit(true);
       setColumnOrder(
         Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
       );
@@ -1340,6 +1686,7 @@ export function ProductSpecificationDataTable({
   }
 
   async function handleExport() {
+    if (onWorkbookExport) { finishEdit(); onWorkbookExport(); return; }
     try {
       const { exportTableToWorkbook } = await import("@/lib/import-export");
       const filename = `product-data-${
@@ -1353,6 +1700,10 @@ export function ProductSpecificationDataTable({
           cellFormats,
           columnOrder,
           columnCount: COLUMN_COUNT,
+          rowOrder,
+          rowHeights,
+          conditionalRules,
+          columnSizing,
         },
         filename,
       );
@@ -1382,7 +1733,9 @@ export function ProductSpecificationDataTable({
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    getItemKey: (index) => tableRows[index].original.rowIndex,
+    estimateSize: (index) =>
+      rowHeights[tableRows[index].original.rowIndex] ?? ROW_HEIGHT,
     overscan: 5,
   });
 
@@ -1403,71 +1756,172 @@ export function ProductSpecificationDataTable({
   const headerGroup = table.getHeaderGroups()[0];
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
 
-  // Handle cell multi-selection via mouse down (fires before focus changes)
-  const handleCellMouseDown = useCallback(
-    (vRow: number, vCol: number, e: React.MouseEvent) => {
-      const row = tableRows[vRow];
-      const col = visibleColumns[vCol];
-      if (!row || !col) return;
+  const rowOffsets = useMemo(() => {
+    const offsets = [0];
+    for (const row of tableRows)
+      offsets.push(
+        offsets[offsets.length - 1] +
+          (rowHeights[row.original.rowIndex] ?? ROW_HEIGHT),
+      );
+    return offsets;
+  }, [tableRows, rowHeights]);
 
-      const rowIndex = row.original.rowIndex;
-      const colIndex = parseInt(col.id.split("-")[1]);
-      const cellKey = `${rowIndex},${colIndex}`;
-      if (
-        editingCellRef.current === cellKey &&
-        !e.ctrlKey &&
-        !e.metaKey &&
-        !e.shiftKey
-      )
-        return;
-      finishEdit();
+  useLayoutEffect(() => {
+    rowVirtualizer.measure();
+  }, [rowOffsets, rowVirtualizer]);
 
-      if (e.ctrlKey || e.metaKey) {
-        // Prevent default to avoid context menu on Mac with Ctrl+Click
-        e.preventDefault();
-        const newSelected = new Set(selectedCells);
-        if (newSelected.has(cellKey)) {
-          newSelected.delete(cellKey);
-        } else {
-          newSelected.add(cellKey);
-        }
-        setSelectedCells(newSelected);
-        setSelectionStartVisual({ row: vRow, col: vCol });
-        setActiveCell({ row: rowIndex, col: colIndex });
-        pendingFocusRef.current = cellKey;
-      } else if (e.shiftKey && selectionStartVisual) {
-        e.preventDefault();
-        const minVRow = Math.min(selectionStartVisual.row, vRow);
-        const maxVRow = Math.max(selectionStartVisual.row, vRow);
-        const minVCol = Math.min(selectionStartVisual.col, vCol);
-        const maxVCol = Math.max(selectionStartVisual.col, vCol);
+  function rowAtOffset(offset: number, offsets = rowOffsets) {
+    let low = 0,
+      high = offsets.length - 2;
+    while (low < high) {
+      const middle = Math.floor((low + high + 1) / 2);
+      if (offsets[middle] <= offset) low = middle;
+      else high = middle - 1;
+    }
+    return low;
+  }
 
-        const newSelection = new Set<string>();
-        for (let vr = minVRow; vr <= maxVRow; vr++) {
-          for (let vc = minVCol; vc <= maxVCol; vc++) {
-            const r = tableRows[vr].original.rowIndex;
-            const c = parseInt(visibleColumns[vc].id.split("-")[1]);
-            newSelection.add(`${r},${c}`);
-          }
-        }
-        setSelectedCells(newSelection);
-        setActiveCell({ row: rowIndex, col: colIndex });
-        pendingFocusRef.current = cellKey;
-      } else {
-        // Normal click - single selection (let default focus behavior proceed)
-        setSelectedCells(new Set([cellKey]));
-        setSelectionStartVisual({ row: vRow, col: vCol });
-        setActiveCell({ row: rowIndex, col: colIndex });
+  function handleCellPointerDown(
+    vRow: number,
+    vCol: number,
+    event: React.PointerEvent,
+  ) {
+    if (event.button !== 0) return;
+    const key = visualCellKey(vRow, vCol);
+    if (
+      editingCellRef.current === key &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    ) {
+      if (!(event.target instanceof HTMLTextAreaElement)) {
+        event.preventDefault();
+        tableRef.current
+          ?.querySelector<HTMLTextAreaElement>(`textarea[data-cell-key="${key}"]`)
+          ?.focus({ preventScroll: true });
       }
-    },
-    [
-      selectionStartVisual,
-      selectedCells,
-      tableRows,
-      visibleColumns,
-      finishEdit,
-    ],
-  );
+      return;
+    }
+    event.preventDefault();
+    gestureCleanupRef.current?.();
+    finishEdit();
+    const viewport = parentRef.current;
+    if (!viewport) return;
+    const anchor =
+      event.shiftKey && selectionStartVisual
+        ? selectionStartVisual
+        : { row: vRow, col: vCol };
+    const additive = event.ctrlKey || event.metaKey;
+    const base = additive ? new Set(selectedCells) : new Set<string>();
+    if (additive && base.has(key)) base.delete(key);
+    else base.add(key);
+    const before = selectedCells;
+    const beforeActive = activeCell;
+    const beforeAnchor = selectionStartVisual;
+    const select = (r: number, c: number) => {
+      const keys = additive ? new Set(base) : new Set<string>();
+      for (
+        let row = Math.min(anchor.row, r);
+        row <= Math.max(anchor.row, r);
+        row++
+      )
+        for (
+          let col = Math.min(anchor.col, c);
+          col <= Math.max(anchor.col, c);
+          col++
+        )
+          keys.add(visualCellKey(row, col));
+      setSelectedCells(keys);
+    };
+    if (event.shiftKey) select(vRow, vCol);
+    else setSelectedCells(base);
+    const [row, col] = key.split(",").map(Number);
+    setActiveCell({ row, col });
+    setSelectionStartVisual(anchor);
+    pendingFocusRef.current = key;
+    const pointerId = event.pointerId;
+    const origin = { x: event.clientX, y: event.clientY };
+    let pointer = origin;
+    let dragging = false;
+    let frame = 0;
+    let lastRow = vRow,
+      lastCol = vCol;
+    const update = () => {
+      if (!dragging) return;
+      const rect = viewport.getBoundingClientRect();
+      const x = pointer.x - rect.left,
+        y = pointer.y - rect.top;
+      if (y > rect.height - 28) viewport.scrollTop += 18;
+      else if (y < ROW_HEIGHT * 2 + 20) viewport.scrollTop -= 18;
+      if (x > rect.width - 28) viewport.scrollLeft += 18;
+      else if (x < ROW_NUMBER_WIDTH + 20) viewport.scrollLeft -= 18;
+      const r = rowAtOffset(y + viewport.scrollTop - ROW_HEIGHT * 2);
+      let offset = ROW_NUMBER_WIDTH;
+      let c = columnSizes.findIndex((width) => {
+        offset += width;
+        return x + viewport.scrollLeft < offset;
+      });
+      if (c < 0) c = visibleColumns.length - 1;
+      if (r !== lastRow || c !== lastCol) {
+        select(r, c);
+        lastRow = r;
+        lastCol = c;
+      }
+    };
+    const tick = () => {
+      update();
+      frame = requestAnimationFrame(tick);
+    };
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      pointer = { x: e.clientX, y: e.clientY };
+      if (Math.hypot(pointer.x - origin.x, pointer.y - origin.y) > 3)
+        dragging = true;
+      if (dragging) e.preventDefault();
+      update();
+    };
+    const cleanup = () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", complete);
+      window.removeEventListener("pointercancel", cancel);
+      window.removeEventListener("keydown", keydown);
+      window.removeEventListener("blur", cancel);
+      gestureCleanupRef.current = null;
+    };
+    const complete = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
+      if (dragging) {
+        const end = visualCellKey(lastRow, lastCol);
+        const [row, col] = end.split(",").map(Number);
+        pendingFocusRef.current = end;
+        setActiveCell({ row, col });
+      }
+    };
+    const cancel = () => {
+      cleanup();
+      setSelectedCells(before);
+      pendingFocusRef.current = beforeActive
+        ? `${beforeActive.row},${beforeActive.col}`
+        : null;
+      setActiveCell(beforeActive);
+      setSelectionStartVisual(beforeAnchor);
+    };
+    const keydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancel();
+      }
+    };
+    window.addEventListener("pointermove", move, { passive: false });
+    window.addEventListener("pointerup", complete);
+    window.addEventListener("pointercancel", cancel);
+    window.addEventListener("keydown", keydown);
+    window.addEventListener("blur", cancel);
+    gestureCleanupRef.current = cleanup;
+    frame = requestAnimationFrame(tick);
+  }
 
   function visualCellKey(row: number, col: number) {
     return `${tableRows[row].original.rowIndex},${visibleColumns[col].id.split("-")[1]}`;
@@ -1511,14 +1965,15 @@ export function ProductSpecificationDataTable({
     pendingFocusRef.current = key;
     const viewport = parentRef.current;
     if (viewport) {
-      const top = row * ROW_HEIGHT + ROW_HEIGHT * 2;
+      const top = rowOffsets[row] + ROW_HEIGHT * 2;
+      const height = rowOffsets[row + 1] - rowOffsets[row];
       const left = columnSizes
         .slice(0, col)
         .reduce((sum, size) => sum + size, ROW_NUMBER_WIDTH);
       if (top < viewport.scrollTop + ROW_HEIGHT * 2)
         viewport.scrollTop = top - ROW_HEIGHT * 2;
-      else if (top + ROW_HEIGHT > viewport.scrollTop + viewport.clientHeight)
-        viewport.scrollTop = top + ROW_HEIGHT - viewport.clientHeight;
+      else if (top + height > viewport.scrollTop + viewport.clientHeight)
+        viewport.scrollTop = top + height - viewport.clientHeight;
       if (left < viewport.scrollLeft + ROW_NUMBER_WIDTH)
         viewport.scrollLeft = left - ROW_NUMBER_WIDTH;
       else if (
@@ -1536,8 +1991,8 @@ export function ProductSpecificationDataTable({
     const focus = () => {
       const key = pendingFocusRef.current;
       if (!key) return;
-      const input = tableRef.current?.querySelector<HTMLInputElement>(
-        `input[data-cell-key="${key}"]`,
+      const input = tableRef.current?.querySelector<HTMLTextAreaElement>(
+        `textarea[data-cell-key="${key}"]`,
       );
       if (input) {
         input.focus({ preventScroll: true });
@@ -1616,7 +2071,7 @@ export function ProductSpecificationDataTable({
 
   useEffect(() => {
     setSelectionStartVisual(null);
-  }, [columnFilters, columnOrder, sorting]);
+  }, [columnFilters, columnOrder, rowOrder, sorting]);
 
   type FillRange = { top: number; bottom: number; left: number; right: number };
   const selectionBounds = useMemo<FillRange | null>(() => {
@@ -1647,6 +2102,7 @@ export function ProductSpecificationDataTable({
     cols: number[];
     values: Record<string, string>;
     widths: number[];
+    offsets: number[];
   } | null>(null);
 
   useEffect(() => {
@@ -1673,7 +2129,7 @@ export function ProductSpecificationDataTable({
         fillSource.bottom,
         Math.min(
           context.rows.length - 1,
-          Math.floor((y + viewport.scrollTop - ROW_HEIGHT * 2) / ROW_HEIGHT),
+          rowAtOffset(y + viewport.scrollTop - ROW_HEIGHT * 2, context.offsets),
         ),
       );
       let offset = ROW_NUMBER_WIDTH;
@@ -1777,44 +2233,24 @@ export function ProductSpecificationDataTable({
   useEffect(() => {
     setFillSource(null);
     setFillPreview(null);
-  }, [sorting, columnFilters, columnOrder, resetKey, isReadOnly]);
+  }, [
+    sorting,
+    columnFilters,
+    columnOrder,
+    rowOrder,
+    rowHeights,
+    resetKey,
+    isReadOnly,
+  ]);
 
   return (
     <div className="flex flex-col flex-1 min-h-0 min-w-0">
       {/* Formatting Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 p-2 border-b border-border bg-muted/50 shrink-0">
-        <WorkbookColorPopover
-          icon={PaintBucketIcon}
-          label="Fill color"
-          colors={fillColors}
-          currentColor={selectionFillState.color}
-          isMixed={selectionFillState.isMixed}
-          disabled={isReadOnly}
-          variant="fill"
-          onSelect={(color) =>
-            applyCellFormat(() => ({
-              bgColor: color === NO_FILL_COLOR ? undefined : color,
-            }))
-          }
-        />
-        <WorkbookColorPopover
-          icon={TextSquareIcon}
-          label="Text color"
-          colors={textColors}
-          currentColor={selectionTextState.color}
-          isMixed={selectionTextState.isMixed}
-          disabled={isReadOnly}
-          variant="text"
-          onSelect={(color) =>
-            applyCellFormat(() => ({
-              textColor: isDefaultWorkbookTextColor(color) ? undefined : color,
-            }))
-          }
-        />
+      <div className="flex flex-wrap items-center gap-1.5 p-2 border-b border-border bg-muted/50 shrink-0">
         <WorkbookTextFormatToolbar
           formats={selectionKeys.map((key) => cellFormats[key] ?? {})}
           disabled={isReadOnly || !selectionKeys.length}
-          onFormat={(format) => applyCellFormat(() => format)}
+          onFormat={(format) => applyCellFormat((key) => ({ ...format, ...(format.dateFormat ? { date1904: cellFormats[key]?.date1904 } : {}) }))}
           onDecimals={(change) =>
             applyCellFormat((key) => {
               const raw = cellData[key] ?? "";
@@ -1831,17 +2267,67 @@ export function ProductSpecificationDataTable({
               };
             })
           }
-        />
-        {selectedCells.size > 1 && (
-          <>
-            <div className="w-px h-5 bg-border" />
-            <span className="text-xs text-muted-foreground">
-              {selectedCells.size} cells selected
-            </span>
-          </>
-        )}
+        >
+          <WorkbookColorPopover
+            icon={PaintBucketIcon}
+            label="Fill color"
+            colors={fillColors}
+            currentColor={selectionFillState.color}
+            isMixed={selectionFillState.isMixed}
+            disabled={isReadOnly || !selectionKeys.length}
+            variant="fill"
+            onSelect={(color) =>
+              applyCellFormat(() => ({
+                bgColor: color === NO_FILL_COLOR ? undefined : color,
+              }))
+            }
+          />
+          <WorkbookColorPopover
+            icon={TextSquareIcon}
+            label="Text color"
+            colors={textColors}
+            currentColor={selectionTextState.color}
+            isMixed={selectionTextState.isMixed}
+            disabled={isReadOnly || !selectionKeys.length}
+            variant="text"
+            onSelect={(color) =>
+              applyCellFormat(() => ({
+                textColor: isDefaultWorkbookTextColor(color)
+                  ? undefined
+                  : color,
+              }))
+            }
+          />
+        </WorkbookTextFormatToolbar>
 
-        <div className="w-px h-5 bg-border" />
+
+        <div className="w-px h-4 bg-border" />
+
+        <WorkbookConditionalFormatDialog
+          rules={conditionalRules}
+          scope={
+            selectionBounds
+              ? {
+                  rows: tableRows
+                    .slice(selectionBounds.top, selectionBounds.bottom + 1)
+                    .map((row) => row.original.rowIndex),
+                  columns: visibleColumns
+                    .slice(selectionBounds.left, selectionBounds.right + 1)
+                    .map((col) => Number(col.id.split("-")[1])),
+                }
+              : null
+          }
+          rowOrder={rowOrder}
+          columnOrder={columnOrder}
+          fillColors={fillColors}
+          textColors={textColors}
+          disabled={isReadOnly || !!isSavePending?.()}
+          onChange={(next) => {
+            if (isReadOnly || isSavePending?.()) return;
+            record({ type: "conditionalRules", prev: conditionalRules, next });
+            setConditionalRules(next);
+          }}
+        />
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -1877,7 +2363,7 @@ export function ProductSpecificationDataTable({
 
         <div className="flex-1" />
 
-        <InputGroup className="max-w-48">
+        <InputGroup className="h-7 w-64 max-w-full min-w-48">
           <InputGroupInput
             aria-label="Search table"
             placeholder="Search…"
@@ -1911,35 +2397,37 @@ export function ProductSpecificationDataTable({
               </InputGroupButton>
             </InputGroupAddon>
           )}
+          <InputGroupAddon align="inline-end" className="gap-0 pr-1">
+            <span
+              className="text-xs text-muted-foreground whitespace-nowrap"
+              role="status"
+              aria-live="polite"
+            >
+              {debouncedSearch
+                ? `${activeMatchIndex < 0 ? 0 : activeMatchIndex + 1} / ${searchMatches.length}`
+                : ""}
+            </span>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Previous search match"
+              disabled={!searchMatches.length}
+              onClick={() => navigateSearch(-1)}
+            >
+              <Icon icon={ArrowUp01Icon} size={14} strokeWidth={2} />
+            </InputGroupButton>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Next search match"
+              disabled={!searchMatches.length}
+              onClick={() => navigateSearch(1)}
+            >
+              <Icon icon={ArrowDown01Icon} size={14} strokeWidth={2} />
+            </InputGroupButton>
+          </InputGroupAddon>
         </InputGroup>
 
-        <span
-          className="text-xs text-muted-foreground whitespace-nowrap"
-          role="status"
-          aria-live="polite"
-        >
-          {debouncedSearch
-            ? `${activeMatchIndex < 0 ? 0 : activeMatchIndex + 1} / ${searchMatches.length} matches`
-            : ""}
-        </span>
-        <Button
-          variant="outline"
-          size="icon-xs"
-          aria-label="Previous search match"
-          disabled={!searchMatches.length}
-          onClick={() => navigateSearch(-1)}
-        >
-          <Icon icon={ArrowUp01Icon} size={14} strokeWidth={2} />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon-xs"
-          aria-label="Next search match"
-          disabled={!searchMatches.length}
-          onClick={() => navigateSearch(1)}
-        >
-          <Icon icon={ArrowDown01Icon} size={14} strokeWidth={2} />
-        </Button>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -2112,6 +2600,7 @@ export function ProductSpecificationDataTable({
                           }}
                         >
                           <DataTypeSelect
+                            visibleIndex={virtualCol.index}
                             colIndex={originalColIndex}
                             value={
                               columnTypeData[originalColIndex] !== "blank"
@@ -2179,7 +2668,7 @@ export function ProductSpecificationDataTable({
                     }}
                   >
                     <div
-                      className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground relative"
+                      className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                       style={{
                         width: ROW_NUMBER_WIDTH,
                         minWidth: ROW_NUMBER_WIDTH,
@@ -2190,7 +2679,43 @@ export function ProductSpecificationDataTable({
                         redlineDiffs.changedRows.has(rowIndex) && (
                           <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
                         )}
-                      {virtualRow.index + 3}
+                      <span className="absolute start-0 w-8 text-center tabular-nums">{virtualRow.index + 3}</span>
+                      {!isReadOnly && (
+                        <>
+                          <div className="absolute end-1 top-1/2 -translate-y-1/2">
+                          <WorkbookHeaderMenu
+                            label={`Row ${virtualRow.index + 3} options`}
+                            axis="row"
+                            onInsert={(after) =>
+                              changeStructure("row", rowIndex, after)
+                            }
+                            onDelete={() =>
+                              changeStructure("row", rowIndex, null)
+                            }
+                            onHeight={(reset) =>
+                              reset
+                                ? setRowHeight(rowIndex)
+                                : setHeightEditor({
+                                    row: rowIndex,
+                                    value: String(
+                                      rowHeights[rowIndex] ?? ROW_HEIGHT,
+                                    ),
+                                  })
+                            }
+                          />
+                          </div>
+                          <div
+                            role="separator"
+                            aria-orientation="horizontal"
+                            aria-label={`Resize row ${virtualRow.index + 3}`}
+                            className="absolute -bottom-1 left-0 z-20 h-2 w-full cursor-row-resize touch-none hover:bg-primary/50"
+                            onPointerDown={(event) =>
+                              startRowResize(rowIndex, event)
+                            }
+                            onDoubleClick={() => setRowHeight(rowIndex)}
+                          />
+                        </>
+                      )}
                     </div>
 
                     <tr
@@ -2206,7 +2731,11 @@ export function ProductSpecificationDataTable({
                           column.id.split("-")[1],
                         );
                         const cellKey = `${rowIndex},${originalColIndex}`;
-                        const format = cellFormats[cellKey];
+                        const format = resolveCellFormat(
+                          cellKey,
+                          cellData[cellKey] ?? "",
+                          cellFormats[cellKey],
+                        );
                         const isSelected = selectedCells.has(cellKey);
                         const diff = isRedlineView
                           ? redlineDiffs.cellDiffs[cellKey]
@@ -2231,12 +2760,17 @@ export function ProductSpecificationDataTable({
                           workbookTheme,
                         );
 
+                        const cellValue =
+                          editingCell === cellKey
+                            ? editValue
+                            : formatWorkbookValue(cellData[cellKey] ?? "", format);
                         const input = (
-                          <input
+                          <textarea
+                            rows={1}
+                            wrap="off"
                             data-cell-key={cellKey}
-                            aria-label={`Row ${rowIndex + 1}, column ${originalColIndex + 1}`}
-                            readOnly={isReadOnly}
-                            onDoubleClick={() => startEdit(cellKey)}
+                            aria-label={`Row ${virtualRow.index + 3}, column ${virtualCol.index + 1}`}
+                            readOnly={isReadOnly || editingCell !== cellKey}
                             onCompositionStart={() => {
                               composingRef.current = true;
                               startEdit(cellKey);
@@ -2245,26 +2779,20 @@ export function ProductSpecificationDataTable({
                               composingRef.current = false;
                             }}
                             className={cn(
-                              "h-full w-full border border-border/60 outline-none px-2 text-sm",
-                              isSelected
-                                ? "ring-1 ring-primary ring-inset border-foreground/60"
-                                : "border-border",
-                              showHighlightDiff && redlineHighlightBorder,
+                              "w-full resize-none border-0 bg-transparent outline-none px-2 text-sm leading-[1.5]",
                               showInlineDiff && "caret-transparent",
-                              editingCell !== cellKey && "caret-transparent",
+                              editingCell !== cellKey
+                                ? "caret-transparent cursor-default select-none overflow-hidden"
+                                : "cursor-text overflow-auto",
                             )}
                             style={{
-                              backgroundColor:
-                                resolvedBg || "var(--background)",
-                              backgroundImage: searchMatchKeys.has(cellKey)
-                                ? "linear-gradient(hsl(45 95% 55% / 0.35), hsl(45 95% 55% / 0.35))"
-                                : undefined,
-                              outline:
-                                activeSearchKey === cellKey &&
-                                searchMatchKeys.has(cellKey)
-                                  ? "2px solid var(--primary)"
-                                  : undefined,
-                              outlineOffset: -2,
+                              height: Math.min(
+                                virtualRow.size - 4,
+                                Math.ceil((format.fontSize ?? 14) * 1.5) *
+                                  cellValue.split("\n").length,
+                              ),
+                              flexShrink: 0,
+                              backgroundColor: "transparent",
                               fontWeight: format?.bold ? "bold" : undefined,
                               fontStyle: format?.italic ? "italic" : undefined,
                               textDecoration: format?.underline
@@ -2272,37 +2800,20 @@ export function ProductSpecificationDataTable({
                                 : undefined,
                               fontSize: format?.fontSize,
                               textAlign: format?.alignment,
-                              boxShadow: showHighlightDiff
-                                ? getRedlineHighlightInsetShadow(workbookTheme)
-                                : undefined,
-                              color: showInlineDiff
+                              color: showInlineDiff || editingCell !== cellKey
                                 ? "transparent"
                                 : resolvedText || "inherit",
                               caretColor: showInlineDiff
                                 ? "transparent"
                                 : undefined,
                             }}
-                            value={
-                              editingCell === cellKey
-                                ? editValue
-                                : formatWorkbookValue(
-                                    cellData[cellKey] ?? "",
-                                    format,
-                                  )
-                            }
+                            value={cellValue}
                             onChange={(e) => {
                               if (isReadOnly) return;
                               startEdit(cellKey);
                               cellDraftRef.current[cellKey] = e.target.value;
                               setEditValue(e.target.value);
                             }}
-                            onMouseDown={(e) =>
-                              handleCellMouseDown(
-                                virtualRow.index,
-                                virtualCol.index,
-                                e,
-                              )
-                            }
                             onContextMenu={(e) => {
                               if (e.ctrlKey || e.metaKey) e.preventDefault();
                             }}
@@ -2319,10 +2830,14 @@ export function ProductSpecificationDataTable({
                             onKeyDown={(e) => {
                               if (
                                 e.nativeEvent.isComposing ||
-                                composingRef.current ||
-                                e.keyCode === 229
+                                composingRef.current
                               )
                                 return;
+                              if (e.keyCode === 229 || e.key === "Process") {
+                                if (editingCellRef.current !== cellKey)
+                                  startEdit(cellKey, "");
+                                return;
+                              }
                               const editing =
                                 editingCellRef.current === cellKey;
                               if (e.key === "Escape" && editing) {
@@ -2426,8 +2941,46 @@ export function ProductSpecificationDataTable({
                               left: virtualCol.start,
                               width: virtualCol.size,
                               height: virtualRow.size,
+                              backgroundColor:
+                                resolvedBg || "var(--background)",
+                              backgroundImage: searchMatchKeys.has(cellKey)
+                                ? "linear-gradient(hsl(45 95% 55% / 0.35), hsl(45 95% 55% / 0.35))"
+                                : undefined,
+                              outline:
+                                activeSearchKey === cellKey &&
+                                searchMatchKeys.has(cellKey)
+                                  ? "2px solid var(--primary)"
+                                  : undefined,
+                              outlineOffset: -2,
+
+                              boxShadow: showHighlightDiff
+                                ? getRedlineHighlightInsetShadow(workbookTheme)
+                                : undefined,
+                              justifyContent:
+                                format.verticalAlignment === "top"
+                                  ? "flex-start"
+                                  : format.verticalAlignment === "bottom"
+                                    ? "flex-end"
+                                    : "center",
+                              paddingBlock: 2,
                             }}
-                            className="relative"
+                            className={cn(
+                              "relative flex flex-col border border-border cursor-default",
+                              editingCell === cellKey
+                                ? "touch-auto"
+                                : "touch-none",
+                              showHighlightDiff && redlineHighlightBorder,
+                              isSelected &&
+                                "ring-1 ring-primary ring-inset border-foreground/60",
+                            )}
+                            onPointerDown={(event) =>
+                              handleCellPointerDown(
+                                virtualRow.index,
+                                virtualCol.index,
+                                event,
+                              )
+                            }
+                            onDoubleClick={() => startEdit(cellKey)}
                           >
                             {showHighlightDiff ? (
                               <Tooltip>
@@ -2441,6 +2994,18 @@ export function ProductSpecificationDataTable({
                               </Tooltip>
                             ) : (
                               input
+                            )}
+
+                            {editingCell !== cellKey && !showInlineDiff && (
+                              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 inset-y-0.5 flex flex-col overflow-hidden px-2 text-sm leading-[1.5]"
+                                style={{ color: resolvedText || "inherit", fontSize: format.fontSize, fontWeight: format.bold ? "bold" : undefined, fontStyle: format.italic ? "italic" : undefined,
+                                  justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "flex-end" : "center" }}>
+                                <div className="shrink-0">
+                                  {cellValue.split("\n").map((line, index) => <div key={index} className="flex whitespace-pre" style={{ minHeight: "1.5em", justifyContent: format.alignment === "right" ? "flex-end" : format.alignment === "center" ? "center" : "flex-start" }}>
+                                    <span className="shrink-0" style={{ textDecoration: format.underline ? "underline" : undefined }}>{line || "\u00a0"}</span>
+                                  </div>)}
+                                </div>
+                              </div>
                             )}
 
                             {fillPreview &&
@@ -2459,6 +3024,7 @@ export function ProductSpecificationDataTable({
                                   aria-label="Drag to autofill selected cells"
                                   title="Drag down or right to fill"
                                   className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 touch-none cursor-crosshair border border-background bg-primary"
+                                  onDoubleClick={(e) => e.stopPropagation()}
                                   onPointerDown={(e) => {
                                     if (e.button !== 0 || isSavePending?.())
                                       return;
@@ -2475,6 +3041,7 @@ export function ProductSpecificationDataTable({
                                       ),
                                       values: cellDataRef.current,
                                       widths: columnSizes,
+                                      offsets: rowOffsets,
                                     };
                                     setFillSource(selectionBounds);
                                     setFillPreview(selectionBounds);
@@ -2507,6 +3074,79 @@ export function ProductSpecificationDataTable({
         </ScrollAreaPrimitive.Root>
       </DndContext>
 
+      <Dialog
+        open={!!heightEditor}
+        onOpenChange={(open) => {
+          if (!open) setHeightEditor(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Row height</DialogTitle>
+            <DialogDescription>
+              Set a height from 24 to 300 pixels. Default is 34.
+            </DialogDescription>
+          </DialogHeader>
+          <Label htmlFor="workbook-row-height">Height in pixels</Label>
+          <Input
+            id="workbook-row-height"
+            type="number"
+            min={24}
+            max={300}
+            value={heightEditor?.value ?? ""}
+            onChange={(event) =>
+              setHeightEditor(
+                (state) => state && { ...state, value: event.target.value },
+              )
+            }
+          />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setHeightEditor(null)}>Cancel</Button>
+            <Button
+              disabled={
+                !heightEditor ||
+                !Number.isFinite(Number(heightEditor.value)) ||
+                Number(heightEditor.value) < 24 ||
+                Number(heightEditor.value) > 300
+              }
+              onClick={() => {
+                if (heightEditor)
+                  setRowHeight(heightEditor.row, Number(heightEditor.value));
+                setHeightEditor(null);
+              }}
+            >
+              Apply
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (heightEditor) setRowHeight(heightEditor.row);
+                setHeightEditor(null);
+              }}
+            >
+              Reset
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!importLayout} onOpenChange={(open) => { if (!open) setImportLayout(null); }}>
+        <AppDialogContent title="Import sheet layouts" description="Choose how each sheet stores its headers." size="md"
+          primaryAction={{ label: "Import workbook", onClick: () => { if (!importLayout) return; const { file, sheets } = importLayout; setImportLayout(null); void processImport(file, Object.fromEntries(sheets.map((sheet) => [sheet.name, sheet.offset]))); } }}
+          secondaryAction={{ label: "Cancel", onClick: () => setImportLayout(null) }}>
+          <div className="space-y-4 p-4">
+            <p className="text-sm text-muted-foreground">Raw cells keeps every row. For older Uprevit exports, choose the header layout explicitly. Each sheet supports 5,000 data rows and 150 columns; the workbook supports 750,000 data cells and 5 MiB.</p>
+            {importLayout?.sheets.map((sheet, index) => <div key={sheet.name} className="space-y-2 rounded-md border p-3">
+              <Label htmlFor={`import-layout-${index}`}>{sheet.name}</Label>
+              <Select value={String(sheet.offset)} onValueChange={(value) => setImportLayout((current) => current && ({ ...current, sheets: current.sheets.map((item, at) => at === index ? { ...item, offset: Number(value) } : item) }))}>
+                <SelectTrigger id={`import-layout-${index}`}><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="0">Raw cells — keep all rows</SelectItem><SelectItem value="1">First row contains column names</SelectItem><SelectItem value="2">First two rows contain names and classifications</SelectItem></SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{sheet.rows.toLocaleString()} file rows; {Math.max(0, sheet.rows - sheet.offset).toLocaleString()} data rows. {sheet.known ? "Uprevit layout detected." : "Header styling and sizing are retained for export."}</p>
+            </div>)}
+          </div>
+        </AppDialogContent>
+      </Dialog>
       <ConfirmFileImportAlertDialog
         open={showImportConfirm}
         onOpenChange={setShowImportConfirm}
@@ -2523,3 +3163,5 @@ export function ProductSpecificationDataTable({
     </div>
   );
 }
+
+export { ProductWorkbookSheets as ProductSpecificationDataTable } from "./ProductWorkbookSheets";

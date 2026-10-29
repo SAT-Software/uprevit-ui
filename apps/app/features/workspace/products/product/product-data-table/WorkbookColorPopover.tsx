@@ -59,6 +59,10 @@ function ColorSwatch({
             ? { backgroundColor: color }
             : undefined
       }
+      aria-label={
+        isNoFill ? "No fill" : isDefaultText ? "Default text colour" : color
+      }
+      aria-pressed={isSelected}
       title={isNoFill ? "No fill" : isDefaultText ? "Default" : color}
     >
       {variant === "text" && (
@@ -146,6 +150,7 @@ export function WorkbookColorPopover({
           size="icon-sm"
           disabled={disabled}
           className={cn("relative hover:bg-muted-foreground/20")}
+          aria-label={label}
           title={label}
         >
           <Icon icon={icon} size={16} strokeWidth={2} />

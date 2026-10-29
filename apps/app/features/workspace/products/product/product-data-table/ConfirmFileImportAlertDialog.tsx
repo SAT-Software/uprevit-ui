@@ -24,18 +24,18 @@ export function ConfirmFileImportAlertDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <AppDialogContent
-        title="Replace existing data?"
-        description="Your current data will be replaced with the imported file. This action cannot be undone."
+        title="Replace this workbook?"
+        description="All sheets will be replaced by the imported workbook. This action cannot be undone."
         variant="confirm-destructive"
         size="md"
         confirmContent={{
-          heading: "Replace existing data?",
+          heading: "Replace this workbook?",
           message:
-            "Your current data will be replaced with the imported file. This action cannot be undone.",
+            "All sheets will be replaced by the imported workbook. This action cannot be undone.",
           icon: Alert01Icon,
         }}
         primaryAction={{
-          label: "Continue",
+          label: "Replace workbook",
           onClick: onConfirm,
           icon: FileImportIcon,
         }}

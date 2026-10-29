@@ -1,4 +1,20 @@
-import type { CellFormat } from "@/types/product-data-table";
+import XLSX from "xlsx-js-style";
+
+export function workbookDateSerial(value: string, date1904 = false): number | undefined {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const time = Date.parse(value + "T00:00:00Z");
+    if (!Number.isFinite(time) || new Date(time).toISOString().slice(0, 10) !== value) return undefined;
+    const days = time / 86400000;
+    return date1904 ? days + 24107 : days + 25569 - (value < "1900-03-01" ? 1 : 0);
+  }
+  if (/^\d+(?:\.\d+)?$/.test(value) && Number(value) < 2958466) return Number(value);
+  return undefined;
+}
+
+import type {
+  CellFormat,
+  WorkbookConditionalRule,
+} from "@/types/product-data-table";
 import {
   IMPORT_LIMITS,
   validateCellCount,
@@ -28,6 +44,10 @@ export function formatWorkbookValue(
   value: string,
   format?: CellFormat,
 ): string {
+  if (format?.dateFormat) {
+    const serial = workbookDateSerial(value, format.date1904);
+    if (serial !== undefined) return XLSX.SSF.format(format.dateFormat, serial, { date1904: format.date1904 });
+  }
   const number = workbookNumber(value);
   const places = format?.decimalPlaces;
   return number !== undefined &&
@@ -55,9 +75,7 @@ export function createWorkbookFill(seeds: string[]): (index: number) => string {
       const step = scaled[1] - scaled[0];
       if (step === BigInt(0)) return (index) => seeds[index % seeds.length];
       if (
-        scaled.every(
-          (value, i) => i === 0 || value - scaled[i - 1] === step,
-        )
+        scaled.every((value, i) => i === 0 || value - scaled[i - 1] === step)
       ) {
         return (index) => {
           const next = scaled[0] + step * BigInt(index);
@@ -66,7 +84,10 @@ export function createWorkbookFill(seeds: string[]): (index: number) => string {
             .replace("-", "")
             .padStart(precision + 1, "0");
           const value = precision
-            ? `${digits.slice(0, -precision)}.${digits.slice(-precision)}`.replace(/\.?0+$/, "")
+            ? `${digits.slice(0, -precision)}.${digits.slice(-precision)}`.replace(
+                /\.?0+$/,
+                "",
+              )
             : digits;
           const result = (next < BigInt(0) ? "-" : "") + value;
           return workbookNumber(result) !== undefined
@@ -92,7 +113,14 @@ export function parseWorkbookClipboard(html: string, text: string): string[][] {
     document
       .querySelectorAll("script,style,template")
       .forEach((element) => element.remove());
-    const table = document.querySelector("table");
+    let table = document.querySelector("table");
+    // Word can wrap the copied grid in a single-cell layout table.
+    while (table) {
+      const ownCells = Array.from(table.rows).filter((row) => row.closest("table") === table).flatMap((row) => Array.from(row.cells));
+      const nested = ownCells.length === 1 ? ownCells[0].querySelector("table") : null;
+      if (!nested || table.textContent?.trim() !== nested.textContent?.trim()) break;
+      table = nested;
+    }
     if (table) {
       const occupied = new Set<string>();
       Array.from(table.rows)
@@ -156,4 +184,46 @@ export function parseWorkbookClipboard(html: string, text: string): string[][] {
   return rows.map((row) =>
     Array.from({ length: width }, (_, c) => row[c] ?? ""),
   );
+}
+
+export function workbookRuleMatches(
+  value: string,
+  rule: WorkbookConditionalRule,
+): boolean {
+  if (rule.operator === "contains")
+    return value.toLowerCase().includes(rule.value.toLowerCase());
+  const number = workbookNumber(value);
+  const threshold = workbookNumber(rule.value);
+  if (number === undefined || threshold === undefined) return false;
+  return rule.operator === "gt"
+    ? number > threshold
+    : rule.operator === "lt"
+      ? number < threshold
+      : number === threshold;
+}
+
+export function createWorkbookFormatResolver(rules: WorkbookConditionalRule[]) {
+  const compiled = rules.map((rule) => ({
+    rule,
+    rows: new Set(rule.rows),
+    columns: new Set(rule.columns),
+  }));
+  return (key: string, value: string, manual?: CellFormat): CellFormat => {
+    const [row, column] = key.split(",").map(Number);
+    let format = manual ?? {};
+    for (const { rule, rows, columns } of compiled) {
+      if (
+        !rows.has(row) ||
+        !columns.has(column) ||
+        !workbookRuleMatches(value, rule)
+      )
+        continue;
+      format = {
+        ...format,
+        ...(rule.bgColor ? { bgColor: rule.bgColor } : {}),
+        ...(rule.textColor ? { textColor: rule.textColor } : {}),
+      };
+    }
+    return format;
+  };
 }

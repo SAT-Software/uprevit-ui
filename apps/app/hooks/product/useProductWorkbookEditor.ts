@@ -59,7 +59,10 @@ export function useProductWorkbookEditor({
   ) {
     setPreviousSource({ productId, tab, serverBaseline });
     setSavedBaseline(serverBaseline);
-    setHasUnsavedChanges(false);
+    if (previousSource.productId !== productId || previousSource.tab !== tab || (!hasUnsavedChanges && !isSaving && serverBaseline !== savedBaseline)) {
+      setHasUnsavedChanges(false);
+      setTableResetKey((key) => key + 1);
+    }
   }
 
   const hasEditableUnsavedChanges = hasUnsavedChanges && !isContentLocked;
@@ -70,7 +73,7 @@ export function useProductWorkbookEditor({
 
   useEffect(() => {
     pendingDataRef.current = null;
-  }, [productId, tab, tableResetKey, serverBaseline]);
+  }, [productId, tab, tableResetKey]);
 
   const saveDataToDB = useCallback(
     (data: ProductDataTableSchema): Promise<void> => {
