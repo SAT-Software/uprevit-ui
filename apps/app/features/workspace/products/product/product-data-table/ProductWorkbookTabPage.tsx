@@ -110,7 +110,7 @@ export function ProductWorkbookTabPage({
     !isRedlineView && !isContentLocked,
   );
 
-  if (isLoading) {
+  if (isLoading || (isRedlineView && isLoadingDiff)) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
         <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
@@ -257,6 +257,7 @@ export function ProductWorkbookTabPage({
 
       <ProductSpecificationDataTable
         resetKey={editor.tableResetKey}
+        sourceRevision={isRedlineView ? resolvedWorkbookData : productId + tab}
         initialData={initialData}
         onDataChange={
           isContentLocked || isRedlineView ? undefined : editor.handleDataChange
