@@ -37,6 +37,7 @@ import {
   workbookDecimalPlaces,
   createWorkbookFill,
   workbookNumber,
+  placeRemovedAtBasePosition,
 } from "@/utils/product/workbook-cell-utils";
 import { WorkbookConditionalFormatDialog } from "./WorkbookConditionalFormatDialog";
 import { WorkbookHeaderMenu } from "./WorkbookHeaderMenu";
@@ -835,6 +836,61 @@ export function WorkbookSheetGrid({
     };
   }, [isRedlineView, redlineBaseData, cellData, headerData, columnTypeData]);
 
+  const redlineOrders = useMemo(() => {
+    if (!isRedlineView || !redlineBaseData) return null;
+    const occupied = (
+      cells: Record<string, string>,
+      headers: Record<number, string>,
+      types: Record<number, DataType>,
+    ) => {
+      const rows = new Set<number>();
+      const columns = new Set<string>();
+      Object.entries(cells).forEach(([key, value]) => {
+        if (!value) return;
+        const [row, col] = key.split(",");
+        rows.add(Number(row));
+        columns.add(`col-${col}`);
+      });
+      Object.entries(headers).forEach(([col, value]) => {
+        if (value) columns.add(`col-${col}`);
+      });
+      Object.entries(types).forEach(([col, value]) => {
+        if (value && value !== "blank") columns.add(`col-${col}`);
+      });
+      return { rows, columns };
+    };
+    const base = occupied(
+      redlineBaseData.cellData,
+      redlineBaseData.headerData,
+      redlineBaseData.columnTypeData,
+    );
+    const next = occupied(cellData, headerData, columnTypeData);
+    return {
+      rowOrder: placeRemovedAtBasePosition(
+        rowOrder,
+        redlineBaseData.rowOrder ??
+          Array.from({ length: ROW_COUNT }, (_, i) => i),
+        (row) => base.rows.has(row) && !next.rows.has(row),
+      ),
+      columnOrder: placeRemovedAtBasePosition(
+        columnOrder,
+        redlineBaseData.columnOrder ??
+          Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
+        (col) => base.columns.has(col) && !next.columns.has(col),
+      ),
+    };
+  }, [
+    isRedlineView,
+    redlineBaseData,
+    cellData,
+    headerData,
+    columnTypeData,
+    rowOrder,
+    columnOrder,
+  ]);
+  const displayRowOrder = redlineOrders?.rowOrder ?? rowOrder;
+  const displayColumnOrder = redlineOrders?.columnOrder ?? columnOrder;
+
   const formatDiffValue = (value: string) => {
     if (!value) return "—";
     return value;
@@ -1407,11 +1463,11 @@ export function WorkbookSheetGrid({
   // Refresh TanStack's cached accessor values after a committed value change.
   const rows = useMemo(
     () =>
-      rowOrder.map((rowIndex) => ({
+      displayRowOrder.map((rowIndex) => ({
         rowIndex,
         values: cellData,
       })),
-    [cellData, rowOrder],
+    [cellData, displayRowOrder],
   );
 
   const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
@@ -1499,7 +1555,7 @@ export function WorkbookSheetGrid({
     state: {
       columnSizing,
       sorting,
-      columnOrder,
+      columnOrder: displayColumnOrder,
       globalFilter: globalFilterValue,
     },
     onColumnSizingChange: (updater) => {
@@ -1751,7 +1807,7 @@ export function WorkbookSheetGrid({
 
   useEffect(() => {
     colVirtualizer.measure();
-  }, [columnSizing, columnOrder, colVirtualizer]);
+  }, [columnSizing, displayColumnOrder, colVirtualizer]);
 
   const headerGroup = table.getHeaderGroups()[0];
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
@@ -2527,7 +2583,7 @@ export function WorkbookSheetGrid({
                     1
                   </div>
                   <SortableContext
-                    items={columnOrder}
+                    items={displayColumnOrder}
                     strategy={horizontalListSortingStrategy}
                   >
                     <div

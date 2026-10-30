@@ -227,3 +227,28 @@ export function createWorkbookFormatResolver(rules: WorkbookConditionalRule[]) {
     return format;
   };
 }
+
+export function placeRemovedAtBasePosition<T>(
+  order: T[],
+  baseOrder: T[],
+  isRemoved: (id: T) => boolean,
+): T[] {
+  const removed = new Set(order.filter(isRemoved));
+  if (!removed.size) return order;
+  const after = new Map<T | null, T[]>();
+  let anchor: T | null = null;
+  for (const id of baseOrder) {
+    if (!removed.has(id)) {
+      anchor = id;
+      continue;
+    }
+    const list = after.get(anchor) ?? [];
+    list.push(id);
+    after.set(anchor, list);
+  }
+  const result = [...(after.get(null) ?? [])];
+  for (const id of order) {
+    if (!removed.has(id)) result.push(id, ...(after.get(id) ?? []));
+  }
+  return result;
+}

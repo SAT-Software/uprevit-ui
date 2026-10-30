@@ -112,6 +112,8 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
       headers: props.redlineBaseData.headerData,
       columnTypes: Object.fromEntries(Object.entries(props.redlineBaseData.columnTypeData).filter(([, value]) => value !== "blank")) as ProductDataTableSchema["columnTypes"],
       cells: props.redlineBaseData.cellData,
+      rowOrder: props.redlineBaseData.rowOrder,
+      columnOrder: props.redlineBaseData.columnOrder,
     },
   }] : []);
   const displaySheets = props.isRedlineView ? [...sheets, ...baseSheets.filter((base) => !sheets.some((sheet) => sheet.id === base.id)).map((base) => ({ ...base, data: emptySheet() }))] : sheets;
