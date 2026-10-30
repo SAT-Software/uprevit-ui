@@ -20,7 +20,6 @@ import {
 } from "@uprevit/ui/components/ui/popover";
 import { SidebarTrigger } from "@uprevit/ui/components/ui/sidebar";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
-import { useExportProductPDF } from "@/hooks/product/useExportProductPDF";
 import { useGetProductVersionsInfinite } from "@/hooks/product/useGetProductVersionsInfinite";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useUpdateProduct } from "@/hooks/product/useUpdateProduct";
@@ -43,6 +42,7 @@ import { NotificationsBell } from "@/components/common/NotificationsBell";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
+import DialogExportProductPDF from "../DialogExportProductPDF";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
 import { toast } from "sonner";
@@ -262,6 +262,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const productId = params.productId as string;
   const [versionPopoverOpen, setVersionPopoverOpen] = useState(false);
   const [comparePopoverOpen, setComparePopoverOpen] = useState(false);
+  const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
   const { data: productData } = useGetProductTabData(productId, "all-tabs");
   const {
@@ -277,8 +278,6 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     useUpdateProductTabData();
   const { mutateAsync: updateProduct, isPending: isUpdatingProduct } =
     useUpdateProduct();
-  const { mutate: exportPDF, isPending: isExportingPDF } =
-    useExportProductPDF();
   const searchParams = useSearchParams();
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
@@ -593,32 +592,10 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                   aria-label="Export product as PDF"
                   size="icon-xs"
                   variant="outline"
-                  onClick={() => {
-                    exportPDF(
-                      { productId },
-                      {
-                        onSuccess: () => {
-                          toast.success(
-                            "PDF export queued. Open Exports to track status.",
-                          );
-                        },
-                        onError: (error) => {
-                          toast.error(
-                            error instanceof Error
-                              ? error.message
-                              : "Failed to queue PDF export",
-                          );
-                        },
-                      },
-                    );
-                  }}
-                  disabled={isExportingPDF || isExportLocked}
+                  onClick={() => setShowExportPDFDialog(true)}
+                  disabled={isExportLocked}
                 >
-                  {isExportingPDF ? (
-                    <Spinner className="size-3" />
-                  ) : (
-                    <Icon icon={Pdf01Icon} size={14} />
-                  )}
+                  <Icon icon={Pdf01Icon} size={14} />
                 </Button>
               </span>
             </TooltipTrigger>
@@ -968,6 +945,16 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         </div>
         <NotificationsBell />
       </div>
+      <DialogExportProductPDF
+        open={showExportPDFDialog}
+        onOpenChange={setShowExportPDFDialog}
+        product={{
+          _id: productId,
+          product_name: product?.productName,
+          product_plan_number: productCoreData?.product_plan_number,
+          version: product?.version,
+        }}
+      />
     </header>
   );
 }
