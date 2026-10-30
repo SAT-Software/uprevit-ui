@@ -70,7 +70,8 @@ export function WorkbookConditionalFormatDialog({
     const columns = rule.columns
       .map((col) => columnOrder.indexOf(`col-${col}`) + 1)
       .sort((a, b) => a - b);
-    return `Rows ${describePositions(rows)}; columns ${describePositions(columns)} (${rows.length * columns.length} cells)`;
+    const cells = rows.length * columns.length;
+    return `Rows ${describePositions(rows)}; columns ${describePositions(columns)} (${cells} ${cells === 1 ? "cell" : "cells"})`;
   };
   const valid =
     draft &&
@@ -78,6 +79,11 @@ export function WorkbookConditionalFormatDialog({
     (draft.bgColor || draft.textColor) &&
     (draft.operator === "contains" ||
       workbookNumber(draft.value) !== undefined);
+  const numberError =
+    !!draft &&
+    draft.operator !== "contains" &&
+    draft.value !== "" &&
+    workbookNumber(draft.value) === undefined;
   const existing = rules.some((rule) => rule.id === draft?.id);
   return (
     <Dialog onOpenChange={() => setDraft(null)}>
@@ -86,9 +92,9 @@ export function WorkbookConditionalFormatDialog({
           Rules{rules.length ? ` (${rules.length})` : ""}
         </Button>
       </DialogTrigger>
-      <AppDialogContent title="Conditional formatting" description="Manage rules that colour cells when conditions match." size="md" secondaryAction={{ label: "Done" }}>
+      <AppDialogContent title="Conditional formatting" description="Manage rules that color cells when conditions match." size="md" secondaryAction={{ label: "Done" }}>
         <div className="space-y-4 p-4">
-        <p className="text-sm text-muted-foreground">Colour cells when a condition matches. Later rules take priority.</p>
+        <p className="text-sm text-muted-foreground">Color cells when a condition matches. Later rules take priority.</p>
         <div className="max-h-60 space-y-2 overflow-y-auto">
           {!rules.length && (
             <p className="text-sm text-muted-foreground">No rules yet. Select cells to add your first condition.</p>
@@ -202,17 +208,24 @@ export function WorkbookConditionalFormatDialog({
               <Input
                 id="workbook-rule-value"
                 value={draft.value}
+                aria-invalid={numberError}
+                aria-describedby={numberError ? "workbook-rule-value-error" : undefined}
                 onChange={(event) =>
                   setDraft({ ...draft, value: event.target.value })
                 }
               />
+              {numberError && (
+                <p id="workbook-rule-value-error" className="text-xs text-destructive">
+                  Enter a plain number, such as 12 or -0.5.
+                </p>
+              )}
             </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-              <span className="text-xs">Colours</span>
+              <span className="text-xs">Colors</span>
               <WorkbookColorPopover
                 icon={PaintBucketIcon}
-                label="Rule fill colour"
+                label="Rule fill color"
                 colors={fillColors}
                 currentColor={draft.bgColor}
                 isMixed={false}
@@ -226,7 +239,7 @@ export function WorkbookConditionalFormatDialog({
               />
               <WorkbookColorPopover
                 icon={TextSquareIcon}
-                label="Rule text colour"
+                label="Rule text color"
                 colors={textColors}
                 currentColor={draft.textColor}
                 isMixed={false}
@@ -251,7 +264,7 @@ export function WorkbookConditionalFormatDialog({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Choose at least one colour. Numeric rules apply to plain numbers
+              Choose at least one color. Numeric rules apply to plain numbers
               only.
             </p>
             <div className="flex flex-wrap justify-end gap-2 border-t pt-3">

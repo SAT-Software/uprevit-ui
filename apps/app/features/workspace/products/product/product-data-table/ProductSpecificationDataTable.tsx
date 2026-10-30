@@ -3094,52 +3094,49 @@ export function WorkbookSheetGrid({
         }}
       >
         <DialogContent className="sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle>Row height</DialogTitle>
-            <DialogDescription>
-              Set a height from 24 to 300 pixels. Default is 34.
-            </DialogDescription>
-          </DialogHeader>
-          <Label htmlFor="workbook-row-height">Height in pixels</Label>
-          <Input
-            id="workbook-row-height"
-            type="number"
-            min={24}
-            max={300}
-            value={heightEditor?.value ?? ""}
-            onChange={(event) =>
-              setHeightEditor(
-                (state) => state && { ...state, value: event.target.value },
-              )
-            }
-          />
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setHeightEditor(null)}>Cancel</Button>
-            <Button
-              disabled={
-                !heightEditor ||
-                !Number.isFinite(Number(heightEditor.value)) ||
-                Number(heightEditor.value) < 24 ||
-                Number(heightEditor.value) > 300
+          <form
+            className="grid gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (heightEditor)
+                setRowHeight(heightEditor.row, Number(heightEditor.value));
+              setHeightEditor(null);
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Row height</DialogTitle>
+              <DialogDescription>
+                Set a height from 24 to 300 pixels. Default is 34.
+              </DialogDescription>
+            </DialogHeader>
+            <Label htmlFor="workbook-row-height">Height in pixels</Label>
+            <Input
+              id="workbook-row-height"
+              type="number"
+              min={24}
+              max={300}
+              value={heightEditor?.value ?? ""}
+              onChange={(event) =>
+                setHeightEditor(
+                  (state) => state && { ...state, value: event.target.value },
+                )
               }
-              onClick={() => {
-                if (heightEditor)
-                  setRowHeight(heightEditor.row, Number(heightEditor.value));
-                setHeightEditor(null);
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (heightEditor) setRowHeight(heightEditor.row);
-                setHeightEditor(null);
-              }}
-            >
-              Reset
-            </Button>
-          </DialogFooter>
+            />
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setHeightEditor(null)}>Cancel</Button>
+              <Button
+                type="submit"
+                disabled={
+                  !heightEditor ||
+                  !Number.isFinite(Number(heightEditor.value)) ||
+                  Number(heightEditor.value) < 24 ||
+                  Number(heightEditor.value) > 300
+                }
+              >
+                Set row height
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

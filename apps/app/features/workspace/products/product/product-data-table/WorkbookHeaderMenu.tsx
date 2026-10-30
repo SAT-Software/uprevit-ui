@@ -36,7 +36,6 @@ export function WorkbookHeaderMenu({
         <DropdownMenuItem onSelect={() => onInsert(true)}>
           Insert {axis} {axis === "row" ? "below" : "right"}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onDelete}>Delete {axis}</DropdownMenuItem>
         {onHeight && (
           <>
             <DropdownMenuSeparator />
@@ -48,6 +47,10 @@ export function WorkbookHeaderMenu({
             </DropdownMenuItem>
           </>
         )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+          Delete {axis}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

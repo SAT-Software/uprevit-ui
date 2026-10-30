@@ -174,9 +174,9 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
     </DndContext>
     <Dialog open={!!rename} onOpenChange={(open) => { if (!open) setRename(null); }}>
       <AppDialogContent title="Rename sheet" description="Choose a unique sheet name." size="sm"
-        primaryAction={{ label: "Save name", disabled: !!error || !canEdit, onClick: () => { if (!canEdit || error) return; const next = sheetsRef.current.map((sheet) => sheet.id === rename ? { ...sheet, name: candidate } : sheet); emit(next); setSheets(next); setRename(null); } }}
+        primaryAction={{ label: "Save name", type: "submit", form: "workbook-sheet-rename", disabled: !!error || !canEdit }}
         secondaryAction={{ label: "Cancel", onClick: () => setRename(null) }}>
-        <div className="space-y-2 p-4"><Label htmlFor="workbook-sheet-name">Sheet name</Label><Input id="workbook-sheet-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={!!error} aria-describedby="workbook-sheet-error" /><p id="workbook-sheet-error" className="text-xs text-muted-foreground" role="status">{error ?? "Use a unique name of up to 31 characters."}</p></div>
+        <form id="workbook-sheet-rename" className="space-y-2 p-4" onSubmit={(event) => { event.preventDefault(); if (!canEdit || error) return; const next = sheetsRef.current.map((sheet) => sheet.id === rename ? { ...sheet, name: candidate } : sheet); emit(next); setSheets(next); setRename(null); }}><Label htmlFor="workbook-sheet-name">Sheet name</Label><Input id="workbook-sheet-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={!!error} aria-describedby="workbook-sheet-error" /><p id="workbook-sheet-error" className={error ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role="status">{error ?? "Use a unique name of up to 31 characters."}</p></form>
       </AppDialogContent>
     </Dialog>
     <Dialog open={!!deleteSheet} onOpenChange={(open) => { if (!open) setDeleteSheet(null); }}>
