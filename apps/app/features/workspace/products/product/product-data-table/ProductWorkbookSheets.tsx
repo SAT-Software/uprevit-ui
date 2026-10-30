@@ -36,8 +36,7 @@ export function ProductWorkbookSheets(props: ProductSpecificationDataTableProps)
 function WorkbookSheets(props: ProductSpecificationDataTableProps) {
   const [sheets, setSheets] = useState(() => initialSheets(props.initialData));
   const sheetsRef = useRef(sheets);
-  const mutationRevision = useRef(0);
-  const getWorkbookRevision = useCallback(() => mutationRevision.current, []);
+  const getWorkbookRevision = useCallback(() => JSON.stringify(sheetsRef.current), []);
   const [active, setActive] = useState(sheets[0].id);
   const sheetRailRef = useRef<HTMLDivElement>(null);
   const sheetScrollRef = useRef<HTMLDivElement>(null);
@@ -72,11 +71,6 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
   const clearers = useRef(new Map<string, () => void>());
   const loaded = useRef(!!props.initialData);
   const emit = (next: WorkbookSheet[]) => {
-    const previous = sheetsRef.current;
-    if (next.length !== previous.length || next.some((sheet, index) => {
-      const old = previous[index];
-      return !old || sheet.id !== old.id || sheet.name !== old.name || (sheet.data !== old.data && JSON.stringify(sheet.data) !== JSON.stringify(old.data));
-    })) mutationRevision.current++;
     sheetsRef.current = next;
     // Preserve the legacy representation until the user creates or imports sheets.
     props.onDataChange?.(next.length === 1 && !props.initialData?.sheets && next[0].name === "Sheet1" ? next[0].data : { ...emptySheet(), sheets: next });

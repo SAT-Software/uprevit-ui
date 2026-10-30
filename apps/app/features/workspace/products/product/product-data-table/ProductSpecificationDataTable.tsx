@@ -595,7 +595,7 @@ export function WorkbookSheetGrid({
   onWorkbookImport?: (data: import("@/types/product-data-table").ProductDataTableSchema) => void;
   onWorkbookExport?: () => void;
   hasOtherSheets?: boolean;
-  getWorkbookRevision?: () => number;
+  getWorkbookRevision?: () => string;
   onSelectionCountChange?: (count: number) => void;
 }) {
   const { resolvedTheme } = useTheme();
