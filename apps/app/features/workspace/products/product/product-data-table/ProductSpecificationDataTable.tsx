@@ -1132,7 +1132,7 @@ export function WorkbookSheetGrid({
   );
 
   // Ref for table container to manage cell focus
-  const tableRef = useRef<HTMLTableElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const finishEdit = useCallback(
     (cancel = false) => {
@@ -2559,7 +2559,7 @@ export function WorkbookSheetGrid({
             ref={parentRef}
             className="absolute inset-0 overscroll-contain [&>div]:!block"
           >
-            <table
+            <div
               ref={tableRef}
               style={{
                 height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
@@ -2567,11 +2567,11 @@ export function WorkbookSheetGrid({
                 position: "relative",
               }}
             >
-              <thead
+              <div
                 className="sticky top-0 z-20 bg-muted"
                 style={{ height: ROW_HEIGHT * 2 }}
               >
-                <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                <div className="flex" style={{ height: ROW_HEIGHT }}>
                   <div
                     className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                     style={{
@@ -2616,9 +2616,9 @@ export function WorkbookSheetGrid({
                       })}
                     </div>
                   </SortableContext>
-                </tr>
+                </div>
 
-                <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                <div className="flex" style={{ height: ROW_HEIGHT }}>
                   <div
                     className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                     style={{
@@ -2712,8 +2712,8 @@ export function WorkbookSheetGrid({
                       );
                     })}
                   </div>
-                </tr>
-              </thead>
+                </div>
+              </div>
 
               {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                 const row = tableRows[virtualRow.index];
@@ -2721,7 +2721,7 @@ export function WorkbookSheetGrid({
                 const rowIndex = row.original.rowIndex;
 
                 return (
-                  <tbody
+                  <div
                     key={row.id}
                     className="flex"
                     style={{
@@ -2782,7 +2782,7 @@ export function WorkbookSheetGrid({
                       )}
                     </div>
 
-                    <tr
+                    <div
                       className="relative"
                       style={{
                         width: totalColumnWidth,
@@ -3128,11 +3128,11 @@ export function WorkbookSheetGrid({
                           </div>
                         );
                       })}
-                    </tr>
-                  </tbody>
+                    </div>
+                  </div>
                 );
               })}
-            </table>
+            </div>
           </ScrollAreaPrimitive.Viewport>
           <ScrollBar
             orientation="horizontal"
