@@ -37,6 +37,7 @@ import {
   workbookDecimalPlaces,
   createWorkbookFill,
   workbookNumber,
+  placeRemovedAtBasePosition,
 } from "@/utils/product/workbook-cell-utils";
 import { WorkbookConditionalFormatDialog } from "./WorkbookConditionalFormatDialog";
 import { WorkbookHeaderMenu } from "./WorkbookHeaderMenu";
@@ -436,11 +437,13 @@ const EditableHeaderContent = ({
 const DraggableHeader = ({
   header,
   virtualCol,
+  colIndex,
   showChangeIndicator = false,
   isReadOnly = false,
 }: {
   header: Header<RowData, unknown>;
   virtualCol: { start: number; size: number };
+  colIndex: number;
   showChangeIndicator?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -470,6 +473,8 @@ const DraggableHeader = ({
   return (
     <div
       ref={setNodeRef}
+      role="columnheader"
+      aria-colindex={colIndex}
       className="border-r border-b border-border flex items-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
       style={style}
     >
@@ -594,7 +599,7 @@ export function WorkbookSheetGrid({
   onWorkbookImport?: (data: import("@/types/product-data-table").ProductDataTableSchema) => void;
   onWorkbookExport?: () => void;
   hasOtherSheets?: boolean;
-  getWorkbookRevision?: () => number;
+  getWorkbookRevision?: () => string;
   onSelectionCountChange?: (count: number) => void;
 }) {
   const { resolvedTheme } = useTheme();
@@ -834,6 +839,61 @@ export function WorkbookSheetGrid({
       changedCols,
     };
   }, [isRedlineView, redlineBaseData, cellData, headerData, columnTypeData]);
+
+  const redlineOrders = useMemo(() => {
+    if (!isRedlineView || !redlineBaseData) return null;
+    const occupied = (
+      cells: Record<string, string>,
+      headers: Record<number, string>,
+      types: Record<number, DataType>,
+    ) => {
+      const rows = new Set<number>();
+      const columns = new Set<string>();
+      Object.entries(cells).forEach(([key, value]) => {
+        if (!value) return;
+        const [row, col] = key.split(",");
+        rows.add(Number(row));
+        columns.add(`col-${col}`);
+      });
+      Object.entries(headers).forEach(([col, value]) => {
+        if (value) columns.add(`col-${col}`);
+      });
+      Object.entries(types).forEach(([col, value]) => {
+        if (value && value !== "blank") columns.add(`col-${col}`);
+      });
+      return { rows, columns };
+    };
+    const base = occupied(
+      redlineBaseData.cellData,
+      redlineBaseData.headerData,
+      redlineBaseData.columnTypeData,
+    );
+    const next = occupied(cellData, headerData, columnTypeData);
+    return {
+      rowOrder: placeRemovedAtBasePosition(
+        rowOrder,
+        redlineBaseData.rowOrder ??
+          Array.from({ length: ROW_COUNT }, (_, i) => i),
+        (row) => base.rows.has(row) && !next.rows.has(row),
+      ),
+      columnOrder: placeRemovedAtBasePosition(
+        columnOrder,
+        redlineBaseData.columnOrder ??
+          Array.from({ length: COLUMN_COUNT }, (_, i) => `col-${i}`),
+        (col) => base.columns.has(col) && !next.columns.has(col),
+      ),
+    };
+  }, [
+    isRedlineView,
+    redlineBaseData,
+    cellData,
+    headerData,
+    columnTypeData,
+    rowOrder,
+    columnOrder,
+  ]);
+  const displayRowOrder = redlineOrders?.rowOrder ?? rowOrder;
+  const displayColumnOrder = redlineOrders?.columnOrder ?? columnOrder;
 
   const formatDiffValue = (value: string) => {
     if (!value) return "—";
@@ -1076,7 +1136,7 @@ export function WorkbookSheetGrid({
   );
 
   // Ref for table container to manage cell focus
-  const tableRef = useRef<HTMLTableElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const finishEdit = useCallback(
     (cancel = false) => {
@@ -1407,11 +1467,11 @@ export function WorkbookSheetGrid({
   // Refresh TanStack's cached accessor values after a committed value change.
   const rows = useMemo(
     () =>
-      rowOrder.map((rowIndex) => ({
+      displayRowOrder.map((rowIndex) => ({
         rowIndex,
         values: cellData,
       })),
-    [cellData, rowOrder],
+    [cellData, displayRowOrder],
   );
 
   const columns: ColumnDef<{ rowIndex: number }>[] = useMemo(() => {
@@ -1499,7 +1559,7 @@ export function WorkbookSheetGrid({
     state: {
       columnSizing,
       sorting,
-      columnOrder,
+      columnOrder: displayColumnOrder,
       globalFilter: globalFilterValue,
     },
     onColumnSizingChange: (updater) => {
@@ -1751,7 +1811,7 @@ export function WorkbookSheetGrid({
 
   useEffect(() => {
     colVirtualizer.measure();
-  }, [columnSizing, columnOrder, colVirtualizer]);
+  }, [columnSizing, displayColumnOrder, colVirtualizer]);
 
   const headerGroup = table.getHeaderGroups()[0];
   const totalColumnWidth = columnSizes.reduce((sum, size) => sum + size, 0);
@@ -2018,6 +2078,22 @@ export function WorkbookSheetGrid({
       ),
     [visibleColumns],
   );
+  const mountedRows = rowVirtualizer.getVirtualItems();
+  const mountedCols = colVirtualizer.getVirtualItems();
+  const isMounted = (row?: number, col?: number) =>
+    row !== undefined &&
+    col !== undefined &&
+    row >= (mountedRows[0]?.index ?? 0) &&
+    row <= (mountedRows.at(-1)?.index ?? -1) &&
+    col >= (mountedCols[0]?.index ?? 0) &&
+    col <= (mountedCols.at(-1)?.index ?? -1);
+  const tabStopKey =
+    activeCell &&
+    isMounted(rowPositions.get(activeCell.row), colPositions.get(activeCell.col))
+      ? `${activeCell.row},${activeCell.col}`
+      : mountedRows.length && mountedCols.length
+        ? visualCellKey(mountedRows[0].index, mountedCols[0].index)
+        : null;
   const searchMatches = useMemo(() => {
     if (!debouncedSearch) return [];
     const query = debouncedSearch.toLowerCase();
@@ -2495,20 +2571,27 @@ export function WorkbookSheetGrid({
             ref={parentRef}
             className="absolute inset-0 overscroll-contain [&>div]:!block"
           >
-            <table
+            <div
               ref={tableRef}
+              role="grid"
+              aria-label="Workbook sheet"
+              aria-rowcount={tableRows.length + 2}
+              aria-colcount={visibleColumns.length + 1}
               style={{
                 height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
                 width: totalColumnWidth + ROW_NUMBER_WIDTH,
                 position: "relative",
               }}
             >
-              <thead
+              <div
+                role="rowgroup"
                 className="sticky top-0 z-20 bg-muted"
                 style={{ height: ROW_HEIGHT * 2 }}
               >
-                <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                <div role="row" aria-rowindex={1} className="flex" style={{ height: ROW_HEIGHT }}>
                   <div
+                    role="rowheader"
+                    aria-colindex={1}
                     className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                     style={{
                       width: ROW_NUMBER_WIDTH,
@@ -2519,7 +2602,7 @@ export function WorkbookSheetGrid({
                     1
                   </div>
                   <SortableContext
-                    items={columnOrder}
+                    items={displayColumnOrder}
                     strategy={horizontalListSortingStrategy}
                   >
                     <div
@@ -2545,6 +2628,7 @@ export function WorkbookSheetGrid({
                               start: virtualCol.start,
                               size: virtualCol.size,
                             }}
+                            colIndex={virtualCol.index + 2}
                             showChangeIndicator={showChangeIndicator}
                             isReadOnly={isReadOnly}
                           />
@@ -2552,10 +2636,12 @@ export function WorkbookSheetGrid({
                       })}
                     </div>
                   </SortableContext>
-                </tr>
+                </div>
 
-                <tr className="flex" style={{ height: ROW_HEIGHT }}>
+                <div role="row" aria-rowindex={2} className="flex" style={{ height: ROW_HEIGHT }}>
                   <div
+                    role="rowheader"
+                    aria-colindex={1}
                     className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                     style={{
                       width: ROW_NUMBER_WIDTH,
@@ -2585,6 +2671,8 @@ export function WorkbookSheetGrid({
                       const select = (
                         <div
                           key={`type-${column.id}`}
+                          role="gridcell"
+                          aria-colindex={virtualCol.index + 2}
                           className={cn(
                             "border-r border-b border-border flex items-center bg-muted",
                             showHighlightDiff && redlineHighlightRing,
@@ -2648,8 +2736,8 @@ export function WorkbookSheetGrid({
                       );
                     })}
                   </div>
-                </tr>
-              </thead>
+                </div>
+              </div>
 
               {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                 const row = tableRows[virtualRow.index];
@@ -2657,8 +2745,10 @@ export function WorkbookSheetGrid({
                 const rowIndex = row.original.rowIndex;
 
                 return (
-                  <tbody
+                  <div
                     key={row.id}
+                    role="row"
+                    aria-rowindex={virtualRow.index + 3}
                     className="flex"
                     style={{
                       position: "absolute",
@@ -2668,6 +2758,8 @@ export function WorkbookSheetGrid({
                     }}
                   >
                     <div
+                      role="rowheader"
+                      aria-colindex={1}
                       className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                       style={{
                         width: ROW_NUMBER_WIDTH,
@@ -2718,7 +2810,7 @@ export function WorkbookSheetGrid({
                       )}
                     </div>
 
-                    <tr
+                    <div
                       className="relative"
                       style={{
                         width: totalColumnWidth,
@@ -2769,6 +2861,7 @@ export function WorkbookSheetGrid({
                             rows={1}
                             wrap="off"
                             data-cell-key={cellKey}
+                            tabIndex={cellKey === tabStopKey ? 0 : -1}
                             aria-label={`Row ${virtualRow.index + 3}, column ${virtualCol.index + 1}`}
                             readOnly={isReadOnly || editingCell !== cellKey}
                             onCompositionStart={() => {
@@ -2850,7 +2943,10 @@ export function WorkbookSheetGrid({
                                 startEdit(cellKey);
                                 return;
                               }
-                              if (e.key === "Enter" || e.key === "Tab") {
+                              if (
+                                e.key === "Enter" ||
+                                (e.key === "Tab" && editing)
+                              ) {
                                 e.preventDefault();
                                 finishEdit();
                                 let r = virtualRow.index;
@@ -2936,6 +3032,8 @@ export function WorkbookSheetGrid({
                         return (
                           <div
                             key={`${rowIndex}-${column.id}`}
+                            role="gridcell"
+                            aria-colindex={virtualCol.index + 2}
                             style={{
                               position: "absolute",
                               left: virtualCol.start,
@@ -2965,7 +3063,7 @@ export function WorkbookSheetGrid({
                               paddingBlock: 2,
                             }}
                             className={cn(
-                              "relative flex flex-col border border-border cursor-default",
+                              "relative flex flex-col border border-border cursor-default focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary",
                               editingCell === cellKey
                                 ? "touch-auto"
                                 : "touch-none",
@@ -2999,7 +3097,7 @@ export function WorkbookSheetGrid({
                             {editingCell !== cellKey && !showInlineDiff && (
                               <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 inset-y-0.5 flex flex-col overflow-hidden px-2 text-sm leading-[1.5]"
                                 style={{ color: resolvedText || "inherit", fontSize: format.fontSize, fontWeight: format.bold ? "bold" : undefined, fontStyle: format.italic ? "italic" : undefined,
-                                  justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "flex-end" : "center" }}>
+                                  justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "safe flex-end" : "safe center" }}>
                                 <div className="shrink-0">
                                   {cellValue.split("\n").map((line, index) => <div key={index} className="flex whitespace-pre" style={{ minHeight: "1.5em", justifyContent: format.alignment === "right" ? "flex-end" : format.alignment === "center" ? "center" : "flex-start" }}>
                                     <span className="shrink-0" style={{ textDecoration: format.underline ? "underline" : undefined }}>{line || "\u00a0"}</span>
@@ -3021,6 +3119,7 @@ export function WorkbookSheetGrid({
                               selectionBounds.right === virtualCol.index && (
                                 <button
                                   type="button"
+                                  tabIndex={-1}
                                   aria-label="Drag to autofill selected cells"
                                   title="Drag down or right to fill"
                                   className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 touch-none cursor-crosshair border border-background bg-primary"
@@ -3059,11 +3158,11 @@ export function WorkbookSheetGrid({
                           </div>
                         );
                       })}
-                    </tr>
-                  </tbody>
+                    </div>
+                  </div>
                 );
               })}
-            </table>
+            </div>
           </ScrollAreaPrimitive.Viewport>
           <ScrollBar
             orientation="horizontal"
@@ -3081,52 +3180,49 @@ export function WorkbookSheetGrid({
         }}
       >
         <DialogContent className="sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle>Row height</DialogTitle>
-            <DialogDescription>
-              Set a height from 24 to 300 pixels. Default is 34.
-            </DialogDescription>
-          </DialogHeader>
-          <Label htmlFor="workbook-row-height">Height in pixels</Label>
-          <Input
-            id="workbook-row-height"
-            type="number"
-            min={24}
-            max={300}
-            value={heightEditor?.value ?? ""}
-            onChange={(event) =>
-              setHeightEditor(
-                (state) => state && { ...state, value: event.target.value },
-              )
-            }
-          />
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setHeightEditor(null)}>Cancel</Button>
-            <Button
-              disabled={
-                !heightEditor ||
-                !Number.isFinite(Number(heightEditor.value)) ||
-                Number(heightEditor.value) < 24 ||
-                Number(heightEditor.value) > 300
+          <form
+            className="grid gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (heightEditor)
+                setRowHeight(heightEditor.row, Number(heightEditor.value));
+              setHeightEditor(null);
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Row height</DialogTitle>
+              <DialogDescription>
+                Set a height from 24 to 300 pixels. Default is 34.
+              </DialogDescription>
+            </DialogHeader>
+            <Label htmlFor="workbook-row-height">Height in pixels</Label>
+            <Input
+              id="workbook-row-height"
+              type="number"
+              min={24}
+              max={300}
+              value={heightEditor?.value ?? ""}
+              onChange={(event) =>
+                setHeightEditor(
+                  (state) => state && { ...state, value: event.target.value },
+                )
               }
-              onClick={() => {
-                if (heightEditor)
-                  setRowHeight(heightEditor.row, Number(heightEditor.value));
-                setHeightEditor(null);
-              }}
-            >
-              Apply
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (heightEditor) setRowHeight(heightEditor.row);
-                setHeightEditor(null);
-              }}
-            >
-              Reset
-            </Button>
-          </DialogFooter>
+            />
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setHeightEditor(null)}>Cancel</Button>
+              <Button
+                type="submit"
+                disabled={
+                  !heightEditor ||
+                  !Number.isFinite(Number(heightEditor.value)) ||
+                  Number(heightEditor.value) < 24 ||
+                  Number(heightEditor.value) > 300
+                }
+              >
+                Set row height
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

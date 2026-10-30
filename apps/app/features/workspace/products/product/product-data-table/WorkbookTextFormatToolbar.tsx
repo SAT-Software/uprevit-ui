@@ -101,7 +101,7 @@ export function WorkbookTextFormatToolbar({
         </SelectContent>
       </Select>
       {separator}
-      <ButtonGroup aria-label="Cell colours">{children}</ButtonGroup>
+      <ButtonGroup aria-label="Cell colors">{children}</ButtonGroup>
       {separator}
       {(
         [

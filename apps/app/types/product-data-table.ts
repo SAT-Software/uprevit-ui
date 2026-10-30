@@ -73,6 +73,8 @@ export interface ProductSpecificationDataTableProps {
     headerData: Record<number, string>;
     columnTypeData: Record<number, DataType>;
     cellData: Record<string, string>;
+    rowOrder?: number[];
+    columnOrder?: string[];
   };
 }
 

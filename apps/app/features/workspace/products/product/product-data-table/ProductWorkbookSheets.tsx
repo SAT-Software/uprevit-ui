@@ -36,8 +36,7 @@ export function ProductWorkbookSheets(props: ProductSpecificationDataTableProps)
 function WorkbookSheets(props: ProductSpecificationDataTableProps) {
   const [sheets, setSheets] = useState(() => initialSheets(props.initialData));
   const sheetsRef = useRef(sheets);
-  const mutationRevision = useRef(0);
-  const getWorkbookRevision = useCallback(() => mutationRevision.current, []);
+  const getWorkbookRevision = useCallback(() => JSON.stringify(sheetsRef.current), []);
   const [active, setActive] = useState(sheets[0].id);
   const sheetRailRef = useRef<HTMLDivElement>(null);
   const sheetScrollRef = useRef<HTMLDivElement>(null);
@@ -72,11 +71,6 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
   const clearers = useRef(new Map<string, () => void>());
   const loaded = useRef(!!props.initialData);
   const emit = (next: WorkbookSheet[]) => {
-    const previous = sheetsRef.current;
-    if (next.length !== previous.length || next.some((sheet, index) => {
-      const old = previous[index];
-      return !old || sheet.id !== old.id || sheet.name !== old.name || (sheet.data !== old.data && JSON.stringify(sheet.data) !== JSON.stringify(old.data));
-    })) mutationRevision.current++;
     sheetsRef.current = next;
     // Preserve the legacy representation until the user creates or imports sheets.
     props.onDataChange?.(next.length === 1 && !props.initialData?.sheets && next[0].name === "Sheet1" ? next[0].data : { ...emptySheet(), sheets: next });
@@ -112,6 +106,8 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
       headers: props.redlineBaseData.headerData,
       columnTypes: Object.fromEntries(Object.entries(props.redlineBaseData.columnTypeData).filter(([, value]) => value !== "blank")) as ProductDataTableSchema["columnTypes"],
       cells: props.redlineBaseData.cellData,
+      rowOrder: props.redlineBaseData.rowOrder,
+      columnOrder: props.redlineBaseData.columnOrder,
     },
   }] : []);
   const displaySheets = props.isRedlineView ? [...sheets, ...baseSheets.filter((base) => !sheets.some((sheet) => sheet.id === base.id)).map((base) => ({ ...base, data: emptySheet() }))] : sheets;
@@ -150,7 +146,7 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
     <div className="flex shrink-0 items-center gap-2 border-t bg-muted/50 p-1.5">
     <div ref={sheetRailRef} className="flex min-w-0 flex-1 items-center gap-1">
     {scrollState.overflow && <Button size="icon-xs" variant="outline" className="shrink-0" aria-label="Scroll sheets left" disabled={!scrollState.left} onClick={() => scrollSheets(-1)}><Icon icon={ArrowLeft01Icon} size={14} /></Button>}
-    <div ref={sheetScrollRef} onScroll={updateSheetScroll} className="min-w-0 flex-1 overflow-x-auto" aria-label="Workbook sheets">
+    <div ref={sheetScrollRef} onScroll={updateSheetScroll} className="min-w-0 flex-1 overflow-x-auto" role="group" aria-label="Workbook sheets">
     <div ref={sheetContentsRef} className="flex w-max items-center gap-1">
       <SortableContext items={displaySheets.map((sheet) => sheet.id)} strategy={horizontalListSortingStrategy}>
       {displaySheets.map((sheet, index) => <WorkbookSheetTab key={sheet.id} sheet={sheet} status={props.isRedlineView ? !sheets.some((current) => current.id === sheet.id) ? "Deleted" : !baseSheets.some((base) => base.id === sheet.id) ? "Added" : undefined : undefined} active={active === sheet.id} disabled={!canEdit} canDelete={sheets.length > 1} canMoveLeft={index > 0} canMoveRight={index < sheets.length - 1}
@@ -174,9 +170,9 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
     </DndContext>
     <Dialog open={!!rename} onOpenChange={(open) => { if (!open) setRename(null); }}>
       <AppDialogContent title="Rename sheet" description="Choose a unique sheet name." size="sm"
-        primaryAction={{ label: "Save name", disabled: !!error || !canEdit, onClick: () => { if (!canEdit || error) return; const next = sheetsRef.current.map((sheet) => sheet.id === rename ? { ...sheet, name: candidate } : sheet); emit(next); setSheets(next); setRename(null); } }}
+        primaryAction={{ label: "Save name", type: "submit", form: "workbook-sheet-rename", disabled: !!error || !canEdit }}
         secondaryAction={{ label: "Cancel", onClick: () => setRename(null) }}>
-        <div className="space-y-2 p-4"><Label htmlFor="workbook-sheet-name">Sheet name</Label><Input id="workbook-sheet-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={!!error} aria-describedby="workbook-sheet-error" /><p id="workbook-sheet-error" className="text-xs text-muted-foreground" role="status">{error ?? "Use a unique name of up to 31 characters."}</p></div>
+        <form id="workbook-sheet-rename" className="space-y-2 p-4" onSubmit={(event) => { event.preventDefault(); if (!canEdit || error) return; const next = sheetsRef.current.map((sheet) => sheet.id === rename ? { ...sheet, name: candidate } : sheet); emit(next); setSheets(next); setRename(null); }}><Label htmlFor="workbook-sheet-name">Sheet name</Label><Input id="workbook-sheet-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={!!error} aria-describedby="workbook-sheet-error" /><p id="workbook-sheet-error" className={error ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role="status">{error ?? "Use a unique name of up to 31 characters."}</p></form>
       </AppDialogContent>
     </Dialog>
     <Dialog open={!!deleteSheet} onOpenChange={(open) => { if (!open) setDeleteSheet(null); }}>
@@ -205,12 +201,12 @@ function WorkbookSheetTab({ sheet, status, active, disabled, canDelete, canMoveL
   sheet: WorkbookSheet; status?: "Added" | "Deleted"; active: boolean; disabled: boolean; canDelete: boolean; canMoveLeft: boolean; canMoveRight: boolean;
   onSelect: () => void; onRename: () => void; onDelete: () => void; onMove: (direction: -1 | 1) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sheet.id, disabled });
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sheet.id, disabled });
   return <ContextMenu>
     <ContextMenuTrigger asChild disabled={disabled}>
       <Button ref={setNodeRef} size="sm" variant={active ? "secondary" : "ghost"}
         style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : undefined }}
-        {...attributes} {...listeners} aria-pressed={active} onClick={onSelect} onDoubleClick={onRename}
+        {...listeners} aria-pressed={active} onClick={onSelect} onDoubleClick={onRename}
         onKeyDown={(event) => { if (event.key === "F2" && !disabled) { event.preventDefault(); onRename(); } }}>
         {sheet.name}{status && <span className="text-xs text-muted-foreground">({status})</span>}
       </Button>

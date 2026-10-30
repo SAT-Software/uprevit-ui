@@ -37,6 +37,7 @@ export function useProductWorkbookEditor({
   const pendingDataRef = useRef<ProductDataTableSchema | null>(null);
   const onSaveSuccessRef = useRef<() => void>(() => {});
   const savePromiseRef = useRef<Promise<void> | null>(null);
+  const dirtyCheckRef = useRef<number | undefined>(undefined);
 
   const { mutate: updateTabData, isPending: isSaving } =
     useUpdateProductTabData();
@@ -73,7 +74,10 @@ export function useProductWorkbookEditor({
 
   useEffect(() => {
     pendingDataRef.current = null;
+    window.clearTimeout(dirtyCheckRef.current);
   }, [productId, tab, tableResetKey]);
+
+  useEffect(() => () => window.clearTimeout(dirtyCheckRef.current), []);
 
   const saveDataToDB = useCallback(
     (data: ProductDataTableSchema): Promise<void> => {
@@ -90,6 +94,7 @@ export function useProductWorkbookEditor({
       const savePromise = new Promise<void>((resolve, reject) => {
         updateTabData(payload, {
           onSuccess: () => {
+            window.clearTimeout(dirtyCheckRef.current);
             setSavedBaseline(serializeWorkbookForComparison(data));
             setHasUnsavedChanges(false);
             setLastSavedAt(new Date());
@@ -117,11 +122,15 @@ export function useProductWorkbookEditor({
       if (isContentLocked) return;
 
       pendingDataRef.current = data;
-      setHasUnsavedChanges(
-        serializeWorkbookForComparison(data) !== savedBaseline,
-      );
+      window.clearTimeout(dirtyCheckRef.current);
+      const check = () =>
+        setHasUnsavedChanges(
+          serializeWorkbookForComparison(data) !== savedBaseline,
+        );
+      if (hasUnsavedChanges) dirtyCheckRef.current = window.setTimeout(check, 300);
+      else check();
     },
-    [isContentLocked, savedBaseline],
+    [isContentLocked, savedBaseline, hasUnsavedChanges],
   );
 
   const handleManualSave = useCallback(() => {
@@ -135,6 +144,7 @@ export function useProductWorkbookEditor({
   }, [saveDataToDB]);
 
   const discardChanges = useCallback(() => {
+    window.clearTimeout(dirtyCheckRef.current);
     pendingDataRef.current = null;
     setSavedBaseline(serverBaseline);
     setHasUnsavedChanges(false);

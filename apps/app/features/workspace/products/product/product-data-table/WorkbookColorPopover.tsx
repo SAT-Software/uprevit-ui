@@ -60,7 +60,7 @@ function ColorSwatch({
             : undefined
       }
       aria-label={
-        isNoFill ? "No fill" : isDefaultText ? "Default text colour" : color
+        isNoFill ? "No fill" : isDefaultText ? "Default text color" : color
       }
       aria-pressed={isSelected}
       title={isNoFill ? "No fill" : isDefaultText ? "Default" : color}
