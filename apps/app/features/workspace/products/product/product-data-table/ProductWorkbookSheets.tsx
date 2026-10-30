@@ -150,7 +150,7 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
     <div className="flex shrink-0 items-center gap-2 border-t bg-muted/50 p-1.5">
     <div ref={sheetRailRef} className="flex min-w-0 flex-1 items-center gap-1">
     {scrollState.overflow && <Button size="icon-xs" variant="outline" className="shrink-0" aria-label="Scroll sheets left" disabled={!scrollState.left} onClick={() => scrollSheets(-1)}><Icon icon={ArrowLeft01Icon} size={14} /></Button>}
-    <div ref={sheetScrollRef} onScroll={updateSheetScroll} className="min-w-0 flex-1 overflow-x-auto" aria-label="Workbook sheets">
+    <div ref={sheetScrollRef} onScroll={updateSheetScroll} className="min-w-0 flex-1 overflow-x-auto" role="group" aria-label="Workbook sheets">
     <div ref={sheetContentsRef} className="flex w-max items-center gap-1">
       <SortableContext items={displaySheets.map((sheet) => sheet.id)} strategy={horizontalListSortingStrategy}>
       {displaySheets.map((sheet, index) => <WorkbookSheetTab key={sheet.id} sheet={sheet} status={props.isRedlineView ? !sheets.some((current) => current.id === sheet.id) ? "Deleted" : !baseSheets.some((base) => base.id === sheet.id) ? "Added" : undefined : undefined} active={active === sheet.id} disabled={!canEdit} canDelete={sheets.length > 1} canMoveLeft={index > 0} canMoveRight={index < sheets.length - 1}
@@ -205,12 +205,12 @@ function WorkbookSheetTab({ sheet, status, active, disabled, canDelete, canMoveL
   sheet: WorkbookSheet; status?: "Added" | "Deleted"; active: boolean; disabled: boolean; canDelete: boolean; canMoveLeft: boolean; canMoveRight: boolean;
   onSelect: () => void; onRename: () => void; onDelete: () => void; onMove: (direction: -1 | 1) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sheet.id, disabled });
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sheet.id, disabled });
   return <ContextMenu>
     <ContextMenuTrigger asChild disabled={disabled}>
       <Button ref={setNodeRef} size="sm" variant={active ? "secondary" : "ghost"}
         style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : undefined }}
-        {...attributes} {...listeners} aria-pressed={active} onClick={onSelect} onDoubleClick={onRename}
+        {...listeners} aria-pressed={active} onClick={onSelect} onDoubleClick={onRename}
         onKeyDown={(event) => { if (event.key === "F2" && !disabled) { event.preventDefault(); onRename(); } }}>
         {sheet.name}{status && <span className="text-xs text-muted-foreground">({status})</span>}
       </Button>

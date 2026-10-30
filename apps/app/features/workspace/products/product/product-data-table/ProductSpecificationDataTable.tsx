@@ -2018,6 +2018,14 @@ export function WorkbookSheetGrid({
       ),
     [visibleColumns],
   );
+  const tabStopKey =
+    activeCell &&
+    rowPositions.has(activeCell.row) &&
+    colPositions.has(activeCell.col)
+      ? `${activeCell.row},${activeCell.col}`
+      : tableRows.length && visibleColumns.length
+        ? visualCellKey(0, 0)
+        : null;
   const searchMatches = useMemo(() => {
     if (!debouncedSearch) return [];
     const query = debouncedSearch.toLowerCase();
@@ -2769,6 +2777,7 @@ export function WorkbookSheetGrid({
                             rows={1}
                             wrap="off"
                             data-cell-key={cellKey}
+                            tabIndex={cellKey === tabStopKey ? 0 : -1}
                             aria-label={`Row ${virtualRow.index + 3}, column ${virtualCol.index + 1}`}
                             readOnly={isReadOnly || editingCell !== cellKey}
                             onCompositionStart={() => {
@@ -2850,7 +2859,10 @@ export function WorkbookSheetGrid({
                                 startEdit(cellKey);
                                 return;
                               }
-                              if (e.key === "Enter" || e.key === "Tab") {
+                              if (
+                                e.key === "Enter" ||
+                                (e.key === "Tab" && editing)
+                              ) {
                                 e.preventDefault();
                                 finishEdit();
                                 let r = virtualRow.index;
@@ -2965,7 +2977,7 @@ export function WorkbookSheetGrid({
                               paddingBlock: 2,
                             }}
                             className={cn(
-                              "relative flex flex-col border border-border cursor-default",
+                              "relative flex flex-col border border-border cursor-default focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary",
                               editingCell === cellKey
                                 ? "touch-auto"
                                 : "touch-none",
@@ -3021,6 +3033,7 @@ export function WorkbookSheetGrid({
                               selectionBounds.right === virtualCol.index && (
                                 <button
                                   type="button"
+                                  tabIndex={-1}
                                   aria-label="Drag to autofill selected cells"
                                   title="Drag down or right to fill"
                                   className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 touch-none cursor-crosshair border border-background bg-primary"
