@@ -109,7 +109,7 @@ export default function MarketingHeader() {
       <div className="fixed top-0 left-0 z-60 w-full">
         <div
           className={cn(
-            "mx-auto flex h-14 md:h-16 w-full items-center justify-between transition-all delay-150 ease-in-out duration-300",
+            "mx-auto flex h-14 md:h-16 w-full items-center justify-between transition-all ease-out duration-300",
             !isAtTop ? "bg-accent/80 border-b" : "bg-transparent",
             isDecoratedMarketingPage &&
               "border-b border-dashed border-border/80",
@@ -178,14 +178,14 @@ export default function MarketingHeader() {
                                 <NavigationMenuLink asChild>
                                   <Link
                                     href="/resources"
-                                    className="group/hub flex h-full w-full flex-col justify-end gap-3 rounded-lg border border-border/60 bg-linear-to-b from-background/40 to-muted/70 p-4 no-underline outline-hidden transition-colors delay-100 duration-200 ease-in-out hover:bg-transparent hover:from-background/40 hover:to-muted/80 focus:bg-transparent focus-visible:from-background/40 focus-visible:to-muted/80"
+                                    className="group/hub flex h-full w-full flex-col justify-end gap-3 rounded-lg border border-border/60 bg-linear-to-b from-background/40 to-muted/70 p-4 no-underline outline-hidden transition-colors duration-150 ease-out hover:bg-transparent hover:from-background/40 hover:to-muted/80 focus:bg-transparent focus-visible:from-background/40 focus-visible:to-muted/80"
                                   >
                                     <div className="">
                                       <Icon
                                         icon={Layers01Icon}
                                         size={22}
                                         strokeWidth={2}
-                                        className="text-muted-foreground transition-colors delay-100 duration-200 ease-in-out group-hover/hub:text-foreground group-focus-visible/hub:text-foreground"
+                                        className="text-muted-foreground transition-colors duration-150 ease-out group-hover/hub:text-foreground group-focus-visible/hub:text-foreground"
                                       />
                                     </div>
                                     <div className="flex flex-col gap-0.5">
@@ -419,16 +419,16 @@ function ResourceMenuItem({
         className="group/resource flex flex-row items-stretch border-b border-dashed border-border"
       >
         <span className="flex shrink-0 items-stretch justify-center border-r border-dashed border-border p-1">
-          <span className="flex aspect-square h-full items-center justify-center rounded-lg transition-colors delay-100 duration-200 ease-in-out group-hover/resource:bg-accent group-focus-visible/resource:bg-accent">
+          <span className="flex aspect-square h-full items-center justify-center rounded-lg transition-colors duration-150 ease-out group-hover/resource:bg-accent group-focus-visible/resource:bg-accent">
             <Icon
               icon={svgIcon}
               size={28}
               strokeWidth={2}
-              className="size-6 text-muted-foreground transition-colors delay-100 duration-200 ease-in-out group-hover/resource:text-foreground group-focus-visible/resource:text-foreground"
+              className="size-6 text-muted-foreground transition-colors duration-150 ease-out group-hover/resource:text-foreground group-focus-visible/resource:text-foreground"
             />
           </span>
         </span>
-        <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 rounded-lg p-2 m-1 transition-colors delay-100 duration-200 ease-in-out group-hover/resource:bg-accent group-focus-visible/resource:bg-accent">
+        <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 rounded-lg p-2 m-1 transition-colors duration-150 ease-out group-hover/resource:bg-accent group-focus-visible/resource:bg-accent">
           <span className="text-sm font-medium text-foreground">{title}</span>
           <span className="line-clamp-1 text-sm leading-snug text-muted-foreground">
             {description}

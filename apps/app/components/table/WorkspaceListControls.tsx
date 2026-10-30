@@ -268,13 +268,13 @@ export function WorkspaceListControls({
                     ? `Filter the view, ${filters.length} active`
                     : "Filter the view"
                 }
-                className="text-muted-foreground/60 hover:text-muted-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-150 ease-out"
               >
                 <Icon
                   icon={FilterEditIcon}
                   size={12}
                   strokeWidth={2}
-                  className="transition-colors delay-100 duration-200 ease-in-out"
+                  className="transition-colors duration-150 ease-out"
                 />
                 {hasActiveFilters && (
                   <span className="rounded-full bg-border size-4 flex items-center justify-center border border-foreground/20 text-[10px] font-medium text-muted-foreground tabular-nums">
@@ -411,7 +411,7 @@ export function WorkspaceListControls({
                 icon={FilterAddIcon}
                 size={12}
                 strokeWidth={2}
-                className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground/60 group-hover:text-foreground transition-colors duration-150 ease-out"
               />
               Add filter
             </Button>
@@ -425,7 +425,7 @@ export function WorkspaceListControls({
                 icon={FilterResetIcon}
                 size={12}
                 strokeWidth={2}
-                className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground/60 group-hover:text-foreground transition-colors duration-150 ease-out"
               />
               Apply filter
             </Button>

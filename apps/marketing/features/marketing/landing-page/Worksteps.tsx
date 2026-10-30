@@ -134,7 +134,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                   className={cn(
                     "relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-sm",
                     isCompleted
-                      ? "group-hover:bg-purple-50 group-hover:dark:bg-purple-950 text-muted-foreground border-border group-hover:text-primary group-hover:dark:text-foreground transition-all duration-300 delay-100 ease-in-out"
+                      ? "group-hover:bg-purple-50 group-hover:dark:bg-purple-950 text-muted-foreground border-border group-hover:text-primary group-hover:dark:text-foreground transition-all duration-300 ease-in-out"
                       : isInProgress
                         ? "bg-accent border-border text-blue-500"
                         : "bg-background border-border text-muted-foreground",
@@ -145,7 +145,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                       icon={CheckmarkCircle01Icon}
                       size={20}
                       strokeWidth={2}
-                      className="transition-all delay-100 ease-in-out duration-300"
+                      className="transition-all ease-in-out duration-300"
                     />
                   )}
                   {isInProgress && (
@@ -181,7 +181,7 @@ export function Worksteps({ className }: WorkstepsProps) {
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-[10px] h-5 px-1.5 rounded-md backdrop-blur-sm transition-all ease-in-out duration-300 delay-100",
+                        "text-[10px] h-5 px-1.5 rounded-md backdrop-blur-sm transition-all ease-in-out duration-300",
                         isCompleted
                           ? "bg-primary/10 text-primary border-primary/20"
                           : isInProgress

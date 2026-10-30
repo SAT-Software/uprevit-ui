@@ -121,7 +121,7 @@ function DepartmentsPage() {
                             icon={SortingAZ01Icon}
                             size={16}
                             strokeWidth={2}
-                            className="text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
+                            className="text-muted-foreground/60 transition-colors duration-150 ease-out group-hover:text-foreground"
                           />
 
                           <SelectValue />

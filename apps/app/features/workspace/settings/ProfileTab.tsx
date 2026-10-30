@@ -173,7 +173,7 @@ function ProfileTab() {
         <div className="grid grid-cols-1 md:grid-cols-2">
           {PROFILE_FIELDS.map((field, index) => (
             <div key={field.id} className={profileFieldCellClassName(index)}>
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors duration-150 ease-out group-hover:text-muted-foreground">
                 <Icon icon={field.icon} size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 space-y-0.5">

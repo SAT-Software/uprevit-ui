@@ -79,7 +79,7 @@ export function AnalyticsStatsGrid({ kpi, isLoading }: AnalyticsStatsGridProps) 
             <div
               className={cn(
                 "hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground sm:flex",
-                "text-muted-foreground group-hover:text-foreground transition-colors ease-in-out delay-100 duration-200",
+                "text-muted-foreground group-hover:text-foreground transition-colors duration-150 ease-out",
               )}
             >
               <Icon icon={stat.icon} size={16} strokeWidth={2} />

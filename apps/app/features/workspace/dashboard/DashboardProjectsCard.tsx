@@ -48,7 +48,7 @@ function ProjectsCardHeader() {
             icon={ArrowUpRight01Icon}
             size={16}
             strokeWidth={2}
-            className="text-foreground/40 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+            className="text-foreground/40 group-hover:text-foreground transition-colors duration-150 ease-out"
           />
         </Link>
       </Button>

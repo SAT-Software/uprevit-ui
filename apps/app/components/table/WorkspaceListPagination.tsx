@@ -91,7 +91,7 @@ export function WorkspaceListPagination({
             >
               <Icon
                 icon={ArrowLeftDoubleIcon}
-                className="text-muted-foreground group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground group-hover:text-foreground transition-colors duration-150 ease-out"
                 size={16}
                 strokeWidth={2}
               />
@@ -108,7 +108,7 @@ export function WorkspaceListPagination({
             >
               <Icon
                 icon={ArrowLeft01Icon}
-                className="text-muted-foreground group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground group-hover:text-foreground transition-colors duration-150 ease-out"
                 size={16}
                 strokeWidth={2}
               />
@@ -155,7 +155,7 @@ export function WorkspaceListPagination({
             >
               <Icon
                 icon={ArrowRight01Icon}
-                className="text-muted-foreground group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground group-hover:text-foreground transition-colors duration-150 ease-out"
                 size={16}
                 strokeWidth={2}
               />
@@ -172,7 +172,7 @@ export function WorkspaceListPagination({
             >
               <Icon
                 icon={ArrowRightDoubleIcon}
-                className="text-muted-foreground group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+                className="text-muted-foreground group-hover:text-foreground transition-colors duration-150 ease-out"
                 size={16}
                 strokeWidth={2}
               />

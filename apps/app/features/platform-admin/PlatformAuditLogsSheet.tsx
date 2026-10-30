@@ -178,7 +178,7 @@ export function PlatformAuditLogsSheet({
                         icon={FilterVerticalIcon}
                         size={14}
                         strokeWidth={2}
-                        className="shrink-0 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
+                        className="shrink-0 text-muted-foreground/60 transition-colors duration-150 ease-out group-hover:text-foreground"
                       />
                       <SelectValue placeholder="Status" />
                     </div>

@@ -104,7 +104,7 @@ export default function DialogArchiveEntity({
               }}
             >
               <Icon
-                className="transition-colors delay-100 duration-200 ease-in-out"
+                className="transition-colors duration-150 ease-out"
                 icon={ArchiveIcon}
                 size={16}
                 strokeWidth={2}

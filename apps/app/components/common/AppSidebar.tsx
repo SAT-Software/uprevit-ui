@@ -70,7 +70,6 @@ const data = {
           url: "/dashboard",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={Home04Icon}
               size={16}
               strokeWidth={2}
@@ -82,7 +81,6 @@ const data = {
           url: "/departments",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={NewOfficeIcon}
               size={16}
               strokeWidth={2}
@@ -94,7 +92,6 @@ const data = {
           url: "/projects",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={KanbanIcon}
               size={16}
               strokeWidth={2}
@@ -106,7 +103,6 @@ const data = {
           url: "/products",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={Blockchain03Icon}
               size={16}
               strokeWidth={2}
@@ -118,7 +114,6 @@ const data = {
           url: "/workflows",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={WorkflowIcon}
               size={16}
               strokeWidth={2}
@@ -135,7 +130,6 @@ const data = {
           url: "/source-files",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={Folder02Icon}
               size={16}
               strokeWidth={2}
@@ -147,7 +141,6 @@ const data = {
           url: "/bookmarked-products",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={Bookmark01Icon}
               size={16}
               strokeWidth={2}
@@ -159,7 +152,6 @@ const data = {
           url: "/archive",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={ArchiveIcon}
               size={16}
               strokeWidth={2}
@@ -176,7 +168,6 @@ const data = {
           url: "/reports",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={Archive01Icon}
               size={16}
               strokeWidth={2}
@@ -188,7 +179,6 @@ const data = {
           url: "/analytics",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={Chart02Icon}
               size={16}
               strokeWidth={2}
@@ -205,7 +195,6 @@ const data = {
           url: "/docs",
           icon: (
             <Icon
-              className="transition-all delay-100 duration-200 ease-in-out"
               icon={BookOpen02Icon}
               size={16}
               strokeWidth={2}
@@ -229,7 +218,6 @@ const productSubItems: {
     completionKey: "product_information",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={Layout01Icon}
         size={16}
         strokeWidth={2}
@@ -242,7 +230,6 @@ const productSubItems: {
     completionKey: "compliance_information",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={ContractsIcon}
         size={16}
         strokeWidth={2}
@@ -255,7 +242,6 @@ const productSubItems: {
     completionKey: "label_components",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={LayerIcon}
         size={16}
         strokeWidth={2}
@@ -268,7 +254,6 @@ const productSubItems: {
     completionKey: "symbols_graphics",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={Album02Icon}
         size={16}
         strokeWidth={2}
@@ -281,7 +266,6 @@ const productSubItems: {
     completionKey: "product_data",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={AiSheetsIcon}
         size={16}
         strokeWidth={2}
@@ -294,7 +278,6 @@ const productSubItems: {
     completionKey: "operational_parameters",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={FileDatabaseIcon}
         size={16}
         strokeWidth={2}
@@ -307,7 +290,6 @@ const productSubItems: {
     completionKey: "label_tags",
     icon: (
       <Icon
-        className="transition-all delay-100 duration-200 ease-in-out"
         icon={LabelImportantIcon}
         size={16}
         strokeWidth={2}

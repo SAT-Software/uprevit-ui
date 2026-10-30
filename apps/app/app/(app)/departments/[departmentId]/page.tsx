@@ -175,7 +175,7 @@ export default function DepartmentDetailPage() {
                       trigger={
                         <Button type="button" variant="outline" size="sm">
                           <Icon
-                            className="transition-colors delay-100 duration-200 ease-in-out"
+                            className="transition-colors duration-150 ease-out"
                             icon={ProfileIcon}
                             size={16}
                             strokeWidth={2}
@@ -207,7 +207,7 @@ export default function DepartmentDetailPage() {
                           icon={ManagerIcon}
                           size={16}
                           strokeWidth={2}
-                          className="transition-colors delay-100 duration-200 ease-in-out"
+                          className="transition-colors duration-150 ease-out"
                         />
                       </Button>
                     </HoverCardTrigger>

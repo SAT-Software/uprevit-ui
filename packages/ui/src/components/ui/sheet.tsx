@@ -78,7 +78,7 @@ function SheetContent({
             icon={CancelSquareIcon}
             size={16}
             strokeWidth={2}
-            className="transition-colors delay-100 duration-200 ease-in-out"
+            className="transition-colors duration-150 ease-out"
           />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
