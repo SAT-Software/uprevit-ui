@@ -437,11 +437,13 @@ const EditableHeaderContent = ({
 const DraggableHeader = ({
   header,
   virtualCol,
+  colIndex,
   showChangeIndicator = false,
   isReadOnly = false,
 }: {
   header: Header<RowData, unknown>;
   virtualCol: { start: number; size: number };
+  colIndex: number;
   showChangeIndicator?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -471,6 +473,8 @@ const DraggableHeader = ({
   return (
     <div
       ref={setNodeRef}
+      role="columnheader"
+      aria-colindex={colIndex}
       className="border-r border-b border-border flex items-center text-xs font-medium text-muted-foreground bg-muted group select-none relative"
       style={style}
     >
@@ -2569,6 +2573,10 @@ export function WorkbookSheetGrid({
           >
             <div
               ref={tableRef}
+              role="grid"
+              aria-label="Workbook sheet"
+              aria-rowcount={tableRows.length + 2}
+              aria-colcount={visibleColumns.length + 1}
               style={{
                 height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
                 width: totalColumnWidth + ROW_NUMBER_WIDTH,
@@ -2576,11 +2584,14 @@ export function WorkbookSheetGrid({
               }}
             >
               <div
+                role="rowgroup"
                 className="sticky top-0 z-20 bg-muted"
                 style={{ height: ROW_HEIGHT * 2 }}
               >
-                <div className="flex" style={{ height: ROW_HEIGHT }}>
+                <div role="row" aria-rowindex={1} className="flex" style={{ height: ROW_HEIGHT }}>
                   <div
+                    role="rowheader"
+                    aria-colindex={1}
                     className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                     style={{
                       width: ROW_NUMBER_WIDTH,
@@ -2617,6 +2628,7 @@ export function WorkbookSheetGrid({
                               start: virtualCol.start,
                               size: virtualCol.size,
                             }}
+                            colIndex={virtualCol.index + 2}
                             showChangeIndicator={showChangeIndicator}
                             isReadOnly={isReadOnly}
                           />
@@ -2626,8 +2638,10 @@ export function WorkbookSheetGrid({
                   </SortableContext>
                 </div>
 
-                <div className="flex" style={{ height: ROW_HEIGHT }}>
+                <div role="row" aria-rowindex={2} className="flex" style={{ height: ROW_HEIGHT }}>
                   <div
+                    role="rowheader"
+                    aria-colindex={1}
                     className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                     style={{
                       width: ROW_NUMBER_WIDTH,
@@ -2657,6 +2671,8 @@ export function WorkbookSheetGrid({
                       const select = (
                         <div
                           key={`type-${column.id}`}
+                          role="gridcell"
+                          aria-colindex={virtualCol.index + 2}
                           className={cn(
                             "border-r border-b border-border flex items-center bg-muted",
                             showHighlightDiff && redlineHighlightRing,
@@ -2731,6 +2747,8 @@ export function WorkbookSheetGrid({
                 return (
                   <div
                     key={row.id}
+                    role="row"
+                    aria-rowindex={virtualRow.index + 3}
                     className="flex"
                     style={{
                       position: "absolute",
@@ -2740,6 +2758,8 @@ export function WorkbookSheetGrid({
                     }}
                   >
                     <div
+                      role="rowheader"
+                      aria-colindex={1}
                       className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
                       style={{
                         width: ROW_NUMBER_WIDTH,
@@ -3012,6 +3032,8 @@ export function WorkbookSheetGrid({
                         return (
                           <div
                             key={`${rowIndex}-${column.id}`}
+                            role="gridcell"
+                            aria-colindex={virtualCol.index + 2}
                             style={{
                               position: "absolute",
                               left: virtualCol.start,
