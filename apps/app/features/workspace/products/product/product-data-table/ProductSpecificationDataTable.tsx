@@ -2074,13 +2074,21 @@ export function WorkbookSheetGrid({
       ),
     [visibleColumns],
   );
+  const mountedRows = rowVirtualizer.getVirtualItems();
+  const mountedCols = colVirtualizer.getVirtualItems();
+  const isMounted = (row?: number, col?: number) =>
+    row !== undefined &&
+    col !== undefined &&
+    row >= (mountedRows[0]?.index ?? 0) &&
+    row <= (mountedRows.at(-1)?.index ?? -1) &&
+    col >= (mountedCols[0]?.index ?? 0) &&
+    col <= (mountedCols.at(-1)?.index ?? -1);
   const tabStopKey =
     activeCell &&
-    rowPositions.has(activeCell.row) &&
-    colPositions.has(activeCell.col)
+    isMounted(rowPositions.get(activeCell.row), colPositions.get(activeCell.col))
       ? `${activeCell.row},${activeCell.col}`
-      : tableRows.length && visibleColumns.length
-        ? visualCellKey(0, 0)
+      : mountedRows.length && mountedCols.length
+        ? visualCellKey(mountedRows[0].index, mountedCols[0].index)
         : null;
   const searchMatches = useMemo(() => {
     if (!debouncedSearch) return [];
