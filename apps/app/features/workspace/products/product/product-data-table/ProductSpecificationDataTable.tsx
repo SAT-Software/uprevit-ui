@@ -3011,7 +3011,7 @@ export function WorkbookSheetGrid({
                             {editingCell !== cellKey && !showInlineDiff && (
                               <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 inset-y-0.5 flex flex-col overflow-hidden px-2 text-sm leading-[1.5]"
                                 style={{ color: resolvedText || "inherit", fontSize: format.fontSize, fontWeight: format.bold ? "bold" : undefined, fontStyle: format.italic ? "italic" : undefined,
-                                  justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "flex-end" : "center" }}>
+                                  justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "safe flex-end" : "safe center" }}>
                                 <div className="shrink-0">
                                   {cellValue.split("\n").map((line, index) => <div key={index} className="flex whitespace-pre" style={{ minHeight: "1.5em", justifyContent: format.alignment === "right" ? "flex-end" : format.alignment === "center" ? "center" : "flex-start" }}>
                                     <span className="shrink-0" style={{ textDecoration: format.underline ? "underline" : undefined }}>{line || "\u00a0"}</span>
