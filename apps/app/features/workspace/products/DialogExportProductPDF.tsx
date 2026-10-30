@@ -74,8 +74,8 @@ export default function DialogExportProductPDF({
           icon: Pdf01Icon,
         }}
         primaryAction={{
-          label: "Queue PDF Export",
-          loadingLabel: "Queueing…",
+          label: "Export PDF",
+          loadingLabel: "Exporting…",
           onClick: handleExport,
           loading: isPending,
           disabled: isPending,

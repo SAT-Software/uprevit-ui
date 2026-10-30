@@ -51,7 +51,7 @@ function ShowOrHideTableColumnsDropdown<TData>({
               <Icon
                 icon={ColumnsThreeCogIcon}
                 size={16}
-                className="transition-colors delay-100 duration-200 ease-in-out"
+                className="transition-colors duration-150 ease-out"
               />
             </Button>
           </DropdownMenuTrigger>
@@ -142,7 +142,7 @@ function ShowOrHideTableColumnsDropdown<TData>({
               icon={Refresh04Icon}
               size={14}
               strokeWidth={2}
-              className="text-muted-foreground/60 group-hover:text-foreground transition-colors delay-100 duration-200 ease-in-out"
+              className="text-muted-foreground/60 group-hover:text-foreground transition-colors duration-150 ease-out"
             />
             Reset Default
           </DropdownMenuItem>

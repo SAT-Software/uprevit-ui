@@ -73,10 +73,10 @@ const SortableHeader = ({
     className="group flex h-8 w-full cursor-pointer items-center justify-between hover:bg-muted/50 data-[state=open]:bg-accent"
   >
     <div className="flex w-full items-center justify-between gap-2">
-      <span className="whitespace-nowrap text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
+      <span className="whitespace-nowrap text-muted-foreground/60 transition-colors duration-150 ease-out group-hover:text-muted-foreground">
         {title}
       </span>
-      <div className="opacity-50 transition-all delay-100 duration-200 ease-in-out group-hover:opacity-100">
+      <div className="opacity-50 transition-opacity duration-150 ease-out group-hover:opacity-100">
         {column.getIsSorted() === "desc" ? (
           <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
         ) : column.getIsSorted() === "asc" ? (

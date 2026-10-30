@@ -1,8 +1,6 @@
 "use client";
 
 import { Button } from "@uprevit/ui/components/ui/button";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import { ScrollBar } from "@uprevit/ui/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -2563,614 +2561,604 @@ export function WorkbookSheetGrid({
         onDragEnd={handleDragEnd}
         sensors={sensors}
       >
-        <ScrollAreaPrimitive.Root
-          type="always"
-          className="relative flex-1 min-h-0 min-w-0 overflow-hidden"
+        <div
+          ref={parentRef}
+          className="relative flex-1 min-h-0 min-w-0 overflow-auto overscroll-contain [&::-webkit-scrollbar]:size-2.5 [&::-webkit-scrollbar-corner]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/40 hover:[&::-webkit-scrollbar-thumb]:bg-foreground/60"
+          style={{ scrollbarWidth: "auto", scrollbarColor: "auto" }}
         >
-          <ScrollAreaPrimitive.Viewport
-            ref={parentRef}
-            className="absolute inset-0 overscroll-contain [&>div]:!block"
+          <div
+            ref={tableRef}
+            role="grid"
+            aria-label="Workbook sheet"
+            aria-rowcount={tableRows.length + 2}
+            aria-colcount={visibleColumns.length + 1}
+            style={{
+              height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
+              width: totalColumnWidth + ROW_NUMBER_WIDTH,
+              position: "relative",
+            }}
           >
             <div
-              ref={tableRef}
-              role="grid"
-              aria-label="Workbook sheet"
-              aria-rowcount={tableRows.length + 2}
-              aria-colcount={visibleColumns.length + 1}
-              style={{
-                height: rowVirtualizer.getTotalSize() + ROW_HEIGHT * 2,
-                width: totalColumnWidth + ROW_NUMBER_WIDTH,
-                position: "relative",
-              }}
+              role="rowgroup"
+              className="sticky top-0 z-20 bg-muted"
+              style={{ height: ROW_HEIGHT * 2 }}
             >
-              <div
-                role="rowgroup"
-                className="sticky top-0 z-20 bg-muted"
-                style={{ height: ROW_HEIGHT * 2 }}
-              >
-                <div role="row" aria-rowindex={1} className="flex" style={{ height: ROW_HEIGHT }}>
-                  <div
-                    role="rowheader"
-                    aria-colindex={1}
-                    className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                    style={{
-                      width: ROW_NUMBER_WIDTH,
-                      height: ROW_HEIGHT,
-                      minWidth: ROW_NUMBER_WIDTH,
-                    }}
-                  >
-                    1
-                  </div>
-                  <SortableContext
-                    items={displayColumnOrder}
-                    strategy={horizontalListSortingStrategy}
-                  >
-                    <div
-                      className="relative"
-                      style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
-                    >
-                      {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                        const header = headerGroup?.headers[virtualCol.index];
-                        if (!header) return null;
-
-                        const originalColIndex = parseInt(
-                          header.column.id.split("-")[1],
-                        );
-                        const showChangeIndicator =
-                          isRedlineView &&
-                          redlineDiffs.changedCols.has(originalColIndex);
-
-                        return (
-                          <DraggableHeader
-                            key={header.id}
-                            header={header}
-                            virtualCol={{
-                              start: virtualCol.start,
-                              size: virtualCol.size,
-                            }}
-                            colIndex={virtualCol.index + 2}
-                            showChangeIndicator={showChangeIndicator}
-                            isReadOnly={isReadOnly}
-                          />
-                        );
-                      })}
-                    </div>
-                  </SortableContext>
+              <div role="row" aria-rowindex={1} className="flex" style={{ height: ROW_HEIGHT }}>
+                <div
+                  role="rowheader"
+                  aria-colindex={1}
+                  className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                  style={{
+                    width: ROW_NUMBER_WIDTH,
+                    height: ROW_HEIGHT,
+                    minWidth: ROW_NUMBER_WIDTH,
+                  }}
+                >
+                  1
                 </div>
-
-                <div role="row" aria-rowindex={2} className="flex" style={{ height: ROW_HEIGHT }}>
-                  <div
-                    role="rowheader"
-                    aria-colindex={1}
-                    className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                    style={{
-                      width: ROW_NUMBER_WIDTH,
-                      height: ROW_HEIGHT,
-                      minWidth: ROW_NUMBER_WIDTH,
-                    }}
-                  >
-                    2
-                  </div>
+                <SortableContext
+                  items={displayColumnOrder}
+                  strategy={horizontalListSortingStrategy}
+                >
                   <div
                     className="relative"
                     style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
+                  >
+                    {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                      const header = headerGroup?.headers[virtualCol.index];
+                      if (!header) return null;
+
+                      const originalColIndex = parseInt(
+                        header.column.id.split("-")[1],
+                      );
+                      const showChangeIndicator =
+                        isRedlineView &&
+                        redlineDiffs.changedCols.has(originalColIndex);
+
+                      return (
+                        <DraggableHeader
+                          key={header.id}
+                          header={header}
+                          virtualCol={{
+                            start: virtualCol.start,
+                            size: virtualCol.size,
+                          }}
+                          colIndex={virtualCol.index + 2}
+                          showChangeIndicator={showChangeIndicator}
+                          isReadOnly={isReadOnly}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </div>
+
+              <div role="row" aria-rowindex={2} className="flex" style={{ height: ROW_HEIGHT }}>
+                <div
+                  role="rowheader"
+                  aria-colindex={1}
+                  className="sticky left-0 z-30 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                  style={{
+                    width: ROW_NUMBER_WIDTH,
+                    height: ROW_HEIGHT,
+                    minWidth: ROW_NUMBER_WIDTH,
+                  }}
+                >
+                  2
+                </div>
+                <div
+                  className="relative"
+                  style={{ width: totalColumnWidth, height: ROW_HEIGHT }}
+                >
+                  {colVirtualizer.getVirtualItems().map((virtualCol) => {
+                    const column = visibleColumns[virtualCol.index];
+                    const originalColIndex = parseInt(
+                      column.id.split("-")[1],
+                    );
+                    const diff = isRedlineView
+                      ? redlineDiffs.columnTypeDiffs[originalColIndex]
+                      : undefined;
+                    const showInlineDiff =
+                      isRedlineView && redlineMode === "inline" && diff;
+                    const showHighlightDiff =
+                      isRedlineView && redlineMode === "highlight" && diff;
+
+                    const select = (
+                      <div
+                        key={`type-${column.id}`}
+                        role="gridcell"
+                        aria-colindex={virtualCol.index + 2}
+                        className={cn(
+                          "border-r border-b border-border flex items-center bg-muted",
+                          showHighlightDiff && redlineHighlightRing,
+                        )}
+                        style={{
+                          position: "absolute",
+                          left: virtualCol.start,
+                          width: virtualCol.size,
+                          height: ROW_HEIGHT,
+                          boxShadow: showHighlightDiff
+                            ? getRedlineHighlightInsetShadow(workbookTheme)
+                            : undefined,
+                        }}
+                      >
+                        <DataTypeSelect
+                          visibleIndex={virtualCol.index}
+                          colIndex={originalColIndex}
+                          value={
+                            columnTypeData[originalColIndex] !== "blank"
+                              ? columnTypeData[originalColIndex]
+                              : undefined
+                          }
+                          isReadOnly={isReadOnly}
+                          onChange={(col, val) => {
+                            if (isReadOnly) return;
+                            const prev = columnTypeData[col];
+                            setColumnTypeData((d) => ({ ...d, [col]: val }));
+                            if (prev !== val) {
+                              record({
+                                type: "columnType",
+                                colIndex: col,
+                                prev,
+                                next: val,
+                              });
+                            }
+                          }}
+                        />
+                        {showInlineDiff && diff && (
+                          <div className="absolute inset-0 pointer-events-none bg-muted px-2 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
+                            <DiffValueDisplay
+                              diff={diff}
+                              formatValue={formatColumnTypeDiffValue}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+
+                    return showHighlightDiff && diff ? (
+                      <Tooltip key={`type-${column.id}`}>
+                        <TooltipTrigger asChild>{select}</TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">
+                          <DiffValueDisplay
+                            diff={diff}
+                            formatValue={formatColumnTypeDiffValue}
+                          />
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      select
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = tableRows[virtualRow.index];
+              if (!row) return null;
+              const rowIndex = row.original.rowIndex;
+
+              return (
+                <div
+                  key={row.id}
+                  role="row"
+                  aria-rowindex={virtualRow.index + 3}
+                  className="flex"
+                  style={{
+                    position: "absolute",
+                    top: virtualRow.start + ROW_HEIGHT * 2,
+                    height: virtualRow.size,
+                    width: totalColumnWidth + ROW_NUMBER_WIDTH,
+                  }}
+                >
+                  <div
+                    role="rowheader"
+                    aria-colindex={1}
+                    className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
+                    style={{
+                      width: ROW_NUMBER_WIDTH,
+                      minWidth: ROW_NUMBER_WIDTH,
+                      height: virtualRow.size,
+                    }}
+                  >
+                    {isRedlineView &&
+                      redlineDiffs.changedRows.has(rowIndex) && (
+                        <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      )}
+                    <span className="absolute start-0 w-8 text-center tabular-nums">{virtualRow.index + 3}</span>
+                    {!isReadOnly && (
+                      <>
+                        <div className="absolute end-1 top-1/2 -translate-y-1/2">
+                        <WorkbookHeaderMenu
+                          label={`Row ${virtualRow.index + 3} options`}
+                          axis="row"
+                          onInsert={(after) =>
+                            changeStructure("row", rowIndex, after)
+                          }
+                          onDelete={() =>
+                            changeStructure("row", rowIndex, null)
+                          }
+                          onHeight={(reset) =>
+                            reset
+                              ? setRowHeight(rowIndex)
+                              : setHeightEditor({
+                                  row: rowIndex,
+                                  value: String(
+                                    rowHeights[rowIndex] ?? ROW_HEIGHT,
+                                  ),
+                                })
+                          }
+                        />
+                        </div>
+                        <div
+                          role="separator"
+                          aria-orientation="horizontal"
+                          aria-label={`Resize row ${virtualRow.index + 3}`}
+                          className="absolute -bottom-1 left-0 z-20 h-2 w-full cursor-row-resize touch-none hover:bg-primary/50"
+                          onPointerDown={(event) =>
+                            startRowResize(rowIndex, event)
+                          }
+                          onDoubleClick={() => setRowHeight(rowIndex)}
+                        />
+                      </>
+                    )}
+                  </div>
+
+                  <div
+                    className="relative"
+                    style={{
+                      width: totalColumnWidth,
+                      height: virtualRow.size,
+                    }}
                   >
                     {colVirtualizer.getVirtualItems().map((virtualCol) => {
                       const column = visibleColumns[virtualCol.index];
                       const originalColIndex = parseInt(
                         column.id.split("-")[1],
                       );
+                      const cellKey = `${rowIndex},${originalColIndex}`;
+                      const format = resolveCellFormat(
+                        cellKey,
+                        cellData[cellKey] ?? "",
+                        cellFormats[cellKey],
+                      );
+                      const isSelected = selectedCells.has(cellKey);
                       const diff = isRedlineView
-                        ? redlineDiffs.columnTypeDiffs[originalColIndex]
+                        ? redlineDiffs.cellDiffs[cellKey]
                         : undefined;
+                      const isActiveDiffCell =
+                        activeCell?.row === rowIndex &&
+                        activeCell?.col === originalColIndex;
                       const showInlineDiff =
-                        isRedlineView && redlineMode === "inline" && diff;
+                        isRedlineView &&
+                        redlineMode === "inline" &&
+                        diff &&
+                        !(isActiveDiffCell && !isReadOnly);
                       const showHighlightDiff =
                         isRedlineView && redlineMode === "highlight" && diff;
 
-                      const select = (
+                      const resolvedBg = resolveWorkbookFillColor(
+                        format?.bgColor,
+                        workbookTheme,
+                      );
+                      const resolvedText = resolveWorkbookTextColor(
+                        format?.textColor,
+                        workbookTheme,
+                      );
+
+                      const cellValue =
+                        editingCell === cellKey
+                          ? editValue
+                          : formatWorkbookValue(cellData[cellKey] ?? "", format);
+                      const input = (
+                        <textarea
+                          rows={1}
+                          wrap="off"
+                          data-cell-key={cellKey}
+                          tabIndex={cellKey === tabStopKey ? 0 : -1}
+                          aria-label={`Row ${virtualRow.index + 3}, column ${virtualCol.index + 1}`}
+                          readOnly={isReadOnly || editingCell !== cellKey}
+                          onCompositionStart={() => {
+                            composingRef.current = true;
+                            startEdit(cellKey);
+                          }}
+                          onCompositionEnd={() => {
+                            composingRef.current = false;
+                          }}
+                          className={cn(
+                            "w-full resize-none border-0 bg-transparent outline-none px-2 text-sm leading-[1.5]",
+                            showInlineDiff && "caret-transparent",
+                            editingCell !== cellKey
+                              ? "caret-transparent cursor-default select-none overflow-hidden"
+                              : "cursor-text overflow-auto",
+                          )}
+                          style={{
+                            height: Math.min(
+                              virtualRow.size - 4,
+                              Math.ceil((format.fontSize ?? 14) * 1.5) *
+                                cellValue.split("\n").length,
+                            ),
+                            flexShrink: 0,
+                            backgroundColor: "transparent",
+                            fontWeight: format?.bold ? "bold" : undefined,
+                            fontStyle: format?.italic ? "italic" : undefined,
+                            textDecoration: format?.underline
+                              ? "underline"
+                              : undefined,
+                            fontSize: format?.fontSize,
+                            textAlign: format?.alignment,
+                            color: showInlineDiff || editingCell !== cellKey
+                              ? "transparent"
+                              : resolvedText || "inherit",
+                            caretColor: showInlineDiff
+                              ? "transparent"
+                              : undefined,
+                          }}
+                          value={cellValue}
+                          onChange={(e) => {
+                            if (isReadOnly) return;
+                            startEdit(cellKey);
+                            cellDraftRef.current[cellKey] = e.target.value;
+                            setEditValue(e.target.value);
+                          }}
+                          onContextMenu={(e) => {
+                            if (e.ctrlKey || e.metaKey) e.preventDefault();
+                          }}
+                          onFocus={() => {
+                            setActiveCell({
+                              row: rowIndex,
+                              col: originalColIndex,
+                            });
+                          }}
+                          onBlur={() => {
+                            if (editingCellRef.current === cellKey)
+                              finishEdit();
+                          }}
+                          onKeyDown={(e) => {
+                            if (
+                              e.nativeEvent.isComposing ||
+                              composingRef.current
+                            )
+                              return;
+                            if (e.keyCode === 229 || e.key === "Process") {
+                              if (editingCellRef.current !== cellKey)
+                                startEdit(cellKey, "");
+                              return;
+                            }
+                            const editing =
+                              editingCellRef.current === cellKey;
+                            if (e.key === "Escape" && editing) {
+                              e.preventDefault();
+                              finishEdit(true);
+                              return;
+                            }
+                            if (e.key === "F2") {
+                              e.preventDefault();
+                              startEdit(cellKey);
+                              return;
+                            }
+                            if (
+                              e.key === "Enter" ||
+                              (e.key === "Tab" && editing)
+                            ) {
+                              e.preventDefault();
+                              finishEdit();
+                              let r = virtualRow.index;
+                              let c = virtualCol.index;
+                              const step = e.shiftKey ? -1 : 1;
+                              if (e.key === "Enter") r += step;
+                              else {
+                                c += step;
+                                if (
+                                  c >= visibleColumns.length &&
+                                  r < tableRows.length - 1
+                                ) {
+                                  c = 0;
+                                  r++;
+                                } else if (c < 0 && r > 0) {
+                                  c = visibleColumns.length - 1;
+                                  r--;
+                                }
+                              }
+                              focusVisualCell(r, c);
+                              return;
+                            }
+                            if (editing) return;
+                            if (
+                              [
+                                "ArrowUp",
+                                "ArrowDown",
+                                "ArrowLeft",
+                                "ArrowRight",
+                              ].includes(e.key) &&
+                              !e.ctrlKey &&
+                              !e.metaKey &&
+                              !e.altKey
+                            ) {
+                              e.preventDefault();
+                              focusVisualCell(
+                                virtualRow.index +
+                                  (e.key === "ArrowUp"
+                                    ? -1
+                                    : e.key === "ArrowDown"
+                                      ? 1
+                                      : 0),
+                                virtualCol.index +
+                                  (e.key === "ArrowLeft"
+                                    ? -1
+                                    : e.key === "ArrowRight"
+                                      ? 1
+                                      : 0),
+                                e.shiftKey,
+                              );
+                              return;
+                            }
+                            if (isReadOnly || isSavePending?.()) return;
+                            if (e.key === "Delete" || e.key === "Backspace") {
+                              e.preventDefault();
+                              const keys = selectionKeys.filter((key) => {
+                                const [r, c] = key.split(",").map(Number);
+                                return (
+                                  rowPositions.has(r) && colPositions.has(c)
+                                );
+                              });
+                              applyValues(
+                                Object.fromEntries(
+                                  keys.map((key) => [key, ""]),
+                                ),
+                              );
+                            } else if (
+                              e.key.length === 1 &&
+                              !e.ctrlKey &&
+                              !e.metaKey &&
+                              !e.altKey
+                            ) {
+                              e.preventDefault();
+                              startEdit(cellKey, e.key);
+                            }
+                          }}
+                          onPaste={(e) =>
+                            handlePaste(e, virtualRow.index, virtualCol.index)
+                          }
+                        />
+                      );
+
+                      return (
                         <div
-                          key={`type-${column.id}`}
+                          key={`${rowIndex}-${column.id}`}
                           role="gridcell"
                           aria-colindex={virtualCol.index + 2}
-                          className={cn(
-                            "border-r border-b border-border flex items-center bg-muted",
-                            showHighlightDiff && redlineHighlightRing,
-                          )}
                           style={{
                             position: "absolute",
                             left: virtualCol.start,
                             width: virtualCol.size,
-                            height: ROW_HEIGHT,
+                            height: virtualRow.size,
+                            backgroundColor:
+                              resolvedBg || "var(--background)",
+                            backgroundImage: searchMatchKeys.has(cellKey)
+                              ? "linear-gradient(hsl(45 95% 55% / 0.35), hsl(45 95% 55% / 0.35))"
+                              : undefined,
+                            outline:
+                              activeSearchKey === cellKey &&
+                              searchMatchKeys.has(cellKey)
+                                ? "2px solid var(--primary)"
+                                : undefined,
+                            outlineOffset: -2,
+
                             boxShadow: showHighlightDiff
                               ? getRedlineHighlightInsetShadow(workbookTheme)
                               : undefined,
+                            justifyContent:
+                              format.verticalAlignment === "top"
+                                ? "flex-start"
+                                : format.verticalAlignment === "bottom"
+                                  ? "flex-end"
+                                  : "center",
+                            paddingBlock: 2,
                           }}
+                          className={cn(
+                            "relative flex flex-col border border-border cursor-default focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary",
+                            editingCell === cellKey
+                              ? "touch-auto"
+                              : "touch-none",
+                            showHighlightDiff && redlineHighlightBorder,
+                            isSelected &&
+                              "ring-1 ring-primary ring-inset border-foreground/60",
+                          )}
+                          onPointerDown={(event) =>
+                            handleCellPointerDown(
+                              virtualRow.index,
+                              virtualCol.index,
+                              event,
+                            )
+                          }
+                          onDoubleClick={() => startEdit(cellKey)}
                         >
-                          <DataTypeSelect
-                            visibleIndex={virtualCol.index}
-                            colIndex={originalColIndex}
-                            value={
-                              columnTypeData[originalColIndex] !== "blank"
-                                ? columnTypeData[originalColIndex]
-                                : undefined
-                            }
-                            isReadOnly={isReadOnly}
-                            onChange={(col, val) => {
-                              if (isReadOnly) return;
-                              const prev = columnTypeData[col];
-                              setColumnTypeData((d) => ({ ...d, [col]: val }));
-                              if (prev !== val) {
-                                record({
-                                  type: "columnType",
-                                  colIndex: col,
-                                  prev,
-                                  next: val,
-                                });
-                              }
-                            }}
-                          />
+                          {showHighlightDiff ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>{input}</TooltipTrigger>
+                              <TooltipContent side="top" className="text-xs">
+                                <DiffValueDisplay
+                                  diff={diff}
+                                  formatValue={formatDiffValue}
+                                />
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            input
+                          )}
+
+                          {editingCell !== cellKey && !showInlineDiff && (
+                            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 inset-y-0.5 flex flex-col overflow-hidden px-2 text-sm leading-[1.5]"
+                              style={{ color: resolvedText || "inherit", fontSize: format.fontSize, fontWeight: format.bold ? "bold" : undefined, fontStyle: format.italic ? "italic" : undefined,
+                                justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "safe flex-end" : "safe center" }}>
+                              <div className="shrink-0">
+                                {cellValue.split("\n").map((line, index) => <div key={index} className="flex whitespace-pre" style={{ minHeight: "1.5em", justifyContent: format.alignment === "right" ? "flex-end" : format.alignment === "center" ? "center" : "flex-start" }}>
+                                  <span className="shrink-0" style={{ textDecoration: format.underline ? "underline" : undefined }}>{line || "\u00a0"}</span>
+                                </div>)}
+                              </div>
+                            </div>
+                          )}
+
+                          {fillPreview &&
+                            virtualRow.index >= fillPreview.top &&
+                            virtualRow.index <= fillPreview.bottom &&
+                            virtualCol.index >= fillPreview.left &&
+                            virtualCol.index <= fillPreview.right && (
+                              <div className="pointer-events-none absolute inset-0 border border-primary bg-primary/15" />
+                            )}
+                          {!isReadOnly &&
+                            !editingCell &&
+                            selectionBounds?.bottom === virtualRow.index &&
+                            selectionBounds.right === virtualCol.index && (
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label="Drag to autofill selected cells"
+                                title="Drag down or right to fill"
+                                className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 touch-none cursor-crosshair border border-background bg-primary"
+                                onDoubleClick={(e) => e.stopPropagation()}
+                                onPointerDown={(e) => {
+                                  if (e.button !== 0 || isSavePending?.())
+                                    return;
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  finishEdit();
+                                  fillContextRef.current = {
+                                    pointerId: e.pointerId,
+                                    rows: tableRows.map(
+                                      (row) => row.original.rowIndex,
+                                    ),
+                                    cols: visibleColumns.map((col) =>
+                                      Number(col.id.split("-")[1]),
+                                    ),
+                                    values: cellDataRef.current,
+                                    widths: columnSizes,
+                                    offsets: rowOffsets,
+                                  };
+                                  setFillSource(selectionBounds);
+                                  setFillPreview(selectionBounds);
+                                }}
+                              />
+                            )}
                           {showInlineDiff && diff && (
-                            <div className="absolute inset-0 pointer-events-none bg-muted px-2 py-0.5 flex flex-col justify-center text-[10px] leading-tight">
+                            <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
                               <DiffValueDisplay
                                 diff={diff}
-                                formatValue={formatColumnTypeDiffValue}
+                                formatValue={formatDiffValue}
                               />
                             </div>
                           )}
                         </div>
                       );
-
-                      return showHighlightDiff && diff ? (
-                        <Tooltip key={`type-${column.id}`}>
-                          <TooltipTrigger asChild>{select}</TooltipTrigger>
-                          <TooltipContent side="top" className="text-xs">
-                            <DiffValueDisplay
-                              diff={diff}
-                              formatValue={formatColumnTypeDiffValue}
-                            />
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        select
-                      );
                     })}
                   </div>
                 </div>
-              </div>
-
-              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                const row = tableRows[virtualRow.index];
-                if (!row) return null;
-                const rowIndex = row.original.rowIndex;
-
-                return (
-                  <div
-                    key={row.id}
-                    role="row"
-                    aria-rowindex={virtualRow.index + 3}
-                    className="flex"
-                    style={{
-                      position: "absolute",
-                      top: virtualRow.start + ROW_HEIGHT * 2,
-                      height: virtualRow.size,
-                      width: totalColumnWidth + ROW_NUMBER_WIDTH,
-                    }}
-                  >
-                    <div
-                      role="rowheader"
-                      aria-colindex={1}
-                      className="sticky left-0 z-10 bg-muted border-r border-b border-border flex items-center justify-center text-xs font-medium text-muted-foreground"
-                      style={{
-                        width: ROW_NUMBER_WIDTH,
-                        minWidth: ROW_NUMBER_WIDTH,
-                        height: virtualRow.size,
-                      }}
-                    >
-                      {isRedlineView &&
-                        redlineDiffs.changedRows.has(rowIndex) && (
-                          <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
-                        )}
-                      <span className="absolute start-0 w-8 text-center tabular-nums">{virtualRow.index + 3}</span>
-                      {!isReadOnly && (
-                        <>
-                          <div className="absolute end-1 top-1/2 -translate-y-1/2">
-                          <WorkbookHeaderMenu
-                            label={`Row ${virtualRow.index + 3} options`}
-                            axis="row"
-                            onInsert={(after) =>
-                              changeStructure("row", rowIndex, after)
-                            }
-                            onDelete={() =>
-                              changeStructure("row", rowIndex, null)
-                            }
-                            onHeight={(reset) =>
-                              reset
-                                ? setRowHeight(rowIndex)
-                                : setHeightEditor({
-                                    row: rowIndex,
-                                    value: String(
-                                      rowHeights[rowIndex] ?? ROW_HEIGHT,
-                                    ),
-                                  })
-                            }
-                          />
-                          </div>
-                          <div
-                            role="separator"
-                            aria-orientation="horizontal"
-                            aria-label={`Resize row ${virtualRow.index + 3}`}
-                            className="absolute -bottom-1 left-0 z-20 h-2 w-full cursor-row-resize touch-none hover:bg-primary/50"
-                            onPointerDown={(event) =>
-                              startRowResize(rowIndex, event)
-                            }
-                            onDoubleClick={() => setRowHeight(rowIndex)}
-                          />
-                        </>
-                      )}
-                    </div>
-
-                    <div
-                      className="relative"
-                      style={{
-                        width: totalColumnWidth,
-                        height: virtualRow.size,
-                      }}
-                    >
-                      {colVirtualizer.getVirtualItems().map((virtualCol) => {
-                        const column = visibleColumns[virtualCol.index];
-                        const originalColIndex = parseInt(
-                          column.id.split("-")[1],
-                        );
-                        const cellKey = `${rowIndex},${originalColIndex}`;
-                        const format = resolveCellFormat(
-                          cellKey,
-                          cellData[cellKey] ?? "",
-                          cellFormats[cellKey],
-                        );
-                        const isSelected = selectedCells.has(cellKey);
-                        const diff = isRedlineView
-                          ? redlineDiffs.cellDiffs[cellKey]
-                          : undefined;
-                        const isActiveDiffCell =
-                          activeCell?.row === rowIndex &&
-                          activeCell?.col === originalColIndex;
-                        const showInlineDiff =
-                          isRedlineView &&
-                          redlineMode === "inline" &&
-                          diff &&
-                          !(isActiveDiffCell && !isReadOnly);
-                        const showHighlightDiff =
-                          isRedlineView && redlineMode === "highlight" && diff;
-
-                        const resolvedBg = resolveWorkbookFillColor(
-                          format?.bgColor,
-                          workbookTheme,
-                        );
-                        const resolvedText = resolveWorkbookTextColor(
-                          format?.textColor,
-                          workbookTheme,
-                        );
-
-                        const cellValue =
-                          editingCell === cellKey
-                            ? editValue
-                            : formatWorkbookValue(cellData[cellKey] ?? "", format);
-                        const input = (
-                          <textarea
-                            rows={1}
-                            wrap="off"
-                            data-cell-key={cellKey}
-                            tabIndex={cellKey === tabStopKey ? 0 : -1}
-                            aria-label={`Row ${virtualRow.index + 3}, column ${virtualCol.index + 1}`}
-                            readOnly={isReadOnly || editingCell !== cellKey}
-                            onCompositionStart={() => {
-                              composingRef.current = true;
-                              startEdit(cellKey);
-                            }}
-                            onCompositionEnd={() => {
-                              composingRef.current = false;
-                            }}
-                            className={cn(
-                              "w-full resize-none border-0 bg-transparent outline-none px-2 text-sm leading-[1.5]",
-                              showInlineDiff && "caret-transparent",
-                              editingCell !== cellKey
-                                ? "caret-transparent cursor-default select-none overflow-hidden"
-                                : "cursor-text overflow-auto",
-                            )}
-                            style={{
-                              height: Math.min(
-                                virtualRow.size - 4,
-                                Math.ceil((format.fontSize ?? 14) * 1.5) *
-                                  cellValue.split("\n").length,
-                              ),
-                              flexShrink: 0,
-                              backgroundColor: "transparent",
-                              fontWeight: format?.bold ? "bold" : undefined,
-                              fontStyle: format?.italic ? "italic" : undefined,
-                              textDecoration: format?.underline
-                                ? "underline"
-                                : undefined,
-                              fontSize: format?.fontSize,
-                              textAlign: format?.alignment,
-                              color: showInlineDiff || editingCell !== cellKey
-                                ? "transparent"
-                                : resolvedText || "inherit",
-                              caretColor: showInlineDiff
-                                ? "transparent"
-                                : undefined,
-                            }}
-                            value={cellValue}
-                            onChange={(e) => {
-                              if (isReadOnly) return;
-                              startEdit(cellKey);
-                              cellDraftRef.current[cellKey] = e.target.value;
-                              setEditValue(e.target.value);
-                            }}
-                            onContextMenu={(e) => {
-                              if (e.ctrlKey || e.metaKey) e.preventDefault();
-                            }}
-                            onFocus={() => {
-                              setActiveCell({
-                                row: rowIndex,
-                                col: originalColIndex,
-                              });
-                            }}
-                            onBlur={() => {
-                              if (editingCellRef.current === cellKey)
-                                finishEdit();
-                            }}
-                            onKeyDown={(e) => {
-                              if (
-                                e.nativeEvent.isComposing ||
-                                composingRef.current
-                              )
-                                return;
-                              if (e.keyCode === 229 || e.key === "Process") {
-                                if (editingCellRef.current !== cellKey)
-                                  startEdit(cellKey, "");
-                                return;
-                              }
-                              const editing =
-                                editingCellRef.current === cellKey;
-                              if (e.key === "Escape" && editing) {
-                                e.preventDefault();
-                                finishEdit(true);
-                                return;
-                              }
-                              if (e.key === "F2") {
-                                e.preventDefault();
-                                startEdit(cellKey);
-                                return;
-                              }
-                              if (
-                                e.key === "Enter" ||
-                                (e.key === "Tab" && editing)
-                              ) {
-                                e.preventDefault();
-                                finishEdit();
-                                let r = virtualRow.index;
-                                let c = virtualCol.index;
-                                const step = e.shiftKey ? -1 : 1;
-                                if (e.key === "Enter") r += step;
-                                else {
-                                  c += step;
-                                  if (
-                                    c >= visibleColumns.length &&
-                                    r < tableRows.length - 1
-                                  ) {
-                                    c = 0;
-                                    r++;
-                                  } else if (c < 0 && r > 0) {
-                                    c = visibleColumns.length - 1;
-                                    r--;
-                                  }
-                                }
-                                focusVisualCell(r, c);
-                                return;
-                              }
-                              if (editing) return;
-                              if (
-                                [
-                                  "ArrowUp",
-                                  "ArrowDown",
-                                  "ArrowLeft",
-                                  "ArrowRight",
-                                ].includes(e.key) &&
-                                !e.ctrlKey &&
-                                !e.metaKey &&
-                                !e.altKey
-                              ) {
-                                e.preventDefault();
-                                focusVisualCell(
-                                  virtualRow.index +
-                                    (e.key === "ArrowUp"
-                                      ? -1
-                                      : e.key === "ArrowDown"
-                                        ? 1
-                                        : 0),
-                                  virtualCol.index +
-                                    (e.key === "ArrowLeft"
-                                      ? -1
-                                      : e.key === "ArrowRight"
-                                        ? 1
-                                        : 0),
-                                  e.shiftKey,
-                                );
-                                return;
-                              }
-                              if (isReadOnly || isSavePending?.()) return;
-                              if (e.key === "Delete" || e.key === "Backspace") {
-                                e.preventDefault();
-                                const keys = selectionKeys.filter((key) => {
-                                  const [r, c] = key.split(",").map(Number);
-                                  return (
-                                    rowPositions.has(r) && colPositions.has(c)
-                                  );
-                                });
-                                applyValues(
-                                  Object.fromEntries(
-                                    keys.map((key) => [key, ""]),
-                                  ),
-                                );
-                              } else if (
-                                e.key.length === 1 &&
-                                !e.ctrlKey &&
-                                !e.metaKey &&
-                                !e.altKey
-                              ) {
-                                e.preventDefault();
-                                startEdit(cellKey, e.key);
-                              }
-                            }}
-                            onPaste={(e) =>
-                              handlePaste(e, virtualRow.index, virtualCol.index)
-                            }
-                          />
-                        );
-
-                        return (
-                          <div
-                            key={`${rowIndex}-${column.id}`}
-                            role="gridcell"
-                            aria-colindex={virtualCol.index + 2}
-                            style={{
-                              position: "absolute",
-                              left: virtualCol.start,
-                              width: virtualCol.size,
-                              height: virtualRow.size,
-                              backgroundColor:
-                                resolvedBg || "var(--background)",
-                              backgroundImage: searchMatchKeys.has(cellKey)
-                                ? "linear-gradient(hsl(45 95% 55% / 0.35), hsl(45 95% 55% / 0.35))"
-                                : undefined,
-                              outline:
-                                activeSearchKey === cellKey &&
-                                searchMatchKeys.has(cellKey)
-                                  ? "2px solid var(--primary)"
-                                  : undefined,
-                              outlineOffset: -2,
-
-                              boxShadow: showHighlightDiff
-                                ? getRedlineHighlightInsetShadow(workbookTheme)
-                                : undefined,
-                              justifyContent:
-                                format.verticalAlignment === "top"
-                                  ? "flex-start"
-                                  : format.verticalAlignment === "bottom"
-                                    ? "flex-end"
-                                    : "center",
-                              paddingBlock: 2,
-                            }}
-                            className={cn(
-                              "relative flex flex-col border border-border cursor-default focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary",
-                              editingCell === cellKey
-                                ? "touch-auto"
-                                : "touch-none",
-                              showHighlightDiff && redlineHighlightBorder,
-                              isSelected &&
-                                "ring-1 ring-primary ring-inset border-foreground/60",
-                            )}
-                            onPointerDown={(event) =>
-                              handleCellPointerDown(
-                                virtualRow.index,
-                                virtualCol.index,
-                                event,
-                              )
-                            }
-                            onDoubleClick={() => startEdit(cellKey)}
-                          >
-                            {showHighlightDiff ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>{input}</TooltipTrigger>
-                                <TooltipContent side="top" className="text-xs">
-                                  <DiffValueDisplay
-                                    diff={diff}
-                                    formatValue={formatDiffValue}
-                                  />
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              input
-                            )}
-
-                            {editingCell !== cellKey && !showInlineDiff && (
-                              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 inset-y-0.5 flex flex-col overflow-hidden px-2 text-sm leading-[1.5]"
-                                style={{ color: resolvedText || "inherit", fontSize: format.fontSize, fontWeight: format.bold ? "bold" : undefined, fontStyle: format.italic ? "italic" : undefined,
-                                  justifyContent: format.verticalAlignment === "top" ? "flex-start" : format.verticalAlignment === "bottom" ? "safe flex-end" : "safe center" }}>
-                                <div className="shrink-0">
-                                  {cellValue.split("\n").map((line, index) => <div key={index} className="flex whitespace-pre" style={{ minHeight: "1.5em", justifyContent: format.alignment === "right" ? "flex-end" : format.alignment === "center" ? "center" : "flex-start" }}>
-                                    <span className="shrink-0" style={{ textDecoration: format.underline ? "underline" : undefined }}>{line || "\u00a0"}</span>
-                                  </div>)}
-                                </div>
-                              </div>
-                            )}
-
-                            {fillPreview &&
-                              virtualRow.index >= fillPreview.top &&
-                              virtualRow.index <= fillPreview.bottom &&
-                              virtualCol.index >= fillPreview.left &&
-                              virtualCol.index <= fillPreview.right && (
-                                <div className="pointer-events-none absolute inset-0 border border-primary bg-primary/15" />
-                              )}
-                            {!isReadOnly &&
-                              !editingCell &&
-                              selectionBounds?.bottom === virtualRow.index &&
-                              selectionBounds.right === virtualCol.index && (
-                                <button
-                                  type="button"
-                                  tabIndex={-1}
-                                  aria-label="Drag to autofill selected cells"
-                                  title="Drag down or right to fill"
-                                  className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 touch-none cursor-crosshair border border-background bg-primary"
-                                  onDoubleClick={(e) => e.stopPropagation()}
-                                  onPointerDown={(e) => {
-                                    if (e.button !== 0 || isSavePending?.())
-                                      return;
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    finishEdit();
-                                    fillContextRef.current = {
-                                      pointerId: e.pointerId,
-                                      rows: tableRows.map(
-                                        (row) => row.original.rowIndex,
-                                      ),
-                                      cols: visibleColumns.map((col) =>
-                                        Number(col.id.split("-")[1]),
-                                      ),
-                                      values: cellDataRef.current,
-                                      widths: columnSizes,
-                                      offsets: rowOffsets,
-                                    };
-                                    setFillSource(selectionBounds);
-                                    setFillPreview(selectionBounds);
-                                  }}
-                                />
-                              )}
-                            {showInlineDiff && diff && (
-                              <div className="absolute inset-0 pointer-events-none px-2 py-1 flex flex-col justify-center gap-0.5 text-[10px]">
-                                <DiffValueDisplay
-                                  diff={diff}
-                                  formatValue={formatDiffValue}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollAreaPrimitive.Viewport>
-          <ScrollBar
-            orientation="horizontal"
-            className="z-40 [&>[data-slot=scroll-area-thumb]]:bg-foreground/40 hover:[&>[data-slot=scroll-area-thumb]]:bg-foreground/60"
-          />
-          <ScrollBar orientation="vertical" className="z-40" />
-          <ScrollAreaPrimitive.Corner />
-        </ScrollAreaPrimitive.Root>
+              );
+            })}
+          </div>
+        </div>
       </DndContext>
 
       <Dialog

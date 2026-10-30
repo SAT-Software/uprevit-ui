@@ -79,7 +79,7 @@ function NavigationMenuTrigger({
         icon={ArrowDown01Icon}
         size={16}
         strokeWidth={2}
-        className="ml-1 size-4 overflow-visible transition duration-200 delay-100 ease-in-out group-data-[state=open]:rotate-180"
+        className="ml-1 size-4 overflow-visible transition-transform duration-200 ease-out group-data-[state=open]:rotate-180"
         aria-hidden="true"
       />
     </NavigationMenuPrimitive.Trigger>

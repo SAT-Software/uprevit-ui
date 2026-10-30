@@ -85,7 +85,7 @@ export function VersionControlCards() {
             <div
               key={index}
               className={cn(
-                "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 group-data-[active=true]:-mb-2 transition-all duration-300 ease-in-out delay-300",
+                "w-full bg-card border border-border rounded-xl p-2 mb-2 group-hover:-mb-2 group-data-[active=true]:-mb-2 transition-all duration-300 ease-in-out motion-reduce:transition-none",
                 isActive
                   ? "shadow-bottom-lg border-foreground/20 bg-foreground dark:bg-background/90 z-50 group-hover:bg-foreground group-hover:dark:bg-background/90 group-data-[active=true]:bg-foreground group-data-[active=true]:dark:bg-background/90"
                   : "shadow-sm bg-muted/60 z-40 group-hover:bg-muted group-data-[active=true]:bg-muted",
@@ -101,7 +101,7 @@ export function VersionControlCards() {
                 <div className="flex items-center gap-2">
                   <div
                     className={cn(
-                      "p-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
+                      "p-1.5 rounded-lg transition-all duration-300 ease-in-out",
                       isActive
                         ? "bg-neutral-700 group-hover:dark:bg-neutral-900 text-neutral-300 border border-neutral-600 group-hover:text-purple-400 group-hover:dark:text-purple-600 group-data-[active=true]:dark:bg-neutral-300 group-data-[active=true]:text-purple-400 group-data-[active=true]:dark:text-purple-600"
                         : "bg-accent/50 text-muted-foreground",
@@ -135,7 +135,7 @@ export function VersionControlCards() {
                 <Badge
                   variant="outline"
                   className={cn(
-                    "text-[10px] h-5 px-1.5 rounded-lg transition-all duration-300 ease-in-out delay-200",
+                    "text-[10px] h-5 px-1.5 rounded-lg transition-all duration-300 ease-in-out",
                     isActive
                       ? "bg-neutral-700 text-neutral-300 border-neutral-600 group-hover:text-background group-hover:dark:text-neutral-100 group-hover:border-background/50 group-data-[active=true]:text-background group-data-[active=true]:dark:text-neutral-100 group-data-[active=true]:border-background/50"
                       : "bg-border/40 border-border text-muted-foreground",

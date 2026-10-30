@@ -67,7 +67,7 @@ function BillingFieldCell({
 }) {
   return (
     <div className={fieldCellClassName()}>
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-muted-foreground">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground/60 transition-colors duration-150 ease-out group-hover:text-muted-foreground">
         <Icon icon={icon} size={18} strokeWidth={2} />
       </div>
       <div className="min-w-0 space-y-0.5">
