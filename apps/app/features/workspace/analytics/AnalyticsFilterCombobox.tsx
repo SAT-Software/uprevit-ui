@@ -108,13 +108,15 @@ export function AnalyticsFilterCombobox({
             onValueChange={setSearch}
           />
           <CommandList onScroll={handleScroll}>
-            <CommandEmpty>
-              {isPending
-                ? "Loading…"
-                : isError
-                  ? `Failed to load ${label.toLowerCase()}s.`
-                  : `No ${label.toLowerCase()} found.`}
-            </CommandEmpty>
+            {isError ? (
+              <p className="px-2 py-1.5 text-sm text-muted-foreground">
+                Failed to load {label.toLowerCase()}s.
+              </p>
+            ) : (
+              <CommandEmpty>
+                {isPending ? "Loading…" : `No ${label.toLowerCase()} found.`}
+              </CommandEmpty>
+            )}
             <CommandGroup>
               {!search && (
                 <CommandItem value={ALL} onSelect={() => select(undefined)}>
