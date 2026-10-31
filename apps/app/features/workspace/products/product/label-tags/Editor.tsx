@@ -406,7 +406,29 @@ const Editor = ({
       containerMaxWidthRef.current = containerMaxWidth;
 
       const newEditor = new MarkerArea();
+      newEditor.style.minWidth = "0";
+      newEditor.style.minHeight = "0";
+      newEditor.style.height = "100%";
       newEditor.targetImage = targetImg;
+
+      // MarkerJS has no public pan bounds; all its input paths call applyTransform.
+      const pannable = newEditor as unknown as {
+        _panX: number;
+        _panY: number;
+        _canvasContainer?: HTMLDivElement;
+        applyTransform: () => void;
+      };
+      const applyTransform = pannable.applyTransform.bind(newEditor);
+      pannable.applyTransform = () => {
+        const viewport = pannable._canvasContainer;
+        if (viewport && viewport.clientWidth > 0 && viewport.clientHeight > 0) {
+          const maxX = Math.max(0, (newEditor.targetWidth * newEditor.zoomLevel - viewport.clientWidth) / 2);
+          const maxY = Math.max(0, (newEditor.targetHeight * newEditor.zoomLevel - viewport.clientHeight) / 2);
+          pannable._panX = Math.max(-maxX, Math.min(maxX, pannable._panX));
+          pannable._panY = Math.max(-maxY, Math.min(maxY, pannable._panY));
+        }
+        applyTransform();
+      };
 
       if (naturalWidth > containerMaxWidth) {
         const scale = containerMaxWidth / naturalWidth;
@@ -485,6 +507,16 @@ const Editor = ({
   }, [annotation]);
 
   useEffect(() => {
+    const container = editorContainer.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => {
+      if (editor.current) editor.current.zoomLevel = editor.current.zoomLevel;
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     document.addEventListener("keydown", handleKeyboardShortcuts, true);
     return () => {
       document.removeEventListener("keydown", handleKeyboardShortcuts, true);
@@ -492,7 +524,7 @@ const Editor = ({
   }, [handleKeyboardShortcuts]);
 
   return (
-    <div className="grid h-full min-h-[360px] w-full grid-rows-[auto_1fr_auto] overflow-hidden bg-background">
+    <div className="grid h-[clamp(360px,60dvh,720px)] w-full grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-background">
       <EditorToolbar
         variant={variant}
         markerTypes={markerTypes}
@@ -501,10 +533,19 @@ const Editor = ({
         onAction={handleToolbarAction}
         onNewMarker={handleNewMarker}
       />
-      <div className="relative min-h-0">
+      <div className="relative min-h-0 min-w-0">
         <div
           ref={editorContainer}
-          className="flex h-full min-h-[280px] overflow-hidden bg-muted/20 **:bg-no-repeat"
+          onWheelCapture={(event) => {
+            if (
+              !event.ctrlKey &&
+              !event.metaKey &&
+              Math.abs(event.deltaY) >= Math.abs(event.deltaX)
+            ) {
+              event.stopPropagation();
+            }
+          }}
+          className="flex h-full min-h-0 min-w-0 overflow-hidden bg-muted/20 **:bg-no-repeat"
         ></div>
         {showLegendOverlay && legendItems.length > 0 && (
           <LegendOverlay items={legendItems} />

@@ -38,7 +38,6 @@ import {
   Refresh04Icon,
   Search02Icon,
 } from "@hugeicons/core-free-icons";
-import { cn } from "@uprevit/ui/lib/utils";
 
 const actionFilters = [
   { value: "all", label: "All actions" },
@@ -183,7 +182,7 @@ export function ActivityLogsSheet({
                         icon={FilterVerticalIcon}
                         size={14}
                         strokeWidth={2}
-                        className="shrink-0 text-muted-foreground/60 transition-colors delay-100 duration-200 ease-in-out group-hover:text-foreground"
+                        className="shrink-0 text-muted-foreground/60 transition-colors duration-150 ease-out group-hover:text-foreground"
                       />
                       <SelectValue placeholder="Action" />
                     </div>
@@ -213,9 +212,6 @@ export function ActivityLogsSheet({
                     icon={Refresh04Icon}
                     size={14}
                     strokeWidth={2}
-                    className={cn(
-                      "transition-all delay-100 duration-200 ease-in-out",
-                    )}
                   />
                 </Button>
               </TooltipTrigger>

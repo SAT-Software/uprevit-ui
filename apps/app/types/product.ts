@@ -10,6 +10,7 @@ export interface ProductTeamMember {
   name: string;
   email: string;
   profileAvatar?: string;
+  status?: "invited" | "active" | "inactive";
 }
 
 export interface ProductTeam {

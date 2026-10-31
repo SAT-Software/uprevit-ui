@@ -13,6 +13,7 @@ This guide provides instructions and conventions for agents operating in the upr
 - Don't use phase wording inside PRs, branch names or commits, Phases and steps are part of internal emend development plan
 - PR title should be a concise, human-readable summary of the change in one line, without any reference to issue numbers or commit hashes.
 - PR description sould also be simple bullet points on what is done in it. Apart from this bullet points only more thing can be added which is which issue it closes if there is one. Don't add any bloated information.
+- When a change has a companion PR in `../uprevit-backend`, link it in the PR description (e.g. `Depends on SAT-Software/uprevit-backend#211`). Greptile may read only the default branch of the other repo, so `.greptile/rules.md` relies on this link to avoid flagging backend changes that are not merged yet.
 - Create github issue which will be closed by the PR that you are creating, and follow the same guidelines as PRs.
 - Add as much metadata information you can add for the PR and issue like type, labels, Develpment etc.
 - Don't write unnecessary comments in code
@@ -39,4 +40,3 @@ This guide provides instructions and conventions for agents operating in the upr
 ## TODOs
 
 - **Dashboard activity stats historical attribution (backend):** `src/utils/dashboardActivityStats.ts` currently attributes product activity to the product's *current* department/project and drops archived products from those counts. For true 30-day history, denormalize parent IDs onto audit events at write time (or read historical parents from audit scope) so archive/move does not rewrite earlier activity. Deferred from release `0.6.0` (Greptile PR #161).
-- **Analytics totals beyond 100 products (UI):** `app/(app)/analytics/page.tsx` computes Draft, Released, Overdue and the charts from the first 100 products (the list API maximum). Total Products and Archived use the API `totalCount`. For accurate workspace-wide numbers, add a server-side analytics aggregate (or page through all products).

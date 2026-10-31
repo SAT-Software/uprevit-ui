@@ -1,107 +1,127 @@
 "use client";
 
+import Link from "next/link";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { analyticsDrillHref } from "@/features/workspace/analytics/analyticsLinks";
+import type { AnalyticsData, AnalyticsFilters } from "@/types/analytics";
 import {
   AlertCircleIcon,
-  ArchiveIcon,
-  Blockchain03Icon,
   CheckmarkCircle02Icon,
+  Clock01Icon,
   PropertyEditIcon,
+  Target02Icon,
+  UserCheck01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { cn } from "@uprevit/ui/lib/utils";
 
-interface AnalyticsKpi {
-  totalProducts: number;
-  draftCount: number;
-  releasedCount: number;
-  archivedCount: number;
-  overdueCount: number;
-}
+type Tiles = AnalyticsData["tiles"];
 
-interface AnalyticsStatsGridProps {
-  kpi: AnalyticsKpi;
-  isLoading: boolean;
-}
-
-function formatStatValue(value: number) {
-  return value <= 9 ? `0${value}` : String(value);
-}
-
-const STATS = [
+const STATS: {
+  key: keyof Tiles;
+  title: string;
+  info: string;
+  icon: typeof AlertCircleIcon;
+  metric?: string;
+  format?: (value: number) => string;
+}[] = [
   {
-    id: "total-products",
-    title: "Total Products",
-    key: "totalProducts" as const,
-    icon: Blockchain03Icon,
-    info: "Total active products in your workspace",
-  },
-  {
-    id: "draft",
-    title: "Draft",
-    key: "draftCount" as const,
+    key: "in_progress",
+    title: "In progress",
+    info: "Products in draft, submitted or in review",
     icon: PropertyEditIcon,
-    info: "Products still in draft status",
+    metric: "in_progress",
   },
   {
-    id: "released",
+    key: "released",
     title: "Released",
-    key: "releasedCount" as const,
+    info: "Versions released in the selected period",
     icon: CheckmarkCircle02Icon,
-    info: "Products whose latest version is released",
+    metric: "released",
   },
   {
-    id: "archived",
-    title: "Archived",
-    key: "archivedCount" as const,
-    icon: ArchiveIcon,
-    info: "Products archived from your workspace",
+    key: "on_time_rate",
+    title: "On-time rate",
+    info: "Share of versions released in the selected period on or before their target date",
+    icon: Target02Icon,
+    format: (value) => `${Math.round(value * 100)}%`,
   },
   {
-    id: "overdue",
+    key: "median_days_to_release",
+    title: "Median time to release",
+    info: "Median days from creating a version to releasing it, for versions released in the selected period",
+    icon: Clock01Icon,
+    format: (value) => `${Math.round(value)} d`,
+  },
+  {
+    key: "pending_approvals",
+    title: "Pending approvals",
+    info: "Products waiting on approvers in active reviews, counted once per approver",
+    icon: UserCheck01Icon,
+  },
+  {
+    key: "overdue",
     title: "Overdue",
-    key: "overdueCount" as const,
+    info: "Unreleased products past their target date",
     icon: AlertCircleIcon,
-    info: "Draft products past their target date",
+    metric: "overdue",
   },
 ];
 
-export function AnalyticsStatsGrid({ kpi, isLoading }: AnalyticsStatsGridProps) {
+export function AnalyticsStatsGrid({
+  tiles,
+  filters,
+  isLoading,
+}: {
+  tiles?: Tiles;
+  filters: AnalyticsFilters;
+  isLoading: boolean;
+}) {
   return (
-    <div className="grid grid-cols-2 border-b border-border min-[1200px]:grid-cols-5">
-      {STATS.map((stat) => (
-        <div
-          key={stat.id}
-          className="relative group flex w-full items-center justify-between p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden lg:p-4"
-        >
-          <div className="relative flex items-center gap-4">
-            <div
-              className={cn(
-                "hidden size-10 mb-1 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-accent-foreground sm:flex",
-                "text-muted-foreground group-hover:text-foreground transition-colors ease-in-out delay-100 duration-200",
-              )}
-            >
+    <div className="grid grid-cols-2 lg:grid-cols-3 min-[1400px]:grid-cols-6">
+      {STATS.map((stat) => {
+        const value = tiles?.[stat.key];
+        const content = (
+          <div className="flex items-center gap-4">
+            <div className="hidden size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-accent/80 text-muted-foreground transition-colors duration-150 ease-out group-hover:text-foreground sm:flex">
               <Icon icon={stat.icon} size={16} strokeWidth={2} />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-normal text-sm text-muted-foreground">
+                <p className="truncate text-sm text-muted-foreground">
                   {stat.title}
                 </p>
                 <InfoTooltip content={stat.info} />
               </div>
-              <div className="mb-2 h-8 text-2xl font-semibold leading-8 tabular-nums">
+              <div className="h-8 text-2xl font-semibold leading-8 tabular-nums">
                 {isLoading ? (
-                  <Skeleton className="h-8 w-10 rounded" />
+                  <Skeleton className="h-8 w-12 rounded" />
+                ) : value == null ? (
+                  "—"
                 ) : (
-                  formatStatValue(kpi[stat.key])
+                  (stat.format?.(value) ?? value)
                 )}
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+        const className =
+          "group relative flex border-b border-border p-4 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border last:before:hidden";
+
+        return stat.metric ? (
+          <Link
+            key={stat.key}
+            href={analyticsDrillHref(filters, stat.metric)}
+            className={`${className} transition-colors duration-150 ease-out hover:bg-muted/40`}
+          >
+            {content}
+          </Link>
+        ) : (
+          <div key={stat.key} className={className}>
+            {content}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -48,6 +48,9 @@ export function useCreateProductVersion() {
       toast.success(`Version ${data.product.version} created successfully`);
       queryClient.invalidateQueries({ queryKey: ["all-products"] });
       queryClient.invalidateQueries({ queryKey: ["product-versions-infinite"] });
+      queryClient.invalidateQueries({ queryKey: ["all-user-bookmark-folders"] });
+      queryClient.invalidateQueries({ queryKey: ["all-bookmarked-products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-in-bookmark-folder"] });
     },
     onError: (error) => {
       const message = getErrorMessage(error, "Failed to create new version");

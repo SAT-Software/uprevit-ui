@@ -18,7 +18,7 @@ export function Icon({
       strokeWidth={strokeWidth}
       color={color}
       className={cn(
-        "transition-colors delay-100 duration-200 ease-in-out",
+        "transition-colors duration-150 ease-out",
         className,
       )}
       {...rest}

@@ -48,7 +48,7 @@ export default function ProductTeamDialog({
             <FormFieldLabel
               htmlFor={`${id}-owner`}
               label="Product Owner"
-              tooltip="Accountable for this product across all versions. Can edit and manage the team."
+              tooltip="Accountable for this version and the versions created from it. Can edit and manage the team."
             />
             <ProductMemberCombobox
               id={`${id}-owner`}

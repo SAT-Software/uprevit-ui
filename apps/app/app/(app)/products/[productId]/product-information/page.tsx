@@ -363,7 +363,7 @@ export default function Page() {
         diffKey: "countryOfOrigin",
       },
       {
-        label: "OEM / Contract manufactured",
+        label: "OEM / Contract manufacturer",
         value: productData.oem_contract_manufacturer || "N/A",
         icon: Building03Icon,
         diffKey: "oemContractManufacturer",
@@ -621,7 +621,7 @@ export default function Page() {
                   trigger={
                     <Button type="button" variant="outline" size="sm">
                       <Icon
-                        className="transition-colors delay-100 duration-200 ease-in-out"
+                        className="transition-colors duration-150 ease-out"
                         icon={ProfileIcon}
                         size={16}
                         strokeWidth={2}

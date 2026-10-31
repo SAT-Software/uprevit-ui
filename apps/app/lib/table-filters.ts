@@ -46,7 +46,7 @@ export const advancedFilterFn = <TData,>(): FilterFn<TData> => {
     const { operator, value } = filterValue as AdvancedFilterValue;
     const normalizedValue =
       typeof rowValue === "boolean" && typeof value === "string"
-        ? value === "true"
+        ? ["true", "yes"].includes(value.trim().toLowerCase())
         : value;
 
     switch (operator) {

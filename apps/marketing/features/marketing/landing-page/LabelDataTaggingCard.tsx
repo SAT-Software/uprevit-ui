@@ -73,28 +73,28 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
                 />
                 <div className="pointer-events-none absolute inset-0 hidden dark:block bg-gradient-to-b from-slate-950/10 via-slate-950/18 to-slate-950/22" />
 
-                <div className="absolute w-0 h-0 hidden sm:block sm:top-12 sm:left-1 sm:w-36 sm:h-7 border border-transparent bg-transparent group-hover:border-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-400" />
-                <div className="absolute w-0 h-0 hidden sm:block   sm:top-20 sm:left-8.5 sm:w-22 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-500" />
-                <div className="absolute w-0 h-0 hidden sm:block   sm:top-29 sm:left-8.5 sm:w-16 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-600" />
-                <div className="absolute w-0 h-0 hidden sm:block  sm:bottom-7 sm:right-4.5 sm:w-9 sm:h-9 border border-transparent bg-transparent group-hover:border-yellow-500 group-hover:bg-yellow-500/10 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-700" />
+                <div className="absolute w-0 h-0 hidden sm:block sm:top-12 sm:left-1 sm:w-36 sm:h-7 border border-transparent bg-transparent group-hover:border-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out" />
+                <div className="absolute w-0 h-0 hidden sm:block   sm:top-20 sm:left-8.5 sm:w-22 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-100" />
+                <div className="absolute w-0 h-0 hidden sm:block   sm:top-29 sm:left-8.5 sm:w-16 sm:h-5.5 border bg-transparent border-transparent group-hover:border-red-500 group-hover:bg-red-500/10 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-200" />
+                <div className="absolute w-0 h-0 hidden sm:block  sm:bottom-7 sm:right-4.5 sm:w-9 sm:h-9 border border-transparent bg-transparent group-hover:border-yellow-500 group-hover:bg-yellow-500/10 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/10 rounded sm:rounded-md transition-all duration-300 ease-in-out delay-300" />
               </div>
             </div>
 
             <div className="absolute top-1.5 right-1.5 lg:top-2 lg:right-2 bg-accent/40 backdrop-blur-sm border border-border p-1.5 lg:p-2 rounded-lg text-xs shadow-sm flex flex-col gap-1.5 lg:gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-red-500 group-hover:bg-red-500/20 group-data-[active=true]:border-red-500 group-data-[active=true]:bg-red-500/20 transition-all ease-in-out duration-300" />
                 <span className="text-foreground text-[10px]">
                   Variable Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-blue-500 group-hover:bg-blue-500/20 group-data-[active=true]:border-blue-500 group-data-[active=true]:bg-blue-500/20 transition-all ease-in-out duration-300" />
                 <span className="text-foreground text-[10px]">
                   Constant Data
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-yellow-500 group-hover:bg-yellow-500/20 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/20 transition-all ease-in-out duration-300 delay-75" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-accent group-hover:border-yellow-500 group-hover:bg-yellow-500/20 group-data-[active=true]:border-yellow-500 group-data-[active=true]:bg-yellow-500/20 transition-all ease-in-out duration-300" />
                 <span className="text-foreground text-[10px]">UDI Barcode</span>
               </div>
             </div>
@@ -110,7 +110,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
               <span className="p-1 rounded-xl text-foreground/70">
                 <Icon icon={Image01Icon} size={16} strokeWidth={2} />
               </span>
-              <span className="p-1 rounded-xl text-foreground/70 bg-accent group-hover:text-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:text-blue-500 group-data-[active=true]:bg-blue-500/10 transition-all ease-in-out duration-300 delay-100">
+              <span className="p-1 rounded-xl text-foreground/70 bg-accent group-hover:text-blue-500 group-hover:bg-blue-500/10 group-data-[active=true]:text-blue-500 group-data-[active=true]:bg-blue-500/10 transition-all ease-in-out duration-300">
                 <Icon icon={CubeIcon} size={16} strokeWidth={2} />
               </span>
               <span className="p-1 rounded-xl text-foreground/70">

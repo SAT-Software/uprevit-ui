@@ -12,8 +12,9 @@ async function getProductTabData(
     auth: AuthContextProps;
   }
 ) {
+  const workbooksParam = tabName === "all-tabs" ? "&workbooks=false" : "";
   const response = await fetch(
-    `/api/products/productData?id=${productId}&tab=${tabName}`,
+    `/api/products/productData?id=${productId}&tab=${tabName}${workbooksParam}`,
     {
       headers: {
         Authorization: `Bearer ${auth?.user?.access_token}`,

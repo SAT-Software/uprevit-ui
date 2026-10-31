@@ -1,31 +1,33 @@
 ---
 title: Analytics
-description: See product counts and trends across your workspace in charts.
+description: See where products are in the pipeline, what is due and what is holding work back.
 ---
 
-**Analytics** (`/analytics`) shows your workspace's products as numbers and charts. Open it from **Insights → Analytics** in the sidebar. Every workspace member can view it.
+**Analytics** (`/analytics`) shows how work is moving through your workspace. Open it from **Insights → Analytics** in the sidebar. Every workspace member can view it.
 
-<DocsVideo videoKey="reports-analytics.overview" title="Reports and Analytics overview" />
+Use the filters at the top to choose a period (**Last 30 days** to **Last 12 months**, default **Last 90 days**), a department and a project. Every card and chart follows the filters.
+
+Click **In progress**, **Released** or **Overdue**, a chart segment, a calendar day, a month in **Created vs released** or a tab in **What blocks submission** to open the products behind it. Click a department to open its page.
 
 ## Summary cards
 
-| Card | What it counts |
-|------|----------------|
-| **Total Products** | Active products in the workspace. |
-| **Draft** | Products whose latest version is in Draft. |
-| **Released** | Products whose latest version is released. |
-| **Archived** | Products that have been archived. |
-| **Overdue** | Draft products past their target date. |
+| Card | What it shows |
+|------|---------------|
+| **In progress** | Products in Draft, Submitted or In review. |
+| **Released** | Versions released in the selected period. |
+| **On-time rate** | Share of versions released in the period on or before their target date. |
+| **Median time to release** | Median days from creating a version to releasing it, for versions released in the period. |
+| **Pending approvals** | Products waiting on approvers in active reviews, counted once per approver. |
+| **Overdue** | Unreleased products past their target date. |
 
 ## Charts
 
-- **Products Over Time** counts each product once, on the date it was last created or changed. Choose a range from **Last 7 days** to **Last 1 year**. The default is **Last 1 month**.
-- **Products by Department** shows the five departments with the most products.
-- **Products by Project** shows the five projects with the most products.
-
-<Callout type="info" title="Large workspaces">
-  **Draft**, **Released**, **Overdue**, and the charts are based on up to 100 products. **Total Products** and **Archived** always count every product.
-</Callout>
+- **Pipeline by stage** shows how many products are in Draft, Submitted, In review and Released.
+- **Due-date calendar** shows unreleased products by target date, from the start of the selected period to eight weeks ahead. Days before today are overdue.
+- **Pending approvals** shows how many products are waiting on each approver.
+- **Created vs released** compares versions created and versions released each month.
+- **What blocks submission** shows how many drafts still have each of the seven product tabs incomplete. A draft can count under several tabs.
+- **Departments by stage** shows each department's products split by stage.
 
 ## Related topics
 

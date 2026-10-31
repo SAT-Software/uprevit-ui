@@ -30,7 +30,7 @@ export function BookmarkedProductListItem({
     <>
       <div className="group relative w-full flex items-center justify-between rounded-xl border border-border/60 bg-background transition-colors hover:bg-muted/40 p-2 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring">
         <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted transition-colors delay-100 duration-200 ease-in-out group-hover:border-border group-hover:bg-muted/80 ">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted transition-colors duration-150 ease-out group-hover:border-border group-hover:bg-muted/80 ">
             <Icon
               icon={Blockchain03Icon}
               className="text-muted-foreground/60 group-hover:text-foreground"

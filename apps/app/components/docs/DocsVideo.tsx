@@ -10,6 +10,7 @@ type DocsVideoProps = {
   title?: string;
   caption?: string;
   className?: string;
+  cropPadding?: boolean;
 };
 
 export function DocsVideo({
@@ -17,6 +18,7 @@ export function DocsVideo({
   title,
   caption,
   className,
+  cropPadding,
 }: DocsVideoProps) {
   const { data, isLoading, isError, error, isFetching } =
     useDocumentationVideoUrl(videoKey);
@@ -46,7 +48,7 @@ export function DocsVideo({
 
   return (
     <figure className={cn("my-6", className)}>
-      <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black outline-1 outline-border outline-offset-0">
+      <div className="not-prose aspect-video w-full overflow-hidden rounded-2xl bg-black outline-1 outline-border outline-offset-0">
         <Player
           key={data.url}
           src={data.url}
@@ -59,7 +61,10 @@ export function DocsVideo({
             width: "100%",
             height: "100%",
           }}
-          className="h-full w-full scale-[1.08] object-cover [object-position:center_58%]"
+          className={cn(
+            "h-full w-full object-contain",
+            cropPadding && "scale-[1.08] [object-position:center_58%]",
+          )}
         />
       </div>
       {caption ? (

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductHeader } from "@/features/workspace/products/product/ProductHeader";
 import { ProductInReviewBanner } from "@/features/workspace/products/product/ProductInReviewBanner";
 import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
+import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
 import { ExportJobStatus } from "@/types/export-job";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
@@ -25,6 +26,9 @@ export default function ProductLayout({
       : Array.isArray(params.productId)
         ? params.productId[0]
         : undefined;
+  const compareVersionId = useSearchParams().get("compareVersion");
+  const { isError: isComparisonError, refetch: retryComparison } =
+    useGetProductDiffRedline(productId, compareVersionId);
 
   const { data: exportJobsData } = useGetProductExportJobs(
     {
@@ -56,7 +60,17 @@ export default function ProductLayout({
         showTrigger={false}
       />
       <div className="relative flex flex-1 flex-col min-h-0 bg-background">
-        {children}
+        {compareVersionId && isComparisonError ? (
+          <div role="alert" className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+            <h2 className="text-base font-semibold">Unable to compare versions</h2>
+            <p className="max-w-md text-sm text-muted-foreground">
+              One or more product versions could not be loaded. Try again or choose another version.
+            </p>
+            <Button variant="outline" onClick={() => void retryComparison()}>
+              Try again
+            </Button>
+          </div>
+        ) : children}
         {hasActiveExport ? (
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-accent/80 backdrop-blur-[2px]">
             <div className="mx-4 flex max-w-md items-start gap-3 rounded-xl border border-border bg-background px-4 py-3 shadow-sm">

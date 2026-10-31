@@ -237,7 +237,7 @@ export function AutomatedRedliningCard() {
         setTextScrambleTrigger(false);
       }}
       data-active={isTouchActive ? "true" : undefined}
-      className="lg:relative group w-full lg:w-2/3 h-125 lg:h-full bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col overflow-hidden group transition-all duration-300 ease-in-out delay-300"
+      className="lg:relative group w-full lg:w-2/3 h-125 lg:h-full bg-background p-4 md:p-4 lg:p-8 rounded-xl border border-border shadow-none flex flex-col overflow-hidden group transition-all duration-300 ease-in-out"
     >
       <div className="z-10 flex flex-col h-full">
         <div className="mb-6">
@@ -250,7 +250,7 @@ export function AutomatedRedliningCard() {
           </p>
         </div>
 
-        <div className="lg:absolute -bottom-16 lg:-right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out delay-300">
+        <div className="lg:absolute -bottom-16 lg:-right-20 w-full flex-1 min-h-0 transition-transform duration-300 ease-in-out">
           <div className="p-1 bg-muted border border-border rounded-2xl shadow-bottom-lg">
             <div className="relative h-full bg-background rounded-t-2xl border border-border shadow-none overflow-hidden flex flex-col">
               <div className="flex flex-col items-start gap-2 px-2 py-2 sm:flex-row sm:items-center sm:justify-start sm:gap-4 border-b bg-muted/30">
@@ -267,7 +267,7 @@ export function AutomatedRedliningCard() {
                     />
                     Version 2
                   </span>
-                  <span className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 group-data-[active=true]:bg-purple-100/50 group-data-[active=true]:dark:bg-purple-900/50 group-data-[active=true]:border-purple-500 transition-all duration-300 ease-in-out delay-100">
+                  <span className="py-0.5 px-1 inline-flex rounded-lg items-center gap-1 text-[10px] bg-secondary text-secondary-foreground border border-border group-hover:bg-purple-100/50 group-hover:dark:bg-purple-900/50 group-hover:border-purple-500 group-data-[active=true]:bg-purple-100/50 group-data-[active=true]:dark:bg-purple-900/50 group-data-[active=true]:border-purple-500 transition-all duration-300 ease-in-out">
                     <Icon
                       icon={ArrowDown01Icon}
                       size={10}

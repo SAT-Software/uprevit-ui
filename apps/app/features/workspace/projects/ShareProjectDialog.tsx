@@ -60,7 +60,7 @@ export default function ShareProjectDialog({
           <TooltipTrigger asChild>
             <Button variant="outline" size="sm">
               <Icon
-                className="transition-colors delay-100 duration-200 ease-in-out"
+                className="transition-colors duration-150 ease-out"
                 icon={Share08Icon}
                 size={16}
                 strokeWidth={2}

@@ -118,8 +118,6 @@ export default function Page() {
             const parentId = (item as { parent_id?: string | null }).parent_id;
             return parentId ? String(parentId) : undefined;
           },
-          getFallbackKey: (item) =>
-            `${item.component_number}-${item.component_type}`,
         })
       : [];
   const labelComponentChangeCount =

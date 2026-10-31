@@ -53,7 +53,7 @@ export function NotificationsBell() {
         >
           <Icon icon={BellIcon} size={18} />
           {unreadCount > 0 ? (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-white tabular-nums">
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 dark:bg-destructive/60 text-[10px] font-semibold leading-none text-white tabular-nums">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           ) : null}

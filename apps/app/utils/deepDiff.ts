@@ -218,10 +218,12 @@ export function deepDiff(
             ? String(nextItem.parent_id)
             : "";
 
-        if (parentId && baseMap.has(parentId)) {
+        const nextId = getBaseId(nextItem);
+        const matchId = baseMap.has(parentId) ? parentId : nextId;
+        if (matchId && baseMap.has(matchId) && !matchedBaseIds.has(matchId)) {
           // Found matching base item - compare for modifications
-          const baseEntry = baseMap.get(parentId)!;
-          matchedBaseIds.add(parentId);
+          const baseEntry = baseMap.get(matchId)!;
+          matchedBaseIds.add(matchId);
 
           const itemPath = path ? `${path}[${nextIndex}]` : `[${nextIndex}]`;
           diffs.push(...deepDiff(baseEntry.item, nextItem, itemPath));

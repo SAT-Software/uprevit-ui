@@ -81,12 +81,12 @@ export function FindReplaceDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <AppDialogContent
         title="Find & Replace"
-        description="Search and replace text across all cells in the table."
+        description="Replace matching text in this sheet."
         variant="form"
         size="md"
         wrapBodyInFieldGroup
         primaryAction={{
-          label: "Replace All",
+          label: `Replace all${matches.length ? ` (${matches.length})` : ""}`,
           onClick: handleReplaceAll,
           disabled: matches.length === 0,
           icon: SearchReplaceIcon,

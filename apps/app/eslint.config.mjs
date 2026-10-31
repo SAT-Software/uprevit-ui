@@ -5,6 +5,11 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     "react-hooks/incompatible-library": "off"
   }
 }, {
+  files: ["components/evilcharts/**"],
+  rules: {
+    "react-hooks/refs": "off"
+  }
+}, {
   ignores: ["node_modules/**", ".next/**", ".source/**", "out/**", "build/**", "next-env.d.ts"]
 }];
 
