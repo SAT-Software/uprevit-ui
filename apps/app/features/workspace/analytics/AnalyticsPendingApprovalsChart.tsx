@@ -6,6 +6,7 @@ import { EChartsBarChart } from "@/components/evilcharts/charts/echarts-bar-char
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
 import { AnalyticsEmptyState } from "@/features/workspace/analytics/AnalyticsEmptyState";
 import { AnalyticsShowMore } from "@/features/workspace/analytics/AnalyticsShowMore";
+import { AnalyticsDrillLinks } from "@/features/workspace/analytics/AnalyticsDrillLinks";
 import { analyticsDrillHref } from "@/features/workspace/analytics/analyticsLinks";
 import type { AnalyticsData, AnalyticsFilters } from "@/types/analytics";
 
@@ -68,6 +69,13 @@ export function AnalyticsPendingApprovalsChart({
         </EChartsBarChart>
         </div>
       )}
+      <AnalyticsDrillLinks
+        label="Pending approvals by approver"
+        links={rows.map((row) => ({
+          href: analyticsDrillHref(filters, "approver", row.user_id),
+          label: `${row.name}: ${row.count}`,
+        }))}
+      />
     </AnalyticsChartPanel>
   );
 }

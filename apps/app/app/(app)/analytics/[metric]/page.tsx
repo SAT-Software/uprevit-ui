@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import {
   ANALYTICS_METRIC_TITLES,
   STAGE_CHART_CONFIG,
@@ -41,7 +42,10 @@ function valueLabel(metric: string, value?: string) {
 
 export default function AnalyticsDrillDownPage() {
   const { metric } = useParams<{ metric: string }>();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const page = Math.max(1, Math.floor(Number(searchParams.get("page"))) || 1);
   const value = searchParams.get("value") ?? undefined;
   const filters: AnalyticsFilters = {
     from: searchParams.get("from") ?? undefined,
@@ -49,9 +53,16 @@ export default function AnalyticsDrillDownPage() {
     departmentId: searchParams.get("departmentId") ?? undefined,
     projectId: searchParams.get("projectId") ?? undefined,
   };
-  const { data: products = [], isLoading, isError } = useGetAnalyticsProducts(
+  const { data, isLoading, isError } = useGetAnalyticsProducts(
     { ...filters, metric, value },
+    page,
   );
+  const products = data?.data ?? [];
+  const setPage = (next: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", String(next));
+    router.replace(`${pathname}?${params}`);
+  };
   const backQuery = analyticsSearchParams(filters).toString();
   const subtitle = valueLabel(metric, value);
 
@@ -71,7 +82,7 @@ export default function AnalyticsDrillDownPage() {
         </p>
         {!isLoading && (
           <span className="text-sm tabular-nums text-muted-foreground">
-            ({products.length})
+            ({data?.pagination?.totalCount ?? 0})
           </span>
         )}
       </div>
@@ -148,6 +159,14 @@ export default function AnalyticsDrillDownPage() {
           </Table>
         )}
       </div>
+      {!isError && (
+        <div className="flex h-10 shrink-0 items-center border-t border-border">
+          <WorkspaceListPagination
+            pagination={data?.pagination}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
     </div>
   );
 }
