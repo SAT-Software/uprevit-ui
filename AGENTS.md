@@ -40,4 +40,3 @@ This guide provides instructions and conventions for agents operating in the upr
 ## TODOs
 
 - **Dashboard activity stats historical attribution (backend):** `src/utils/dashboardActivityStats.ts` currently attributes product activity to the product's *current* department/project and drops archived products from those counts. For true 30-day history, denormalize parent IDs onto audit events at write time (or read historical parents from audit scope) so archive/move does not rewrite earlier activity. Deferred from release `0.6.0` (Greptile PR #161).
-- **Analytics totals beyond 100 products (UI):** `app/(app)/analytics/page.tsx` computes Draft, Released, Overdue and the charts from the first 100 products (the list API maximum). Total Products and Archived use the API `totalCount`. For accurate workspace-wide numbers, add a server-side analytics aggregate (or page through all products).

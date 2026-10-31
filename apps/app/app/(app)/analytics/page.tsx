@@ -1,139 +1,102 @@
 "use client";
 
-import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { AnalyticsBlockingTabsChart } from "@/features/workspace/analytics/AnalyticsBlockingTabsChart";
+import { AnalyticsCreatedReleasedChart } from "@/features/workspace/analytics/AnalyticsCreatedReleasedChart";
+import { AnalyticsDepartmentsChart } from "@/features/workspace/analytics/AnalyticsDepartmentsChart";
+import { AnalyticsDueCalendarChart } from "@/features/workspace/analytics/AnalyticsDueCalendarChart";
+import { AnalyticsFilterBar } from "@/features/workspace/analytics/AnalyticsFilterBar";
+import { AnalyticsPendingApprovalsChart } from "@/features/workspace/analytics/AnalyticsPendingApprovalsChart";
+import { AnalyticsPipelineChart } from "@/features/workspace/analytics/AnalyticsPipelineChart";
 import { AnalyticsStatsGrid } from "@/features/workspace/analytics/AnalyticsStatsGrid";
-import { ProductsByDepartmentChart } from "@/features/workspace/analytics/ProductsByDepartmentBarChart";
-import { ProductsByProjectChart } from "@/features/workspace/analytics/ProductsByProjectBarChart";
-import { ProductsOverTimeChart } from "@/features/workspace/analytics/ProductsVsTimeLineChart";
-import { useGetArchivedProducts } from "@/hooks/archive/useGetArchivedProducts";
-import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
-import type { ProductStatus } from "@/types/product";
-
-type ProductAnalyticsItem = {
-  _id?: string;
-  status?: ProductStatus;
-  target_date?: string | null;
-  department_id?: string;
-  project_id?: string;
-  auditLogs?: Array<{ actionAt?: string | Date }>;
-  createdAt?: string;
-  department?: Array<{ department_name?: string }>;
-  project?: Array<{ project_name?: string }>;
-};
-
-const ANALYTICS_PRODUCT_LIMIT = 100;
+import {
+  analyticsSearchParams,
+  useGetAnalytics,
+} from "@/hooks/analytics/useGetAnalytics";
+import type { AnalyticsFilters } from "@/types/analytics";
 
 export default function AnalyticsPage() {
-  const { data: productsData, isLoading: productsLoading } =
-    useGetAllProducts({ limit: ANALYTICS_PRODUCT_LIMIT });
-  const { data: archivedProductsData, isLoading: archivedLoading } =
-    useGetArchivedProducts({ limit: 1 });
-  const isLoading = productsLoading || archivedLoading;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const filters: AnalyticsFilters = {
+    from: searchParams.get("from") ?? undefined,
+    to: searchParams.get("to") ?? undefined,
+    departmentId: searchParams.get("departmentId") ?? undefined,
+    projectId: searchParams.get("projectId") ?? undefined,
+  };
+  const { data, isLoading, isError } = useGetAnalytics(filters);
 
-  const analytics = useMemo(() => {
-    const products =
-      (productsData?.result?.products as ProductAnalyticsItem[]) || [];
-
-    const totalProducts =
-      productsData?.result?.pagination?.totalCount ?? products.length;
-    const draftCount = products.filter((p) => p.status === "draft").length;
-    const releasedCount = products.filter((p) => p.status === "released")
-      .length;
-    const archivedCount =
-      archivedProductsData?.result?.pagination?.totalCount ?? 0;
-
-    const today = new Date();
-    const overdueCount = products.filter((p) => {
-      if (p.status !== "draft") return false;
-      if (!p.target_date) return false;
-      return new Date(p.target_date) < today;
-    }).length;
-
-    const departmentCounts: Record<string, { name: string; count: number }> =
-      {};
-    products.forEach((p) => {
-      const deptId = p.department_id ?? "unknown";
-      const deptName = p.department?.[0]?.department_name || "Unknown";
-      if (!departmentCounts[deptId]) {
-        departmentCounts[deptId] = { name: deptName, count: 0 };
-      }
-      departmentCounts[deptId].count++;
-    });
-    const departmentData = Object.entries(departmentCounts)
-      .map(([, data]) => ({ department: data.name, products: data.count }))
-      .sort((a, b) => b.products - a.products);
-
-    const projectCounts: Record<string, { name: string; count: number }> = {};
-    products.forEach((p) => {
-      const projId = p.project_id ?? "unknown";
-      const projName = p.project?.[0]?.project_name || "Unknown";
-      if (!projectCounts[projId]) {
-        projectCounts[projId] = { name: projName, count: 0 };
-      }
-      projectCounts[projId].count++;
-    });
-    const projectData = Object.entries(projectCounts)
-      .map(([, data]) => ({ project: data.name, products: data.count }))
-      .sort((a, b) => b.products - a.products);
-
-    const dailyData: Record<string, number> = {};
-    products.forEach((p) => {
-      const createdAt = p.auditLogs?.[0]?.actionAt || p.createdAt;
-      if (createdAt) {
-        const date = new Date(createdAt);
-        const dateKey = date.toISOString().split("T")[0];
-        dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
-      }
-    });
-    const timeData = Object.entries(dailyData)
-      .map(([date, count]) => ({ date, products: count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    return {
-      kpi: {
-        totalProducts,
-        draftCount,
-        releasedCount,
-        archivedCount,
-        overdueCount,
-      },
-      departmentData,
-      projectData,
-      timeData,
-    };
-  }, [productsData, archivedProductsData]);
+  const setFilters = (next: AnalyticsFilters) => {
+    const query = analyticsSearchParams(next).toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+      <div className="flex min-h-10 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Analytics</p>
-          <InfoTooltip content="Visualize your workspace data with interactive charts across products, departments, and projects." />
+          <InfoTooltip content="See where products are in the pipeline, what is due, what is blocking submission and who reviews are waiting on. Click any chart to list the products behind it." />
         </div>
+        <AnalyticsFilterBar filters={filters} onChange={setFilters} />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <AnalyticsStatsGrid kpi={analytics.kpi} isLoading={isLoading} />
-
-        <div className="flex flex-col gap-2 p-2">
-          <ProductsOverTimeChart
-            data={analytics.timeData}
-            isLoading={isLoading}
-          />
-
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-            <ProductsByDepartmentChart
-              data={analytics.departmentData}
+        {isError ? (
+          <p className="p-6 text-sm text-muted-foreground">
+            Analytics could not be loaded. Refresh the page to try again.
+          </p>
+        ) : (
+          <>
+            <AnalyticsStatsGrid
+              tiles={data?.tiles}
+              filters={filters}
               isLoading={isLoading}
             />
-
-            <ProductsByProjectChart
-              data={analytics.projectData}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
+            <div className="flex flex-col gap-2 p-2">
+              <AnalyticsPipelineChart
+                data={data?.pipeline}
+                filters={filters}
+                isLoading={isLoading}
+              />
+              <AnalyticsDueCalendarChart
+                data={data?.due_calendar}
+                filters={filters}
+                isLoading={isLoading}
+              />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                  <AnalyticsCreatedReleasedChart
+                    data={data?.created_vs_released}
+                    filters={filters}
+                    isLoading={isLoading}
+                  />
+                </div>
+                <AnalyticsBlockingTabsChart
+                  data={data?.incomplete_tabs}
+                  draftCount={data?.draft_count}
+                  filters={filters}
+                  isLoading={isLoading}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                  <AnalyticsDepartmentsChart
+                    data={data?.departments}
+                    isLoading={isLoading}
+                  />
+                </div>
+                <AnalyticsPendingApprovalsChart
+                  data={data?.pending_by_approver}
+                  filters={filters}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
