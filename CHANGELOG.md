@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-31
+
+### Added
+
+- Added a redesigned Analytics page with pipeline by stage, a due-date calendar, created vs released, what blocks submission, departments by stage, and pending approvals.
+- Added six Analytics summary tiles, period, department, and project filters, and a filtered product list from any tile or chart segment.
+- Added multi-sheet workbooks with sheet management, drag reordering, overflow navigation, and multi-sheet Excel import and export.
+- Added walkthrough videos for Workspace, Operational Parameters, Notifications, Exports, Archives, and Bookmarks.
+
+### Updated
+
+- Improved workbook keyboard editing, Word paste, selection, row sizing, insertion, conditional formatting, and redline order.
+- Kept workbook values, formatting, and metadata through save and Excel round trips.
+- Polished the workbook toolbar, scrollbars, sheet bar, and header controls, and improved grid focus and accessibility.
+- Sped up product and analytics pages by loading each workbook with its own tab and loading the Excel library only when needed.
+- Kept the product team read-only on earlier versions and marked members removed from the workspace.
+- Refreshed bookmark lists after a new product version is created.
+- Opened the export confirmation from the product header PDF button and renamed the export buttons.
+- Refreshed the getting started, product, Redlines, Reports, and Source Files videos and showed docs videos at full frame.
+- Updated monorepo package versions to `0.10.0`.
+
+### Fixed
+
+- Fixed image comparisons to match rows through version ancestry and show failed comparisons clearly.
+- Kept portrait and landscape label images within the editor bounds.
+- Kept edited standards descriptions and showed readable custom-field activity values.
+- Fixed boolean filters, table-column labels, and OEM manufacturer wording.
+- Fixed the mobile product header covering the workbook toolbar.
+- Removed hover transition delays.
+
+
 ## [0.9.2] - 2026-10-18
 
 ### Added

@@ -131,7 +131,8 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
           emit(sheetsRef.current.map((item) => item.id === sheet.id ? { ...item, data: { ...data, cellFormats: Object.keys(cellFormats).length ? cellFormats : undefined, sheetLayout: item.data.sheetLayout, headerRows: item.data.headerRows } } : item));
         }}
         onWorkbookImport={(data) => {
-          const next = data.sheets ?? [{ id: crypto.randomUUID(), name: "Sheet1", data }];
+          const ids = new Map(sheetsRef.current.map((item) => [item.name, item.id]));
+          const next = (data.sheets ?? [{ id: "", name: "Sheet1", data }]).map((item) => ({ ...item, id: ids.get(item.name) ?? crypto.randomUUID() }));
           emit(next); setSheets(next); setActive(next[0].id); setGeneration((value) => value + 1);
         }}
         onWorkbookExport={async () => {
