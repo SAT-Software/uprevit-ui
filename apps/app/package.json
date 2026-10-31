@@ -80,6 +80,7 @@
     "shadcn": "^4.13.0",
     "shiki": "^4.5.0",
     "sonner": "^2.0.7",
+    "ssf": "^0.11.2",
     "tailwind-merge": "^3.1.0",
     "tw-animate-css": "^1.2.5",
     "uploadthing": "^7.7.4",
