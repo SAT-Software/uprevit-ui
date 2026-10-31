@@ -108,8 +108,13 @@ export function AnalyticsDueCalendarChart({
         </div>
       }
     >
-      <div ref={containerRef} className="p-3">
-        <div style={{ height: cellSize * 7 + 54 }}>
+      <div ref={containerRef} className="overflow-x-auto p-3">
+        <div
+          style={{
+            height: cellSize * 7 + 54,
+            width: Math.max(width, weeks * cellSize + LABEL_SPACE),
+          }}
+        >
         <EChartsHeatmapChart
           className="h-full w-full"
           cellSize={cellSize}
