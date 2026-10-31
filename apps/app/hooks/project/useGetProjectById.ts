@@ -32,6 +32,6 @@ export function useGetProjectById(id: string) {
   return useQuery({
     queryKey: ["project", id],
     queryFn: ({ signal }) => getProjectById(id, { signal, auth }),
-    enabled: auth.isAuthenticated,
+    enabled: auth.isAuthenticated && !!id,
   });
 }

@@ -1,7 +1,11 @@
 "use client";
 
-import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
-import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
+import { useState } from "react";
+import { AnalyticsFilterCombobox } from "@/features/workspace/analytics/AnalyticsFilterCombobox";
+import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
+import { useGetDepartmentsInfinite } from "@/hooks/department/useGetDepartmentsInfinite";
+import { useGetProjectById } from "@/hooks/project/useGetProjectById";
+import { useGetProjectsInfinite } from "@/hooks/project/useGetProjectsInfinite";
 import type { AnalyticsFilters } from "@/types/analytics";
 import {
   Select,
@@ -11,7 +15,6 @@ import {
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
 
-const ALL = "all";
 const PERIODS = [
   { value: "30", label: "Last 30 days" },
   { value: "90", label: "Last 90 days" },
@@ -41,15 +44,38 @@ export function AnalyticsFilterBar({
   filters: AnalyticsFilters;
   onChange: (filters: AnalyticsFilters) => void;
 }) {
-  const { data: departmentsData } = useGetAllDepartments({ limit: 100 });
-  const { data: projectsData } = useGetAllProjects({ limit: 100 });
-  const departments: { _id: string; department_name: string }[] =
-    departmentsData?.result?.departments ?? [];
-  const projects: { _id: string; project_name: string; department_id?: string }[] =
-    (projectsData?.result?.projects ?? []).filter(
-      (project: { department_id?: string }) =>
-        !filters.departmentId || project.department_id === filters.departmentId,
-    );
+  const [departmentSearch, setDepartmentSearch] = useState("");
+  const [projectSearch, setProjectSearch] = useState("");
+  const departmentsQuery = useGetDepartmentsInfinite({
+    limit: 50,
+    search: departmentSearch,
+  });
+  const projectsQuery = useGetProjectsInfinite({
+    limit: 50,
+    search: projectSearch,
+    departmentId: filters.departmentId,
+  });
+  const { data: selectedDepartment } = useGetDepartmentById(
+    filters.departmentId ?? "",
+  );
+  const { data: selectedProject } = useGetProjectById(filters.projectId ?? "");
+  const departments = (departmentsQuery.data?.pages ?? []).flatMap(
+    (page) =>
+      (page.result?.departments ?? []).map(
+        (department: { _id: string; department_name: string }) => ({
+          value: department._id,
+          label: department.department_name,
+        }),
+      ),
+  );
+  const projects = (projectsQuery.data?.pages ?? []).flatMap((page) =>
+    (page.result?.projects ?? []).map(
+      (project: { _id: string; project_name: string }) => ({
+        value: project._id,
+        label: project.project_name,
+      }),
+    ),
+  );
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -78,50 +104,39 @@ export function AnalyticsFilterBar({
         </SelectContent>
       </Select>
 
-      <Select
-        value={filters.departmentId ?? ALL}
-        onValueChange={(departmentId) =>
-          onChange({
-            ...filters,
-            departmentId: departmentId === ALL ? undefined : departmentId,
-            projectId: undefined,
-          })
+      <AnalyticsFilterCombobox
+        label="Department"
+        allLabel="All departments"
+        value={filters.departmentId}
+        selectedLabel={selectedDepartment?.department?.department_name}
+        options={departments}
+        isPending={departmentsQuery.isPending}
+        isError={departmentsQuery.isError}
+        hasNextPage={departmentsQuery.hasNextPage}
+        isFetching={departmentsQuery.isFetching}
+        isFetchingNextPage={departmentsQuery.isFetchingNextPage}
+        fetchNextPage={departmentsQuery.fetchNextPage}
+        onSearchChange={setDepartmentSearch}
+        onChange={(departmentId) =>
+          onChange({ ...filters, departmentId, projectId: undefined })
         }
-      >
-        <SelectTrigger className="h-8 w-auto max-w-56" aria-label="Department">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All departments</SelectItem>
-          {departments.map((department) => (
-            <SelectItem key={department._id} value={department._id}>
-              {department.department_name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      />
 
-      <Select
-        value={filters.projectId ?? ALL}
-        onValueChange={(projectId) =>
-          onChange({
-            ...filters,
-            projectId: projectId === ALL ? undefined : projectId,
-          })
-        }
-      >
-        <SelectTrigger className="h-8 w-auto max-w-56" aria-label="Project">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All projects</SelectItem>
-          {projects.map((project) => (
-            <SelectItem key={project._id} value={project._id}>
-              {project.project_name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <AnalyticsFilterCombobox
+        label="Project"
+        allLabel="All projects"
+        value={filters.projectId}
+        selectedLabel={selectedProject?.project?.project_name}
+        options={projects}
+        isPending={projectsQuery.isPending}
+        isError={projectsQuery.isError}
+        hasNextPage={projectsQuery.hasNextPage}
+        isFetching={projectsQuery.isFetching}
+        isFetchingNextPage={projectsQuery.isFetchingNextPage}
+        fetchNextPage={projectsQuery.fetchNextPage}
+        onSearchChange={setProjectSearch}
+        onChange={(projectId) => onChange({ ...filters, projectId })}
+      />
     </div>
   );
 }
