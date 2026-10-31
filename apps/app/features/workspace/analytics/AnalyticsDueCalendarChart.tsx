@@ -18,7 +18,7 @@ function calendarStart(from: string) {
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1),
   );
   return nextMonth.getTime() - date.getTime() < 7 * DAY_MS
-    ? nextMonth.toISOString().slice(0, 10)
+    ? from.slice(0, 8) + "01"
     : from;
 }
 
@@ -97,6 +97,11 @@ export function AnalyticsDueCalendarChart({
   );
   const cellGap = cellSize >= 20 ? 4 : 3;
 
+  useEffect(() => {
+    const element = containerRef.current;
+    if (element) element.scrollLeft = element.scrollWidth;
+  }, [cellSize, weeks]);
+
   return (
     <AnalyticsChartPanel
       title="Due-date calendar"
@@ -123,7 +128,7 @@ export function AnalyticsDueCalendarChart({
             value: count,
           }))}
           config={config}
-          range={data && from ? [from, data.to] : 90}
+          range={data && from ? [from, data.to] : undefined}
           weekStart="monday"
           isLoading={isLoading}
           onSelectionChange={(selection) =>
