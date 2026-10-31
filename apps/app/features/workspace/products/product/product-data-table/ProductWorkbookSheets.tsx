@@ -143,9 +143,9 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
       />
     </div>)}
     <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToHorizontalAxis]} onDragEnd={({ active, over }) => { if (over) reorder(String(active.id), String(over.id)); }}>
-    <div className="flex shrink-0 items-center gap-2 border-t bg-muted/50 p-1.5">
+    <div className="flex shrink-0 items-center gap-2 border-t bg-muted/50 p-1">
     <div ref={sheetRailRef} className="flex min-w-0 flex-1 items-center gap-1">
-    {scrollState.overflow && <Button size="icon-xs" variant="outline" className="shrink-0" aria-label="Scroll sheets left" disabled={!scrollState.left} onClick={() => scrollSheets(-1)}><Icon icon={ArrowLeft01Icon} size={14} /></Button>}
+    {scrollState.overflow && <Button size="icon-xs" variant="outline" className="size-6 shrink-0" aria-label="Scroll sheets left" disabled={!scrollState.left} onClick={() => scrollSheets(-1)}><Icon icon={ArrowLeft01Icon} size={14} /></Button>}
     <div ref={sheetScrollRef} onScroll={updateSheetScroll} className="min-w-0 flex-1 overflow-x-auto" role="group" aria-label="Workbook sheets">
     <div ref={sheetContentsRef} className="flex w-max items-center gap-1">
       <SortableContext items={displaySheets.map((sheet) => sheet.id)} strategy={horizontalListSortingStrategy}>
@@ -154,7 +154,7 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
         onMove={(direction) => reorder(sheet.id, sheets[index + direction].id)} />)}
       </SortableContext>
       {!props.isReadOnly && !props.isRedlineView && <>
-        <Tooltip><TooltipTrigger asChild><Button size="icon-sm" variant="ghost" aria-label="Add sheet" disabled={props.isSavePending?.()} onClick={() => {
+        <Tooltip><TooltipTrigger asChild><Button size="icon-xs" variant="ghost" className="size-6" aria-label="Add sheet" disabled={props.isSavePending?.()} onClick={() => {
           let index = sheets.length + 1;
           while (sheets.some((sheet) => sheet.name.toLowerCase() === `sheet${index}`)) index++;
           const sheet = { id: crypto.randomUUID(), name: `Sheet${index}`, data: emptySheet() };
@@ -163,7 +163,7 @@ function WorkbookSheets(props: ProductSpecificationDataTableProps) {
       </>}
     </div>
     </div>
-    {scrollState.overflow && <Button size="icon-xs" variant="outline" className="shrink-0" aria-label="Scroll sheets right" disabled={!scrollState.right} onClick={() => scrollSheets(1)}><Icon icon={ArrowRight01Icon} size={14} /></Button>}
+    {scrollState.overflow && <Button size="icon-xs" variant="outline" className="size-6 shrink-0" aria-label="Scroll sheets right" disabled={!scrollState.right} onClick={() => scrollSheets(1)}><Icon icon={ArrowRight01Icon} size={14} /></Button>}
     </div>
     <span role="status" className="w-32 shrink-0 px-2 text-end text-xs text-muted-foreground tabular-nums">{selectionCounts[active] > 1 ? `${selectionCounts[active]} cells selected` : ""}</span>
     </div>
@@ -204,7 +204,7 @@ function WorkbookSheetTab({ sheet, status, active, disabled, canDelete, canMoveL
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sheet.id, disabled });
   return <ContextMenu>
     <ContextMenuTrigger asChild disabled={disabled}>
-      <Button ref={setNodeRef} size="sm" variant={active ? "secondary" : "ghost"}
+      <Button ref={setNodeRef} size="sm" variant={active ? "secondary" : "ghost"} className="h-6 text-xs"
         style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : undefined }}
         {...listeners} aria-pressed={active} onClick={onSelect} onDoubleClick={onRename}
         onKeyDown={(event) => { if (event.key === "F2" && !disabled) { event.preventDefault(); onRename(); } }}>

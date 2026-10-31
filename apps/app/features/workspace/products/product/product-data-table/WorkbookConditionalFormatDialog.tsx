@@ -22,7 +22,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
-import { PaintBucketIcon, TextSquareIcon } from "@hugeicons/core-free-icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  PaintBoardIcon,
+  PaintBucketIcon,
+  TextSquareIcon,
+} from "@hugeicons/core-free-icons";
 import { WorkbookColorPopover } from "./WorkbookColorPopover";
 
 const OPERATORS = {
@@ -87,11 +97,22 @@ export function WorkbookConditionalFormatDialog({
   const existing = rules.some((rule) => rule.id === draft?.id);
   return (
     <Dialog onOpenChange={() => setDraft(null)}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" title="Conditional formatting">
-          Rules{rules.length ? ` (${rules.length})` : ""}
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button
+              size={rules.length ? "sm" : "icon-xs"}
+              variant="outline"
+              aria-label="Conditional formatting"
+              className="hover:bg-accent-foreground/10"
+            >
+              <Icon icon={PaintBoardIcon} size={16} strokeWidth={2} />
+              {rules.length > 0 && rules.length}
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Conditional formatting</TooltipContent>
+      </Tooltip>
       <AppDialogContent title="Conditional formatting" description="Manage rules that color cells when conditions match." size="md" secondaryAction={{ label: "Done" }}>
         <div className="space-y-4 p-4">
         <p className="text-sm text-muted-foreground">Color cells when a condition matches. Later rules take priority.</p>

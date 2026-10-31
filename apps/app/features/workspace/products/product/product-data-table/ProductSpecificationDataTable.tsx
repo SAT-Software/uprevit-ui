@@ -2563,7 +2563,7 @@ export function WorkbookSheetGrid({
       >
         <div
           ref={parentRef}
-          className="relative flex-1 min-h-0 min-w-0 overflow-auto overscroll-contain [&::-webkit-scrollbar]:size-2.5 [&::-webkit-scrollbar-corner]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/40 hover:[&::-webkit-scrollbar-thumb]:bg-foreground/60"
+          className="relative flex-1 min-h-0 min-w-0 overflow-auto overscroll-contain [&::-webkit-scrollbar]:size-1.5 [&::-webkit-scrollbar-corner]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/15 hover:[&::-webkit-scrollbar-thumb]:bg-foreground/30"
           style={{ scrollbarWidth: "auto", scrollbarColor: "auto" }}
         >
           <div
@@ -2594,7 +2594,7 @@ export function WorkbookSheetGrid({
                     minWidth: ROW_NUMBER_WIDTH,
                   }}
                 >
-                  1
+                  <span className="absolute start-0 w-8 text-center tabular-nums">1</span>
                 </div>
                 <SortableContext
                   items={displayColumnOrder}
@@ -2644,7 +2644,7 @@ export function WorkbookSheetGrid({
                     minWidth: ROW_NUMBER_WIDTH,
                   }}
                 >
-                  2
+                  <span className="absolute start-0 w-8 text-center tabular-nums">2</span>
                 </div>
                 <div
                   className="relative"

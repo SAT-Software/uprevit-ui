@@ -25,8 +25,8 @@ export function WorkbookHeaderMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon-2xs" variant="ghost" aria-label={label}>
-          <Icon icon={MoreVerticalIcon} size={12} />
+        <Button size="icon-2xs" variant="ghost" aria-label={label} className="hover:bg-accent-foreground/10">
+          <Icon icon={MoreVerticalIcon} size={10} strokeWidth={2} className="size-2.5 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
