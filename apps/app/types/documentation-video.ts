@@ -21,5 +21,9 @@ export type DocumentationVideoKey =
   | "product.products-intro"
   | "product.symbols-graphics"
   | "projects.projects-tab"
-  | "reports-analytics.overview"
-  | "working-with-files.source-files-archive-bookmarks";
+  | "reports-analytics.reports"
+  | "review-outputs.archives"
+  | "review-outputs.exports"
+  | "review-outputs.notifications"
+  | "working-with-files.bookmarks"
+  | "working-with-files.source-files";
