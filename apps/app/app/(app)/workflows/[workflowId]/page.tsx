@@ -29,7 +29,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@uprevit/ui/components/ui/tabs";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { CancelWorkflowDialog } from "@/features/workspace/workflows/CancelWorkflowDialog";
 import { CompleteWorkflowDialog } from "@/features/workspace/workflows/CompleteWorkflowDialog";
 import { DeleteWorkflowDialog } from "@/features/workspace/workflows/DeleteWorkflowDialog";
@@ -62,7 +62,7 @@ function WorkflowDetail() {
   const [reminderOpen, setReminderOpen] = useState(false);
   const [reminderKey, setReminderKey] = useState(0);
   const auth = useAuth();
-  const { data, isPending, isError, error } = useWorkflow(params.workflowId);
+  const { data, isPending, error, refetch } = useWorkflow(params.workflowId);
   const workflow = data?.workflow;
   const openRequests =
     workflow?.assignments.reduce(
@@ -83,21 +83,32 @@ function WorkflowDetail() {
 
   if (isPending) {
     return (
-      <div className="space-y-4 p-4">
-        <Skeleton className="h-8 w-80" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-7 w-32" />
+        </div>
+        <div className="flex h-10 shrink-0 items-center gap-3 border-b border-border px-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+        <div className="p-4">
+          <Skeleton className="h-64 w-full rounded-2xl" />
+        </div>
       </div>
     );
   }
 
-  if (isError || !workflow) {
+  if (!workflow) {
     return (
-      <DashboardErrorState
+      <ErrorState
         variant="panel"
         icon={WorkflowIcon}
         title="Failed to load workflow"
         description={error?.message}
-        className="m-4"
+        onRetry={() => refetch()}
+        fill
       />
     );
   }

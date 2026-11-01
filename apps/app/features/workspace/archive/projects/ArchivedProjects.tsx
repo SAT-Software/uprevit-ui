@@ -43,9 +43,9 @@ export function ArchivedProjects() {
   });
   const {
     data: archivedProjects,
-    isFetching,
     isPending,
-    isError,
+    isError: isQueryError,
+    refetch,
   } = useGetArchivedProjects(listState.query);
   const restoreProject = useRestoreProject();
 
@@ -63,12 +63,14 @@ export function ArchivedProjects() {
 
     restoreProject.mutate(selectedItemToRestore._id, {
       onSuccess: () => setRestoreDialogOpen(false),
+      onError: () => setRestoreDialogOpen(false),
     });
   };
 
   const items: ProjectArchiveRow[] = archivedProjects?.result?.projects ?? [];
   const pagination = archivedProjects?.result?.pagination;
-  const isListBusy = isPending || isFetching;
+  const isListBusy = isPending;
+  const isError = isQueryError && !archivedProjects;
   const hasItemsToList =
     isListBusy ||
     isError ||
@@ -113,6 +115,7 @@ export function ArchivedProjects() {
         onClearFilters={listState.clearFilters}
         isLoading={isListBusy}
         isError={isError}
+        onRetry={() => refetch()}
         hasItemsToList={hasItemsToList}
         pagination={pagination}
         onPageChange={listState.setPage}

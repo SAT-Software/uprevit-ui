@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useState } from "react";
 import {
   useParams,
@@ -8,7 +10,6 @@ import {
   useSearchParams,
 } from "next/navigation";
 import {
-  AlertCircleIcon,
   TimelineEventIcon,
   DashboardBrowsingIcon,
   Invoice01Icon,
@@ -59,27 +60,6 @@ function isWorkspaceTab(value: string | null): value is WorkspaceTab {
   );
 }
 
-function WorkspaceDetailErrorState({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 py-10">
-      <div className="flex size-10 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-        <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
-      </div>
-      <div className="space-y-0.5 text-center">
-        <p className="text-sm font-medium">
-          We couldn&apos;t load the workspace details
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Please try again in a moment
-        </p>
-      </div>
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Try again
-      </Button>
-    </div>
-  );
-}
-
 function WorkspaceAdminsTab({ admins }: { admins: PlatformWorkspaceAdmin[] }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-background">
@@ -116,22 +96,14 @@ function WorkspaceAdminsTab({ admins }: { admins: PlatformWorkspaceAdmin[] }) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="h-32 text-center text-muted-foreground"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Icon
-                      icon={NewOfficeIcon}
-                      size={24}
-                      strokeWidth={2}
-                      className="text-muted-foreground/30"
-                    />
-                    <p className="text-sm">
-                      No organization admins yet. Use invite to add one.
-                    </p>
-                  </div>
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={3} className="p-0">
+                  <EmptyState
+                    embedded
+                    icon={NewOfficeIcon}
+                    title="No organization admins yet"
+                    description="Use invite to add one"
+                  />
                 </TableCell>
               </TableRow>
             )}
@@ -148,9 +120,9 @@ export default function PlatformAdminWorkspaceDetailPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { data, isLoading, isError, refetch } =
+  const { data, isPending: isLoading, refetch } =
     useGetPlatformWorkspaceDetail(workspaceId);
-  const hasLoadError = !isLoading && (isError || !data);
+  const hasLoadError = !isLoading && !data;
 
   const tabParam = searchParams.get("tab");
   const activeTab: WorkspaceTab = isWorkspaceTab(tabParam)
@@ -233,7 +205,13 @@ export default function PlatformAdminWorkspaceDetailPage() {
           </div>
         ) : hasLoadError ? (
           <div className="p-2">
-            <WorkspaceDetailErrorState onRetry={() => refetch()} />
+            <ErrorState
+              variant="panel"
+              icon={NewOfficeIcon}
+              title="Failed to load workspace details"
+              onRetry={() => refetch()}
+              className="min-h-48"
+            />
           </div>
         ) : (
           <Tabs

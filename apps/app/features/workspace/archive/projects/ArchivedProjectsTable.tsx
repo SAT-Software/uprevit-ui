@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { toast } from "sonner";
 import { useAuth } from "react-oidc-context";
 import { isAdminProfile } from "@/utils/isAdmin";
@@ -23,9 +24,9 @@ import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceLis
 import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
 import {
-  DashboardErrorState,
-  DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
-} from "@/features/workspace/dashboard/DashboardErrorState";
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
 import { ListFilterColumn } from "@/lib/workspace-list-query";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 import {
@@ -130,6 +131,7 @@ interface ArchivedProjectsTableProps {
   onClearFilters: Parameters<typeof WorkspaceListControls>[0]["onClearFilters"];
   isLoading?: boolean;
   isError?: boolean;
+  onRetry?: () => void;
   hasItemsToList?: boolean;
   pagination?: Parameters<typeof WorkspaceListPagination>[0]["pagination"];
   onPageChange: (page: number) => void;
@@ -147,6 +149,7 @@ export function ArchivedProjectsTable({
   onClearFilters,
   isLoading = false,
   isError = false,
+  onRetry,
   hasItemsToList = true,
   pagination,
   onPageChange,
@@ -327,12 +330,13 @@ export function ArchivedProjectsTable({
 
         <div className="w-full">
           {isError ? (
-            <DashboardErrorState
+            <ErrorState
               variant="panel"
               embedded
               icon={KanbanIcon}
               title="Failed to load archived projects"
-              className={DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT}
+              onRetry={onRetry}
+              className={TABLE_BODY_STATE_MIN_HEIGHT}
             />
           ) : hasItemsToList ? (
             <div className="flex flex-col items-end">
@@ -402,11 +406,23 @@ export function ArchivedProjectsTable({
                     })
                   ) : (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center text-sm text-muted-foreground"
-                      >
-                        No archived projects found.
+                      <TableCell colSpan={columns.length} className="p-0">
+                        <EmptyState
+                          embedded
+                          icon={KanbanIcon}
+                          title="No archived projects found"
+                          description="Try changing your filters"
+                          action={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={onClearFilters}
+                            >
+                              Clear filters
+                            </Button>
+                          }
+                        />
                       </TableCell>
                     </TableRow>
                   )}
@@ -425,30 +441,15 @@ export function ArchivedProjectsTable({
               </div>
             </div>
           ) : (
-            <ArchivedProjectsEmptyState />
+            <EmptyState
+              embedded
+              icon={KanbanIcon}
+              title="No archived projects"
+              description="Archived projects will appear here"
+              className="border-t border-border"
+            />
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function ArchivedProjectsEmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-b-2xl border-t border-dashed border-border py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
-        <Icon
-          icon={KanbanIcon}
-          size={28}
-          strokeWidth={1.75}
-          className="text-muted-foreground/70"
-        />
-      </div>
-      <div>
-        <p className="text-sm font-medium">No archived projects</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Archived projects will appear here.
-        </p>
       </div>
     </div>
   );

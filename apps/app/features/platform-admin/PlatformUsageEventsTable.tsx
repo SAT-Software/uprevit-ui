@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import type { ReactNode } from "react";
 import {
   type ColumnDef,
@@ -9,7 +14,6 @@ import {
 } from "@tanstack/react-table";
 import { useEffect, useMemo } from "react";
 import { CheckListIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -30,7 +34,6 @@ import {
   useWorkspaceListQuery,
   WORKSPACE_LIST_LIMIT,
 } from "@/lib/workspace-list-query";
-import { getErrorMessage } from "@/lib/api-error";
 import type { UsageEvent, UsageEventSource } from "@/types/billing";
 import { formatToLocalDateTime } from "@/utils/formatDateAndTimeLocal";
 
@@ -74,7 +77,7 @@ export function PlatformUsageEventsTable({
     filterColumns: [],
   });
 
-  const { data, isLoading, isError, error } = useGetUsageEvents(workspaceId, {
+  const { data, isPending: isLoading, isError, refetch } = useGetUsageEvents(workspaceId, {
     page: listState.query.page,
     limit: WORKSPACE_LIST_LIMIT,
   });
@@ -192,7 +195,7 @@ export function PlatformUsageEventsTable({
     pageCount: paginationInfo?.totalPages ?? 1,
   });
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <div className="flex flex-col">
         <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
@@ -202,9 +205,14 @@ export function PlatformUsageEventsTable({
           </div>
           {headerActions}
         </div>
-        <p className="p-4 text-sm text-destructive">
-          {getErrorMessage(error, "Unable to load usage events.")}
-        </p>
+        <ErrorState
+          variant="panel"
+          embedded
+          icon={CheckListIcon}
+          title="Failed to load usage events"
+          onRetry={() => refetch()}
+          className={TABLE_BODY_STATE_MIN_HEIGHT}
+        />
       </div>
     );
   }
@@ -271,20 +279,13 @@ export function PlatformUsageEventsTable({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={TABLE_COLUMN_COUNT}
-                  className="h-32 text-center text-muted-foreground"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Icon
-                      icon={CheckListIcon}
-                      size={24}
-                      strokeWidth={2}
-                      className="text-muted-foreground/30"
-                    />
-                    <p className="text-sm">No usage events recorded yet</p>
-                  </div>
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={TABLE_COLUMN_COUNT} className="p-0">
+                  <EmptyState
+                    embedded
+                    icon={CheckListIcon}
+                    title="No usage events recorded yet"
+                  />
                 </TableCell>
               </TableRow>
             )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import {
   Column,
   ColumnDef,
@@ -57,9 +58,9 @@ import {
 } from "@uprevit/ui/components/ui/toggle-group";
 import ShowOrHideTableColumnsDropdown from "../common/ShowOrHideTableColumnsDropdown";
 import {
-  DashboardErrorState,
-  DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
-} from "./DashboardErrorState";
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
 import {
   ProductStatusCell,
   ProductVersionCell,
@@ -382,7 +383,12 @@ const columns: ColumnDef<Item>[] = [
 export default function DashboardProductsTable() {
   const auth = useAuth();
   const [ownerFilter, setOwnerFilter] = useState<"all" | "mine">("all");
-  const { data, isLoading, error } = useGetAllProducts({
+  const {
+    data,
+    isPending: isLoading,
+    error,
+    refetch,
+  } = useGetAllProducts({
     limit: 5,
     sort: "actionAt",
     order: "desc",
@@ -455,7 +461,7 @@ export default function DashboardProductsTable() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="w-full border border-border rounded-2xl overflow-hidden">
         <div className="w-full flex items-center justify-between border-b h-10 pl-3 pr-2 bg-muted/60">
@@ -475,12 +481,13 @@ export default function DashboardProductsTable() {
             </Link>
           </Button>
         </div>
-        <DashboardErrorState
+        <ErrorState
           variant="panel"
           embedded
           icon={Blockchain03Icon}
           title="Failed to load products"
-          className={DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT}
+          onRetry={() => refetch()}
+          className={TABLE_BODY_STATE_MIN_HEIGHT}
         />
       </div>
     );
@@ -583,25 +590,18 @@ export default function DashboardProductsTable() {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
-                  <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                    <Icon
-                      icon={Blockchain03Icon}
-                      size={32}
-                      strokeWidth={2}
-                      className="text-muted-foreground"
-                    />
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      No products found
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Get started by creating a new product
-                    </p>
-                  </div>
-                </div>
+              <TableCell colSpan={columns.length} className="p-0">
+                <EmptyState
+                  embedded
+                  icon={Blockchain03Icon}
+                  title="No products found"
+                  description={
+                    ownerFilter === "mine"
+                      ? "You don't own any products yet"
+                      : "Get started by creating a new product"
+                  }
+                  className={TABLE_BODY_STATE_MIN_HEIGHT}
+                />
               </TableCell>
             </TableRow>
           )}

@@ -146,7 +146,7 @@ export function WorkflowProductsTab({ workflow }: { workflow: WorkflowDetail }) 
             <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium">No Products yet</p>
+            <p className="text-sm font-medium">No products yet</p>
             <p className="text-xs text-muted-foreground">
               {workflow.canEdit
                 ? "Add the Products this workflow should approve."

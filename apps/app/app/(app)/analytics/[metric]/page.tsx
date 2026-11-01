@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import {
@@ -13,7 +15,7 @@ import { analyticsSearchParams } from "@/hooks/analytics/useGetAnalytics";
 import { useGetAnalyticsProducts } from "@/hooks/analytics/useGetAnalyticsProducts";
 import type { AnalyticsFilters } from "@/types/analytics";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, Blockchain03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
@@ -53,10 +55,13 @@ export default function AnalyticsDrillDownPage() {
     departmentId: searchParams.get("departmentId") ?? undefined,
     projectId: searchParams.get("projectId") ?? undefined,
   };
-  const { data, isLoading, isError } = useGetAnalyticsProducts(
-    { ...filters, metric, value },
-    page,
-  );
+  const {
+    data,
+    isPending: isLoading,
+    isError: isQueryError,
+    refetch,
+  } = useGetAnalyticsProducts({ ...filters, metric, value }, page);
+  const isError = isQueryError && !data;
   const products = data?.data ?? [];
   const setPage = (next: number) => {
     const params = new URLSearchParams(searchParams);
@@ -80,19 +85,22 @@ export default function AnalyticsDrillDownPage() {
             <span className="text-muted-foreground"> · {subtitle}</span>
           ) : null}
         </p>
-        {!isLoading && (
+        {data && (
           <span className="text-sm tabular-nums text-muted-foreground">
             ({data?.pagination?.totalCount ?? 0})
           </span>
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto">
         {isError ? (
-          <p className="p-6 text-sm text-muted-foreground">
-            These products could not be loaded. Go back to Analytics and try
-            again.
-          </p>
+          <ErrorState
+            variant="panel"
+            icon={Blockchain03Icon}
+            title="Failed to load products"
+            onRetry={() => refetch()}
+            fill
+          />
         ) : (
           <Table>
             <TableHeader>
@@ -147,11 +155,12 @@ export default function AnalyticsDrillDownPage() {
                   ))}
               {!isLoading && !products.length && (
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="py-10 text-center text-muted-foreground"
-                  >
-                    No products match this selection.
+                  <TableCell colSpan={8} className="p-0">
+                    <EmptyState
+                      embedded
+                      icon={Blockchain03Icon}
+                      title="No products match this selection"
+                    />
                   </TableCell>
                 </TableRow>
               )}

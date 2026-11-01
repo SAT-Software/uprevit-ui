@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@uprevit/ui/components/ui/button";
+import { EmptyState } from "@/components/common/EmptyState";
 import Link from "next/link";
 import {
   Column,
@@ -18,9 +20,9 @@ import { WorkspaceListPagination } from "@/components/table/WorkspaceListPaginat
 import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceListPaginationSkeleton";
 import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import {
-  DashboardErrorState,
-  DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
-} from "@/features/workspace/dashboard/DashboardErrorState";
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import {
   ListFilterColumn,
@@ -260,16 +262,17 @@ export default function DepartmentPageProjectsTable({
   });
   const {
     data: projectsData,
-    isFetching: isProjectsFetching,
     isPending: isProjectsPending,
-    isError: isProjectsError,
+    isError: isProjectsQueryError,
+    refetch: refetchProjects,
   } = useGetAllProjects({
     ...listState.query,
     departmentId,
   });
   const data = projectsData?.result?.projects || [];
   const projectsPagination = projectsData?.result?.pagination;
-  const isProjectsListBusy = isProjectsPending || isProjectsFetching;
+  const isProjectsListBusy = isProjectsPending;
+  const isProjectsError = isProjectsQueryError && !projectsData;
   const hasProjectsToList =
     isProjectsListBusy ||
     isProjectsError ||
@@ -343,12 +346,13 @@ export default function DepartmentPageProjectsTable({
 
         <div className="w-full">
           {isProjectsError ? (
-            <DashboardErrorState
+            <ErrorState
               variant="panel"
               embedded
               icon={KanbanIcon}
               title="Failed to load projects"
-              className={DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT}
+              onRetry={() => refetchProjects()}
+              className={TABLE_BODY_STATE_MIN_HEIGHT}
             />
           ) : hasProjectsToList ? (
             <div className="flex flex-col items-end">
@@ -414,28 +418,23 @@ export default function DepartmentPageProjectsTable({
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
-                              <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                                <Icon
-                                  icon={KanbanIcon}
-                                  size={32}
-                                  strokeWidth={2}
-                                  className="text-muted-foreground"
-                                />
-                              </div>
-                              <div className="text-center space-y-1">
-                                <p className="text-sm font-medium text-foreground">
-                                  No projects found
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Get started by creating a new project
-                                </p>
-                              </div>
-                            </div>
+                          <TableCell colSpan={columns.length} className="p-0">
+                            <EmptyState
+                              embedded
+                              icon={KanbanIcon}
+                              title="No projects found"
+                              description="Try changing your filters"
+                              action={
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={listState.clearFilters}
+                                >
+                                  Clear filters
+                                </Button>
+                              }
+                            />
                           </TableCell>
                         </TableRow>
                       )}
@@ -455,24 +454,13 @@ export default function DepartmentPageProjectsTable({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                <div className="flex items-center justify-center p-4 border border-dashed border-border bg-muted/50 rounded-full mb-3">
-                  <Icon
-                    icon={KanbanIcon}
-                    size={32}
-                    strokeWidth={2}
-                    className="text-muted-foreground/50 "
-                  />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  No projects found
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This department doesn&apos;t have any projects yet.
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              embedded
+              icon={KanbanIcon}
+              title="No projects found"
+              description="This department doesn't have any projects yet"
+              className="border-t border-border"
+            />
           )}
         </div>
       </div>

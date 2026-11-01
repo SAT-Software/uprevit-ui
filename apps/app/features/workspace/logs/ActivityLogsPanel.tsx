@@ -1,8 +1,9 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft02Icon, Loading03Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft02Icon, Clock01Icon, Loading03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { useAuth } from "react-oidc-context";
 import { Input } from "@uprevit/ui/components/ui/input";
@@ -73,7 +74,7 @@ export function ActivityLogsPanel({
     [action, debouncedSearch, page, scopeId, scopeType, workspaceId],
   );
 
-  const { data, isLoading, isFetching, isError, error } =
+  const { data, isLoading, isFetching, isError, refetch } =
     useGetAuditLogs(filters);
 
   const logs = data?.result?.logs ?? [];
@@ -147,10 +148,14 @@ export function ActivityLogsPanel({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {isError ? (
-          <div className="h-28 rounded-xl border border-destructive/30 bg-destructive/5 flex items-center justify-center text-sm text-destructive">
-            {error?.message || "Failed to load logs"}
-          </div>
+        {isError && !data ? (
+          <ErrorState
+            variant="panel"
+            icon={Clock01Icon}
+            title="Failed to load logs"
+            onRetry={() => refetch()}
+            fill
+          />
         ) : (
           <ActivityLogTable
             logs={logs}

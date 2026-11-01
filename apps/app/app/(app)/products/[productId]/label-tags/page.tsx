@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import LabelTagsTabs from "@/features/workspace/products/product/label-tags/labelTagsTabs";
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
@@ -12,7 +13,6 @@ import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import { cn } from "@uprevit/ui/lib/utils";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
 import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
@@ -46,7 +46,7 @@ export default function Page() {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
 
-  const { data, isLoading, error } = useGetProductTabData(
+  const { data, isPending: isLoading, error, refetch } = useGetProductTabData(
     productId as string,
     "label-tags",
   );
@@ -96,32 +96,19 @@ export default function Page() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
         <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <p className="text-sm font-medium">Label Tags</p>
         </div>
-        <div className="flex flex-1 items-center justify-center p-12">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <Icon
-                icon={Alert01Icon}
-                size={32}
-                strokeWidth={1.5}
-                className="text-destructive"
-              />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-destructive">
-                Error Loading Label Tags
-              </h3>
-              <p className="max-w-md text-sm text-muted-foreground">
-                {error.message}
-              </p>
-            </div>
-          </div>
-        </div>
+        <ErrorState
+          variant="panel"
+          icon={Alert01Icon}
+          title="Failed to load label tags"
+          onRetry={() => refetch()}
+          fill
+        />
       </div>
     );
   }

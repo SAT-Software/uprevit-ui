@@ -23,7 +23,7 @@ import {
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { DashboardErrorState } from "./DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 
 interface StatsCardProps {
   id: string;
@@ -44,8 +44,9 @@ function formatStatValue(value: number | undefined) {
 export function StatsGrid({ location }: { location: string }) {
   const {
     data: dashboardStats,
-    isLoading: statsLoading,
+    isPending: statsLoading,
     error: statsError,
+    refetch: refetchStats,
   } = useGetDashboardStats();
   const {
     data: activityStats,
@@ -192,16 +193,17 @@ export function StatsGrid({ location }: { location: string }) {
     );
   }
 
-  if (statsError)
+  if (statsError && !dashboardStats)
     return (
       <div
         className={cn(
           "flex h-22 items-center border-b border-border w-full p-2",
         )}
       >
-        <DashboardErrorState
+        <ErrorState
           icon={DashboardSpeed01Icon}
           title="Failed to load dashboard stats"
+          onRetry={() => refetchStats()}
           className="h-full w-full"
         />
       </div>

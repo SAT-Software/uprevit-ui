@@ -42,9 +42,9 @@ export function ArchivedDepartments() {
   });
   const {
     data: archivedDepartments,
-    isFetching,
     isPending,
-    isError,
+    isError: isQueryError,
+    refetch,
   } = useGetArchivedDepartments(listState.query);
   const restoreDepartment = useRestoreDepartment();
 
@@ -69,7 +69,8 @@ export function ArchivedDepartments() {
   const items: DepartmentArchiveRow[] =
     archivedDepartments?.result?.departments ?? [];
   const pagination = archivedDepartments?.result?.pagination;
-  const isListBusy = isPending || isFetching;
+  const isListBusy = isPending;
+  const isError = isQueryError && !archivedDepartments;
   const hasItemsToList =
     isListBusy ||
     isError ||
@@ -114,6 +115,7 @@ export function ArchivedDepartments() {
         onClearFilters={listState.clearFilters}
         isLoading={isListBusy}
         isError={isError}
+        onRetry={() => refetch()}
         hasItemsToList={hasItemsToList}
         pagination={pagination}
         onPageChange={listState.setPage}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
 import { RedlineValue } from "@/components/common/RedlineValue";
@@ -32,6 +33,7 @@ import {
   redlineFieldHighlightRemoved,
 } from "@/utils/redlineStyles";
 import {
+  Alert01Icon,
   Building03Icon,
   CalendarDownload01Icon,
   CalendarUpload01Icon,
@@ -188,10 +190,12 @@ export default function Page() {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
 
-  const { data, isLoading, isError } = useGetProductTabData(
-    productId,
-    "product-information",
-  );
+  const {
+    data,
+    isPending: isLoading,
+    isError,
+    refetch,
+  } = useGetProductTabData(productId, "product-information");
 
   const { data: diffRedlineData, isLoading: diffRedlineLoading } =
     useGetProductDiffRedline(productId, compareVersionId);
@@ -562,7 +566,19 @@ export default function Page() {
     );
   }
 
-  if (isError || !productData) return notFound();
+  if (isError && !productData) {
+    return (
+      <ErrorState
+        variant="panel"
+        icon={Alert01Icon}
+        title="Failed to load product information"
+        onRetry={() => refetch()}
+        fill
+      />
+    );
+  }
+
+  if (!productData) return notFound();
 
   const productStatus = productMetadata?.status;
   const targetDateLabel = productMetadata?.target_date

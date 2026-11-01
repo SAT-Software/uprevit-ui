@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useState } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import {
@@ -27,7 +29,7 @@ import type { AppNotification } from "@/types/notification";
 
 export function NotificationsBell() {
   const [open, setOpen] = useState(false);
-  const { data, isPending, isError } = useNotifications();
+  const { data, isPending, isError, refetch } = useNotifications();
   const { mutate: markRead, isPending: isMarking } = useMarkNotificationsRead();
 
   const notifications = data?.result.notifications ?? [];
@@ -99,18 +101,21 @@ export function NotificationsBell() {
               </div>
             ))
           ) : isError && !data ? (
-            <p className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-              Failed to load notifications.
-            </p>
+            <ErrorState
+              variant="panel"
+              embedded
+              icon={BellIcon}
+              title="Failed to load notifications"
+              onRetry={() => refetch()}
+              className="min-h-48 rounded-lg"
+            />
           ) : notifications.length === 0 ? (
-            <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
-              <span className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <Icon icon={BellIcon} size={16} />
-              </span>
-              <p className="text-sm text-muted-foreground">
-                You&apos;re all caught up.
-              </p>
-            </div>
+            <EmptyState
+              embedded
+              icon={BellIcon}
+              title="You're all caught up"
+              className="min-h-48"
+            />
           ) : (
             notifications.map((notification) => {
               const isUnread = !notification.readAt;

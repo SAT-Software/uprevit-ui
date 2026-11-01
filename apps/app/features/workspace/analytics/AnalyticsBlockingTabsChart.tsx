@@ -1,11 +1,12 @@
 "use client";
 
+import { TaskDone01Icon } from "@hugeicons/core-free-icons";
+import { EmptyState } from "@/components/common/EmptyState";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EChartsPieChart } from "@/components/evilcharts/charts/echarts-pie-chart";
 import { TAB_COLORS, TAB_LABELS } from "@/data/analytics-config";
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
-import { AnalyticsEmptyState } from "@/features/workspace/analytics/AnalyticsEmptyState";
 import { analyticsDrillHref } from "@/features/workspace/analytics/analyticsLinks";
 import type { AnalyticsData, AnalyticsFilters } from "@/types/analytics";
 
@@ -42,7 +43,12 @@ export function AnalyticsBlockingTabsChart({
       info="How many drafts still have each tab incomplete. A draft can count under several tabs. Click a tab to list those drafts."
     >
       {!isLoading && !sectors.length ? (
-        <AnalyticsEmptyState message="No drafts have incomplete tabs." />
+        <EmptyState
+          embedded
+          icon={TaskDone01Icon}
+          title="No drafts have incomplete tabs"
+          className="min-h-60"
+        />
       ) : (
         <div className="relative">
           <EChartsPieChart

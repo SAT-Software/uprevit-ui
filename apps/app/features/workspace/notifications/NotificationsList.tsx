@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import { formatDistanceToNowStrict } from "date-fns";
 import { ArrowRight01Icon, BellIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -144,32 +146,28 @@ export function NotificationsList({ unread }: { unread: boolean }) {
 
   if ((isError && !data) || (notifications.length === 0 && isRefetchError)) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border bg-background py-16 text-center">
-        <p className="text-sm text-muted-foreground">
-          Failed to load notifications.
-        </p>
-        {retryButton(() => refetch())}
-      </div>
+      <ErrorState
+        variant="panel"
+        icon={BellIcon}
+        title="Failed to load notifications"
+        onRetry={() => refetch()}
+        className="min-h-[17.5rem]"
+      />
     );
   }
 
   if (notifications.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border bg-background py-16 text-center">
-        <span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Icon icon={BellIcon} size={18} />
-        </span>
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">
-            {unread ? "No unread notifications" : "No notifications yet"}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {unread
-              ? "You're all caught up."
-              : "Product team changes and reviews will show up here."}
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        icon={BellIcon}
+        title={unread ? "No unread notifications" : "No notifications yet"}
+        description={
+          unread
+            ? "You're all caught up"
+            : "Product team changes and reviews will show up here"
+        }
+        className="min-h-[17.5rem]"
+      />
     );
   }
 

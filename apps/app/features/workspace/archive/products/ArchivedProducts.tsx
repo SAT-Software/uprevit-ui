@@ -50,9 +50,9 @@ export function ArchivedProducts() {
   });
   const {
     data: archivedProducts,
-    isFetching,
     isPending,
-    isError,
+    isError: isQueryError,
+    refetch,
   } = useGetArchivedProducts(listState.query);
   const { mutate: updateProductStatus, isPending: isRestorePending } =
     useUpdateProduct();
@@ -86,7 +86,8 @@ export function ArchivedProducts() {
 
   const items: ProductArchiveRow[] = archivedProducts?.result?.products ?? [];
   const pagination = archivedProducts?.result?.pagination;
-  const isListBusy = isPending || isFetching;
+  const isListBusy = isPending;
+  const isError = isQueryError && !archivedProducts;
   const hasItemsToList =
     isListBusy ||
     isError ||
@@ -129,6 +130,7 @@ export function ArchivedProducts() {
         onClearFilters={listState.clearFilters}
         isLoading={isListBusy}
         isError={isError}
+        onRetry={() => refetch()}
         hasItemsToList={hasItemsToList}
         pagination={pagination}
         onPageChange={listState.setPage}
