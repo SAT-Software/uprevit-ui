@@ -110,6 +110,7 @@ export default function Page() {
   const handleLoadQuery = (query: SavedQuery) => {
     loadConditions(query.conditions, query.conditionLogic);
     setResults(null);
+    reportsQuery.reset();
     toast.success(`Loaded "${query.name}"`);
   };
 
@@ -158,6 +159,7 @@ export default function Page() {
   const handleClear = () => {
     clearConditions();
     setResults(null);
+    reportsQuery.reset();
   };
 
   const isQueryValid = validateConditions();

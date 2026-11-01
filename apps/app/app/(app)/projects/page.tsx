@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
@@ -71,6 +72,12 @@ function ProjectsPage() {
 
   const projects = projectsData?.result?.projects ?? [];
   const pagination = projectsData?.result?.pagination;
+
+  useEffect(() => {
+    if (pagination && listState.query.page > Math.max(pagination.totalPages, 1)) {
+      listState.setPage(1);
+    }
+  }, [listState, pagination]);
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
