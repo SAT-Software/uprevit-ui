@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import Link from "next/link";
 import {
   AlertCircleIcon,
@@ -223,7 +224,7 @@ function HistoryItem({
 
 export function WorkflowHistoryTab({ workflow }: { workflow: WorkflowDetail }) {
   const isDraft = workflow.status === "draft";
-  const { data, isPending, isError } = useWorkflowHistory(
+  const { data, isPending, isError, refetch } = useWorkflowHistory(
     workflow._id,
     workflow.status,
   );
@@ -249,11 +250,13 @@ export function WorkflowHistoryTab({ workflow }: { workflow: WorkflowDetail }) {
             </div>
           ))}
         </div>
-      ) : isError ? (
-        <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-          <Icon icon={AlertCircleIcon} size={16} />
-          Failed to load history
-        </div>
+      ) : isError && !data ? (
+        <ErrorState
+          embedded
+          icon={AlertCircleIcon}
+          title="Failed to load history"
+          onRetry={() => refetch()}
+        />
       ) : events.length === 0 ? (
         <EmptyHistory text="No events yet." />
       ) : (

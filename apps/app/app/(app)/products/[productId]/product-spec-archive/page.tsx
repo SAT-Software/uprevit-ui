@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { Button } from "@uprevit/ui/components/ui/button";
 import ProductDataGrid, {
   ProductDataGridRef,
@@ -44,7 +45,7 @@ export default function Page() {
   const productDataGridRef = useRef<ProductDataGridRef>(null);
 
   const { mutate: updateProductDataTab } = useUpdateProductTabData();
-  const { data, isLoading, error } = useGetProductTabData(
+  const { data, isPending: isLoading, error, refetch } = useGetProductTabData(
     productId,
     "product-specifications"
   );
@@ -103,30 +104,17 @@ export default function Page() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="flex flex-col gap-2 p-2 h-full">
         <div className="flex flex-col gap-6 border border-border bg-background rounded-xl w-full h-full overflow-y-auto">
-          <div className="flex items-center justify-center p-12">
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="p-3 rounded-full bg-destructive/10">
-                <Icon
-                  icon={Alert01Icon}
-                  size={32}
-                  strokeWidth={2}
-                  className="text-destructive"
-                />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-destructive">
-                  Error Loading Product Data
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  {error.message}
-                </p>
-              </div>
-            </div>
-          </div>
+          <ErrorState
+            variant="panel"
+            icon={Alert01Icon}
+            title="Failed to load spec archive"
+            onRetry={() => refetch()}
+            fill
+          />
         </div>
       </div>
     );

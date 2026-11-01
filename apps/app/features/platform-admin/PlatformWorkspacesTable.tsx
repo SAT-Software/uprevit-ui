@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -172,7 +177,12 @@ export function PlatformWorkspacesTable({
     filterColumns: WORKSPACE_FILTER_COLUMNS,
   });
 
-  const { data, isLoading, isFetching } = useGetPlatformWorkspaces({
+  const {
+    data,
+    isPending: isLoading,
+    isError,
+    refetch,
+  } = useGetPlatformWorkspaces({
     page: listState.query.page,
     limit: listState.query.limit,
     sort: listState.query.sort,
@@ -269,6 +279,19 @@ export function PlatformWorkspacesTable({
           <TableBody>
             {isLoading ? (
               <TableBodySkeleton columnCount={TABLE_COLUMN_COUNT} />
+            ) : isError && !data ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={TABLE_COLUMN_COUNT} className="p-0">
+                  <ErrorState
+                    variant="panel"
+                    embedded
+                    icon={NewOfficeIcon}
+                    title="Failed to load workspaces"
+                    onRetry={() => refetch()}
+                    className={TABLE_BODY_STATE_MIN_HEIGHT}
+                  />
+                </TableCell>
+              </TableRow>
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -289,23 +312,13 @@ export function PlatformWorkspacesTable({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={TABLE_COLUMN_COUNT}
-                  className="h-32 text-center text-muted-foreground"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Icon
-                      icon={NewOfficeIcon}
-                      size={24}
-                      strokeWidth={2}
-                      className="text-muted-foreground/30"
-                    />
-                    <p className="text-sm">
-                      No workspaces found
-                      {isFetching ? " · Updating…" : ""}
-                    </p>
-                  </div>
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={TABLE_COLUMN_COUNT} className="p-0">
+                  <EmptyState
+                    embedded
+                    icon={NewOfficeIcon}
+                    title="No workspaces found"
+                  />
                 </TableCell>
               </TableRow>
             )}

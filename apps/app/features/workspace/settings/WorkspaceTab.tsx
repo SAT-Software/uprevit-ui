@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import {
   Avatar,
@@ -81,8 +82,9 @@ function WorkspaceTab() {
   const isAdmin = isAdminProfile(auth.user?.profile);
   const {
     data,
-    isLoading: workspaceLoading,
+    isPending: workspaceLoading,
     error: workspaceError,
+    refetch: refetchWorkspace,
   } = useGetWorkspace();
   const { data: workspaceUserData } = useGetAllUsersByWorkspace({
     page: 1,
@@ -154,19 +156,13 @@ function WorkspaceTab() {
     );
   }
 
-  if (workspaceError) {
+  if (workspaceError && !data) {
     return (
-      <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-          <Icon icon={AlertCircleIcon} size={18} strokeWidth={2} />
-        </div>
-        <div className="space-y-0.5">
-          <div className="text-sm font-medium">Failed to load workspace</div>
-          <div className="text-sm text-muted-foreground">
-            {workspaceError?.message || "An unexpected error occurred"}
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        icon={AlertCircleIcon}
+        title="Failed to load workspace"
+        onRetry={() => refetchWorkspace()}
+      />
     );
   }
 

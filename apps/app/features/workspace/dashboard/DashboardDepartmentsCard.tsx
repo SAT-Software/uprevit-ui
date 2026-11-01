@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import { ArrowUpRight01Icon, NewOfficeIcon } from "@hugeicons/core-free-icons";
@@ -9,9 +10,9 @@ import Link from "next/link";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import DepartmentCard from "../common/DepartmentCard";
 import {
-  DashboardErrorState,
-  DASHBOARD_CARDS_ERROR_MIN_HEIGHT,
-} from "./DashboardErrorState";
+  ErrorState,
+  CARDS_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
 
 export interface DepartmentUser {
   _id: string;
@@ -58,10 +59,12 @@ function DepartmentsCardHeader() {
 function DashboardDepartmentsCard() {
   const {
     data: departmentsData,
-    isLoading,
-    isError,
+    isPending: isLoading,
+    isError: isQueryError,
+    refetch,
   } = useGetAllDepartments({ limit: 5, sort: "actionAt", order: "desc" });
 
+  const isError = isQueryError && !departmentsData;
   const departments = departmentsData?.result?.departments ?? [];
 
   if (isLoading) {
@@ -81,12 +84,13 @@ function DashboardDepartmentsCard() {
     return (
       <div className="w-full min-w-0 flex-1 border border-border rounded-2xl overflow-hidden">
         <DepartmentsCardHeader />
-        <DashboardErrorState
+        <ErrorState
           variant="panel"
           embedded
           icon={NewOfficeIcon}
           title="Failed to load departments"
-          className={DASHBOARD_CARDS_ERROR_MIN_HEIGHT}
+          onRetry={() => refetch()}
+          className={CARDS_STATE_MIN_HEIGHT}
         />
       </div>
     );
@@ -98,24 +102,13 @@ function DashboardDepartmentsCard() {
     return (
       <div className="w-full min-w-0 flex-1 border border-border rounded-2xl overflow-hidden">
         <DepartmentsCardHeader />
-        <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8">
-          <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-            <Icon
-              icon={NewOfficeIcon}
-              size={32}
-              strokeWidth={2}
-              className="text-muted-foreground"
-            />
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-sm font-medium text-foreground">
-              No departments found
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Get started by creating a new department
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          embedded
+          icon={NewOfficeIcon}
+          title="No departments found"
+          description="Get started by creating a new department"
+          className={CARDS_STATE_MIN_HEIGHT}
+        />
       </div>
     );
   }

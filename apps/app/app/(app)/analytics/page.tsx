@@ -1,5 +1,7 @@
 "use client";
 
+import { Chart01Icon } from "@hugeicons/core-free-icons";
+import { ErrorState } from "@/components/common/ErrorState";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { AnalyticsBlockingTabsChart } from "@/features/workspace/analytics/AnalyticsBlockingTabsChart";
@@ -26,7 +28,13 @@ export default function AnalyticsPage() {
     departmentId: searchParams.get("departmentId") ?? undefined,
     projectId: searchParams.get("projectId") ?? undefined,
   };
-  const { data, isLoading, isError } = useGetAnalytics(filters);
+  const {
+    data,
+    isPending: isLoading,
+    isError: isQueryError,
+    refetch,
+  } = useGetAnalytics(filters);
+  const isError = isQueryError && !data;
 
   const setFilters = (next: AnalyticsFilters) => {
     const query = analyticsSearchParams(next).toString();
@@ -43,11 +51,15 @@ export default function AnalyticsPage() {
         <AnalyticsFilterBar filters={filters} onChange={setFilters} />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {isError ? (
-          <p className="p-6 text-sm text-muted-foreground">
-            Analytics could not be loaded. Refresh the page to try again.
-          </p>
+          <ErrorState
+            variant="panel"
+            icon={Chart01Icon}
+            title="Failed to load analytics"
+            onRetry={() => refetch()}
+            fill
+          />
         ) : (
           <>
             <AnalyticsStatsGrid

@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Fragment, useEffect, useMemo, useState, type UIEvent } from "react";
 
@@ -573,16 +574,20 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     >
       <div className="flex items-center gap-2">
         <SidebarTrigger className="bg-sidebar text-muted-foreground hover:text-muted-foreground" />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <h1 className="max-w-40 truncate text-sm font-semibold text-foreground">
-              {product?.productName}
-            </h1>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" align="start">
-            {product?.productName}
-          </TooltipContent>
-        </Tooltip>
+        {product ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <h1 className="max-w-40 truncate text-sm font-semibold text-foreground">
+                {product.productName}
+              </h1>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="start">
+              {product.productName}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Skeleton className="h-4 w-28" />
+        )}
 
         <div className="flex items-center gap-2 ml-2">
           <Tooltip>

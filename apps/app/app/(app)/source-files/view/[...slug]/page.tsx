@@ -1,12 +1,14 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
+import { FolderGridSkeleton } from "@/components/common/FolderGridSkeleton";
 import { useAuth } from "react-oidc-context";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft01Icon, FolderAddIcon, Link05Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, Folder01Icon, Link05Icon } from "@hugeicons/core-free-icons";
 
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import DialogDeleteSourceFile from "@/features/workspace/source-files/DialogDeleteSourceFile";
@@ -16,7 +18,7 @@ import DialogEditSourceFilesFolder from "@/features/workspace/source-files/Dialo
 import DialogUploadSourceFiles from "@/features/workspace/source-files/DialogUploadSourceFiles";
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
 import { SourceFilesItemsGrid } from "@/features/workspace/source-files/SourceFilesItemsGrid";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { useDeleteSourceFiles } from "@/hooks/source-files/useDeleteSourceFiles";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
 import { useGetCurrentSourceFilesFolder } from "@/hooks/source-files/useGetCurrentSourceFilesFolder";
@@ -91,9 +93,11 @@ export default function ProductSourceFilesPage() {
     }
   };
 
-  const { data, isLoading, isError, refetch } =
+  const { data, isPending, isError, refetch } =
     useGetSourceFilesFolderById(folderId);
-  const { data: currentFolderData } = useGetCurrentSourceFilesFolder(folderId);
+  const { data: currentFolderData, isPending: isCurrentFolderPending } =
+    useGetCurrentSourceFilesFolder(folderId);
+  const isLoading = isPending || isCurrentFolderPending;
   const auth = useAuth();
   const userId = auth?.user?.profile?.userId;
 
@@ -133,21 +137,13 @@ export default function ProductSourceFilesPage() {
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center px-3 pt-4">
-                <Skeleton className="h-[78px] w-[92px] rounded-xl" />
-                <Skeleton className="mt-3 h-4 w-20" />
-                <Skeleton className="mt-1.5 h-3 w-14" />
-              </div>
-            ))}
-          </div>
+          <FolderGridSkeleton />
         </div>
       </div>
     );
   }
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
@@ -158,19 +154,14 @@ export default function ProductSourceFilesPage() {
             </p>
           </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <DashboardErrorState
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <ErrorState
             variant="panel"
-            icon={FolderAddIcon}
+            icon={Folder01Icon}
             title="Failed to load folder"
-            description="Something went wrong while fetching your source files. Please try again."
-            className="min-h-[320px]"
+            onRetry={() => refetch()}
+            fill
           />
-          <div className="mt-3 flex justify-center">
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Try again
-            </Button>
-          </div>
         </div>
       </div>
     );
@@ -184,7 +175,7 @@ export default function ProductSourceFilesPage() {
           <p className="truncate text-sm font-medium">
             {currentFolder?.name ?? "Folder"}
           </p>
-          {currentFolder?.parentId == null && (
+          {currentFolder && currentFolder.parentId == null && (
             <Badge variant="secondary">
               <Icon icon={Link05Icon} size={14} strokeWidth={2} />
               {linkedProduct?.product_name || "Not linked"}
@@ -225,35 +216,32 @@ export default function ProductSourceFilesPage() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col overflow-y-auto",
+          hasContent && "p-4",
+        )}
+      >
         {!hasContent ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
-              <Icon
-                icon={FolderAddIcon}
-                size={28}
-                strokeWidth={1.75}
-                className="text-muted-foreground/70"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-medium">No source files yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Upload files or create a subfolder to get started.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 pt-1">
-              <DialogAddProductFolder
-                parentId={currentFolder?._id}
-                folderId={folderId}
-              />
-              <DialogUploadSourceFiles
-                folder={currentFolder!}
-                currentFolder={currentFolder!}
-                folderId={folderId}
-              />
-            </div>
-          </div>
+          <EmptyState
+            fill
+            icon={Folder01Icon}
+            title="No source files yet"
+            description="Upload files or create a subfolder to get started"
+            action={
+              <div className="flex items-center gap-2">
+                <DialogAddProductFolder
+                  parentId={currentFolder?._id}
+                  folderId={folderId}
+                />
+                <DialogUploadSourceFiles
+                  folder={currentFolder!}
+                  currentFolder={currentFolder!}
+                  folderId={folderId}
+                />
+              </div>
+            }
+          />
         ) : (
           <div className="flex flex-col gap-4">
             {subfolders.length > 0 && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -29,7 +30,7 @@ import { Tabs, TabsList, TabsTrigger } from "@uprevit/ui/components/ui/tabs";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ProductCombobox } from "@/components/common/ProductCombobox";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { CreateWorkflowDialog } from "@/features/workspace/workflows/WorkflowDetailsDialog";
 import { WorkflowsTable } from "@/features/workspace/workflows/WorkflowsTable";
 import { useWorkflows } from "@/hooks/workflow/useWorkflows";
@@ -65,7 +66,7 @@ function WorkflowsList() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  const { data, isPending, isFetching, isError } = useWorkflows({
+  const { data, isPending, isFetching, isError, refetch } = useWorkflows({
     view,
     page,
     limit: WORKSPACE_LIST_LIMIT,
@@ -173,33 +174,28 @@ function WorkflowsList() {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {isError ? (
-            <DashboardErrorState
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          {isError && !data ? (
+            <ErrorState
               variant="panel"
               icon={WorkflowIcon}
               title="Failed to load workflows"
-              className="m-4"
+              onRetry={() => refetch()}
+              fill
             />
           ) : !isPending && workflows.length === 0 ? (
-            <div className="m-4 flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-muted/30 py-10 text-center">
-              <div className="flex items-center justify-center rounded-full border border-border bg-background p-4 shadow-sm">
-                <Icon
-                  icon={WorkflowIcon}
-                  className="text-muted-foreground"
-                />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">No workflows found</p>
-                <p className="text-xs text-muted-foreground">
-                  {hasFilters
-                    ? "Try a different search or filter."
-                    : isMyTasks
-                      ? "Workflows you are asked to approve will show up here."
-                      : "Create a workflow to send Products for approval."}
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              fill
+              icon={WorkflowIcon}
+              title="No workflows found"
+              description={
+                hasFilters
+                  ? "Try a different search or filter"
+                  : isMyTasks
+                    ? "Workflows you are asked to approve will show up here"
+                    : "Create a workflow to send Products for approval"
+              }
+            />
           ) : (
             <>
               <div className="w-full border-b border-border">

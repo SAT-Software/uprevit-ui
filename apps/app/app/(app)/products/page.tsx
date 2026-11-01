@@ -22,7 +22,8 @@ import { WorkspaceListPagination } from "@/components/table/WorkspaceListPaginat
 import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceListPaginationSkeleton";
 import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import CreateProductDialog from "@/features/workspace/products/CreateProductDialog";
 import DialogArchiveProduct from "@/features/workspace/products/DialogArchiveProduct";
 import DialogBookmarkProduct from "@/features/workspace/products/DialogBookmarkProduct";
@@ -98,7 +99,6 @@ function isProductsTab(value: string | null): value is ProductsTab {
   return PRODUCTS_TABS.includes(value as ProductsTab);
 }
 
-const PRODUCT_LIST_CONTENT_MIN_HEIGHT = "min-h-[55rem] md:min-h-[42rem]";
 
 const DEFAULT_COLUMN_VISIBILITY: VisibilityState = {
   createdOn: false,
@@ -483,33 +483,33 @@ export default function ProductsPage() {
   });
   const {
     data: allProductsData,
-    isFetching: isAllProductsFetching,
     isPending: isAllProductsPending,
     isError: isAllProductsError,
+    refetch: refetchAllProducts,
   } = useGetAllProducts(listState.query, !isBookmarkedTab);
   const {
     data: bookmarkedProductsData,
-    isFetching: isBookmarkedProductsFetching,
     isPending: isBookmarkedProductsPending,
     isError: isBookmarkedProductsError,
+    refetch: refetchBookmarkedProducts,
   } = useGetAllBookmarkedProducts(listState.query, isBookmarkedTab);
 
   const data = isBookmarkedTab ? bookmarkedProductsData : allProductsData;
-  const isFetching = isBookmarkedTab
-    ? isBookmarkedProductsFetching
-    : isAllProductsFetching;
   const isPending = isBookmarkedTab
     ? isBookmarkedProductsPending
     : isAllProductsPending;
-  const isError = isBookmarkedTab
-    ? isBookmarkedProductsError
-    : isAllProductsError;
+  const isError =
+    (isBookmarkedTab ? isBookmarkedProductsError : isAllProductsError) &&
+    !data;
+  const refetch = isBookmarkedTab
+    ? refetchBookmarkedProducts
+    : refetchAllProducts;
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     DEFAULT_COLUMN_VISIBILITY,
   );
 
   const paginationInfo = data?.result?.pagination;
-  const isListBusy = isPending || isFetching;
+  const isListBusy = isPending;
   const hasProductsToList =
     isListBusy ||
     isError ||
@@ -601,9 +601,9 @@ export default function ProductsPage() {
           </TabsList>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {isError ? (
-            <DashboardErrorState
+            <ErrorState
               variant="panel"
               icon={Blockchain03Icon}
               title={
@@ -611,7 +611,8 @@ export default function ProductsPage() {
                   ? "Failed to load bookmarked products"
                   : "Failed to load products"
               }
-              className={PRODUCT_LIST_CONTENT_MIN_HEIGHT}
+              onRetry={() => refetch()}
+              fill
             />
           ) : hasProductsToList ? (
             <div className="flex flex-col items-end">
@@ -703,15 +704,27 @@ export default function ProductsPage() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            {isBookmarkedTab ? (
-                              <BookmarkedProductsEmptyState />
-                            ) : (
-                              <ProductsEmptyState />
-                            )}
+                          <TableCell colSpan={columns.length} className="p-0">
+                            <EmptyState
+                              embedded
+                              icon={Blockchain03Icon}
+                              title={
+                                isBookmarkedTab
+                                  ? "No bookmarked products found"
+                                  : "No products found"
+                              }
+                              description="Try changing your filters"
+                              action={
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={listState.clearFilters}
+                                >
+                                  Clear filters
+                                </Button>
+                              }
+                            />
                           </TableCell>
                         </TableRow>
                       )}
@@ -731,56 +744,22 @@ export default function ProductsPage() {
               </div>
             </div>
           ) : isBookmarkedTab ? (
-            <BookmarkedProductsEmptyState className="m-4" />
+            <EmptyState
+              fill
+              icon={Blockchain03Icon}
+              title="No bookmarked products"
+              description="Bookmark products from the All Products tab to see them here"
+            />
           ) : (
-            <ProductsEmptyState className="m-4" />
+            <EmptyState
+              fill
+              icon={Blockchain03Icon}
+              title="No products found"
+              description="Get started by creating a new product"
+            />
           )}
         </div>
       </Tabs>
-    </div>
-  );
-}
-
-function BookmarkedProductsEmptyState({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30",
-        className,
-      )}
-    >
-      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-foreground">
-          No bookmarked products
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Bookmark products from the All Products tab to see them here
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ProductsEmptyState({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30",
-        className,
-      )}
-    >
-      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <Icon icon={Blockchain03Icon} className="text-muted-foreground" />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-foreground">No products found</p>
-        <p className="text-xs text-muted-foreground">
-          Get started by creating a new product
-        </p>
-      </div>
     </div>
   );
 }

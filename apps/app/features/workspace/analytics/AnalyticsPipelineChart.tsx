@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { EChartsBarChart } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { PIPELINE_STATUSES, STAGE_CHART_CONFIG } from "@/data/analytics-config";
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
@@ -23,6 +24,14 @@ export function AnalyticsPipelineChart({
       title="Pipeline by stage"
       info="Where every active product sits right now. Click a stage to list its products."
     >
+      {isLoading ? (
+        <div className="flex h-36 w-full flex-col justify-center px-5 pt-6">
+          <span role="status" className="sr-only">
+            Loading…
+          </span>
+          <Skeleton aria-hidden="true" className="h-10 w-full rounded" />
+        </div>
+      ) : (
       <EChartsBarChart
         className="h-36 w-full p-3"
         data={[{ stage: "Products", ...data }]}
@@ -31,7 +40,6 @@ export function AnalyticsPipelineChart({
         layout="horizontal"
         stackType="stacked"
         barRadius={4}
-        isLoading={isLoading}
         onItemClick={({ key }) =>
           router.push(analyticsDrillHref(filters, "status", key))
         }
@@ -43,6 +51,7 @@ export function AnalyticsPipelineChart({
         <EChartsBarChart.Tooltip />
         <EChartsBarChart.Legend align="left" />
       </EChartsBarChart>
+      )}
     </AnalyticsChartPanel>
   );
 }

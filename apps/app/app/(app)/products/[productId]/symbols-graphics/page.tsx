@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
 import SchematicsSymbolsTabs from "@/features/workspace/products/product/graphics-other-components/SchematicsSymbolsTabs";
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
@@ -37,7 +39,7 @@ export default function Page() {
   const isRedlineView = !!compareVersionId;
 
   // Fetch all tabs to get both symbols-graphics data and product name
-  const { data, isLoading, error } = useGetProductTabData(
+  const { data, isPending: isLoading, error, refetch } = useGetProductTabData(
     productId as string,
     "all-tabs",
   );
@@ -68,11 +70,15 @@ export default function Page() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-destructive">
-        Error loading symbols & graphics: {error.message}
-      </div>
+      <ErrorState
+        variant="panel"
+        icon={Alert01Icon}
+        title="Failed to load symbols & graphics"
+        onRetry={() => refetch()}
+        fill
+      />
     );
   }
 

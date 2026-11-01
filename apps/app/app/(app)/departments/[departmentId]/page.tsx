@@ -5,7 +5,7 @@ import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntit
 import DepartmentPageProjectsTable from "@/features/workspace/departments/DepartmentPageProjectsTable";
 import ShareDepartmentDialog from "@/features/workspace/departments/ShareDepartmentDialog";
 import UpdateDepartmentDialog from "@/features/workspace/departments/UpdateDepartmentDialog";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { useGetDepartmentById } from "@/hooks/department/useGetDepartmentById";
 import { AuditLog } from "@/types/audit-log";
 import { isAdminProfile } from "@/utils/isAdmin";
@@ -43,7 +43,7 @@ export default function DepartmentDetailPage() {
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
-  const { data, isLoading, isError } = useGetDepartmentById(departmentId);
+  const { data, isPending: isLoading, refetch } = useGetDepartmentById(departmentId);
 
   const department = data?.department;
 
@@ -79,11 +79,12 @@ export default function DepartmentDetailPage() {
       <div className="flex flex-col gap-2 w-full h-full">
         {isLoading ? (
           <DepartmentDetailHeaderSkeleton />
-        ) : isError || !department ? (
-          <DashboardErrorState
+        ) : !department ? (
+          <ErrorState
             variant="panel"
             icon={NewOfficeIcon}
             title="Failed to load department"
+            onRetry={() => refetch()}
             className="min-h-48"
           />
         ) : (

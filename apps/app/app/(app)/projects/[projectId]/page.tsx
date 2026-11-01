@@ -3,7 +3,7 @@
 import { MembersInlineTrigger } from "@/components/common/MembersDialog";
 import DialogArchiveEntity from "@/features/workspace/archive/DialogArchiveEntity";
 import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import ProjectPageProductsTable from "@/features/workspace/projects/ProjectPageProductsTable";
 import ShareProjectDialog from "@/features/workspace/projects/ShareProjectDialog";
 import UpdateProjectDialog from "@/features/workspace/projects/UpdateProjectDialog";
@@ -43,7 +43,7 @@ export default function ProjectDetailPage() {
   const auth = useAuth();
   const isAdmin = isAdminProfile(auth.user?.profile);
 
-  const { data, isLoading, isError } = useGetProjectById(projectId);
+  const { data, isPending: isLoading, refetch } = useGetProjectById(projectId);
   const project = data?.project;
 
   if (!projectId) return notFound();
@@ -74,11 +74,12 @@ export default function ProjectDetailPage() {
       <div className="flex flex-col gap-2 w-full h-full">
         {isLoading ? (
           <ProjectDetailHeaderSkeleton />
-        ) : isError || !project ? (
-          <DashboardErrorState
+        ) : !project ? (
+          <ErrorState
             variant="panel"
             icon={KanbanIcon}
             title="Failed to load project"
+            onRetry={() => refetch()}
             className="min-h-48"
           />
         ) : (
@@ -234,7 +235,7 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
-        {!isLoading && !isError && project ? (
+        {project ? (
           <ProjectPageProductsTable projectId={projectId} />
         ) : null}
       </div>

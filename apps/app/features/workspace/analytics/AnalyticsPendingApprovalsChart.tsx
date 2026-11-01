@@ -1,10 +1,11 @@
 "use client";
 
+import { ValidationApprovalIcon } from "@hugeicons/core-free-icons";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EChartsBarChart } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
-import { AnalyticsEmptyState } from "@/features/workspace/analytics/AnalyticsEmptyState";
 import { AnalyticsShowMore } from "@/features/workspace/analytics/AnalyticsShowMore";
 import { AnalyticsDrillLinks } from "@/features/workspace/analytics/AnalyticsDrillLinks";
 import { analyticsDrillHref } from "@/features/workspace/analytics/analyticsLinks";
@@ -43,7 +44,11 @@ export function AnalyticsPendingApprovalsChart({
       }
     >
       {!isLoading && !rows.length ? (
-        <AnalyticsEmptyState message="No reviews are waiting on anyone." />
+        <EmptyState
+          embedded
+          icon={ValidationApprovalIcon}
+          title="No reviews are waiting on anyone"
+        />
       ) : (
         <div style={{ height: Math.max(rows.length, 2) * 44 + 60 }}>
         <EChartsBarChart
