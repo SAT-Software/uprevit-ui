@@ -104,6 +104,7 @@ const GRAY = "rgba(120, 120, 120, 1)"; // fallback when the ramp has no resolved
 // opacity factors live here. `withAlpha` MULTIPLIES a token's own alpha.
 // ─────────────────────────────────────────────────────────────────────────────
 const EMPTY_CELL_OPACITY = 0.08; // a day with no value — foreground at a whisper (GitHub's #ebedf0 / #161b22)
+const TODAY_CELL_OPACITY = 0.5; // the `splitDate` day — muted foreground, a step darker than empty
 const CELL_DIM_OPACITY = 0.55; // cells outside the current selection — soft, so the ramp still reads
 const HOVER_RING_WIDTH = 1; // outline drawn around the hovered cell, in pixels
 const HOVER_RING_OPACITY = 0.6; // × foreground alpha
@@ -191,7 +192,7 @@ export interface CellProps {
   gap?: number; // space between cells in pixels
   isClickable?: boolean; // lets cells be selected by clicking them
   pastDataKey?: string; // config key whose ramp colors days before `splitDate`
-  splitDate?: string; // ISO date that starts `dataKey`'s ramp; marked with a dashed "Today" line
+  splitDate?: string; // ISO date that starts `dataKey`'s ramp; that day is marked as today
 }
 
 /**
@@ -643,13 +644,14 @@ function buildCalendarOption(ctx: OptionBuildContext): CalendarComponentOption {
 }
 
 function buildCellSeries(ctx: OptionBuildContext): CustomSeriesOption {
-  const { grid, cell, selectedDate, resolved, revealEnabled, weekStart } = ctx;
+  const { grid, cell, selectedDate, resolved, revealEnabled } = ctx;
   const { tokens } = resolved;
   const slots = resolved.series[cell.dataKey] ?? [];
   const pastSlots = cell.pastDataKey ? (resolved.series[cell.pastDataKey] ?? slots) : slots;
   const slotsFor = (date: string) =>
     cell.splitDate && date < cell.splitDate ? pastSlots : slots;
   const emptyFill = withAlpha(tokens.foreground, EMPTY_CELL_OPACITY);
+  const todayFill = withAlpha(tokens.mutedForeground, TODAY_CELL_OPACITY);
   const hoverRing = withAlpha(tokens.foreground, HOVER_RING_OPACITY);
   const selectedRing = withAlpha(tokens.foreground, SELECTED_RING_OPACITY);
   const hasSelection = selectedDate !== null;
@@ -671,17 +673,24 @@ function buildCellSeries(ctx: OptionBuildContext): CustomSeriesOption {
 
     const selected = hasSelection && item.date === selectedDate;
     const dimmed = hasSelection && !selected;
-    const fill = item.level === 0 ? emptyFill : rampColor(slotsFor(item.date), item.level, grid.levels);
+    const isToday = item.date === cell.splitDate;
+    const fill =
+      item.level > 0
+        ? rampColor(slotsFor(item.date), item.level, grid.levels)
+        : isToday
+          ? todayFill
+          : emptyFill;
+    const ring = selected ? selectedRing : isToday && item.level > 0 ? todayFill : null;
 
-    const rect: RenderItemReturn = {
+    return {
       type: "rect",
       shape: { x: cx - width / 2, y: cy - height / 2, width, height, r: radius },
       // The selected cell keeps full strength and wears a ring; the rest soften.
       style: {
         fill,
         opacity: dimmed ? CELL_DIM_OPACITY : 1,
-        stroke: selected ? selectedRing : "transparent",
-        lineWidth: selected ? SELECTED_RING_WIDTH : 0,
+        stroke: ring ?? "transparent",
+        lineWidth: ring ? SELECTED_RING_WIDTH : 0,
       },
       // Draw the selected cell last so its ring is never covered by a neighbour.
       z2: selected ? 2 : 1,
@@ -707,33 +716,6 @@ function buildCellSeries(ctx: OptionBuildContext): CustomSeriesOption {
       emphasis: {
         style: { stroke: hoverRing, lineWidth: HOVER_RING_WIDTH },
       },
-    };
-    if (item.date !== cell.splitDate) return rect;
-
-    const dayIndex =
-      (new Date(parseIsoDate(item.date)).getUTCDay() - (weekStart === "monday" ? 1 : 0) + DAYS_PER_WEEK) %
-      DAYS_PER_WEEK;
-    const x = cx - cellWidth / 2 - gap / 2;
-    const top = cy - cellHeight / 2 - dayIndex * cellHeight;
-    const bottom = top + DAYS_PER_WEEK * cellHeight;
-    return {
-      type: "group",
-      children: [
-        rect,
-        {
-          type: "line",
-          silent: true,
-          shape: { x1: x, y1: top - 4, x2: x, y2: bottom + 2 },
-          style: { stroke: withAlpha(tokens.foreground, 0.45), lineWidth: 1, lineDash: [3, 3] },
-        },
-        {
-          type: "text",
-          silent: true,
-          x: x + 3,
-          y: bottom + 4,
-          style: { text: "Today", fill: tokens.foreground, fontSize: 11 },
-        },
-      ],
     };
   };
 
