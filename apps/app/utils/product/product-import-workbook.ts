@@ -77,45 +77,55 @@ const cellText = (cell?: XLSX.CellObject) => {
   return String(cell.v).trim();
 };
 
-function readTable(sheet: XLSX.WorkSheet): Table | null {
-  if (!sheet["!ref"]) return null;
-  const range = XLSX.utils.decode_range(sheet["!ref"]);
-  const at = (r: number, c: number) => sheet[XLSX.utils.encode_cell({ r, c })] as XLSX.CellObject | undefined;
-
-  let headerRow = -1;
-  for (let r = range.s.r; r <= Math.min(range.e.r, range.s.r + 9); r += 1) {
-    if (REF_HEADERS.includes(key(cellText(at(r, 0))))) {
-      headerRow = r;
-      break;
-    }
+function readTable(sheet: XLSX.WorkSheet, sheetName: string): Table | null {
+  const byRow = new Map<number, Map<number, XLSX.CellObject>>();
+  for (const address of Object.keys(sheet)) {
+    if (address.startsWith("!")) continue;
+    const cell = sheet[address] as XLSX.CellObject;
+    if (cell?.v == null || cell.v === "") continue;
+    const { r, c } = XLSX.utils.decode_cell(address);
+    const row = byRow.get(r) ?? new Map<number, XLSX.CellObject>();
+    row.set(c, cell);
+    byRow.set(r, row);
   }
-  if (headerRow < 0) return null;
+  const rowNumbers = [...byRow.keys()].sort((a, b) => a - b);
+  const headerRow = rowNumbers.slice(0, 10).find((r) => REF_HEADERS.includes(key(cellText(byRow.get(r)!.get(0)))));
+  if (headerRow === undefined) return null;
 
-  const headers: string[] = [];
-  for (let c = 0; c <= range.e.c; c += 1) headers.push(cellText(at(headerRow, c)));
+  const headers = new Map<number, string>();
+  const seen = new Set<string>();
+  for (const [c, cell] of [...byRow.get(headerRow)!.entries()].sort(([a], [b]) => a - b)) {
+    const header = cellText(cell);
+    if (!header) continue;
+    if (seen.has(key(header))) {
+      throw new Error(`${sheetName} has more than one column named "${header}". Rename one of them and upload the file again.`);
+    }
+    seen.add(key(header));
+    headers.set(c, header);
+  }
 
   const rows: Row[] = [];
-  for (let r = headerRow + 1; r <= range.e.r; r += 1) {
+  for (const r of rowNumbers) {
+    if (r <= headerRow) continue;
     const cells = new Map<string, string>();
     const raw = new Map<string, XLSX.CellObject>();
-    headers.forEach((header, c) => {
-      if (!header || c === 0) return;
-      const cell = at(r, c);
-      if (cell?.f && !cell.v) return;
+    for (const [c, cell] of byRow.get(r)!) {
+      const header = headers.get(c);
+      if (c === 0 || !header) continue;
       const text = cellText(cell);
-      if (!text) return;
+      if (!text) continue;
       cells.set(key(header), text);
-      raw.set(key(header), cell!);
-    });
-    rows.push({ row: r + 1, ref: cellText(at(r, 0)), cells, raw });
+      raw.set(key(header), cell);
+    }
+    rows.push({ row: r + 1, ref: cellText(byRow.get(r)!.get(0)), cells, raw });
   }
-  return { headers: headers.filter(Boolean), rows };
+  return { headers: [...headers.values()], rows };
 }
 
-function readDate(cell: XLSX.CellObject | undefined, text: string) {
+function readDate(cell: XLSX.CellObject | undefined, text: string, date1904: boolean) {
   if (!text) return { value: null };
-  if (cell?.t === "n" && typeof cell.v === "number") {
-    const parsed = XLSX.SSF.parse_date_code(cell.v);
+  if (cell?.t === "n" && typeof cell.v === "number" && cell.v > 0) {
+    const parsed = XLSX.SSF.parse_date_code(cell.v, { date1904 });
     if (parsed?.y) {
       const pad = (value: number) => String(value).padStart(2, "0");
       return { value: `${parsed.y}-${pad(parsed.m)}-${pad(parsed.d)}` };
@@ -156,7 +166,7 @@ function emptyProduct(row: Row): ImportedProduct {
   };
 }
 
-function readProducts(table: Table, notices: string[]) {
+function readProducts(table: Table, notices: string[], date1904: boolean) {
   const customFieldColumns = table.headers.slice(1).filter(
     (header) => !(key(header) in PRODUCT_FIELDS),
   );
@@ -175,7 +185,7 @@ function readProducts(table: Table, notices: string[]) {
     for (const [header, field] of Object.entries(PRODUCT_FIELDS) as Array<[string, ProductField]>) {
       const value = row.cells.get(header) ?? "";
       if (field === "target_date") {
-        const date = readDate(row.raw.get(header), value);
+        const date = readDate(row.raw.get(header), value, date1904);
         product.target_date = date.value;
         if (date.error) error(date.error);
       } else if (field in product.product_information) {
@@ -347,13 +357,13 @@ export function parseImportWorkbook(buffer: ArrayBuffer): ImportWorkbook {
 
   const sheets = new Map(workbook.SheetNames.map((name) => [key(name), workbook.Sheets[name]]));
   const productsSheet = sheets.get(SHEETS.products);
-  const productsTable = productsSheet ? readTable(productsSheet) : null;
+  const productsTable = productsSheet ? readTable(productsSheet, "Products") : null;
   if (!productsTable) {
     throw new Error("This file has no Products sheet with a \"Product Ref (Plan Number)\" header. Download the Uprevit import template and fill it in.");
   }
 
   const notices: string[] = [];
-  const { products, customFieldColumns } = readProducts(productsTable, notices);
+  const { products, customFieldColumns } = readProducts(productsTable, notices, !!workbook.Workbook?.WBProps?.date1904);
   if (!products.length) throw new Error("The Products sheet has no products. Add at least one row with a plan number.");
   if (products.length > MAX_IMPORT_PRODUCTS) {
     throw new Error(`The file has ${products.length} products. Import at most ${MAX_IMPORT_PRODUCTS} at a time by splitting it into smaller files.`);
@@ -369,13 +379,18 @@ export function parseImportWorkbook(buffer: ArrayBuffer): ImportWorkbook {
     if (!byRef.has(key(product.product_plan_number))) byRef.set(key(product.product_plan_number), product);
   }
 
-  const table = (name: string) => {
+  const table = (name: string, label: string) => {
     const sheet = sheets.get(name);
-    return sheet ? readTable(sheet) : null;
+    if (!sheet) return null;
+    const result = readTable(sheet, label);
+    if (!result) {
+      throw new Error(`The ${label} sheet has no "Product Ref (Plan Number)" header in column A. Restore the header from the template, or delete the sheet, and upload the file again.`);
+    }
+    return result;
   };
-  const standards = table(SHEETS.standards);
-  const languages = table(SHEETS.languages);
-  const components = table(SHEETS.components);
+  const standards = table(SHEETS.standards, "All Standards");
+  const languages = table(SHEETS.languages, "Languages");
+  const components = table(SHEETS.components, "Label Components");
   attachRows("All Standards", standards, byRef, notices, (product, row) => applyStandards(product, row, standards!));
   attachRows("Languages", languages, byRef, notices, (product, row) => applyLanguages(product, row, languages!));
   attachRows("Label Components", components, byRef, notices, (product, row) => applyComponents(product, row, components!));

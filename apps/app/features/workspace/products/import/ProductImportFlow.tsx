@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LockIcon } from "@hugeicons/core-free-icons";
 import { useAuth } from "react-oidc-context";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -37,11 +37,31 @@ export function ProductImportFlow() {
     [loaded, assignments, excluded],
   );
 
+  const stopped = useRef(false);
+  useEffect(() => {
+    stopped.current = false;
+    return () => {
+      stopped.current = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (!progress) return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    const confirmLeave = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest?.("a[href]");
+      if (!link || link.getAttribute("target") === "_blank" || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      if (!window.confirm("Products are still being created. Leave this page? The import stops after the current batch.")) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
+    document.addEventListener("click", confirmLeave, true);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      document.removeEventListener("click", confirmLeave, true);
+    };
   }, [progress]);
 
   const reset = () => {
@@ -78,6 +98,7 @@ export function ProductImportFlow() {
     setResults(null);
     setProgress({ done: 0, total: ready.length });
     for (let index = 0; index < ready.length; index += IMPORT_BATCH_SIZE) {
+      if (stopped.current) return;
       const batch = ready.slice(index, index + IMPORT_BATCH_SIZE);
       try {
         collected.push(...(await importBatch(batch.map((row) => toImportPayload(row, excludedColumns)))));

@@ -89,12 +89,12 @@ export function ProductImportReview({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [assignOpen, setAssignOpen] = useState(false);
-  const [detailsKey, setDetailsKey] = useState<string | null>(null);
+  const [detailsRowNumber, setDetailsRowNumber] = useState<number | null>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
 
-  const openDetails = (key: string, trigger: HTMLElement) => {
+  const openDetails = (rowNumber: number, trigger: HTMLElement) => {
     returnFocus.current = trigger;
-    setDetailsKey(key);
+    setDetailsRowNumber(rowNumber);
   };
 
   const counts = useMemo(() => {
@@ -112,7 +112,7 @@ export function ProductImportReview({
   const visibleKeys = visible.map((row) => planKey(row.product.product_plan_number));
   const allVisibleSelected = visibleKeys.length > 0 && visibleKeys.every((key) => selected.has(key));
   const someVisibleSelected = visibleKeys.some((key) => selected.has(key));
-  const detailsRow = detailsKey ? rows.find((row) => planKey(row.product.product_plan_number) === detailsKey) ?? null : null;
+  const detailsRow = detailsRowNumber === null ? null : rows.find((row) => row.product.row === detailsRowNumber) ?? null;
   const selectedPlans = selectedRows.map((row) => row.product.product_plan_number);
 
   const toggle = (key: string, checked: boolean) => {
@@ -271,7 +271,7 @@ export function ProductImportReview({
                     <TableCell className="max-w-72">
                       <button
                         type="button"
-                        onClick={(event) => openDetails(key, event.currentTarget)}
+                        onClick={(event) => openDetails(row.product.row, event.currentTarget)}
                         className="block max-w-full truncate rounded-sm text-left text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
                         title={row.product.product_name}
                       >
@@ -295,7 +295,7 @@ export function ProductImportReview({
                         {row.issues.length > 1 && row.status !== "excluded" && (
                           <button
                             type="button"
-                            onClick={(event) => openDetails(key, event.currentTarget)}
+                            onClick={(event) => openDetails(row.product.row, event.currentTarget)}
                             className="rounded-sm text-xs font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
                           >
                             View all {row.issues.length} problems
@@ -332,7 +332,7 @@ export function ProductImportReview({
       <ProductImportDetailsSheet
         row={detailsRow}
         excludedColumns={excludedColumns}
-        onOpenChange={(open) => !open && setDetailsKey(null)}
+        onOpenChange={(open) => !open && setDetailsRowNumber(null)}
         onCloseAutoFocus={(event) => {
           event.preventDefault();
           returnFocus.current?.focus();

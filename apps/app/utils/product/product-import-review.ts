@@ -61,7 +61,7 @@ export function buildImportRows(
       destination = { kind: "existing", label: fromFile.project.project_name, departmentLabel: product.department_name, createsDepartment: false, project: fromFile.project };
     } else if (product.department_name && product.project_name && fromFile?.ambiguous) {
       destination = { kind: "none", label: "", departmentLabel: product.department_name, createsDepartment: false };
-      issues.push({ level: "warning", message: `More than one project is named "${product.project_name}" in ${product.department_name}. Assign the right one here.` });
+      issues.push({ level: "warning", message: `Your workspace has more than one department named "${product.department_name}" or project named "${product.project_name}", so the file can't say which one. Assign the right project here.` });
     } else if (product.department_name && product.project_name) {
       const numbers = [...(numbersByProject.get(nameKey(product.department_name, product.project_name)) ?? [])];
       const number = numbers.length === 1 ? numbers[0] : "";
