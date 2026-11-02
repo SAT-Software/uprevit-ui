@@ -25,7 +25,7 @@ const pathData = [
 ];
 
 const NESTED_ROUTE_PATTERN =
-  /^\/(departments|projects|source-files|bookmarked-products|workflows)\/.+|^\/platform-admin\/workspaces\/.+/;
+  /^\/(departments|projects|source-files|bookmarked-products|workflows)\/.+|^\/products\/import$|^\/platform-admin\/workspaces\/.+/;
 
 export function AppHeader() {
   const pathname = usePathname();
