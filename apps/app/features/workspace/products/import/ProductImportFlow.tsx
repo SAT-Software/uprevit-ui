@@ -98,7 +98,10 @@ export function ProductImportFlow() {
     setResults(null);
     setProgress({ done: 0, total: ready.length });
     for (let index = 0; index < ready.length; index += IMPORT_BATCH_SIZE) {
-      if (stopped.current) return;
+      if (stopped.current) {
+        refreshLists();
+        return;
+      }
       const batch = ready.slice(index, index + IMPORT_BATCH_SIZE);
       try {
         collected.push(...(await importBatch(batch.map((row) => toImportPayload(row, excludedColumns)))));
