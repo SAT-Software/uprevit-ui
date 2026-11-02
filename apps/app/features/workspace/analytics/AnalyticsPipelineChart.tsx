@@ -25,15 +25,18 @@ export function AnalyticsPipelineChart({
       info="Where every active product sits right now. Click a stage to list its products."
     >
       {isLoading ? (
-        <div className="flex h-36 w-full flex-col justify-center px-5 pt-6">
+        <div className="relative h-32 w-full">
           <span role="status" className="sr-only">
             Loading…
           </span>
-          <Skeleton aria-hidden="true" className="h-10 w-full rounded" />
+          <Skeleton
+            aria-hidden="true"
+            className="absolute inset-x-5 top-[60px] h-[31px] rounded"
+          />
         </div>
       ) : (
       <EChartsBarChart
-        className="h-36 w-full p-3"
+        className="h-32 w-full p-3"
         data={[{ stage: "Products", ...data }]}
         config={STAGE_CHART_CONFIG}
         xDataKey="stage"

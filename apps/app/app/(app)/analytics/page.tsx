@@ -67,17 +67,26 @@ export default function AnalyticsPage() {
               filters={filters}
               isLoading={isLoading}
             />
-            <div className="flex flex-col gap-2 p-2">
+            <div className="grid shrink-0 gap-2 p-2">
               <AnalyticsPipelineChart
                 data={data?.pipeline}
                 filters={filters}
                 isLoading={isLoading}
               />
-              <AnalyticsDueCalendarChart
-                data={data?.due_calendar}
-                filters={filters}
-                isLoading={isLoading}
-              />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                  <AnalyticsDueCalendarChart
+                    data={data?.due_calendar}
+                    filters={filters}
+                    isLoading={isLoading}
+                  />
+                </div>
+                <AnalyticsPendingApprovalsChart
+                  data={data?.pending_by_approver}
+                  filters={filters}
+                  isLoading={isLoading}
+                />
+              </div>
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                   <AnalyticsCreatedReleasedChart
@@ -93,19 +102,10 @@ export default function AnalyticsPage() {
                   isLoading={isLoading}
                 />
               </div>
-              <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                  <AnalyticsDepartmentsChart
-                    data={data?.departments}
-                    isLoading={isLoading}
-                  />
-                </div>
-                <AnalyticsPendingApprovalsChart
-                  data={data?.pending_by_approver}
-                  filters={filters}
-                  isLoading={isLoading}
-                />
-              </div>
+              <AnalyticsDepartmentsChart
+                data={data?.departments}
+                isLoading={isLoading}
+              />
             </div>
           </>
         )}
