@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added PostHog error tracking for browser and server errors, with source map upload and Core Web Vitals.
+- Added a same-origin `/ingest` proxy for PostHog so ad blockers do not drop errors or support traffic.
+
+### Removed
+
+- Removed Sentry from the app.
+
 ## [0.10.0] - 2026-10-31
 
 ### Added
