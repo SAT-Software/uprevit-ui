@@ -49,6 +49,7 @@ import {
   ArrowDown01Icon,
   ArrowUp01Icon,
   Blockchain03Icon,
+  FileImportIcon,
   MoreVerticalSquare01Icon,
   Pdf01Icon,
   PropertyAddIcon,
@@ -58,6 +59,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { useAuth } from "react-oidc-context";
+import { isAdminProfile } from "@/utils/isAdmin";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -456,6 +459,8 @@ const columns: ColumnDef<ProductListItem>[] = [
 ];
 
 export default function ProductsPage() {
+  const auth = useAuth();
+  const isAdmin = isAdminProfile(auth.user?.profile);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -585,6 +590,14 @@ export default function ProductsPage() {
             </>
           ) : null}
           <ProductExportsSheet />
+          {isAdmin && (
+            <Button asChild variant="outline" size="sm">
+              <Link href="/products/import">
+                <Icon icon={FileImportIcon} />
+                Import
+              </Link>
+            </Button>
+          )}
           <CreateProductDialog />
         </div>
       </div>

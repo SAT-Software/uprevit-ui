@@ -333,7 +333,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const compareVersionId = searchParams.get("compareVersion");
   const pathSegments = pathname.split("/").filter(Boolean);
   const productId =
-    pathSegments[0] === "products" && pathSegments[1] !== "exports"
+    pathSegments[0] === "products" && !["exports", "import"].includes(pathSegments[1])
       ? pathSegments[1]
       : undefined;
   const showProductSubNavigation = Boolean(productId);
