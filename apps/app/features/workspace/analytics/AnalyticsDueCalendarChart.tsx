@@ -17,6 +17,7 @@ const MIN_CELL = 10;
 const MAX_CELL = 40;
 const DEFAULT_PERIOD_DAYS = 90;
 const WEEKS_AHEAD = 8;
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const COMPACT_DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
@@ -101,10 +102,11 @@ export function AnalyticsDueCalendarChart({
   }, []);
 
   const now = Date.now();
+  const filterFrom = filters.from?.match(ISO_DAY) ? filters.from : undefined;
   const from = calendarStart(
-    data?.from ?? filters.from ?? toIsoDay(now - DEFAULT_PERIOD_DAYS * DAY_MS),
+    data?.from ?? filterFrom ?? toIsoDay(now - DEFAULT_PERIOD_DAYS * DAY_MS),
   );
-  const to = data?.to ?? toIsoDay(now + WEEKS_AHEAD * 7 * DAY_MS);
+  const to = data?.to ?? toIsoDay(now + (WEEKS_AHEAD * 7 - 1) * DAY_MS);
   const weeks =
     Math.ceil(
       (new Date(to).getTime() - new Date(from).getTime()) / DAY_MS / 7,
