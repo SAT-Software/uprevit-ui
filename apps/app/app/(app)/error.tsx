@@ -2,7 +2,7 @@
 
 import { ErrorState } from "@/components/common/ErrorState";
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
-import * as Sentry from "@sentry/nextjs";
+import posthog from "posthog-js";
 import { useEffect } from "react";
 
 export default function AppError({
@@ -13,7 +13,7 @@ export default function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    posthog.captureException(error);
   }, [error]);
 
   return (

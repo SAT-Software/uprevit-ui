@@ -6,6 +6,8 @@ import posthog, {
 import { redactPath, redactUrl } from "@/lib/posthog/redactUrl";
 
 export const POSTHOG_TOKEN = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
+const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
+const INGEST_PATH = "/ingest";
 
 const SUPPORT_PROXY_PATHS: Record<string, string> = {
   "/api/conversations/v1/widget/message": "/api/posthog/conversations/message",
@@ -54,6 +56,8 @@ const supportBeforeSend: BeforeSendFn = (event) => {
   const isAllowed =
     event.event === "$snapshot" ||
     event.event === "$identify" ||
+    event.event === "$exception" ||
+    event.event === "$web_vitals" ||
     event.event.startsWith("$conversations_");
   if (!isAllowed) return null;
 
@@ -64,7 +68,8 @@ const supportBeforeSend: BeforeSendFn = (event) => {
 };
 
 export const posthogConfig: Partial<PostHogConfig> = {
-  api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+  api_host: INGEST_PATH,
+  ui_host: POSTHOG_HOST.replace(".i.posthog.com", ".posthog.com"),
   defaults: "2026-08-30",
   person_profiles: "identified_only",
   autocapture: false,
@@ -73,8 +78,8 @@ export const posthogConfig: Partial<PostHogConfig> = {
   rageclick: false,
   capture_dead_clicks: false,
   capture_heatmaps: false,
-  capture_exceptions: false,
-  capture_performance: false,
+  capture_exceptions: true,
+  capture_performance: { web_vitals: true, network_timing: false },
   enable_recording_console_log: false,
   disable_session_recording: true,
   disable_surveys: true,
@@ -109,7 +114,7 @@ export const posthogConfig: Partial<PostHogConfig> = {
   },
   before_send: supportBeforeSend,
   rewriteRequestPath: (url) => {
-    const proxyPath = SUPPORT_PROXY_PATHS[url.pathname];
+    const proxyPath = SUPPORT_PROXY_PATHS[url.pathname.replace(INGEST_PATH, "")];
     return proxyPath ? new URL(proxyPath, window.location.origin) : url;
   },
 };

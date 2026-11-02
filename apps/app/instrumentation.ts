@@ -1,13 +1,23 @@
-import * as Sentry from "@sentry/nextjs";
+import type { Instrumentation } from "next";
 
-export async function register() {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./sentry.server.config");
-  }
+export const onRequestError: Instrumentation.onRequestError = async (
+  error,
+  _request,
+  context,
+) => {
+  const token = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
+  if (process.env.NEXT_RUNTIME !== "nodejs" || !token) return;
 
-  if (process.env.NEXT_RUNTIME === "edge") {
-    await import("./sentry.edge.config");
-  }
-}
-
-export const onRequestError = Sentry.captureRequestError;
+  const { PostHog } = await import("posthog-node");
+  const posthog = new PostHog(token, {
+    host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    flushAt: 1,
+    flushInterval: 0,
+  });
+  await posthog.captureExceptionImmediate(error, undefined, {
+    source: "next-server",
+    routePath: context.routePath,
+    routeType: context.routeType,
+  });
+  await posthog.shutdown();
+};

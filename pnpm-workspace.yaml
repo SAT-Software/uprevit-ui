@@ -3,7 +3,7 @@ packages:
   - packages/*
 
 allowBuilds:
-  '@sentry/cli': true
+  '@posthog/cli': true
   core-js: false
   esbuild: true
   msgpackr-extract: true
