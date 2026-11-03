@@ -5,24 +5,14 @@ import { Card, CardContent } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import { useScrollSection } from "@/lib/scroll-context";
 import { ModernTvIcon } from "@hugeicons/core-free-icons";
-import Lottie, { type LottieRefCurrentProps } from "lottie-react";
-import { useEffect, useRef, useState } from "react";
-import uprevitMarketingVideo from "@/public/Uprevit-Marketing-Video.json";
-import { MediaPlayToggle } from "@/components/MediaPlayToggle";
+import Player from "next-video/player";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+
+const demoVideoUrl = `${process.env.NEXT_PUBLIC_MARKETING_CDN_URL}/videos/uprevit-demo-v1.mp4`;
 
 export default function DemoSection() {
   const demoRef = useScrollSection("demo");
-  const lottieRef = useRef<LottieRefCurrentProps>(null);
   const reduceMotion = usePrefersReducedMotion();
-  // null until the visitor toggles; defaults to their motion preference.
-  const [userPlaying, setUserPlaying] = useState<boolean | null>(null);
-  const playing = userPlaying ?? !reduceMotion;
-
-  useEffect(() => {
-    if (playing) lottieRef.current?.play();
-    else lottieRef.current?.pause();
-  }, [playing]);
 
   return (
     <div ref={demoRef} className="w-full mt-40 mb-20">
@@ -61,18 +51,19 @@ export default function DemoSection() {
 
           <div className="p-1 bg-muted border-border border rounded-2xl shadow-bottom-lg">
             <Card className="aspect-auto mx-auto border-border overflow-hidden shadow-none">
-              <CardContent className="relative p-0 overflow-hidden">
-                <Lottie
-                  lottieRef={lottieRef}
-                  animationData={uprevitMarketingVideo}
+              <CardContent className="pointer-events-auto relative aspect-video p-0 overflow-hidden bg-black">
+                <Player
+                  key={String(reduceMotion)}
+                  src={demoVideoUrl}
+                  autoPlay={!reduceMotion}
+                  muted
                   loop
-                  autoplay={!reduceMotion}
-                  className="aspect-auto"
-                />
-                <MediaPlayToggle
-                  playing={playing}
-                  onToggle={() => setUserPlaying(!playing)}
-                  label="product demo"
+                  playsInline
+                  crossOrigin={undefined}
+                  title="Uprevit product demo"
+                  aria-label="Uprevit product demo"
+                  style={{ width: "100%", height: "100%" }}
+                  className="h-full w-full object-contain"
                 />
               </CardContent>
             </Card>
