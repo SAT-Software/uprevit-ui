@@ -4,6 +4,7 @@ import { COMPLIANCE_STANDARDS } from "@/data/compliance-standards";
 import { COUNTRIES } from "@/data/countries";
 import { DEVICE_CLASS_OPTIONS } from "@/data/device-classes";
 import { GEO_MARKETS } from "@/data/geo-markets";
+import { planKey } from "@/utils/product/product-import-review";
 import type {
   ImportComponent,
   ImportedProduct,
@@ -243,16 +244,16 @@ function attachRows(
   const unknown = new Set<string>();
   for (const row of table.rows) {
     if (!row.ref) continue;
-    const product = products.get(key(row.ref));
+    const product = products.get(planKey(row.ref));
     if (!product) {
       if (row.cells.size) unknown.add(row.ref);
       continue;
     }
-    if (seen.has(key(row.ref))) {
+    if (seen.has(planKey(row.ref))) {
       product.issues.push({ level: "error", message: `Plan number appears more than once on ${sheetName}.` });
       continue;
     }
-    seen.add(key(row.ref));
+    seen.add(planKey(row.ref));
     apply(product, row);
   }
   if (unknown.size) {
@@ -371,12 +372,12 @@ export function parseImportWorkbook(buffer: ArrayBuffer): ImportWorkbook {
 
   const byRef = new Map<string, ImportedProduct>();
   const counts = new Map<string, number>();
-  products.forEach((product) => counts.set(key(product.product_plan_number), (counts.get(key(product.product_plan_number)) ?? 0) + 1));
+  products.forEach((product) => counts.set(planKey(product.product_plan_number), (counts.get(planKey(product.product_plan_number)) ?? 0) + 1));
   for (const product of products) {
-    if ((counts.get(key(product.product_plan_number)) ?? 0) > 1) {
+    if ((counts.get(planKey(product.product_plan_number)) ?? 0) > 1) {
       product.issues.push({ level: "error", message: "This plan number is used by more than one product in the file." });
     }
-    if (!byRef.has(key(product.product_plan_number))) byRef.set(key(product.product_plan_number), product);
+    if (!byRef.has(planKey(product.product_plan_number))) byRef.set(planKey(product.product_plan_number), product);
   }
 
   const table = (name: string, label: string) => {
