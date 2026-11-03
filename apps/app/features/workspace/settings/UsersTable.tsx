@@ -1,5 +1,12 @@
 "use client";
 
+import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceListPaginationSkeleton";
+import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
+import {
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useMemo } from "react";
 import {
   flexRender,
@@ -74,8 +81,8 @@ export function UsersTable() {
 
   const {
     data: responseData,
-    isLoading,
-    isError,
+    isPending: isLoading,
+    isError: isQueryError,
     refetch,
   } = useGetAllUsersByWorkspace(listQuery);
 
@@ -83,6 +90,7 @@ export function UsersTable() {
     () => responseData?.result?.users ?? [],
     [responseData],
   );
+  const isError = isQueryError && !responseData;
   const pagination = responseData?.result?.pagination;
   const totalCount = pagination?.totalCount ?? 0;
 
@@ -92,43 +100,19 @@ export function UsersTable() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (isLoading) {
-    return (
-      <div className="overflow-hidden rounded-2xl border border-border bg-background">
-        <div className="flex h-10 items-center border-b border-border bg-muted/60 pl-3 pr-2">
-          <Skeleton className="h-4 w-24" />
-        </div>
-        <div className="space-y-2 p-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-destructive/30 bg-destructive/5 p-8">
-        <p className="text-sm font-medium text-destructive">
-          Failed to load members.
-        </p>
-        <Button variant="outline" size="sm" className="h-7" onClick={() => refetch()}>
-          Try Again
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-background">
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Users</p>
           <InfoTooltip content="Manage workspace members, roles, and access." />
-          <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-            {totalCount}
-          </Badge>
+          {isLoading ? (
+            <Skeleton className="h-5 w-6 rounded-md" />
+          ) : (
+            <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+              {totalCount}
+            </Badge>
+          )}
         </div>
         <div className="flex flex-wrap items-center justify-end gap-1.5">
           {isAdmin ? (
@@ -239,7 +223,22 @@ export function UsersTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableBodySkeleton columnCount={columns.length} />
+            ) : isError ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="p-0">
+                  <ErrorState
+                    variant="panel"
+                    embedded
+                    icon={UserMultipleIcon}
+                    title="Failed to load members"
+                    onRetry={() => refetch()}
+                    className={TABLE_BODY_STATE_MIN_HEIGHT}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -263,20 +262,30 @@ export function UsersTable() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-32 text-center text-muted-foreground"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Icon
-                      icon={UserMultipleIcon}
-                      size={24}
-                      strokeWidth={2}
-                      className="text-muted-foreground/30"
-                    />
-                    <p className="text-sm">No members found. Invite users to get started.</p>
-                  </div>
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="p-0">
+                  <EmptyState
+                    embedded
+                    icon={UserMultipleIcon}
+                    title="No members found"
+                    description={
+                      listState.query.filters.length > 0
+                        ? "Try changing your filters"
+                        : "Invite users to get started"
+                    }
+                    action={
+                      listState.query.filters.length > 0 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={listState.clearFilters}
+                        >
+                          Clear filters
+                        </Button>
+                      ) : undefined
+                    }
+                  />
                 </TableCell>
               </TableRow>
             )}
@@ -285,10 +294,14 @@ export function UsersTable() {
       </div>
 
       <div className="flex h-10 w-full items-center">
-        <WorkspaceListPagination
-          pagination={pagination}
-          onPageChange={listState.setPage}
-        />
+        {isLoading ? (
+          <WorkspaceListPaginationSkeleton />
+        ) : (
+          <WorkspaceListPagination
+            pagination={pagination}
+            onPageChange={listState.setPage}
+          />
+        )}
       </div>
     </div>
   );

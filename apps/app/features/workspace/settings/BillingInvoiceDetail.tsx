@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useGetBillingInvoice } from "@/hooks/billing/useGetBillingInvoice";
 import { useDownloadBillingInvoice } from "@/hooks/billing/useDownloadBillingInvoice";
 import { useGetPlatformBillingInvoice } from "@/hooks/platform-admin/useGetPlatformBillingInvoice";
@@ -178,26 +179,16 @@ function BillingInvoiceDetail({
             <Link href={backHref}>Back to invoices</Link>
           </Button>
         ) : null}
-        <div className="flex items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-            <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
-          </div>
-          <div className="flex-1 space-y-0.5">
-            <div className="text-sm font-medium">
-              {isNotFound ? "Invoice not found" : "Unable to load invoice"}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {isNotFound
-                ? "This invoice may have been removed or the link is incorrect."
-                : message}
-            </div>
-          </div>
-          {!isNotFound ? (
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Try again
-            </Button>
-          ) : null}
-        </div>
+        <ErrorState
+          icon={AlertCircleIcon}
+          title={isNotFound ? "Invoice not found" : "Failed to load invoice"}
+          description={
+            isNotFound
+              ? "This invoice may have been removed or the link is incorrect."
+              : message
+          }
+          onRetry={isNotFound ? undefined : () => refetch()}
+        />
       </div>
     );
   }

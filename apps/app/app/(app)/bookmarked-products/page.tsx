@@ -1,16 +1,14 @@
 "use client";
 
+import { cn } from "@uprevit/ui/lib/utils";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import DialogCreateFolder from "@/features/workspace/bookmarks/DialogCreateFolder";
-import {
-  BookmarkedProductsFoldersCard,
-  BookmarkedProductsFoldersGridSkeleton,
-} from "@/features/workspace/bookmarks/BookmarkedProductsFoldersCard";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { BookmarkedProductsFoldersCard } from "@/features/workspace/bookmarks/BookmarkedProductsFoldersCard";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
+import { FolderGridSkeleton } from "@/components/common/FolderGridSkeleton";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
-import { FolderAddIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { Folder01Icon } from "@hugeicons/core-free-icons";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 
 interface BookmarkFolder {
@@ -20,10 +18,10 @@ interface BookmarkFolder {
 }
 
 function BookmarkedProductsPage() {
-  const { data, isLoading, error, refetch } = useGetAllUserBookmarkFolders();
+  const { data, isPending, error, refetch } = useGetAllUserBookmarkFolders();
 
   const allBookmarkFolders = data?.result?.bookmarked_product_folders ?? [];
-  const showInitialLoadingState = isLoading && !data;
+  const showInitialLoadingState = isPending;
   const showErrorState = Boolean(error) && !data;
   const hasFolders = allBookmarkFolders.length > 0;
 
@@ -44,44 +42,30 @@ function BookmarkedProductsPage() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col overflow-y-auto",
+          (showInitialLoadingState || hasFolders) && "p-4",
+        )}
+      >
         {showInitialLoadingState ? (
-          <BookmarkedProductsFoldersGridSkeleton />
+          <FolderGridSkeleton />
         ) : showErrorState ? (
-          <>
-            <DashboardErrorState
-              variant="panel"
-              icon={FolderAddIcon}
-              title="Failed to load bookmark folders"
-              description="Something went wrong while fetching your folders. Please try again."
-              className="min-h-[320px]"
-            />
-            <div className="mt-3 flex justify-center">
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            </div>
-          </>
+          <ErrorState
+            variant="panel"
+            icon={Folder01Icon}
+            title="Failed to load bookmark folders"
+            onRetry={() => refetch()}
+            fill
+          />
         ) : !hasFolders ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
-              <Icon
-                icon={FolderAddIcon}
-                size={28}
-                strokeWidth={1.75}
-                className="text-muted-foreground/70"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-medium">No bookmark folders yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Create a folder to start saving products for quick access.
-              </p>
-            </div>
-            <div className="pt-1">
-              <DialogCreateFolder />
-            </div>
-          </div>
+          <EmptyState
+            icon={Folder01Icon}
+            title="No bookmark folders yet"
+            description="Create a folder to start saving products for quick access"
+            action={<DialogCreateFolder />}
+            fill
+          />
         ) : (
           <BookmarkedProductsFoldersCard
             folders={allBookmarkFolders as BookmarkFolder[]}

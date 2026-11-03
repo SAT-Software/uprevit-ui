@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-03
+
+### Added
+
+- Added an admin-only Import page that creates products from the Uprevit template, with a review step before any product is created.
+- Added PostHog error tracking for browser and server errors, with source map upload and Core Web Vitals.
+- Added a same-origin `/ingest` proxy for PostHog so ad blockers do not drop errors or support traffic.
+- Added an approval workflows walkthrough video to the documentation.
+- Added the landing page demo video, which plays muted and looped and respects reduced motion.
+- Added keyboard-accessible drill-down links to the Analytics created vs released, due-date calendar, and pending approvals charts.
+- Added search and load more for departments and projects in the Analytics filters.
+
+### Updated
+
+- Unified loading, empty, and error states across the app, with retry on errors and a Clear filters action on filtered empty states.
+- Paged the Analytics drill-down product lists and show their total count.
+- Tidied the Analytics chart sizing and due-date calendar layout, and marked today on the calendar.
+- Updated monorepo package versions to `0.11.0`.
+
+### Removed
+
+- Removed Sentry from the app.
+- Removed the unused Lottie animation, report feature video, and `lottie-react` package.
+
+### Fixed
+
+- Fixed Analytics filter load errors showing alongside the All option.
+- Fixed the due-date calendar loading range so it matches the loaded range.
+- Refreshed product lists when a template import stops early.
+- Reset out-of-range list pages and stale report errors.
+- Fixed the landing page demo player not receiving hover and clicks.
+
 ## [0.10.0] - 2026-10-31
 
 ### Added

@@ -32,6 +32,6 @@ export function useGetDepartmentById(departmentId: string) {
   return useQuery({
     queryKey: ["department", departmentId],
     queryFn: ({ signal }) => getDepartmentById(departmentId, { signal, auth }),
-    enabled: auth.isAuthenticated,
+    enabled: auth.isAuthenticated && !!departmentId,
   });
 }

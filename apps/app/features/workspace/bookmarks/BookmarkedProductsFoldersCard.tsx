@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { cn } from "@uprevit/ui/lib/utils";
 
 interface BookmarkFolderItem {
   _id: string;
@@ -65,28 +64,6 @@ export function BookmarkedProductsFoldersCard({
             </p>
           </div>
         </Link>
-      ))}
-    </div>
-  );
-}
-
-export function BookmarkedProductsFoldersGridSkeleton({
-  count = 6,
-}: {
-  count?: number;
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="flex flex-col items-center px-3 pt-4">
-          <div
-            className={cn(
-              "h-[78px] w-[92px] animate-pulse rounded-xl bg-muted",
-            )}
-          />
-          <div className="mt-3 h-4 w-20 animate-pulse rounded bg-muted" />
-          <div className="mt-1.5 h-3 w-14 animate-pulse rounded bg-muted" />
-        </div>
       ))}
     </div>
   );

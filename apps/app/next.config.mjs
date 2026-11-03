@@ -1,7 +1,12 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import { createMDX } from "fumadocs-mdx/next";
 
+const posthogHost =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+const posthogAssetsHost = posthogHost.replace(".i.posthog.com", "-assets.i.posthog.com");
+
 const nextConfig = {
+  skipTrailingSlashRedirect: true,
   transpilePackages: ["@uprevit/ui"],
   images: {
     remotePatterns: [
@@ -43,55 +48,41 @@ const nextConfig = {
         ? "https://weh8ywxicg.execute-api.us-east-1.amazonaws.com/Prod"
         : undefined);
 
-    if (!target) return [];
-
     return {
-      fallback: [
+      afterFiles: [
         {
-          source: "/api/:path*",
-          destination: `${target}/:path*`,
+          source: "/ingest/static/:path*",
+          destination: `${posthogAssetsHost}/static/:path*`,
+        },
+        {
+          source: "/ingest/array/:path*",
+          destination: `${posthogAssetsHost}/array/:path*`,
+        },
+        {
+          source: "/ingest/:path*",
+          destination: `${posthogHost}/:path*`,
         },
       ],
+      fallback: target
+        ? [
+            {
+              source: "/api/:path*",
+              destination: `${target}/:path*`,
+            },
+          ]
+        : [],
     };
   },
 };
 
 const withMDX = createMDX();
 
-export default withSentryConfig(withMDX(nextConfig), {
-  // For all available options, see:
-  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-
-  org: "uprevit",
-
-  project: "uprevit-ui",
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
-
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  tunnelRoute: "/monitoring",
-
-  webpack: {
-    // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true,
-
-    // Tree-shaking options for reducing bundle size
-    treeshake: {
-      // Automatically tree-shake Sentry logger statements to reduce bundle size
-      removeDebugLogging: true,
-    },
+export default withPostHogConfig(withMDX(nextConfig), {
+  personalApiKey: process.env.POSTHOG_API_KEY ?? "",
+  projectId: process.env.POSTHOG_PROJECT_ID,
+  host: posthogHost.replace(".i.posthog.com", ".posthog.com"),
+  sourcemaps: {
+    enabled: Boolean(process.env.POSTHOG_API_KEY && process.env.POSTHOG_PROJECT_ID),
+    deleteAfterUpload: true,
   },
 });

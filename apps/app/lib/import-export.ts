@@ -13,6 +13,7 @@ import {
   workbookNumber,
   workbookDateSerial,
 } from "@/utils/product/workbook-cell-utils";
+import { formatWorkbookDate } from "@/utils/product/workbook-date-format";
 import {
   validateFileSize,
   validateDataBoundaries,
@@ -206,7 +207,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
       if (cell.v != null) cells[key] = value;
       if (format.dateFormat && cells[key] !== undefined) {
         const serial = workbookDateSerial(cells[key], format.date1904);
-        if (serial !== undefined) { format.dateDisplay = XLSX.SSF.format(format.dateFormat, serial, { date1904: format.date1904 }); format.dateRaw = cells[key]; }
+        if (serial !== undefined) { format.dateDisplay = formatWorkbookDate(format.dateFormat, serial, format.date1904); format.dateRaw = cells[key]; }
       }
       if (Object.keys(format).length) cellFormats[key] = format;
     }

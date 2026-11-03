@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useState, type ReactNode } from "react";
 import { useCreatePlatformBillingAccount } from "@/hooks/platform-admin/useCreatePlatformBillingAccount";
 import { useGetPlatformBillingAccount } from "@/hooks/platform-admin/useGetPlatformBillingAccount";
@@ -153,23 +154,12 @@ function BillingLoadError({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-        <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
-      </div>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <p className="text-sm font-medium">Unable to load billing account</p>
-        <p className="text-sm text-muted-foreground">{message}</p>
-      </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="shrink-0"
-        onClick={onRetry}
-      >
-        Try again
-      </Button>
-    </div>
+    <ErrorState
+      icon={AlertCircleIcon}
+      title="Failed to load billing account"
+      description={message}
+      onRetry={onRetry}
+    />
   );
 }
 

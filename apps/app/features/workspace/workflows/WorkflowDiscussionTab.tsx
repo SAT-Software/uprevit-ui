@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useState } from "react";
 import {
   AlertCircleIcon,
@@ -238,7 +239,7 @@ export function WorkflowDiscussionTab({
   const isDraft = workflow.status === "draft";
   const isActive =
     workflow.status === "in_review" || workflow.status === "ready_to_complete";
-  const { data, isPending, isError } = useWorkflowDiscussion(
+  const { data, isPending, isError, refetch } = useWorkflowDiscussion(
     workflow._id,
     workflow.status,
     filter === "all" ? undefined : filter,
@@ -288,11 +289,13 @@ export function WorkflowDiscussionTab({
             </div>
           ))}
         </div>
-      ) : isError ? (
-        <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-          <Icon icon={AlertCircleIcon} size={16} />
-          Failed to load discussion
-        </div>
+      ) : isError && !data ? (
+        <ErrorState
+          embedded
+          icon={AlertCircleIcon}
+          title="Failed to load discussion"
+          onRetry={() => refetch()}
+        />
       ) : items.length === 0 ? (
         <EmptyDiscussion
           text={

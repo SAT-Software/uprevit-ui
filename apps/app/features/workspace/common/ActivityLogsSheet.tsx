@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@uprevit/ui/lib/utils";
 import { type UIEvent, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
@@ -105,7 +106,7 @@ export function ActivityLogsSheet({
     hasNextPage,
     fetchNextPage,
     isError,
-    error,
+    refetch,
   } = useGetAuditLogsInfinite(filters);
 
   const logs = data?.pages.flatMap((page) => page.result.logs) ?? [];
@@ -212,6 +213,7 @@ export function ActivityLogsSheet({
                     icon={Refresh04Icon}
                     size={14}
                     strokeWidth={2}
+                    className={cn(isFetching && "animate-spin")}
                   />
                 </Button>
               </TooltipTrigger>
@@ -226,10 +228,9 @@ export function ActivityLogsSheet({
               logs={logs}
               className="w-auto py-3 pl-4 pr-2"
               isInitialLoading={isLoading}
-              isRefreshing={isFetching && !isLoading && !isFetchingNextPage}
               isFetchingNextPage={isFetchingNextPage}
-              isError={isError}
-              errorMessage={error?.message}
+              isError={isError && !data}
+              onRetry={() => refetch()}
             />
           </div>
         </div>

@@ -22,6 +22,7 @@ export type DocumentationVideoKey =
   | "product.symbols-graphics"
   | "projects.projects-tab"
   | "reports-analytics.reports"
+  | "review-outputs.approval-workflows"
   | "review-outputs.archives"
   | "review-outputs.exports"
   | "review-outputs.notifications"

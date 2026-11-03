@@ -1,12 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceListPaginationSkeleton";
 import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import DepartmentCard from "@/features/workspace/common/DepartmentCard";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import CreateDepartmentDialog from "@/features/workspace/departments/CreateDepartmentDialog";
 import { useGetAllDepartments } from "@/hooks/department/useGetAllDepartments";
 import {
@@ -71,7 +73,6 @@ const DEPARTMENT_SORT_OPTIONS = [
   { value: "actionAt", label: "Last Changed" },
 ];
 
-const DEPARTMENT_LIST_CONTENT_MIN_HEIGHT = "min-h-[55rem] md:min-h-[42rem]";
 
 function DepartmentsPage() {
   const listState = useWorkspaceListQuery({
@@ -81,12 +82,20 @@ function DepartmentsPage() {
   });
   const {
     data: departmentsData,
-    isLoading,
-    isError,
+    isPending: isLoading,
+    isError: isQueryError,
+    refetch,
   } = useGetAllDepartments(listState.query);
+  const isError = isQueryError && !departmentsData;
 
   const departments = departmentsData?.result?.departments ?? [];
   const pagination = departmentsData?.result?.pagination;
+
+  useEffect(() => {
+    if (pagination && listState.query.page > Math.max(pagination.totalPages, 1)) {
+      listState.setPage(1);
+    }
+  }, [listState, pagination]);
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
@@ -178,20 +187,42 @@ function DepartmentsPage() {
           <CreateDepartmentDialog />
         </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {isLoading ? (
           [...Array(WORKSPACE_LIST_LIMIT)].map((_, index) => (
             <DepartmentLoadingCard key={index} />
           ))
         ) : isError ? (
-          <DashboardErrorState
+          <ErrorState
             variant="panel"
             icon={NewOfficeIcon}
             title="Failed to load departments"
-            className={DEPARTMENT_LIST_CONTENT_MIN_HEIGHT}
+            onRetry={() => refetch()}
+            fill
           />
         ) : departments.length === 0 ? (
-          <DepartmentEmptyState />
+          <EmptyState
+            icon={NewOfficeIcon}
+            title="No departments found"
+            description={
+              listState.query.filters.length > 0
+                ? "Try changing your filters"
+                : "Get started by creating a new department"
+            }
+            action={
+              listState.query.filters.length > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={listState.clearFilters}
+                >
+                  Clear filters
+                </Button>
+              ) : undefined
+            }
+            fill
+          />
         ) : (
           departments.map((department: DepartmentsProps) => (
             <DepartmentCard
@@ -201,16 +232,18 @@ function DepartmentsPage() {
             />
           ))
         )}
-        <div className="flex h-10 items-center border-b">
-          {isLoading ? (
-            <WorkspaceListPaginationSkeleton />
-          ) : !isError ? (
-            <WorkspaceListPagination
-              pagination={pagination}
-              onPageChange={listState.setPage}
-            />
-          ) : null}
-        </div>
+        {(isLoading || (!isError && departments.length > 0)) && (
+          <div className="flex h-10 items-center border-b">
+            {isLoading ? (
+              <WorkspaceListPaginationSkeleton />
+            ) : (
+              <WorkspaceListPagination
+                pagination={pagination}
+                onPageChange={listState.setPage}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -239,29 +272,6 @@ function DepartmentLoadingCard() {
           <Skeleton className="size-7 rounded-full border-2 border-background" />
           <Skeleton className="size-7 rounded-full border-2 border-background" />
         </div>
-      </div>
-    </div>
-  );
-}
-
-function DepartmentEmptyState() {
-  return (
-    <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8 border border-dashed border-border rounded-xl bg-muted/30">
-      <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-        <Icon
-          icon={NewOfficeIcon}
-          size={32}
-          strokeWidth={2}
-          className="text-muted-foreground"
-        />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-foreground">
-          No departments found
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Get started by creating a new department
-        </p>
       </div>
     </div>
   );

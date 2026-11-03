@@ -17,8 +17,9 @@ export default function Page() {
 
   const {
     data: operationalTabData,
-    isLoading,
+    isPending: isLoading,
     error,
+    refetch,
   } = useGetProductTabData(productId, "operational-parameters");
 
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
@@ -48,9 +49,10 @@ export default function Page() {
       title="Operational Parameters"
       subtitle="Manage operational parameters in the table below"
       redlineBannerLabel="Redline View: Operational Parameters"
-      errorTitle="Error Loading Operational Parameters"
+      errorTitle="Failed to load operational parameters"
       isLoading={isLoading}
       error={error}
+      onRetry={() => refetch()}
       workbookData={workbookData}
       isContentLocked={isContentLocked}
       isRedlineView={isRedlineView}

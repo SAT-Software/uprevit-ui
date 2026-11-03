@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -26,14 +28,13 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
   const router = useRouter();
   const {
     data: workspace,
-    isLoading: workspaceLoading,
+    isPending: workspaceLoading,
     isError: workspaceError,
   } = useGetPlatformWorkspaceDetail(workspaceId);
   const {
     data: billing,
-    isLoading: billingLoading,
+    isPending: billingLoading,
     isError: billingError,
-    error,
     refetch,
   } = useGetPlatformBillingChargebee(workspaceId);
 
@@ -101,19 +102,14 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
                 <Skeleton className="h-64 w-full rounded-xl" />
               </div>
             ) : billingError || !billing ? (
-              <div className="flex items-center gap-4 p-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-                  <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
-                </div>
-                <div className="flex-1 text-sm text-muted-foreground">
-                  {error instanceof Error
-                    ? error.message
-                    : "Unable to load invoices."}
-                </div>
-                <Button variant="outline" size="sm" onClick={() => refetch()}>
-                  Try again
-                </Button>
-              </div>
+              <ErrorState
+                variant="panel"
+                embedded
+                icon={Invoice01Icon}
+                title="Failed to load invoices"
+                onRetry={() => refetch()}
+                className="min-h-48"
+              />
             ) : billing.invoiceError ? (
               <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
                 <Icon
@@ -125,30 +121,20 @@ export default function PlatformAdminWorkspaceInvoicesPage() {
                 {billing.invoiceError}
               </div>
             ) : !billing.connection.customerId ? (
-              <div className="flex h-32 flex-col items-center justify-center gap-2 text-center">
-                <Icon
-                  icon={Invoice01Icon}
-                  size={24}
-                  strokeWidth={2}
-                  className="text-muted-foreground/30"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Invoices will appear once billing is set up for this
-                  workspace.
-                </p>
-              </div>
+              <EmptyState
+                embedded
+                icon={Invoice01Icon}
+                title="No billing set up yet"
+                description="Invoices will appear once billing is set up for this workspace"
+                className="min-h-48"
+              />
             ) : billing.invoices.length === 0 ? (
-              <div className="flex h-32 flex-col items-center justify-center gap-2 text-center">
-                <Icon
-                  icon={Invoice01Icon}
-                  size={24}
-                  strokeWidth={2}
-                  className="text-muted-foreground/30"
-                />
-                <p className="text-sm text-muted-foreground">
-                  No invoices found.
-                </p>
-              </div>
+              <EmptyState
+                embedded
+                icon={Invoice01Icon}
+                title="No invoices found"
+                className="min-h-48"
+              />
             ) : (
               <BillingInvoicesTable
                 invoices={billing.invoices}

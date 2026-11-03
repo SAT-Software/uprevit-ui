@@ -1,5 +1,8 @@
 "use client";
 
+import { cn } from "@uprevit/ui/lib/utils";
+import { FolderGridSkeleton } from "@/components/common/FolderGridSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { UIEvent, useMemo, useState } from "react";
 import { useAuth } from "react-oidc-context";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -7,7 +10,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import SourceFilesFoldersCard from "@/features/workspace/source-files/SourceFilesFoldersCard";
 import ActivityLogsSheet from "@/features/workspace/common/ActivityLogsSheet";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
 import { useGetBookmarkedSourceFilesFoldersByUserId } from "@/hooks/source-files/useGetBookmarkedSourceFilesFoldersByUserId";
@@ -28,7 +31,6 @@ import {
 } from "@uprevit/ui/components/ui/tabs";
 
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import {
   Select,
@@ -45,7 +47,6 @@ import {
 
 import {
   Folder01Icon,
-  FolderAddIcon,
   ProfileIcon,
   SortingAZ01Icon,
   SortingAZ02Icon,
@@ -73,20 +74,6 @@ const SOURCE_FILES_SORT_OPTIONS = [
 
 function isSourceFilesTab(value: string | null): value is SourceFilesTab {
   return SOURCE_FILES_TABS.includes(value as SourceFilesTab);
-}
-
-function SourceFilesFoldersGridSkeleton({ count = 6 }: { count?: number }) {
-  return (
-    <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex flex-col items-center px-3 pt-4">
-          <Skeleton className="h-[78px] w-[92px] rounded-xl" />
-          <Skeleton className="mt-3 h-4 w-20" />
-          <Skeleton className="mt-1.5 h-3 w-14" />
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function SourceFilesPage() {
@@ -122,9 +109,11 @@ function SourceFilesPage() {
 
   const {
     data: bookmarkedData,
-    isLoading: bookmarkedLoading,
-    isError: bookmarkedError,
+    isPending: bookmarkedLoading,
+    isError: isBookmarkedQueryError,
+    refetch: refetchBookmarked,
   } = useGetBookmarkedSourceFilesFoldersByUserId(userId as string);
+  const bookmarkedError = isBookmarkedQueryError && !bookmarkedData;
 
   const bookmarkedFolders = (
     (bookmarkedData?.result ?? []) as BookmarkedSourceFilesFolder[]
@@ -132,8 +121,8 @@ function SourceFilesPage() {
 
   const {
     data: infiniteData,
-    isLoading: foldersLoading,
-    isError: foldersError,
+    isPending: foldersLoading,
+    isError: isFoldersQueryError,
     refetch: refetchFolders,
     fetchNextPage,
     hasNextPage,
@@ -145,6 +134,8 @@ function SourceFilesPage() {
     enabled: activeTab === "all-folders",
   });
 
+  const foldersError = isFoldersQueryError && !infiniteData;
+
   const allFolders = useMemo(
     () =>
       infiniteData?.pages.flatMap((page) => page?.result?.folders ?? []) ?? [],
@@ -152,6 +143,10 @@ function SourceFilesPage() {
   );
 
   const hasBookmarks = bookmarkedFolders.length > 0;
+  const showsFullState =
+    activeTab === "bookmarked"
+      ? !bookmarkedLoading && (bookmarkedError || !hasBookmarks)
+      : !foldersLoading && (foldersError || allFolders.length === 0);
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     if (activeTab !== "all-folders") return;
@@ -285,24 +280,23 @@ function SourceFilesPage() {
         </div>
 
         <div
-          className="min-h-0 flex-1 overflow-y-auto p-2"
+          className={cn(
+            "flex min-h-0 flex-1 flex-col overflow-y-auto",
+            !showsFullState && "p-2",
+          )}
           onScroll={handleScroll}
         >
-          <TabsContent value="bookmarked" className="mt-0">
+          <TabsContent value="bookmarked" className="mt-0 flex flex-1 flex-col">
             {bookmarkedLoading ? (
-              <SourceFilesFoldersGridSkeleton />
+              <FolderGridSkeleton />
             ) : bookmarkedError ? (
-              <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
-                <span>Failed to load bookmarked folders.</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-destructive hover:text-destructive"
-                  onClick={() => window.location.reload()}
-                >
-                  Retry
-                </Button>
-              </div>
+              <ErrorState
+                variant="panel"
+                icon={Folder01Icon}
+                title="Failed to load bookmarked folders"
+                onRetry={() => refetchBookmarked()}
+                fill
+              />
             ) : hasBookmarks ? (
               <SourceFilesFoldersCard
                 folders={bookmarkedFolders}
@@ -310,67 +304,51 @@ function SourceFilesPage() {
                 showAsBookmarked
               />
             ) : (
-              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
-                  <Icon
-                    icon={FolderAddIcon}
-                    size={28}
-                    strokeWidth={1.75}
-                    className="text-muted-foreground/70"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">No bookmarked folders</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Bookmark folders from the All Folders tab for quick access.
-                  </p>
-                </div>
-              </div>
+              <EmptyState
+                fill
+                icon={Folder01Icon}
+                title="No bookmarked folders"
+                description="Bookmark folders from the All Folders tab for quick access"
+              />
             )}
           </TabsContent>
 
-          <TabsContent value="all-folders" className="mt-0">
+          <TabsContent value="all-folders" className="mt-0 flex flex-1 flex-col">
             {foldersLoading ? (
-              <SourceFilesFoldersGridSkeleton />
+              <FolderGridSkeleton />
             ) : foldersError ? (
-              <>
-                <DashboardErrorState
-                  variant="panel"
-                  icon={Folder01Icon}
-                  title="Failed to load source files folders"
-                  description="Please try again later"
-                  className="min-h-[320px]"
-                />
-                <div className="mt-3 flex justify-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => refetchFolders()}
-                  >
-                    Try again
-                  </Button>
-                </div>
-              </>
+              <ErrorState
+                variant="panel"
+                icon={Folder01Icon}
+                title="Failed to load folders"
+                onRetry={() => refetchFolders()}
+                fill
+              />
             ) : allFolders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
-                  <Icon
-                    icon={FolderAddIcon}
-                    size={28}
-                    strokeWidth={1.75}
-                    className="text-muted-foreground/70"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">No folders yet</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Create your first folder to start organizing source files.
-                  </p>
-                </div>
-                <div className="pt-1">
-                  <DialogAddProductFolder />
-                </div>
-              </div>
+              <EmptyState
+                fill
+                icon={Folder01Icon}
+                title={filters.length > 0 ? "No folders found" : "No folders yet"}
+                description={
+                  filters.length > 0
+                    ? "Try changing your filters"
+                    : "Create your first folder to start organizing source files"
+                }
+                action={
+                  filters.length > 0 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFilters([])}
+                    >
+                      Clear filters
+                    </Button>
+                  ) : (
+                    <DialogAddProductFolder />
+                  )
+                }
+              />
             ) : (
               <>
                 <SourceFilesFoldersCard

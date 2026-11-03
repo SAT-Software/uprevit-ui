@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Search02Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
+import { EmptyState } from "@/components/common/EmptyState";
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import { cn } from "@uprevit/ui/lib/utils";
 interface ResultsTableProps {
   products: ReportsProduct[];
   isLoading?: boolean;
-  pagination: {
+  pagination?: {
     total: number;
     page: number;
     limit: number;
@@ -54,7 +54,7 @@ export function ResultsTable({
     if (isLoading) {
       return (
         <TableBody>
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <TableRow key={i}>
               {reportResultColumns.map((column) => (
                 <TableCell
@@ -74,26 +74,13 @@ export function ResultsTable({
       return (
         <TableBody>
           <TableRow>
-            <TableCell
-              colSpan={reportResultColumns.length}
-              className="h-40 text-center"
-            >
-              <div className="flex flex-col items-center justify-center gap-2">
-                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Icon
-                    icon={Search02Icon}
-                    size={20}
-                    strokeWidth={2}
-                    className="text-muted-foreground/60"
-                  />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  No products match your criteria
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Try adjusting your filters or adding different conditions
-                </p>
-              </div>
+            <TableCell colSpan={reportResultColumns.length} className="p-0">
+              <EmptyState
+                embedded
+                icon={Search02Icon}
+                title="No products match your criteria"
+                description="Try adjusting your filters or adding different conditions"
+              />
             </TableCell>
           </TableRow>
         </TableBody>
@@ -147,9 +134,13 @@ export function ResultsTable({
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Results</p>
-          <Badge variant="secondary" className="font-normal">
-            {pagination.total} found
-          </Badge>
+          {pagination ? (
+            <Badge variant="secondary" className="font-normal">
+              {pagination.total} found
+            </Badge>
+          ) : (
+            <Skeleton className="h-5 w-16 rounded-md" />
+          )}
         </div>
         {headerActions ? (
           <div className="flex items-center gap-2">{headerActions}</div>
@@ -187,14 +178,16 @@ export function ResultsTable({
 
       <div className="flex h-10 w-full shrink-0 items-center">
         <WorkspaceListPagination
-          pagination={{
-            currentPage: pagination.page,
-            totalPages: pagination.totalPages,
-            totalCount: pagination.total,
-            limit: pagination.limit,
-            hasNextPage: pagination.page < pagination.totalPages,
-            hasPrevPage: pagination.page > 1,
-          }}
+          pagination={
+            pagination && {
+              currentPage: pagination.page,
+              totalPages: pagination.totalPages,
+              totalCount: pagination.total,
+              limit: pagination.limit,
+              hasNextPage: pagination.page < pagination.totalPages,
+              hasPrevPage: pagination.page > 1,
+            }
+          }
           onPageChange={onPageChange}
         />
       </div>

@@ -11,7 +11,6 @@ async function getCurrentSourceFilesFolder(
     auth: AuthContextProps;
   }
 ) {
-  console.log("Folder id in hook", folderId);
   const response = await fetch(
     `/api/source-files/current-folder?workspaceId=${auth?.user?.profile.workspaceId}&id=${folderId}`,
     {

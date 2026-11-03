@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
@@ -45,7 +46,7 @@ export default function Page() {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
 
-  const { data, isLoading, error } = useGetProductTabData(
+  const { data, isPending: isLoading, error, refetch } = useGetProductTabData(
     productId,
     "all-tabs",
   );
@@ -93,7 +94,7 @@ export default function Page() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="flex h-full flex-col gap-2">
         <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
@@ -127,26 +128,13 @@ export default function Page() {
         </div>
 
         <div className="flex h-full w-full flex-col overflow-y-auto">
-          <div className="flex items-center justify-center p-12">
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="rounded-full bg-destructive/10 p-3">
-                <Icon
-                  icon={Alert01Icon}
-                  size={32}
-                  strokeWidth={1.5}
-                  className="text-destructive"
-                />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-destructive">
-                  Error Loading Compliance Details
-                </h3>
-                <p className="max-w-md text-sm text-muted-foreground">
-                  {error.message}
-                </p>
-              </div>
-            </div>
-          </div>
+          <ErrorState
+            variant="panel"
+            icon={Alert01Icon}
+            title="Failed to load compliance details"
+            onRetry={() => refetch()}
+            fill
+          />
         </div>
       </div>
     );

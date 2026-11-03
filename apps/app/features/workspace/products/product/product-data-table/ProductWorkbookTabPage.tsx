@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -40,6 +41,7 @@ interface ProductWorkbookTabPageProps {
   errorTitle: string;
   isLoading: boolean;
   error: Error | null;
+  onRetry: () => void;
   workbookData: ProductDataTableSchema | undefined;
   isContentLocked: boolean;
   isRedlineView: boolean;
@@ -58,6 +60,7 @@ export function ProductWorkbookTabPage({
   errorTitle,
   isLoading,
   error,
+  onRetry,
   workbookData,
   isContentLocked,
   isRedlineView,
@@ -127,32 +130,19 @@ export function ProductWorkbookTabPage({
     );
   }
 
-  if (error) {
+  if (error && !workbookData) {
     return (
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
         <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-muted/60 p-2 pl-3">
           <p className="text-base font-medium">{title}</p>
         </div>
-        <div className="flex flex-1 items-center justify-center p-12">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <Icon
-                icon={Alert01Icon}
-                size={32}
-                strokeWidth={1.5}
-                className="text-destructive"
-              />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-destructive">
-                {errorTitle}
-              </h3>
-              <p className="max-w-md text-sm text-muted-foreground">
-                {error.message}
-              </p>
-            </div>
-          </div>
-        </div>
+        <ErrorState
+          variant="panel"
+          icon={Alert01Icon}
+          title={errorTitle}
+          onRetry={onRetry}
+          fill
+        />
       </div>
     );
   }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetPlatformSummary } from "@/hooks/platform-admin/useGetPlatformSummary";
 import type { IconProps } from "@uprevit/ui/components/common/Icon";
@@ -92,7 +93,12 @@ function PlatformStatCardSkeleton({
 }
 
 export function PlatformSummaryCards() {
-  const { data, isLoading } = useGetPlatformSummary();
+  const {
+    data,
+    isPending: isLoading,
+    isError,
+    refetch,
+  } = useGetPlatformSummary();
   const pastDue = data?.billing.pastDueWorkspaces ?? 0;
 
   const stats: PlatformStat[] = [
@@ -132,6 +138,19 @@ export function PlatformSummaryCards() {
       info: `Workspaces with usage limit enforcement enabled. ${pastDue} past due.`,
     },
   ];
+
+  if (isError && !data) {
+    return (
+      <div className="flex h-22 w-full items-center border-b border-border p-2">
+        <ErrorState
+          icon={DashboardSquare01Icon}
+          title="Failed to load platform summary"
+          onRetry={() => refetch()}
+          className="h-full w-full"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 border-b border-border bg-background min-[1200px]:grid-cols-5">

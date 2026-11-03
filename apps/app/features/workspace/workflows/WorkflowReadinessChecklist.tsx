@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -91,7 +92,7 @@ export function WorkflowReadinessChecklist({
   workflowId: string;
   onStart?: () => void;
 }) {
-  const { data, isPending, isError } = useWorkflowReadiness(workflowId);
+  const { data, isPending, isError, refetch } = useWorkflowReadiness(workflowId);
   const [showPassed, setShowPassed] = useState(false);
   const checks = data?.readiness.checks ?? [];
   const failed = checks.filter((check) => !check.passed);
@@ -156,11 +157,13 @@ export function WorkflowReadinessChecklist({
             <Skeleton key={index} className="h-8 w-full" />
           ))}
         </div>
-      ) : isError ? (
-        <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-          <Icon icon={AlertCircleIcon} size={16} />
-          Failed to check readiness
-        </div>
+      ) : isError && !data ? (
+        <ErrorState
+          embedded
+          icon={AlertCircleIcon}
+          title="Failed to check readiness"
+          onRetry={() => refetch()}
+        />
       ) : (
         <>
           {failed.length ? (

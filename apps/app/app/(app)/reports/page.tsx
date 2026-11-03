@@ -1,5 +1,7 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -87,6 +89,7 @@ export default function Page() {
 
       setResults(response.result);
     } catch (error) {
+      if (!results) return;
       toast.error(
         error instanceof Error
           ? error.message
@@ -107,6 +110,7 @@ export default function Page() {
   const handleLoadQuery = (query: SavedQuery) => {
     loadConditions(query.conditions, query.conditionLogic);
     setResults(null);
+    reportsQuery.reset();
     toast.success(`Loaded "${query.name}"`);
   };
 
@@ -155,6 +159,7 @@ export default function Page() {
   const handleClear = () => {
     clearConditions();
     setResults(null);
+    reportsQuery.reset();
   };
 
   const isQueryValid = validateConditions();
@@ -254,11 +259,19 @@ export default function Page() {
 
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-foreground">Query Results</p>
-            {hasExecutedResults && results ? (
+            {reportsQuery.isError && !results ? (
+              <ErrorState
+                variant="panel"
+                icon={TableIcon}
+                title="Failed to run query"
+                onRetry={() => handleExecuteQuery(1)}
+                className="min-h-[17.5rem]"
+              />
+            ) : (hasExecutedResults && results) || reportsQuery.isPending ? (
               <ResultsTable
-                products={results.products}
+                products={results?.products ?? []}
                 isLoading={reportsQuery.isPending}
-                pagination={results.pagination}
+                pagination={results?.pagination}
                 onPageChange={(page) => handleExecuteQuery(page)}
                 headerActions={
                   hasResultProducts ? (
@@ -272,22 +285,11 @@ export default function Page() {
                 }
               />
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-14 text-center">
-                <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Icon
-                    icon={TableIcon}
-                    size={20}
-                    strokeWidth={2}
-                    className="text-muted-foreground/60"
-                  />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  No query results yet
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Build your query above and run it to see matching products
-                </p>
-              </div>
+              <EmptyState
+                icon={TableIcon}
+                title="No query results yet"
+                description="Build your query above and run it to see matching products"
+              />
             )}
           </div>
         </div>

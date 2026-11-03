@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { Fragment, useState } from "react";
 import {
   type Column,
@@ -20,6 +21,7 @@ import {
   CircleChevronDownIcon,
   CircleChevronLeftIcon,
   CircleChevronRightIcon,
+  Clock01Icon,
   InformationCircleIcon,
   Loading03Icon,
   Location01Icon,
@@ -506,12 +508,9 @@ export function ActivityLogTable({
                 );
               })
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No logs found.
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="p-0">
+                  <EmptyState embedded icon={Clock01Icon} title="No logs found" />
                 </TableCell>
               </TableRow>
             )}

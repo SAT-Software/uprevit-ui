@@ -17,8 +17,9 @@ export default function Page() {
 
   const {
     data: productTabData,
-    isLoading,
+    isPending: isLoading,
     error,
+    refetch,
   } = useGetProductTabData(productId, "product-specifications");
 
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
@@ -47,9 +48,10 @@ export default function Page() {
       title="Product Specifications"
       subtitle="Manage product data in the table below"
       redlineBannerLabel="Redline View: Product Specifications"
-      errorTitle="Error Loading Product Data"
+      errorTitle="Failed to load product specifications"
       isLoading={isLoading}
       error={error}
+      onRetry={() => refetch()}
       workbookData={workbookData}
       isContentLocked={isContentLocked}
       isRedlineView={isRedlineView}

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@uprevit/ui/components/ui/button";
+import { EmptyState } from "@/components/common/EmptyState";
 import Link from "next/link";
 import {
   Column,
@@ -20,9 +22,9 @@ import { WorkspaceListPaginationSkeleton } from "@/components/table/WorkspaceLis
 import { WorkspaceListToolbarSkeleton } from "@/components/table/WorkspaceListToolbarSkeleton";
 import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
 import {
-  DashboardErrorState,
-  DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT,
-} from "@/features/workspace/dashboard/DashboardErrorState";
+  ErrorState,
+  TABLE_BODY_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import {
   ListFilterColumn,
@@ -381,9 +383,9 @@ export default function ProjectPageProductsTable({
 
   const {
     data: productsData,
-    isFetching: isProductsFetching,
     isPending: isProductsPending,
-    isError: isProductsError,
+    isError: isProductsQueryError,
+    refetch: refetchProducts,
   } = useGetAllProducts({
     ...listState.query,
     projectId,
@@ -391,7 +393,8 @@ export default function ProjectPageProductsTable({
 
   const data = (productsData?.result?.products || []) as Item[];
   const productsPagination = productsData?.result?.pagination;
-  const isProductsListBusy = isProductsPending || isProductsFetching;
+  const isProductsListBusy = isProductsPending;
+  const isProductsError = isProductsQueryError && !productsData;
   const hasProductsToList =
     isProductsListBusy ||
     isProductsError ||
@@ -466,12 +469,13 @@ export default function ProjectPageProductsTable({
 
         <div className="w-full">
           {isProductsError ? (
-            <DashboardErrorState
+            <ErrorState
               variant="panel"
               embedded
               icon={Blockchain03Icon}
               title="Failed to load products"
-              className={DASHBOARD_TABLE_BODY_ERROR_MIN_HEIGHT}
+              onRetry={() => refetchProducts()}
+              className={TABLE_BODY_STATE_MIN_HEIGHT}
             />
           ) : hasProductsToList ? (
             <div className="flex flex-col items-end">
@@ -537,29 +541,23 @@ export default function ProjectPageProductsTable({
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            <div className="flex flex-col gap-4 items-center justify-center w-full py-8">
-                              <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-                                <Icon
-                                  icon={Blockchain03Icon}
-                                  size={32}
-                                  strokeWidth={2}
-                                  className="text-muted-foreground"
-                                />
-                              </div>
-                              <div className="text-center space-y-1">
-                                <p className="text-sm font-medium text-foreground">
-                                  No products found
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  This project doesn&apos;t have any products
-                                  yet.
-                                </p>
-                              </div>
-                            </div>
+                          <TableCell colSpan={columns.length} className="p-0">
+                            <EmptyState
+                              embedded
+                              icon={Blockchain03Icon}
+                              title="No products found"
+                              description="Try changing your filters"
+                              action={
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={listState.clearFilters}
+                                >
+                                  Clear filters
+                                </Button>
+                              }
+                            />
                           </TableCell>
                         </TableRow>
                       )}
@@ -579,24 +577,13 @@ export default function ProjectPageProductsTable({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl bg-muted/10">
-                <div className="flex items-center justify-center p-4 border border-dashed border-border bg-muted/50 rounded-full mb-3">
-                  <Icon
-                    icon={Blockchain03Icon}
-                    size={32}
-                    strokeWidth={2}
-                    className="text-muted-foreground/50"
-                  />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  No products found
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This project doesn&apos;t have any products yet.
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              embedded
+              icon={Blockchain03Icon}
+              title="No products found"
+              description="This project doesn't have any products yet"
+              className="border-t border-border"
+            />
           )}
         </div>
       </div>

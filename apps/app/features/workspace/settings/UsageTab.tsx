@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useState } from "react";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetBillingSummary } from "@/hooks/billing/useGetBillingSummary";
@@ -278,7 +279,13 @@ function UsageLimitEnforcementForm({
 }
 
 function UsageTab() {
-  const { data, isLoading, isError, error, refetch } = useGetBillingSummary();
+  const {
+    data,
+    isPending: isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetBillingSummary();
   const updatePreferences = useUpdateBillingPreferences();
   const [formResetKey, setFormResetKey] = useState(0);
 
@@ -335,28 +342,12 @@ function UsageTab() {
               </p>
             </div>
           ) : (
-            <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-                <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
-              </div>
-              <div className="flex-1 space-y-0.5">
-                <div className="text-sm font-medium">
-                  Unable to load usage information
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Something went wrong while fetching your usage for this
-                  period.
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7"
-                onClick={() => refetch()}
-              >
-                Try again
-              </Button>
-            </div>
+            <ErrorState
+              icon={AlertCircleIcon}
+              title="Failed to load usage information"
+              description="Something went wrong while fetching your usage for this period."
+              onRetry={() => refetch()}
+            />
           )}
         </div>
       </div>

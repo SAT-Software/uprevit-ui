@@ -1,5 +1,7 @@
 "use client";
 
+import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useCallback, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,7 +16,7 @@ import {
   Xls01Icon,
 } from "@hugeicons/core-free-icons";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { useDownloadReportExportJob } from "@/hooks/reports/useDownloadReportExportJob";
 import { useGetReportExportJobs } from "@/hooks/reports/useGetReportExportJobs";
 import {
@@ -222,7 +224,7 @@ export function ReportExportsSheet({
     { enabled: true, pollWhenActive: true },
   );
 
-  const { data, isLoading, isFetching, error } = useGetReportExportJobs(
+  const { data, isPending: isLoading, isFetching, error, refetch } = useGetReportExportJobs(
     { page: 1, status: statuses },
     { enabled: sheetOpen, pollWhenActive: true },
   );
@@ -388,21 +390,18 @@ export function ReportExportsSheet({
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Spinner className="size-4" />
-                Loading exports…
+              <div className="flex flex-col gap-2">
+                {Array.from({ length: 3 }, (_, index) => (
+                  <Skeleton key={index} className="h-[66px] w-full rounded-xl" />
+                ))}
               </div>
-            ) : error ? (
-              <DashboardErrorState
+            ) : error && !data ? (
+              <ErrorState
                 variant="panel"
                 embedded
                 icon={AlertCircleIcon}
                 title="Failed to load exports"
-                description={
-                  error instanceof Error
-                    ? error.message
-                    : "Reload the page or try again"
-                }
+                onRetry={() => refetch()}
                 className="min-h-48"
               />
             ) : jobs.length ? (
@@ -417,9 +416,12 @@ export function ReportExportsSheet({
                 ))}
               </div>
             ) : (
-              <div className="flex h-32 items-center justify-center rounded-xl border border-border bg-muted/20 px-4 text-center text-sm text-muted-foreground">
-                No export jobs found
-              </div>
+              <EmptyState
+                icon={Download04Icon}
+                title="No export jobs yet"
+                description="Exports you start will show up here"
+                className="min-h-48"
+              />
             )}
           </div>
         </div>

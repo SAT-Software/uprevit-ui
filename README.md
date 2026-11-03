@@ -4,9 +4,9 @@ Uprevit is a medical device labeling documentation platform. This repository con
 
 ## Current Release
 
-**0.10.0 (Beta)** redesigns Analytics with drill-down, adds multi-sheet workbooks, speeds up product pages, and adds new walkthrough videos.
+**0.11.0 (Beta)** adds product import from the Uprevit template, PostHog error tracking, consistent loading and error states, and a landing page demo video.
 
-See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.10.0` backend release.
+See [CHANGELOG.md](./CHANGELOG.md) for the full release notes. Use it with the matching `0.11.0` backend release.
 
 ## Monorepo Structure
 
@@ -123,6 +123,8 @@ The product app reads its environment from `apps/app/.env.local` in local develo
 - `NEXT_PUBLIC_COGNITO_DOMAIN`: Cognito hosted UI domain
 - `NEXT_PUBLIC_LOGOUT_URI`: post-logout redirect URL
 - `API_PROXY_TARGET`: backend base URL used by the `/api/*` rewrite proxy
+- `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` and `NEXT_PUBLIC_POSTHOG_HOST`: PostHog project token and host for error tracking and support
+- `POSTHOG_API_KEY` and `POSTHOG_PROJECT_ID`: build-only values that let the build upload source maps
 
 Example local values are provided in `apps/app/.env.example`.
 
@@ -140,7 +142,7 @@ Notes:
 
 ### Marketing App
 
-The marketing app currently does not require runtime environment variables. If that changes, use `apps/marketing/.env.local` and mirror placeholders in `apps/marketing/.env.example`.
+The marketing app needs `NEXT_PUBLIC_MARKETING_CDN_URL`, the CloudFront domain that serves the landing page demo video. Set it in `apps/marketing/.env.local` and keep the placeholder in `apps/marketing/.env.example`.
 
 ## Local Backend Integration
 
@@ -193,7 +195,7 @@ Typical flow:
 5. Tag the deployed `main` commit as `vx.y.z`.
 6. Merge `main` back into `develop` after the release.
 
-Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.10.0` and create the `v0.10.0` tag after production verification.
+Keep release versions aligned with `../uprevit-backend`. Merge and verify the backend release before the UI release. For this release, use `release/0.11.0` and create the `v0.11.0` tag after production verification.
 
 After `main` deploys, fast-forward `demo` to the same `main` commit so both environments run the same SHA.
 

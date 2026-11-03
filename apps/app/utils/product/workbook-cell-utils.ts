@@ -1,4 +1,4 @@
-import XLSX from "xlsx-js-style";
+import { formatWorkbookDate } from "@/utils/product/workbook-date-format";
 
 export function workbookDateSerial(value: string, date1904 = false): number | undefined {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -46,7 +46,7 @@ export function formatWorkbookValue(
 ): string {
   if (format?.dateFormat) {
     const serial = workbookDateSerial(value, format.date1904);
-    if (serial !== undefined) return XLSX.SSF.format(format.dateFormat, serial, { date1904: format.date1904 });
+    if (serial !== undefined) return formatWorkbookDate(format.dateFormat, serial, format.date1904);
   }
   const number = workbookNumber(value);
   const places = format?.decimalPlaces;

@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
 import ProductComponentDetailsTable from "@/features/workspace/products/product/component-details/ProductComponentDetailsTable";
 import { useParams, useSearchParams } from "next/navigation";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
@@ -59,8 +61,9 @@ export default function Page() {
 
   const {
     data: componentsData,
-    isLoading,
+    isPending: isLoading,
     error: componentsError,
+    refetch,
   } = useGetProductTabData(productId as string, "label-components");
 
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
@@ -88,11 +91,15 @@ export default function Page() {
     );
   }
 
-  if (componentsError) {
+  if (componentsError && !componentsData) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-destructive">
-        Error loading label components: {componentsError.message}
-      </div>
+      <ErrorState
+        variant="panel"
+        icon={Alert01Icon}
+        title="Failed to load label components"
+        onRetry={() => refetch()}
+        fill
+      />
     );
   }
 

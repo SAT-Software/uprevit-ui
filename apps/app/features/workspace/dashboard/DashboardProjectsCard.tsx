@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { useGetAllProjects } from "@/hooks/project/useGetAllProjects";
 import { ArrowUpRight01Icon, KanbanIcon } from "@hugeicons/core-free-icons";
@@ -9,9 +10,9 @@ import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import Link from "next/link";
 import ProjectCard from "../common/ProjectCard";
 import {
-  DashboardErrorState,
-  DASHBOARD_CARDS_ERROR_MIN_HEIGHT,
-} from "./DashboardErrorState";
+  ErrorState,
+  CARDS_STATE_MIN_HEIGHT,
+} from "@/components/common/ErrorState";
 
 interface ProjectUser {
   _id: string;
@@ -59,10 +60,12 @@ function ProjectsCardHeader() {
 function DashboardProjectsCard() {
   const {
     data: projectsData,
-    isLoading,
-    isError,
+    isPending: isLoading,
+    isError: isQueryError,
+    refetch,
   } = useGetAllProjects({ limit: 5, sort: "actionAt", order: "desc" });
 
+  const isError = isQueryError && !projectsData;
   const projects = projectsData?.result?.projects ?? [];
 
   if (isLoading) {
@@ -82,12 +85,13 @@ function DashboardProjectsCard() {
     return (
       <div className="w-full min-w-0 flex-1 border border-border rounded-2xl overflow-hidden">
         <ProjectsCardHeader />
-        <DashboardErrorState
+        <ErrorState
           variant="panel"
           embedded
           icon={KanbanIcon}
           title="Failed to load projects"
-          className={DASHBOARD_CARDS_ERROR_MIN_HEIGHT}
+          onRetry={() => refetch()}
+          className={CARDS_STATE_MIN_HEIGHT}
         />
       </div>
     );
@@ -99,19 +103,13 @@ function DashboardProjectsCard() {
     return (
       <div className="w-full min-w-0 flex-1 border border-border rounded-2xl overflow-hidden">
         <ProjectsCardHeader />
-        <div className="flex flex-col gap-4 items-center justify-center w-full min-h-[200px] py-8">
-          <div className="flex items-center justify-center p-4 bg-background rounded-full shadow-sm border border-border">
-            <Icon icon={KanbanIcon} size={16} strokeWidth={2} />
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-sm font-medium text-foreground">
-              No projects found
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Get started by creating a new project
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          embedded
+          icon={KanbanIcon}
+          title="No projects found"
+          description="Get started by creating a new project"
+          className={CARDS_STATE_MIN_HEIGHT}
+        />
       </div>
     );
   }

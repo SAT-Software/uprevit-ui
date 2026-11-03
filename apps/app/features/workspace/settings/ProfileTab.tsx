@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState } from "@/components/common/ErrorState";
 import { useGetUser } from "@/hooks/user/useGetUser";
 import {
   Avatar,
@@ -68,7 +69,7 @@ const profileFieldCellClassName = (index: number) =>
 function ProfileTab() {
   const auth = useAuth();
   const signOut = useSignOut();
-  const { data, isLoading, error } = useGetUser();
+  const { data, isPending: isLoading, error, refetch } = useGetUser();
   const userProfile = data?.user;
 
   if (isLoading) {
@@ -109,19 +110,13 @@ function ProfileTab() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <div className="flex items-center gap-4 rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-destructive/20 bg-destructive/10 text-destructive">
-          <Icon icon={AlertCircleIcon} size={16} strokeWidth={2} />
-        </div>
-        <div className="space-y-0.5">
-          <div className="text-sm font-medium">Failed to load profile</div>
-          <div className="text-sm text-muted-foreground">
-            {error?.message || "An unexpected error occurred"}
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        icon={AlertCircleIcon}
+        title="Failed to load profile"
+        onRetry={() => refetch()}
+      />
     );
   }
 

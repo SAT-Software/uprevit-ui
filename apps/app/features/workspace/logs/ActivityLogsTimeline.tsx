@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import {
   AddSquareIcon,
   ArrowRight01Icon,
@@ -8,7 +9,7 @@ import {
   PropertyEditIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import {
   Avatar,
   AvatarFallback,
@@ -50,10 +51,9 @@ type ActivityLogsTimelineProps = {
   logs: AuditLogV2[];
   className?: string;
   isInitialLoading?: boolean;
-  isRefreshing?: boolean;
   isFetchingNextPage?: boolean;
   isError?: boolean;
-  errorMessage?: string;
+  onRetry?: () => void;
 };
 
 const formatChangeValue = (value: unknown): string => {
@@ -215,23 +215,22 @@ export function ActivityLogsTimeline({
   logs,
   className,
   isInitialLoading = false,
-  isRefreshing = false,
   isFetchingNextPage = false,
   isError = false,
-  errorMessage,
+  onRetry,
 }: ActivityLogsTimelineProps) {
-  if (isInitialLoading || isRefreshing) {
+  if (isInitialLoading) {
     return <ActivityLogsTimelineSkeleton className={className} />;
   }
 
   if (isError) {
     return (
-      <DashboardErrorState
+      <ErrorState
         variant="panel"
         embedded
         icon={Clock01Icon}
         title="Failed to load activity logs"
-        description={errorMessage || "Reload the page or login again"}
+        onRetry={onRetry}
         className={cn("min-h-48", className)}
       />
     );
@@ -239,16 +238,15 @@ export function ActivityLogsTimeline({
 
   if (!logs.length) {
     return (
-      <div
-        className={cn(
-          "flex h-28 items-center justify-center rounded-xl border border-border bg-muted/20 px-4 text-center text-sm text-muted-foreground",
-          className,
-        )}
-      >
-        No activity logs found
-      </div>
+      <EmptyState
+        embedded
+        icon={Clock01Icon}
+        title="No activity logs found"
+        className={cn("min-h-48", className)}
+      />
     );
   }
+
 
   return (
     <div className={cn("", className)}>

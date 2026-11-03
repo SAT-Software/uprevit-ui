@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -20,7 +21,7 @@ import {
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { getWorkflowSearchField } from "@/data/workflow-search-config";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { LoadQueryDialog } from "@/features/workspace/reports/components/LoadQueryDialog";
 import { QueryBuilder } from "@/features/workspace/reports/components/QueryBuilder/QueryBuilder";
 import { SaveQueryDialog } from "@/features/workspace/reports/components/SaveQueryDialog";
@@ -219,32 +220,24 @@ export default function WorkflowSearchPage() {
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-foreground">Results</p>
             {!request ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-14 text-center">
-                <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Icon
-                    icon={WorkflowIcon}
-                    size={20}
-                    strokeWidth={2}
-                    className="text-muted-foreground/60"
-                  />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  No search yet
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Build your search above and run it to see matching workflows
-                </p>
-              </div>
-            ) : isError ? (
-              <DashboardErrorState
+              <EmptyState
+                icon={WorkflowIcon}
+                title="No search yet"
+                description="Build your search above and run it to see matching workflows"
+              />
+            ) : isError && !data ? (
+              <ErrorState
                 variant="panel"
                 icon={WorkflowIcon}
                 title="Failed to search workflows"
+                onRetry={() => refetch()}
               />
             ) : !isPending && workflows.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-border bg-muted/20 py-10 text-center text-sm text-muted-foreground">
-                No workflows match this search.
-              </p>
+              <EmptyState
+                icon={WorkflowIcon}
+                title="No workflows match this search"
+                description="Try changing your search conditions"
+              />
             ) : (
               <div className="overflow-hidden rounded-xl border border-border">
                 <div className="overflow-x-auto">

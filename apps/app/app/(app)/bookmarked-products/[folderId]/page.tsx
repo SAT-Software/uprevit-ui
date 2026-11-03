@@ -1,7 +1,8 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 import DialogAddProductsToFolder from "@/features/workspace/bookmarks/DialogAddProductsToFolder";
 import DialogEditBookmarkFolder from "@/features/workspace/bookmarks/DialogEditBookmarkFolder";
@@ -11,12 +12,10 @@ import {
   BookmarkedProductListSkeleton,
   type BookmarkedProduct,
 } from "@/features/workspace/bookmarks/BookmarkedProductListItem";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { useGetProductsInABookmarkFolder } from "@/hooks/bookmark/useGetProductsInABookmarkFolder";
 import { useGetAllUserBookmarkFolders } from "@/hooks/bookmark/useGetAllUserBookmarkFolders";
-import { FolderAddIcon, PackageIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
-import { Button } from "@uprevit/ui/components/ui/button";
+import { PackageIcon } from "@hugeicons/core-free-icons";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { cn } from "@uprevit/ui/lib/utils";
 
@@ -47,7 +46,6 @@ function FolderTitleIcon({ className }: { className?: string }) {
 }
 
 export default function FolderPage() {
-  const router = useRouter();
   const params = useParams();
   const folderId = params.folderId as string;
 
@@ -59,7 +57,7 @@ export default function FolderPage() {
 
   const {
     data: folderData,
-    isLoading,
+    isPending: isLoading,
     error,
     refetch,
   } = useGetProductsInABookmarkFolder(folderId);
@@ -88,7 +86,7 @@ export default function FolderPage() {
     );
   }
 
-  if (error) {
+  if (error && !folderData) {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
@@ -99,26 +97,14 @@ export default function FolderPage() {
             </p>
           </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <DashboardErrorState
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <ErrorState
             variant="panel"
-            icon={FolderAddIcon}
+            icon={PackageIcon}
             title="Failed to load bookmarked products"
-            description={error.message}
-            className="min-h-[320px]"
+            onRetry={() => refetch()}
+            fill
           />
-          <div className="mt-3 flex justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Try again
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => router.push("/bookmarked-products")}
-            >
-              Go back
-            </Button>
-          </div>
         </div>
       </div>
     );
@@ -150,30 +136,25 @@ export default function FolderPage() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col overflow-y-auto",
+          products.length > 0 && "p-2",
+        )}
+      >
         {products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/60">
-              <Icon
-                icon={PackageIcon}
-                size={28}
-                strokeWidth={1.75}
-                className="text-muted-foreground/70"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-medium">No products in this folder</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Add products to organize your bookmark collection.
-              </p>
-            </div>
-            <div className="pt-1">
+          <EmptyState
+            fill
+            icon={PackageIcon}
+            title="No products in this folder"
+            description="Add products to organize your bookmark collection"
+            action={
               <DialogAddProductsToFolder
                 folderName={bookmarkFolderName}
                 folderId={folderId}
               />
-            </div>
-          </div>
+            }
+          />
         ) : (
           <div className="flex w-full flex-col gap-2">
             {products.map((product) => (

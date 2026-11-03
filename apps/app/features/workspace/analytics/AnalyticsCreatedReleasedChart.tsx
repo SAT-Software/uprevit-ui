@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { EChartsAreaChart } from "@/components/evilcharts/charts/echarts-area-chart";
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
+import { AnalyticsDrillLinks } from "@/features/workspace/analytics/AnalyticsDrillLinks";
 import { analyticsDrillHref } from "@/features/workspace/analytics/analyticsLinks";
 import type { AnalyticsData, AnalyticsFilters } from "@/types/analytics";
 
@@ -65,6 +66,17 @@ export function AnalyticsCreatedReleasedChart({
         <EChartsAreaChart.Tooltip />
         <EChartsAreaChart.Legend align="left" />
       </EChartsAreaChart>
+      <AnalyticsDrillLinks
+        label="Created vs released products by month"
+        links={data.flatMap((row) =>
+          (["created", "released"] as const)
+            .filter((metric) => row[metric] > 0)
+            .map((metric) => ({
+              href: analyticsDrillHref(filters, metric, row.month),
+              label: `${config[metric].label} ${monthLabel(row.month)} ${row.month.slice(0, 4)}: ${row[metric]}`,
+            })),
+        )}
+      />
     </AnalyticsChartPanel>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
+import { NewOfficeIcon } from "@hugeicons/core-free-icons";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EChartsBarChart } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { PIPELINE_STATUSES, STAGE_CHART_CONFIG } from "@/data/analytics-config";
 import { AnalyticsChartPanel } from "@/features/workspace/analytics/AnalyticsChartPanel";
-import { AnalyticsEmptyState } from "@/features/workspace/analytics/AnalyticsEmptyState";
 import { AnalyticsShowMore } from "@/features/workspace/analytics/AnalyticsShowMore";
 import type { AnalyticsData } from "@/types/analytics";
 
@@ -36,7 +37,11 @@ export function AnalyticsDepartmentsChart({
       }
     >
       {!isLoading && !rows.length ? (
-        <AnalyticsEmptyState message="No products in any department yet." />
+        <EmptyState
+          embedded
+          icon={NewOfficeIcon}
+          title="No products in any department yet"
+        />
       ) : (
         <div style={{ height: Math.max(rows.length, 3) * 40 + 70 }}>
         <EChartsBarChart

@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { useState } from "react";
 import { WorkflowIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
@@ -16,7 +17,7 @@ import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { GuardedLink } from "@/components/common/GuardedLink";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
-import { DashboardErrorState } from "@/features/workspace/dashboard/DashboardErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { WorkflowStatusBadge } from "@/features/workspace/workflows/WorkflowStatusBadge";
 import { useWorkflows } from "@/hooks/workflow/useWorkflows";
 import { WORKSPACE_LIST_LIMIT } from "@/lib/workspace-list-query";
@@ -25,7 +26,7 @@ import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 export function ProductWorkflowsSheet({ lineageId }: { lineageId: string }) {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const { data, isPending, isFetching, isError } = useWorkflows(
+  const { data, isPending, isFetching, isError, refetch } = useWorkflows(
     {
       view: "all",
       page,
@@ -61,23 +62,38 @@ export function ProductWorkflowsSheet({ lineageId }: { lineageId: string }) {
         </SheetHeader>
         <div className="flex min-h-0 flex-1 flex-col pt-10">
           <div className="min-h-0 flex-1 overflow-y-auto">
-            {isError ? (
-              <DashboardErrorState
+            {isError && !data ? (
+              <ErrorState
                 variant="panel"
                 icon={WorkflowIcon}
                 title="Failed to load workflows"
-                className="m-4"
+                onRetry={() => refetch()}
+                className="m-4 w-auto"
               />
             ) : isPending ? (
-              <div className="flex flex-col gap-2 p-3">
+              <ul className="divide-y divide-border border-b border-border">
                 {Array.from({ length: 4 }, (_, index) => (
-                  <Skeleton key={index} className="h-14 w-full" />
+                  <li key={index} className="flex flex-col gap-1 px-4 py-2.5">
+                    <div className="flex h-5 items-center justify-between">
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-5 w-20 rounded-md" />
+                    </div>
+                    <div className="flex h-5 items-center">
+                      <Skeleton className="h-4 w-48" />
+                    </div>
+                    <div className="flex h-5 items-center">
+                      <Skeleton className="h-3 w-56" />
+                    </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : workflows.length === 0 ? (
-              <p className="p-4 text-center text-sm text-muted-foreground">
-                This Product has not been in a workflow yet.
-              </p>
+              <EmptyState
+                icon={WorkflowIcon}
+                title="No workflows yet"
+                description="This Product has not been in a workflow yet"
+                className="m-4 w-auto"
+              />
             ) : (
               <ul className="divide-y divide-border border-b border-border">
                 {workflows.map((workflow) => {
