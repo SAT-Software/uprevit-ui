@@ -51,7 +51,7 @@ export default function DemoSection() {
 
           <div className="p-1 bg-muted border-border border rounded-2xl shadow-bottom-lg">
             <Card className="aspect-auto mx-auto border-border overflow-hidden shadow-none">
-              <CardContent className="relative aspect-video p-0 overflow-hidden bg-black">
+              <CardContent className="pointer-events-auto relative aspect-video p-0 overflow-hidden bg-black">
                 <Player
                   key={String(reduceMotion)}
                   src={demoVideoUrl}
