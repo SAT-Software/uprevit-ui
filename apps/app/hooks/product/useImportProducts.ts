@@ -11,8 +11,7 @@ export interface ImportProductPayload {
   product_name: string;
   product_description: string;
   target_date: string | null;
-  project_id?: string;
-  new_project?: { department_name: string; project_name: string; project_number: string };
+  project_id: string;
   product_information: Record<string, string>;
   custom_fields: Array<{ label: string; value: string }>;
   compliance: Array<{ standard: string; standard_description: string }>;

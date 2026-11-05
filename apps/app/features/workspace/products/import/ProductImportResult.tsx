@@ -23,19 +23,13 @@ export function ProductImportProgress({ done, total }: { done: number; total: nu
 
 interface ProductImportResultProps {
   results: ImportCreateResult[];
-  createdProjects: number;
-  createdDepartments: number;
   onRetry: () => void;
   onImportAnother: () => void;
 }
 
-export function ProductImportResult({ results, createdProjects, createdDepartments, onRetry, onImportAnother }: ProductImportResultProps) {
+export function ProductImportResult({ results, onRetry, onImportAnother }: ProductImportResultProps) {
   const created = results.filter((result) => result.status === "created").length;
   const failed = results.filter((result) => result.status === "failed");
-  const extras = [
-    createdProjects ? plural(createdProjects, "project") : "",
-    createdDepartments ? plural(createdDepartments, "department") : "",
-  ].filter(Boolean);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 md:py-10">
@@ -48,7 +42,6 @@ export function ProductImportResult({ results, createdProjects, createdDepartmen
             {created ? `${plural(created, "draft product")} created` : "No products were created"}
           </h2>
           <p className="text-muted-foreground text-sm text-pretty">
-            {extras.length ? `The import also created ${extras.join(" and ")}. ` : ""}
             {failed.length
               ? `${plural(failed.length, "product")} couldn't be created. They're listed below.`
               : "Every ready product was created as a Draft."}

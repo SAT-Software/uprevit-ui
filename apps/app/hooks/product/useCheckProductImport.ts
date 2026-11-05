@@ -5,8 +5,7 @@ import type { ImportCheckResult } from "@/types/product-import";
 
 export interface ImportCheckInput {
   plan_numbers: string[];
-  project_numbers: string[];
-  destinations: Array<{ department_name: string; project_name: string }>;
+  projects: string[];
 }
 
 export function useCheckProductImport() {
