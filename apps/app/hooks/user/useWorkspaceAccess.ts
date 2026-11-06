@@ -3,6 +3,7 @@ import {
   canEditWorkspaceDataProfile,
   canManageBillingProfile,
   isAdminProfile,
+  isManagerProfile,
 } from "@/utils/isAdmin";
 
 /** What the signed-in member may do in the workspace, from their Cognito groups. */
@@ -11,6 +12,7 @@ export function useWorkspaceAccess() {
 
   return {
     isAdmin: isAdminProfile(profile),
+    isManager: isManagerProfile(profile),
     canEdit: canEditWorkspaceDataProfile(profile),
     canManageBilling: canManageBillingProfile(profile),
   };
