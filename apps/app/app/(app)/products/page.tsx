@@ -28,6 +28,7 @@ import CreateProductDialog from "@/features/workspace/products/CreateProductDial
 import DialogArchiveProduct from "@/features/workspace/products/DialogArchiveProduct";
 import DialogBookmarkProduct from "@/features/workspace/products/DialogBookmarkProduct";
 import DialogCreateVersion from "@/features/workspace/products/DialogCreateVersion";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 import DialogExportProductPDF from "@/features/workspace/products/DialogExportProductPDF";
 import DialogShareProduct from "@/features/workspace/products/DialogShareProduct";
 import { ProductBookmarkMenuItem } from "@/features/workspace/products/ProductBookmarkMenuItem";
@@ -791,6 +792,7 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
   const { canEdit } = useProductRole(row.original);
+  const { canEdit: canExport } = useWorkspaceAccess();
   const canCreateVersion = canCreateProductVersion(row.original) && canEdit;
   const isContentLocked =
     isProductContentLocked(row.original.status) || !canEdit;
@@ -835,15 +837,17 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
                 New version
               </DropdownMenuItem>
             ) : null}
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => {
-                setTimeout(() => setShowExportPDFDialog(true), 100);
-              }}
-            >
-              <Icon icon={Pdf01Icon} />
-              <span>Export to PDF</span>
-            </DropdownMenuItem>
+            {canExport ? (
+              <DropdownMenuItem
+                onClick={(e) => e.stopPropagation()}
+                onSelect={() => {
+                  setTimeout(() => setShowExportPDFDialog(true), 100);
+                }}
+              >
+                <Icon icon={Pdf01Icon} />
+                <span>Export to PDF</span>
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>

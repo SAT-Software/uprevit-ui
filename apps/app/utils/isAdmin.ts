@@ -1,20 +1,29 @@
 export type AuthProfile = Record<string, unknown> | null | undefined;
 
-function includesAdmin(groups: unknown) {
+export function hasCognitoGroup(profile: AuthProfile, group: string) {
+  const groups = profile?.["cognito:groups"];
   if (Array.isArray(groups)) {
-    return groups.includes("admin");
+    return groups.includes(group);
   }
 
   if (typeof groups === "string") {
     return groups
       .split(",")
-      .map((group) => group.trim())
-      .includes("admin");
+      .map((item) => item.trim())
+      .includes(group);
   }
 
   return false;
 }
 
 export function isAdminProfile(profile: AuthProfile) {
-  return includesAdmin(profile?.["cognito:groups"]);
+  return hasCognitoGroup(profile, "admin");
+}
+
+export function canEditWorkspaceDataProfile(profile: AuthProfile) {
+  return isAdminProfile(profile) || hasCognitoGroup(profile, "user");
+}
+
+export function canManageBillingProfile(profile: AuthProfile) {
+  return isAdminProfile(profile) || hasCognitoGroup(profile, "manager");
 }

@@ -12,6 +12,7 @@ import {
   TableIcon,
 } from "@hugeicons/core-free-icons";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 import { ExportButtons } from "@/features/workspace/reports/components/ExportButtons";
 import {
   ExportFormat,
@@ -56,6 +57,7 @@ export default function Page() {
 
   const reportsQuery = useReportsQuery();
   const exportPDF = useExportPDF();
+  const { canEdit: canExport } = useWorkspaceAccess();
   const exportExcel = useExportExcel();
   const { queries: savedQueries, saveQuery, deleteQuery } = useSavedQueries();
 
@@ -274,7 +276,7 @@ export default function Page() {
                 pagination={results?.pagination}
                 onPageChange={(page) => handleExecuteQuery(page)}
                 headerActions={
-                  hasResultProducts ? (
+                  hasResultProducts && canExport ? (
                     <ExportButtons
                       onExportPDF={() => handleOpenExportDialog("pdf")}
                       onExportExcel={() => handleOpenExportDialog("excel")}

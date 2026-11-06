@@ -105,7 +105,7 @@ interface SourceFilesItemsGridProps {
   files: SourceFilesFolder[];
   className?: string;
   onPreviewImage: (url: string, name: string) => void;
-  onDelete: (fileId: string) => void;
+  onDelete?: (fileId: string) => void;
   onDownload: (url: string, fileName: string) => void;
 }
 
@@ -163,19 +163,23 @@ export function SourceFilesItemsGrid({
                   <Icon icon={DownloadSquare01Icon} />
                   <span>Download</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  className="group"
-                  onClick={(event) => event.stopPropagation()}
-                  onSelect={() => onDelete(file._id)}
-                >
-                  <Icon
-                    icon={Delete02Icon}
-                    className="text-destructive/60 group-hover:text-destructive"
-                  />
-                  <span>Delete</span>
-                </DropdownMenuItem>
+                {onDelete ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      className="group"
+                      onClick={(event) => event.stopPropagation()}
+                      onSelect={() => onDelete(file._id)}
+                    >
+                      <Icon
+                        icon={Delete02Icon}
+                        className="text-destructive/60 group-hover:text-destructive"
+                      />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : null}
               </DropdownMenuContent>
             </DropdownMenu>
 

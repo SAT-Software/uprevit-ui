@@ -25,13 +25,14 @@ import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 import { useAuth } from "react-oidc-context";
-import { isAdminProfile } from "@/utils/isAdmin";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
-const ADMIN_TABS = ["admins", "workspace", "usage", "security"] as const;
+const ADMIN_TABS = ["admins", "workspace", "security"] as const;
+const BILLING_TABS = ["usage"] as const;
 
-function isAdminTab(tab: string | null) {
-  return tab !== null && (ADMIN_TABS as readonly string[]).includes(tab);
+function isTabIn(tabs: readonly string[], tab: string | null) {
+  return tab !== null && tabs.includes(tab);
 }
 
 function SettingsPage() {
@@ -41,12 +42,14 @@ function SettingsPage() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
-  const isAdmin = isAdminProfile(auth.user?.profile);
+  const { isAdmin, canManageBilling } = useWorkspaceAccess();
   const resolvedTab = tab === "billing" ? "usage" : tab;
+  const canOpenTab = (value: string | null) =>
+    (!isTabIn(ADMIN_TABS, value) || isAdmin) &&
+    (!isTabIn(BILLING_TABS, value) || canManageBilling);
+  const resolvedTabAllowed = canOpenTab(resolvedTab);
   const activeTab =
-    resolvedTab && (!isAdminTab(resolvedTab) || isAdmin)
-      ? resolvedTab
-      : "profile";
+    resolvedTab && resolvedTabAllowed ? resolvedTab : "profile";
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [syncedActiveTab, setSyncedActiveTab] = useState(activeTab);
 
@@ -61,9 +64,8 @@ function SettingsPage() {
     if (
       auth.isLoading ||
       !auth.isAuthenticated ||
-      isAdmin ||
       !resolvedTab ||
-      !isAdminTab(resolvedTab)
+      resolvedTabAllowed
     ) {
       return;
     }
@@ -77,15 +79,15 @@ function SettingsPage() {
   }, [
     auth.isAuthenticated,
     auth.isLoading,
-    isAdmin,
     pathname,
     resolvedTab,
+    resolvedTabAllowed,
     router,
     searchParams,
   ]);
 
   const handleTabChange = (value: string) => {
-    if (isAdminTab(value) && !isAdmin) {
+    if (!canOpenTab(value)) {
       return;
     }
 
@@ -134,11 +136,13 @@ function SettingsPage() {
               Users
             </TabsTrigger>
             {isAdmin ? (
+              <TabsTrigger value="admins">
+                <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
+                Admins
+              </TabsTrigger>
+            ) : null}
+            {canManageBilling ? (
               <>
-                <TabsTrigger value="admins">
-                  <Icon icon={UserShield01Icon} size={14} strokeWidth={2} />
-                  Admins
-                </TabsTrigger>
                 <TabsTrigger value="usage">
                   <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
                   Usage

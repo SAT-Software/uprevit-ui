@@ -6,6 +6,7 @@ import {
   WORKSPACE_LIST_LIMIT,
 } from "@/lib/workspace-list-query";
 import { useAuth } from "react-oidc-context";
+import { APPROVER_USER_TYPES, type UserType } from "@/types/user";
 
 export type UseGetUsersInfiniteOptions = {
   limit?: number;
@@ -13,12 +14,14 @@ export type UseGetUsersInfiniteOptions = {
   order?: ListOrder;
   search?: string;
   activeOnly?: boolean;
+  userTypes?: UserType[];
   enabled?: boolean;
 };
 
 function buildUserSearchFilters(
   search?: string,
   activeOnly?: boolean,
+  userTypes?: UserType[],
 ): ListFilter[] | undefined {
   const trimmed = search?.trim();
   const filters: ListFilter[] = [
@@ -34,6 +37,18 @@ function buildUserSearchFilters(
     ...(activeOnly
       ? [{ field: "status", operator: "eq" as const, value: "active" }]
       : []),
+    ...(userTypes
+      ? [
+          { field: "userType", operator: "is_not_null" as const },
+          ...APPROVER_USER_TYPES.filter(
+            (type) => !userTypes.includes(type),
+          ).map((type) => ({
+            field: "userType",
+            operator: "neq" as const,
+            value: type,
+          })),
+        ]
+      : []),
   ];
 
   return filters.length ? filters : undefined;
@@ -47,6 +62,7 @@ export function useGetUsersInfinite(options?: UseGetUsersInfiniteOptions) {
   const order = options?.order ?? "asc";
   const search = options?.search?.trim() ?? "";
   const activeOnly = options?.activeOnly ?? false;
+  const userTypes = options?.userTypes;
 
   return useInfiniteQuery({
     queryKey: [
@@ -57,6 +73,7 @@ export function useGetUsersInfinite(options?: UseGetUsersInfiniteOptions) {
       order,
       search,
       activeOnly,
+      userTypes,
     ],
     queryFn: ({ pageParam, signal }) =>
       getAllUsersByWorkspace({
@@ -67,7 +84,7 @@ export function useGetUsersInfinite(options?: UseGetUsersInfiniteOptions) {
           limit,
           sort,
           order,
-          filters: buildUserSearchFilters(search, activeOnly),
+          filters: buildUserSearchFilters(search, activeOnly, userTypes),
         },
       }),
     initialPageParam: 1,

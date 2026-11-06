@@ -24,9 +24,22 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
+import { Label } from "@uprevit/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@uprevit/ui/components/ui/select";
+
+const NO_BASE_TYPE = "none";
 
 type InviteMembersFormValues = {
   users: { name: string; email: string }[];
+  userType: "user" | "approver" | typeof NO_BASE_TYPE;
+  isManager: boolean;
 };
 
 export function InviteMembersDialog() {
@@ -40,6 +53,8 @@ export function InviteMembersDialog() {
   const form = useForm<InviteMembersFormValues>({
     defaultValues: {
       users: [{ name: "", email: "" }],
+      userType: "user",
+      isManager: false,
     },
   });
 
@@ -49,10 +64,18 @@ export function InviteMembersDialog() {
   });
 
   function onSubmit(data: InviteMembersFormValues) {
+    const userType = data.userType === NO_BASE_TYPE ? null : data.userType;
+    if (!userType && !data.isManager) {
+      toast.error("Pick a User Type, Manager access, or both.");
+      return;
+    }
+
     const users = data.users
       .map((user) => ({
         name: user.name.trim(),
         email: user.email.trim(),
+        userType,
+        isManager: data.isManager,
       }))
       .filter((user) => user.name.length > 0 && user.email.length > 0);
     if (users.length === 0) {
@@ -84,7 +107,7 @@ export function InviteMembersDialog() {
       <AppDialogContent
         title="Invite Users"
         description="Invite users to this workspace by name and email."
-        subtitle="Enter the name and email address of the users you want to invite to this workspace."
+        subtitle="Enter the name and email address of the users you want to invite, then pick their access."
         variant="form"
         size="xl"
         primaryAction={{
@@ -194,6 +217,53 @@ export function InviteMembersDialog() {
                 )}
               </div>
             ))}
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <Controller
+                name="userType"
+                control={form.control}
+                render={({ field: controllerField }) => (
+                  <Field className="space-y-0 sm:max-w-56">
+                    <FormFieldLabel
+                      htmlFor={`invite-user-type-${id}`}
+                      label="User Type"
+                      tooltip="Users can create and edit. Approvers can view everything and act only in workflows they are assigned to."
+                    />
+                    <Select
+                      value={controllerField.value}
+                      onValueChange={controllerField.onChange}
+                    >
+                      <SelectTrigger id={`invite-user-type-${id}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="approver">Approver</SelectItem>
+                        <SelectItem value={NO_BASE_TYPE}>None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+              <Controller
+                name="isManager"
+                control={form.control}
+                render={({ field: controllerField }) => (
+                  <div className="flex h-9 items-center gap-2">
+                    <Checkbox
+                      id={`invite-manager-${id}`}
+                      checked={controllerField.value}
+                      onCheckedChange={(checked) =>
+                        controllerField.onChange(checked === true)
+                      }
+                    />
+                    <Label htmlFor={`invite-manager-${id}`}>
+                      Manager (billing access)
+                    </Label>
+                  </div>
+                )}
+              />
+            </div>
 
             <div className="flex flex-col items-center gap-2 sm:flex-row">
               <Button

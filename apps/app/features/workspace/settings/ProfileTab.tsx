@@ -142,7 +142,10 @@ function ProfileTab() {
             <h2 className="truncate text-base font-semibold">
               {userProfile?.name}
             </h2>
-            <UserTypeBadge userType={userProfile?.userType} />
+            <UserTypeBadge
+              userType={userProfile?.userType}
+              isManager={userProfile?.isManager}
+            />
           </div>
           <p className="text-sm text-muted-foreground">
             Manage your personal information and account settings.

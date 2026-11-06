@@ -37,6 +37,7 @@ import {
   PlusSignSquareIcon,
   UploadSquare01Icon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const DEPARTMENT_IMAGE_ACCEPT =
   "image/png,image/jpg,image/jpeg,image/gif,image/webp";
@@ -57,6 +58,7 @@ type FormValues = {
 };
 
 export default function CreateDepartmentDialog() {
+  const { canEdit } = useWorkspaceAccess();
   const id = useId();
 
   const [open, setOpen] = useState(false);
@@ -182,6 +184,8 @@ export default function CreateDepartmentDialog() {
       setUploadingImage(false);
     }
   }
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

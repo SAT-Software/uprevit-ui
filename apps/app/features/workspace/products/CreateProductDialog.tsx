@@ -41,6 +41,7 @@ import type { ProductTeamMember } from "@/types/product";
 import { useCreateProduct } from "@/hooks/product/useCreateProduct";
 import { useAuth } from "react-oidc-context";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { PRODUCT_TEAM_USER_TYPES } from "@/types/user";
 import ProductMemberCombobox from "./ProductMemberCombobox";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
@@ -48,6 +49,7 @@ import {
   PlusSignSquareIcon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 interface FormValues {
   ppn: string;
@@ -60,6 +62,7 @@ interface FormValues {
 }
 
 export default function CreateProductDialog() {
+  const { canEdit } = useWorkspaceAccess();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
@@ -222,6 +225,8 @@ export default function CreateProductDialog() {
       console.error(error);
     }
   };
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -553,6 +558,7 @@ export default function CreateProductDialog() {
                 tooltip="Accountable for this product. The owner, contributors, and admins can edit it."
               />
               <ProductMemberCombobox
+                userTypes={PRODUCT_TEAM_USER_TYPES}
                 id={`${id}-owner`}
                 value={owner}
                 placeholder={`${user?.name ?? "Me"} (Me)`}

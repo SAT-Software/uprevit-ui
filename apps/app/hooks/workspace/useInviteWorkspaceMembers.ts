@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import type { MemberAccess } from "@/types/user";
 
 export function useInviteWorkspaceMembers() {
   const queryClient = useQueryClient();
@@ -9,7 +10,9 @@ export function useInviteWorkspaceMembers() {
   const workspaceId = auth.user?.profile.workspaceId;
 
   return useMutation({
-    mutationFn: async (users: { name: string; email: string }[]) => {
+    mutationFn: async (
+      users: ({ name: string; email: string } & MemberAccess)[],
+    ) => {
       const accessToken = auth.user?.access_token;
       if (!accessToken) throw new Error("User is not authenticated");
 

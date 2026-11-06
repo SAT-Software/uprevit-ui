@@ -2,7 +2,7 @@ import { useParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import type { GetAllTabsResponse, ProductTeam } from "@/types/product";
-import { isAdminProfile } from "@/utils/isAdmin";
+import { canEditWorkspaceDataProfile, isAdminProfile } from "@/utils/isAdmin";
 import {
   getProductLockedMessage,
   getProductRole,
@@ -17,10 +17,12 @@ export function useProductRole(product?: ProductTeam) {
     isAdminProfile(auth.user?.profile),
   );
 
+  const canEditWorkspace = canEditWorkspaceDataProfile(auth.user?.profile);
+
   return {
     role,
-    canEdit: role !== "viewer",
-    canManageTeam: role === "owner" || role === "admin",
+    canEdit: canEditWorkspace && role !== "viewer",
+    canManageTeam: canEditWorkspace && (role === "owner" || role === "admin"),
   };
 }
 

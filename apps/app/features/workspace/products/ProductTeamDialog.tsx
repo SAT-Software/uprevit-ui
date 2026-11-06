@@ -10,6 +10,7 @@ import { Cancel01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import { useUpdateProductTeam } from "@/hooks/product/useUpdateProductTeam";
 import type { ProductTeam } from "@/types/product";
+import { PRODUCT_TEAM_USER_TYPES } from "@/types/user";
 import ProductMemberCombobox from "./ProductMemberCombobox";
 import { ProductMemberAvatar } from "./ProductMemberAvatar";
 
@@ -51,6 +52,7 @@ export default function ProductTeamDialog({
               tooltip="Accountable for this version and the versions created from it. Can edit and manage the team."
             />
             <ProductMemberCombobox
+              userTypes={PRODUCT_TEAM_USER_TYPES}
               id={`${id}-owner`}
               value={team.owner}
               placeholder="Select owner"
@@ -72,6 +74,7 @@ export default function ProductTeamDialog({
               tooltip="Can edit and submit this product's versions."
             />
             <ProductMemberCombobox
+              userTypes={PRODUCT_TEAM_USER_TYPES}
               id={`${id}-contributor`}
               placeholder="Add contributor"
               excludeIds={teamIds}

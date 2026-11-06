@@ -27,6 +27,7 @@ import { Icon } from "@uprevit/ui/components/common/Icon";
 import { UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useGetUsersInfinite } from "@/hooks/user/useGetUsersInfinite";
 import type { ProductTeamMember } from "@/types/product";
+import type { UserType } from "@/types/user";
 import { ProductMemberAvatar } from "./ProductMemberAvatar";
 
 const MIN_VISIBLE_MEMBERS = 5;
@@ -36,6 +37,7 @@ interface ProductMemberComboboxProps {
   value?: ProductTeamMember | null;
   placeholder: string;
   excludeIds?: string[];
+  userTypes: UserType[];
   disabled?: boolean;
   onSelect: (member: ProductTeamMember) => void;
   trigger?: ReactNode;
@@ -46,6 +48,7 @@ export default function ProductMemberCombobox({
   value,
   placeholder,
   excludeIds = [],
+  userTypes,
   disabled,
   onSelect,
   trigger,
@@ -75,6 +78,7 @@ export default function ProductMemberCombobox({
     enabled: open,
     search: debouncedSearch,
     activeOnly: true,
+    userTypes,
   });
 
   const members = useMemo(

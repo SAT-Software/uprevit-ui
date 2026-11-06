@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@uprevit/ui/components/ui/select";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
+import { APPROVER_USER_TYPES } from "@/types/user";
 import ProductMemberCombobox from "@/features/workspace/products/ProductMemberCombobox";
 import { ProductMemberAvatar } from "@/features/workspace/products/ProductMemberAvatar";
 import { useReplaceWorkflowApprover } from "@/hooks/workflow/useWorkflows";
@@ -130,6 +131,7 @@ export function ReplaceApproverDialog({
           </Select>
         ) : (
           <ProductMemberCombobox
+            userTypes={APPROVER_USER_TYPES}
             id={memberId}
             value={selected}
             placeholder="Pick a member"

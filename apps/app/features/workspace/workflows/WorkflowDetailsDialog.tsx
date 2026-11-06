@@ -26,6 +26,7 @@ import {
 } from "@/hooks/workflow/useWorkflows";
 import type { WorkflowCompletionMode, WorkflowDetail } from "@/types/workflow";
 import { WorkflowCompletionModeSelect } from "./WorkflowCompletionModeSelect";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 interface FormValues {
   name: string;
@@ -116,6 +117,7 @@ function WorkflowDetailsFields({
 }
 
 export function CreateWorkflowDialog() {
+  const { canEdit } = useWorkspaceAccess();
   const id = useId();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -149,6 +151,8 @@ export function CreateWorkflowDialog() {
       },
     );
   };
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
