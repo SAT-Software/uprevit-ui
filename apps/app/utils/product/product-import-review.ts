@@ -42,7 +42,7 @@ export function buildImportRows(
     } else {
       destination = { kind: "none", label: "", departmentLabel: "" };
       if (product.project && match?.ambiguous) {
-        issues.push({ level: "warning", message: `More than one project in your workspace is named "${product.project}". Assign the right project here, or use its project number in the file.` });
+        issues.push({ level: "warning", message: `More than one project in your workspace matches "${product.project}". Assign the right project here.` });
       } else if (product.project) {
         error(`Project "${product.project}" isn't in your workspace. The import doesn't create projects. Assign an existing project here, or create the project in Uprevit and upload the file again.`);
       }
