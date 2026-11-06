@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "react-oidc-context";
 import {
   Alert02Icon,
   ArrowDown01Icon,
@@ -64,6 +65,7 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<AccessOptionValue>(current);
   const { mutate: updateAccess, isPending } = useUpdateUserAccess();
+  const auth = useAuth();
 
   const next: MemberAccess = getMemberAccessOption(selected).access;
   const changed = selected !== current;
@@ -89,7 +91,12 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
     updateAccess(
       { userId: user._id, access: next },
       {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => {
+          setOpen(false);
+          if (user.cognitoSub && user.cognitoSub === auth.user?.profile?.sub) {
+            void auth.signinSilent().catch(() => undefined);
+          }
+        },
         onError: (error) => {
           if (error instanceof MemberAccessBlockedError) {
             blockersQuery.refetch();
