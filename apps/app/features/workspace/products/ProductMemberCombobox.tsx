@@ -78,18 +78,15 @@ export default function ProductMemberCombobox({
     enabled: open,
     search: debouncedSearch,
     activeOnly: true,
+    userTypes,
   });
 
   const members = useMemo(
     () =>
       (data?.pages.flatMap((page) => page.result?.users ?? []) ?? []).filter(
-        (user) =>
-          user._id &&
-          !excludeIds.includes(user._id) &&
-          !!user.userType &&
-          userTypes.includes(user.userType),
+        (user) => user._id && !excludeIds.includes(user._id),
       ),
-    [data, excludeIds, userTypes],
+    [data, excludeIds],
   );
 
   useEffect(() => {
