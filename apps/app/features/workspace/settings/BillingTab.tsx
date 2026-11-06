@@ -159,6 +159,7 @@ function BillingUsagePeriodCard({
 }) {
   const hasOverage =
     summary.limitStatus.seats.overLimit ||
+    summary.limitStatus.approverSeats.overLimit ||
     summary.limitStatus.exports.overLimit ||
     summary.limitStatus.uploadGb.overLimit;
 
@@ -418,7 +419,8 @@ function BillingTab() {
                   Included seats
                 </div>
                 <div className="text-sm font-medium">
-                  {account.usageLimits.seats.toLocaleString()}
+                  {account.usageLimits.seats.toLocaleString()} Full,{" "}
+                  {account.usageLimits.approverSeats.toLocaleString()} Approver
                 </div>
               </div>
             </div>

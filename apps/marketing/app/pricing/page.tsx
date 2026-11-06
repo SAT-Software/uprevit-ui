@@ -31,12 +31,12 @@ const pricingFAQs = [
   {
     question: "How is Uprevit priced?",
     answer:
-      "Uprevit pricing combines a platform fee, seat count, and optional usage add-ons for uploads, exports, and SSO. Larger rollouts or advanced requirements can be reviewed with our team.",
+      "Uprevit pricing combines a one-time platform fee, seats, and optional usage add-ons for uploads, exports, and SSO. Larger rollouts or advanced requirements can be reviewed with our team.",
   },
   {
     question: "What counts as a seat?",
     answer:
-      "A seat is one licensed user in a workspace. Pricing scales with the number of users your team needs access for.",
+      "Admins and Users who create and edit products use a seat. Approvers, who review products and act on their assigned workflows, use a lower-priced Approver seat. Managers who only need billing access are free.",
   },
   {
     question: "What counts as an export?",

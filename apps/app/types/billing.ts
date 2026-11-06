@@ -14,6 +14,7 @@ export type BillingUsageMetric =
 
 export type UsageLimits = {
   seats: number;
+  approverSeats: number;
   exports: number;
   uploadGb: number;
   ssoAllowed: boolean;
@@ -45,6 +46,7 @@ export type LimitStatusMetric = {
 
 export type LimitStatus = {
   seats: LimitStatusMetric;
+  approverSeats: LimitStatusMetric;
   exports: LimitStatusMetric;
   uploadGb: LimitStatusMetric;
 };
@@ -83,6 +85,7 @@ export type WorkspaceBillingSummary = {
   };
   usage: {
     activeSeats: number;
+    seatClasses: { full: number; approver: number; manager: number };
     exports: number;
     uploadBytes: number;
     uploadGb: number;

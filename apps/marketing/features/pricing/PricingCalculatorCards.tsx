@@ -30,6 +30,7 @@ import { Icon } from "@uprevit/ui/components/common/Icon";
 type BillingCycle = "annual" | "monthly";
 
 const BASE_SEAT_COUNT = 1;
+const PLATFORM_FEE = 1000;
 const INCLUDED_UPLOAD_GB_MONTHLY = 10;
 const INCLUDED_UPLOAD_GB_ANNUAL = 120;
 const INCLUDED_EXPORTS_MONTHLY = 50;
@@ -41,15 +42,15 @@ const MB_PER_GB = 1024;
 
 const pricing = {
   annual: {
-    platform: 1500,
-    seat: 300,
-    uploadPerMb: 0.017578125,
-    export: 3,
+    seat: 200,
+    approverSeat: 100,
+    uploadPerMb: 19 / MB_PER_GB,
+    export: 2.9,
     sso: 1500,
   },
   monthly: {
-    platform: 149,
-    seat: 29,
+    seat: 20,
+    approverSeat: 10,
     uploadPerMb: 0.00185546875,
     export: 0.29,
     sso: 149,
@@ -74,7 +75,8 @@ function formatTinyCurrency(value: number) {
   return formatCurrency(value, 0, 8);
 }
 
-function getCycleSuffix(billingCycle: BillingCycle) {
+function getCycleSuffix(billingCycle: BillingCycle | null) {
+  if (!billingCycle) return "one-time";
   return billingCycle === "annual" ? "/ year" : "/ month";
 }
 
@@ -139,7 +141,7 @@ function AmountDisplay({
   size = "default",
 }: {
   value: number;
-  billingCycle: BillingCycle;
+  billingCycle: BillingCycle | null;
   size?: "default" | "large";
 }) {
   const roundedValue = Number.isInteger(value)
@@ -295,9 +297,113 @@ function ScaleLink({ copy }: { copy: string }) {
   );
 }
 
+function SeatCalculatorCard({
+  title,
+  description,
+  count,
+  min,
+  onCountChange,
+  unitPrices,
+  billingCycle,
+}: {
+  title: string;
+  description: string;
+  count: number;
+  min: number;
+  onCountChange: (value: number) => void;
+  unitPrices: Record<BillingCycle, number>;
+  billingCycle: BillingCycle;
+}) {
+  return (
+  <CalculatorCard
+    icon={UserGroupIcon}
+    iconClassName="text-foreground"
+    title={title}
+    description={description}
+    headerAction={
+      <ScaleLink copy="Need more than 100 seats? Talk to sales" />
+    }
+    leftContent={
+      <div className="space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <CountDisplay value={count} suffix={count === 1 ? "seat" : "seats"} />
+          <p className="text-sm text-muted-foreground">
+            Range: {min} to {MAX_SEATS} seats
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <Slider
+            value={[count]}
+            min={min}
+            max={MAX_SEATS}
+            step={1}
+            onValueChange={(value) => onCountChange(value[0] ?? min)}
+            aria-label={title}
+            trackClassName="h-2 rounded-full bg-muted"
+            rangeClassName="bg-foreground"
+            thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-md before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
+          />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{min}</span>
+            <span>{MAX_SEATS}</span>
+          </div>
+        </div>
+
+        <div className="border-t border-border/70 pt-6">
+          <div className="space-y-2">
+            <AmountDisplay
+              value={count * unitPrices[billingCycle]}
+              billingCycle={billingCycle}
+            />
+            <p className="text-sm text-muted-foreground">
+              {billingCycle === "annual"
+                ? `${formatCurrency(unitPrices[billingCycle])} per seat per year, billed yearly.`
+                : `${formatCurrency(unitPrices[billingCycle])} per seat per month.`}
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+    rightContent={
+      <div className="space-y-4">
+        <p className="text-sm font-medium text-foreground">Unit pricing</p>
+        <RailRow
+          label={
+            billingCycle === "annual" ? "Selected cycle" : "Yearly option"
+          }
+          value={
+            billingCycle === "annual"
+              ? `${formatCurrency(unitPrices[billingCycle])} / seat / year`
+              : `${formatCurrency(unitPrices.annual)} / seat / year`
+          }
+        />
+        <RailRow
+          label={
+            billingCycle === "monthly" ? "Selected cycle" : "Monthly option"
+          }
+          value={
+            billingCycle === "monthly"
+              ? `${formatCurrency(unitPrices[billingCycle])} / seat / month`
+              : `${formatCurrency(unitPrices.monthly)} / seat / month`
+          }
+        />
+        <div className="border-t border-border/70 pt-4">
+          <RailRow
+            label="Yearly monthly equivalent"
+            value={`${formatCurrency(unitPrices.annual / 12)} / seat / month`}
+          />
+        </div>
+      </div>
+    }
+  />
+  );
+}
+
 export function PricingCalculatorCards() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("annual");
   const [seatCount, setSeatCount] = useState(BASE_SEAT_COUNT);
+  const [approverSeatCount, setApproverSeatCount] = useState(0);
   const [uploadGb, setUploadGb] = useState(INCLUDED_UPLOAD_GB_ANNUAL);
   const [exportsCount, setExportsCount] = useState(INCLUDED_EXPORTS_ANNUAL);
   const [ssoEnabled, setSsoEnabled] = useState(false);
@@ -310,22 +416,21 @@ export function PricingCalculatorCards() {
   const extraUploadMb = extraUploadGb * MB_PER_GB;
   const extraExports = Math.max(0, exportsCount - includedExports);
 
-  const platformCycleAmount = currentPricing.platform;
-  const seatsCycleAmount = seatCount * currentPricing.seat;
+  const seatsCycleAmount =
+    seatCount * currentPricing.seat +
+    approverSeatCount * currentPricing.approverSeat;
   const uploadCycleAmount = extraUploadMb * currentPricing.uploadPerMb;
   const exportsCycleAmount = extraExports * currentPricing.export;
   const ssoCycleAmount = ssoEnabled ? currentPricing.sso : 0;
 
   const totalCycleAmount = useMemo(
     () =>
-      platformCycleAmount +
       seatsCycleAmount +
       uploadCycleAmount +
       exportsCycleAmount +
       ssoCycleAmount,
     [
       exportsCycleAmount,
-      platformCycleAmount,
       seatsCycleAmount,
       ssoCycleAmount,
       uploadCycleAmount,
@@ -351,8 +456,8 @@ export function PricingCalculatorCards() {
     annualExports - INCLUDED_EXPORTS_ANNUAL,
   );
   const annualCycleAmount =
-    pricing.annual.platform +
     seatCount * pricing.annual.seat +
+    approverSeatCount * pricing.annual.approverSeat +
     annualExtraUploadGb * MB_PER_GB * pricing.annual.uploadPerMb +
     annualExtraExports * pricing.annual.export +
     (ssoEnabled ? pricing.annual.sso : 0);
@@ -365,8 +470,8 @@ export function PricingCalculatorCards() {
     monthlyEquivalentExports - INCLUDED_EXPORTS_MONTHLY,
   );
   const monthlyCycleAmount =
-    pricing.monthly.platform +
     seatCount * pricing.monthly.seat +
+    approverSeatCount * pricing.monthly.approverSeat +
     monthlyExtraUploadGb * MB_PER_GB * pricing.monthly.uploadPerMb +
     monthlyExtraExports * pricing.monthly.export +
     (ssoEnabled ? pricing.monthly.sso : 0);
@@ -423,22 +528,10 @@ export function PricingCalculatorCards() {
         }
         leftContent={
           <div className="space-y-2">
-            <AmountDisplay
-              value={platformCycleAmount}
-              billingCycle={billingCycle}
-            />
-            {billingCycle === "annual" ? (
-              <p className="text-sm text-muted-foreground">
-                Equivalent to{" "}
-                {getMonthlyEquivalentNote(platformCycleAmount, billingCycle)} on
-                a yearly contract.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Switch to yearly billing to bring this down to{" "}
-                {getMonthlyEquivalentNote(pricing.annual.platform, "annual")}.
-              </p>
-            )}
+            <AmountDisplay value={PLATFORM_FEE} billingCycle={null} />
+            <p className="text-sm text-muted-foreground">
+              Charged once on the first invoice, on monthly or yearly billing.
+            </p>
           </div>
         }
         rightContent={
@@ -446,101 +539,34 @@ export function PricingCalculatorCards() {
             <p className="text-sm font-medium text-foreground">Workspace</p>
             <RailRow label="Platform workspace" value="1 account" emphasized />
             <RailRow
-              label="Yearly billing"
-              value={`${formatCurrency(pricing.annual.platform)} / year`}
-            />
-            <RailRow
-              label="Monthly billing"
-              value={`${formatCurrency(pricing.monthly.platform)} / month`}
+              label="One-time fee"
+              value={formatCurrency(PLATFORM_FEE)}
             />
           </div>
         }
       />
 
-      <CalculatorCard
-        icon={UserGroupIcon}
-        iconClassName="text-foreground"
+      <SeatCalculatorCard
         title="Seats"
-        description="Licensed users in the workspace. Move the slider to estimate how the workspace scales with your team."
-        headerAction={
-          <ScaleLink copy="Need more than 100 seats? Talk to sales" />
-        }
-        leftContent={
-          <div className="space-y-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <CountDisplay
-                value={seatCount}
-                suffix={seatCount === 1 ? "licensed user" : "licensed users"}
-              />
-              <p className="text-sm text-muted-foreground">
-                Range: 1 to {MAX_SEATS} seats
-              </p>
-            </div>
+        description="Admins and Users who create and edit products. Move the slider to estimate how the workspace scales with your team."
+        count={seatCount}
+        min={1}
+        onCountChange={setSeatCount}
+        unitPrices={{ annual: pricing.annual.seat, monthly: pricing.monthly.seat }}
+        billingCycle={billingCycle}
+      />
 
-            <div className="space-y-3">
-              <Slider
-                value={[seatCount]}
-                min={1}
-                max={MAX_SEATS}
-                step={1}
-                onValueChange={(value) => setSeatCount(value[0] ?? 1)}
-                aria-label="Licensed seats"
-                trackClassName="h-2 rounded-full bg-muted"
-                rangeClassName="bg-foreground"
-                thumbClassName="h-7 w-7 rounded-full border border-border bg-background shadow-md before:absolute before:left-1/2 before:top-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-foreground"
-              />
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>1</span>
-                <span>{MAX_SEATS}</span>
-              </div>
-            </div>
-
-            <div className="border-t border-border/70 pt-6">
-              <div className="space-y-2">
-                <AmountDisplay
-                  value={seatsCycleAmount}
-                  billingCycle={billingCycle}
-                />
-                <p className="text-sm text-muted-foreground">
-                  {billingCycle === "annual"
-                    ? `${formatCurrency(currentPricing.seat)} per seat per year, billed yearly.`
-                    : `${formatCurrency(currentPricing.seat)} per seat per month.`}
-                </p>
-              </div>
-            </div>
-          </div>
-        }
-        rightContent={
-          <div className="space-y-4">
-            <p className="text-sm font-medium text-foreground">Unit pricing</p>
-            <RailRow
-              label={
-                billingCycle === "annual" ? "Selected cycle" : "Yearly option"
-              }
-              value={
-                billingCycle === "annual"
-                  ? `${formatCurrency(currentPricing.seat)} / seat / year`
-                  : `${formatCurrency(pricing.annual.seat)} / seat / year`
-              }
-            />
-            <RailRow
-              label={
-                billingCycle === "monthly" ? "Selected cycle" : "Monthly option"
-              }
-              value={
-                billingCycle === "monthly"
-                  ? `${formatCurrency(currentPricing.seat)} / seat / month`
-                  : `${formatCurrency(pricing.monthly.seat)} / seat / month`
-              }
-            />
-            <div className="border-t border-border/70 pt-4">
-              <RailRow
-                label="Yearly monthly equivalent"
-                value={`${formatCurrency(pricing.annual.seat / 12)} / seat / month`}
-              />
-            </div>
-          </div>
-        }
+      <SeatCalculatorCard
+        title="Approver seats"
+        description="Approvers review products and act on workflows assigned to them. Managers who only need billing access are free."
+        count={approverSeatCount}
+        min={0}
+        onCountChange={setApproverSeatCount}
+        unitPrices={{
+          annual: pricing.annual.approverSeat,
+          monthly: pricing.monthly.approverSeat,
+        }}
+        billingCycle={billingCycle}
       />
 
       <CalculatorCard
@@ -836,7 +862,7 @@ export function PricingCalculatorCards() {
         icon={Coins01Icon}
         iconClassName="text-foreground"
         title="Total"
-        description="Estimated price for one workspace based on the current seat count, upload volume, export volume, and SSO selection."
+        description="Estimated recurring price for one workspace based on the current seat counts, upload volume, export volume, and SSO selection."
         className="border-primary/20"
         rightRailClassName="bg-primary/5"
         leftContent={
@@ -846,12 +872,12 @@ export function PricingCalculatorCards() {
             </p>
             <div className="space-y-3">
               <RailRow
-                label="Platform fee"
-                value={formatCurrency(platformCycleAmount)}
+                label="Platform fee (one-time)"
+                value={formatCurrency(PLATFORM_FEE)}
                 emphasized
               />
               <RailRow
-                label={`${seatCount} seat${seatCount === 1 ? "" : "s"}`}
+                label={`${seatCount} seat${seatCount === 1 ? "" : "s"}, ${approverSeatCount} Approver seat${approverSeatCount === 1 ? "" : "s"}`}
                 value={formatCurrency(seatsCycleAmount)}
                 emphasized
               />
@@ -921,6 +947,11 @@ export function PricingCalculatorCards() {
                 </p>
               </div>
             )}
+
+            <p className="text-sm text-muted-foreground">
+              Plus a one-time {formatCurrency(PLATFORM_FEE)} platform fee on
+              the first invoice.
+            </p>
 
             <div className="border-t border-border/70 pt-4">
               <ScaleLink copy="Need a larger rollout or tailored agreement? Talk to sales" />

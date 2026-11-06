@@ -431,10 +431,12 @@ export function DialogEditPlatformBillingAccount({
                   <Field>
                     <Label>Seat limit</Label>
                     <p className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-                      {account.usageLimits.seats.toLocaleString()} seats
+                      {account.usageLimits.seats.toLocaleString()} Full,{" "}
+                      {account.usageLimits.approverSeats.toLocaleString()} Approver
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Mirrored from Chargebee. Used: {summary.usage.activeSeats}
+                      Mirrored from Chargebee. Used: {summary.usage.seatClasses.full} Full,{" "}
+                      {summary.usage.seatClasses.approver} Approver
                     </p>
                   </Field>
                   <Field>

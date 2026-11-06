@@ -271,7 +271,7 @@ function UsageLimitEnforcementForm({
         </Field>
 
         <p className="text-xs text-muted-foreground lg:col-span-3">
-          Seat limits are set from your subscription and cannot be changed here.
+          Full and Approver seat limits are set from your subscription and cannot be changed here.
         </p>
       </div>
     </div>
@@ -305,7 +305,8 @@ function UsageTab() {
           <Skeleton className="h-7 w-28 rounded-md" />
         </div>
         <div className="flex flex-col gap-2 p-2">
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+            <Skeleton className="h-36 rounded-2xl" />
             <Skeleton className="h-36 rounded-2xl" />
             <Skeleton className="h-36 rounded-2xl" />
             <Skeleton className="h-36 rounded-2xl" />
@@ -356,6 +357,7 @@ function UsageTab() {
 
   const hasOverage =
     data.limitStatus.seats.overLimit ||
+    data.limitStatus.approverSeats.overLimit ||
     data.limitStatus.exports.overLimit ||
     data.limitStatus.uploadGb.overLimit;
   const uploadVolume = formatUploadVolumeDisplay(
@@ -395,10 +397,10 @@ function UsageTab() {
           </div>
         ) : null}
 
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           <UsageMetricCard
-            label="Active members"
-            info="Number of active members in your workspace for this billing period."
+            label="Full seats"
+            info="Active Admins and Users. Manager-only members are free and don't use a seat."
             used={data.usage.activeSeats}
             included={data.usageLimits.seats}
             unit="seats"
@@ -411,6 +413,22 @@ function UsageTab() {
               data.limitStatus.seats.used >= data.limitStatus.seats.limit
             }
             colorClass="from-sky-400 via-sky-500 to-sky-600"
+          />
+          <UsageMetricCard
+            label="Approver seats"
+            info="Active Approvers. They can view the workspace and act on workflows assigned to them."
+            used={data.usage.seatClasses.approver}
+            included={data.usageLimits.approverSeats}
+            unit="seats"
+            usedValue={data.limitStatus.approverSeats.used}
+            limitValue={data.limitStatus.approverSeats.limit}
+            isOverLimit={data.limitStatus.approverSeats.overLimit}
+            isAtLimit={
+              !data.limitStatus.approverSeats.overLimit &&
+              data.usageLimits.approverSeats > 0 &&
+              data.limitStatus.approverSeats.used >= data.limitStatus.approverSeats.limit
+            }
+            colorClass="from-violet-400 via-violet-500 to-violet-600"
           />
           <UsageMetricCard
             label="Exports"
