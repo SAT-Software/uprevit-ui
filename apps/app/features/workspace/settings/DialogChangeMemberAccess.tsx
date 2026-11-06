@@ -3,53 +3,82 @@
 import { useId, useState } from "react";
 import Link from "next/link";
 import {
+  Alert02Icon,
   ArrowDown01Icon,
+  ArrowUpRight01Icon,
   Cancel01Icon,
+  RefreshIcon,
   UserEdit01Icon,
 } from "@hugeicons/core-free-icons";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
-import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import { Dialog, DialogTrigger } from "@uprevit/ui/components/ui/dialog";
-import { Label } from "@uprevit/ui/components/ui/label";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldTitle,
+} from "@uprevit/ui/components/ui/field";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@uprevit/ui/components/ui/radio-group";
+import { ScrollArea } from "@uprevit/ui/components/ui/scroll-area";
+import { Spinner } from "@uprevit/ui/components/ui/spinner";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@uprevit/ui/components/ui/tabs";
+import { useMemberAccessBlockers } from "@/hooks/user/useMemberAccessBlockers";
 import {
   MemberAccessBlockedError,
   useUpdateUserAccess,
 } from "@/hooks/user/useUpdateUserAccess";
 import type { MemberAccess, MemberAccessBlockers, User } from "@/types/user";
+import {
+  MEMBER_ACCESS_OPTIONS,
+  getMemberAccessOption,
+  getMemberAccessOptionValue,
+  type MemberAccessOptionValue,
+} from "./memberAccessOptions";
 import { UserTypeBadge } from "./UserTypeBadge";
 
-const NO_BASE_TYPE = "none";
-
-const BASE_TYPE_OPTIONS = [
-  { value: "user", label: "User" },
-  { value: "approver", label: "Approver" },
-  { value: NO_BASE_TYPE, label: "None (Manager only)" },
-] as const;
+function plural(count: number, word: string) {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
 
 export function DialogChangeMemberAccess({ user }: { user: User }) {
   const id = useId();
-  const current: MemberAccess = {
+  const current = getMemberAccessOptionValue({
     userType: user.userType === "admin" ? null : (user.userType ?? null),
     isManager: user.isManager === true,
-  };
+  });
   const [open, setOpen] = useState(false);
-  const [next, setNext] = useState<MemberAccess>(current);
-  const [blockers, setBlockers] = useState<MemberAccessBlockers | null>(null);
+  const [selected, setSelected] = useState<MemberAccessOptionValue>(current);
   const { mutate: updateAccess, isPending } = useUpdateUserAccess();
 
-  const changed =
-    next.userType !== current.userType || next.isManager !== current.isManager;
+  const next: MemberAccess = getMemberAccessOption(selected).access;
+  const changed = selected !== current;
+  const losesEditAccess = next.userType !== "user";
+  const blockersQuery = useMemberAccessBlockers(
+    user._id,
+    next,
+    open && changed && losesEditAccess,
+  );
+  const blockers = blockersQuery.data;
+  const blockerCount = blockers
+    ? blockers.products.length + blockers.workflows.length
+    : 0;
+  const checking = changed && losesEditAccess && blockersQuery.isFetching;
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
-    setNext(current);
-    setBlockers(null);
+    setSelected(current);
   }
 
   function handleConfirm() {
@@ -60,7 +89,7 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
         onSuccess: () => setOpen(false),
         onError: (error) => {
           if (error instanceof MemberAccessBlockedError) {
-            setBlockers(error.blockers);
+            blockersQuery.refetch();
           }
         },
       },
@@ -82,16 +111,21 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
       </DialogTrigger>
       <AppDialogContent
         title="Change access"
-        description={`Change access for ${user.name}.`}
-        subtitle="Confirm this with your workspace manager so it fits your usage limits and pricing."
+        description={`Choose what ${user.name} can do in this workspace.`}
+        subtitle="Access changes can affect your usage limits and pricing."
         variant="form"
-        size="md"
+        size="lg"
         primaryAction={{
-          label: "Change access",
-          loadingLabel: "Changing…",
+          label: "Save access",
+          loadingLabel: "Saving…",
           onClick: handleConfirm,
           loading: isPending,
-          disabled: isPending || !changed,
+          disabled:
+            isPending ||
+            !changed ||
+            checking ||
+            blockerCount > 0 ||
+            (losesEditAccess && blockersQuery.isError),
           icon: UserEdit01Icon,
         }}
         secondaryAction={{
@@ -102,94 +136,202 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
       >
         <div className="space-y-4 p-4">
           <RadioGroup
-            value={next.userType ?? NO_BASE_TYPE}
-            onValueChange={(value) => {
-              const userType =
-                value === NO_BASE_TYPE ? null : (value as "user" | "approver");
-              setNext({ userType, isManager: userType ? next.isManager : true });
-              setBlockers(null);
-            }}
-            aria-label="User Type"
+            value={selected}
+            onValueChange={(value) =>
+              setSelected(value as MemberAccessOptionValue)
+            }
+            aria-label="Access"
+            className="gap-2 sm:grid-cols-2"
           >
-            {BASE_TYPE_OPTIONS.map((option) => (
-              <div key={option.value} className="flex items-center gap-2">
-                <RadioGroupItem
-                  value={option.value}
-                  id={`${id}-${option.value}`}
-                />
-                <Label htmlFor={`${id}-${option.value}`}>{option.label}</Label>
-              </div>
+            {MEMBER_ACCESS_OPTIONS.map((option) => (
+              <FieldLabel
+                key={option.value}
+                htmlFor={`${id}-${option.value}`}
+                className="w-full last:sm:col-span-2"
+              >
+                <Field orientation="horizontal" className="p-3!">
+                  <RadioGroupItem
+                    value={option.value}
+                    id={`${id}-${option.value}`}
+                  />
+                  <FieldContent className="gap-0.5">
+                    <FieldTitle>
+                      {option.label}
+                      {option.value === current ? (
+                        <Badge variant="outline" className="font-normal">
+                          Current
+                        </Badge>
+                      ) : null}
+                    </FieldTitle>
+                    <FieldDescription className="text-xs">
+                      {option.description}
+                    </FieldDescription>
+                  </FieldContent>
+                </Field>
+              </FieldLabel>
             ))}
           </RadioGroup>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id={`${id}-manager`}
-              checked={next.isManager}
-              disabled={!next.userType}
-              onCheckedChange={(checked) => {
-                setNext({ ...next, isManager: checked === true });
-                setBlockers(null);
-              }}
-            />
-            <Label htmlFor={`${id}-manager`}>Manager (billing access)</Label>
-          </div>
+
+          {changed && losesEditAccess ? (
+            checking && !blockers ? (
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Spinner className="size-4" />
+                Checking {user.name}&apos;s Products and workflows…
+              </p>
+            ) : blockersQuery.isError ? (
+              <p className="text-sm text-muted-foreground">
+                Couldn&apos;t check {user.name}&apos;s Products and workflows.{" "}
+                <button
+                  type="button"
+                  className="underline underline-offset-2"
+                  onClick={() => blockersQuery.refetch()}
+                >
+                  Try again
+                </button>
+              </p>
+            ) : blockers && blockerCount > 0 ? (
+              <MemberAccessBlockersPanel
+                name={user.name}
+                blockers={blockers}
+                checking={checking}
+                onRecheck={() => blockersQuery.refetch()}
+              />
+            ) : null
+          ) : null}
         </div>
-        {blockers ? (
-          <div className="space-y-3 px-4 pb-4 text-sm">
-            <p className="text-destructive">
-              Reassign these first, then try again.
-            </p>
-            {blockers.products.length > 0 ? (
-              <div className="space-y-1">
-                <p className="font-medium">Products</p>
-                <ul className="list-disc space-y-0.5 pl-5">
-                  {blockers.products.map((product) => (
-                    <li key={product._id}>
-                      <Link
-                        href={`/products/${product._id}/product-information`}
-                        className="underline-offset-2 hover:underline"
-                      >
-                        {product.name}
-                      </Link>{" "}
-                      <span className="text-muted-foreground">
-                        (
-                        {product.relationship === "owner"
-                          ? "Product Owner"
-                          : "Contributor"}
-                        )
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {blockers.workflows.length > 0 ? (
-              <div className="space-y-1">
-                <p className="font-medium">Active workflows</p>
-                <ul className="list-disc space-y-0.5 pl-5">
-                  {blockers.workflows.map((workflow) => (
-                    <li key={workflow._id}>
-                      <Link
-                        href={`/workflows/${workflow._id}`}
-                        className="underline-offset-2 hover:underline"
-                      >
-                        {workflow.numberLabel} {workflow.name}
-                      </Link>{" "}
-                      <span className="text-muted-foreground">
-                        (
-                        {workflow.relationship === "initiator"
-                          ? "Initiator"
-                          : "Approver"}
-                        )
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
       </AppDialogContent>
     </Dialog>
+  );
+}
+
+function MemberAccessBlockersPanel({
+  name,
+  blockers,
+  checking,
+  onRecheck,
+}: {
+  name: string;
+  blockers: MemberAccessBlockers;
+  checking: boolean;
+  onRecheck: () => void;
+}) {
+  const summary = [
+    blockers.products.length > 0
+      ? plural(blockers.products.length, "Product")
+      : null,
+    blockers.workflows.length > 0
+      ? plural(blockers.workflows.length, "active workflow")
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" and ");
+
+  const groups = [
+    {
+      value: "workflows",
+      label: "Workflows",
+      items: blockers.workflows.map((workflow) => ({
+        id: workflow._id,
+        href: `/workflows/${workflow._id}`,
+        name: `${workflow.numberLabel} ${workflow.name}`,
+        role: workflow.relationship === "initiator" ? "Initiator" : "Approver",
+      })),
+    },
+    {
+      value: "products",
+      label: "Products",
+      items: blockers.products.map((product) => ({
+        id: product._id,
+        href: `/products/${product._id}/product-information`,
+        name: product.name,
+        role: product.relationship === "owner" ? "Owner" : "Contributor",
+      })),
+    },
+  ].filter((group) => group.items.length > 0);
+
+  return (
+    <div className="overflow-hidden rounded-md border border-amber-500/30 bg-amber-500/10">
+      <div className="flex items-start gap-3 p-3">
+        <Icon
+          icon={Alert02Icon}
+          size={18}
+          strokeWidth={2}
+          className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+        />
+        <div className="min-w-0 flex-1 space-y-1 text-sm">
+          <p className="font-medium">
+            {name} is still on {summary}
+          </p>
+          <p className="text-muted-foreground">
+            Assign someone else to these first. Links open in a new tab.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="shrink-0 bg-background"
+          onClick={onRecheck}
+          disabled={checking}
+        >
+          <Icon
+            icon={RefreshIcon}
+            size={14}
+            strokeWidth={2}
+            className={checking ? "animate-spin" : undefined}
+          />
+          Check again
+        </Button>
+      </div>
+      <Tabs
+        key={groups.map((group) => group.value).join()}
+        defaultValue={groups[0]?.value}
+        className="gap-0 border-t border-amber-500/30 bg-background"
+      >
+        {groups.length > 1 ? (
+          <TabsList variant="line" className="w-full justify-start border-b px-2">
+            {groups.map((group) => (
+              <TabsTrigger key={group.value} value={group.value} className="flex-none">
+                {group.label}
+                <Badge variant="secondary" className="font-normal">
+                  {group.items.length}
+                </Badge>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        ) : null}
+        {groups.map((group) => (
+          <TabsContent key={group.value} value={group.value}>
+            <ScrollArea viewportClassName="max-h-48" scrollFade>
+              <ul className="divide-y">
+                {group.items.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50"
+                    >
+                      <span className="min-w-0 flex-1 truncate">
+                        {item.name}
+                      </span>
+                      <Badge variant="outline" className="shrink-0 font-normal">
+                        {item.role}
+                      </Badge>
+                      <Icon
+                        icon={ArrowUpRight01Icon}
+                        size={14}
+                        strokeWidth={2}
+                        className="shrink-0 text-muted-foreground group-hover:text-foreground"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
   );
 }
