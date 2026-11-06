@@ -117,18 +117,6 @@ export function ProductImportFlow() {
     setResults([...previous, ...collected]);
   };
 
-  const createdSummary = useMemo(() => {
-    const created = new Set((results ?? []).filter((result) => result.status === "created").map((result) => planKey(result.plan_number)));
-    const projects = new Set<string>();
-    const departments = new Set<string>();
-    for (const row of rows) {
-      if (!created.has(planKey(row.product.product_plan_number)) || row.destination.kind !== "new") continue;
-      projects.add(`${planKey(row.product.department_name)}\n${planKey(row.product.project_name)}`);
-      if (row.destination.createsDepartment) departments.add(planKey(row.product.department_name));
-    }
-    return { projects: projects.size, departments: departments.size };
-  }, [results, rows]);
-
   if (!isAdmin) {
     return (
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
@@ -154,8 +142,6 @@ export function ProductImportFlow() {
       <div className="min-h-0 flex-1 overflow-y-auto">
       <ProductImportResult
         results={results}
-        createdProjects={createdSummary.projects}
-        createdDepartments={createdSummary.departments}
         onRetry={() => runImport(new Set(results.filter((result) => result.status === "failed").map((result) => planKey(result.plan_number))))}
         onImportAnother={reset}
       />

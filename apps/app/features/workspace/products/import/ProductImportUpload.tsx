@@ -41,7 +41,7 @@ export function ProductImportUpload({ busyLabel, error, onFile }: ProductImportU
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-balance">Import products from the Uprevit template</h2>
         <p className="text-muted-foreground text-sm text-pretty">
-          Create many Draft products at once. Departments and projects named in the file are created if they don&apos;t exist yet.
+          Create many Draft products at once. Create your projects in Uprevit first; the import doesn&apos;t create them.
         </p>
       </div>
 

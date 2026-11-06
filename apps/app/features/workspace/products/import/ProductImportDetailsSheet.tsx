@@ -87,7 +87,7 @@ export function ProductImportDetailsSheet({ row, excludedColumns, onOpenChange, 
                 </ul>
                 {row.issues.some((issue) => issue.level === "error") && (
                   <p className="text-muted-foreground text-xs text-pretty">
-                    Fix errors in the file, then upload it again. Products with errors aren&apos;t created.
+                    Products with errors aren&apos;t created. Fix them in the file and upload it again, or assign an existing project when the project isn&apos;t found.
                   </p>
                 )}
               </Section>

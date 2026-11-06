@@ -22,14 +22,13 @@ const SHEETS = {
   components: "label components",
 };
 const IGNORED_SHEETS = ["instructions", "lists"];
+const REMOVED_COLUMNS = ["department", "project number"];
 const REF_HEADERS = ["product ref (plan number)", "product ref", "plan number"];
 
 const PRODUCT_FIELDS = {
   "product name": "product_name",
   "product description": "product_description",
-  department: "department_name",
-  project: "project_name",
-  "project number": "project_number",
+  project: "project",
   "target date": "target_date",
   "market / geography": "market_geography",
   "country of origin": "country_of_origin",
@@ -146,9 +145,7 @@ function emptyProduct(row: Row): ImportedProduct {
     product_plan_number: row.ref,
     product_name: "",
     product_description: "",
-    department_name: "",
-    project_name: "",
-    project_number: "",
+    project: "",
     target_date: null,
     product_information: {
       market_geography: "",
@@ -169,7 +166,7 @@ function emptyProduct(row: Row): ImportedProduct {
 
 function readProducts(table: Table, notices: string[], date1904: boolean) {
   const customFieldColumns = table.headers.slice(1).filter(
-    (header) => !(key(header) in PRODUCT_FIELDS),
+    (header) => !(key(header) in PRODUCT_FIELDS) && !REMOVED_COLUMNS.includes(key(header)),
   );
   const products: ImportedProduct[] = [];
   let rowsWithoutRef = 0;

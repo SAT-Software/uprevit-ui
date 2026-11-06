@@ -19,9 +19,7 @@ export interface ImportedProduct {
   product_plan_number: string;
   product_name: string;
   product_description: string;
-  department_name: string;
-  project_name: string;
-  project_number: string;
+  project: string;
   target_date: string | null;
   product_information: {
     market_geography: string;
@@ -47,13 +45,10 @@ export interface ImportWorkbook {
 
 export interface ImportCheckResult {
   existing_plan_numbers: string[];
-  taken_project_numbers: Array<{ project_number: string; project_name: string }>;
-  destinations: Array<{
-    department_name: string;
-    project_name: string;
-    department_exists: boolean;
+  projects: Array<{
+    value: string;
     ambiguous: boolean;
-    project: { _id: string; project_name: string; project_number: string } | null;
+    project: (ImportProjectChoice & { department_name: string }) | null;
   }>;
 }
 
@@ -66,11 +61,9 @@ export interface ImportProjectChoice {
 export type ImportRowStatus = "ready" | "needs-project" | "error" | "excluded";
 
 export interface ImportDestination {
-  kind: "existing" | "new" | "none";
+  kind: "existing" | "none";
   label: string;
   departmentLabel: string;
-  createsDepartment: boolean;
-  projectNumber?: string;
   project?: ImportProjectChoice;
 }
 

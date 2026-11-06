@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Updated
+
+- The import template has one optional Project column, which takes an existing project's name or project number. The import no longer creates departments or projects; a project that isn't found is shown as an error in review until an existing project is assigned.
+
 ## [0.11.0] - 2026-11-03
 
 ### Added
