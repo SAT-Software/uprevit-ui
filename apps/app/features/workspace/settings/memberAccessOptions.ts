@@ -38,18 +38,42 @@ export const MEMBER_ACCESS_OPTIONS = [
   access: MemberAccess;
 }[];
 
+export const ADMIN_ACCESS_OPTIONS = [
+  {
+    value: "admin",
+    label: "Admin",
+    description: "Manages the workspace, its members and usage.",
+    access: { userType: "admin", isManager: false },
+  },
+  {
+    value: "admin-manager",
+    label: "Admin + Manager",
+    description: "Admin access, plus billing and invoices.",
+    access: { userType: "admin", isManager: true },
+  },
+] as const satisfies readonly {
+  value: string;
+  label: string;
+  description: string;
+  access: MemberAccess;
+}[];
+
+const ALL_ACCESS_OPTIONS = [...MEMBER_ACCESS_OPTIONS, ...ADMIN_ACCESS_OPTIONS];
+
 export type MemberAccessOptionValue =
   (typeof MEMBER_ACCESS_OPTIONS)[number]["value"];
 
-export function getMemberAccessOption(value: MemberAccessOptionValue) {
-  return MEMBER_ACCESS_OPTIONS.find((option) => option.value === value)!;
+export type AccessOptionValue = (typeof ALL_ACCESS_OPTIONS)[number]["value"];
+
+export function getMemberAccessOption(value: AccessOptionValue) {
+  return ALL_ACCESS_OPTIONS.find((option) => option.value === value)!;
 }
 
 export function getMemberAccessOptionValue(
   access: MemberAccess,
-): MemberAccessOptionValue {
+): AccessOptionValue {
   return (
-    MEMBER_ACCESS_OPTIONS.find(
+    ALL_ACCESS_OPTIONS.find(
       (option) =>
         option.access.userType === access.userType &&
         option.access.isManager === access.isManager,
