@@ -43,6 +43,7 @@ import {
   PropertyEditIcon,
   UploadSquare01Icon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const DEPARTMENT_IMAGE_ACCEPT =
   "image/png,image/jpg,image/jpeg,image/gif,image/webp";
@@ -72,6 +73,7 @@ export default function UpdateDepartmentDialog({
 }: {
   department?: DepartmentWithUsers;
 }) {
+  const { canEdit } = useWorkspaceAccess();
   const id = useId();
 
   const [open, setOpen] = useState(false);
@@ -196,6 +198,8 @@ export default function UpdateDepartmentDialog({
       setUploadingImage(false);
     }
   };
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

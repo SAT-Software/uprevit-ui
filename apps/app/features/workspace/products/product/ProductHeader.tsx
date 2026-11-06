@@ -43,6 +43,7 @@ import { NotificationsBell } from "@/components/common/NotificationsBell";
 import { useParams, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmSubmitProductDialog from "./ConfirmSubmitProductDialog";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 import DialogExportProductPDF from "../DialogExportProductPDF";
 import ToggleTabCompletionDialog from "./ToggleTabCompletionDialog";
 import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
@@ -264,6 +265,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const [versionPopoverOpen, setVersionPopoverOpen] = useState(false);
   const [comparePopoverOpen, setComparePopoverOpen] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
+  const { canEdit: canExport } = useWorkspaceAccess();
 
   const { data: productData } = useGetProductTabData(productId, "all-tabs");
   const {
@@ -590,26 +592,28 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         )}
 
         <div className="flex items-center gap-2 ml-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex">
-                <Button
-                  aria-label="Export product as PDF"
-                  size="icon-xs"
-                  variant="outline"
-                  onClick={() => setShowExportPDFDialog(true)}
-                  disabled={isExportLocked}
-                >
-                  <Icon icon={Pdf01Icon} size={14} />
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {isExportLocked
-                ? "An export is already in progress"
-                : "Export product as PDF"}
-            </TooltipContent>
-          </Tooltip>
+          {canExport ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button
+                    aria-label="Export product as PDF"
+                    size="icon-xs"
+                    variant="outline"
+                    onClick={() => setShowExportPDFDialog(true)}
+                    disabled={isExportLocked}
+                  >
+                    <Icon icon={Pdf01Icon} size={14} />
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {isExportLocked
+                  ? "An export is already in progress"
+                  : "Export product as PDF"}
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
 
           <Popover
             open={versionPopoverOpen}

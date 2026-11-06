@@ -4,7 +4,7 @@ import BillingInvoiceDetail from "@/features/workspace/settings/BillingInvoiceDe
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { isAdminProfile } from "@/utils/isAdmin";
+import { canManageBillingProfile } from "@/utils/isAdmin";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -16,20 +16,20 @@ export default function BillingInvoicePage() {
   const invoiceId = params?.invoiceId ?? "";
   const auth = useAuth();
   const router = useRouter();
-  const isAdmin = isAdminProfile(auth.user?.profile);
+  const canManageBilling = canManageBillingProfile(auth.user?.profile);
   const workspaceId = auth.user?.profile?.workspaceId as string | undefined;
 
   useEffect(() => {
     if (auth.isLoading) return;
     if (!auth.isAuthenticated) return;
 
-    if (!isAdmin) {
+    if (!canManageBilling) {
       toast.error("Insufficient privileges, contact Admin");
       router.replace("/settings?tab=profile");
     }
-  }, [auth.isAuthenticated, auth.isLoading, isAdmin, router]);
+  }, [auth.isAuthenticated, auth.isLoading, canManageBilling, router]);
 
-  if (auth.isLoading || !auth.isAuthenticated || !isAdmin) {
+  if (auth.isLoading || !auth.isAuthenticated || !canManageBilling) {
     return (
       <div className="flex flex-col gap-2 p-2">
         <div className="rounded-xl border border-input bg-background p-4">

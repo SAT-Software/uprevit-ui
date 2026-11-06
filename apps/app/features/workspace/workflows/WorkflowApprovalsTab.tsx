@@ -37,6 +37,7 @@ import {
 } from "@uprevit/ui/components/ui/tooltip";
 import { cn } from "@uprevit/ui/lib/utils";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { APPROVER_USER_TYPES } from "@/types/user";
 import ProductMemberCombobox from "@/features/workspace/products/ProductMemberCombobox";
 import { ProductMemberAvatar } from "@/features/workspace/products/ProductMemberAvatar";
 import { useUpdateWorkflow } from "@/hooks/workflow/useWorkflows";
@@ -683,6 +684,7 @@ export function WorkflowApprovalsTab({
                 {canEdit ? (
                   <GroupAction>
                     <ProductMemberCombobox
+                      userTypes={APPROVER_USER_TYPES}
                       placeholder="Add approver"
                       excludeIds={assignments.map((item) => item.userId)}
                       onSelect={(member) =>
@@ -710,6 +712,7 @@ export function WorkflowApprovalsTab({
               </InputGroup>
               <div className="w-full max-w-64">
                 <ProductMemberCombobox
+                  userTypes={APPROVER_USER_TYPES}
                   placeholder={
                     functionLabel.trim()
                       ? "Pick the first approver…"

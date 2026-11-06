@@ -10,6 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft01Icon, Folder01Icon, Link05Icon } from "@hugeicons/core-free-icons";
 
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 import DialogAddProductFolder from "@/features/workspace/source-files/DialogAddProductFolder";
 import DialogDeleteSourceFile from "@/features/workspace/source-files/DialogDeleteSourceFile";
 import DialogImagePreview from "@/features/workspace/source-files/DialogImagePreview";
@@ -70,6 +71,7 @@ export default function ProductSourceFilesPage() {
   const params = useParams<{ slug?: string[] }>();
   const folderId = params?.slug?.[0] ?? "";
   const deleteSourceFile = useDeleteSourceFiles(folderId);
+  const { canEdit } = useWorkspaceAccess();
   const [fileIdToDelete, setFileIdToDelete] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<{
     url: string;
@@ -256,7 +258,7 @@ export default function ProductSourceFilesPage() {
               <SourceFilesItemsGrid
                 files={files}
                 onPreviewImage={(url, name) => setPreviewImage({ url, name })}
-                onDelete={setFileIdToDelete}
+                onDelete={canEdit ? setFileIdToDelete : undefined}
                 onDownload={handleDownloadFile}
               />
             )}

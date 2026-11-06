@@ -56,6 +56,7 @@ import {
   UnfoldMoreIcon,
   UploadSquare01Icon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const PROJECT_IMAGE_ACCEPT =
   "image/png,image/jpg,image/jpeg,image/gif,image/webp";
@@ -81,6 +82,7 @@ interface DialogUpdateProjectProps {
 export default function UpdateProjectDialog({
   project,
 }: DialogUpdateProjectProps) {
+  const { canEdit } = useWorkspaceAccess();
   const id = useId();
 
   const [open, setOpen] = useState(false);
@@ -280,6 +282,8 @@ export default function UpdateProjectDialog({
       setUploadingImage(false);
     }
   };
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

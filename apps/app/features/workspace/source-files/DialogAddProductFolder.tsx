@@ -21,6 +21,7 @@ import {
   Cancel01Icon,
   FolderAddIcon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 interface FormValues {
   folderName: string;
@@ -33,6 +34,7 @@ export default function DialogAddProductFolder({
   parentId?: string;
   folderId?: string;
 }) {
+  const { canEdit } = useWorkspaceAccess();
   const formId = useId();
   const productComboboxId = useId();
   const { mutate: addSourceFilesFolder, isPending } =
@@ -93,6 +95,8 @@ export default function DialogAddProductFolder({
       setSelectedProductName("");
     }
   }
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

@@ -22,6 +22,7 @@ import {
   PropertyEditIcon,
   Tick01Icon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 interface FormValues {
   folderName: string;
@@ -36,6 +37,7 @@ export default function DialogEditSourceFilesFolder({
   folderId: string;
   linkedProductName?: string;
 }) {
+  const { canEdit } = useWorkspaceAccess();
   const formId = useId();
   const productComboboxId = useId();
   const { mutate: updateSourceFilesFolder, isPending } =
@@ -108,6 +110,8 @@ export default function DialogEditSourceFilesFolder({
     setSelectedProductId("");
     setSelectedProductName("");
   }
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

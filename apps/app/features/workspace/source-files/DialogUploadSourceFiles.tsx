@@ -15,6 +15,7 @@ import UploadSourceFiles from "@/features/workspace/source-files/UploadSourceFil
 import { useUploadSourceFiles } from "@/hooks/source-files/useUploadSourceFiles";
 import { useUploadFilesToS3 } from "@/hooks/s3-storage/useUploadFilesToS3";
 import { SourceFilesFolder } from "@/types/source-files";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 export default function DialogUploadSourceFiles({
   folder,
@@ -25,6 +26,7 @@ export default function DialogUploadSourceFiles({
   currentFolder: SourceFilesFolder;
   folderId: string;
 }) {
+  const { canEdit } = useWorkspaceAccess();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -70,6 +72,8 @@ export default function DialogUploadSourceFiles({
       setSelectedFiles([]);
     }
   }
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>

@@ -1,3 +1,8 @@
+export type UserType = "admin" | "user" | "approver";
+
+export const PRODUCT_TEAM_USER_TYPES: UserType[] = ["admin", "user"];
+export const APPROVER_USER_TYPES: UserType[] = ["admin", "user", "approver"];
+
 export interface User {
   _id?: string;
   name: string;
@@ -8,7 +13,8 @@ export interface User {
   designation: string;
   unit?: string;
   phone?: string;
-  userType?: "user" | "admin";
+  userType?: UserType | null;
+  isManager?: boolean;
   location?: string;
   cognitoSub: string;
   workspaceId: string | null;
@@ -30,4 +36,19 @@ export type UsersListResponse = {
     users: User[];
     pagination: WorkspaceListPagination;
   };
+};
+
+export type MemberAccess = {
+  userType: Exclude<UserType, "admin"> | null;
+  isManager: boolean;
+};
+
+export type MemberAccessBlockers = {
+  products: { _id: string; name: string; relationship: "owner" | "contributor" }[];
+  workflows: {
+    _id: string;
+    numberLabel: string;
+    name: string;
+    relationship: "initiator" | "approver";
+  }[];
 };

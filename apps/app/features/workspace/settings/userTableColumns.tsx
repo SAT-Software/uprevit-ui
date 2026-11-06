@@ -16,6 +16,7 @@ import { Icon } from "@uprevit/ui/components/common/Icon";
 import { User } from "@/types/user";
 import DialogRemoveUser from "./DialogRemoveUser";
 import { UserTypeBadge } from "./UserTypeBadge";
+import { DialogChangeMemberAccess } from "./DialogChangeMemberAccess";
 
 function UserStatusBadge({ status }: { status: User["status"] }) {
   const statusClasses = {
@@ -69,10 +70,18 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
     {
       accessorKey: "userType",
       header: "User Type",
-      size: 108,
-      cell: ({ row }) => (
-        <UserTypeBadge userType={row.original.userType} />
-      ),
+      size: 168,
+      cell: ({ row }) =>
+        isAdmin &&
+        row.original.userType !== "admin" &&
+        row.original.status !== "inactive" ? (
+          <DialogChangeMemberAccess user={row.original} />
+        ) : (
+          <UserTypeBadge
+            userType={row.original.userType}
+            isManager={row.original.isManager}
+          />
+        ),
     },
     {
       accessorKey: "designation",

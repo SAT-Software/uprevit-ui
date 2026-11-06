@@ -18,6 +18,7 @@ import {
   Cancel01Icon,
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 interface DialogDeleteSourceFilesFolderProps {
   id: string;
@@ -30,6 +31,7 @@ export default function DialogDeleteSourceFilesFolder({
   folderName,
   folderId,
 }: DialogDeleteSourceFilesFolderProps) {
+  const { canEdit } = useWorkspaceAccess();
   const inputId = useId();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
@@ -50,6 +52,8 @@ export default function DialogDeleteSourceFilesFolder({
       setValue("");
     }
   }
+
+  if (!canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
