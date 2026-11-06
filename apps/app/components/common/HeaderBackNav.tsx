@@ -36,6 +36,10 @@ function getStaticBackNav(pathname: string): BackNav | null {
     return { href: "/bookmarked-products", label: "Bookmarked products" };
   }
 
+  if (/^\/settings\/billing\/invoices\/[^/]+$/.test(pathname)) {
+    return { href: "/settings?tab=billing", label: "Billing" };
+  }
+
   const platformWorkspaceMatch = pathname.match(
     /^\/platform-admin\/workspaces\/([^/]+)(?:\/(.*))?$/,
   );

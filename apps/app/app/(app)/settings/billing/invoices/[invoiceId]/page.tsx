@@ -1,11 +1,10 @@
 "use client";
 
+import { InfoTooltip } from "@/components/common/InfoTooltip";
 import BillingInvoiceDetail from "@/features/workspace/settings/BillingInvoiceDetail";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
-import { Button } from "@uprevit/ui/components/ui/button";
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
-import { canManageBillingProfile } from "@/utils/isAdmin";
-import Link from "next/link";
+import { isManagerProfile } from "@/utils/isAdmin";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
@@ -16,73 +15,44 @@ export default function BillingInvoicePage() {
   const invoiceId = params?.invoiceId ?? "";
   const auth = useAuth();
   const router = useRouter();
-  const canManageBilling = canManageBillingProfile(auth.user?.profile);
+  const isManager = isManagerProfile(auth.user?.profile);
   const workspaceId = auth.user?.profile?.workspaceId as string | undefined;
+  const ready = !auth.isLoading && auth.isAuthenticated && isManager;
 
   useEffect(() => {
-    if (auth.isLoading) return;
-    if (!auth.isAuthenticated) return;
-
-    if (!canManageBilling) {
-      toast.error("Insufficient privileges, contact Admin");
-      router.replace("/settings?tab=profile");
-    }
-  }, [auth.isAuthenticated, auth.isLoading, canManageBilling, router]);
-
-  if (auth.isLoading || !auth.isAuthenticated || !canManageBilling) {
-    return (
-      <div className="flex flex-col gap-2 p-2">
-        <div className="rounded-xl border border-input bg-background p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-4 w-72 max-w-full" />
-            </div>
-            <Skeleton className="h-9 w-9 rounded-md" />
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-input bg-background p-4 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Skeleton className="h-8 w-40" />
-            <Skeleton className="h-9 w-36" />
-          </div>
-          <Skeleton className="h-24 w-full rounded-lg" />
-          <Skeleton className="h-48 w-full rounded-lg" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!workspaceId) {
-    return (
-      <div className="flex flex-col gap-2 p-2">
-        <div className="border border-input bg-background rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Workspace not found.</p>
-          <Button variant="outline" size="sm" className="mt-3" asChild>
-            <Link href="/settings?tab=billing">Back to billing</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+    if (auth.isLoading || !auth.isAuthenticated || isManager) return;
+    toast.error("Only Managers can view invoices.");
+    router.replace("/settings?tab=profile");
+  }, [auth.isAuthenticated, auth.isLoading, isManager, router]);
 
   return (
-    <div className="flex flex-col gap-2 p-2">
-      <div className="border border-input bg-background rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-semibold">Invoice details</h1>
-            <p className="text-sm text-muted-foreground">
-              View line items, totals, and download the invoice PDF.
-            </p>
-          </div>
-          <ThemeToggle />
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-medium">Invoice details</h1>
+          <InfoTooltip content="Line items, totals, and the invoice PDF." />
         </div>
+        <ThemeToggle />
       </div>
 
-      <div className="border border-input bg-background rounded-xl p-4">
-        <BillingInvoiceDetail workspaceId={workspaceId} invoiceId={invoiceId} />
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {!ready ? (
+          <div className="flex flex-col">
+            <Skeleton className="h-20 w-full rounded-none" />
+            <Skeleton className="h-56 w-full rounded-none" />
+          </div>
+        ) : workspaceId ? (
+          <BillingInvoiceDetail
+            workspaceId={workspaceId}
+            invoiceId={invoiceId}
+            showBackLink={false}
+            edgeConnected
+          />
+        ) : (
+          <p className="p-4 text-sm text-muted-foreground">
+            Workspace not found. Sign out and sign in again.
+          </p>
+        )}
       </div>
     </div>
   );

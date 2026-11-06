@@ -5,6 +5,7 @@ import { useGetBillingInvoice } from "@/hooks/billing/useGetBillingInvoice";
 import { useDownloadBillingInvoice } from "@/hooks/billing/useDownloadBillingInvoice";
 import { useGetPlatformBillingInvoice } from "@/hooks/platform-admin/useGetPlatformBillingInvoice";
 import { useDownloadPlatformBillingInvoice } from "@/hooks/platform-admin/useDownloadPlatformBillingInvoice";
+import { DialogMarkInvoicePaid } from "@/features/platform-admin/DialogMarkInvoicePaid";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -234,19 +235,28 @@ function BillingInvoiceDetail({
           </div>
         </div>
 
-        <Button
-          onClick={handleDownload}
-          disabled={downloadInvoice.isPending}
-          size="sm"
-          className="w-fit shrink-0"
-        >
-          {downloadInvoice.isPending ? (
-            <Spinner className="size-4" />
-          ) : (
-            <Icon icon={Download04Icon} size={14} strokeWidth={2} />
-          )}
-          Download PDF
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {isPlatformAdmin && amountDuePositive ? (
+            <DialogMarkInvoicePaid
+              workspaceId={workspaceId}
+              invoiceId={invoice.id}
+              amountDue={formatBillingMoney(invoice.amountDue, currencyCode)}
+            />
+          ) : null}
+          <Button
+            onClick={handleDownload}
+            disabled={downloadInvoice.isPending}
+            size="sm"
+            className="w-fit shrink-0"
+          >
+            {downloadInvoice.isPending ? (
+              <Spinner className="size-4" />
+            ) : (
+              <Icon icon={Download04Icon} size={14} strokeWidth={2} />
+            )}
+            Download PDF
+          </Button>
+        </div>
       </div>
 
       {/* Line items */}
@@ -268,7 +278,7 @@ function BillingInvoiceDetail({
           </div>
         ) : (
           <div className="w-full overflow-hidden">
-            <Table className="table-fixed w-full">
+            <Table className="table-fixed w-full min-w-[36rem]">
               <TableHeader className="bg-muted">
                 <TableRow className="h-10 hover:bg-transparent">
                   <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">
