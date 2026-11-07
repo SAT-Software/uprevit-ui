@@ -5,6 +5,7 @@ import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import { Ripple } from "@uprevit/ui/components/ui/ripple";
 import Image from "next/image";
+import { cdnUrl } from "@/lib/cdn";
 // import HeroFeatureDemo from "@/features/marketing/landing-page/HeroFeatureDemo";
 import HeroFeatureCards from "@/features/marketing/landing-page/HeroFeatureCards";
 import DemoSection from "@/features/marketing/landing-page/DemoSection";
@@ -21,7 +22,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/CE.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/ce.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 55,
@@ -31,7 +32,7 @@ const items = [
     circleIndex: 1,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/MD.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/md.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 35,
@@ -42,7 +43,7 @@ const items = [
     circleIndex: 2,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/DMGPKG.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/damaged-package.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 35,
@@ -53,7 +54,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
-          src="/2DBarcode.png"
+          src={cdnUrl("images/label-symbols/2d-barcode.png")}
           alt=""
           fill
           className="object-contain p-3"
@@ -68,7 +69,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/FDA.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/fda.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 50,
@@ -80,7 +81,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
-          src="/DoNotReuse.png"
+          src={cdnUrl("images/label-symbols/do-not-reuse.png")}
           alt=""
           fill
           className="object-contain p-3"
@@ -94,7 +95,7 @@ const items = [
     circleIndex: 2,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/UKCA.png" alt="" fill className="object-contain p-3" />
+        <Image src={cdnUrl("images/label-symbols/ukca.png")} alt="" fill className="object-contain p-3" />
       </div>
     ),
     speed: 45,
@@ -105,7 +106,7 @@ const items = [
     circleIndex: 3,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/ISO.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/iso.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 35,
@@ -117,7 +118,7 @@ const items = [
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
         <Image
-          src="/WEEE-symbol.webp"
+          src={cdnUrl("images/label-symbols/weee.webp")}
           alt=""
           fill
           className="object-contain p-2"
@@ -131,7 +132,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/Sterile.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/sterile.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 45,
@@ -141,7 +142,7 @@ const items = [
     circleIndex: 0,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/IFU1.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/ifu.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 45,
@@ -152,7 +153,7 @@ const items = [
     circleIndex: 1,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/Importer.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/importer.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 50,
@@ -162,7 +163,7 @@ const items = [
     circleIndex: 1,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/ISO.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/iso.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 45,
@@ -173,7 +174,7 @@ const items = [
     circleIndex: 2,
     content: (
       <div className="relative h-12 w-12 rounded-full border border-dashed bg-muted dark:bg-accent-foreground border-foreground dark:border-background/60 dark:border-dashed flex items-center justify-center">
-        <Image src="/MFR.png" alt="" fill className="object-contain p-2" />
+        <Image src={cdnUrl("images/label-symbols/manufacturer.png")} alt="" fill className="object-contain p-2" />
       </div>
     ),
     speed: 55,

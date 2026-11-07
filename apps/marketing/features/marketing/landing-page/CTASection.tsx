@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { cdnUrl } from "@/lib/cdn";
 import Link from "next/link";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
@@ -50,7 +51,7 @@ export default function CTASection() {
                   >
                     <div className="absolute -left-25 -top-25 overflow-hidden rounded-2xl border border-border/40 bg-background/5 shadow-xl">
                       <Image
-                        src="/uprevit-demo2.png"
+                        src={cdnUrl("images/product/workspace-preview.png")}
                         alt="Uprevit compliance workspace preview"
                         width={1200}
                         height={800}
@@ -67,7 +68,7 @@ export default function CTASection() {
                     </div>
                     <div className="relative z-10 overflow-hidden rounded-2xl border border-border/50 bg-background/5 shadow-2xl">
                       <Image
-                        src="/Dashboard-Dark.png"
+                        src={cdnUrl("images/product/dashboard-dark.png")}
                         alt="Uprevit compliance workspace preview"
                         width={1200}
                         height={800}

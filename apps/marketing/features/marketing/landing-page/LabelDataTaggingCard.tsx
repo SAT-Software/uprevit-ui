@@ -1,5 +1,6 @@
 import { cn } from "@uprevit/ui/lib/utils";
 import Image from "next/image";
+import { cdnUrl } from "@/lib/cdn";
 import {
   CubeIcon,
   Delete02Icon,
@@ -66,7 +67,7 @@ export function LabelDataTaggingCard({ className }: LabelDataTaggingCardProps) {
               {/* Image Container */}
               <div className="relative ml-4 w-full max-w-[280px] sm:max-w-[320px] lg:w-100 lg:h-100 aspect-square overflow-hidden max-h-[300px]">
                 <Image
-                  src="/MDR_Label.webp"
+                  src={cdnUrl("images/labels/mdr-label.webp")}
                   alt="MDR Label"
                   fill
                   className="object-contain drop-shadow-sm dark:brightness-[0.82] dark:contrast-[0.92]"

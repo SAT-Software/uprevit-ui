@@ -42,6 +42,7 @@ import {
 } from "@uprevit/ui/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { cdnUrl } from "@/lib/cdn";
 
 const resourceLinks = [
   {
@@ -131,7 +132,7 @@ export default function MarketingHeader() {
               >
                 <div className="relative dark:hidden flex aspect-square mb-1 size-5 md:size-7 items-center justify-center">
                   <Image
-                    src="/uprevit-logo-black.svg"
+                    src={cdnUrl("brand/uprevit-logo-black.svg")}
                     alt="Uprevit logo"
                     fill
                     className=""
@@ -139,7 +140,7 @@ export default function MarketingHeader() {
                 </div>
                 <div className="relative hidden dark:flex aspect-square mb-1 size-5 md:size-7 items-center justify-center">
                   <Image
-                    src="/uprevit-logo-white.svg"
+                    src={cdnUrl("brand/uprevit-logo-white.svg")}
                     alt="Uprevit logo"
                     fill
                     className=""
