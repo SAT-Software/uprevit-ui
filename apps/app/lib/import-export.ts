@@ -21,6 +21,15 @@ import {
 } from "./import-validation";
 
 const RAW_VALUE_NOTE_PREFIX = "uprevit:raw:";
+const EXPORT_HEADER_FORMATS: CellFormat[] = [
+  { bold: true, textColor: "#3b0764", bgColor: "#f5f0ff", alignment: "left", verticalAlignment: "middle" },
+  { italic: true, textColor: "#6b7280", bgColor: "#fbf8ff", alignment: "left", verticalAlignment: "middle" },
+];
+const EXPORT_HEADER_BORDER = { style: "thin", color: { rgb: "D8C4FF" } };
+const isExportHeaderFormat = (row: number, format: CellFormat) =>
+  !!EXPORT_HEADER_FORMATS[row] &&
+  Object.keys(format).length === Object.keys(EXPORT_HEADER_FORMATS[row]).length &&
+  Object.entries(EXPORT_HEADER_FORMATS[row]).every(([key, value]) => format[key as keyof CellFormat] === value);
 
 interface ExportData extends WorkbookMetadata {
   headers: Record<number, string>;
@@ -195,7 +204,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
       if (format.dateFormat) format.date1904 = matchesOriginal ? originalDate1904 : workbookDate1904;
       const value = matchesOriginal ? original! : /^0{2,}$/.test(cell.z ?? "") ? cell.w ?? String(cell.v ?? "") : String(cell.v ?? "");
       if (r < offset) {
-        if (Object.keys(format).length) headerRows.formats[`${r},${c}`] = format;
+        if (Object.keys(format).length && !isExportHeaderFormat(r, format)) headerRows.formats[`${r},${c}`] = format;
         if (r === 0 && value) headers[c] = value;
         if (r === 1 && value) {
           if (!["constant", "variable", "na", "blank"].includes(value)) throw new Error(`Sheet "${name}" has an invalid classification at ${address}. Choose raw cells to keep it as data.`);
@@ -216,7 +225,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
       const { r, c } = XLSX.utils.decode_cell(address);
       validateDataBoundaries(Math.max(0, r + 1 - offset), c + 1);
       maxRow = Math.max(maxRow, r); maxCol = Math.max(maxCol, c);
-      if (r < offset) headerRows.formats[`${r},${c}`] ??= format;
+      if (r < offset) { if (!isExportHeaderFormat(r, format)) headerRows.formats[`${r},${c}`] ??= format; }
       else cellFormats[`${r - offset},${c}`] ??= format;
     }
     const rowHeights: Record<number, number> = {};
@@ -326,6 +335,17 @@ function tableToWorksheet(data: ExportData) {
     const [row, col] = key.split(",").map(Number);
     exportFormats[`${row - headerOffset},${col}`] = format;
   });
+  const defaultHeaderKeys = new Set<string>();
+  if (!omitHeaders) {
+    columns.forEach((col) => {
+      for (let row = 0; row < headerOffset; row++) {
+        const key = `${row - headerOffset},${col}`;
+        if (exportFormats[key]) continue;
+        exportFormats[key] = EXPORT_HEADER_FORMATS[row];
+        defaultHeaderKeys.add(key);
+      }
+    });
+  }
   const formatKeys = new Set([
     ...Object.keys(exportFormats),
     ...(conditionalRules.length ? Object.keys(cells) : []),
@@ -385,6 +405,7 @@ function tableToWorksheet(data: ExportData) {
             : format.verticalAlignment,
       },
       ...(serial !== undefined ? { numFmt: format.dateFormat } : numberFormat ? { numFmt: numberFormat } : {}),
+      ...(defaultHeaderKeys.has(key) ? { border: { bottom: EXPORT_HEADER_BORDER } } : {}),
     };
   });
   worksheet["!rows"] = rowOrder
@@ -399,6 +420,8 @@ function tableToWorksheet(data: ExportData) {
   Object.entries(data.headerRows?.heights ?? {}).forEach(([row, height]) => { worksheet["!rows"]![Number(row)] = { hpt: height * 0.75 }; });
   worksheet.A1 ??= { t: "s", v: "" };
   worksheet.A1.c = [...(worksheet.A1.c ?? []), { a: "Uprevit", t: LAYOUT_NOTE + headerOffset }];
+  if (!omitHeaders && columns.length)
+    worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: headerOffset - 1, c: 0 }, e: { r: headerOffset + maxRow, c: columns.length - 1 } }) };
   worksheet["!cols"] = columns.map((col) => ({
     wpx: columnSizing[`col-${col}`] ?? 150,
   }));
