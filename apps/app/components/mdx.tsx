@@ -5,11 +5,13 @@ import {
   DocsChangelogGroup,
   DocsChangelogRelease,
 } from "@/components/docs/DocsChangelog";
+import { DocsChangelogReleases } from "@/components/docs/DocsChangelogReleases";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     DocsVideo,
+    DocsChangelogReleases,
     DocsChangelogRelease,
     DocsChangelogGroup,
     ...components,
