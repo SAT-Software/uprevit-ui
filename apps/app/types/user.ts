@@ -39,7 +39,7 @@ export type UsersListResponse = {
 };
 
 export type MemberAccess = {
-  userType: Exclude<UserType, "admin"> | null;
+  userType: UserType | null;
   isManager: boolean;
 };
 

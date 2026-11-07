@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/components/mdx";
 import type { Metadata } from "next";
 import { createRelativeLink } from "fumadocs-ui/mdx";
+import { DocsChangelogPage } from "@/components/docs/DocsChangelogReleases";
 
 export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
@@ -16,9 +17,10 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  const Container = page.url === "/docs/changelog" ? DocsChangelogPage : DocsPage;
 
   return (
-    <DocsPage
+    <Container
       className="mx-0 w-full max-w-none"
       tableOfContent={{
         style: "clerk",
@@ -35,7 +37,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
           })}
         />
       </DocsBody>
-    </DocsPage>
+    </Container>
   );
 }
 

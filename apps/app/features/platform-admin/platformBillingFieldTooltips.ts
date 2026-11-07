@@ -13,7 +13,7 @@ export const BILLING_ACCOUNT_FIELD_TOOLTIPS = {
   ssoEnabled:
     "Actual SSO feature state for this workspace. SSO can only be enabled when the workspace usage limit allows it.",
   seatMonths:
-    "Active member limit for this workspace. Invited and inactive members do not occupy seats.",
+    "Full (Admin and User) and Approver seat limits for this workspace. Manager-only, invited and inactive members do not occupy seats.",
   exports:
     "Completed product or report export limit for the current billing period. Only successfully completed export jobs count.",
   uploadGb:

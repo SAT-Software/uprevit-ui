@@ -72,9 +72,7 @@ export function getUserTableColumns(isAdmin: boolean): ColumnDef<User>[] {
       header: "User Type",
       size: 168,
       cell: ({ row }) =>
-        isAdmin &&
-        row.original.userType !== "admin" &&
-        row.original.status !== "inactive" ? (
+        isAdmin && row.original.status !== "inactive" ? (
           <DialogChangeMemberAccess user={row.original} />
         ) : (
           <UserTypeBadge

@@ -24,6 +24,10 @@ export function canEditWorkspaceDataProfile(profile: AuthProfile) {
   return isAdminProfile(profile) || hasCognitoGroup(profile, "user");
 }
 
+export function isManagerProfile(profile: AuthProfile) {
+  return hasCognitoGroup(profile, "manager");
+}
+
 export function canManageBillingProfile(profile: AuthProfile) {
-  return isAdminProfile(profile) || hasCognitoGroup(profile, "manager");
+  return isAdminProfile(profile) || isManagerProfile(profile);
 }

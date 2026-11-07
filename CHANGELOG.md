@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added Approver and Manager access. Workspace admins pick a member's access when they invite them and can change it later from the Users and Admins tabs, including giving an Admin Manager access.
+- Added a Billing tab for Managers with the plan, current term, included seats, references, and invoices, plus an invoice page with line items and a PDF download.
+- Added Mark as paid on invoices for platform admins, which records a bank transfer in Chargebee.
+
 ### Updated
+
+- The Usage tab shows Full seats (Admins and Users) and Approver seats separately; Manager-only members are free.
+- The pricing page mentions the one-time platform fee, Approver seats, and free Manager-only members.
+- Updated the docs for the new access types, seat limits, and the Billing tab.
 
 - The import template has one optional Project column, which takes an existing project's name or project number. The import no longer creates departments or projects; a project that isn't found is shown as an error in review until an existing project is assigned.
 

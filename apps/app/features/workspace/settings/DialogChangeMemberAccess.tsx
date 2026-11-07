@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "react-oidc-context";
 import {
   Alert02Icon,
   ArrowDown01Icon,
@@ -41,10 +42,11 @@ import {
 } from "@/hooks/user/useUpdateUserAccess";
 import type { MemberAccess, MemberAccessBlockers, User } from "@/types/user";
 import {
+  ADMIN_ACCESS_OPTIONS,
   MEMBER_ACCESS_OPTIONS,
   getMemberAccessOption,
   getMemberAccessOptionValue,
-  type MemberAccessOptionValue,
+  type AccessOptionValue,
 } from "./memberAccessOptions";
 import { UserTypeBadge } from "./UserTypeBadge";
 
@@ -54,17 +56,20 @@ function plural(count: number, word: string) {
 
 export function DialogChangeMemberAccess({ user }: { user: User }) {
   const id = useId();
+  const isAdminMember = user.userType === "admin";
+  const options = isAdminMember ? ADMIN_ACCESS_OPTIONS : MEMBER_ACCESS_OPTIONS;
   const current = getMemberAccessOptionValue({
-    userType: user.userType === "admin" ? null : (user.userType ?? null),
+    userType: user.userType ?? null,
     isManager: user.isManager === true,
   });
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<MemberAccessOptionValue>(current);
+  const [selected, setSelected] = useState<AccessOptionValue>(current);
   const { mutate: updateAccess, isPending } = useUpdateUserAccess();
+  const auth = useAuth();
 
   const next: MemberAccess = getMemberAccessOption(selected).access;
   const changed = selected !== current;
-  const losesEditAccess = next.userType !== "user";
+  const losesEditAccess = next.userType !== "user" && next.userType !== "admin";
   const blockersQuery = useMemberAccessBlockers(
     user._id,
     next,
@@ -86,7 +91,12 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
     updateAccess(
       { userId: user._id, access: next },
       {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => {
+          setOpen(false);
+          if (user.cognitoSub && user.cognitoSub === auth.user?.profile?.sub) {
+            void auth.signinSilent().catch(() => undefined);
+          }
+        },
         onError: (error) => {
           if (error instanceof MemberAccessBlockedError) {
             blockersQuery.refetch();
@@ -138,16 +148,18 @@ export function DialogChangeMemberAccess({ user }: { user: User }) {
           <RadioGroup
             value={selected}
             onValueChange={(value) =>
-              setSelected(value as MemberAccessOptionValue)
+              setSelected(value as AccessOptionValue)
             }
             aria-label="Access"
             className="gap-2 sm:grid-cols-2"
           >
-            {MEMBER_ACCESS_OPTIONS.map((option) => (
+            {options.map((option) => (
               <FieldLabel
                 key={option.value}
                 htmlFor={`${id}-${option.value}`}
-                className="w-full last:sm:col-span-2"
+                className={
+                  options.length % 2 ? "w-full last:sm:col-span-2" : "w-full"
+                }
               >
                 <Field orientation="horizontal" className="p-3!">
                   <RadioGroupItem

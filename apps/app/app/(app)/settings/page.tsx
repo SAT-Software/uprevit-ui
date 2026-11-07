@@ -10,10 +10,12 @@ import {
 import ProfileTab from "@/features/workspace/settings/ProfileTab";
 import WorkspaceTab from "@/features/workspace/settings/WorkspaceTab";
 import UsageTab from "@/features/workspace/settings/UsageTab";
+import BillingTab from "@/features/workspace/settings/BillingTab";
 import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
 import {
+  CreditCardIcon,
   Timer01Icon,
   DashboardSquare01Icon,
   UserIcon,
@@ -29,7 +31,8 @@ import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
 const ADMIN_TABS = ["admins", "workspace", "security"] as const;
-const BILLING_TABS = ["usage"] as const;
+const USAGE_TABS = ["usage"] as const;
+const MANAGER_TABS = ["billing"] as const;
 
 function isTabIn(tabs: readonly string[], tab: string | null) {
   return tab !== null && tabs.includes(tab);
@@ -42,14 +45,14 @@ function SettingsPage() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
-  const { isAdmin, canManageBilling } = useWorkspaceAccess();
-  const resolvedTab = tab === "billing" ? "usage" : tab;
+  const { isAdmin, isManager, canManageBilling } = useWorkspaceAccess();
   const canOpenTab = (value: string | null) =>
     (!isTabIn(ADMIN_TABS, value) || isAdmin) &&
-    (!isTabIn(BILLING_TABS, value) || canManageBilling);
-  const resolvedTabAllowed = canOpenTab(resolvedTab);
+    (!isTabIn(USAGE_TABS, value) || canManageBilling) &&
+    (!isTabIn(MANAGER_TABS, value) || isManager);
+  const tabAllowed = canOpenTab(tab);
   const activeTab =
-    resolvedTab && resolvedTabAllowed ? resolvedTab : "profile";
+    tab && tabAllowed ? tab : "profile";
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [syncedActiveTab, setSyncedActiveTab] = useState(activeTab);
 
@@ -64,8 +67,8 @@ function SettingsPage() {
     if (
       auth.isLoading ||
       !auth.isAuthenticated ||
-      !resolvedTab ||
-      resolvedTabAllowed
+      !tab ||
+      tabAllowed
     ) {
       return;
     }
@@ -80,8 +83,8 @@ function SettingsPage() {
     auth.isAuthenticated,
     auth.isLoading,
     pathname,
-    resolvedTab,
-    resolvedTabAllowed,
+    tab,
+    tabAllowed,
     router,
     searchParams,
   ]);
@@ -142,16 +145,16 @@ function SettingsPage() {
               </TabsTrigger>
             ) : null}
             {canManageBilling ? (
-              <>
-                <TabsTrigger value="usage">
-                  <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
-                  Usage
-                </TabsTrigger>
-                {/* <TabsTrigger value="billing">
-                  <Icon icon={CreditCardIcon} size={16} strokeWidth={2} className="mr-2" />
-                  Billing
-                </TabsTrigger> */}
-              </>
+              <TabsTrigger value="usage">
+                <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
+                Usage
+              </TabsTrigger>
+            ) : null}
+            {isManager ? (
+              <TabsTrigger value="billing">
+                <Icon icon={CreditCardIcon} size={14} strokeWidth={2} />
+                Billing
+              </TabsTrigger>
             ) : null}
           </TabsList>
         </div>
@@ -177,10 +180,9 @@ function SettingsPage() {
             {activeTab === "usage" && <UsageTab />}
           </TabsContent>
 
-          {/* Billing Tab is kept hidden, it is disabled for now. Later on we will add new user group as manager which is not billed who can only handle this billing tab and can't do any other activities*/}
-          {/* <TabsContent value="billing" className="mt-6">
+          <TabsContent value="billing" className="mt-0">
             {activeTab === "billing" && <BillingTab />}
-          </TabsContent> */}
+          </TabsContent>
         </div>
       </Tabs>
     </div>

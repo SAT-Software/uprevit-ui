@@ -25,7 +25,7 @@ export function BillingInvoicesTable({
 }) {
   return (
     <div className="w-full overflow-hidden border-b border-border">
-      <Table className="table-fixed w-full">
+      <Table className="table-fixed w-full min-w-[32rem]">
         <TableHeader className="bg-muted">
           <TableRow className="h-10 hover:bg-transparent">
             <TableHead className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0">

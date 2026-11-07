@@ -396,10 +396,10 @@ function UsageMetricsGrid({ data }: { data: PlatformBillingDetail }) {
   );
 
   return (
-    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
       <UsageMetricCard
-        label="Active members"
-        info="Number of active members in this workspace for the current billing period."
+        label="Full seats"
+        info="Active Admins and Users. Manager-only members are free and don't use a seat."
         used={summary.usage.activeSeats}
         included={summary.usageLimits.seats}
         unit="seats"
@@ -412,6 +412,22 @@ function UsageMetricsGrid({ data }: { data: PlatformBillingDetail }) {
           summary.limitStatus.seats.used >= summary.limitStatus.seats.limit
         }
         colorClass="from-sky-400 via-sky-500 to-sky-600"
+      />
+      <UsageMetricCard
+        label="Approver seats"
+        info="Active Approvers. They can view the workspace and act on workflows assigned to them."
+        used={summary.usage.seatClasses.approver}
+        included={summary.usageLimits.approverSeats}
+        unit="seats"
+        usedValue={summary.limitStatus.approverSeats.used}
+        limitValue={summary.limitStatus.approverSeats.limit}
+        isOverLimit={summary.limitStatus.approverSeats.overLimit}
+        isAtLimit={
+          !summary.limitStatus.approverSeats.overLimit &&
+          summary.usageLimits.approverSeats > 0 &&
+          summary.limitStatus.approverSeats.used >= summary.limitStatus.approverSeats.limit
+        }
+        colorClass="from-violet-400 via-violet-500 to-violet-600"
       />
       <UsageMetricCard
         label="Exports"
