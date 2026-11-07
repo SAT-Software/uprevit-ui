@@ -3,13 +3,14 @@
 import { Card } from "@uprevit/ui/components/ui/card";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import Image from "next/image";
+import { cdnUrl } from "@/lib/cdn";
 
 const screenshots = [
-  "/features/feature-0.png",
-  "/features/feature-1.png",
-  "/features/feature-2.png",
-  "/features/feature-3.png",
-  "/features/feature-4.png",
+  cdnUrl("images/hero-features/labeling-standards.png"),
+  cdnUrl("images/hero-features/product-specifications.png"),
+  cdnUrl("images/hero-features/source-files.png"),
+  cdnUrl("images/hero-features/label-components.png"),
+  cdnUrl("images/hero-features/symbols-graphics.png"),
 ];
 
 const featureNames = [

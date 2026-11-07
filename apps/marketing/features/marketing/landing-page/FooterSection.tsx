@@ -4,6 +4,7 @@ import { Linkedin02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import Link from "next/link";
 import Image from "next/image";
+import { cdnUrl } from "@/lib/cdn";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
 
 export default function FooterSection() {
@@ -25,7 +26,7 @@ export default function FooterSection() {
             <Link href="/" className="flex items-center gap-2 p-1">
               <div className="relative flex aspect-square mb-1 size-8 items-center justify-center">
                 <Image
-                  src="/uprevit-logo-white.svg"
+                  src={cdnUrl("brand/uprevit-logo-white.svg")}
                   alt="Uprevit logo"
                   fill
                   className=""

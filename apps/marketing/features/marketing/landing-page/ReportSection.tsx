@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { MediaPlayToggle } from "@/components/MediaPlayToggle";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { cdnUrl } from "@/lib/cdn";
 
 export default function ReportSection() {
   const lightRef = useRef<HTMLVideoElement>(null);
@@ -60,7 +61,7 @@ export default function ReportSection() {
               <CardContent className="relative p-0 overflow-hidden">
                 <video
                   ref={lightRef}
-                  src="/Report-Light-Demo.mp4"
+                  src={cdnUrl("videos/report-demo-light.mp4")}
                   className="overflow-hidden rounded-xl dark:hidden"
                   aria-label="Report builder demo"
                   loop
@@ -70,7 +71,7 @@ export default function ReportSection() {
                 />
                 <video
                   ref={darkRef}
-                  src="/Report-Dark-Demo.mp4"
+                  src={cdnUrl("videos/report-demo-dark.mp4")}
                   className="hidden overflow-hidden rounded-xl dark:block"
                   aria-label="Report builder demo"
                   loop

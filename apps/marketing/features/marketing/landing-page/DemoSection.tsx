@@ -7,8 +7,9 @@ import { useScrollSection } from "@/lib/scroll-context";
 import { ModernTvIcon } from "@hugeicons/core-free-icons";
 import Player from "next-video/player";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { cdnUrl } from "@/lib/cdn";
 
-const demoVideoUrl = `${process.env.NEXT_PUBLIC_MARKETING_CDN_URL}/videos/uprevit-demo-v1.mp4`;
+const demoVideoUrl = cdnUrl("videos/uprevit-demo-v1.mp4");
 
 export default function DemoSection() {
   const demoRef = useScrollSection("demo");
