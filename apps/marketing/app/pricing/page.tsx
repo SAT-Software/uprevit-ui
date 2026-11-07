@@ -36,7 +36,7 @@ const pricingFAQs = [
   {
     question: "What counts as a seat?",
     answer:
-      "Admins and Users who create and edit products use a seat. Approvers, who review products and act on their assigned workflows, use a lower-priced Approver seat. Managers who only need billing access are free.",
+      "Admins and Users who create and edit products use a seat. Approvers, who review products and act on their assigned workflows, use a lower-priced Approver seat. Manager-only members, who need billing access but no Products or workflows, are free.",
   },
   {
     question: "What counts as an export?",
@@ -121,8 +121,8 @@ function PricingPageContent() {
                         </span>
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
-                        One plan for regulated labeling teams: platform + seats
-                        + transparent upload and export usage, with SSO
+                        One plan for regulated labeling teams: a one-time
+                        platform fee + seats + transparent upload and export usage, with SSO
                         available when you need it.
                       </p>
                       <div className="mt-5 grid gap-3">

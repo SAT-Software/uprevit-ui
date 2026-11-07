@@ -200,7 +200,7 @@ function UsageLimitEnforcementForm({
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 pl-3 pr-2">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Limit enforcement</p>
-          <InfoTooltip content="Choose whether over-limit usage is allowed or blocked for exports and uploads." />
+          <InfoTooltip content="Choose whether over-limit usage is allowed or blocked for exports, uploads, and seats." />
         </div>
         <Button
           variant="secondary"

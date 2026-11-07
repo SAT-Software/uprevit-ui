@@ -50,9 +50,10 @@ The tabs you see depend on your role:
 | **Workspace** | Admins | Workspace details, approval workflow defaults, and support settings. |
 | **Users** | Everyone | Everyone in the workspace. |
 | **Admins** | Admins | Workspace admins. |
-| **Usage** | Admins | Usage this billing period and usage limits. |
+| **Usage** | Admins and Managers | Usage this billing period and usage limits. |
+| **Billing** | Managers | Plan, current term, included seats, and invoices. |
 
-If you aren't an admin and open a link to an admin-only tab, Uprevit shows your **Profile** tab instead.
+If you open a link to a tab you don't have access to, Uprevit shows your **Profile** tab instead.
 
 You can also switch between light and dark themes from the Settings header.
 
@@ -103,7 +104,7 @@ The workspace is created during first-time setup. The admin who sets it up enter
 
 ## Members
 
-The **Users** tab lists everyone in the workspace, with their **User Type** (**Admin** or **User**) and **Status**:
+The **Users** tab lists everyone in the workspace, with their **User Type** (**Admin**, **User**, or **Approver**), a **Manager** badge for people with billing access, and their **Status**:
 
 | Status | Meaning |
 |--------|---------|
@@ -115,13 +116,34 @@ Use the filter and sort controls to find people by name, email, designation, loc
 
 Admins also see the **Admins** tab, which lists only workspace admins. On both tabs, admins can turn on **Show removed** to include removed members.
 
+## Member access
+
+| Access | What they can do | Seat |
+|--------|------------------|------|
+| **Admin** | Manages the workspace, its members, and usage. Everything a User can do. | Full seat |
+| **User** | Creates and edits Products and starts workflows. | Full seat |
+| **Approver** | Views everything and acts only in workflows they're assigned to. | Approver seat |
+| **Manager** | Sees usage, billing, and invoices. Can be added to any of the above, or given on its own. | Free when given on its own |
+
+A **Manager only** member sees billing and usage but has no access to Products or workflows.
+
 ## Invite members (admins)
 
 1. In **Settings**, click **Invite Users**.
-2. Enter a **Name** and **Email** for each person. Click **Add Another User** to add more, up to 10 at a time.
+2. Enter a **Name** and **Email** for each person, then choose their **Access**: **User**, **User + Manager**, **Approver**, **Approver + Manager**, or **Manager only**. Click **Add another** to add more, up to 10 at a time.
 3. Click **Send Invitations**.
 
-Invited people sign in and complete their profile before they can use the workspace. Inviting someone who was removed gives them access again.
+Invited people sign in and complete their profile before they can use the workspace. Inviting someone who was removed gives them access again. You can't invite someone as an Admin.
+
+## Change member access (admins)
+
+1. On the **Users** or **Admins** tab, click the person's access badge.
+2. In **Change access**, pick the new access. For an Admin, choose **Admin** or **Admin + Manager**.
+3. Click **Save access**.
+
+To make someone an Approver or Manager only, first move them off any Products they own or contribute to, and any active workflows they started. For Manager only, also replace them as an approver on active workflows. **Change access** lists these with links, and **Check again** refreshes the list.
+
+If your workspace blocks usage over its limits, an access change that would go over a seat limit isn't saved.
 
 ## Remove members (admins)
 
@@ -131,19 +153,37 @@ Invited people sign in and complete their profile before they can use the worksp
 
 They lose access immediately. Their past activity in the workspace is kept. If they owned products, ownership moves to you.
 
-## Usage and limits (admins)
+## Usage and limits (admins and managers)
 
 The **Usage** tab shows **Usage & limits** for the current billing period:
 
 - **Full seats** (Admins and Users), **Approver seats**, **Exports**, and **Upload volume**, compared with your limits. Manager-only members are free and don't use a seat.
 - Whether the **SSO add-on** (single sign-on) is enabled.
 
-Under **Limit enforcement**, choose what happens to exports and uploads when the workspace reaches a limit:
+Under **Limit enforcement**, choose what happens when the workspace reaches a limit:
 
-- **Allow overage**: exports and uploads keep working past the limit.
-- **Block when over limit**: exports and uploads that go over the limit are blocked.
+- **Allow overage**: exports, uploads, and new members keep working past the limit.
+- **Block when over limit**: exports, uploads, and member changes that go over the limit are blocked.
 
-You can also set an **Export limit** and an **Upload limit (GB)**, then click **Save preferences**. Seat limits come from your subscription and can't be changed here.
+You can also set an **Export limit** and an **Upload limit (GB)**, then click **Save preferences**. **Full seat** and **Approver seat** limits come from your subscription and can't be changed here. When blocking is on, Uprevit checks them when an invited member finishes setting up their profile and when a member's access changes.
+
+## Billing and invoices (managers)
+
+<Callout type="warn" title="Manager only">
+  Only members with **Manager** access see the **Billing** tab and invoices. Admins can see it too once they're given **Admin + Manager** access.
+</Callout>
+
+The **Billing** tab shows:
+
+| Section | What it shows |
+|---------|---------------|
+| **Plan** | Your plan, whether you're billed monthly or yearly, and the subscription status. |
+| **Current term** | When the current term starts and ends, and the next billing date. |
+| **Included** | Your **Full seats**, **Approver seats**, and whether SSO is included. |
+| **References** | Your **Customer ID** and **Subscription ID**. Share these with Uprevit support when you ask about a bill. |
+| **Invoices** | Every invoice for the workspace. Click **Refresh** to reload them. |
+
+Click an invoice to see its line items and totals, and click **Download PDF** to save it. Click **Billing** in the header to go back. To change your plan, contact Uprevit support.
 
 ## Admin role
 
