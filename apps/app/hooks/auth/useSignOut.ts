@@ -19,8 +19,9 @@ export function useSignOut() {
     await auth.removeUser();
     clearSupportSession();
 
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri,
-    )}`;
+    const logoutUrl = new URL("/logout", cognitoDomain);
+    logoutUrl.searchParams.set("client_id", clientId);
+    logoutUrl.searchParams.set("logout_uri", logoutUri);
+    window.location.assign(logoutUrl);
   }, [auth]);
 }
