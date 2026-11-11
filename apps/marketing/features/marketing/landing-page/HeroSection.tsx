@@ -28,12 +28,17 @@ export default function HeroSection() {
           </p>
         </div>
         <div className="mt-8 flex items-center justify-center gap-4">
-          <Button onClick={() => scrollTo("demo")} variant="outline" size="lg">
+          <Button
+            onClick={() => scrollTo("demo")}
+            variant="outline"
+            size="lg"
+            data-attr="hero-learn-more"
+          >
             Learn More
             <Icon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
           </Button>
           <Button asChild size="lg">
-            <Link href="/contact">
+            <Link href="/contact" data-attr="hero-contact-us">
               Contact Us
               <Icon icon={Mail01Icon} size={16} strokeWidth={2} />
             </Link>

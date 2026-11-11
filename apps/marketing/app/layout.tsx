@@ -4,6 +4,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 import { TooltipProvider } from "@uprevit/ui/components/ui/tooltip";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -32,6 +33,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>{children}</TooltipProvider>
+          <CookieConsentBanner />
         </ThemeProvider>
       </body>
     </html>

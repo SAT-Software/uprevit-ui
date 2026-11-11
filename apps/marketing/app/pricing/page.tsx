@@ -127,7 +127,7 @@ function PricingPageContent() {
                       </p>
                       <div className="mt-5 grid gap-3">
                         <Button asChild className="h-11 rounded-lg text-base">
-                          <Link href="/contact">
+                          <Link href="/contact" data-attr="pricing-talk-to-us">
                             Talk to Us
                             <Icon
                               icon={ArrowRight01Icon}

@@ -34,7 +34,9 @@ export default function CTASection() {
                 </h2>
                 <div className="mt-8 flex items-center justify-center gap-4">
                   <Button asChild size="lg">
-                    <Link href="/contact">Get Started</Link>
+                    <Link href="/contact" data-attr="cta-get-started">
+                      Get Started
+                    </Link>
                   </Button>
                 </div>
               </div>
