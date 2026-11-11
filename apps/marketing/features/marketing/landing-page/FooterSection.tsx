@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { cdnUrl } from "@/lib/cdn";
 import { ThemeToggle } from "@uprevit/ui/components/common/ThemeToggle";
+import { openCookieConsent } from "@/components/CookieConsentBanner";
 
 export default function FooterSection() {
   return (
@@ -131,6 +132,13 @@ export default function FooterSection() {
             >
               Terms of Service
             </Link>
+            <button
+              type="button"
+              onClick={openCookieConsent}
+              className="hover:text-neutral-50 transition-colors"
+            >
+              Cookie Settings
+            </button>
           </div>
         </div>
 
