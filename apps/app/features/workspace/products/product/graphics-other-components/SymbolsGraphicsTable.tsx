@@ -1,0 +1,890 @@
+"use client";
+
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  Column,
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  PaginationState,
+  Row,
+  SortingState,
+  useReactTable,
+  VisibilityState,
+} from "@tanstack/react-table";
+import { Fragment, ReactNode, useMemo, useState } from "react";
+
+import { InfoTooltip } from "@/components/common/InfoTooltip";
+import { Badge } from "@uprevit/ui/components/ui/badge";
+import { Button } from "@uprevit/ui/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@uprevit/ui/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@uprevit/ui/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@uprevit/ui/components/ui/tooltip";
+import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
+import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
+import ShowOrHideTableColumnsDropdown from "@/features/workspace/common/ShowOrHideTableColumnsDropdown";
+import type { ListFilter, ListFilterColumn } from "@/lib/workspace-list-query";
+import { advancedFilterFn } from "@/lib/table-filters";
+import { ProductImageFrame } from "../ProductImageFrame";
+import {
+  ArrowDown01Icon,
+  ArrowRight01Icon,
+  ArrowUp01Icon,
+  Delete02Icon,
+  MoreVerticalSquare01Icon,
+  PropertyEditIcon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
+import type { DiffItem } from "@/utils/deepDiff";
+import { cn } from "@uprevit/ui/lib/utils";
+import { RedlineStatusBadge } from "@/components/common/RedlineBadge";
+import { RedlineCell } from "@/components/common/RedlineCell";
+import { redlineChipAdded, redlineChipRemoved } from "@/utils/redlineStyles";
+
+export type SymbolsGraphicsTableItem = {
+  id: string;
+  componentName: string;
+  componentImage: string;
+  key?: string;
+  _redlineStatus?: "added" | "removed" | "modified" | "unchanged";
+  _redlineDiffs?: DiffItem[];
+  _redlineId?: string;
+  _redlineBaseImage?: string;
+};
+
+type RenderDialog<TItem> = (
+  item: TItem,
+  open: boolean,
+  onOpenChange: (open: boolean) => void,
+) => ReactNode;
+
+type TableMeta = {
+  isContentLocked?: boolean;
+  isRedlineView?: boolean;
+  getFieldDiff?: (
+    row: SymbolsGraphicsTableItem,
+    field: string,
+    value?: unknown,
+  ) => DiffItem | null;
+  getRowStatus?: (
+    row: SymbolsGraphicsTableItem,
+  ) => "added" | "removed" | "modified" | null;
+  renderEditDialog?: RenderDialog<SymbolsGraphicsTableItem>;
+  renderDeleteDialog?: RenderDialog<SymbolsGraphicsTableItem>;
+};
+
+export const getPersistentItemId = (item: SymbolsGraphicsTableItem): string =>
+  item._redlineId || item.id || item.componentName;
+
+export const getRedlineImagePresentation = (
+  row: SymbolsGraphicsTableItem,
+  meta?: TableMeta,
+) => {
+  const image =
+    typeof row.componentImage === "string" ? row.componentImage.trim() : "";
+  const rowStatus = meta?.getRowStatus?.(row);
+  const diff = meta?.isRedlineView
+    ? (meta.getFieldDiff?.(row, "componentImage", row.componentImage) ??
+      row._redlineDiffs?.find((d) => d.path === "image") ??
+      null)
+    : null;
+  const oldImage =
+    row._redlineBaseImage ||
+    (typeof diff?.old_value === "string" ? diff.old_value.trim() : "");
+  const newImage =
+    typeof diff?.new_value === "string" ? diff.new_value.trim() : "";
+
+  if (rowStatus === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (rowStatus === "removed") {
+    return {
+      src: image || oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "added") {
+    return {
+      src: image || newImage,
+      badge: "NEW" as const,
+      frameClassName: "border-blue-300",
+      imageClassName: undefined,
+    };
+  }
+
+  if (diff?.status === "removed") {
+    return {
+      src: oldImage,
+      badge: "DEL" as const,
+      frameClassName: "border-red-300",
+      imageClassName: "opacity-70",
+    };
+  }
+
+  if (diff?.status === "modified") {
+    const modifiedImage = image || newImage || oldImage;
+    const imageWasRemoved = !image && !newImage && Boolean(oldImage);
+    return {
+      src: modifiedImage,
+      badge: "MOD" as const,
+      frameClassName: "border-amber-300",
+      imageClassName: imageWasRemoved ? "opacity-70" : undefined,
+    };
+  }
+
+  return {
+    src: image,
+    frameClassName: undefined as string | undefined,
+    imageClassName: undefined as string | undefined,
+  };
+};
+
+export const SortableHeader = <TItem,>({
+  column,
+  title,
+}: {
+  column?: Column<TItem, unknown>;
+  title: string;
+}) => {
+  if (!column) {
+    return (
+      <div className="flex items-center text-muted-foreground/60">
+        <span>{title}</span>
+      </div>
+    );
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-10 group data-[state=open]:bg-accent hover:bg-muted/50 w-full flex justify-between items-center cursor-pointer"
+        >
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors duration-150 ease-out">
+              <span>{title}</span>
+            </div>
+            <div className="opacity-50 group-hover:opacity-100 transition-opacity duration-150 ease-out">
+              {column.getIsSorted() === "desc" ? (
+                <Icon icon={ArrowDown01Icon} className="ml-1 h-3 w-3" />
+              ) : column.getIsSorted() === "asc" ? (
+                <Icon icon={ArrowUp01Icon} className="ml-1 h-3 w-3" />
+              ) : (
+                <Icon icon={UnfoldMoreIcon} className="ml-1 h-3 w-3" />
+              )}
+            </div>
+          </div>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Sort by {title}</TooltipContent>
+    </Tooltip>
+  );
+};
+
+const getMeta = (table: { options: { meta?: unknown } }) =>
+  table.options.meta as TableMeta | undefined;
+
+export const graphicsImageColumn = <
+  TItem extends SymbolsGraphicsTableItem,
+>(): ColumnDef<TItem> => ({
+  accessorKey: "componentImage",
+  meta: { label: "Image" },
+  header: () => <SortableHeader title="Image" />,
+  cell: ({ row, table }) => {
+    const imagePresentation = getRedlineImagePresentation(
+      row.original,
+      getMeta(table),
+    );
+
+    if (imagePresentation.badge && imagePresentation.src) {
+      return (
+        <div className="flex flex-col gap-1">
+          <span
+            className={`text-[9px] font-medium ${
+              imagePresentation.badge === "NEW"
+                ? "text-blue-600"
+                : imagePresentation.badge === "DEL"
+                  ? "text-red-600"
+                  : "text-amber-700"
+            }`}
+          >
+            {imagePresentation.badge}
+          </span>
+          <ProductImageFrame
+            src={imagePresentation.src}
+            alt={row.original.componentName}
+            frameClassName={imagePresentation.frameClassName}
+            imageClassName={imagePresentation.imageClassName}
+          />
+        </div>
+      );
+    }
+
+    return imagePresentation.src ? (
+      <ProductImageFrame
+        src={imagePresentation.src}
+        alt={row.original.componentName}
+        frameClassName={imagePresentation.frameClassName}
+        imageClassName={imagePresentation.imageClassName}
+      />
+    ) : (
+      <ProductImageFrame alt={row.original.componentName} />
+    );
+  },
+  size: 80,
+});
+
+export const graphicsNameColumn = <TItem extends SymbolsGraphicsTableItem>(
+  label: string,
+  accessorKey = "componentName",
+  diffField = "text",
+): ColumnDef<TItem> =>
+  ({
+    accessorKey,
+    enableSorting: true,
+    meta: { label },
+    header: ({ column }) => <SortableHeader column={column} title={label} />,
+    cell: ({ row, table }) => {
+      const meta = getMeta(table);
+      const value = row.getValue(accessorKey);
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, diffField, value)
+        : null;
+      return diff ? (
+        <RedlineCell
+          value={value}
+          diff={diff}
+          formatFn={(v) => (
+            <span className="font-medium">
+              {typeof v === "string" ? v : String(v ?? "")}
+            </span>
+          )}
+        />
+      ) : (
+        <span className="font-medium">{value as ReactNode}</span>
+      );
+    },
+  }) as ColumnDef<TItem>;
+
+export const graphicsDescriptionColumn = <
+  TItem extends SymbolsGraphicsTableItem,
+>(
+  label: string,
+  accessorKey = "componentDescription",
+  diffField = "description",
+): ColumnDef<TItem> =>
+  ({
+    accessorKey,
+    enableSorting: true,
+    meta: { label },
+    header: ({ column }) => <SortableHeader column={column} title={label} />,
+    cell: ({ row, table }) => {
+      const meta = getMeta(table);
+      const value = row.getValue(accessorKey);
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, diffField, value)
+        : null;
+      return diff ? (
+        <RedlineCell
+          value={value}
+          diff={diff}
+          formatFn={(v) => (
+            <div className="max-w-xs whitespace-pre-line text-sm">
+              {typeof v === "string" ? v : v != null ? String(v) : "-"}
+            </div>
+          )}
+        />
+      ) : (
+        <div className="max-w-xs whitespace-pre-line text-sm text-muted-foreground">
+          {(value as ReactNode) || "-"}
+        </div>
+      );
+    },
+  }) as ColumnDef<TItem>;
+
+export const graphicsPresenceColumn = <
+  TItem extends SymbolsGraphicsTableItem,
+>(
+  label: string,
+  accessorKey: "presentOnLabels" | "symbolsTextPresent",
+): ColumnDef<TItem> =>
+  ({
+    accessorKey,
+    enableSorting: true,
+    meta: { label },
+    header: ({ column }) => <SortableHeader column={column} title={label} />,
+    cell: ({ row, table }) => {
+      const meta = getMeta(table);
+      const labels = row.getValue(accessorKey) as string[];
+
+      let addedLabels: string[] = [];
+      let removedLabels: string[] = [];
+      if (meta?.isRedlineView) {
+        const rowStatus = row.original._redlineStatus;
+        const rowDiffs = row.original._redlineDiffs ?? [];
+        if (rowStatus === "added") {
+          addedLabels = labels;
+        } else if (rowStatus === "removed") {
+          removedLabels = labels;
+        } else {
+          const labelDiffs = rowDiffs.filter((d) =>
+            d.path.startsWith("label_presence"),
+          );
+          addedLabels = labelDiffs
+            .filter(
+              (d) =>
+                (d.status === "added" || d.status === "modified") &&
+                d.new_value,
+            )
+            .map((d) => d.new_value as string);
+          removedLabels = labelDiffs
+            .filter(
+              (d) =>
+                (d.status === "removed" || d.status === "modified") &&
+                d.old_value,
+            )
+            .map((d) => d.old_value as string);
+        }
+      }
+
+      const displayLabels = meta?.isRedlineView
+        ? [
+            ...labels,
+            ...addedLabels.filter((l) => !labels.includes(l)),
+            ...removedLabels.filter((l) => !labels.includes(l)),
+          ]
+        : labels;
+
+      return (
+        <div className="flex flex-wrap gap-1">
+          {displayLabels && displayLabels.length > 0 ? (
+            displayLabels.map((label, index) => {
+              const isNewlyAdded = addedLabels.includes(label);
+              const isRemoved = removedLabels.includes(label);
+              return (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className={cn(
+                    "text-xs",
+                    isNewlyAdded && redlineChipAdded,
+                    isRemoved && redlineChipRemoved,
+                  )}
+                >
+                  {label}
+                </Badge>
+              );
+            })
+          ) : (
+            <span className="text-muted-foreground text-sm">-</span>
+          )}
+        </div>
+      );
+    },
+  }) as ColumnDef<TItem>;
+
+export const graphicsYesNoColumn = <TItem extends SymbolsGraphicsTableItem>(
+  label: string,
+  accessorKey = "textPresent",
+  diffField = "text_present",
+): ColumnDef<TItem> =>
+  ({
+    accessorKey,
+    enableSorting: true,
+    meta: { label },
+    header: ({ column }) => <SortableHeader column={column} title={label} />,
+    cell: ({ row, table }) => {
+      const meta = getMeta(table);
+      const value = row.getValue(accessorKey);
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, diffField, value)
+        : null;
+
+      if (diff) {
+        return (
+          <RedlineCell
+            value={value}
+            diff={diff}
+            formatFn={(v, state) => (
+              <Badge
+                variant={
+                  state === "new"
+                    ? "default"
+                    : state === "old"
+                      ? "destructive"
+                      : v
+                        ? "default"
+                        : "secondary"
+                }
+                className={cn(
+                  state === "new" &&
+                    "border-blue-500 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600",
+                  state === "old" && redlineChipRemoved,
+                )}
+              >
+                {v ? "Yes" : "No"}
+              </Badge>
+            )}
+          />
+        );
+      }
+
+      return (
+        <Badge variant={value ? "default" : "secondary"}>
+          {value ? "Yes" : "No"}
+        </Badge>
+      );
+    },
+  }) as ColumnDef<TItem>;
+
+export const graphicsCountColumn = <TItem extends SymbolsGraphicsTableItem>(
+  label: string,
+  accessorKey = "count",
+  diffField = "count",
+): ColumnDef<TItem> =>
+  ({
+    accessorKey,
+    enableSorting: true,
+    meta: { label },
+    header: ({ column }) => <SortableHeader column={column} title={label} />,
+    cell: ({ row, table }) => {
+      const meta = getMeta(table);
+      const count = row.getValue(accessorKey) as number;
+      const diff = meta?.isRedlineView
+        ? meta.getFieldDiff?.(row.original, diffField, count)
+        : null;
+      const displayCount = count ?? 1;
+
+      return diff ? (
+        <RedlineCell
+          value={displayCount}
+          diff={diff}
+          formatFn={(v) => (
+            <span className="font-medium">
+              {typeof v === "string" ? v : String(v ?? "")}
+            </span>
+          )}
+        />
+      ) : (
+        <span className="font-medium">{displayCount}</span>
+      );
+    },
+    size: 80,
+  }) as ColumnDef<TItem>;
+
+const expanderColumn: ColumnDef<SymbolsGraphicsTableItem> = {
+  id: "expander",
+  enableHiding: false,
+  meta: { label: "Expand" },
+  header: () => null,
+  cell: ({ row }) =>
+    row.getCanExpand() ? (
+      <Button
+        className="size-7 shadow-none text-muted-foreground/60 hover:text-foreground"
+        onClick={row.getToggleExpandedHandler()}
+        aria-expanded={row.getIsExpanded()}
+        aria-label={
+          row.getIsExpanded()
+            ? `Collapse details for ${row.original.componentName}`
+            : `Expand details for ${row.original.componentName}`
+        }
+        size="icon"
+        variant="ghost"
+      >
+        <Icon
+          icon={row.getIsExpanded() ? ArrowDown01Icon : ArrowRight01Icon}
+          size={16}
+          className="opacity-60"
+        />
+      </Button>
+    ) : undefined,
+  size: 40,
+};
+
+const actionsColumn: ColumnDef<SymbolsGraphicsTableItem> = {
+  id: "actions",
+  meta: { label: "Actions" },
+  header: () => <span className="sr-only">Actions</span>,
+  cell: ({ row, table }) => <RowActions row={row} meta={getMeta(table)} />,
+  size: 40,
+  enableHiding: false,
+};
+
+export default function SymbolsGraphicsTable<
+  TItem extends SymbolsGraphicsTableItem,
+>({
+  title,
+  info,
+  emptyMessage,
+  data,
+  columns,
+  filterColumns,
+  isContentLocked = false,
+  isRedlineView = false,
+  addDialog,
+  renderEditDialog,
+  renderDeleteDialog,
+}: {
+  title: string;
+  info: string;
+  emptyMessage: string;
+  data?: TItem[];
+  columns: ColumnDef<TItem>[];
+  filterColumns: ListFilterColumn[];
+  isContentLocked?: boolean;
+  isRedlineView?: boolean;
+  addDialog: ReactNode;
+  renderEditDialog: RenderDialog<TItem>;
+  renderDeleteDialog: RenderDialog<TItem>;
+}) {
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "componentName", desc: false },
+  ]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [filters, setFilters] = useState<ListFilter[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+
+  const allColumns = useMemo(
+    () => [
+      expanderColumn as ColumnDef<TItem>,
+      ...columns,
+      actionsColumn as ColumnDef<TItem>,
+    ],
+    [columns],
+  );
+
+  const getRowStatus = (row: SymbolsGraphicsTableItem) => {
+    if (!isRedlineView) return null;
+    const status = row._redlineStatus;
+    if (!status || status === "unchanged") return null;
+    return status === "modified" ? "modified" : status;
+  };
+
+  const getFieldDiff = (
+    row: SymbolsGraphicsTableItem,
+    field: string,
+    value?: unknown,
+  ) => {
+    if (!isRedlineView) return null;
+    const status = row._redlineStatus;
+    const rawValue = value ?? (row as Record<string, unknown>)[field];
+    if (status === "added") {
+      return {
+        path: field,
+        status: "added",
+        old_value: null,
+        new_value: rawValue,
+      } as DiffItem;
+    }
+    if (status === "removed") {
+      return {
+        path: field,
+        status: "removed",
+        old_value: rawValue,
+        new_value: null,
+      } as DiffItem;
+    }
+    return row._redlineDiffs?.find((d) => d.path === field) ?? null;
+  };
+
+  const meta: TableMeta = {
+    isContentLocked,
+    isRedlineView,
+    getFieldDiff,
+    getRowStatus,
+    renderEditDialog: renderEditDialog as RenderDialog<SymbolsGraphicsTableItem>,
+    renderDeleteDialog:
+      renderDeleteDialog as RenderDialog<SymbolsGraphicsTableItem>,
+  };
+
+  const table = useReactTable({
+    data: data || [],
+    columns: allColumns,
+    getRowId: (originalRow) => getPersistentItemId(originalRow),
+    getRowCanExpand: (row) => Boolean(row.original.componentImage?.trim()),
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    enableSortingRemoval: false,
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
+    defaultColumn: { filterFn: advancedFilterFn<TItem>() },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    state: { sorting, pagination, columnFilters, columnVisibility },
+    meta,
+  });
+
+  const handleApplyFilters = (nextFilters: ListFilter[]) => {
+    setFilters(nextFilters);
+    setColumnFilters(
+      nextFilters.map((filter) => ({
+        id: filter.field,
+        value: {
+          operator: filter.operator,
+          value: filter.value ?? "",
+        },
+      })),
+    );
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters([]);
+    setColumnFilters([]);
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  };
+
+  const filteredRowCount = table.getFilteredRowModel().rows.length;
+  const pageCount = Math.max(1, table.getPageCount());
+  const currentPage = pagination.pageIndex + 1;
+
+  return (
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">{title}</p>
+          <InfoTooltip content={info} />
+        </div>
+        <div className="flex items-center gap-2">
+          <ShowOrHideTableColumnsDropdown table={table} />
+          <WorkspaceListControls
+            filters={filters}
+            filterColumns={filterColumns}
+            onApplyFilters={handleApplyFilters}
+            onClearFilters={handleClearFilters}
+          />
+          {addDialog}
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex flex-col items-end">
+          <div className="w-full overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow
+                    key={headerGroup.id}
+                    className="h-10 hover:bg-transparent"
+                  >
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{ width: `${header.getSize()}px` }}
+                        className="h-10 border-r border-border text-xs font-medium text-muted-foreground/60 last:border-r-0"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody className="[&_tr:last-child]:border-b">
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => {
+                    const rowStatus = getRowStatus(row.original);
+                    const isAdded = isRedlineView && rowStatus === "added";
+                    const isRemoved = isRedlineView && rowStatus === "removed";
+                    const isModified =
+                      isRedlineView && rowStatus === "modified";
+                    const itemId = getPersistentItemId(row.original);
+                    const imagePresentation = row.getIsExpanded()
+                      ? getRedlineImagePresentation(row.original, meta)
+                      : null;
+
+                    return (
+                      <Fragment key={itemId}>
+                        <TableRow
+                          data-state={row.getIsSelected() && "selected"}
+                          className={cn(
+                            "hover:bg-muted/50",
+                            isAdded && "bg-blue-50/30 dark:bg-blue-950/20",
+                            isRemoved && "bg-red-50/30 dark:bg-red-950/20",
+                            isModified && "bg-amber-50/30 dark:bg-amber-950/20",
+                          )}
+                        >
+                          {row.getVisibleCells().map((cell, cellIdx) => (
+                            <TableCell
+                              key={cell.id}
+                              className="last:py-0 [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                            >
+                              <div className="flex items-center gap-2">
+                                {cellIdx === 0 && (
+                                  <RedlineStatusBadge
+                                    status={rowStatus}
+                                    inline
+                                    className="rounded-full"
+                                  />
+                                )}
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+
+                        {imagePresentation && (
+                          <TableRow>
+                            <TableCell colSpan={row.getVisibleCells().length}>
+                              <div className="flex flex-col items-center py-2">
+                                {imagePresentation.src ? (
+                                  <ProductImageFrame
+                                    src={imagePresentation.src}
+                                    alt={row.original.componentName}
+                                    variant="preview"
+                                    frameClassName={
+                                      imagePresentation.frameClassName
+                                    }
+                                    imageClassName={
+                                      imagePresentation.imageClassName
+                                    }
+                                    priority
+                                  />
+                                ) : (
+                                  <ProductImageFrame
+                                    alt={row.original.componentName}
+                                    variant="preview"
+                                  />
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </Fragment>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={allColumns.length}
+                      className="h-24 text-center text-sm text-muted-foreground"
+                    >
+                      {emptyMessage}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex h-10 w-full items-center border-b">
+            <WorkspaceListPagination
+              pagination={{
+                currentPage,
+                totalPages: pageCount,
+                totalCount: filteredRowCount,
+                limit: pagination.pageSize,
+                hasNextPage: table.getCanNextPage(),
+                hasPrevPage: table.getCanPreviousPage(),
+              }}
+              onPageChange={(page) => table.setPageIndex(page - 1)}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RowActions({
+  row,
+  meta,
+}: {
+  row: Row<SymbolsGraphicsTableItem>;
+  meta?: TableMeta;
+}) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const item = row.original;
+  const actionsDisabled =
+    meta?.isContentLocked || item._redlineStatus === "removed";
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            className="shadow-none text-muted-foreground/60 hover:text-foreground"
+            aria-label="More actions"
+            disabled={actionsDisabled}
+          >
+            <Icon icon={MoreVerticalSquare01Icon} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              disabled={actionsDisabled}
+              onSelect={() => setTimeout(() => setShowEditDialog(true), 100)}
+            >
+              <Icon icon={PropertyEditIcon} />
+              <span>Edit</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            disabled={actionsDisabled}
+            onSelect={() => setTimeout(() => setShowDeleteDialog(true), 100)}
+            className="text-destructive focus:text-destructive"
+          >
+            <Icon icon={Delete02Icon} className="text-destructive" />
+            <span>Delete</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {meta?.renderEditDialog?.(item, showEditDialog, setShowEditDialog)}
+      {meta?.renderDeleteDialog?.(item, showDeleteDialog, setShowDeleteDialog)}
+    </>
+  );
+}
