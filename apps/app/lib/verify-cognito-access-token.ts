@@ -14,18 +14,21 @@ function getJwks() {
   return jwks;
 }
 
-export async function verifyCognitoAccessToken(token: string): Promise<boolean> {
-  if (!issuer) return false;
+export async function verifyCognitoAccessToken(
+  token: string,
+): Promise<{ sub: string } | null> {
+  if (!issuer || !clientId) {
+    console.error(
+      "[auth] Token verification is disabled: NEXT_PUBLIC_COGNITO_AUTHORITY or NEXT_PUBLIC_CLIENT_ID is missing.",
+    );
+    return null;
+  }
 
   try {
     const { payload } = await jwtVerify(token, getJwks(), { issuer });
-
-    if (clientId && payload.client_id !== clientId) {
-      return false;
-    }
-
-    return true;
+    if (payload.token_use !== "access" || payload.client_id !== clientId) return null;
+    return typeof payload.sub === "string" && payload.sub ? { sub: payload.sub } : null;
   } catch {
-    return false;
+    return null;
   }
 }

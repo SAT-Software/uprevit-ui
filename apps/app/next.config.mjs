@@ -1,5 +1,6 @@
 import { withPostHogConfig } from "@posthog/nextjs-config";
 import { createMDX } from "fumadocs-mdx/next";
+import { apiProxyTarget } from "./lib/api-proxy-target.mjs";
 
 const posthogHost =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
@@ -85,13 +86,6 @@ const nextConfig = {
   },
 
   async rewrites() {
-    const target =
-      process.env.API_PROXY_TARGET ||
-      process.env.NEXT_PUBLIC_API_PROXY_TARGET ||
-      (process.env.NODE_ENV === "development"
-        ? "https://weh8ywxicg.execute-api.us-east-1.amazonaws.com/Prod"
-        : undefined);
-
     return {
       afterFiles: [
         {
@@ -107,11 +101,11 @@ const nextConfig = {
           destination: `${posthogHost}/:path*`,
         },
       ],
-      fallback: target
+      fallback: apiProxyTarget
         ? [
             {
               source: "/api/:path*",
-              destination: `${target}/:path*`,
+              destination: `${apiProxyTarget}/:path*`,
             },
           ]
         : [],

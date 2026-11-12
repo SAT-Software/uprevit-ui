@@ -1,4 +1,5 @@
 import { redactUrl } from "@/lib/posthog/redactUrl";
+import { consumeRateLimit } from "@/lib/rate-limit";
 
 const POSTHOG_HOSTS = new Set(["https://us.i.posthog.com", "https://eu.i.posthog.com"]);
 const UPSTREAM_PATHS: Record<string, string> = {
@@ -38,9 +39,6 @@ export async function POST(
     return error("Support is not configured", 503);
   }
 
-  const fetchSite = request.headers.get("sec-fetch-site");
-  if (fetchSite && fetchSite !== "same-origin") return error("Forbidden", 403);
-
   let appOrigin: string;
   try {
     const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || request.url);
@@ -49,11 +47,17 @@ export async function POST(
   } catch {
     return error("Support is not configured", 503);
   }
+  const fetchSite = request.headers.get("sec-fetch-site");
   const origin = request.headers.get("origin");
+  if (!fetchSite && !origin) return error("Forbidden", 403);
+  if (fetchSite && fetchSite !== "same-origin") return error("Forbidden", 403);
   if (origin && origin !== appOrigin) return error("Forbidden", 403);
 
   const token = request.headers.get("x-conversations-token") ?? "";
   if (!TOKEN_PATTERN.test(token)) return error("Invalid conversations token", 401);
+
+  const ip = (request.headers.get("x-forwarded-for") ?? "").split(",").map((value) => value.trim()).filter(Boolean).at(-1) || "unknown";
+  if (!consumeRateLimit(`support:${ip}`, 30, 60_000).ok) return error("Too many requests", 429);
 
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
     return error("Message is too large", 413);
