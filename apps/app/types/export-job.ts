@@ -1,4 +1,4 @@
-export type ExportJobFormat = "pdf" | "excel";
+export type ExportJobFormat = "pdf" | "excel" | "csv";
 
 export type ExportJobStatus = "queued" | "processing" | "completed" | "failed";
 
@@ -6,7 +6,8 @@ export type ExportJobTarget =
   | "product"
   | "product_specifications"
   | "operational_parameters"
-  | "report";
+  | "report"
+  | "audit_log";
 
 export interface ExportJobSummary {
   jobId: string;
