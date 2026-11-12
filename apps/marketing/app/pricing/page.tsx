@@ -31,7 +31,7 @@ const pricingFAQs = [
   {
     question: "How is Uprevit priced?",
     answer:
-      "Uprevit pricing combines a one-time platform fee, seats, and optional usage add-ons for uploads, exports, and SSO. Larger rollouts or advanced requirements can be reviewed with our team.",
+      "Uprevit pricing combines a one-time platform fee, seats, and optional usage add-ons for uploads and exports. SSO (SAML/OIDC) sign-in is coming soon — contact us to plan it. Larger rollouts or advanced requirements can be reviewed with our team.",
   },
   {
     question: "What counts as a seat?",
@@ -122,8 +122,8 @@ function PricingPageContent() {
                       </div>
                       <p className="mt-3 text-sm text-muted-foreground">
                         One plan for regulated labeling teams: a one-time
-                        platform fee + seats + transparent upload and export usage, with SSO
-                        available when you need it.
+                        platform fee + seats + transparent upload and export usage. SSO
+                        (SAML/OIDC) is coming soon — contact us to plan it.
                       </p>
                       <div className="mt-5 grid gap-3">
                         <Button asChild className="h-11 rounded-lg text-base">
@@ -154,7 +154,7 @@ function PricingPageContent() {
                           "Product and report exports",
                           "Transparent upload and export add-ons",
                           "Annual billing with monthly option",
-                          "SSO add-on available",
+                          "SSO (SAML/OIDC): coming soon — contact us",
                         ].map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <Icon
