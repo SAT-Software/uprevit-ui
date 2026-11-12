@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAuth, type AuthContextProps } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 import type {
   DocumentationVideoKey,
   DocumentationVideoSignedUrlResponse,
@@ -40,8 +41,7 @@ async function fetchDocumentationVideoUrl({
   );
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to load documentation video");
+    throw await getResponseError(response, "Failed to load documentation video");
   }
 
   return (await response.json()) as DocumentationVideoSignedUrlResponse;

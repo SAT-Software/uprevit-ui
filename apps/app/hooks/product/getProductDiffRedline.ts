@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { deepDiff, DiffItem } from "@/utils/deepDiff";
 import type { AllTabsData } from "@/types/product";
+import { getResponseError } from "@/lib/api-error";
 
 interface ProductDiffResult {
   result: {
@@ -35,8 +36,7 @@ async function fetchProductData(
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch product data");
+    throw await getResponseError(response, "Failed to fetch product data");
   }
   const data = (await response.json()) as { result?: { data?: AllTabsData } };
   if (!data.result?.data) throw new Error("This product version is unavailable");

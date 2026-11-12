@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import type { ImportCreateResult } from "@/types/product-import";
 
 export const IMPORT_BATCH_SIZE = 25;
@@ -41,7 +41,7 @@ export function useImportProducts() {
         },
       });
       if (!res.ok) {
-        throw new Error(await getResponseErrorMessage(res, "The products couldn't be created"));
+        throw await getResponseError(res, "The products couldn't be created");
       }
       const data = await res.json();
       return data.results ?? [];

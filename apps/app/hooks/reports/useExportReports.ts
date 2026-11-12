@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth, AuthContextProps } from "react-oidc-context";
 import { EnqueueReportExportResponse } from "@/types/export-job";
 import { ReportsQueryRequest } from "@/types/reports";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 
 type ExportFormat = "pdf" | "excel";
 
@@ -32,12 +32,7 @@ async function enqueueReportExport({
   });
 
   if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(
-        response,
-        `Failed to queue ${format.toUpperCase()} export`,
-      )
-    );
+    throw await getResponseError(response, `Failed to queue ${format.toUpperCase()} export`);
   }
 
   return response.json();

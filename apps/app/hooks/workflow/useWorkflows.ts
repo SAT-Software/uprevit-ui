@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 import type {
   GetWorkflowsResponse,
   UpdateWorkflowInput,
@@ -63,7 +63,7 @@ async function workflowRequest<T>(
     },
   });
   if (!res.ok) {
-    throw new Error(await getResponseErrorMessage(res, fallbackMessage));
+    throw await getResponseError(res, fallbackMessage);
   }
   return res.json();
 }

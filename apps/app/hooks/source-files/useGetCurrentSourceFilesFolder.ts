@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getCurrentSourceFilesFolder(
   folderId: string,
@@ -22,8 +23,7 @@ async function getCurrentSourceFilesFolder(
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch source files folder by id");
+    throw await getResponseError(response, "Failed to fetch source files folder by id");
   }
   const data = await response.json();
   return data;

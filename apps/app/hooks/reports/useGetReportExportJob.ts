@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { GetReportExportJobResponse } from "@/types/export-job";
+import { getResponseError } from "@/lib/api-error";
 
 async function getReportExportJob({
   auth,
@@ -20,8 +21,7 @@ async function getReportExportJob({
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch report export job");
+    throw await getResponseError(response, "Failed to fetch report export job");
   }
 
   return response.json();

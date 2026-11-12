@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
 import { isAdminProfile } from "@/utils/isAdmin";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import { toast } from "sonner";
 
 export function useMemberListIncludeInactive() {
@@ -51,12 +51,7 @@ export function useMemberListIncludeInactive() {
         });
 
         if (!response.ok) {
-          throw new Error(
-            await getResponseErrorMessage(
-              response,
-              "Failed to save member list preference",
-            ),
-          );
+          throw await getResponseError(response, "Failed to save member list preference");
         }
 
         queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId] });

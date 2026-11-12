@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import type { StandardSymbolsResponse } from "@/types/standard-symbol";
+import { getResponseError } from "@/lib/api-error";
 
 async function getStandardSymbols({
   signal,
@@ -23,8 +24,7 @@ async function getStandardSymbols({
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch standard symbols");
+    throw await getResponseError(response, "Failed to fetch standard symbols");
   }
 
   return (await response.json()) as StandardSymbolsResponse;

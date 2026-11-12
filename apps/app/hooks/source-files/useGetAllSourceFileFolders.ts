@@ -6,6 +6,7 @@ import {
 import type { SourceFilesFoldersApiResponse } from "@/types/source-files";
 import { parseSourceFilesFoldersListResponse } from "@/utils/source-files-list-response";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 export const SOURCE_FILES_LIST_LIMIT = 24;
 
@@ -37,8 +38,7 @@ export async function getAllSourceFileFolders({
     signal,
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || "Failed to fetch source files folders");
+    throw await getResponseError(res, "Failed to fetch source files folders");
   }
 
   const data: unknown = await res.json();

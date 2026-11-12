@@ -6,6 +6,7 @@ import type {
   AnalyticsProduct,
 } from "@/types/analytics";
 import type { WorkspaceListPagination } from "@/types/user";
+import { getResponseError } from "@/lib/api-error";
 
 const ANALYTICS_PRODUCTS_LIMIT = 50;
 
@@ -44,8 +45,7 @@ async function getAnalyticsProducts({
     },
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch analytics products");
+    throw await getResponseError(response, "Failed to fetch analytics products");
   }
   const { data, pagination } = await response.json();
   return { data, pagination };

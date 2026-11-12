@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getDepartmentById(
   departmentId: string,
@@ -19,8 +20,7 @@ async function getDepartmentById(
     signal,
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch department");
+    throw await getResponseError(response, "Failed to fetch department");
   }
   const data = await response.json();
   return data;

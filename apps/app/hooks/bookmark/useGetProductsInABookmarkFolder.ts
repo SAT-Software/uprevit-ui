@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getProductsInABookmarkFolder(
   folderId: string,
@@ -17,8 +18,7 @@ async function getProductsInABookmarkFolder(
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch products in a bookmark folder");
+    throw await getResponseError(response, "Failed to fetch products in a bookmark folder");
   }
   const data = await response.json();
   return data;

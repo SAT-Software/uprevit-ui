@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getProductTabData(
   productId: string,
@@ -24,8 +25,7 @@ async function getProductTabData(
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch product tab data");
+    throw await getResponseError(response, "Failed to fetch product tab data");
   }
   const data = await response.json();
   return data;

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import type { ImportCheckResult } from "@/types/product-import";
 
 export interface ImportCheckInput {
@@ -22,9 +22,7 @@ export function useCheckProductImport() {
         },
       });
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(res, "The file couldn't be checked against your workspace. Check your connection and upload it again."),
-        );
+        throw await getResponseError(res, "The file couldn't be checked against your workspace. Check your connection and upload it again.");
       }
       return res.json();
     },

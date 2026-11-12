@@ -5,9 +5,21 @@ import {
   QueryClientProvider,
   isServer,
 } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import dynamic from "next/dynamic";
 import * as React from "react";
 import { AuthProvider } from "react-oidc-context";
+import { shouldRetryQuery } from "@/lib/api-error";
+
+const ReactQueryDevtools =
+  process.env.NODE_ENV === "development"
+    ? dynamic(
+        () =>
+          import("@tanstack/react-query-devtools").then(
+            (mod) => mod.ReactQueryDevtools,
+          ),
+        { ssr: false },
+      )
+    : null;
 
 const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_REDIRECT_URI!;
@@ -25,7 +37,7 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
-        retry: 3,
+        retry: shouldRetryQuery,
         retryDelay: 1000,
       },
     },
@@ -50,7 +62,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <AuthProvider {...cognitoAuthConfig}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <ReactQueryDevtools />
+        {ReactQueryDevtools ? <ReactQueryDevtools /> : null}
       </QueryClientProvider>
     </AuthProvider>
   );

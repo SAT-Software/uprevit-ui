@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import type { SupportConfig } from "@/types/support";
 import { getSupportPrincipal } from "@/hooks/support/useSupportPrincipal";
 
@@ -18,9 +18,7 @@ export function useGetSupportConfig() {
         signal,
       });
       if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to load support settings"),
-        );
+        throw await getResponseError(response, "Failed to load support settings");
       }
       const data = (await response.json()) as { result: SupportConfig };
       return data.result;

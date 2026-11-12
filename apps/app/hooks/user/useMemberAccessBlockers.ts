@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import type { MemberAccess, MemberAccessBlockers } from "@/types/user";
 
 export function useMemberAccessBlockers(
@@ -26,9 +26,7 @@ export function useMemberAccessBlockers(
         signal,
       });
       if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to check access"),
-        );
+        throw await getResponseError(response, "Failed to check access");
       }
       const body = await response.json();
       return body.blockers;

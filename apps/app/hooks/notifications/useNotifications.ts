@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 import type { GetNotificationsResponse } from "@/types/notification";
 
 const NOTIFICATIONS_QUERY_KEY = ["notifications"];
@@ -33,9 +33,7 @@ async function getNotifications(
     signal,
   });
   if (!res.ok) {
-    throw new Error(
-      await getResponseErrorMessage(res, "Failed to fetch notifications"),
-    );
+    throw await getResponseError(res, "Failed to fetch notifications");
   }
   return res.json();
 }
@@ -88,12 +86,7 @@ export function useMarkNotificationsRead() {
         },
       });
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(
-            res,
-            "Failed to mark notifications as read",
-          ),
-        );
+        throw await getResponseError(res, "Failed to mark notifications as read");
       }
       return res.json();
     },

@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
-import { WorkspaceAccessFrozenError } from "@/utils/workspaceAccessErrors";
+import {
+  ApiError,
+  getResponseErrorMessage,
+  shouldRetryQuery,
+} from "@/lib/api-error";
+import {
+  isWorkspaceAccessFrozenError,
+  WorkspaceAccessFrozenError,
+} from "@/utils/workspaceAccessErrors";
 
 async function getUserById(
   userId: string,
@@ -28,7 +35,7 @@ async function getUserById(
     ) {
       throw new WorkspaceAccessFrozenError(message);
     }
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
   const data = await response.json();
   return data;
@@ -43,10 +50,7 @@ export function useGetUser() {
     queryFn: ({ signal }) => getUserById(userId as string, { signal, auth }),
     enabled: auth.isAuthenticated && Boolean(userId),
     retry: (failureCount, error) =>
-      !(
-        error instanceof WorkspaceAccessFrozenError ||
-        (error instanceof Error &&
-          error.message.toLowerCase().includes("workspace access is frozen"))
-      ) && failureCount < 3,
+      !isWorkspaceAccessFrozenError(error) &&
+      shouldRetryQuery(failureCount, error),
   });
 }

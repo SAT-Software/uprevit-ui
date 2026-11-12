@@ -4,6 +4,7 @@ import {
   ListQueryParams,
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 export async function getAllProducts({
   signal,
@@ -26,8 +27,7 @@ export async function getAllProducts({
     signal,
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch products");
+    throw await getResponseError(response, "Failed to fetch products");
   }
   const data = await response.json();
 
