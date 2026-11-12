@@ -9,6 +9,7 @@ import {
   InputGroupInput,
 } from "@uprevit/ui/components/ui/input-group";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { Checkbox } from "@uprevit/ui/components/ui/checkbox";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
 import {
   Cancel01Icon,
@@ -19,7 +20,7 @@ import {
 interface SaveQueryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string) => void;
+  onSave: (name: string, shared: boolean) => Promise<boolean>;
   isConditionsEmpty: boolean;
   placeholder?: string;
 }
@@ -33,24 +34,33 @@ export function SaveQueryDialog({
 }: SaveQueryDialogProps) {
   const inputId = useId();
   const [name, setName] = useState("");
+  const [shared, setShared] = useState(false);
+
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
+      if (!nextOpen && isSaving) return;
       if (!nextOpen) {
         setName("");
+        setShared(false);
       }
       onOpenChange(nextOpen);
     },
-    [onOpenChange],
+    [isSaving, onOpenChange],
   );
 
-  const handleSave = useCallback(() => {
-    if (!name.trim()) return;
+  const handleSave = useCallback(async () => {
+    if (!name.trim() || isSaving) return;
 
-    onSave(name.trim());
+    setIsSaving(true);
+    const saved = await onSave(name.trim(), shared);
+    setIsSaving(false);
+    if (!saved) return;
     setName("");
+    setShared(false);
     onOpenChange(false);
-  }, [name, onSave, onOpenChange]);
+  }, [name, shared, isSaving, onSave, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -62,7 +72,7 @@ export function SaveQueryDialog({
         primaryAction={{
           label: "Save Query",
           onClick: handleSave,
-          disabled: !name.trim() || isConditionsEmpty,
+          disabled: !name.trim() || isConditionsEmpty || isSaving,
           icon: SaveIcon,
         }}
         secondaryAction={{
@@ -79,8 +89,8 @@ export function SaveQueryDialog({
               className="mt-0.5 shrink-0 text-muted-foreground"
             />
             <p className="text-xs text-muted-foreground">
-              Saved queries are stored locally in your browser. They will not
-              sync across devices and may be lost if you clear browser data.
+              Saved queries are stored in your workspace and are available on
+              any device.
             </p>
           </div>
 
@@ -97,6 +107,14 @@ export function SaveQueryDialog({
               />
             </InputGroup>
           </Field>
+
+          <label className="flex min-h-6 items-center gap-2 text-sm">
+            <Checkbox
+              checked={shared}
+              onCheckedChange={(checked) => setShared(checked === true)}
+            />
+            Share with everyone in this workspace
+          </label>
         </FieldGroup>
       </AppDialogContent>
     </Dialog>

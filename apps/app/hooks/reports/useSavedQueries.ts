@@ -1,103 +1,362 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
-import { SavedQuery, QueryCondition } from "@/types/reports";
+import { useCallback, useEffect, useMemo } from "react";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { AuthContextProps, useAuth } from "react-oidc-context";
+import {
+  ApiError,
+  getErrorMessage,
+  getResponseError,
+  shouldRetryQuery,
+} from "@/lib/api-error";
+import type { QueryCondition, SavedQuery } from "@/types/reports";
 
-const REPORTS_STORAGE_KEY = "uprevit_reports_saved_queries";
+export type SavedQueryKind = "report" | "workflow";
 
-function readStorage(storageKey: string) {
-  try {
-    return localStorage.getItem(storageKey);
-  } catch {
-    return null;
-  }
+type ConditionLogic = "AND" | "OR";
+
+type SavedQueryDefinition = {
+  conditions: unknown[];
+  conditionLogic?: ConditionLogic;
+};
+
+type ApiSavedQuery = {
+  id: string;
+  kind: SavedQueryKind;
+  name: string;
+  definition: SavedQueryDefinition;
+  shared: boolean;
+  isOwner: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SavedQueryCodec<T> = {
+  toStored: (condition: T) => unknown;
+  fromStored: (condition: unknown) => T;
+};
+
+type LegacySavedQuery = {
+  name?: string;
+  conditions?: unknown[];
+  conditionLogic?: ConditionLogic;
+};
+
+const QUERY_KEY = "saved-queries";
+const BASE_URL = "/api/reports/saved-queries";
+const LEGACY_STORAGE_KEYS: Record<SavedQueryKind, string> = {
+  report: "uprevit_reports_saved_queries",
+  workflow: "uprevit_workflow_saved_searches",
+};
+const importedKinds = new Set<SavedQueryKind>();
+
+async function request<R>(
+  auth: AuthContextProps,
+  path: string,
+  fallbackMessage: string,
+  init: RequestInit = {},
+): Promise<R> {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${auth.user?.access_token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) throw await getResponseError(response, fallbackMessage);
+  return response.json();
 }
 
+const listSavedQueries = async (
+  auth: AuthContextProps,
+  kind: SavedQueryKind,
+  signal: AbortSignal,
+) => {
+  const data = await request<{ result: { queries: ApiSavedQuery[] } }>(
+    auth,
+    `?kind=${kind}`,
+    "Failed to fetch saved queries",
+    { signal },
+  );
+  return data.result.queries;
+};
+
+const createSavedQuery = (
+  auth: AuthContextProps,
+  body: {
+    kind: SavedQueryKind;
+    name: string;
+    definition: SavedQueryDefinition;
+    shared: boolean;
+  },
+) =>
+  request<{ result: { query: ApiSavedQuery } }>(
+    auth,
+    "",
+    "Failed to save query",
+    { method: "POST", body: JSON.stringify(body) },
+  );
+
+const updateSavedQuery = (
+  auth: AuthContextProps,
+  id: string,
+  changes: { shared: boolean },
+) =>
+  request<{ result: { query: ApiSavedQuery } }>(
+    auth,
+    `/${id}`,
+    "Failed to update saved query",
+    { method: "PUT", body: JSON.stringify(changes) },
+  );
+
+const deleteSavedQuery = (auth: AuthContextProps, id: string) =>
+  request<unknown>(auth, `/${id}`, "Failed to delete saved query", {
+    method: "DELETE",
+  });
+
+const readLegacy = (kind: SavedQueryKind): LegacySavedQuery[] => {
+  try {
+    const raw = window.localStorage.getItem(LEGACY_STORAGE_KEYS[kind]);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const removeLegacy = (kind: SavedQueryKind) => {
+  try {
+    window.localStorage.removeItem(LEGACY_STORAGE_KEYS[kind]);
+  } catch {}
+};
+
+const restoreLegacy = (kind: SavedQueryKind, items: LegacySavedQuery[]) => {
+  try {
+    window.localStorage.setItem(LEGACY_STORAGE_KEYS[kind], JSON.stringify(items));
+  } catch {}
+};
+
+const LEGACY_IMPORT_CLAIM_MS = 2 * 60 * 1000;
+
+const claimLegacyImport = (kind: SavedQueryKind) => {
+  try {
+    const claimKey = `${LEGACY_STORAGE_KEYS[kind]}_importing`;
+    const claimedAt = Number(window.localStorage.getItem(claimKey));
+    if (claimedAt && Date.now() - claimedAt < LEGACY_IMPORT_CLAIM_MS) return false;
+    window.localStorage.setItem(claimKey, String(Date.now()));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const releaseLegacyImport = (kind: SavedQueryKind) => {
+  try {
+    window.localStorage.removeItem(`${LEGACY_STORAGE_KEYS[kind]}_importing`);
+  } catch {}
+};
+
+const toResult = async <R>(action: () => Promise<R>, fallback: string) => {
+  try {
+    return { success: true as const, data: await action() };
+  } catch (error) {
+    return { success: false as const, error: getErrorMessage(error, fallback) };
+  }
+};
+
 export function useSavedQueries<T = QueryCondition>(
-  storageKey: string = REPORTS_STORAGE_KEY,
+  kind: SavedQueryKind = "report",
+  codec?: SavedQueryCodec<T>,
 ) {
-  const subscribe = useCallback(
-    (onChange: () => void) => {
-      window.addEventListener("storage", onChange);
-      window.addEventListener(storageKey, onChange);
-      return () => {
-        window.removeEventListener("storage", onChange);
-        window.removeEventListener(storageKey, onChange);
-      };
-    },
-    [storageKey],
+  const auth = useAuth();
+  const workspaceId = auth.user?.profile?.workspaceId;
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => [QUERY_KEY, workspaceId, kind],
+    [workspaceId, kind],
   );
-  const stored = useSyncExternalStore(
-    subscribe,
-    () => readStorage(storageKey),
-    () => undefined,
+
+  const listQuery = useQuery({
+    queryKey,
+    queryFn: ({ signal }) => listSavedQueries(auth, kind, signal),
+    enabled: auth.isAuthenticated && Boolean(workspaceId),
+    retry: shouldRetryQuery,
+  });
+
+  const isLoaded = listQuery.isSuccess;
+  const apiQueries = listQuery.data;
+
+  const toSavedQuery = useCallback(
+    (query: ApiSavedQuery): SavedQuery<T> => ({
+      id: query.id,
+      name: query.name,
+      conditions: query.definition.conditions.map((condition) =>
+        codec ? codec.fromStored(condition) : (condition as T),
+      ),
+      conditionLogic: query.definition.conditionLogic,
+      createdAt: query.createdAt,
+      updatedAt: query.updatedAt,
+      shared: query.shared,
+      isOwner: query.isOwner,
+    }),
+    [codec],
   );
-  const isLoaded = stored !== undefined;
-  const queries = useMemo<SavedQuery<T>[]>(() => {
-    try {
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
-      console.error("Failed to load saved queries from localStorage:", error);
-      return [];
-    }
-  }, [stored]);
+
+  const queries = useMemo(
+    () => (apiQueries ?? []).map(toSavedQuery),
+    [apiQueries, toSavedQuery],
+  );
+
+  const toDefinition = useCallback(
+    (conditions: unknown[], conditionLogic?: ConditionLogic) => ({
+      conditions: codec
+        ? conditions.map((condition) => codec.toStored(condition as T))
+        : conditions,
+      ...(conditionLogic ? { conditionLogic } : {}),
+    }),
+    [codec],
+  );
+
+  const invalidate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey }),
+    [queryClient, queryKey],
+  );
+
+  const createMutation = useMutation({
+    mutationFn: (input: {
+      name: string;
+      conditions: T[];
+      conditionLogic: ConditionLogic;
+      shared: boolean;
+    }) =>
+      createSavedQuery(auth, {
+        kind,
+        name: input.name,
+        definition: toDefinition(input.conditions, input.conditionLogic),
+        shared: input.shared,
+      }),
+    onSuccess: invalidate,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, shared }: { id: string; shared: boolean }) =>
+      updateSavedQuery(auth, id, { shared }),
+    onSuccess: invalidate,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteSavedQuery(auth, id),
+    onSuccess: invalidate,
+  });
+
+  const { mutateAsync: createAsync } = createMutation;
+  const { mutateAsync: updateAsync } = updateMutation;
+  const { mutateAsync: deleteAsync } = deleteMutation;
 
   const saveQuery = useCallback(
-    (
+    async (
       name: string,
       conditions: T[],
-      conditionLogic: "AND" | "OR"
+      conditionLogic: ConditionLogic,
+      shared = false,
     ) => {
-      try {
-        const newQuery: SavedQuery<T> = {
-          id: crypto.randomUUID(),
-          name,
-          conditions,
-          conditionLogic,
-          createdAt: new Date().toISOString(),
-        };
-        const updated = [...queries, newQuery];
-        localStorage.setItem(storageKey, JSON.stringify(updated));
-        window.dispatchEvent(new Event(storageKey));
-        return { success: true, query: newQuery };
-      } catch (error) {
-        console.error("Failed to save query:", error);
-        return {
-          success: false,
-          error: "Failed to save query. LocalStorage may be full.",
-        };
-      }
+      const result = await toResult(
+        () => createAsync({ name, conditions, conditionLogic, shared }),
+        "Failed to save query.",
+      );
+      return result.success
+        ? { success: true, query: toSavedQuery(result.data.result.query) }
+        : { success: false, error: result.error };
     },
-    [queries, storageKey]
+    [createAsync, toSavedQuery],
   );
 
   const deleteQuery = useCallback(
-    (id: string) => {
-      try {
-        const updated = queries.filter((q) => q.id !== id);
-        localStorage.setItem(storageKey, JSON.stringify(updated));
-        window.dispatchEvent(new Event(storageKey));
-        return { success: true };
-      } catch (error) {
-        console.error("Failed to delete query:", error);
-        return { success: false, error: "Failed to delete query" };
-      }
+    async (id: string) => {
+      const result = await toResult(
+        () => deleteAsync(id),
+        "Failed to delete query.",
+      );
+      return result.success
+        ? { success: true }
+        : { success: false, error: result.error };
     },
-    [queries, storageKey]
+    [deleteAsync],
+  );
+
+  const updateShared = useCallback(
+    async (id: string, shared: boolean) => {
+      const result = await toResult(
+        () => updateAsync({ id, shared }),
+        "Failed to update saved query.",
+      );
+      return result.success
+        ? { success: true }
+        : { success: false, error: result.error };
+    },
+    [updateAsync],
   );
 
   const getQuery = useCallback(
-    (id: string) => {
-      return queries.find((q) => q.id === id);
-    },
-    [queries]
+    (id: string) => queries.find((query) => query.id === id),
+    [queries],
   );
+
+  useEffect(() => {
+    if (!isLoaded || importedKinds.has(kind)) return;
+    importedKinds.add(kind);
+    const ownNames = new Set(
+      (apiQueries ?? []).filter((query) => query.isOwner).map((query) => query.name),
+    );
+    const legacy = readLegacy(kind);
+    if (legacy.length === 0 || !claimLegacyImport(kind)) return;
+
+    void (async () => {
+      for (const [index, item] of legacy.entries()) {
+        if (
+          typeof item?.name !== "string" ||
+          !item.name.trim() ||
+          !Array.isArray(item.conditions) ||
+          item.conditions.length === 0 ||
+          ownNames.has(item.name.trim())
+        ) {
+          continue;
+        }
+        try {
+          await createSavedQuery(auth, {
+            kind,
+            name: item.name.trim(),
+            definition: toDefinition(item.conditions, item.conditionLogic),
+            shared: false,
+          });
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 400) {
+            restoreLegacy(kind, legacy.slice(index + 1));
+            continue;
+          }
+          releaseLegacyImport(kind);
+          void invalidate();
+          return;
+        }
+        restoreLegacy(kind, legacy.slice(index + 1));
+      }
+      removeLegacy(kind);
+      releaseLegacyImport(kind);
+      void invalidate();
+    })();
+  }, [apiQueries, auth, invalidate, isLoaded, kind, toDefinition]);
 
   return {
     queries,
     isLoaded,
+    loadError: listQuery.isError,
     saveQuery,
     deleteQuery,
+    updateShared,
     getQuery,
   };
 }
