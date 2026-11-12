@@ -21,9 +21,9 @@ async function consumeDailyQuota(token: string) {
     headers: { authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(5000),
   }).catch(() => null);
-  if (quota?.status === 429) {
+  if (quota && quota.status >= 400 && quota.status < 500) {
     const body = await quota.json().catch(() => null);
-    return textResponse(body?.message ?? "Daily docs chat limit reached. It resets tomorrow.", 429);
+    return textResponse(body?.message ?? "Chat is unavailable right now.", quota.status);
   }
   if (!quota?.ok) return textResponse("Chat is unavailable right now.", 503);
   return null;
@@ -46,7 +46,12 @@ export async function POST(request: Request) {
   }
 
   const limit = consumeRateLimit(`chat:${identity.sub}`, CHAT_REQUESTS_PER_MINUTE, 60_000);
-  if (!limit.ok) return textResponse("Too many chat requests. Wait a minute, then try again.", 429);
+  if (!limit.ok) {
+    return new Response("Too many chat requests. Wait a minute, then try again.", {
+      status: 429,
+      headers: { "content-type": "text/plain; charset=utf-8", "Retry-After": String(limit.retryAfter) },
+    });
+  }
 
   return handleChatRequest(request, {
     maxOutputTokens: MAX_OUTPUT_TOKENS,
