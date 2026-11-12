@@ -140,6 +140,26 @@ const restoreLegacy = (kind: SavedQueryKind, items: LegacySavedQuery[]) => {
   } catch {}
 };
 
+const LEGACY_IMPORT_CLAIM_MS = 2 * 60 * 1000;
+
+const claimLegacyImport = (kind: SavedQueryKind) => {
+  try {
+    const claimKey = `${LEGACY_STORAGE_KEYS[kind]}_importing`;
+    const claimedAt = Number(window.localStorage.getItem(claimKey));
+    if (claimedAt && Date.now() - claimedAt < LEGACY_IMPORT_CLAIM_MS) return false;
+    window.localStorage.setItem(claimKey, String(Date.now()));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const releaseLegacyImport = (kind: SavedQueryKind) => {
+  try {
+    window.localStorage.removeItem(`${LEGACY_STORAGE_KEYS[kind]}_importing`);
+  } catch {}
+};
+
 const toResult = async <R>(action: () => Promise<R>, fallback: string) => {
   try {
     return { success: true as const, data: await action() };
@@ -293,8 +313,7 @@ export function useSavedQueries<T = QueryCondition>(
       (apiQueries ?? []).filter((query) => query.isOwner).map((query) => query.name),
     );
     const legacy = readLegacy(kind);
-    if (legacy.length === 0) return;
-    removeLegacy(kind);
+    if (legacy.length === 0 || !claimLegacyImport(kind)) return;
 
     void (async () => {
       for (const [index, item] of legacy.entries()) {
@@ -315,12 +334,18 @@ export function useSavedQueries<T = QueryCondition>(
             shared: false,
           });
         } catch (error) {
-          if (error instanceof ApiError && error.status === 400) continue;
-          restoreLegacy(kind, legacy.slice(index));
+          if (error instanceof ApiError && error.status === 400) {
+            restoreLegacy(kind, legacy.slice(index + 1));
+            continue;
+          }
+          releaseLegacyImport(kind);
           void invalidate();
           return;
         }
+        restoreLegacy(kind, legacy.slice(index + 1));
       }
+      removeLegacy(kind);
+      releaseLegacyImport(kind);
       void invalidate();
     })();
   }, [apiQueries, auth, invalidate, isLoaded, kind, toDefinition]);

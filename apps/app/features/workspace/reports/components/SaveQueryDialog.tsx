@@ -36,18 +36,19 @@ export function SaveQueryDialog({
   const [name, setName] = useState("");
   const [shared, setShared] = useState(false);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
+      if (!nextOpen && isSaving) return;
       if (!nextOpen) {
         setName("");
         setShared(false);
       }
       onOpenChange(nextOpen);
     },
-    [onOpenChange],
+    [isSaving, onOpenChange],
   );
-
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = useCallback(async () => {
     if (!name.trim() || isSaving) return;
