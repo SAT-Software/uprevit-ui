@@ -2544,13 +2544,13 @@ export function WorkbookSheetGrid({
             <Button
               variant="outline"
               size="icon-xs"
-              aria-label="Export current view as Excel"
+              aria-label="Export workbook as Excel"
               onClick={handleExport}
             >
               <Icon icon={FileExportIcon} size={14} strokeWidth={2} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Export current view as Excel</TooltipContent>
+          <TooltipContent>Export workbook as Excel</TooltipContent>
         </Tooltip>
       </div>
 
