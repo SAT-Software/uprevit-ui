@@ -72,8 +72,10 @@ const exportStatusLabels: Record<AuditLogExportJob["status"], string> = {
   failed: "Failed",
 };
 
-const endOfDay = (value: string) =>
-  new Date(`${value}T23:59:59.999Z`).toISOString();
+const startOfLocalDay = (value: string) => new Date(`${value}T00:00:00`).toISOString();
+
+const endOfLocalDay = (value: string) =>
+  new Date(`${value}T23:59:59.999`).toISOString();
 
 function FilterSelect({
   value,
@@ -200,8 +202,8 @@ export function ActivityLogsPanel({
       actions: action === "all" ? undefined : [action],
       entityType: entity === "all" ? undefined : entity,
       actorUserId: actor === "all" ? undefined : actor,
-      from: from || undefined,
-      to: to ? endOfDay(to) : undefined,
+      from: from ? startOfLocalDay(from) : undefined,
+      to: to ? endOfLocalDay(to) : undefined,
     }),
     [action, actor, debouncedSearch, entity, from, to],
   );
