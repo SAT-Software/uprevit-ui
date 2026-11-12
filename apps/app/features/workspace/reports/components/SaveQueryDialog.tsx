@@ -20,7 +20,7 @@ import {
 interface SaveQueryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string, shared: boolean) => void;
+  onSave: (name: string, shared: boolean) => Promise<boolean>;
   isConditionsEmpty: boolean;
   placeholder?: string;
 }
@@ -47,14 +47,19 @@ export function SaveQueryDialog({
     [onOpenChange],
   );
 
-  const handleSave = useCallback(() => {
-    if (!name.trim()) return;
+  const [isSaving, setIsSaving] = useState(false);
 
-    onSave(name.trim(), shared);
+  const handleSave = useCallback(async () => {
+    if (!name.trim() || isSaving) return;
+
+    setIsSaving(true);
+    const saved = await onSave(name.trim(), shared);
+    setIsSaving(false);
+    if (!saved) return;
     setName("");
     setShared(false);
     onOpenChange(false);
-  }, [name, shared, onSave, onOpenChange]);
+  }, [name, shared, isSaving, onSave, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -66,7 +71,7 @@ export function SaveQueryDialog({
         primaryAction={{
           label: "Save Query",
           onClick: handleSave,
-          disabled: !name.trim() || isConditionsEmpty,
+          disabled: !name.trim() || isConditionsEmpty || isSaving,
           icon: SaveIcon,
         }}
         secondaryAction={{

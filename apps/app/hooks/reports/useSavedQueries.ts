@@ -52,7 +52,6 @@ const LEGACY_STORAGE_KEYS: Record<SavedQueryKind, string> = {
   report: "uprevit_reports_saved_queries",
   workflow: "uprevit_workflow_saved_searches",
 };
-const LEGACY_IMPORT_LIMIT = 50;
 const importedKinds = new Set<SavedQueryKind>();
 
 async function request<R>(
@@ -123,7 +122,7 @@ const readLegacy = (kind: SavedQueryKind): LegacySavedQuery[] => {
   try {
     const raw = window.localStorage.getItem(LEGACY_STORAGE_KEYS[kind]);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.slice(0, LEGACY_IMPORT_LIMIT) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -287,12 +286,12 @@ export function useSavedQueries<T = QueryCondition>(
     [queries],
   );
 
-  const hasServerQueries = (apiQueries?.length ?? 0) > 0;
-
   useEffect(() => {
     if (!isLoaded || importedKinds.has(kind)) return;
     importedKinds.add(kind);
-    if (hasServerQueries) return;
+    const ownNames = new Set(
+      (apiQueries ?? []).filter((query) => query.isOwner).map((query) => query.name),
+    );
     const legacy = readLegacy(kind);
     if (legacy.length === 0) return;
     removeLegacy(kind);
@@ -303,7 +302,8 @@ export function useSavedQueries<T = QueryCondition>(
           typeof item?.name !== "string" ||
           !item.name.trim() ||
           !Array.isArray(item.conditions) ||
-          item.conditions.length === 0
+          item.conditions.length === 0 ||
+          ownNames.has(item.name.trim())
         ) {
           continue;
         }
@@ -323,11 +323,12 @@ export function useSavedQueries<T = QueryCondition>(
       }
       void invalidate();
     })();
-  }, [auth, hasServerQueries, invalidate, isLoaded, kind, toDefinition]);
+  }, [apiQueries, auth, invalidate, isLoaded, kind, toDefinition]);
 
   return {
     queries,
     isLoaded,
+    loadError: listQuery.isError,
     saveQuery,
     deleteQuery,
     updateShared,

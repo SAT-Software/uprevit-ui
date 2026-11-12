@@ -59,7 +59,7 @@ export default function Page() {
   const exportPDF = useExportPDF();
   const { canEdit: canExport } = useWorkspaceAccess();
   const exportExcel = useExportExcel();
-  const { queries: savedQueries, saveQuery, deleteQuery, updateShared } =
+  const { queries: savedQueries, loadError, saveQuery, deleteQuery, updateShared } =
     useSavedQueries("report");
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -104,7 +104,7 @@ export default function Page() {
   const handleSaveQuery = async (name: string, shared: boolean) => {
     if (!validateConditions()) {
       toast.error("Please fill in all required fields for each condition.");
-      return;
+      return false;
     }
     const result = await saveQuery(name, conditions, conditionLogic, shared);
     if (result.success) {
@@ -112,6 +112,7 @@ export default function Page() {
     } else {
       toast.error(result.error || "Failed to save query.");
     }
+    return result.success;
   };
 
   const handleLoadQuery = (query: SavedQuery) => {
@@ -318,6 +319,7 @@ export default function Page() {
         open={loadDialogOpen}
         onOpenChange={setLoadDialogOpen}
         queries={savedQueries}
+        loadError={loadError}
         onLoad={handleLoadQuery}
         onDelete={handleDeleteQuery}
         onToggleShared={handleToggleShared}

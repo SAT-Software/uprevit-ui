@@ -77,9 +77,9 @@ const toApiCondition = ({
 };
 
 const fromLocalDayInterval = (value: string) => {
-  const start = new Date(value.split("/")[0]);
-  return value.includes("/") && !Number.isNaN(start.getTime())
-    ? format(start, "yyyy-MM-dd")
+  const [start, end] = value.split("/").map((part) => new Date(part).getTime());
+  return value.includes("/") && !Number.isNaN(start) && !Number.isNaN(end)
+    ? format(new Date((start + end) / 2), "yyyy-MM-dd")
     : value;
 };
 
@@ -108,6 +108,7 @@ export default function WorkflowSearchPage() {
   } = useQueryBuilderState(WORKFLOW_SEARCH_OPTIONS);
   const {
     queries: savedSearches,
+    loadError,
     saveQuery,
     deleteQuery,
     updateShared,
@@ -137,11 +138,12 @@ export default function WorkflowSearchPage() {
   const handleSave = async (name: string, shared: boolean) => {
     if (!isSearchValid) {
       toast.error("Fill in every condition before saving.");
-      return;
+      return false;
     }
     const result = await saveQuery(name, conditions, conditionLogic, shared);
     if (result.success) toast.success(`"${name}" has been saved.`);
     else toast.error(result.error || "Failed to save search.");
+    return result.success;
   };
 
   const handleLoad = (search: SavedQuery<WorkflowSearchCondition>) => {
@@ -297,6 +299,7 @@ export default function WorkflowSearchPage() {
         open={loadDialogOpen}
         onOpenChange={setLoadDialogOpen}
         queries={savedSearches}
+        loadError={loadError}
         onLoad={handleLoad}
         onDelete={async (id) => {
           const result = await deleteQuery(id);

@@ -22,6 +22,7 @@ interface LoadQueryDialogProps<T extends SavedQuery<unknown>> {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   queries: T[];
+  loadError?: boolean;
   onLoad: (query: T) => void;
   onDelete: (id: string) => void;
   onToggleShared?: (id: string, shared: boolean) => void;
@@ -31,6 +32,7 @@ export function LoadQueryDialog<T extends SavedQuery<unknown>>({
   open,
   onOpenChange,
   queries,
+  loadError,
   onLoad,
   onDelete,
   onToggleShared,
@@ -61,7 +63,11 @@ export function LoadQueryDialog<T extends SavedQuery<unknown>>({
         size="md"
         className="max-h-[85vh]"
       >
-        {queries.length === 0 ? (
+        {loadError ? (
+          <p className="py-12 text-center text-sm text-muted-foreground">
+            Couldn&apos;t load saved queries. Close this and try again.
+          </p>
+        ) : queries.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
               <Icon icon={HardDriveUploadIcon} size={20} strokeWidth={2} />
