@@ -6,7 +6,7 @@ applications:
       phases:
         preBuild:
           commands:
-            - nvm use 22
+            - nvm use 24
             - corepack enable pnpm
             - corepack install
             # Drop cached node_modules so workspace packages (e.g. @uprevit/ui exports)
@@ -16,7 +16,7 @@ applications:
             - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
           commands:
-            - nvm use 22
+            - nvm use 24
             - env | sed -nE '/^OPENROUTER_(API_KEY|MODEL)=/p' >> apps/app/.env.production
             - pnpm run build:app
       artifacts:
@@ -35,14 +35,14 @@ applications:
       phases:
         preBuild:
           commands:
-            - nvm use 22
+            - nvm use 24
             - corepack enable pnpm
             - corepack install
             - rm -rf node_modules apps/*/node_modules packages/*/node_modules
             - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
           commands:
-            - nvm use 22
+            - nvm use 24
             - pnpm run build:marketing
       artifacts:
         baseDirectory: apps/marketing/.next

@@ -155,15 +155,13 @@ export const useFileUpload = (
         inputRef.current.value = ""
       }
 
-      const newState = {
+      return {
         ...prev,
         files: [],
         errors: [],
       }
-
-      onFilesChange?.(newState.files)
-      return newState
     })
+    onFilesChange?.([])
   }, [onFilesChange])
 
   const addFiles = useCallback(
@@ -236,17 +234,13 @@ export const useFileUpload = (
         // Call the onFilesAdded callback with the newly added valid files
         onFilesAdded?.(validFiles)
 
-        setState((prev) => {
-          const newFiles = !multiple
-            ? validFiles
-            : [...prev.files, ...validFiles]
-          onFilesChange?.(newFiles)
-          return {
-            ...prev,
-            files: newFiles,
-            errors,
-          }
-        })
+        const nextFiles = !multiple ? validFiles : [...state.files, ...validFiles]
+        setState((prev) => ({
+          ...prev,
+          files: nextFiles,
+          errors,
+        }))
+        onFilesChange?.(nextFiles)
       } else if (errors.length > 0) {
         setState((prev) => ({
           ...prev,
@@ -286,17 +280,15 @@ export const useFileUpload = (
           URL.revokeObjectURL(fileToRemove.preview)
         }
 
-        const newFiles = prev.files.filter((file) => file.id !== id)
-        onFilesChange?.(newFiles)
-
         return {
           ...prev,
-          files: newFiles,
+          files: prev.files.filter((file) => file.id !== id),
           errors: [],
         }
       })
+      onFilesChange?.(state.files.filter((file) => file.id !== id))
     },
-    [onFilesChange]
+    [state.files, onFilesChange]
   )
 
   const clearErrors = useCallback(() => {
