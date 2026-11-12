@@ -11,9 +11,13 @@ export type GetAuditLogsFilters = {
   limit?: number;
   actions?: string[];
   search?: string;
+  entityType?: string;
+  actorUserId?: string;
   from?: string;
   to?: string;
 };
+
+const SCOPES_WITHOUT_SCOPE_ID: AuditScopeType[] = ["archive", "workspace"];
 
 async function getAuditLogs(
   filters: GetAuditLogsFilters,
@@ -29,10 +33,17 @@ async function getAuditLogs(
   params.set("workspaceId", filters.workspaceId);
   params.set("scopeType", filters.scopeType);
   const optionalParams: Array<[string, string | undefined]> = [
-    ["scopeId", filters.scopeType !== "archive" ? filters.scopeId : undefined],
+    [
+      "scopeId",
+      SCOPES_WITHOUT_SCOPE_ID.includes(filters.scopeType)
+        ? undefined
+        : filters.scopeId,
+    ],
     ["page", filters.page ? filters.page.toString() : undefined],
     ["limit", filters.limit ? filters.limit.toString() : undefined],
     ["search", filters.search || undefined],
+    ["entityType", filters.entityType],
+    ["actorUserId", filters.actorUserId],
     ["from", filters.from || undefined],
     ["to", filters.to || undefined],
     [
@@ -64,7 +75,8 @@ const auditLogsEnabled = (filters: GetAuditLogsFilters, isAuthenticated: boolean
   isAuthenticated &&
   Boolean(filters.workspaceId) &&
   Boolean(filters.scopeType) &&
-  (filters.scopeType === "archive" || Boolean(filters.scopeId));
+  (SCOPES_WITHOUT_SCOPE_ID.includes(filters.scopeType) ||
+    Boolean(filters.scopeId));
 
 export function useGetAuditLogs(filters: GetAuditLogsFilters) {
   const auth = useAuth();

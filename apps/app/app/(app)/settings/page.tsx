@@ -14,7 +14,9 @@ import BillingTab from "@/features/workspace/settings/BillingTab";
 import AdminsTab from "@/features/workspace/settings/AdminsTab";
 import { InviteMembersDialog } from "@/features/workspace/settings/InviteMembersDialog";
 import UsersTab from "@/features/workspace/settings/UsersTab";
+import ActivityTab from "@/features/workspace/settings/ActivityTab";
 import {
+  Clock01Icon,
   CreditCardIcon,
   Timer01Icon,
   DashboardSquare01Icon,
@@ -30,7 +32,7 @@ import { useAuth } from "react-oidc-context";
 import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
-const ADMIN_TABS = ["admins", "workspace", "security"] as const;
+const ADMIN_TABS = ["admins", "workspace", "security", "activity"] as const;
 const USAGE_TABS = ["usage"] as const;
 const MANAGER_TABS = ["billing"] as const;
 
@@ -144,6 +146,12 @@ function SettingsPage() {
                 Admins
               </TabsTrigger>
             ) : null}
+            {isAdmin ? (
+              <TabsTrigger value="activity">
+                <Icon icon={Clock01Icon} size={14} strokeWidth={2} />
+                Activity
+              </TabsTrigger>
+            ) : null}
             {canManageBilling ? (
               <TabsTrigger value="usage">
                 <Icon icon={Timer01Icon} size={14} strokeWidth={2} />
@@ -174,6 +182,10 @@ function SettingsPage() {
 
           <TabsContent value="admins" className="mt-0">
             {activeTab === "admins" && <AdminsTab />}
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-0">
+            {activeTab === "activity" && <ActivityTab />}
           </TabsContent>
 
           <TabsContent value="usage" className="mt-0">

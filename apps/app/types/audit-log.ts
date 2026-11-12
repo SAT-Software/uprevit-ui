@@ -13,7 +13,19 @@ export type AuditScopeType =
   | "project"
   | "department"
   | "source-files"
-  | "archive";
+  | "archive"
+  | "workflow"
+  | "workspace";
+
+export type AuditEntityType =
+  | "product"
+  | "project"
+  | "department"
+  | "source_file"
+  | "source_folder"
+  | "workflow"
+  | "user"
+  | "workspace";
 
 export type AuditVisibility = "all" | "admin";
 
@@ -32,7 +44,7 @@ export interface AuditLogV2 {
     id: string;
   };
   entity?: {
-    type: "product" | "project" | "department" | "source_file" | "source_folder";
+    type: AuditEntityType;
     id: string;
   };
   action:
@@ -55,7 +67,15 @@ export interface AuditLogV2 {
     role?: "admin" | "user";
   };
   where: {
-    module: "products" | "projects" | "departments" | "source-files" | "archive";
+    module:
+      | "products"
+      | "projects"
+      | "departments"
+      | "source-files"
+      | "archive"
+      | "workflows"
+      | "users"
+      | "workspace";
     tab?: string;
     parentId?: string;
   };
