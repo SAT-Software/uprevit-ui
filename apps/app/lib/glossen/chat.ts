@@ -17,6 +17,10 @@ import {
 import { source } from "@/lib/source"
 
 // Change the provider or model here. Any AI SDK provider works.
+export const MAX_CHAT_BODY_BYTES = 256 * 1024
+const MAX_CHAT_MESSAGES = 50
+const MAX_CHAT_CHARS = 60_000
+
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 })
@@ -201,6 +205,7 @@ function textResponse(message: string, status: number) {
 
 export interface ChatHandlerOptions {
   maxOutputTokens?: number
+  beforeModelCall?: () => Promise<Response | null>
 }
 
 export async function handleChatRequest(
@@ -212,11 +217,37 @@ export async function handleChatRequest(
     return textResponse("The chat service isn't configured yet.", 500)
   }
 
-  let body: unknown
+  let raw: string
   try {
-    body = await req.json()
+    raw = await req.text()
   } catch {
     return textResponse("The chat request was invalid.", 400)
+  }
+
+  if (new TextEncoder().encode(raw).length > MAX_CHAT_BODY_BYTES) {
+    return textResponse("The chat request is too large.", 413)
+  }
+
+  let body: unknown
+  try {
+    body = JSON.parse(raw)
+  } catch {
+    return textResponse("The chat request was invalid.", 400)
+  }
+
+  const messagesInput =
+    typeof body === "object" && body !== null
+      ? (body as { messages?: unknown }).messages
+      : undefined
+  if (
+    Array.isArray(messagesInput) &&
+    (messagesInput.length > MAX_CHAT_MESSAGES ||
+      JSON.stringify(messagesInput).length > MAX_CHAT_CHARS)
+  ) {
+    return textResponse(
+      "This conversation is too large. Remove some passages or start a new chat.",
+      413,
+    )
   }
 
   const validation = await safeValidateUIMessages<GlossenUIMessage>({
@@ -233,6 +264,9 @@ export async function handleChatRequest(
     return textResponse("The chat request was invalid.", 400)
   }
   const messages = validation.data
+
+  const blocked = await options.beforeModelCall?.()
+  if (blocked) return blocked
 
   let docs: Docs
   try {
