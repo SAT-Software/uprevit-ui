@@ -47,18 +47,18 @@ Report exports include every product that matches your query, not just the page 
 
 Click **Exports** on `/reports` to open **Report Exports**. Report exports use the same statuses and the same 24-hour limit as product exports.
 
-## Immediate specification export
+## Specification and operational-parameter exports
 
-On **Product Specifications** and **Operational Parameters**, click **Export this table** in the grid toolbar. The current grid downloads straight away as an Excel file named `product-data-` followed by today's date. It doesn't use the background queue.
+On **Product Specifications** and **Operational Parameters**, the **Export** menu in the tab header queues a background export of that tab's **saved** version as PDF or Excel. It appears in **Product Exports** like any other product export. If the grid has unsaved edits, save first, because the tracked export uses the saved version.
 
-Use the product PDF export when you need a packaged document across tabs.
+The grid toolbar's **Export current view as Excel** downloads the grid immediately, including unsaved edits. It doesn't use the background queue and isn't listed in Exports.
 
 ## Export formats
 
 | Format | Where |
 |--------|-------|
-| **PDF** | A product's full documentation, or a report's results |
-| **Excel** | A report's results, or a Product Specifications or Operational Parameters grid |
+| **PDF** | A product's full documentation, a saved Product Specifications or Operational Parameters tab, or a report's results |
+| **Excel** | A saved Product Specifications or Operational Parameters tab, a report's results, or the current grid view |
 
 ## Permissions
 
