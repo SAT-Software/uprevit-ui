@@ -326,6 +326,45 @@
       opacity: 0.5;
     }
   }
+
+  .blog-cover-flow {
+    stroke-dasharray: 12 120;
+    animation: blog-cover-flow 3s linear infinite;
+  }
+
+  .blog-cover-status {
+    animation: blog-cover-status 9s infinite;
+  }
+
+  @keyframes blog-cover-flow {
+    from {
+      stroke-dashoffset: 12;
+    }
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+
+  @keyframes blog-cover-status {
+    0%,
+    30% {
+      opacity: 1;
+    }
+    33.4%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blog-cover-flow {
+      display: none;
+    }
+
+    .blog-cover-status {
+      animation: none;
+    }
+  }
 }
 
 /* Thin, low-contrast scrollbars so scrollable regions keep a visible cue */

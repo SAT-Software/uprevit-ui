@@ -3,7 +3,8 @@
 import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
-// import Link from "next/link";
+import Link from "next/link";
+import { Button } from "@uprevit/ui/components/ui/button";
 import {
   BookOpen02Icon,
   File02Icon,
@@ -54,6 +55,7 @@ const resources = [
       "Release notes",
     ],
     cta: "Read insights",
+    available: true,
   },
   {
     id: "toolkits",
@@ -190,10 +192,13 @@ export default function ResourcesHub() {
                     <p className="text-xs uppercase tracking-wide font-normal text-muted-foreground">
                       Updated regularly
                     </p>
-                    {/* <Button variant="outline" asChild>
-                      <Link href={resource.href}>{resource.cta}</Link>
-                    </Button> */}
-                    <Badge variant="outline">Coming soon</Badge>
+                    {resource.available ? (
+                      <Button variant="outline" asChild>
+                        <Link href={resource.href}>{resource.cta}</Link>
+                      </Button>
+                    ) : (
+                      <Badge variant="outline">Coming soon</Badge>
+                    )}
                   </div>
                 </div>
               ))}
