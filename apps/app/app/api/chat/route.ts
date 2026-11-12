@@ -41,7 +41,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (Number(request.headers.get("content-length") ?? 0) > MAX_CHAT_BODY_BYTES) {
+  const contentLength = request.headers.get("content-length");
+  if (!contentLength) return textResponse("The chat request is missing its length.", 411);
+  if (Number(contentLength) > MAX_CHAT_BODY_BYTES) {
     return textResponse("The chat request is too large.", 413);
   }
 
