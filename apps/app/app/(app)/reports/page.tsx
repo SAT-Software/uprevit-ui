@@ -59,7 +59,8 @@ export default function Page() {
   const exportPDF = useExportPDF();
   const { canEdit: canExport } = useWorkspaceAccess();
   const exportExcel = useExportExcel();
-  const { queries: savedQueries, saveQuery, deleteQuery } = useSavedQueries();
+  const { queries: savedQueries, saveQuery, deleteQuery, updateShared } =
+    useSavedQueries("report");
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
@@ -100,10 +101,14 @@ export default function Page() {
     }
   };
 
-  const handleSaveQuery = (name: string) => {
-    const result = saveQuery(name, conditions, conditionLogic);
+  const handleSaveQuery = async (name: string, shared: boolean) => {
+    if (!validateConditions()) {
+      toast.error("Please fill in all required fields for each condition.");
+      return;
+    }
+    const result = await saveQuery(name, conditions, conditionLogic, shared);
     if (result.success) {
-      toast.success(`"${name}" has been saved locally.`);
+      toast.success(`"${name}" has been saved.`);
     } else {
       toast.error(result.error || "Failed to save query.");
     }
@@ -116,9 +121,15 @@ export default function Page() {
     toast.success(`Loaded "${query.name}"`);
   };
 
-  const handleDeleteQuery = (id: string) => {
-    deleteQuery(id);
-    toast.success("The saved query has been deleted.");
+  const handleDeleteQuery = async (id: string) => {
+    const result = await deleteQuery(id);
+    if (result.success) toast.success("The saved query has been deleted.");
+    else toast.error(result.error || "Failed to delete query.");
+  };
+
+  const handleToggleShared = async (id: string, shared: boolean) => {
+    const result = await updateShared(id, shared);
+    if (!result.success) toast.error(result.error || "Failed to update query.");
   };
 
   const handleOpenExportDialog = (format: ExportFormat) => {
@@ -309,6 +320,7 @@ export default function Page() {
         queries={savedQueries}
         onLoad={handleLoadQuery}
         onDelete={handleDeleteQuery}
+        onToggleShared={handleToggleShared}
       />
       <ExportReportDialog
         open={exportDialogOpen}

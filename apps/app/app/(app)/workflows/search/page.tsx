@@ -1,6 +1,7 @@
 "use client";
 
 import { EmptyState } from "@/components/common/EmptyState";
+import { format } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -34,7 +35,10 @@ import {
   WorkflowSearchConditionRow,
 } from "@/features/workspace/workflows/WorkflowSearchConditionRow";
 import { WorkflowsTable } from "@/features/workspace/workflows/WorkflowsTable";
-import { useSavedQueries } from "@/hooks/reports/useSavedQueries";
+import {
+  type SavedQueryCodec,
+  useSavedQueries,
+} from "@/hooks/reports/useSavedQueries";
 import {
   type WorkflowSearchRequest,
   useWorkflowSearch,
@@ -42,8 +46,6 @@ import {
 import { WORKSPACE_LIST_LIMIT } from "@/lib/workspace-list-query";
 import type { SavedQuery } from "@/types/reports";
 import type { WorkflowSearchCondition } from "@/types/workflow";
-
-const SAVED_SEARCHES_STORAGE_KEY = "uprevit_workflow_saved_searches";
 
 const WORKFLOW_SEARCH_OPTIONS: QueryBuilderOptions<WorkflowSearchCondition> = {
   createCondition: () => ({ field: "", operator: "contains", value: "" }),
@@ -74,6 +76,23 @@ const toApiCondition = ({
   return { field, operator, value: apiValue, ...(logic ? { logic } : {}) };
 };
 
+const fromLocalDayInterval = (value: string) => {
+  const start = new Date(value.split("/")[0]);
+  return value.includes("/") && !Number.isNaN(start.getTime())
+    ? format(start, "yyyy-MM-dd")
+    : value;
+};
+
+const SAVED_SEARCH_CODEC: SavedQueryCodec<WorkflowSearchCondition> = {
+  toStored: (condition) => ({ ...toApiCondition(condition), id: condition.id }),
+  fromStored: (stored) => {
+    const condition = stored as WorkflowSearchCondition;
+    return getWorkflowSearchField(condition.field)?.type === "date"
+      ? { ...condition, value: fromLocalDayInterval(condition.value) }
+      : condition;
+  },
+};
+
 export default function WorkflowSearchPage() {
   const {
     conditions,
@@ -91,7 +110,8 @@ export default function WorkflowSearchPage() {
     queries: savedSearches,
     saveQuery,
     deleteQuery,
-  } = useSavedQueries<WorkflowSearchCondition>(SAVED_SEARCHES_STORAGE_KEY);
+    updateShared,
+  } = useSavedQueries<WorkflowSearchCondition>("workflow", SAVED_SEARCH_CODEC);
   const [request, setRequest] = useState<WorkflowSearchRequest | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
@@ -114,9 +134,13 @@ export default function WorkflowSearchPage() {
     else setRequest(next);
   };
 
-  const handleSave = (name: string) => {
-    const result = saveQuery(name, conditions, conditionLogic);
-    if (result.success) toast.success(`"${name}" has been saved locally.`);
+  const handleSave = async (name: string, shared: boolean) => {
+    if (!isSearchValid) {
+      toast.error("Fill in every condition before saving.");
+      return;
+    }
+    const result = await saveQuery(name, conditions, conditionLogic, shared);
+    if (result.success) toast.success(`"${name}" has been saved.`);
     else toast.error(result.error || "Failed to save search.");
   };
 
@@ -136,7 +160,7 @@ export default function WorkflowSearchPage() {
       <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-muted/60 p-2 pl-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Advanced Search</p>
-          <InfoTooltip content="Find workflows with up to 10 conditions joined with AND or OR. Saved searches stay in this browser." />
+          <InfoTooltip content="Find workflows with up to 10 conditions joined with AND or OR. Saved searches are available in this workspace." />
         </div>
 
         <div className="flex items-center gap-2">
@@ -274,10 +298,15 @@ export default function WorkflowSearchPage() {
         onOpenChange={setLoadDialogOpen}
         queries={savedSearches}
         onLoad={handleLoad}
-        onDelete={(id) => {
-          const result = deleteQuery(id);
+        onDelete={async (id) => {
+          const result = await deleteQuery(id);
           if (result.success) toast.success("The saved search has been deleted.");
           else toast.error(result.error || "Failed to delete saved search.");
+        }}
+        onToggleShared={async (id, shared) => {
+          const result = await updateShared(id, shared);
+          if (!result.success)
+            toast.error(result.error || "Failed to update saved search.");
         }}
       />
     </div>

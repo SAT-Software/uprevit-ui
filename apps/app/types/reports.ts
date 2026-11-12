@@ -43,4 +43,7 @@ export interface SavedQuery<T = QueryCondition> {
   conditions: T[];
   conditionLogic?: "AND" | "OR";
   createdAt: string;
+  updatedAt?: string;
+  shared?: boolean;
+  isOwner?: boolean;
 }

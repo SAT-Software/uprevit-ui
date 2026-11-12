@@ -2,7 +2,9 @@
 
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
+import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Button } from "@uprevit/ui/components/ui/button";
+import { Switch } from "@uprevit/ui/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +24,7 @@ interface LoadQueryDialogProps<T extends SavedQuery<unknown>> {
   queries: T[];
   onLoad: (query: T) => void;
   onDelete: (id: string) => void;
+  onToggleShared?: (id: string, shared: boolean) => void;
 }
 
 export function LoadQueryDialog<T extends SavedQuery<unknown>>({
@@ -30,6 +33,7 @@ export function LoadQueryDialog<T extends SavedQuery<unknown>>({
   queries,
   onLoad,
   onDelete,
+  onToggleShared,
 }: LoadQueryDialogProps<T>) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -89,6 +93,11 @@ export function LoadQueryDialog<T extends SavedQuery<unknown>>({
                       <Icon icon={Calendar03Icon} size={12} strokeWidth={2} />
                       {formatDate(query.createdAt)}
                     </span>
+                    {query.shared && (
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                        Shared
+                      </Badge>
+                    )}
                     {/* <span className="text-xs text-muted-foreground">
                       {query.conditions.length} condition
                       {query.conditions.length !== 1 ? "s" : ""}
@@ -96,6 +105,18 @@ export function LoadQueryDialog<T extends SavedQuery<unknown>>({
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
+                  {query.isOwner !== false && onToggleShared && (
+                    <label className="mr-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Switch
+                        checked={query.shared === true}
+                        onCheckedChange={(checked) =>
+                          onToggleShared(query.id, checked)
+                        }
+                        aria-label={`Share ${query.name} with everyone in this workspace`}
+                      />
+                      Share
+                    </label>
+                  )}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -116,19 +137,21 @@ export function LoadQueryDialog<T extends SavedQuery<unknown>>({
                     </TooltipTrigger>
                     <TooltipContent>Load query</TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        size="icon-xs"
-                        onClick={() => onDelete(query.id)}
-                        aria-label={`Delete ${query.name}`}
-                      >
-                        <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete query</TooltipContent>
-                  </Tooltip>
+                  {query.isOwner !== false && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="icon-xs"
+                          onClick={() => onDelete(query.id)}
+                          aria-label={`Delete ${query.name}`}
+                        >
+                          <Icon icon={Delete02Icon} size={14} strokeWidth={2} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete query</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             ))}
