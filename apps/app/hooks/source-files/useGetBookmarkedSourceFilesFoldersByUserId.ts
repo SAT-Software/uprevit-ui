@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getBookmarkedSourceFilesFoldersByUserId(
   userId: string,
@@ -19,9 +20,9 @@ async function getBookmarkedSourceFilesFoldersByUserId(
     signal,
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      text || "Failed to fetch bookmarked source files folders by user"
+    throw await getResponseError(
+      response,
+      "Failed to fetch bookmarked source files folders by user",
     );
   }
   const data = await response.json();

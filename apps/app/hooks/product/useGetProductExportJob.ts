@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { GetProductExportJobResponse } from "@/types/export-job";
+import { getResponseError } from "@/lib/api-error";
 
 async function getProductExportJob({
   auth,
@@ -20,8 +21,7 @@ async function getProductExportJob({
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch product export job");
+    throw await getResponseError(response, "Failed to fetch product export job");
   }
 
   return response.json();

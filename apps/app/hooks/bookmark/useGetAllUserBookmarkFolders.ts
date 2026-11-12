@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 type BookmarkFoldersResponse = {
   result: {
@@ -37,8 +38,7 @@ async function getAllUserBookmarkFolders({
     return EMPTY_BOOKMARK_FOLDERS_RESPONSE;
   }
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch user bookmark folders");
+    throw await getResponseError(response, "Failed to fetch user bookmark folders");
   }
   const data = (await response.json().catch(() => null)) as
     | Partial<BookmarkFoldersResponse>

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 async function updateUser(
@@ -26,9 +26,7 @@ async function updateUser(
   });
 
   if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(response, "Failed to update user")
-    );
+    throw await getResponseError(response, "Failed to update user");
   }
 
   const data = await response.json();

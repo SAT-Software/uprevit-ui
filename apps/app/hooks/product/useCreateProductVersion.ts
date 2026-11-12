@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 interface CreateVersionResponse {
   message: string;
@@ -34,12 +34,7 @@ export function useCreateProductVersion() {
       });
 
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(
-            res,
-            `Failed to create version (${res.status})`,
-          ),
-        );
+        throw await getResponseError(res, `Failed to create version (${res.status})`);
       }
 
       return res.json();

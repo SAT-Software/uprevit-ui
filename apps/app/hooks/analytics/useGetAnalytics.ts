@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import type { AnalyticsData, AnalyticsFilters } from "@/types/analytics";
+import { getResponseError } from "@/lib/api-error";
 
 export function analyticsSearchParams(filters: AnalyticsFilters) {
   const params = new URLSearchParams();
@@ -30,8 +31,7 @@ async function getAnalytics({
     },
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch analytics");
+    throw await getResponseError(response, "Failed to fetch analytics");
   }
   const data = await response.json();
   return data.data;

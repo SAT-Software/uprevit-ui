@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { DownloadProductExportJobResponse } from "@/types/export-job";
+import { getResponseError } from "@/lib/api-error";
 
 async function getProductExportDownloadUrl({
   auth,
@@ -17,8 +18,7 @@ async function getProductExportDownloadUrl({
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch export download URL");
+    throw await getResponseError(response, "Failed to fetch export download URL");
   }
 
   return response.json();

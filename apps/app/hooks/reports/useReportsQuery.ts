@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useAuth, AuthContextProps } from "react-oidc-context";
 import { ReportsQueryRequest } from "@/types/reports";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 
 async function executeReportsQuery({
   payload,
@@ -23,9 +23,7 @@ async function executeReportsQuery({
   });
 
   if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(response, "Failed to execute reports query")
-    );
+    throw await getResponseError(response, "Failed to execute reports query");
   }
 
   return response.json();

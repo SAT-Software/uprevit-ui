@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 export type OnboardUserPayload = {
   user_id: string;
@@ -36,9 +36,7 @@ export function useOnboardUser() {
       });
 
       if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to update user profile")
-        );
+        throw await getResponseError(response, "Failed to update user profile");
       }
 
       return response.json().catch(() => null);

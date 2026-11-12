@@ -3,7 +3,7 @@ import { useAuth } from "react-oidc-context";
 import { useGetUser } from "../user/useGetUser";
 import { useGetWorkspace } from "../workspace/useGetWorkspace";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 interface ToggleBookmarkSourceFilesFolderRequest {
   folderId: string;
@@ -36,12 +36,7 @@ export function useToggleBookmarkSourceFilesFolder() {
         },
       });
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(
-            res,
-            "Failed to toggle bookmark for source files folder",
-          ),
-        );
+        throw await getResponseError(res, "Failed to toggle bookmark for source files folder");
       }
       return res.json().catch(() => null);
     },

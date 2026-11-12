@@ -2,7 +2,7 @@ import { Product } from "@/types/product";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 type UpdateProductProps = Partial<Product> & {
   action?: string;
@@ -29,9 +29,7 @@ export function useUpdateProduct() {
         },
       });
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(res, "Failed to update product"),
-        );
+        throw await getResponseError(res, "Failed to update product");
       }
       return res.json().catch(() => null);
     },

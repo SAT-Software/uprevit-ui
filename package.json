@@ -21,9 +21,5 @@
   },
   "devDependencies": {
     "turbo": "^2.11.10"
-  },
-  "dependencies": {
-    "@hugeicons/core-free-icons": "^4.4.0",
-    "@hugeicons/react": "^1.1.10"
   }
 }

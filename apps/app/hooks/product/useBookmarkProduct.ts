@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 interface ProductBookmark {
   user_id: string;
@@ -32,12 +32,7 @@ export function useBookmarkProduct() {
         },
       );
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(
-            res,
-            "Failed to create bookmark product",
-          ),
-        );
+        throw await getResponseError(res, "Failed to create bookmark product");
       }
       return res.json().catch(() => null);
     },

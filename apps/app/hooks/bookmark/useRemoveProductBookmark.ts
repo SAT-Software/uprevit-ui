@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 interface RemoveProductBookmark {
   user_id: string;
@@ -34,12 +34,7 @@ export function useRemoveProductBookmark() {
         },
       );
       if (!res.ok) {
-        throw new Error(
-          await getResponseErrorMessage(
-            res,
-            "Failed to remove product from bookmark folder",
-          ),
-        );
+        throw await getResponseError(res, "Failed to remove product from bookmark folder");
       }
       return res.json().catch(() => null);
     },

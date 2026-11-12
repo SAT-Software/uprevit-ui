@@ -4,6 +4,7 @@ import {
   ListQueryParams,
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getAllBookmarkedProducts({
   signal,
@@ -29,8 +30,7 @@ async function getAllBookmarkedProducts({
     },
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch bookmarked products");
+    throw await getResponseError(response, "Failed to fetch bookmarked products");
   }
   const data = await response.json();
 

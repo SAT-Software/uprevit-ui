@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import type { BillingChargebeeDetail } from "@/types/billing";
 
 export function useGetBillingChargebee() {
@@ -21,9 +21,7 @@ export function useGetBillingChargebee() {
       });
 
       if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to load billing information"),
-        );
+        throw await getResponseError(response, "Failed to load billing information");
       }
 
       const json = await response.json();

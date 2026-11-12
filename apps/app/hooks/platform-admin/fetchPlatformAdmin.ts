@@ -1,5 +1,5 @@
 import type { AuthContextProps } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 
 export async function fetchPlatformAdmin<T>(
   path: string,
@@ -29,9 +29,7 @@ export async function fetchPlatformAdmin<T>(
   });
 
   if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(response, "Platform admin request failed"),
-    );
+    throw await getResponseError(response, "Platform admin request failed");
   }
 
   const json = await response.json();

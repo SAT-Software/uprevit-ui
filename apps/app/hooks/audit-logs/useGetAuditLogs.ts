@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { AuditScopeType, GetAuditLogsResponse } from "@/types/audit-log";
+import { getResponseError } from "@/lib/api-error";
 
 export type GetAuditLogsFilters = {
   workspaceId: string;
@@ -53,8 +54,7 @@ async function getAuditLogs(
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch audit logs");
+    throw await getResponseError(response, "Failed to fetch audit logs");
   }
 
   return response.json();

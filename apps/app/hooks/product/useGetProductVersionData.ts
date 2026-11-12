@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getProductVersionData(
   versionId: string,
@@ -23,8 +24,7 @@ async function getProductVersionData(
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch version data");
+    throw await getResponseError(response, "Failed to fetch version data");
   }
   const data = await response.json();
   return data;

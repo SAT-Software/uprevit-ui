@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import type { BillingInvoiceDownloadResponse } from "@/types/billing";
 
 export function useDownloadBillingInvoice(workspaceId: string, invoiceId: string) {
@@ -23,9 +23,7 @@ export function useDownloadBillingInvoice(workspaceId: string, invoiceId: string
       );
 
       if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to download invoice"),
-        );
+        throw await getResponseError(response, "Failed to download invoice");
       }
 
       const json = await response.json();

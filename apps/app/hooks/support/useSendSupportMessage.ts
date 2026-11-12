@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import { getResponseErrorMessage } from "@/lib/api-error";
+import { getResponseError } from "@/lib/api-error";
 import { redactUrl } from "@/lib/posthog/redactUrl";
 import { useSupportConversationsClient } from "@/hooks/support/useSupportConversations";
 import type { SupportConfig, SupportDraft } from "@/types/support";
@@ -32,9 +32,7 @@ async function uploadSupportImage(file: File, accessToken: string, checkCurrent:
     body: JSON.stringify({ contentType: file.type, sizeBytes: file.size }),
   });
   if (!createResponse.ok) {
-    throw new Error(
-      await getResponseErrorMessage(createResponse, `Could not upload ${file.name}.`),
-    );
+    throw await getResponseError(createResponse, `Could not upload ${file.name}.`);
   }
 
   const { result } = (await createResponse.json()) as {
@@ -62,9 +60,7 @@ async function uploadSupportImage(file: File, accessToken: string, checkCurrent:
     { method: "POST", headers },
   );
   if (!completeResponse.ok) {
-    throw new Error(
-      await getResponseErrorMessage(completeResponse, `Could not upload ${file.name}.`),
-    );
+    throw await getResponseError(completeResponse, `Could not upload ${file.name}.`);
   }
   checkCurrent();
 

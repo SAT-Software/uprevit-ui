@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Workspace } from "@/types/workspace";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 import { invalidateBillingSummary } from "@/lib/invalidateBillingSummary";
 
 async function updateWorkspace(
@@ -26,9 +26,7 @@ async function updateWorkspace(
   });
 
   if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(response, "Failed to update workspace")
-    );
+    throw await getResponseError(response, "Failed to update workspace");
   }
 
   const data = await response.json();

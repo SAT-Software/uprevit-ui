@@ -5,6 +5,7 @@ import {
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import type { UsersListResponse } from "@/types/user";
+import { getResponseError } from "@/lib/api-error";
 
 export async function getAllUsersByWorkspace({
   signal,
@@ -28,8 +29,7 @@ export async function getAllUsersByWorkspace({
     signal,
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch users");
+    throw await getResponseError(response, "Failed to fetch users");
   }
   return response.json();
 }

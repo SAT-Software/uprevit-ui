@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 export type DashboardActivityBreakdown = {
   created_only: number;
@@ -43,8 +44,7 @@ async function getDashboardActivityStats({
   );
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch dashboard activity stats");
+    throw await getResponseError(response, "Failed to fetch dashboard activity stats");
   }
 
   const data = (await response.json());

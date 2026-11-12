@@ -1,5 +1,6 @@
 import { AuthContextProps } from "react-oidc-context";
 import { WORKSPACE_LIST_LIMIT } from "@/lib/workspace-list-query";
+import { getResponseError } from "@/lib/api-error";
 
 export type GetProductVersionsParams = {
   signal: AbortSignal;
@@ -33,8 +34,7 @@ export async function getProductVersions({
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch product versions");
+    throw await getResponseError(response, "Failed to fetch product versions");
   }
 
   return response.json();

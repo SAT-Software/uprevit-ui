@@ -4,6 +4,7 @@ import {
   ListQueryParams,
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getArchivedDepartments({
   signal,
@@ -31,8 +32,7 @@ async function getArchivedDepartments({
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch archived departments");
+    throw await getResponseError(response, "Failed to fetch archived departments");
   }
   const data = await response.json();
   return data;

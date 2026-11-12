@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { getErrorMessage, getResponseErrorMessage } from "@/lib/api-error";
+import { getErrorMessage, getResponseError } from "@/lib/api-error";
 
 export type OnboardAdminWorkspacePayload = {
   workspaceName: string;
@@ -39,9 +39,7 @@ export function useOnboardAdminCreateWorkspace() {
       });
 
       if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to create workspace")
-        );
+        throw await getResponseError(response, "Failed to create workspace");
       }
 
       return response.json().catch(() => null);

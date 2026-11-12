@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 async function getWorkspaceById(
   id: string,
@@ -19,8 +20,7 @@ async function getWorkspaceById(
     signal,
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch workspace");
+    throw await getResponseError(response, "Failed to fetch workspace");
   }
   const data = await response.json();
   return data;

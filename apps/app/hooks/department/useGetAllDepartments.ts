@@ -4,6 +4,7 @@ import {
   ListQueryParams,
 } from "@/lib/workspace-list-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
+import { getResponseError } from "@/lib/api-error";
 
 export async function getAllDepartments({
   signal,
@@ -30,8 +31,7 @@ export async function getAllDepartments({
     }
   );
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || "Failed to fetch departments");
+    throw await getResponseError(response, "Failed to fetch departments");
   }
   const data = await response.json();
   return data;
