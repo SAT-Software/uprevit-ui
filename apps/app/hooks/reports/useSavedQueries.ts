@@ -135,6 +135,12 @@ const removeLegacy = (kind: SavedQueryKind) => {
   } catch {}
 };
 
+const restoreLegacy = (kind: SavedQueryKind, items: LegacySavedQuery[]) => {
+  try {
+    window.localStorage.setItem(LEGACY_STORAGE_KEYS[kind], JSON.stringify(items));
+  } catch {}
+};
+
 const toResult = async <R>(action: () => Promise<R>, fallback: string) => {
   try {
     return { success: true as const, data: await action() };
@@ -289,9 +295,10 @@ export function useSavedQueries<T = QueryCondition>(
     if (hasServerQueries) return;
     const legacy = readLegacy(kind);
     if (legacy.length === 0) return;
+    removeLegacy(kind);
 
     void (async () => {
-      for (const item of legacy) {
+      for (const [index, item] of legacy.entries()) {
         if (
           typeof item?.name !== "string" ||
           !item.name.trim() ||
@@ -309,10 +316,11 @@ export function useSavedQueries<T = QueryCondition>(
           });
         } catch (error) {
           if (error instanceof ApiError && error.status === 400) continue;
+          restoreLegacy(kind, legacy.slice(index));
+          void invalidate();
           return;
         }
       }
-      removeLegacy(kind);
       void invalidate();
     })();
   }, [auth, hasServerQueries, invalidate, isLoaded, kind, toDefinition]);
