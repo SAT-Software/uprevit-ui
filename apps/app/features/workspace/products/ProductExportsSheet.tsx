@@ -69,9 +69,15 @@ type ProductExportsSheetProps = {
   showTrigger?: boolean;
 };
 
+const TARGET_LABELS: Record<string, string> = {
+  product_specifications: "Specifications",
+  operational_parameters: "Operational parameters",
+};
+
 function getJobLabel(job: ExportJobSummary) {
   if (job.fileName) return job.fileName;
-  return `${job.format.toUpperCase()} export`;
+  const target = TARGET_LABELS[job.target];
+  return `${job.format.toUpperCase()} export${target ? ` (${target})` : ""}`;
 }
 
 function FormatIcon({ format }: { format: ExportJobFormat }) {

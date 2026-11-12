@@ -8,7 +8,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@uprevit/ui/components/ui/dropdown-menu";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
+import { useExportWorkbookTab } from "@/hooks/product/useExportWorkbookTab";
+import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
+import { getErrorMessage } from "@/lib/api-error";
+import { toast } from "sonner";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { ProductSpecificationDataTable } from "@/features/workspace/products/product/product-data-table/ProductSpecificationDataTable";
 import {
@@ -69,6 +80,8 @@ export function ProductWorkbookTabPage({
   nextVersionWorkbook,
 }: ProductWorkbookTabPageProps) {
   const { lockedMessage } = useProductAccess();
+  const { canEdit: canExport } = useWorkspaceAccess();
+  const { mutate: exportTab, isPending: isExportPending } = useExportWorkbookTab();
   const [redlineMode, setRedlineMode] = useState<"highlight" | "inline">(
     "inline",
   );
@@ -107,6 +120,19 @@ export function ProductWorkbookTabPage({
       editor.discardChanges,
     ],
   );
+
+  const queueExport = (format: "pdf" | "excel") =>
+    exportTab(
+      {
+        productId,
+        target: tab === "product-specifications" ? "product_specifications" : "operational_parameters",
+        format,
+      },
+      {
+        onSuccess: () => toast.success("Export queued. Open Exports to track status."),
+        onError: (error) => toast.error(getErrorMessage(error, "Failed to queue export")),
+      },
+    );
 
   useRegisterProductWorkbookGuard(
     workbookGuardRegistration,
@@ -167,6 +193,35 @@ export function ProductWorkbookTabPage({
         </div>
 
         <div className="flex items-center gap-3">
+          {canExport && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isExportPending}>
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="max-w-64">
+                {editor.hasEditableUnsavedChanges && (
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    Save your changes first. Tracked exports use the saved version.
+                  </DropdownMenuLabel>
+                )}
+                <DropdownMenuItem
+                  disabled={editor.hasEditableUnsavedChanges}
+                  onSelect={() => queueExport("excel")}
+                >
+                  Excel (saved version)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={editor.hasEditableUnsavedChanges}
+                  onSelect={() => queueExport("pdf")}
+                >
+                  PDF (saved version)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           {isRedlineView && (
             <div className="flex items-center gap-1 rounded-md bg-muted/60 p-1">
               <Button
