@@ -21,7 +21,7 @@ import {
 import { LoadQueryDialog } from "@/features/workspace/reports/components/LoadQueryDialog";
 import { ConditionRow } from "@/features/workspace/reports/components/QueryBuilder/ConditionRow";
 import { QueryBuilder } from "@/features/workspace/reports/components/QueryBuilder/QueryBuilder";
-import ReportExportsSheet from "@/features/workspace/reports/components/ReportExportsSheet";
+import ExportJobsSheet from "@/features/workspace/exports/ExportJobsSheet";
 import { ResultsTable } from "@/features/workspace/reports/components/ResultsTable";
 import { SaveQueryDialog } from "@/features/workspace/reports/components/SaveQueryDialog";
 import {
@@ -235,7 +235,8 @@ export default function Page() {
               <TooltipContent>Clear all conditions</TooltipContent>
             </Tooltip>
           )}
-          <ReportExportsSheet
+          <ExportJobsSheet
+            resource="reports"
             open={exportsSheetOpen}
             onOpenChange={setExportsSheetOpen}
           />

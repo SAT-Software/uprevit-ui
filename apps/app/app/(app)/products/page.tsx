@@ -33,7 +33,7 @@ import DialogExportProductPDF from "@/features/workspace/products/DialogExportPr
 import DialogShareProduct from "@/features/workspace/products/DialogShareProduct";
 import { ProductBookmarkMenuItem } from "@/features/workspace/products/ProductBookmarkMenuItem";
 import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRemoveProductBookmark";
-import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
+import ExportJobsSheet from "@/features/workspace/exports/ExportJobsSheet";
 import { ProductListItem } from "@/features/workspace/products/productListItem";
 import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
@@ -585,7 +585,7 @@ export default function ProductsPage() {
               />
             </>
           ) : null}
-          <ProductExportsSheet />
+          <ExportJobsSheet resource="products" />
           {isAdmin && (
             <Button asChild variant="outline" size="sm">
               <Link href="/products/import">

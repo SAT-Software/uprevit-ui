@@ -24,11 +24,9 @@ import {
 } from "@uprevit/ui/components/ui/select";
 import { AuditScopeType } from "@/types/audit-log";
 import { useGetAuditLogs } from "@/hooks/audit-logs/useGetAuditLogs";
-import {
-  type AuditLogExportJob,
-  useAuditLogExportJobs,
-  useEnqueueAuditLogExport,
-} from "@/hooks/audit-logs/useAuditLogExport";
+import { useEnqueueAuditLogExport } from "@/hooks/audit-logs/useAuditLogExport";
+import { useGetExportJobs } from "@/hooks/exports/useExportJobs";
+import { ExportJobSummary } from "@/types/export-job";
 import { useGetAllUsersByWorkspace } from "@/hooks/user/useGetAllUsersByWorkspace";
 import { ActivityLogTable } from "./ActivityLogTable";
 
@@ -65,7 +63,7 @@ const entityFilters = [
   { value: "workspace", label: "Workspace" },
 ];
 
-const exportStatusLabels: Record<AuditLogExportJob["status"], string> = {
+const exportStatusLabels: Record<ExportJobSummary["status"], string> = {
   queued: "Queued",
   processing: "Preparing",
   completed: "Ready",
@@ -124,7 +122,7 @@ function ActorFilterSelect({
   );
 }
 
-function AuditLogExportJobRow({ job }: { job: AuditLogExportJob }) {
+function AuditLogExportJobRow({ job }: { job: ExportJobSummary }) {
   const download = () => {
     if (!job.downloadUrl) return;
     const link = document.createElement("a");
@@ -183,9 +181,11 @@ export function ActivityLogsPanel({
   const isWorkspaceScope = scopeType === "workspace";
   const { mutate: enqueueExport, isPending: isEnqueuePending } =
     useEnqueueAuditLogExport();
-  const { data: exportJobsData } = useAuditLogExportJobs({
-    enabled: isWorkspaceScope,
-  });
+  const { data: exportJobsData } = useGetExportJobs(
+    "audit-logs",
+    {},
+    { enabled: isWorkspaceScope },
+  );
   const exportJob = exportJobsData?.result.jobs[0];
 
   useEffect(() => {

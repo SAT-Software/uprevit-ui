@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
-import { EnqueueProductExportResponse } from "@/types/export-job";
+import { ExportEnqueueResponse } from "@/types/export-job";
+import { exportJobsQueryKey } from "@/hooks/exports/useExportJobs";
 import { getResponseError } from "@/lib/api-error";
 
 export type WorkbookTabExportTarget = "product_specifications" | "operational_parameters";
@@ -15,7 +16,7 @@ async function exportWorkbookTab({
   productId: string;
   target: WorkbookTabExportTarget;
   format: "pdf" | "excel";
-}): Promise<EnqueueProductExportResponse> {
+}): Promise<ExportEnqueueResponse> {
   const response = await fetch(`/api/products/${productId}/exports`, {
     method: "POST",
     headers: {
@@ -40,7 +41,7 @@ export function useExportWorkbookTab() {
     mutationFn: (input: { productId: string; target: WorkbookTabExportTarget; format: "pdf" | "excel" }) =>
       exportWorkbookTab({ auth, ...input }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product-export-jobs"] });
+      queryClient.invalidateQueries({ queryKey: exportJobsQueryKey("products") });
     },
   });
 }

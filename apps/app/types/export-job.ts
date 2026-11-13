@@ -26,6 +26,7 @@ export interface ExportJobSummary {
   completedAt?: string;
   failedAt?: string;
   expiresAt: string;
+  downloadUrl?: string;
 }
 
 export interface ExportJobPagination {
@@ -70,19 +71,3 @@ export interface DownloadExportJobResponse {
     expiresAt: string;
   };
 }
-
-export type EnqueueProductExportResponse = ExportEnqueueResponse;
-
-export type EnqueueReportExportResponse = ExportEnqueueResponse;
-
-export type GetProductExportJobsResponse = GetExportJobsResponse;
-
-export type GetReportExportJobsResponse = GetExportJobsResponse;
-
-export type GetProductExportJobResponse = GetExportJobResponse;
-
-export type GetReportExportJobResponse = GetExportJobResponse;
-
-export type DownloadProductExportJobResponse = DownloadExportJobResponse;
-
-export type DownloadReportExportJobResponse = DownloadExportJobResponse;
