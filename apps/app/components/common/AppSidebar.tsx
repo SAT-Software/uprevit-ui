@@ -4,7 +4,8 @@ import { GuardedLink } from "@/components/common/GuardedLink";
 import { UprevitLogo } from "@/components/common/UprevitLogo";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { useGetWorkspace } from "@/hooks/workspace/useGetWorkspace";
-import type { AllTabsData } from "@/types/product";
+import { PRODUCT_TABS, type ProductTabSlug } from "@/lib/product-tabs";
+import type { IconSvgElement } from "@hugeicons/react";
 import {
   AiSheetsIcon,
   Album02Icon,
@@ -206,97 +207,22 @@ const data = {
   ],
 };
 
-const productSubItems: {
-  title: string;
-  url: string;
-  completionKey: keyof AllTabsData;
-  icon: React.ReactNode;
-}[] = [
-  {
-    title: "Product Information",
-    url: "/product-information",
-    completionKey: "product_information",
-    icon: (
-      <Icon
-        icon={Layout01Icon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-  {
-    title: "Compliance Information",
-    url: "/compliance-information",
-    completionKey: "compliance_information",
-    icon: (
-      <Icon
-        icon={ContractsIcon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-  {
-    title: "Label Components",
-    url: "/label-components",
-    completionKey: "label_components",
-    icon: (
-      <Icon
-        icon={LayerIcon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-  {
-    title: "Symbols & Graphics",
-    url: "/symbols-graphics",
-    completionKey: "symbols_graphics",
-    icon: (
-      <Icon
-        icon={Album02Icon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-  {
-    title: "Product Specifications",
-    url: "/product-specifications",
-    completionKey: "product_data",
-    icon: (
-      <Icon
-        icon={AiSheetsIcon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-  {
-    title: "Operational Parameters",
-    url: "/operational-parameters",
-    completionKey: "operational_parameters",
-    icon: (
-      <Icon
-        icon={FileDatabaseIcon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-  {
-    title: "Label Tags",
-    url: "/label-tags",
-    completionKey: "label_tags",
-    icon: (
-      <Icon
-        icon={LabelImportantIcon}
-        size={16}
-        strokeWidth={2}
-      />
-    ),
-  },
-];
+const PRODUCT_TAB_ICONS: Record<ProductTabSlug, IconSvgElement> = {
+  "product-information": Layout01Icon,
+  "compliance-information": ContractsIcon,
+  "label-components": LayerIcon,
+  "symbols-graphics": Album02Icon,
+  "product-specifications": AiSheetsIcon,
+  "operational-parameters": FileDatabaseIcon,
+  "label-tags": LabelImportantIcon,
+};
+
+const productSubItems = PRODUCT_TABS.map((tab) => ({
+  title: tab.label,
+  url: `/${tab.slug}`,
+  completionKey: tab.field,
+  icon: <Icon icon={PRODUCT_TAB_ICONS[tab.slug]} size={16} strokeWidth={2} />,
+}));
 
 function ProductTabCompletionDot({ isCompleted }: { isCompleted: boolean }) {
   return (

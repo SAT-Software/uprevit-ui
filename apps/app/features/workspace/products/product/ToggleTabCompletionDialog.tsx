@@ -10,6 +10,7 @@ import {
   InformationCircleIcon,
   Undo02Icon,
 } from "@hugeicons/core-free-icons";
+import { getProductTab } from "@/lib/product-tabs";
 
 interface ToggleTabCompletionDialogProps {
   children: React.ReactNode;
@@ -18,16 +19,6 @@ interface ToggleTabCompletionDialogProps {
   onConfirm: () => Promise<void>;
   disabled?: boolean;
 }
-
-const TAB_DISPLAY_NAMES: Record<string, string> = {
-  "product-information": "Product Information",
-  "compliance-information": "Compliance Information",
-  "label-components": "Label Components",
-  "symbols-graphics": "Symbols & Graphics",
-  "product-specifications": "Product Specifications",
-  "operational-parameters": "Operational Parameters",
-  "label-tags": "Label Tags",
-};
 
 export default function ToggleTabCompletionDialog({
   children,
@@ -39,7 +30,7 @@ export default function ToggleTabCompletionDialog({
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const displayTabName = TAB_DISPLAY_NAMES[tabName] || tabName;
+  const displayTabName = getProductTab(tabName)?.label ?? tabName;
 
   async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();

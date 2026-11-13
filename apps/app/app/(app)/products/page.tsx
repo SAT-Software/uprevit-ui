@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ProductProgressCell } from "@/components/common/ProductProgressCell";
 import {
   type Column,
   ColumnDef,
@@ -14,7 +15,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { InfoTooltip } from "@/components/common/InfoTooltip";
-import { ProductProgressHoverCard } from "@/components/common/ProductProgressHoverCard";
 import { AuditMetaCell } from "@/components/table/AuditMetaCell";
 import { TableBodySkeleton } from "@/components/table/TableBodySkeleton";
 import { WorkspaceListControls } from "@/components/table/WorkspaceListControls";
@@ -88,7 +88,6 @@ import {
   ProductStatusCell,
   ProductVersionCell,
 } from "@/features/workspace/products/ProductLifecycleCells";
-import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
 const PRODUCTS_TABS = ["all", "bookmarked"] as const;
 type ProductsTab = (typeof PRODUCTS_TABS)[number];
@@ -311,97 +310,7 @@ const columns: ColumnDef<ProductListItem>[] = [
     minSize: 90,
     maxSize: 90,
     header: ({ column }) => <SortableHeader column={column} title="Progress" />,
-    cell: ({ row }) => {
-      const progress = (row.getValue("complete_count") as number) || 0;
-      const tabsCompleted: string[] = [];
-
-      if (row.original) {
-        if (row.original.product_information?.tab_completed)
-          tabsCompleted.push("product-information");
-        if (row.original.compliance_information?.tab_completed)
-          tabsCompleted.push("compliance-information");
-        if (row.original.label_components?.tab_completed)
-          tabsCompleted.push("label-components");
-        if (row.original.symbols_graphics?.tab_completed)
-          tabsCompleted.push("symbols-graphics");
-        if (row.original.product_data?.tab_completed)
-          tabsCompleted.push("product-specifications");
-        if (row.original.operational_parameters?.tab_completed)
-          tabsCompleted.push("operational-parameters");
-        if (row.original.label_tags?.tab_completed)
-          tabsCompleted.push("label-tags");
-      }
-
-      const PROGRESS_STATES = [
-        {
-          min: 100,
-          label: "Ready to submit",
-          dot: "bg-emerald-500",
-          text: "text-emerald-600 dark:text-emerald-300",
-          bar: "from-emerald-400 via-emerald-500 to-emerald-600",
-        },
-        {
-          min: 70,
-          label: "On track",
-          dot: "bg-sky-500",
-          text: "text-sky-600 dark:text-sky-300",
-          bar: "from-sky-400 via-sky-500 to-sky-600",
-        },
-        {
-          min: 40,
-          label: "In progress",
-          dot: "bg-amber-500",
-          text: "text-amber-600 dark:text-amber-300",
-          bar: "from-amber-400 via-amber-500 to-amber-600",
-        },
-        {
-          min: 0,
-          label: "Getting started",
-          dot: "bg-slate-400",
-          text: "text-slate-600 dark:text-slate-300",
-          bar: "from-slate-400 via-slate-500 to-slate-600",
-        },
-      ] as const;
-
-      const SUBMITTED_STATE = {
-        min: 100,
-        label: "Submitted",
-        dot: "bg-violet-500",
-        text: "text-violet-600 dark:text-violet-300",
-        bar: "from-violet-400 via-violet-500 to-violet-600",
-      } as const;
-
-      const getProgressState = (value: number) => {
-        for (const state of PROGRESS_STATES) {
-          if (value >= state.min) return state;
-        }
-        return PROGRESS_STATES[PROGRESS_STATES.length - 1];
-      };
-
-      const clampedPercentage = Math.max(
-        0,
-        Math.min(100, Math.round(progress || 0)),
-      );
-
-      const status = row.original.status;
-      const progressState =
-        status && status !== "draft"
-          ? { ...SUBMITTED_STATE, label: PRODUCT_STATUS_LABELS[status] }
-          : getProgressState(clampedPercentage);
-
-      return (
-        <ProductProgressHoverCard
-          percentage={clampedPercentage}
-          colorClass={progressState.bar}
-          size={18}
-          strokeWidth={2}
-          progress={progress}
-          product_name={row.original?.product_name}
-          tabsCompleted={tabsCompleted.length}
-          totalTabs={7}
-        />
-      );
-    },
+    cell: ({ row }) => <ProductProgressCell product={row.original} />,
   },
   {
     id: "createdOn",

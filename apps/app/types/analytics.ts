@@ -1,3 +1,4 @@
+import type { ProductTabField } from "@/lib/product-tabs";
 import type { ProductStatus } from "@/types/product";
 
 export type AnalyticsFilters = {
@@ -9,14 +10,7 @@ export type AnalyticsFilters = {
 
 export type PipelineStatus = "draft" | "submitted" | "in_review" | "released";
 
-export type CompletionTab =
-  | "product_information"
-  | "compliance_information"
-  | "label_components"
-  | "symbols_graphics"
-  | "product_data"
-  | "operational_parameters"
-  | "label_tags";
+export type CompletionTab = ProductTabField;
 
 export type AnalyticsData = {
   range: { from: string; to: string };
