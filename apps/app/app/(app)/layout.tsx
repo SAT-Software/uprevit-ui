@@ -8,8 +8,7 @@ import {
   SidebarProvider,
 } from "@uprevit/ui/components/ui/sidebar";
 import { AppSidebar } from "@/components/common/AppSidebar";
-import { ProductExportJobNotifier } from "@/components/common/ProductExportJobNotifier";
-import { ReportExportJobNotifier } from "@/components/common/ReportExportJobNotifier";
+import { ExportJobNotifier } from "@/components/common/ExportJobNotifier";
 import { PostHogSupportSync } from "@/components/common/PostHogSupportSync";
 import { ProductWorkbookUnsavedGuardProvider } from "@/lib/product-workbook-unsaved-guard";
 
@@ -22,8 +21,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <AppSidebar />
         <SidebarInset>
           <AppHeader />
-          <ProductExportJobNotifier />
-          <ReportExportJobNotifier />
+          <ExportJobNotifier resource="products" />
+          <ExportJobNotifier resource="reports" />
           <MainContentWrapper>{children}</MainContentWrapper>
         </SidebarInset>
       </SidebarProvider>

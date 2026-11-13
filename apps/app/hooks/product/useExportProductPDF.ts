@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContextProps, useAuth } from "react-oidc-context";
-import { EnqueueProductExportResponse } from "@/types/export-job";
+import { ExportEnqueueResponse } from "@/types/export-job";
+import { exportJobsQueryKey } from "@/hooks/exports/useExportJobs";
 import { getResponseError } from "@/lib/api-error";
 
 async function exportProductPDF({
@@ -9,7 +10,7 @@ async function exportProductPDF({
 }: {
   auth: AuthContextProps;
   productId: string;
-}): Promise<EnqueueProductExportResponse> {
+}): Promise<ExportEnqueueResponse> {
   const response = await fetch(`/api/products/${productId}/exports`, {
     method: "POST",
     headers: {
@@ -34,7 +35,7 @@ export function useExportProductPDF() {
     mutationFn: ({ productId }: { productId: string }) =>
       exportProductPDF({ auth, productId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product-export-jobs"] });
+      queryClient.invalidateQueries({ queryKey: exportJobsQueryKey("products") });
     },
   });
 }

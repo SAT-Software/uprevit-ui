@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth, AuthContextProps } from "react-oidc-context";
-import { EnqueueReportExportResponse } from "@/types/export-job";
+import { ExportEnqueueResponse } from "@/types/export-job";
 import { ReportsQueryRequest } from "@/types/reports";
+import { exportJobsQueryKey } from "@/hooks/exports/useExportJobs";
 import { getResponseError } from "@/lib/api-error";
 
 type ExportFormat = "pdf" | "excel";
@@ -17,7 +18,7 @@ async function enqueueReportExport({
   payload: ExportRequest;
   auth: AuthContextProps;
   format: ExportFormat;
-}): Promise<EnqueueReportExportResponse> {
+}): Promise<ExportEnqueueResponse> {
   const response = await fetch("/api/reports/exports", {
     method: "POST",
     headers: {
@@ -53,7 +54,7 @@ export function useExportPDF() {
         format: "pdf",
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["report-export-jobs"] });
+      queryClient.invalidateQueries({ queryKey: exportJobsQueryKey("reports") });
     },
   });
 }
@@ -73,7 +74,7 @@ export function useExportExcel() {
         format: "excel",
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["report-export-jobs"] });
+      queryClient.invalidateQueries({ queryKey: exportJobsQueryKey("reports") });
     },
   });
 }

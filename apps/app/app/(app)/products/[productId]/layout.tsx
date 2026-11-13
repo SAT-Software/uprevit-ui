@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
+import ExportJobsSheet from "@/features/workspace/exports/ExportJobsSheet";
 import { ProductHeader } from "@/features/workspace/products/product/ProductHeader";
 import { ProductInReviewBanner } from "@/features/workspace/products/product/ProductInReviewBanner";
-import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
+import {
+  ACTIVE_EXPORT_JOB_STATUSES,
+  hasActiveExportJobs,
+  useGetExportJobs,
+} from "@/hooks/exports/useExportJobs";
 import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline";
-import { ExportJobStatus } from "@/types/export-job";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
-
-const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
 
 export default function ProductLayout({
   children,
@@ -30,31 +31,20 @@ export default function ProductLayout({
   const { isError: isComparisonError, refetch: retryComparison } =
     useGetProductDiffRedline(productId, compareVersionId);
 
-  const { data: exportJobsData } = useGetProductExportJobs(
-    {
-      page: 1,
-      status: ACTIVE_EXPORT_JOB_STATUSES,
-      targetId: productId,
-    },
-    {
-      enabled: Boolean(productId),
-      pollWhenActive: true,
-      activePollIntervalMs: 10000,
-    },
+  const { data: exportJobsData } = useGetExportJobs(
+    "products",
+    { status: ACTIVE_EXPORT_JOB_STATUSES, targetId: productId },
+    { enabled: Boolean(productId), activePollIntervalMs: 10000 },
   );
 
-  const hasActiveExport =
-    typeof exportJobsData?.result.hasActiveJobs === "boolean"
-      ? exportJobsData.result.hasActiveJobs
-      : (exportJobsData?.result.jobs ?? []).some((job) =>
-          ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
-        );
+  const hasActiveExport = hasActiveExportJobs(exportJobsData);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <ProductHeader isExportLocked={hasActiveExport} />
       <ProductInReviewBanner />
-      <ProductExportsSheet
+      <ExportJobsSheet
+        resource="products"
         open={exportsOpen}
         onOpenChange={setExportsOpen}
         showTrigger={false}

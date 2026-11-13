@@ -17,8 +17,13 @@ import {
 } from "@hugeicons/core-free-icons";
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { ErrorState } from "@/components/common/ErrorState";
-import { useDownloadProductExportJob } from "@/hooks/product/useDownloadProductExportJob";
-import { useGetProductExportJobs } from "@/hooks/product/useGetProductExportJobs";
+import {
+  countActiveExportJobs,
+  exportJobsQueryKey,
+  isActiveExportJob,
+  useDownloadExportJob,
+  useGetExportJobs,
+} from "@/hooks/exports/useExportJobs";
 import {
   ExportJobFormat,
   ExportJobStatus,
@@ -51,8 +56,6 @@ import {
 import { cn } from "@uprevit/ui/lib/utils";
 import { toast } from "sonner";
 
-const ACTIVE_EXPORT_JOB_STATUSES: ExportJobStatus[] = ["queued", "processing"];
-
 const STATUS_FILTERS: Array<{ label: string; value: "all" | ExportJobStatus }> =
   [
     { label: "All", value: "all" },
@@ -62,7 +65,10 @@ const STATUS_FILTERS: Array<{ label: string; value: "all" | ExportJobStatus }> =
     { label: "Failed", value: "failed" },
   ];
 
-type ProductExportsSheetProps = {
+type ExportJobsSheetResource = "products" | "reports";
+
+type ExportJobsSheetProps = {
+  resource: ExportJobsSheetResource;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -74,8 +80,27 @@ const TARGET_LABELS: Record<string, string> = {
   operational_parameters: "Operational parameters",
 };
 
+const SHEET_COPY: Record<
+  ExportJobsSheetResource,
+  { title: string; tooltip: string; info: string; filePrefix: string }
+> = {
+  products: {
+    title: "Product Exports",
+    tooltip: "View product export jobs",
+    info: "Track queued Product PDF exports and download exported files. Exports are available for 24 hours only.",
+    filePrefix: "product-export",
+  },
+  reports: {
+    title: "Report Exports",
+    tooltip: "View report export jobs",
+    info: "Track queued report PDF and Excel exports and download generated files when ready.",
+    filePrefix: "report-export",
+  },
+};
+
 function getJobLabel(job: ExportJobSummary) {
   if (job.fileName) return job.fileName;
+  if (job.target === "report") return `${job.format.toUpperCase()} report export`;
   const target = TARGET_LABELS[job.target];
   return `${job.format.toUpperCase()} export${target ? ` (${target})` : ""}`;
 }
@@ -135,7 +160,7 @@ function ExportStatusBadge({ status }: { status: ExportJobStatus }) {
   );
 }
 
-function ProductExportJobCard({
+function ExportJobCard({
   job,
   isDownloading,
   onDownload,
@@ -186,7 +211,7 @@ function ProductExportJobCard({
             </TooltipTrigger>
             <TooltipContent>Download</TooltipContent>
           </Tooltip>
-        ) : ACTIVE_EXPORT_JOB_STATUSES.includes(job.status) ? (
+        ) : isActiveExportJob(job.status) ? (
           <Spinner className="size-4 text-muted-foreground" />
         ) : null}
       </div>
@@ -194,12 +219,14 @@ function ProductExportJobCard({
   );
 }
 
-export function ProductExportsSheet({
+export function ExportJobsSheet({
+  resource,
   trigger,
   open,
   onOpenChange,
   showTrigger = true,
-}: ProductExportsSheetProps) {
+}: ExportJobsSheetProps) {
+  const copy = SHEET_COPY[resource];
   const queryClient = useQueryClient();
   const [internalOpen, setInternalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | ExportJobStatus>(
@@ -225,30 +252,21 @@ export function ProductExportsSheet({
     [statusFilter],
   );
 
-  const { data: badgeData } = useGetProductExportJobs(
-    { page: 1 },
-    { enabled: true, pollWhenActive: true },
-  );
+  const { data: badgeData } = useGetExportJobs(resource);
 
-  const { data, isPending: isLoading, isFetching, error, refetch } = useGetProductExportJobs(
-    { page: 1, status: statuses },
-    { enabled: sheetOpen, pollWhenActive: true },
-  );
+  const { data, isPending: isLoading, isFetching, error, refetch } =
+    useGetExportJobs(resource, { status: statuses }, { enabled: sheetOpen });
 
-  const { mutate: requestDownload } = useDownloadProductExportJob();
+  const { mutate: requestDownload } = useDownloadExportJob(resource);
 
   const jobs = data?.result.jobs ?? [];
-  const badgeJobs = badgeData?.result.jobs ?? [];
-  const activeCount =
-    typeof badgeData?.result.activeJobsCount === "number"
-      ? badgeData.result.activeJobsCount
-      : badgeJobs.filter((job) =>
-          ACTIVE_EXPORT_JOB_STATUSES.includes(job.status),
-        ).length;
-  const latestJob = badgeJobs[0];
+  const activeCount = countActiveExportJobs(badgeData);
+  const latestJob = badgeData?.result.jobs[0];
 
   const handleRefresh = () => {
-    void queryClient.invalidateQueries({ queryKey: ["product-export-jobs"] });
+    void queryClient.invalidateQueries({
+      queryKey: exportJobsQueryKey(resource),
+    });
   };
 
   const handleDownload = useCallback(
@@ -263,7 +281,7 @@ export function ProductExportsSheet({
             link.href = response.result.downloadUrl;
             link.download =
               response.result.fileName ||
-              `product-export-${response.result.jobId}`;
+              `${copy.filePrefix}-${response.result.jobId}`;
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -285,7 +303,7 @@ export function ProductExportsSheet({
         },
       );
     },
-    [requestDownload],
+    [copy.filePrefix, requestDownload],
   );
 
   const renderIndicator = () => {
@@ -328,7 +346,7 @@ export function ProductExportsSheet({
           <TooltipTrigger asChild>
             <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
           </TooltipTrigger>
-          <TooltipContent>View product export jobs</TooltipContent>
+          <TooltipContent>{copy.tooltip}</TooltipContent>
         </Tooltip>
       ) : null}
       <SheetContent
@@ -336,11 +354,11 @@ export function ProductExportsSheet({
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <SheetHeader>
-          <SheetTitle>Product Exports</SheetTitle>
+          <SheetTitle>{copy.title}</SheetTitle>
           <InfoTooltip
             className="mt-0.5"
             ContentClassName="z-105"
-            content="Track queued Product PDF exports and download exported files. Exports are available for 24 hours only."
+            content={copy.info}
           />
         </SheetHeader>
         <div
@@ -413,7 +431,7 @@ export function ProductExportsSheet({
             ) : jobs.length ? (
               <div className="flex flex-col gap-2">
                 {jobs.map((job) => (
-                  <ProductExportJobCard
+                  <ExportJobCard
                     key={job.jobId}
                     job={job}
                     isDownloading={downloadingJobIds.has(job.jobId)}
@@ -436,4 +454,4 @@ export function ProductExportsSheet({
   );
 }
 
-export default ProductExportsSheet;
+export default ExportJobsSheet;
