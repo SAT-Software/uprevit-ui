@@ -36,7 +36,6 @@ import DialogRemoveProductBookmark from "@/features/workspace/bookmarks/DialogRe
 import ProductExportsSheet from "@/features/workspace/products/ProductExportsSheet";
 import { ProductListItem } from "@/features/workspace/products/productListItem";
 import { ProductOwnerCell } from "@/features/workspace/products/ProductMemberAvatar";
-import { useProductRole } from "@/hooks/product/useProductAccess";
 import UpdateProductDialog from "@/features/workspace/products/UpdateProductDialog";
 import { useGetAllProducts } from "@/hooks/product/useGetAllProducts";
 import { useGetAllBookmarkedProducts } from "@/hooks/product/useGetAllBookmarkedProducts";
@@ -89,11 +88,7 @@ import {
   ProductStatusCell,
   ProductVersionCell,
 } from "@/features/workspace/products/ProductLifecycleCells";
-import {
-  PRODUCT_STATUS_LABELS,
-  canCreateProductVersion,
-  isProductContentLocked,
-} from "@/utils/product/product-lifecycle";
+import { PRODUCT_STATUS_LABELS } from "@/utils/product/product-lifecycle";
 
 const PRODUCTS_TABS = ["all", "bookmarked"] as const;
 type ProductsTab = (typeof PRODUCTS_TABS)[number];
@@ -791,13 +786,11 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
-  const { canEdit } = useProductRole(row.original);
-  const { canEdit: canExport, isAdmin } = useWorkspaceAccess();
-  const canArchive =
-    isAdmin && !row.original.is_archived && row.original.status !== "in_review";
-  const canCreateVersion = canCreateProductVersion(row.original) && canEdit;
-  const isContentLocked =
-    isProductContentLocked(row.original.status) || !canEdit;
+  const capabilities = row.original.capabilities;
+  const { canEdit: canExport } = useWorkspaceAccess();
+  const canArchive = !!capabilities?.canArchive;
+  const canCreateVersion = !!capabilities?.canCreateVersion;
+  const isContentLocked = !capabilities?.canEdit;
 
   return (
     <div

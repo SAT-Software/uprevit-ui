@@ -32,7 +32,6 @@ import {
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
-import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface FormValues {
@@ -65,8 +64,7 @@ export default function ProductInfoEditMetadataDialog({
   const [openTargetDate, setOpenTargetDate] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const { canEdit, lockedMessage } = useProductAccess();
-  const isContentLocked =
-    isProductContentLocked(productMetadata?.status) || !canEdit;
+  const isContentLocked = !canEdit;
 
   const initialValues: FormValues = {
     productName: productMetadata?.product_name || "",

@@ -5,7 +5,6 @@ import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline"
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
 import { type ProductDataTableSchema } from "@/types/product-data-table";
 import { useParams, useSearchParams } from "next/navigation";
-import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 export default function Page() {
@@ -31,10 +30,7 @@ export default function Page() {
     | ProductDataTableSchema
     | undefined;
   const { canEdit } = useProductAccess();
-  const isContentLocked =
-    isProductContentLocked(
-      productTabData?.result?.data?.product_data?.data?.status,
-    ) || !canEdit;
+  const isContentLocked = !canEdit;
   const baseVersionWorkbook = diffData?.result?.base_version?.product_data?.data
     ?.workbook_data as ProductDataTableSchema | undefined;
   const nextVersionWorkbook = diffData?.result?.next_version?.product_data?.data

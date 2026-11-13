@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "@uprevit/ui/components/ui/dialog";
 import { AppDialogContent } from "@uprevit/ui/components/common/app-dialog";
 import { useCreateProductVersion } from "@/hooks/product/useCreateProductVersion";
-import type { ProductStatus } from "@/types/product";
-import { canCreateProductVersion } from "@/utils/product/product-lifecycle";
+import type { ProductCapabilities } from "@/types/product";
 import { Badge } from "@uprevit/ui/components/ui/badge";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
@@ -22,8 +21,7 @@ interface DialogCreateVersionProps {
     _id: string;
     product_name?: string;
     version?: number;
-    status?: ProductStatus;
-    is_latest?: boolean;
+    capabilities?: Pick<ProductCapabilities, "canCreateVersion">;
   };
 }
 
@@ -38,7 +36,7 @@ export default function DialogCreateVersion({
   const currentVersion = product.version || 1;
   const newVersion = currentVersion + 1;
 
-  const canCreateVersion = canCreateProductVersion(product);
+  const canCreateVersion = !!product.capabilities?.canCreateVersion;
 
   async function handleCreateVersion(e: React.MouseEvent) {
     e.preventDefault();

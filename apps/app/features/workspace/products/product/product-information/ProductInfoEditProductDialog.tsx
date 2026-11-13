@@ -17,7 +17,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@uprevit/ui/components/ui/popover";
-import type { ProductMetadata } from "@/types/product";
 import {
   DEVICE_CLASS_GROUPS,
   findDeviceClassOption,
@@ -47,7 +46,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
-import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ProductData {
@@ -76,10 +74,8 @@ interface FormValues {
 
 export default function EditProductDialog({
   product,
-  productMetadata,
 }: {
   product: ProductData;
-  productMetadata: ProductMetadata;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -88,8 +84,7 @@ export default function EditProductDialog({
   const [classComboboxOpen, setClassComboboxOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const { canEdit, lockedMessage } = useProductAccess();
-  const isContentLocked =
-    isProductContentLocked(productMetadata?.status) || !canEdit;
+  const isContentLocked = !canEdit;
 
   const initialValues: FormValues = {
     marketGeographySelect:

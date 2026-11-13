@@ -216,8 +216,23 @@ export interface ProductDataContent extends ProductTeam {
   status: ProductStatus;
   complete_count?: number;
   version?: number;
+  is_archived?: boolean;
   active_workflow?: ProductActiveWorkflow | null;
   released_version?: ProductReleasedVersion | null;
+  capabilities?: ProductCapabilities;
+}
+
+/** What the signed-in member may do with a Product Version, computed by the backend. */
+export interface ProductCapabilities {
+  role: "owner" | "contributor" | "admin" | "viewer";
+  canEdit: boolean;
+  canManageTeam: boolean;
+  canSubmit: boolean;
+  canReturnToDraft: boolean;
+  canMarkTabIncomplete: boolean;
+  canArchive: boolean;
+  canCreateVersion: boolean;
+  lockedReason: string | null;
 }
 
 export type ProductActiveWorkflow = { id: string; numberLabel: string };

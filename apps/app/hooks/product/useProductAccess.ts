@@ -1,32 +1,8 @@
 import { useParams } from "next/navigation";
-import { useAuth } from "react-oidc-context";
 import { useGetProductTabData } from "@/hooks/product/useGetProductTabData";
-import type { GetAllTabsResponse, ProductTeam } from "@/types/product";
-import { canEditWorkspaceDataProfile, isAdminProfile } from "@/utils/isAdmin";
-import {
-  getProductLockedMessage,
-  getProductRole,
-  PRODUCT_EDIT_FORBIDDEN_MESSAGE,
-} from "@/utils/product/product-lifecycle";
+import type { GetAllTabsResponse } from "@/types/product";
 
-export function useProductRole(product?: ProductTeam) {
-  const auth = useAuth();
-  const role = getProductRole(
-    product,
-    auth.user?.profile?.userId as string | undefined,
-    isAdminProfile(auth.user?.profile),
-  );
-
-  const canEditWorkspace = canEditWorkspaceDataProfile(auth.user?.profile);
-
-  return {
-    role,
-    canEdit: canEditWorkspace && role !== "viewer",
-    canManageTeam: canEditWorkspace && (role === "owner" || role === "admin"),
-  };
-}
-
-/** Access of the current user to the product open in the product pages. */
+/** What the current user may do with the product open in the product pages. */
 export function useProductAccess() {
   const params = useParams();
   const productId = typeof params.productId === "string" ? params.productId : "";
@@ -34,13 +10,13 @@ export function useProductAccess() {
     data?: GetAllTabsResponse;
   };
   const product = data?.result?.data?.product_information?.product_data?.data;
-  const access = useProductRole(product);
+  const capabilities = product?.capabilities;
 
   return {
-    ...access,
     product,
-    lockedMessage: access.canEdit
-      ? getProductLockedMessage(product)
-      : PRODUCT_EDIT_FORBIDDEN_MESSAGE,
+    capabilities,
+    canEdit: capabilities?.canEdit ?? false,
+    canManageTeam: capabilities?.canManageTeam ?? false,
+    lockedMessage: capabilities?.lockedReason ?? "This version can't be edited",
   };
 }

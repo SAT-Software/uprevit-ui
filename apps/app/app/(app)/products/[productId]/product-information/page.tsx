@@ -910,13 +910,9 @@ export default function Page() {
               </div>
               {productData && productMetadataForDialog ? (
                 <div className="flex items-center gap-2">
-                  <EditProductDialog
-                    product={productData}
-                    productMetadata={productMetadataForDialog}
-                  />
+                  <EditProductDialog product={productData} />
                   <ProductInformationCustomFieldEditDialog
                     product={productData}
-                    productMetadata={productMetadataForDialog}
                     customFieldsData={customFieldsForDialog}
                   />
                 </div>
