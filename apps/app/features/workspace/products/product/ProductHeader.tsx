@@ -3,6 +3,12 @@
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Fragment, useEffect, useMemo, useState, type UIEvent } from "react";
+import {
+  getCompletedProductTabs,
+  getProductProgressBar,
+  getProductTab,
+  PRODUCT_TABS,
+} from "@/lib/product-tabs";
 
 import { Button } from "@uprevit/ui/components/ui/button";
 import {
@@ -85,54 +91,6 @@ export type Item = {
   delayReason: string | null;
   tabsCompleted: string[];
   completionPercentage: number;
-};
-
-const TOTAL_TABS = 7;
-
-const PROGRESS_STATES = [
-  {
-    min: 100,
-    label: "Ready to submit",
-    dot: "bg-emerald-500",
-    text: "text-emerald-600 dark:text-emerald-300",
-    bar: "from-emerald-400 via-emerald-500 to-emerald-600",
-  },
-  {
-    min: 70,
-    label: "On track",
-    dot: "bg-sky-500",
-    text: "text-sky-600 dark:text-sky-300",
-    bar: "from-sky-400 via-sky-500 to-sky-600",
-  },
-  {
-    min: 40,
-    label: "In progress",
-    dot: "bg-amber-500",
-    text: "text-amber-600 dark:text-amber-300",
-    bar: "from-amber-400 via-amber-500 to-amber-600",
-  },
-  {
-    min: 0,
-    label: "Getting started",
-    dot: "bg-slate-400",
-    text: "text-slate-600 dark:text-slate-300",
-    bar: "from-slate-400 via-slate-500 to-slate-600",
-  },
-] as const;
-
-const SUBMITTED_STATE = {
-  min: 100,
-  label: "Submitted",
-  dot: "bg-violet-500",
-  text: "text-violet-600 dark:text-violet-300",
-  bar: "from-violet-400 via-violet-500 to-violet-600",
-} as const;
-
-const getProgressState = (value: number) => {
-  for (const state of PROGRESS_STATES) {
-    if (value >= state.min) return state;
-  }
-  return PROGRESS_STATES[PROGRESS_STATES.length - 1];
 };
 
 type ProductVersion = Product & { _id: string };
@@ -293,38 +251,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
 
   const currentTab = getCurrentTab();
 
-  const tabCompletionConfig: Record<string, { tab: string; action: string }> = {
-    "product-information": {
-      tab: "product-information",
-      action: "update_product_information_completion",
-    },
-    "compliance-information": {
-      tab: "compliance-information",
-      action: "update_compliance_tab_completion",
-    },
-    "label-components": {
-      tab: "label-components",
-      action: "update_label_component_tab_completion",
-    },
-    "symbols-graphics": {
-      tab: "symbols-graphics",
-      action: "update_symbols_graphics_tab_completion",
-    },
-    "product-specifications": {
-      tab: "product-specifications",
-      action: "update_product_data_tab_completion",
-    },
-    "operational-parameters": {
-      tab: "operational-parameters",
-      action: "update_operational_parameters_tab_completion",
-    },
-    "label-tags": {
-      tab: "label-tags",
-      action: "update_label_tags_tab_completion",
-    },
-  };
-
-  const currentTabConfig = tabCompletionConfig[currentTab ?? ""];
+  const currentTabConfig = getProductTab(currentTab);
   const isTabCompletionEnabled = Boolean(currentTabConfig);
 
   const allTabsData = productData?.result?.data;
@@ -364,24 +291,10 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     await updateProduct({ _id: productId, action: "submit" });
   };
 
-  const tabsCompleted = useMemo(() => {
-    if (!allTabsData) return [];
-    const completed: string[] = [];
-    if (allTabsData.product_information?.tab_completed)
-      completed.push("product-information");
-    if (allTabsData.compliance_information?.tab_completed)
-      completed.push("compliance-information");
-    if (allTabsData.label_components?.tab_completed)
-      completed.push("label-components");
-    if (allTabsData.symbols_graphics?.tab_completed)
-      completed.push("symbols-graphics");
-    if (allTabsData.product_data?.tab_completed)
-      completed.push("product-specifications");
-    if (allTabsData.operational_parameters?.tab_completed)
-      completed.push("operational-parameters");
-    if (allTabsData.label_tags?.tab_completed) completed.push("label-tags");
-    return completed;
-  }, [allTabsData]);
+  const tabsCompleted: string[] = useMemo(
+    () => getCompletedProductTabs(allTabsData),
+    [allTabsData],
+  );
 
   const product: Item | null = productCoreData
     ? {
@@ -411,10 +324,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     0,
     Math.min(100, Math.round(completionPercentage || 0)),
   );
-  const progressState =
-    status === "draft"
-      ? getProgressState(clampedPercentage)
-      : { ...SUBMITTED_STATE, label: statusLabel };
+  const progressBar = getProductProgressBar(status, clampedPercentage);
 
   const isCurrentTabCompleted = currentTab
     ? tabsCompleted.includes(currentTab)
@@ -477,8 +387,8 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     try {
       await updateProductTabData({
         id: productId,
-        action: currentTabConfig.action,
-        tab: currentTabConfig.tab,
+        action: currentTabConfig.completionAction,
+        tab: currentTabConfig.slug,
         data: {
           tab_completed: !isCurrentTabCompleted,
         },
@@ -813,11 +723,11 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
         <ProductProgressHoverCard
           // variant="secondary"
           percentage={clampedPercentage}
-          colorClass={progressState.bar}
+          colorClass={progressBar}
           progress={clampedPercentage}
           product_name={product?.productName ?? ""}
           tabsCompleted={completedTabsCount}
-          totalTabs={TOTAL_TABS}
+          totalTabs={PRODUCT_TABS.length}
           showActions={isTabCompletionEnabled}
           actions={
             isTabCompletionEnabled ? (

@@ -6,8 +6,10 @@ import type {
   ProductStatus,
   ProductTeam,
 } from "@/types/product";
+import type { ProductTabCompletion } from "@/lib/product-tabs";
 
-export type ProductListItem = ProductTeam & {
+export type ProductListItem = ProductTeam &
+  ProductTabCompletion & {
   _id: string;
   productId?: string;
   product_description: string;
@@ -23,13 +25,6 @@ export type ProductListItem = ProductTeam & {
   is_latest?: boolean;
   is_archived?: boolean;
   parent_id?: string | null;
-  product_information?: { tab_completed?: boolean };
-  compliance_information?: { tab_completed?: boolean };
-  label_components?: { tab_completed?: boolean };
-  symbols_graphics?: { tab_completed?: boolean };
-  product_data?: { tab_completed?: boolean };
-  operational_parameters?: { tab_completed?: boolean };
-  label_tags?: { tab_completed?: boolean };
   auditLogs?: Array<AuditLog>;
   createdBy?: string;
   createdOn?: string;
