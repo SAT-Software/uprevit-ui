@@ -792,7 +792,9 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
 
   const { canEdit } = useProductRole(row.original);
-  const { canEdit: canExport } = useWorkspaceAccess();
+  const { canEdit: canExport, isAdmin } = useWorkspaceAccess();
+  const canArchive =
+    isAdmin && !row.original.is_archived && row.original.status !== "in_review";
   const canCreateVersion = canCreateProductVersion(row.original) && canEdit;
   const isContentLocked =
     isProductContentLocked(row.original.status) || !canEdit;
@@ -849,18 +851,22 @@ function RowActions({ row }: { row: { original: ProductListItem } }) {
               </DropdownMenuItem>
             ) : null}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => {
-                setTimeout(() => setShowArchiveDialog(true), 100);
-              }}
-            >
-              <Icon icon={ArchiveIcon} />
-              <span>Archive</span>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
+          {canArchive ? (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onClick={(e) => e.stopPropagation()}
+                  onSelect={() => {
+                    setTimeout(() => setShowArchiveDialog(true), 100);
+                  }}
+                >
+                  <Icon icon={ArchiveIcon} />
+                  <span>Archive</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          ) : null}
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem

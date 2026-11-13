@@ -32,7 +32,7 @@ export function useMemberListIncludeInactive() {
     async (next: boolean) => {
       setIncludeInactive(next);
 
-      if (!isAdmin || !workspace || !workspaceId) return;
+      if (!isAdmin || !workspaceId) return;
 
       try {
         if (!accessToken) return;
@@ -44,7 +44,6 @@ export function useMemberListIncludeInactive() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...workspace,
             _id: workspaceId,
             memberListIncludeInactive: next,
           }),
@@ -64,7 +63,7 @@ export function useMemberListIncludeInactive() {
         toast.error(message);
       }
     },
-    [accessToken, isAdmin, queryClient, workspace, workspaceId],
+    [accessToken, isAdmin, queryClient, workspaceId],
   );
 
   return {

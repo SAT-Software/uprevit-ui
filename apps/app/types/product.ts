@@ -215,7 +215,7 @@ export interface ProductDataContent extends ProductTeam {
   actual_completion_date: string | null;
   status: ProductStatus;
   complete_count?: number;
-  version?: string;
+  version?: number;
   active_workflow?: ProductActiveWorkflow | null;
   released_version?: ProductReleasedVersion | null;
 }

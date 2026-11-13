@@ -37,6 +37,7 @@ export function useUpdateDepartment() {
       queryClient.invalidateQueries({
         queryKey: ["all-departments"],
       });
+      queryClient.invalidateQueries({ queryKey: ["departments-infinite"] });
       invalidateBillingSummary(queryClient);
     },
     onError: (error) => {

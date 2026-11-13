@@ -32,6 +32,8 @@ export function useArchiveDepartment() {
     onSuccess: () => {
       toast.success("Department archived successfully");
       queryClient.invalidateQueries({ queryKey: ["all-departments"] });
+      queryClient.invalidateQueries({ queryKey: ["departments-infinite"] });
+      queryClient.invalidateQueries({ queryKey: ["projects-infinite"] });
       queryClient.invalidateQueries({ queryKey: ["archived-departments"] });
       router.push("/archive");
     },

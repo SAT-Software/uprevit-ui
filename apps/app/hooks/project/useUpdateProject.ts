@@ -35,6 +35,7 @@ export function useUpdateProject() {
         queryKey: ["project", variables._id],
       });
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects-infinite"] });
       invalidateBillingSummary(queryClient);
     },
     onError: (error) => {
