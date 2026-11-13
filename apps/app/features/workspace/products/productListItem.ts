@@ -20,6 +20,7 @@ export type ProductListItem = ProductTeam & {
   project_id: string;
   status: ProductStatus;
   is_latest?: boolean;
+  is_archived?: boolean;
   parent_id?: string | null;
   product_information?: { tab_completed?: boolean };
   compliance_information?: { tab_completed?: boolean };

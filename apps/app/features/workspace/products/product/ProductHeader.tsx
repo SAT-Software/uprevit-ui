@@ -331,14 +331,15 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const allTabsData = productData?.result?.data;
   const productCoreData = allTabsData?.product_information?.product_data?.data;
 
+  const isStatusLoading = !productCoreData?.status;
   const status: ProductStatus = productCoreData?.status ?? "draft";
   const statusLabel = PRODUCT_STATUS_LABELS[status];
   const isProductComplete = productCoreData?.complete_count === 100;
   const isReadOnly = isProductContentLocked(status);
   const activeWorkflow =
     status === "in_review" ? productCoreData?.active_workflow : null;
-  const isEditLocked = isReadOnly || isExportLocked || !canEdit;
-  const isSubmittable = status === "draft";
+  const isEditLocked = isStatusLoading || isReadOnly || isExportLocked || !canEdit;
+  const isSubmittable = !isStatusLoading && status === "draft";
   const canSubmit =
     isSubmittable && isProductComplete && !isExportLocked && canEdit;
   const submitLabel = "Submit for approval";

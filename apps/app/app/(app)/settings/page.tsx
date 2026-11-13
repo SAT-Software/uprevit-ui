@@ -32,9 +32,11 @@ import { useAuth } from "react-oidc-context";
 import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 
 const LIST_QUERY_PARAMS = ["page", "limit", "sort", "order", "filters"];
-const ADMIN_TABS = ["admins", "workspace", "security", "activity"] as const;
+const ADMIN_TABS = ["admins", "workspace", "activity"] as const;
 const USAGE_TABS = ["usage"] as const;
 const MANAGER_TABS = ["billing"] as const;
+const OPEN_TABS = ["profile", "users"] as const;
+const ALL_TABS = [...OPEN_TABS, ...ADMIN_TABS, ...USAGE_TABS, ...MANAGER_TABS];
 
 function isTabIn(tabs: readonly string[], tab: string | null) {
   return tab !== null && tabs.includes(tab);
@@ -49,6 +51,7 @@ function SettingsPage() {
   const auth = useAuth();
   const { isAdmin, isManager, canManageBilling } = useWorkspaceAccess();
   const canOpenTab = (value: string | null) =>
+    isTabIn(ALL_TABS, value) &&
     (!isTabIn(ADMIN_TABS, value) || isAdmin) &&
     (!isTabIn(USAGE_TABS, value) || canManageBilling) &&
     (!isTabIn(MANAGER_TABS, value) || isManager);

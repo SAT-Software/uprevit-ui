@@ -32,6 +32,7 @@ export function useCreateDepartment() {
     onSuccess: () => {
       toast.success("Department created successfully");
       queryClient.invalidateQueries({ queryKey: ["all-departments"] });
+      queryClient.invalidateQueries({ queryKey: ["departments-infinite"] });
       invalidateBillingSummary(queryClient);
     },
     onError: (error) => {

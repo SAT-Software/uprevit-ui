@@ -76,7 +76,10 @@ export default function EditComponentDialog({
       componentDescription: component.component_description || "",
       labelType: buildTags(component.label_type || []),
       dimensions: component.dimensions || "",
-      componentType: component.component_type || "",
+      componentType:
+        component.component_type === "Pre-printed"
+          ? "Preprinted"
+          : component.component_type || "",
       printDirection: component.print_direction || "",
     }),
     [
@@ -264,8 +267,7 @@ export default function EditComponentDialog({
                       <SelectValue placeholder="Select component type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Preprinted">Preprinted</SelectItem>
-                      <SelectItem value="Pre-printed">Pre-printed</SelectItem>
+                      <SelectItem value="Preprinted">Pre-printed</SelectItem>
                       <SelectItem value="Blank">Blank</SelectItem>
                       <SelectItem value="N/A">N/A</SelectItem>
                     </SelectContent>

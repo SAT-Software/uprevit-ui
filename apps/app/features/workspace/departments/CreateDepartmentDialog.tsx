@@ -173,7 +173,6 @@ export default function CreateDepartmentDialog() {
             setOpen(false);
           },
           onError: (error) => {
-            setSelectedUsers([]);
             console.error("Error creating department:", error);
           },
         },

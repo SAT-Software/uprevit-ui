@@ -32,6 +32,7 @@ export function useCreateProject() {
     onSuccess: () => {
       toast.success("Project created successfully");
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects-infinite"] });
       invalidateBillingSummary(queryClient);
     },
     onError: (error) => {

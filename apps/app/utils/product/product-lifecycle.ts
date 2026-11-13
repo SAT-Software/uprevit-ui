@@ -45,8 +45,11 @@ export const getProductInReviewMessage = (
   `This product is in review${product?.active_workflow ? ` (${product.active_workflow.numberLabel})` : ""}. Approvers will be notified of any change you save.`;
 
 export const canCreateProductVersion = (
-  product: Pick<Product, "status" | "is_latest">,
-) => product.status === "released" && product.is_latest !== false;
+  product: Pick<Product, "status" | "is_latest" | "is_archived">,
+) =>
+  product.status === "released" &&
+  product.is_latest !== false &&
+  !product.is_archived;
 
 export type ProductRole = "owner" | "contributor" | "admin" | "viewer";
 

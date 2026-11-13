@@ -30,6 +30,7 @@ export function useRestoreProject() {
     onSuccess: () => {
       toast.success("Project restored successfully");
       queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects-infinite"] });
       queryClient.invalidateQueries({ queryKey: ["archived-projects"] });
     },
     onError: (error) => {

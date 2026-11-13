@@ -251,7 +251,6 @@ export default function ProjectCreateDialog() {
             setOpen(false);
           },
           onError: (error) => {
-            setSelectedUsers([]);
             console.error("Error creating project:", error);
           },
         },
