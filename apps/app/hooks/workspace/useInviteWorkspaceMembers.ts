@@ -35,13 +35,21 @@ export function useInviteWorkspaceMembers() {
       return data;
     },
     onSuccess: (data) => {
-      const results = data?.data as Array<{ status?: string }> | undefined;
+      const results = data?.data as
+        | Array<{ email?: string; status?: string; reason?: string }>
+        | undefined;
       const reactivatedCount = results?.filter(
         (result) => result.status === "Reactivated",
       ).length ?? 0;
       const invitedCount = results?.filter(
         (result) => result.status === "Success",
       ).length ?? 0;
+
+      const failed =
+        results?.filter((result) => result.status === "Failed") ?? [];
+      for (const result of failed) {
+        toast.error(`${result.email}: ${result.reason ?? "Invitation failed"}`);
+      }
 
       if (reactivatedCount > 0 && invitedCount === 0) {
         toast.success(
@@ -51,7 +59,7 @@ export function useInviteWorkspaceMembers() {
         );
       } else if (reactivatedCount > 0) {
         toast.success("Invitations sent and members reactivated");
-      } else {
+      } else if (invitedCount > 0) {
         toast.success("Invitations sent successfully");
       }
 

@@ -71,8 +71,11 @@ export function InviteMembersDialog() {
     }));
 
     inviteMembersMutation(users, {
-      onSuccess: () => {
-        form.reset();
+      onSuccess: (data) => {
+        const results = data?.data as Array<{ status?: string }> | undefined;
+        if (!results?.some((result) => result.status === "Failed")) {
+          form.reset();
+        }
       },
     });
   }
