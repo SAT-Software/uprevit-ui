@@ -30,10 +30,8 @@ import type { Product, ProductStatus } from "@/types/product";
 import { ProductStatusBadge } from "@/components/common/ProductStatusBadge";
 import { formatToLocalDate } from "@/utils/formatDateAndTimeLocal";
 import {
-  PRODUCT_EDIT_FORBIDDEN_MESSAGE,
   PRODUCT_STATUS_LABELS,
   getProductInReviewMessage,
-  getProductLockedMessage,
   isProductContentLocked,
 } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
@@ -285,7 +283,8 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const compareVersionId = searchParams.get("compareVersion");
   const isRedlineView = !!compareVersionId;
   const workbookGuard = useProductWorkbookUnsavedGuardOptional();
-  const { canEdit, canManageTeam } = useProductAccess();
+  const { canEdit, canManageTeam, capabilities, lockedMessage } =
+    useProductAccess();
 
   const getCurrentTab = () => {
     const pathSegments = pathname.split("/");
@@ -338,10 +337,9 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
   const isReadOnly = isProductContentLocked(status);
   const activeWorkflow =
     status === "in_review" ? productCoreData?.active_workflow : null;
-  const isEditLocked = isStatusLoading || isReadOnly || isExportLocked || !canEdit;
+  const isEditLocked = isStatusLoading || isExportLocked || !canEdit;
   const isSubmittable = !isStatusLoading && status === "draft";
-  const canSubmit =
-    isSubmittable && isProductComplete && !isExportLocked && canEdit;
+  const canSubmit = !!capabilities?.canSubmit && !isExportLocked;
   const submitLabel = "Submit for approval";
   const releasedVersion =
     productCoreData?.released_version &&
@@ -350,7 +348,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
       : null;
 
   const canReturnToDraft =
-    status === "submitted" && canEdit && !isExportLocked && !isUpdatingProduct;
+    !!capabilities?.canReturnToDraft && !isExportLocked && !isUpdatingProduct;
 
   const handleReturnToDraft = async () => {
     if (!productId || !canReturnToDraft) return;
@@ -422,7 +420,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
     ? tabsCompleted.includes(currentTab)
     : false;
   const isCompletionLocked =
-    (status === "submitted" || status === "in_review") && isCurrentTabCompleted;
+    canEdit && isCurrentTabCompleted && !capabilities?.canMarkTabIncomplete;
 
   const completedTabsCount = tabsCompleted.length;
   const isSyncingStatus = isUpdatingTab || isUpdatingProduct;
@@ -809,7 +807,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
           <ProductTeamMenu
             productId={productId}
             team={productCoreData}
-            canManageTeam={canManageTeam && productCoreData.is_latest !== false}
+            canManageTeam={canManageTeam}
           />
         ) : null}
         <ProductProgressHoverCard
@@ -850,11 +848,9 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                   title={
                     isExportLocked
                       ? "Editing is disabled while export is in progress"
-                      : isReadOnly
-                        ? getProductLockedMessage(productCoreData)
-                        : !canEdit
-                          ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
-                          : isCompletionLocked
+                      : !canEdit
+                        ? lockedMessage
+                        : isCompletionLocked
                             ? status === "in_review"
                               ? "Tabs can't be marked incomplete while in review"
                               : "Return to draft to mark a tab incomplete"
@@ -894,7 +890,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="end">
                   {!canEdit
-                    ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                    ? lockedMessage
                     : isExportLocked
                       ? "Cannot change status while an export is in progress"
                       : "Move this version back to Draft"}
@@ -942,7 +938,7 @@ export function ProductHeader({ isExportLocked = false }: ProductHeaderProps) {
                   {!isSubmittable
                     ? `This version is ${statusLabel.toLowerCase()}`
                     : !canEdit
-                      ? PRODUCT_EDIT_FORBIDDEN_MESSAGE
+                      ? lockedMessage
                       : isExportLocked
                         ? "Cannot submit while an export is in progress"
                         : !isProductComplete

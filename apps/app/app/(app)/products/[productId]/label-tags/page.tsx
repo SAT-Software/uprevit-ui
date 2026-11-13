@@ -8,12 +8,11 @@ import { useGetProductDiffRedline } from "@/hooks/product/getProductDiffRedline"
 import { LegendItem } from "@/features/workspace/products/product/label-tags/legendTypes";
 import type { DiffItem } from "@/utils/deepDiff";
 import { countChangedRedlineItems } from "@/utils/redlineCounts";
-import type { GetSingleTabResponse, ProductDataContent } from "@/types/product";
+import type { GetSingleTabResponse } from "@/types/product";
 import { buildRedlineArray, type RedlineStatus } from "@/utils/redlineArray";
 import { cn } from "@uprevit/ui/lib/utils";
 import { redlineBannerText } from "@/utils/redlineStyles";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
-import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface LabelTagItem {
@@ -35,10 +34,6 @@ interface LabelTagItem {
 }
 
 type LabelTagsResponse = GetSingleTabResponse<LabelTagItem[]>;
-type ProductInfoTabData = {
-  product_data?: { data?: ProductDataContent };
-};
-type ProductInfoResponse = { result?: { data?: ProductInfoTabData } };
 
 export default function Page() {
   const { productId } = useParams<{ productId: string }>();
@@ -51,23 +46,13 @@ export default function Page() {
     "label-tags",
   );
 
-  const { data: productInfoData } = useGetProductTabData(
-    productId as string,
-    "product-information",
-  );
-
   const { data: diffData, isLoading: isLoadingDiff } = useGetProductDiffRedline(
     productId as string,
     compareVersionId,
   );
 
-  const productInfo = (productInfoData as ProductInfoResponse | undefined)
-    ?.result?.data;
   const { canEdit } = useProductAccess();
-  const isContentLocked =
-    isProductContentLocked(
-      productInfo?.product_data?.data?.status,
-    ) || !canEdit;
+  const isContentLocked = !canEdit;
 
   if (isLoading) {
     return (

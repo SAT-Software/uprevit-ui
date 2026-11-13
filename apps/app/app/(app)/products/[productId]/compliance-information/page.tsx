@@ -16,7 +16,6 @@ import { redlineBannerText } from "@/utils/redlineStyles";
 import { Alert01Icon, ArrowRight01Icon, Home04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import type { ProductStatus } from "@/types/product";
-import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 type ComplianceItem = {
@@ -227,10 +226,7 @@ export default function Page() {
       .filter(Boolean) as WithRedlineMeta<LanguageItem>[];
   })();
 
-  const isContentLocked =
-    isProductContentLocked(
-      allTabsData?.product_information?.product_data?.data?.status,
-    ) || !canEdit;
+  const isContentLocked = !canEdit;
 
   return (
     <div className="flex h-full flex-col">

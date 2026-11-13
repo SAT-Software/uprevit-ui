@@ -1,6 +1,7 @@
 import type {
   AuditLog,
   ProductActiveWorkflow,
+  ProductCapabilities,
   ProductReleasedVersion,
   ProductStatus,
   ProductTeam,
@@ -45,4 +46,5 @@ export type ProductListItem = ProductTeam & {
   complete_count: number;
   active_workflow?: ProductActiveWorkflow | null;
   released_version?: ProductReleasedVersion | null;
+  capabilities?: ProductCapabilities;
 };

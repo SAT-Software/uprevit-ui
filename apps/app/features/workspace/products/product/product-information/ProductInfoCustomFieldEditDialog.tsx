@@ -12,7 +12,6 @@ import {
 } from "@uprevit/ui/components/ui/input-group";
 import { useUpdateProductTabData } from "@/hooks/product/useUpdateProductTabData";
 import { toast } from "sonner";
-import { ProductMetadata } from "@/types/product";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import {
   Alert01Icon,
@@ -36,7 +35,6 @@ import {
   TabsTrigger,
 } from "@uprevit/ui/components/ui/tabs";
 import { FormFieldLabel } from "@/components/common/FormFieldLabel";
-import { isProductContentLocked } from "@/utils/product/product-lifecycle";
 import { useProductAccess } from "@/hooks/product/useProductAccess";
 
 interface ProductData {
@@ -60,7 +58,6 @@ interface FormValues {
 
 interface CustomFieldEditDialogProps {
   product: ProductData;
-  productMetadata: ProductMetadata;
   customFieldsData: Array<{
     _id: string;
     parent_id?: string | null;
@@ -71,7 +68,6 @@ interface CustomFieldEditDialogProps {
 
 export default function ProductInformationCustomFieldEditDialog({
   product,
-  productMetadata,
   customFieldsData,
 }: CustomFieldEditDialogProps) {
   const id = useId();
@@ -81,8 +77,7 @@ export default function ProductInformationCustomFieldEditDialog({
   const [deleteFieldOpen, setDeleteFieldOpen] = useState(false);
   const { mutate: updateProductTabData, isPending } = useUpdateProductTabData();
   const { canEdit, lockedMessage } = useProductAccess();
-  const isContentLocked =
-    isProductContentLocked(productMetadata?.status) || !canEdit;
+  const isContentLocked = !canEdit;
 
   const {
     register,
