@@ -13,21 +13,29 @@ Click **Add First Condition** to start, then **Add Another Condition** for more.
 
 | Piece | Description |
 |-------|-------------|
-| **Category** | The product area to search: Product, Product Information, Compliance Information, Label Components, or Symbols & Graphics. |
+| **Category** | The product area to search, such as Product, Dates, Languages, Barcodes, or Label Tags. |
 | **Field** | Attribute within that category. |
-| **Operator** | Equals, Does not equal, Contains, Does not contain, Exists (has value), Does not exist (empty), Contains any, or Contains all, depending on the field. |
-| **Value** | Text, select, or multi-select depending on field type. |
+| **Operator** | Depends on the field: text fields match exactly or by part, numbers and counts compare with =, ≠, &gt;, ≥, &lt;, or ≤, dates match on, before, or after a day, and list fields such as **Presence on Labels** match any or all of several values. |
+| **Value** | Text, number, date, a pick list, or several values, depending on the field. |
 
-Click **Run Query** to see the results. Click **Clear all conditions** to start over.
+Text matches ignore upper and lower case. Click **Run Query** to see the results. Click **Clear all conditions** to start over.
 
-### Example categories
+### Categories
 
-- **Product** — status, product name, PPN, version, and whether the product is archived.
-- **Product Information** — market, country of origin, commercial/clinical, Basic UDI, and related metadata.
-- **Compliance Information** — standards and languages.
-- **Label Components / Symbols & Graphics** — list fields you can check for a value or for specific entries.
+- **Product** — name, description, PPN, department, project, status, version, **Latest Version**, and **Archived**.
+- **Dates** — created, target, completion, released, obsoleted, and archived dates.
+- **Team & Workflow** — owner, contributors (by name or email), whether the product is in an active workflow, released through a workflow, or a legacy release.
+- **Progress** — whether a given tab is complete, and how many tabs are complete.
+- **Product Information** and **Custom Fields** — market, country of origin, commercial/clinical, device class, Basic UDI-DI, and your custom fields.
+- **Compliance Information** and **Languages** — standards, and label languages by name, code, or country.
+- **Symbols**, **Schematics**, **Barcodes**, and **Other Components** — each item's name or type, description, and presence on labels, plus symbol text and standard library fields, and barcode data and count.
+- **Label Components** and **Label Tags** — component type, number, label type, dimensions, print direction, and label tag names, types, and legend text.
 
-Reports include archived products unless you add a condition on **Archived**.
+Each list category also has a **Number of …** field, for example **Number of Barcodes ≥ 2** or **Number of Symbols = 0**.
+
+When conditions on the same list category are joined by **AND**, they must all match the same item. For example, **Barcode Type equals GS1-128** AND **Presence on Labels includes any of Pouch** finds products with a GS1-128 barcode on the pouch.
+
+Every version of a product is a separate result. Add **Latest Version is Yes** to see only the newest version, or filter **Version ≥ 2**. Reports include archived products unless you add a condition on **Archived**.
 
 ## Saved queries
 
@@ -35,7 +43,7 @@ Click **Save current query** to name and save your conditions. Click **Load a sa
 
 ## Results
 
-**Query Results** lists matching products, 10 per page, with PPN, product name, project, department, status, and version. Click a row to open the product.
+**Query Results** lists matching products, 10 per page, with PPN, product name, project, department, status, and version. Click **Columns** to show more, such as owner, dates, market, device class, or languages. Your column choice is remembered in this browser. Click a row to open the product.
 
 When there are results, click **PDF** or **Excel** in the results header to export them. See [Exports](/docs/review-outputs/exports).
 

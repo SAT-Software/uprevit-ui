@@ -33,8 +33,21 @@ export interface ReportsProduct {
   project_id: string;
   project_name: string | null;
   status: ProductStatus;
+  is_archived?: boolean;
+  product_description?: string | null;
   target_date?: string | null;
+  actual_completion_date?: string | null;
+  released_at?: string | null;
   version?: number;
+  owner_name?: string | null;
+  market_geography?: string | null;
+  country_of_origin?: string | null;
+  commercial_clinical?: string | null;
+  manufacturing_location?: string | null;
+  oem_contract_manufacturer?: string | null;
+  class_of_device?: string | null;
+  basic_udi_di?: string | null;
+  languages?: string[];
 }
 
 export interface SavedQuery<T = QueryCondition> {
