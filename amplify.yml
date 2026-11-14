@@ -12,7 +12,9 @@ applications:
             # Drop cached node_modules so workspace packages (e.g. @uprevit/ui exports)
             # are always re-linked from the current commit. Stale caches can omit new
             # package exports like ./components/common/Icon and break Amplify builds.
-            - rm -rf node_modules apps/*/node_modules packages/*/node_modules
+            # Turbopack's build cache stores absolute paths and Amplify builds in a new
+            # directory each run, so a restored .next/cache breaks the build.
+            - rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/.next/cache
             - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
           commands:
@@ -27,7 +29,6 @@ applications:
         paths:
           - .pnpm-store/**/*
           - .turbo/**/*
-          - apps/app/.next/cache/**/*
 
   - appRoot: apps/marketing
     frontend:
@@ -38,7 +39,7 @@ applications:
             - nvm use 24
             - corepack enable pnpm
             - corepack install
-            - rm -rf node_modules apps/*/node_modules packages/*/node_modules
+            - rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/.next/cache
             - pnpm install --frozen-lockfile --store-dir .pnpm-store
         build:
           commands:
@@ -52,4 +53,3 @@ applications:
         paths:
           - .pnpm-store/**/*
           - .turbo/**/*
-          - apps/marketing/.next/cache/**/*
