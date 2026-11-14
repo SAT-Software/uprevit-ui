@@ -20,12 +20,14 @@ import {
 import { QueryCondition } from "@/types/reports";
 import {
   QUERYABLE_TABS,
-  OPERATORS,
-  getFieldsForTab,
-  Operator,
+  FIELD_OPERATORS,
+  NO_VALUE_OPERATORS,
   ARRAY_FIELD_OPERATORS,
+  getFieldOptions,
+  getFieldsForTab,
+  getQueryableField,
+  Operator,
 } from "@/data/reports-config";
-import { cn } from "@uprevit/ui/lib/utils";
 
 interface ConditionRowProps {
   condition: QueryCondition;
@@ -34,28 +36,11 @@ interface ConditionRowProps {
   position: number;
 }
 
-const TEXT_FIELD_OPERATORS: Operator[] = [
-  "equals",
-  "not_equals",
-  "contains",
-  "not_contains",
-  "exists",
-  "not_exists",
-];
-
-function getOperatorsForField(fieldType: string | undefined): Operator[] {
-  if (fieldType === "boolean") return ["equals", "not_equals"];
-  if (fieldType === "array") {
-    return [
-      ...ARRAY_FIELD_OPERATORS,
-      "equals",
-      "not_equals",
-      "exists",
-      "not_exists",
-    ];
-  }
-  return TEXT_FIELD_OPERATORS;
-}
+const INPUT_TYPES: Partial<Record<string, string>> = {
+  number: "number",
+  count: "number",
+  date: "date",
+};
 
 export function ConditionRow({
   condition,
@@ -64,11 +49,11 @@ export function ConditionRow({
   position,
 }: ConditionRowProps) {
   const fields = getFieldsForTab(condition.tab);
-  const selectedField = fields.find((f) => f.key === condition.field);
-  const needsValue =
-    condition.operator !== "exists" && condition.operator !== "not_exists";
-  const isArrayField = selectedField?.type === "array";
-  const availableOperators = getOperatorsForField(selectedField?.type);
+  const selectedField = getQueryableField(condition.tab, condition.field);
+  const operators = selectedField ? FIELD_OPERATORS[selectedField.type] : [];
+  const options = getFieldOptions(selectedField);
+  const needsValue = !NO_VALUE_OPERATORS.includes(condition.operator);
+  const isMultiValue = ARRAY_FIELD_OPERATORS.includes(condition.operator);
 
   const tags: Tag[] = Array.isArray(condition.value)
     ? condition.value.map((text, index) => ({
@@ -77,44 +62,95 @@ export function ConditionRow({
       }))
     : [];
 
-  const handleTagsChange = (newTags: Tag[]) => {
-    const stringArray = newTags.map((tag) => tag.text);
-    onUpdate({ value: stringArray });
+  const handleFieldChange = (value: string) => {
+    const field = getQueryableField(condition.tab, value);
+    if (!field) return;
+    onUpdate({
+      field: value,
+      operator: FIELD_OPERATORS[field.type][0].value,
+      value: field.type === "boolean" ? "true" : "",
+    });
   };
 
-  const handleFieldChange = (value: string) => {
-    const newField = fields.find((f) => f.key === value);
-    const newOperators = getOperatorsForField(newField?.type);
-    const currentOperator = condition.operator;
-    const isCurrentOperatorValid = newOperators.includes(currentOperator);
-    const newOperator = isCurrentOperatorValid
-      ? currentOperator
-      : newOperators[0];
-    onUpdate({ field: value, value: "", operator: newOperator });
+  const handleOperatorChange = (value: string) => {
+    const operator = value as Operator;
+    const wasMultiValue = ARRAY_FIELD_OPERATORS.includes(condition.operator);
+    const isNextMultiValue = ARRAY_FIELD_OPERATORS.includes(operator);
+    onUpdate(
+      wasMultiValue === isNextMultiValue
+        ? { operator }
+        : { operator, value: isNextMultiValue ? [] : "" },
+    );
+  };
+
+  const renderValueInput = () => {
+    if (options) {
+      return (
+        <Select
+          value={(condition.value as string) || ""}
+          onValueChange={(value) => onUpdate({ value })}
+        >
+          <SelectTrigger
+            className="h-8 min-w-36 flex-1 text-sm"
+            aria-label={`Condition ${position} value`}
+          >
+            <SelectValue placeholder="Value" />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    if (isMultiValue) {
+      return (
+        <div className="min-w-[180px] flex-1">
+          <TagInput
+            tags={tags}
+            setTags={(next: Tag[]) =>
+              onUpdate({ value: next.map((tag) => tag.text) })
+            }
+            placeholder="Add values…"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <Input
+        type={INPUT_TYPES[selectedField?.type ?? ""] ?? "text"}
+        min={selectedField?.type === "count" ? 0 : undefined}
+        placeholder={selectedField?.placeholder ?? "Enter value…"}
+        value={(condition.value as string) || ""}
+        onChange={(event) => onUpdate({ value: event.target.value })}
+        disabled={!selectedField}
+        aria-label={`Condition ${position} value`}
+        className="h-8 min-w-[140px] flex-1 text-sm"
+      />
+    );
   };
 
   return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/30 p-2 transition-colors hover:border-foreground/20",
-      )}
-    >
-      <div
-        className={cn(
-          "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium",
-          "bg-foreground/8 text-foreground",
-        )}
-      >
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/30 p-2 transition-colors hover:border-foreground/20">
+      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground/8 text-xs font-medium text-foreground">
         {position}
       </div>
 
       <Select
         value={condition.tab}
         onValueChange={(value) =>
-          onUpdate({ tab: value, field: "", value: "" })
+          onUpdate({ tab: value, field: "", operator: "equals", value: "" })
         }
       >
-        <SelectTrigger className="h-8 w-40 shrink-0 text-sm [&>span]:truncate">
+        <SelectTrigger
+          className="h-8 w-44 shrink-0 text-sm [&>span]:truncate"
+          aria-label={`Condition ${position} category`}
+        >
           <SelectValue placeholder="Category" />
         </SelectTrigger>
         <SelectContent>
@@ -131,7 +167,10 @@ export function ConditionRow({
         onValueChange={handleFieldChange}
         disabled={!condition.tab}
       >
-        <SelectTrigger className="h-8 w-48 shrink-0 text-sm [&>span]:truncate">
+        <SelectTrigger
+          className="h-8 w-52 shrink-0 text-sm [&>span]:truncate"
+          aria-label={`Condition ${position} field`}
+        >
           <SelectValue placeholder="Field" />
         </SelectTrigger>
         <SelectContent>
@@ -145,64 +184,25 @@ export function ConditionRow({
 
       <Select
         value={condition.operator}
-        onValueChange={(value) => onUpdate({ operator: value as Operator })}
-        disabled={!condition.field}
+        onValueChange={handleOperatorChange}
+        disabled={!selectedField}
       >
-        <SelectTrigger className="h-8 w-44 shrink-0 text-sm [&>span]:truncate">
+        <SelectTrigger
+          className="h-8 w-40 shrink-0 text-sm [&>span]:truncate"
+          aria-label={`Condition ${position} operator`}
+        >
           <SelectValue placeholder="Operator" />
         </SelectTrigger>
         <SelectContent>
-          {availableOperators.map((op) => {
-            const operatorLabel =
-              OPERATORS.find((o) => o.value === op)?.label || op;
-            return (
-              <SelectItem key={op} value={op}>
-                {operatorLabel}
-              </SelectItem>
-            );
-          })}
+          {operators.map((operator) => (
+            <SelectItem key={operator.value} value={operator.value}>
+              {operator.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
-      {needsValue ? (
-        <>
-          {selectedField?.options ? (
-            <Select
-              value={(condition.value as string) || ""}
-              onValueChange={(value) => onUpdate({ value })}
-              disabled={!condition.field}
-            >
-              <SelectTrigger className="h-8 min-w-36 flex-1 text-sm">
-                <SelectValue placeholder="Value" />
-              </SelectTrigger>
-              <SelectContent>
-                {selectedField.options.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : isArrayField ? (
-            <div className="min-w-[180px] flex-1">
-              <TagInput
-                tags={tags}
-                setTags={handleTagsChange}
-                placeholder="Add values…"
-                disabled={!condition.field}
-              />
-            </div>
-          ) : (
-            <Input
-              placeholder="Enter value…"
-              value={(condition.value as string) || ""}
-              onChange={(e) => onUpdate({ value: e.target.value })}
-              disabled={!condition.field}
-              className="h-8 min-w-[140px] flex-1 text-sm"
-            />
-          )}
-        </>
-      ) : null}
+      {needsValue ? renderValueInput() : null}
 
       <Tooltip>
         <TooltipTrigger asChild>

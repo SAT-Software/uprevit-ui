@@ -1,7 +1,6 @@
 "use client";
 
 import { EmptyState } from "@/components/common/EmptyState";
-import { format } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -22,6 +21,7 @@ import {
 import { InfoTooltip } from "@/components/common/InfoTooltip";
 import { WorkspaceListPagination } from "@/components/table/WorkspaceListPagination";
 import { getWorkflowSearchField } from "@/data/workflow-search-config";
+import { fromLocalDayInterval, toLocalDayInterval } from "@/utils/localDayInterval";
 import { ErrorState } from "@/components/common/ErrorState";
 import { LoadQueryDialog } from "@/features/workspace/reports/components/LoadQueryDialog";
 import { QueryBuilder } from "@/features/workspace/reports/components/QueryBuilder/QueryBuilder";
@@ -55,13 +55,6 @@ const WORKFLOW_SEARCH_OPTIONS: QueryBuilderOptions<WorkflowSearchCondition> = {
       !!condition.value.trim()),
 };
 
-const toLocalDayInterval = (date: string) => {
-  const start = new Date(`${date}T00:00`);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-  return `${start.toISOString()}/${end.toISOString()}`;
-};
-
 const toApiCondition = ({
   field,
   operator,
@@ -74,13 +67,6 @@ const toApiCondition = ({
       ? toLocalDayInterval(value)
       : value.trim();
   return { field, operator, value: apiValue, ...(logic ? { logic } : {}) };
-};
-
-const fromLocalDayInterval = (value: string) => {
-  const [start, end] = value.split("/").map((part) => new Date(part).getTime());
-  return value.includes("/") && !Number.isNaN(start) && !Number.isNaN(end)
-    ? format(new Date((start + end) / 2), "yyyy-MM-dd")
-    : value;
 };
 
 const SAVED_SEARCH_CODEC: SavedQueryCodec<WorkflowSearchCondition> = {

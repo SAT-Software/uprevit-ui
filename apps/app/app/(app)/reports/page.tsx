@@ -30,8 +30,16 @@ import {
 } from "@/features/workspace/reports/hooks/useQueryBuilderState";
 import { useExportExcel, useExportPDF } from "@/hooks/reports/useExportReports";
 import { useReportsQuery } from "@/hooks/reports/useReportsQuery";
-import { useSavedQueries } from "@/hooks/reports/useSavedQueries";
-import { ReportsProduct, SavedQuery } from "@/types/reports";
+import {
+  type SavedQueryCodec,
+  useSavedQueries,
+} from "@/hooks/reports/useSavedQueries";
+import { QueryCondition, ReportsProduct, SavedQuery } from "@/types/reports";
+import { NO_VALUE_OPERATORS, getQueryableField } from "@/data/reports-config";
+import {
+  fromLocalDayInterval,
+  toLocalDayInterval,
+} from "@/utils/localDayInterval";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { Button } from "@uprevit/ui/components/ui/button";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
@@ -40,6 +48,26 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@uprevit/ui/components/ui/tooltip";
+
+const isDateValue = (condition: QueryCondition) =>
+  getQueryableField(condition.tab, condition.field)?.type === "date" &&
+  !NO_VALUE_OPERATORS.includes(condition.operator) &&
+  typeof condition.value === "string";
+
+const toApiCondition = (condition: QueryCondition): QueryCondition =>
+  isDateValue(condition)
+    ? { ...condition, value: toLocalDayInterval(condition.value as string) }
+    : condition;
+
+const REPORT_QUERY_CODEC: SavedQueryCodec<QueryCondition> = {
+  toStored: toApiCondition,
+  fromStored: (stored) => {
+    const condition = stored as QueryCondition;
+    return isDateValue(condition)
+      ? { ...condition, value: fromLocalDayInterval(condition.value as string) }
+      : condition;
+  },
+};
 
 export default function Page() {
   const {
@@ -60,7 +88,7 @@ export default function Page() {
   const { canEdit: canExport } = useWorkspaceAccess();
   const exportExcel = useExportExcel();
   const { queries: savedQueries, loadError, saveQuery, deleteQuery, updateShared } =
-    useSavedQueries("report");
+    useSavedQueries("report", REPORT_QUERY_CODEC);
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
@@ -85,7 +113,7 @@ export default function Page() {
 
     try {
       const response = await reportsQuery.mutateAsync({
-        conditions: getApiConditions(),
+        conditions: getApiConditions().map(toApiCondition),
         conditionLogic,
         pagination: { page, limit: 10 },
       });
@@ -147,13 +175,13 @@ export default function Page() {
     try {
       if (format === "pdf") {
         await exportPDF.mutateAsync({
-          conditions: getApiConditions(),
+          conditions: getApiConditions().map(toApiCondition),
           conditionLogic,
         });
         toast.success("PDF export started.");
       } else {
         await exportExcel.mutateAsync({
-          conditions: getApiConditions(),
+          conditions: getApiConditions().map(toApiCondition),
           conditionLogic,
         });
         toast.success("Excel export started.");
