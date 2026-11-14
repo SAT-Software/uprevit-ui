@@ -1,0 +1,49 @@
+name: Amplify deploy status
+
+on:
+  push:
+    branches: [develop, main, demo]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-status:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: App
+            app-id: du2d12sd12i7o
+          - name: Marketing
+            app-id: dzj4wzx6vjm0r
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_AMPLIFY_STATUS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Wait for the Amplify build of this commit
+        env:
+          APP_ID: ${{ matrix.app-id }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          url="https://us-east-1.console.aws.amazon.com/amplify/apps/$APP_ID/branches/$BRANCH/deployments"
+          while true; do
+            job=$(aws amplify list-jobs --app-id "$APP_ID" --branch-name "$BRANCH" --max-results 20 \
+              --query "jobSummaries[?commitId=='$SHA'] | [0].[jobId,status]" --output text)
+            read -r id status <<< "$job"
+            echo "Job $id: ${status:-not started}"
+            case "$status" in
+              SUCCEED) exit 0 ;;
+              FAILED|CANCELLED)
+                echo "::error::Amplify build $id $status. Logs: $url/$id"
+                exit 1 ;;
+            esac
+            sleep 30
+          done
