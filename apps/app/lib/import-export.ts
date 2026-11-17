@@ -1,4 +1,5 @@
 import XLSX from "xlsx-js-style";
+import * as SheetJS from "xlsx";
 import type {
   ProductDataTableSchema,
   WorkbookSheet,
@@ -42,11 +43,11 @@ interface ExportData extends WorkbookMetadata {
 }
 
 function readSheetFormats(
-  workbook: XLSX.WorkBook,
+  workbook: SheetJS.WorkBook,
   sheetName: string,
 ): Record<string, CellFormat> {
   const files = (
-    workbook as XLSX.WorkBook & {
+    workbook as SheetJS.WorkBook & {
       files?: Record<string, { content: Uint8Array | string }>;
     }
   ).files;
@@ -146,19 +147,19 @@ function readSheetFormats(
 const LAYOUT_NOTE = "uprevit:layout:v1:";
 export function inspectWorkbookLayouts(file: ArrayBuffer) {
   validateFileSize(file);
-  const workbook = XLSX.read(file, { cellStyles: true });
+  const workbook = SheetJS.read(file, { cellStyles: true });
   return workbook.SheetNames.map((name) => {
     const sheet = workbook.Sheets[name];
-    const marker = sheet.A1?.c?.find((comment: XLSX.Comment) => comment.t?.includes(LAYOUT_NOTE))?.t;
+    const marker = sheet.A1?.c?.find((comment: SheetJS.Comment) => comment.t?.includes(LAYOUT_NOTE))?.t;
     const count = Number(marker?.split(LAYOUT_NOTE)[1]?.split("\n")[0]);
-    return { name, rows: sheet["!ref"] ? XLSX.utils.decode_range(sheet["!ref"]).e.r + 1 : 0, offset: marker && [0, 1, 2].includes(count) ? count : 0, known: !!marker && [0, 1, 2].includes(count) };
+    return { name, rows: sheet["!ref"] ? SheetJS.utils.decode_range(sheet["!ref"]).e.r + 1 : 0, offset: marker && [0, 1, 2].includes(count) ? count : 0, known: !!marker && [0, 1, 2].includes(count) };
   });
 }
 
 export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<string, number> = {}): ProductDataTableSchema {
   validateFileSize(file);
 
-  const workbook = XLSX.read(file, {
+  const workbook = SheetJS.read(file, {
     raw: true,
     cellStyles: true,
     cellNF: true,
@@ -174,7 +175,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
     const worksheet = workbook.Sheets[name];
     if (!worksheet) throw new Error(`Sheet "${name}" is missing`);
     if (worksheet["!merges"]?.length) throw new Error(`Sheet "${name}" contains merged cells. Unmerge them in Excel before importing; merged ranges cannot yet be edited safely.`);
-    const marker = worksheet.A1?.c?.find((comment: XLSX.Comment) => comment.t?.includes(LAYOUT_NOTE))?.t;
+    const marker = worksheet.A1?.c?.find((comment: SheetJS.Comment) => comment.t?.includes(LAYOUT_NOTE))?.t;
     const offset = layouts[name] ?? (marker ? Number(marker.split(LAYOUT_NOTE)[1]?.split("\n")[0]) : 0);
     if (![0, 1, 2].includes(offset)) throw new Error(`Invalid layout for sheet "${name}"`);
     const headers: Record<number, string> = {};
@@ -187,17 +188,17 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
     for (const [address, cell] of Object.entries(worksheet)) {
       if (address.startsWith("!")) continue;
       const format = formats[address] ?? {};
-      if (typeof cell.z === "string" && XLSX.SSF.is_date(cell.z)) {
+      if (typeof cell.z === "string" && SheetJS.SSF.is_date(cell.z)) {
         format.dateFormat = cell.z;
         format.date1904 = !!workbook.Workbook?.WBProps?.date1904;
       }
       if (cell.v == null && !Object.keys(format).length) continue;
-      const { r, c } = XLSX.utils.decode_cell(address);
+      const { r, c } = SheetJS.utils.decode_cell(address);
       validateDataBoundaries(Math.max(0, r + 1 - offset), c + 1);
       maxRow = Math.max(maxRow, r); maxCol = Math.max(maxCol, c);
       const workbookDate1904 = !!workbook.Workbook?.WBProps?.date1904;
-      const originalDate1904 = cell.c?.some((comment: XLSX.Comment) => comment.t?.includes("uprevit:date1904")) || workbookDate1904;
-      const original = cell.c?.map((comment: XLSX.Comment) => comment.t?.match(/(?:^|\n)[ \t]*uprevit:raw:([^\r\n]*)/)?.[1]).find((value: string | undefined) => value !== undefined);
+      const originalDate1904 = cell.c?.some((comment: SheetJS.Comment) => comment.t?.includes("uprevit:date1904")) || workbookDate1904;
+      const original = cell.c?.map((comment: SheetJS.Comment) => comment.t?.match(/(?:^|\n)[ \t]*uprevit:raw:([^\r\n]*)/)?.[1]).find((value: string | undefined) => value !== undefined);
       const matchesOriginal = original !== undefined && (format.dateFormat
         ? (workbookDateSerial(original, originalDate1904) ?? NaN) + (originalDate1904 ? 1462 : 0) === Number(cell.v) + (workbookDate1904 ? 1462 : 0)
         : workbookNumber(original) === cell.v);
@@ -222,7 +223,7 @@ export function parseWorkbookToTableData(file: ArrayBuffer, layouts: Record<stri
     }
     // OOXML style-only cells may not appear in SheetJS's value map.
     for (const [address, format] of Object.entries(formats)) {
-      const { r, c } = XLSX.utils.decode_cell(address);
+      const { r, c } = SheetJS.utils.decode_cell(address);
       validateDataBoundaries(Math.max(0, r + 1 - offset), c + 1);
       maxRow = Math.max(maxRow, r); maxCol = Math.max(maxCol, c);
       if (r < offset) { if (!isExportHeaderFormat(r, format)) headerRows.formats[`${r},${c}`] ??= format; }

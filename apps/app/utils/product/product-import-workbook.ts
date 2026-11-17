@@ -1,4 +1,4 @@
-import XLSX from "xlsx-js-style";
+import * as XLSX from "xlsx";
 import { COMPLIANCE_LANGUAGES } from "@/data/compliance-languages";
 import { COMPLIANCE_STANDARDS } from "@/data/compliance-standards";
 import { COUNTRIES } from "@/data/countries";
