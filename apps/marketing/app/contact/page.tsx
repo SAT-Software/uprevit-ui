@@ -1,5 +1,4 @@
-"use client";
-
+import { pageMetadata } from "@/lib/metadata";
 import Link from "next/link";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
@@ -55,6 +54,12 @@ const contactFAQs = [
       "Visit the Resources hub for templates, standards, and regulatory updates.",
   },
 ];
+
+export const metadata = pageMetadata(
+  "Contact Us",
+  "Talk to the Uprevit team about medical device labeling, product demos, pricing or enterprise rollouts. We reply within 72 hours.",
+  "/contact",
+);
 
 export default function ContactPage() {
   return (

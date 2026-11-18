@@ -1,9 +1,15 @@
-"use client";
-
+import { pageMetadata } from "@/lib/metadata";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import TemplatesSection from "@/features/resources/templates/TemplatesSection";
+
+export const metadata = pageMetadata(
+  "Labeling Templates",
+  "Practical medical device labeling templates from Uprevit. Coming soon.",
+  "/resources/templates",
+  false,
+);
 
 export default function TemplatesPage() {
   return (
