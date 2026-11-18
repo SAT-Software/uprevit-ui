@@ -30,6 +30,15 @@ const cognitoAuthConfig = {
   redirect_uri: `${appUrl}/auth/callback`,
   response_type: "code",
   scope: "email openid phone",
+  requestTimeoutInSeconds: 10,
+  metadataSeed: URL.canParse(process.env.NEXT_PUBLIC_COGNITO_DOMAIN ?? "")
+    ? {
+        revocation_endpoint: new URL(
+          "/oauth2/revoke",
+          process.env.NEXT_PUBLIC_COGNITO_DOMAIN,
+        ).href,
+      }
+    : undefined,
 };
 
 function makeQueryClient() {
