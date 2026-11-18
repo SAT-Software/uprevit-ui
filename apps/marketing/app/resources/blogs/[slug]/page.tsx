@@ -62,7 +62,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               headline: post.title,
               description: post.description,
               datePublished: post.date,
-              author: { "@type": "Organization", name: post.author, url: siteUrl },
+              dateModified: post.date,
+              author: { "@id": `${siteUrl}/#organization` },
               publisher: { "@id": `${siteUrl}/#organization` },
               image: `${siteUrl}/og-image.png`,
             }}

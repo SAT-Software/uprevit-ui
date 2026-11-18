@@ -6,7 +6,6 @@ import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 import { TooltipProvider } from "@uprevit/ui/components/ui/tooltip";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { JsonLd } from "@/components/JsonLd";
-import { cdnUrl } from "@/lib/cdn";
 import { ogImage, pageMetadata, siteUrl } from "@/lib/metadata";
 
 const outfit = Outfit({
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
     "/",
   ),
   title: { default: homeTitle, template: "%s | Uprevit" },
-  twitter: { card: "summary_large_image", site: "@uprevit", images: ogImage },
+  twitter: { card: "summary_large_image", images: ogImage },
   icons: {
     icon: [
       { url: "/favicon-black.ico", media: "(prefers-color-scheme: light)" },
@@ -42,12 +41,9 @@ const organizationJsonLd = {
       "@id": `${siteUrl}/#organization`,
       name: "Uprevit",
       url: siteUrl,
-      logo: cdnUrl("brand/uprevit-logo-black.svg"),
+      logo: `${siteUrl}/logo.png`,
       email: "contact@uprevit.com",
-      sameAs: [
-        "https://linkedin.com/company/uprevit",
-        "https://x.com/uprevit",
-      ],
+      sameAs: ["https://linkedin.com/company/uprevit"],
     },
     {
       "@type": "WebSite",
