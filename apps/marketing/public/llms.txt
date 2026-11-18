@@ -1,0 +1,15 @@
+# Uprevit
+
+> Uprevit is browser-based software for creating, managing and tracking medical device labeling documentation. Teams collaborate across departments, projects and products in one workspace.
+
+- Documentation templates follow global standards, including EU MDR, FDA UDI, Health Canada and ISO 15223-1 symbols.
+- Version control, time-stamped change history and automated redlining against the master version.
+- Role-based access control for every user, team and department.
+- Exports to PDF and XLS for use in ERP, PLM and MES systems.
+
+## Pages
+
+- [Home](https://www.uprevit.com/): Product overview and FAQ
+- [Pricing](https://www.uprevit.com/pricing): Platform fee, seats and optional add-ons, with a cost calculator
+- [Blog](https://www.uprevit.com/resources/blogs): Articles on medical device labeling and standards
+- [Contact](https://www.uprevit.com/contact): Demos, pricing and enterprise questions (contact@uprevit.com)

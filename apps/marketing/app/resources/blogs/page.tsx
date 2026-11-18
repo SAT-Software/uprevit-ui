@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import BlogsSection from "@/features/resources/blogs/BlogsSection";
 
-export const metadata: Metadata = {
-  title: "Blog | Uprevit",
-  description:
-    "Practical writing on medical device labeling, standards and the teams who manage them.",
-};
+export const metadata = pageMetadata(
+  "Blog",
+  "Practical writing on medical device labeling, standards and the teams who manage them.",
+  "/resources/blogs",
+);
 
 export default function BlogsPage() {
   return (

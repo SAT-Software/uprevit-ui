@@ -1,9 +1,14 @@
-"use client";
-
+import { pageMetadata } from "@/lib/metadata";
 import MarketingHeader from "@/features/marketing/marketing-header";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import ResourcesHub from "@/features/resources/ResourcesHub";
+
+export const metadata = pageMetadata(
+  "Resources for Medical Device Labeling Teams",
+  "Standards, symbols, templates and guides that help medical device labeling teams stay compliant across markets.",
+  "/resources",
+);
 
 export default function ResourcesPage() {
   return (

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: "Welcome to Uprevit",
   description:
     "Create, manage and track medical device labeling documentation with ease. Collaborate seamlessly across teams and effortlessly track your departments, projects and products - all in one place.",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
