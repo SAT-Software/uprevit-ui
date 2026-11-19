@@ -16,6 +16,7 @@ export function useSignOut() {
       window.location.origin;
     const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN!;
 
+    await auth.revokeTokens(["refresh_token"]).catch(() => undefined);
     await auth.removeUser();
     clearSupportSession();
 

@@ -24,7 +24,7 @@ const shiki = createShikiFactory({
 const safeProtocols = /^(https?:|mailto:)/i
 
 export function safeUrl(url: string) {
-  const transformed = defaultUrlTransform(url.trim())
+  const transformed = defaultUrlTransform(url.replace(/[\t\n\r]/g, "").trim())
   if (!transformed) return undefined
   if (
     /^[a-z][a-z0-9+.-]*:/i.test(transformed) &&
@@ -42,7 +42,7 @@ function Anchor({
   const url = href ? safeUrl(href) : undefined
   if (!url) return <span>{children}</span>
 
-  if (url.startsWith("/") || url.startsWith("#")) {
+  if (/^\/(?![/\\])|^#/.test(url)) {
     return (
       <Link href={url} onClick={onNavigate}>
         {children}
