@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added global search. Open it from Search in the sidebar or with ⌘K / Ctrl+K to find products, projects, departments, workflows, pages, and settings, and jump straight to them.
 - Added Approver and Manager access. Workspace admins pick a member's access when they invite them and can change it later from the Users and Admins tabs, including giving an Admin Manager access.
 - Added a Billing tab for Managers with the plan, current term, included seats, references, and invoices, plus an invoice page with line items and a PDF download.
 - Added Mark as paid on invoices for platform admins, which records a bank transfer in Chargebee.
