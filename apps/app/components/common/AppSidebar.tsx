@@ -57,6 +57,7 @@ import {
 import { cn } from "@uprevit/ui/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
 import { version } from "../../package.json";
+import { SidebarSearchButton } from "./AppSidebarSearchButton";
 import { SidebarSupportButton } from "./AppSidebarSupportButton";
 import { SidebarSystemStatusButton } from "./AppSidebarSystemStatusButton";
 import { SidebarNavWorkspace } from "./SidebarNavWorkspace";
@@ -307,6 +308,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </GuardedLink>
       </SidebarHeader>
       <SidebarContent className="gap-2 p-1">
+        <SidebarMenu className="px-1 pt-2">
+          <SidebarMenuItem>
+            <SidebarSearchButton />
+          </SidebarMenuItem>
+        </SidebarMenu>
         {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title} className="px-1 py-1">
