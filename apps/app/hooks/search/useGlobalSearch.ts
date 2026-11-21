@@ -31,7 +31,7 @@ export function useGlobalSearch(search: string) {
 
   const result = useQuery({
     queryKey: ["global-search", auth.user?.profile?.workspaceId, query],
-    queryFn: async ({ signal }): Promise<GlobalSearchResult> => {
+    queryFn: async ({ signal }): Promise<GlobalSearchResult & { query: string }> => {
       const response = await fetch(
         `/api/global-search?${new URLSearchParams({ q: query })}`,
         {
@@ -42,7 +42,7 @@ export function useGlobalSearch(search: string) {
       if (!response.ok) {
         throw await getResponseError(response, "Failed to search");
       }
-      return (await response.json()).result;
+      return { ...(await response.json()).result, query };
     },
     enabled,
     placeholderData: keepPreviousData,

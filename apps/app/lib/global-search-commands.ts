@@ -39,7 +39,7 @@ export type GlobalSearchCommand = {
 const isAdmin = (access: WorkspaceAccess) => access.isAdmin;
 
 export const GLOBAL_SEARCH_COMMANDS: GlobalSearchCommand[] = [
-  { id: "import-products", group: "Actions", label: "Import products", icon: FileImportIcon, href: "/products/import", keywords: "upload excel csv new", allowed: (access) => access.canEdit },
+  { id: "import-products", group: "Actions", label: "Import products", icon: FileImportIcon, href: "/products/import", keywords: "upload excel csv new", allowed: isAdmin },
   { id: "invite-members", group: "Actions", label: "Invite members", icon: UserAdd01Icon, href: "/settings?tab=users", keywords: "add user people team", allowed: isAdmin },
   { id: "toggle-theme", group: "Actions", label: "Switch light or dark theme", icon: Moon02Icon, keywords: "theme dark light mode appearance" },
   { id: "dashboard", group: "Go to", label: "Dashboard", icon: Home04Icon, href: "/dashboard", keywords: "home overview" },

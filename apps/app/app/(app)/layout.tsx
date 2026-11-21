@@ -9,6 +9,7 @@ import {
 } from "@uprevit/ui/components/ui/sidebar";
 import { AppSidebar } from "@/components/common/AppSidebar";
 import { ExportJobNotifier } from "@/components/common/ExportJobNotifier";
+import { GlobalSearchProvider } from "@/components/common/GlobalSearchProvider";
 import { PostHogSupportSync } from "@/components/common/PostHogSupportSync";
 import { ProductWorkbookUnsavedGuardProvider } from "@/lib/product-workbook-unsaved-guard";
 
@@ -18,6 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <PostHogSupportSync />
       <ProductWorkbookUnsavedGuardProvider>
       <SidebarProvider>
+      <GlobalSearchProvider>
         <AppSidebar />
         <SidebarInset>
           <AppHeader />
@@ -25,6 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <ExportJobNotifier resource="reports" />
           <MainContentWrapper>{children}</MainContentWrapper>
         </SidebarInset>
+      </GlobalSearchProvider>
       </SidebarProvider>
       </ProductWorkbookUnsavedGuardProvider>
     </AccessEligibilityGuard>

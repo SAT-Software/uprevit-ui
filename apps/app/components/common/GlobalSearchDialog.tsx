@@ -6,9 +6,9 @@ import {
   type GlobalSearchItem,
   type GlobalSearchResult,
 } from "@/hooks/search/useGlobalSearch";
+import { GuardedLink } from "@/components/common/GuardedLink";
 import { useWorkspaceAccess } from "@/hooks/user/useWorkspaceAccess";
 import { filterGlobalSearchCommands } from "@/lib/global-search-commands";
-import { useProductWorkbookUnsavedGuardOptional } from "@/lib/product-workbook-unsaved-guard";
 import type { WorkflowStatus } from "@/types/workflow";
 import { WORKFLOW_STATUS_LABELS } from "@/utils/workflow/workflow-labels";
 import {
@@ -37,7 +37,6 @@ import {
 import { Skeleton } from "@uprevit/ui/components/ui/skeleton";
 import { Spinner } from "@uprevit/ui/components/ui/spinner";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import { Fragment, useState, type ReactNode } from "react";
 
 const RESULT_GROUPS: {
@@ -90,8 +89,6 @@ export function GlobalSearchDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const router = useRouter();
-  const guard = useProductWorkbookUnsavedGuardOptional();
   const access = useWorkspaceAccess();
   const { resolvedTheme, setTheme } = useTheme();
   const [search, setSearch] = useState("");
@@ -111,6 +108,7 @@ export function GlobalSearchDialog({
   }))
     .filter((group) => group.items.length)
     .sort((a, b) => byLiteralMatch(a.items[0], b.items[0]));
+  const isStale = Boolean(data && data.query !== trimmed);
   const showSkeleton = canSearchServer && isSearching && !data;
   const isEmpty = !commands.length && !resultGroups.length && !showSkeleton && !isError && !(canSearchServer && isSearching);
 
@@ -119,11 +117,22 @@ export function GlobalSearchDialog({
     if (!nextOpen) setSearch("");
   };
 
-  const go = (href: string) => {
-    handleOpenChange(false);
-    if (guard) guard.tryNavigate(href);
-    else router.push(href);
-  };
+  const openSelected = () =>
+    document.querySelector<HTMLAnchorElement>("[cmdk-item][data-selected='true'] a")?.click();
+
+  const itemLink = (href: string | undefined, children: ReactNode) =>
+    href ? (
+    <GuardedLink
+      href={href}
+      tabIndex={-1}
+      onNavigateAccepted={() => handleOpenChange(false)}
+      className="pointer-events-none flex min-w-0 flex-1 items-center gap-2.5"
+    >
+      {children}
+    </GuardedLink>
+    ) : (
+      children
+    );
 
   const renderCommands = (group: "Actions" | "Go to") => {
     const items = commands.filter((command) => command.group === group);
@@ -136,15 +145,20 @@ export function GlobalSearchDialog({
             value={`command-${command.id}`}
             className={ITEM_CLASS}
             onSelect={() => {
-              if (command.href) return go(command.href);
+              if (command.href) return openSelected();
               setTheme(resolvedTheme === "dark" ? "light" : "dark");
               handleOpenChange(false);
             }}
           >
-            <Icon icon={command.icon} className="text-muted-foreground" />
-            <span className="truncate text-foreground/80">
-              <Highlight text={command.label} search={trimmed} />
-            </span>
+            {itemLink(
+              command.href,
+              <>
+                <Icon icon={command.icon} className="text-muted-foreground" />
+                <span className="truncate text-foreground/80">
+                  <Highlight text={command.label} search={trimmed} />
+                </span>
+              </>,
+            )}
           </CommandItem>
         ))}
       </CommandGroup>
@@ -161,19 +175,25 @@ export function GlobalSearchDialog({
             key={item.id}
             value={`${group.key}-${item.id}`}
             className={ITEM_CLASS}
-            onSelect={() => go(group.href(item.id))}
+            disabled={isStale}
+            onSelect={openSelected}
           >
-            <Icon icon={group.icon} className="text-muted-foreground" />
-            <span className="min-w-0 truncate text-foreground/80">
-              <Highlight text={item.title} search={trimmed} />
-            </span>
-            <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">
-              {item.code && <Highlight text={item.code} search={trimmed} />}
-            </span>
-            {item.meta && (
-              <span className="max-w-[40%] shrink-0 truncate text-xs text-muted-foreground">
-                {group.meta ? group.meta(item.meta) : item.meta}
-              </span>
+            {itemLink(
+              group.href(item.id),
+              <>
+                <Icon icon={group.icon} className="text-muted-foreground" />
+                <span className="min-w-0 truncate text-foreground/80">
+                  <Highlight text={item.title} search={trimmed} />
+                </span>
+                <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">
+                  {item.code && <Highlight text={item.code} search={trimmed} />}
+                </span>
+                {item.meta && (
+                  <span className="max-w-[40%] shrink-0 truncate text-xs text-muted-foreground">
+                    {group.meta ? group.meta(item.meta) : item.meta}
+                  </span>
+                )}
+              </>,
             )}
           </CommandItem>
         ))}
