@@ -4,6 +4,7 @@ import HeroSection from "@/features/marketing/landing-page/HeroSection";
 import StandardsSection from "@/features/marketing/landing-page/StandardsSection";
 import ProblemSection from "@/features/marketing/landing-page/ProblemSection";
 import SolutionSection from "@/features/marketing/landing-page/SolutionSection";
+import HowItWorksSection from "@/features/marketing/landing-page/HowItWorksSection";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
 
 export default function Home() {
@@ -19,6 +20,8 @@ export default function Home() {
         <ProblemSection />
         <TileSpacerRow />
         <SolutionSection />
+        <TileSpacerRow />
+        <HowItWorksSection />
         <TileSpacerRow />
       </main>
       <div className="[&_footer]:mt-0">

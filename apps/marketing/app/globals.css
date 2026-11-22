@@ -635,6 +635,20 @@
     animation: typing-dot 1.4s ease-in-out infinite;
   }
 
+  .how-progress {
+    animation: how-progress var(--how-duration, 6s) linear forwards;
+    transform-origin: top;
+  }
+
+  @keyframes how-progress {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
   @keyframes typing-dot {
     0%,
     60%,
