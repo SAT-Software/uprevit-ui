@@ -45,7 +45,8 @@ import {
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { BrandMark } from "@/components/BrandLogo";
-import { FlutedGlassBackdrop } from "./FlutedGlassBackdrop";
+import { BrandBlindsBackdrop } from "./BrandBlindsBackdrop";
+import { StatusBadge, type StatusTone } from "./StatusBadge";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 export type HeroSpotlight = "spec-change" | "review" | "release" | null;
@@ -1021,7 +1022,7 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
   return (
     <div className="relative w-full">
       <div className="relative h-[540px] w-full overflow-hidden rounded-tile sm:h-[620px] lg:h-[680px]">
-        <FlutedGlassBackdrop />
+        <BrandBlindsBackdrop anchorY={0.12} />
 
         <div
           className="hero-enter relative mx-auto h-full max-w-[1310px]"
@@ -1929,27 +1930,16 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
   );
 }
 
+const STATUS_TONE: Record<ProductRow["status"], StatusTone> = {
+  "In review": "review",
+  Released: "released",
+  Submitted: "submitted",
+};
+
 function StatusPill({ status }: { status: ProductRow["status"] }) {
-  if (status === "In review") {
-    return (
-      <span className="inline-flex h-[18px] items-center gap-1 rounded-tile border border-[#F59E0B]/20 bg-warning-soft pl-1.5 pr-1.5 font-ui text-[10.5px] font-medium leading-3 text-warning-strong">
-        <span className="size-1.5 rounded-full bg-stage-review" />
-        In review
-      </span>
-    );
-  }
-  if (status === "Released") {
-    return (
-      <span className="inline-flex h-[18px] items-center gap-1 rounded-tile border border-[#22C55E]/20 bg-success-soft pl-1.5 pr-1.5 font-ui text-[10.5px] font-medium leading-3 text-success-strong">
-        <span className="size-1.5 rounded-full bg-stage-released" />
-        Released
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex h-[18px] items-center gap-1 rounded-tile border border-[#3B82F6]/20 bg-info-soft pl-1.5 pr-1.5 font-ui text-[10.5px] font-medium leading-3 text-info-strong">
-      <span className="size-1.5 rounded-full bg-stage-submitted" />
-      Submitted
-    </span>
+    <StatusBadge tone={STATUS_TONE[status]} className="gap-1 px-1.5 py-0.5 text-[10.5px] leading-3">
+      {status}
+    </StatusBadge>
   );
 }

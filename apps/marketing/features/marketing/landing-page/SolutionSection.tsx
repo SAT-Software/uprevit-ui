@@ -5,7 +5,9 @@ import { MotionConfig, motion } from "motion/react";
 import { BrandMark } from "@/components/BrandLogo";
 import { TileRow } from "@/components/TileGrid";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { DotsBackdrop } from "./DotsBackdrop";
 import { SectionHeader } from "./SectionHeader";
+import { SectionPoints, type SectionPoint } from "./SectionPoints";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const IN_VIEW = { once: true, margin: "-80px" } as const;
@@ -173,7 +175,7 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
         className="absolute inset-0 text-foreground"
       >
         <g fill="none" stroke="currentColor" strokeLinecap="round">
-          <line x1="0" y1="320" x2="1310" y2="320" strokeOpacity={0.12} strokeDasharray="2 5" />
+          <line x1="266" y1="320" x2="1044" y2="320" strokeOpacity={0.12} strokeDasharray="2 5" />
           <line x1="655" y1="0" x2="655" y2="640" strokeOpacity={0.12} strokeDasharray="2 5" />
           <circle cx="655" cy="320" r="318" strokeOpacity={0.14} strokeDasharray="2 5" />
         </g>
@@ -190,21 +192,39 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
         </g>
 
         {NODES.map((node, index) => (
-          <motion.path
-            key={node.title}
-            d={node.connector}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            initial={{ pathLength: 0, strokeOpacity: 0.3 }}
-            whileInView={{ pathLength: 1 }}
-            animate={{ strokeOpacity: hovered === index ? 0.7 : 0.3 }}
-            viewport={IN_VIEW}
-            transition={{
-              pathLength: { duration: 0.7, ease: EASE_OUT, delay: 0.35 + index * 0.06 },
-              strokeOpacity: { duration: 0.2, ease: EASE_OUT },
-            }}
-          />
+          <g key={node.title}>
+            <mask
+              id={`solution-hub-link-${index}`}
+              maskUnits="userSpaceOnUse"
+              x={0}
+              y={0}
+              width={1310}
+              height={640}
+            >
+              <motion.path
+                d={node.connector}
+                fill="none"
+                stroke="#fff"
+                strokeWidth="6"
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={IN_VIEW}
+                transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.35 + index * 0.06 }}
+              />
+            </mask>
+            <motion.path
+              d={node.connector}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeDasharray="3 4"
+              mask={`url(#solution-hub-link-${index})`}
+              initial={false}
+              animate={{ strokeOpacity: hovered === index ? 0.78 : 0.24 }}
+              transition={{ duration: 0.2, ease: EASE_OUT }}
+            />
+          </g>
         ))}
 
         {reduceMotion
@@ -286,9 +306,9 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={IN_VIEW}
         transition={{ duration: 0.6, ease: EASE_OUT }}
-        className="absolute left-[567px] top-[232px] flex size-[176px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_35%_28%,#2E2E2E_0%,#191919_48%,#0D0D0D_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-10px_20px_rgba(0,0,0,0.35),0_0_0_5px_var(--card),0_0_0_6px_rgba(23,23,23,0.08),0_18px_36px_-14px_rgba(0,0,0,0.35)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-10px_20px_rgba(0,0,0,0.45),0_0_0_5px_var(--surface-2),0_0_0_6px_rgba(255,255,255,0.08),0_18px_36px_-14px_rgba(0,0,0,0.7)]"
+        className="absolute left-[567px] top-[232px] flex size-[176px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_20%,#2B2B2B_0%,#191919_52%,#0C0C0C_100%)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-8px_18px_rgba(0,0,0,0.5),0_0_0_5px_var(--card),0_0_0_6px_rgba(23,23,23,0.08),0_18px_36px_-14px_rgba(0,0,0,0.35)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_-8px_18px_rgba(0,0,0,0.6),0_0_0_5px_var(--surface-2),0_0_0_6px_rgba(255,255,255,0.08),0_18px_36px_-14px_rgba(0,0,0,0.75)]"
       >
-        <div className="flex size-[132px] items-center justify-center rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0)_70%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+        <div className="flex size-[132px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_30%,#242424_0%,#171717_58%,#0F0F0F_100%)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),inset_0_-2px_6px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.45),0_4px_12px_rgba(0,0,0,0.45)]">
           <BrandMark
             className="h-[48.5px] w-[58px]"
             markColor="#FFFFFF"
@@ -332,21 +352,21 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
   );
 }
 
-const POINTS: { title: string; body: string; icon: IconName }[] = [
+const POINTS: SectionPoint[] = [
   {
     title: "One record per product",
     body: "Specs, symbols, artwork and files sit together, versioned.",
-    icon: "table",
+    icon: ICON_PATHS.table,
   },
   {
     title: "Changes compared for you",
     body: "Every edit is redlined against the last release.",
-    icon: "compare",
+    icon: ICON_PATHS.compare,
   },
   {
     title: "Reviews in one place",
     body: "Each function approves, with names and times recorded.",
-    icon: "shield",
+    icon: ICON_PATHS.shield,
   },
 ];
 
@@ -367,42 +387,14 @@ export default function SolutionSection() {
         </SectionHeader>
 
         <TileRow centerClassName="relative h-[640px] overflow-hidden max-md:h-[420px] max-sm:h-[300px]">
+          <DotsBackdrop
+            className="opacity-45"
+            dotsClassName="[mask-image:radial-gradient(ellipse_78%_74%_at_50%_50%,transparent_64%,#000_82%,transparent_98%)]"
+          />
           <HubStage reduceMotion={reduceMotion} />
         </TileRow>
 
-        <TileRow
-          splitCenter
-          centerClassName="grid grid-cols-1 gap-px md:grid-cols-3"
-        >
-          {POINTS.map((point, index) => (
-            <motion.div
-              key={point.title}
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={IN_VIEW}
-              transition={{ duration: 0.45, ease: EASE_OUT, delay: index * 0.06 }}
-              className="group flex items-start gap-4 rounded-tile bg-tile p-8"
-            >
-              <span className="flex shrink-0 rounded-xl border border-separator bg-file-frame p-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
-                <span className="flex size-9 items-center justify-center rounded-[9px] bg-card shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] dark:bg-surface-2">
-                  <LineIcon
-                    name={point.icon}
-                    size={18}
-                    className="text-muted-foreground transition-colors duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-foreground"
-                  />
-                </span>
-              </span>
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">
-                  {point.title}
-                </h3>
-                <p className="max-w-[250px] font-ui text-[14px] leading-[22px] text-muted-foreground">
-                  {point.body}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </TileRow>
+        <SectionPoints points={POINTS} />
       </section>
     </MotionConfig>
   );

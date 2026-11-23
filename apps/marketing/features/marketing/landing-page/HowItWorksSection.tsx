@@ -14,6 +14,9 @@ import {
 import { cn } from "@uprevit/ui/lib/utils";
 import { TileRow } from "@/components/TileGrid";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { DotsBackdrop } from "./DotsBackdrop";
+import { ScaledCanvas } from "./ScaledCanvas";
+import { StatusBadge, type StatusTone } from "./StatusBadge";
 import { SectionHeader } from "./SectionHeader";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
@@ -536,10 +539,9 @@ function BuildStage() {
           <span className="flex-1 font-ui text-[11px] font-medium uppercase leading-[14px] tracking-[0.08em] text-muted-foreground">
             Label part
           </span>
-          <span className="flex h-[22px] items-center gap-[5px] rounded-sm bg-muted px-2 font-ui text-[11px] font-medium leading-[14px] text-muted-foreground dark:bg-surface-3">
-            <span className="size-1.5 rounded-full bg-stage-draft" />
+          <StatusBadge tone="draft" className="px-2 text-[11px] leading-4">
             Draft
-          </span>
+          </StatusBadge>
         </div>
         <div className="flex items-center gap-3.5">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-md border border-border dark:border-edge-2">
@@ -588,8 +590,7 @@ const WINDOWS: {
   team: string;
   left: number;
   status: string;
-  badge: string;
-  dot: string;
+  tone: StatusTone;
   shift: number;
   highlight?: { rows: number[]; tint: Tint; delay: number };
 }[] = [
@@ -597,8 +598,7 @@ const WINDOWS: {
     team: "Regulatory",
     left: 44,
     status: "Signed",
-    badge: "bg-success-soft text-success-strong",
-    dot: "bg-success",
+    tone: "released",
     shift: 0,
     highlight: { rows: [2, 3], tint: "info", delay: 1 },
   },
@@ -606,8 +606,7 @@ const WINDOWS: {
     team: "Quality",
     left: 312,
     status: "Reviewing",
-    badge: "bg-primary-50 text-primary-700 dark:bg-primary/15 dark:text-primary-300",
-    dot: "bg-primary",
+    tone: "primary",
     shift: 3,
     highlight: { rows: [6, 7], tint: "primary", delay: 1.2 },
   },
@@ -615,8 +614,7 @@ const WINDOWS: {
     team: "Labeling",
     left: 580,
     status: "Waiting",
-    badge: "bg-muted text-muted-foreground dark:bg-surface-3",
-    dot: "bg-stage-draft",
+    tone: "draft",
     shift: 6,
   },
 ];
@@ -627,13 +625,12 @@ const CURSORS: {
   color: string;
   fill: string;
   arrow: [number, number];
-  side: "left" | "right";
   drift: { x: number[]; y: number[] };
   delay: number;
 }[] = [
-  { label: "Sarah · Regulatory", avatar: "/images/avatars/sara.webp", color: "bg-info", fill: "#155EEF", arrow: [206, 276], side: "left", drift: { x: [-40, 0], y: [-30, 0] }, delay: 0.5 },
-  { label: "Marta · Quality", avatar: "/images/avatars/marta.webp", color: "bg-primary", fill: "#7F22FE", arrow: [470, 340], side: "left", drift: { x: [0, 12, -8, 0], y: [0, -5, 3, 0] }, delay: 0.7 },
-  { label: "You", avatar: "/images/avatars/daniel.webp", color: "bg-[#171717] dark:bg-[#2A2A2A]", fill: "#171717", arrow: [700, 296], side: "right", drift: { x: [0, -8, 6, 0], y: [0, 6, -4, 0] }, delay: 0.9 },
+  { label: "Sarah · Regulatory", avatar: "/images/avatars/sara.webp", color: "bg-info", fill: "#155EEF", arrow: [206, 276], drift: { x: [-40, 0], y: [-30, 0] }, delay: 0.5 },
+  { label: "Marta · Quality", avatar: "/images/avatars/marta.webp", color: "bg-primary", fill: "#7F22FE", arrow: [470, 340], drift: { x: [0, 12, -8, 0], y: [0, -5, 3, 0] }, delay: 0.7 },
+  { label: "You", avatar: "/images/avatars/daniel.webp", color: "bg-[#171717] dark:bg-[#2A2A2A]", fill: "#171717", arrow: [700, 296], drift: { x: [0, -8, 6, 0], y: [0, 6, -4, 0] }, delay: 0.9 },
 ];
 
 function ReviewStage() {
@@ -697,10 +694,11 @@ function ReviewStage() {
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, ease: EASE_OUT, delay: 1.1 + index * 0.25 }}
-              className={cn("flex h-[22px] items-center gap-[5px] rounded-sm px-2 font-ui text-[11px] font-medium leading-[14px]", win.badge)}
+              className="flex"
             >
-              <span className={cn("size-1.5 rounded-full", win.dot)} />
-              {win.status}
+              <StatusBadge tone={win.tone} className="px-2 text-[11px] leading-4">
+                {win.status}
+              </StatusBadge>
             </motion.span>
           </div>
         </motion.div>
@@ -730,9 +728,8 @@ function ReviewStage() {
           </svg>
           <span
             className={cn(
-              "absolute top-[18px] flex h-7 w-max items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-white py-0.5 pl-0.5 pr-2.5 font-ui text-[12px] font-medium leading-4 text-white shadow-[0_6px_14px_-6px_rgba(0,0,0,0.4)] dark:border-[#EDEDED]",
+              "absolute left-3 top-3.5 flex h-7 w-max items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-white py-0.5 pl-0.5 pr-2.5 font-ui text-[12px] font-medium leading-4 text-white shadow-[0_6px_14px_-6px_rgba(0,0,0,0.4)] dark:border-[#EDEDED]",
               cursor.color,
-              cursor.side === "right" ? "left-3.5" : "right-1.5",
             )}
           >
             <Image
@@ -848,42 +845,17 @@ function ReleaseStage() {
   );
 }
 
-function StageBackdrop() {
-  return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_50%_at_50%_50%,rgba(255,255,255,0.95)_0%,rgba(255,255,255,0)_70%)] dark:bg-[radial-gradient(ellipse_55%_50%_at_50%_50%,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0)_70%)]" />
-      <div className="tile-dots absolute inset-0 opacity-80 [mask-image:radial-gradient(ellipse_62%_58%_at_50%_50%,transparent_42%,#000_64%,transparent_92%)]" />
-    </div>
-  );
-}
-
 const STAGES = [ImportStage, BuildStage, ReviewStage, ReleaseStage];
-
-function useStageScale() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [scale, setScale] = React.useState(1);
-
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setScale(Math.min(1, entry.contentRect.width / STAGE_W));
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, scale] as const;
-}
 
 export default function HowItWorksSection() {
   const reduceMotion = usePrefersReducedMotion();
   const [active, setActive] = React.useState(0);
-  const [stageRef, scale] = useStageScale();
+  const stageRef = React.useRef<HTMLDivElement>(null);
   const inView = useInView(stageRef, { margin: "-120px" });
   const seen = useInView(stageRef, { margin: "-120px", once: true });
   const Stage = STAGES[active];
   const autoplay = !reduceMotion && inView;
+  const showStage = reduceMotion || inView || seen;
 
   return (
     <MotionConfig reducedMotion="user">
@@ -976,33 +948,33 @@ export default function HowItWorksSection() {
             })}
           </div>
 
-          <div
-            ref={stageRef}
-            id="how-panel"
-            role="tabpanel"
-            aria-labelledby={`how-tab-${active}`}
-            className="relative overflow-hidden rounded-tile bg-tile"
-            style={{ height: STAGE_H * scale }}
-          >
-            <div
-              aria-hidden="true"
-              className="absolute left-1/2 top-0 origin-top"
-              style={{ width: STAGE_W, height: STAGE_H, transform: `translateX(-50%) scale(${scale})` }}
+          <div ref={stageRef} className="min-w-0">
+            <ScaledCanvas
+              width={STAGE_W}
+              height={STAGE_H}
+              id="how-panel"
+              role="tabpanel"
+              aria-labelledby={`how-tab-${active}`}
+              className="rounded-tile bg-tile"
             >
-              <StageBackdrop />
-              <AnimatePresence initial={false} mode="popLayout">
-                <motion.div
-                  key={active}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, filter: "blur(4px)", transition: { duration: 0.18, ease: EASE_OUT } }}
-                  transition={{ duration: 0.3, ease: EASE_OUT }}
-                >
-                  {seen ? <Stage /> : null}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+              <div aria-hidden="true" className="absolute inset-0">
+                <DotsBackdrop className="opacity-80" />
+                <AnimatePresence mode="popLayout">
+                  {showStage && (
+                    <motion.div
+                      key={active}
+                      className="absolute inset-0"
+                      initial={{ opacity: 0, filter: "blur(4px)" }}
+                      animate={{ opacity: 1, filter: "blur(0px)" }}
+                      exit={{ opacity: 0, filter: "blur(4px)", transition: { duration: 0.18, ease: EASE_OUT } }}
+                      transition={{ duration: 0.3, ease: EASE_OUT }}
+                    >
+                      <Stage />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </ScaledCanvas>
           </div>
         </TileRow>
       </section>

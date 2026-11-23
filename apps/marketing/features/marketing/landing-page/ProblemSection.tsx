@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
 import { cn } from "@uprevit/ui/lib/utils";
 import { TileRow } from "@/components/TileGrid";
+import { DotsBackdrop } from "./DotsBackdrop";
 import { SectionHeader } from "./SectionHeader";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
@@ -824,9 +825,10 @@ export default function ProblemSection() {
         {PAINS.map(({ title, body, Visual }, index) => (
           <article
             key={title}
-            className="flex flex-col gap-8 overflow-hidden rounded-tile bg-tile pt-8"
+            className="relative flex flex-col gap-8 overflow-hidden rounded-tile bg-tile pt-8"
           >
-            <motion.div {...reveal(index * 0.06)} className="flex flex-col gap-1.5 px-8">
+            <DotsBackdrop className="top-24 opacity-40" />
+            <motion.div {...reveal(index * 0.06)} className="relative flex flex-col gap-1.5 px-8">
               <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">
                 {title}
               </h3>
@@ -834,7 +836,7 @@ export default function ProblemSection() {
                 {body}
               </p>
             </motion.div>
-            <div className="mx-auto -mb-[60px] w-[436px] shrink-0 origin-top scale-[0.8] sm:mb-0 sm:scale-100">
+            <div className="relative mx-auto -mb-[60px] w-[436px] shrink-0 origin-top scale-[0.8] sm:mb-0 sm:scale-100">
               <Visual reduceMotion={reduceMotion} />
             </div>
           </article>

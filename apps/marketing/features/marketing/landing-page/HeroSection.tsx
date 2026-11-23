@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { MotionConfig, motion } from "motion/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   ArrowRight02Icon,
@@ -12,6 +13,7 @@ import {
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { TileRow } from "@/components/TileGrid";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import {
   HeroProductPreview,
   type HeroSpotlight,
@@ -22,7 +24,6 @@ interface HeroPill {
   label: string;
   icon: IconSvgElement;
   iconClassName: string;
-  activeClassName: string;
 }
 
 const HERO_PILLS: HeroPill[] = [
@@ -31,26 +32,26 @@ const HERO_PILLS: HeroPill[] = [
     label: "spec change",
     icon: FileEditIcon,
     iconClassName: "text-primary dark:text-primary-400",
-    activeClassName: "border-primary/40 ring-1 ring-primary/20",
   },
   {
     id: "review",
     label: "review",
     icon: Search01Icon,
     iconClassName: "text-warning",
-    activeClassName: "border-warning/40 ring-1 ring-warning/20",
   },
   {
     id: "release",
     label: "release",
     icon: Rocket01Icon,
     iconClassName: "text-success",
-    activeClassName: "border-success/40 ring-1 ring-success/20",
   },
 ];
 
+const PILL_SPRING = { type: "spring" as const, duration: 0.35, bounce: 0.15 };
+
 export default function HeroSection() {
   const [spotlight, setSpotlight] = React.useState<HeroSpotlight>(null);
+  const reduceMotion = usePrefersReducedMotion();
 
   const handleScrollToPreview = React.useCallback(() => {
     const target =
@@ -62,7 +63,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <TileRow
         as="section"
         centerClassName="relative flex flex-col items-center overflow-hidden px-5 pt-14 pb-24 sm:px-8 sm:pt-18 sm:pb-32 lg:pt-[76px] lg:pb-[196px]"
@@ -149,6 +150,7 @@ export default function HeroSection() {
               <HeroInlinePill
                 pill={HERO_PILLS[0]}
                 active={spotlight === "spec-change"}
+                reduceMotion={reduceMotion}
                 onHover={setSpotlight}
                 onToggle={(id) =>
                   setSpotlight((prev) => (prev === id ? null : id))
@@ -158,6 +160,7 @@ export default function HeroSection() {
               <HeroInlinePill
                 pill={HERO_PILLS[1]}
                 active={spotlight === "review"}
+                reduceMotion={reduceMotion}
                 onHover={setSpotlight}
                 onToggle={(id) =>
                   setSpotlight((prev) => (prev === id ? null : id))
@@ -167,6 +170,7 @@ export default function HeroSection() {
               <HeroInlinePill
                 pill={HERO_PILLS[2]}
                 active={spotlight === "release"}
+                reduceMotion={reduceMotion}
                 onHover={setSpotlight}
                 onToggle={(id) =>
                   setSpotlight((prev) => (prev === id ? null : id))
@@ -235,31 +239,37 @@ export default function HeroSection() {
       >
         <HeroProductPreview spotlight={spotlight} />
       </TileRow>
-    </>
+    </MotionConfig>
   );
 }
 
 function HeroInlinePill({
   pill,
   active,
+  reduceMotion,
   onHover,
   onToggle,
 }: {
   pill: HeroPill;
   active: boolean;
+  reduceMotion: boolean;
   onHover: (id: HeroSpotlight) => void;
   onToggle: (id: Exclude<HeroSpotlight, null>) => void;
 }) {
   return (
-    <button
+    <motion.button
       type="button"
-      onMouseEnter={() => onHover(pill.id)}
-      onMouseLeave={() => onHover(null)}
+      onHoverStart={() => onHover(pill.id)}
+      onHoverEnd={() => onHover(null)}
       onClick={() => onToggle(pill.id)}
       aria-pressed={active}
+      whileHover={reduceMotion ? undefined : { y: -1.5, scale: 1.015 }}
+      whileTap={reduceMotion ? undefined : { y: 0, scale: 0.97 }}
+      transition={PILL_SPRING}
       className={cn(
-        "inline-flex h-[28px] cursor-pointer items-center gap-1.5 rounded-md border border-foreground/[0.09] bg-card pl-2 pr-2.5 font-ui text-[14px] font-medium leading-none text-foreground shadow-[inset_0_-1px_0_rgba(23,23,23,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)] outline-none transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-px dark:border-foreground/[0.09] dark:bg-surface-2 dark:shadow-[inset_0_-1px_0_rgba(237,237,237,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)]",
-        active && pill.activeClassName,
+        "inline-flex h-[28px] cursor-pointer items-center gap-1.5 rounded-md border border-foreground/[0.09] bg-card pl-2 pr-2.5 font-ui text-[14px] font-medium leading-none text-foreground shadow-[inset_0_-1px_0_rgba(23,23,23,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)] outline-none transition-[border-color,background-color,box-shadow] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring dark:border-foreground/[0.09] dark:bg-surface-2 dark:shadow-[inset_0_-1px_0_rgba(237,237,237,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)]",
+        active &&
+          "border-foreground/[0.16] bg-subtle shadow-[inset_0_-1px_0_rgba(23,23,23,0.04),0_2px_4px_rgba(0,0,0,0.07),0_6px_14px_-4px_rgba(0,0,0,0.1)] dark:border-foreground/[0.18] dark:bg-surface-3 dark:shadow-[inset_0_-1px_0_rgba(237,237,237,0.05),0_2px_6px_rgba(0,0,0,0.22),0_6px_14px_-4px_rgba(0,0,0,0.3)]",
       )}
     >
       <Icon
@@ -269,6 +279,6 @@ function HeroInlinePill({
         className={cn("shrink-0", pill.iconClassName)}
       />
       <span>{pill.label}</span>
-    </button>
+    </motion.button>
   );
 }
