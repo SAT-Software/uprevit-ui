@@ -31,7 +31,7 @@ const SPRING = { type: "spring" as const, duration: 0.45, bounce: 0 };
 
 function useTicker(intervalMs: number, enabled: boolean) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-80px" });
+  const inView = useInView(ref, { margin: "-40px" });
   const [tick, setTick] = React.useState(0);
 
   React.useEffect(() => {
@@ -144,8 +144,26 @@ const ROLES: {
 
 const PULSE_EASE = [0.45, 0, 0.25, 1] as const;
 
-function RoleBasedAccess({ reduceMotion }: { reduceMotion: boolean }) {
-  const [hovered, setHovered] = React.useState<number | null>(null);
+export function RoleBasedAccess({
+  reduceMotion,
+  badgeVariant = "simple",
+  activeRoleIndex,
+  onRoleHover,
+}: {
+  reduceMotion: boolean;
+  badgeVariant?: "simple" | "detailed";
+  activeRoleIndex?: number | null;
+  onRoleHover?: (index: number | null) => void;
+}) {
+  const [internalHovered, setInternalHovered] = React.useState<number | null>(null);
+  const hovered = activeRoleIndex !== undefined ? activeRoleIndex : internalHovered;
+  const setHovered = React.useCallback(
+    (index: number | null) => {
+      setInternalHovered(index);
+      onRoleHover?.(index);
+    },
+    [onRoleHover],
+  );
   const [ref, tick] = useTicker(2200, !reduceMotion && hovered === null);
   const active = hovered ?? tick % ROLES.length;
   const activeRole = ROLES[active];
@@ -291,9 +309,31 @@ function RoleBasedAccess({ reduceMotion }: { reduceMotion: boolean }) {
         );
       })}
 
-      <div className="absolute left-[162px] top-[292px] flex h-7 items-center gap-1.5 rounded-sm border border-stroke-primary bg-card px-3 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:border-edge-2 dark:bg-surface-2">
-        Access by role
-      </div>
+      {badgeVariant === "detailed" ? (
+        <div className="absolute inset-x-0 top-[296px] flex justify-center">
+          <div className="flex h-[30px] items-center gap-2 rounded-md border border-stroke-primary bg-card pl-1.5 pr-3 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.12)] dark:border-edge-2 dark:bg-surface-2">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-50 shadow-[inset_0_0_0_1px_rgba(127,34,254,0.15)] dark:bg-primary-soft dark:shadow-[inset_0_0_0_1px_rgba(143,64,255,0.28)]">
+              <Icon
+                icon={SecurityCheckIcon}
+                size={12}
+                strokeWidth={2}
+                className="text-primary dark:text-primary-text"
+              />
+            </span>
+            <span className="whitespace-nowrap font-ui text-label font-medium leading-4 text-foreground">
+              Access by role
+            </span>
+            <span className="h-3 w-px shrink-0 bg-stroke-strong dark:bg-edge-3" />
+            <span className="whitespace-nowrap font-mono text-caption leading-[14px] text-muted-foreground">
+              4 roles
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="absolute left-[162px] top-[292px] flex h-7 items-center gap-1.5 rounded-sm border border-stroke-primary bg-card px-3 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:border-edge-2 dark:bg-surface-2">
+          Access by role
+        </div>
+      )}
     </ScaledCanvas>
   );
 }
@@ -761,7 +801,13 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
 
 /* ----------------------------- Single sign-on ----------------------------- */
 
-function SingleSignOn({ reduceMotion }: { reduceMotion: boolean }) {
+export function SingleSignOn({
+  reduceMotion,
+  caption = "SAML or OIDC",
+}: {
+  reduceMotion: boolean;
+  caption?: string;
+}) {
   const [ref, on] = usePlayback(reduceMotion, 7600);
   const [scanDone, setScanDone] = React.useState(false);
 
@@ -983,7 +1029,7 @@ function SingleSignOn({ reduceMotion }: { reduceMotion: boolean }) {
         </motion.div>
 
         <span className="text-center font-mono text-[10px] leading-3 text-foreground/40">
-          SAML or OIDC
+          {caption}
         </span>
       </div>
     </ScaledCanvas>
