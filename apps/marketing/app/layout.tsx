@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Fragment_Mono, Geist, Outfit } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
@@ -12,6 +12,17 @@ const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
+});
+
+const fragmentMono = Fragment_Mono({
+  variable: "--font-fragment-mono",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 const homeTitle = "Uprevit: Medical Device Labeling Management Software";
@@ -61,7 +72,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={outfit.variable} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${outfit.variable} ${geist.variable} ${fragmentMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="antialiased">
         <JsonLd data={organizationJsonLd} />
         <ThemeProvider
