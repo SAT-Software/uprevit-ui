@@ -56,7 +56,7 @@ export function TileRow({
   return (
     <Comp
       className={cn(
-        "grid w-full grid-cols-[minmax(0,1fr)_minmax(0,1310px)_minmax(0,1fr)] gap-px",
+        "grid w-full grid-cols-[minmax(16px,1fr)_minmax(0,1310px)_minmax(16px,1fr)] gap-px sm:grid-cols-[minmax(24px,1fr)_minmax(0,1310px)_minmax(24px,1fr)] lg:grid-cols-[minmax(32px,1fr)_minmax(0,1310px)_minmax(32px,1fr)]",
         className,
       )}
       {...props}
@@ -96,7 +96,10 @@ export function TileSpacerRow({
   return (
     <TileRow
       aria-hidden="true"
-      className={cn(size === "md" ? "h-16" : "h-12", className)}
+      className={cn(
+        size === "md" ? "h-8 sm:h-12 lg:h-16" : "h-6 sm:h-9 lg:h-12",
+        className,
+      )}
       centerClassName={cn(dotted && "tile-dots")}
     >
       <span className="sr-only" />

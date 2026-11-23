@@ -3,7 +3,7 @@ import { useInView } from "motion/react";
 
 export function usePlayback(reduceMotion: boolean, shownMs = 8000, hiddenMs = 900) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-120px" });
+  const inView = useInView(ref, { margin: "-40px" });
   const [shown, setShown] = React.useState(false);
 
   React.useEffect(() => {

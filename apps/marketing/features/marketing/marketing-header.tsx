@@ -180,7 +180,7 @@ export default function MarketingHeader({
         isScrolled && "bg-tile/90 backdrop-blur-md",
       )}
       centerClassName={cn(
-        "flex items-center pl-4 pr-3 sm:pl-6 sm:pr-5 transition-colors duration-200",
+        "flex items-center pl-4 pr-2.5 sm:pl-6 sm:pr-5 transition-colors duration-200",
         isScrolled && "bg-tile/90 backdrop-blur-md",
       )}
     >
@@ -332,7 +332,7 @@ export default function MarketingHeader({
           <Link
             href="/contact"
             data-attr="header-book-demo"
-            className="inline-flex h-[30px] items-center gap-1.5 rounded-sm border border-primary-700 bg-primary px-3 font-ui text-[12.5px] font-medium leading-4 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_16px_-6px_rgba(127,34,254,0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 dark:hover:bg-primary-hover"
+            className="hidden h-[30px] items-center gap-1.5 rounded-sm border border-primary-700 bg-primary px-3 font-ui text-[12.5px] font-medium leading-4 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_16px_-6px_rgba(127,34,254,0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:inline-flex dark:hover:bg-primary-hover"
           >
             Book a demo
           </Link>
@@ -343,10 +343,10 @@ export default function MarketingHeader({
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  className="text-foreground active:scale-[0.96]"
+                  className="size-8 rounded-md border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] active:scale-[0.96] dark:border-edge-2 dark:bg-surface-2"
                   aria-label="Open navigation menu"
                 >
-                  <Icon icon={Menu01Icon} size={18} strokeWidth={2} />
+                  <Icon icon={Menu01Icon} size={16} strokeWidth={1.8} />
                 </Button>
               </SheetTrigger>
               <SheetContent
