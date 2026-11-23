@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { TileSpacerRow } from "@/components/TileGrid";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import CTASection from "@/features/marketing/landing-page/CTASection";
 import FAQSection, { type FAQItem } from "@/features/marketing/landing-page/FAQSection";
 import ContactHeroSection from "./ContactHeroSection";
@@ -73,6 +74,7 @@ function ContactTopicSync({
 }
 
 export default function ContactPageContent() {
+  const reduceMotion = usePrefersReducedMotion();
   const [selectedTopic, setSelectedTopic] =
     React.useState<ContactTopicId>("demo");
 
@@ -80,9 +82,12 @@ export default function ContactPageContent() {
     setSelectedTopic("demo");
     const target = document.getElementById("contact-form");
     if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      });
     }
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <>

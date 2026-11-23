@@ -98,6 +98,16 @@ export default function ContactHeroSection({
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [submitted, setSubmitted] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const hasToggledStepRef = React.useRef(false);
+
+  const focusHeadingOnTransition = React.useCallback(
+    (node: HTMLHeadingElement | null) => {
+      if (node && hasToggledStepRef.current) {
+        node.focus();
+      }
+    },
+    [],
+  );
 
   const selectedTopicLabel =
     TOPICS.find((item) => item.id === selectedTopic)?.label ?? "Book a demo";
@@ -124,6 +134,7 @@ export default function ContactHeroSection({
       return;
     }
     setErrors({});
+    hasToggledStepRef.current = true;
     setSubmitted(true);
   };
 
@@ -209,7 +220,10 @@ export default function ContactHeroSection({
             selectedTopic={selectedTopic}
             onSelectTopic={(topic) => {
               onSelectTopic(topic);
-              if (submitted) setSubmitted(false);
+              if (submitted) {
+                hasToggledStepRef.current = true;
+                setSubmitted(false);
+              }
             }}
             reduceMotion={reduceMotion}
           />
@@ -227,12 +241,20 @@ export default function ContactHeroSection({
                   transition={{ duration: 0.25, ease: EASE_OUT }}
                   className="flex flex-col gap-6 py-2"
                 >
-                  <div className="flex flex-col gap-3">
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="flex flex-col gap-3"
+                  >
                     <span className="inline-flex size-10 items-center justify-center rounded-full border border-success/25 bg-success-soft text-success-strong dark:border-success/30 dark:text-success">
                       <Icon icon={Tick02Icon} size={18} strokeWidth={2.2} />
                     </span>
                     <div className="flex flex-col gap-1">
-                      <h2 className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground">
+                      <h2
+                        ref={focusHeadingOnTransition}
+                        tabIndex={-1}
+                        className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground outline-none"
+                      >
                         Your note is ready to send
                       </h2>
                       <p className="font-ui text-body-m leading-[22px] text-muted-foreground">
@@ -305,7 +327,10 @@ export default function ContactHeroSection({
                   <div className="border-t border-separator pt-4 dark:border-edge-1">
                     <button
                       type="button"
-                      onClick={() => setSubmitted(false)}
+                      onClick={() => {
+                        hasToggledStepRef.current = true;
+                        setSubmitted(false);
+                      }}
                       className="cursor-pointer font-ui text-body-s font-medium text-muted-foreground transition-colors hover:text-foreground"
                     >
                       ← Edit note
@@ -324,7 +349,11 @@ export default function ContactHeroSection({
                   className="flex flex-col gap-5"
                 >
                   <div className="flex flex-col gap-1 pb-1">
-                    <h2 className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground">
+                    <h2
+                      ref={focusHeadingOnTransition}
+                      tabIndex={-1}
+                      className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground outline-none"
+                    >
                       Send us a note
                     </h2>
                     <p className="font-ui text-body-m leading-[22px] text-muted-foreground">

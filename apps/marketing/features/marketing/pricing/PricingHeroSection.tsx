@@ -6,14 +6,20 @@ import { MotionConfig } from "motion/react";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { TileRow } from "@/components/TileGrid";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 export default function PricingHeroSection() {
+  const reduceMotion = usePrefersReducedMotion();
+
   const handleScrollToIncluded = React.useCallback(() => {
     const target = document.getElementById("whats-included");
     if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      });
     }
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <MotionConfig reducedMotion="user">
