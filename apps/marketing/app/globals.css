@@ -635,6 +635,24 @@
     animation: typing-dot 1.4s ease-in-out infinite;
   }
 
+  .faq-pulse-ring {
+    animation: faq-pulse 3.6s var(--ease-out) infinite;
+  }
+
+  @keyframes faq-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0;
+    }
+    14% {
+      opacity: 0.36;
+    }
+    100% {
+      transform: scale(2.35);
+      opacity: 0;
+    }
+  }
+
   .how-progress {
     animation: how-progress var(--how-duration, 6s) linear forwards;
     transform-origin: top;
@@ -668,7 +686,8 @@
       animation: hero-enter-fade 200ms ease-out both;
     }
 
-    .typing-dot {
+    .typing-dot,
+    .faq-pulse-ring {
       animation: none;
     }
   }
