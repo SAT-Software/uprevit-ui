@@ -2,6 +2,19 @@
 
 import * as React from "react";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
+import type { IconSvgElement } from "@hugeicons/react";
+import {
+  CheckmarkBadge01Icon,
+  CubeIcon,
+  FingerPrintIcon,
+  PencilEdit02Icon,
+  SecurityCheckIcon,
+  Settings01Icon,
+  Tag01Icon,
+  UserMultipleIcon,
+  UserShield01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { BrandMark } from "@/components/BrandLogo";
 import { TileRow } from "@/components/TileGrid";
@@ -28,37 +41,6 @@ function useTicker(intervalMs: number, enabled: boolean) {
   }, [enabled, inView, intervalMs]);
 
   return [ref, tick] as const;
-}
-
-function Svg({
-  size,
-  viewBox = "0 0 24 24",
-  strokeWidth = 1.6,
-  className,
-  children,
-}: {
-  size: number;
-  viewBox?: string;
-  strokeWidth?: number;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={viewBox}
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cn("shrink-0", className)}
-    >
-      {children}
-    </svg>
-  );
 }
 
 function GovTile({
@@ -112,7 +94,7 @@ const ROLES: {
   spoke: string;
   pulseFrom: readonly [number, number];
   pulseTo: readonly [number, number];
-  icon: React.ReactNode;
+  icon: IconSvgElement;
 }[] = [
   {
     label: "Admin",
@@ -123,12 +105,7 @@ const ROLES: {
     spoke: "M218 95L218 75",
     pulseFrom: [218, 98],
     pulseTo: [218, 72],
-    icon: (
-      <>
-        <path d="M3.956 10.583L3.033 9.071C2.745 8.6 2.739 8.01 3.017 7.533L3.635 6.471C3.91 6.001 4.417 5.716 4.962 5.727L6.691 5.762C6.926 5.767 7.154 5.687 7.343 5.548C7.795 5.217 8.283 4.933 8.8 4.701C9.012 4.607 9.192 4.452 9.305 4.249L10.12 2.78C10.385 2.303 10.886 2.008 11.431 2.008H12.694C13.238 2.008 13.74 2.303 14.005 2.78L14.82 4.249C14.933 4.452 15.113 4.607 15.325 4.701C15.842 4.933 16.33 5.217 16.782 5.548C16.971 5.687 17.199 5.767 17.434 5.762L19.163 5.727C19.708 5.716 20.215 6 20.49 6.471L21.108 7.533C21.386 8.01 21.38 8.6 21.093 9.071L20.169 10.583C20.048 10.78 20.002 11.013 20.023 11.244C20.071 11.749 20.071 12.267 20.023 12.772C20.002 13.002 20.048 13.235 20.169 13.433L21.092 14.945C21.38 15.415 21.386 16.006 21.108 16.482L20.49 17.544C20.215 18.015 19.708 18.3 19.163 18.289L17.434 18.253C17.199 18.248 16.971 18.328 16.782 18.467C16.33 18.798 15.842 19.083 15.325 19.314C15.113 19.409 14.933 19.564 14.82 19.767L14.005 21.236C13.74 21.712 13.238 22.008 12.694 22.008H11.431C10.887 22.008 10.385 21.712 10.12 21.236L9.305 19.767C9.192 19.564 9.012 19.409 8.8 19.314C8.283 19.083 7.795 18.798 7.343 18.467C7.154 18.328 6.926 18.248 6.691 18.253L4.962 18.289C4.417 18.3 3.91 18.015 3.635 17.544L3.017 16.482C2.739 16.006 2.745 15.415 3.033 14.945L3.956 13.433C4.077 13.235 4.123 13.002 4.102 12.771C4.054 12.267 4.054 11.749 4.102 11.244C4.123 11.014 4.077 10.78 3.956 10.583Z" />
-        <circle cx="12.063" cy="12.008" r="3.5" />
-      </>
-    ),
+    icon: Settings01Icon,
   },
   {
     label: "User",
@@ -139,12 +116,7 @@ const ROLES: {
     spoke: "M273 150L293 150",
     pulseFrom: [270, 150],
     pulseTo: [296, 150],
-    icon: (
-      <>
-        <path d="M16.425 4.605L17.415 3.615C18.235 2.795 19.565 2.795 20.385 3.615C21.205 4.435 21.205 5.765 20.385 6.585L19.395 7.575M16.425 4.605L9.766 11.264C9.258 11.772 8.898 12.408 8.724 13.104L8 16L10.896 15.276C11.592 15.102 12.228 14.742 12.736 14.234L19.395 7.575M16.425 4.605L19.395 7.575" />
-        <path d="M19 13.5C19 16.788 19 18.431 18.092 19.538C17.926 19.74 17.74 19.926 17.538 20.092C16.431 21 14.787 21 11.5 21H11C7.229 21 5.343 21 4.172 19.828C3 18.657 3 16.771 3 13V12.5C3 9.213 3 7.569 3.908 6.462C4.074 6.26 4.26 6.074 4.462 5.908C5.569 5 7.213 5 10.5 5" />
-      </>
-    ),
+    icon: PencilEdit02Icon,
   },
   {
     label: "Approver",
@@ -155,12 +127,7 @@ const ROLES: {
     spoke: "M218 205L218 225",
     pulseFrom: [218, 202],
     pulseTo: [218, 228],
-    icon: (
-      <>
-        <path d="M18.991 19H19M18.991 19C18.368 19.617 17.239 19.464 16.448 19.464C15.476 19.464 15.009 19.654 14.315 20.347C13.725 20.937 12.934 22 12 22C11.066 22 10.275 20.937 9.685 20.347C8.991 19.654 8.523 19.464 7.552 19.464C6.761 19.464 5.632 19.617 5.009 19C4.382 18.378 4.536 17.244 4.536 16.448C4.536 15.441 4.316 14.979 3.599 14.262C2.533 13.196 2 12.662 2 12C2 11.338 2.533 10.804 3.599 9.738C4.239 9.098 4.536 8.464 4.536 7.552C4.536 6.761 4.382 5.632 5 5.009C5.622 4.382 6.756 4.536 7.552 4.536C8.464 4.536 9.098 4.239 9.738 3.599C10.804 2.533 11.338 2 12 2C12.662 2 13.196 2.533 14.262 3.599C14.902 4.239 15.536 4.536 16.448 4.536C17.239 4.536 18.368 4.382 18.991 5C19.618 5.622 19.464 6.756 19.464 7.552C19.464 8.559 19.684 9.021 20.401 9.738C21.467 10.804 22 11.338 22 12C22 12.662 21.467 13.196 20.401 14.262C19.684 14.979 19.464 15.441 19.464 16.448C19.464 17.244 19.618 18.378 18.991 19Z" />
-        <path d="M9 12.893C9 12.893 10.2 13.545 10.8 14.5C10.8 14.5 12.6 10.75 15 9.5" />
-      </>
-    ),
+    icon: CheckmarkBadge01Icon,
   },
   {
     label: "Manager",
@@ -171,13 +138,7 @@ const ROLES: {
     spoke: "M163 150L143 150",
     pulseFrom: [166, 150],
     pulseTo: [140, 150],
-    icon: (
-      <>
-        <path d="M11.995 13.566L11 13.5C10.645 13.51 10.313 13.523 10.001 13.538C6.3 13.719 3.284 16.806 3 20.5" />
-        <circle cx="11" cy="6.5" r="4" />
-        <path d="M21 17.47V16.24C21 15.668 20.548 15.212 20.006 15.105C19.432 14.993 18.947 14.802 18.597 14.634C18.225 14.455 17.775 14.455 17.403 14.634C17.053 14.802 16.568 14.993 15.994 15.105C15.452 15.212 15 15.668 15 16.24V17.47C15 20.05 16.986 21.131 17.726 21.444C17.903 21.519 18.097 21.519 18.274 21.444C19.014 21.131 21 20.05 21 17.47Z" />
-      </>
-    ),
+    icon: UserShield01Icon,
   },
 ];
 
@@ -266,10 +227,7 @@ function RoleBasedAccess({ reduceMotion }: { reduceMotion: boolean }) {
 
       <div className="absolute left-[162px] top-[94px] size-28 rounded-full bg-white/60 p-[5px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_12px_28px_-12px_rgba(0,0,0,0.25)] dark:bg-[#14141499] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_12px_28px_-12px_rgba(0,0,0,0.4)]">
         <div className="flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7F7F7_0%,#E9E9E9_100%)] shadow-[inset_0_0_0_1px_#FFFFFF,inset_0_-2px_6px_rgba(0,0,0,0.06)] dark:bg-[linear-gradient(180deg,#191919_0%,#212121_100%)] dark:shadow-[inset_0_0_0_1px_#141414,inset_0_-2px_6px_rgba(0,0,0,0.1)]">
-          <Svg size={36} strokeWidth={1.5} className="text-foreground">
-            <path d="M18.709 3.495C16.817 2.554 14.501 2 12 2C9.499 2 7.184 2.554 5.291 3.495C4.363 3.957 3.899 4.188 3.45 4.914C3 5.64 3 6.342 3 7.748V11.237C3 16.921 7.542 20.08 10.173 21.434C10.907 21.811 11.274 22 12 22C12.726 22 13.093 21.811 13.827 21.434C16.458 20.08 21 16.921 21 11.237L21 7.748C21 6.342 21 5.64 20.55 4.914C20.101 4.188 19.637 3.957 18.709 3.495Z" />
-            <path d="M9 11.5C9 11.5 10.408 11.752 11 13.5C11 13.5 12.5 10.5 15 9.5" />
-          </Svg>
+          <Icon icon={SecurityCheckIcon} size={36} strokeWidth={1.5} className="shrink-0 text-foreground" />
         </div>
       </div>
 
@@ -310,9 +268,7 @@ function RoleBasedAccess({ reduceMotion }: { reduceMotion: boolean }) {
                   )}
                   style={{ transitionDelay: `${delay}s` }}
                 >
-                  <Svg size={18} strokeWidth={1.6}>
-                    {role.icon}
-                  </Svg>
+                  <Icon icon={role.icon} size={18} strokeWidth={1.6} />
                 </span>
               </span>
             </motion.button>
@@ -344,45 +300,10 @@ function RoleBasedAccess({ reduceMotion }: { reduceMotion: boolean }) {
 
 /* ------------------------ Timestamped activity log ------------------------ */
 
-const LOG_SOURCES: { label: string; top: number; y: number; path: string; icon: React.ReactNode }[] = [
-  {
-    label: "Products",
-    top: 43,
-    y: 69,
-    path: "M162 69C236 69 244 159 330 159",
-    icon: (
-      <>
-        <path d="M12 19C12.209 19 12.404 18.901 12.793 18.703L15.923 17.113C17.308 16.409 18 16.057 18 15.5V8.5M12 19C11.791 19 11.596 18.901 11.207 18.703L8.077 17.113C6.692 16.409 6 16.057 6 15.5V8.5M12 19V12M6 8.5C6 9.057 6.692 9.409 8.077 10.113L11.207 11.703C11.596 11.901 11.791 12 12 12C12.209 12 12.404 11.901 12.793 11.703L15.923 10.113C17.308 9.409 18 9.057 18 8.5C18 7.943 17.308 7.591 15.923 6.887L12.793 5.297C12.404 5.099 12.209 5 12 5C11.791 5 11.596 5.099 11.207 5.297L8.077 6.887C6.692 7.591 6 7.943 6 8.5Z" />
-        <path d="M13.19 21.576L17.884 19.304C19.961 18.299 21 17.796 21 17V7C21 6.204 19.961 5.701 17.884 4.696L13.19 2.424L13.19 2.424C12.606 2.141 12.314 2 12 2C11.686 2 11.394 2.141 10.81 2.424L6.116 4.696C4.039 5.701 3 6.204 3 7V17C3 17.796 4.039 18.299 6.116 19.304L6.116 19.304L10.81 21.576C11.394 21.859 11.686 22 12 22C12.314 22 12.606 21.859 13.19 21.576Z" />
-      </>
-    ),
-  },
-  {
-    label: "Workflows",
-    top: 133,
-    y: 159,
-    path: "M162 159H330",
-    icon: (
-      <>
-        <path d="M18.991 19H19M18.991 19C18.368 19.617 17.239 19.464 16.448 19.464C15.476 19.464 15.009 19.654 14.315 20.347C13.725 20.937 12.934 22 12 22C11.066 22 10.275 20.937 9.685 20.347C8.991 19.654 8.523 19.464 7.552 19.464C6.761 19.464 5.632 19.617 5.009 19C4.382 18.378 4.536 17.244 4.536 16.448C4.536 15.441 4.316 14.979 3.599 14.262C2.533 13.196 2 12.662 2 12C2 11.338 2.533 10.804 3.599 9.738C4.239 9.098 4.536 8.464 4.536 7.552C4.536 6.761 4.382 5.632 5 5.009C5.622 4.382 6.756 4.536 7.552 4.536C8.464 4.536 9.098 4.239 9.738 3.599C10.804 2.533 11.338 2 12 2C12.662 2 13.196 2.533 14.262 3.599C14.902 4.239 15.536 4.536 16.448 4.536C17.239 4.536 18.368 4.382 18.991 5C19.618 5.622 19.464 6.756 19.464 7.552C19.464 8.559 19.684 9.021 20.401 9.738C21.467 10.804 22 11.338 22 12C22 12.662 21.467 13.196 20.401 14.262C19.684 14.979 19.464 15.441 19.464 16.448C19.464 17.244 19.618 18.378 18.991 19Z" />
-        <path d="M9 12.893C9 12.893 10.2 13.545 10.8 14.5C10.8 14.5 12.6 10.75 15 9.5" />
-      </>
-    ),
-  },
-  {
-    label: "Team",
-    top: 223,
-    y: 249,
-    path: "M162 249C236 249 244 159 330 159",
-    icon: (
-      <>
-        <path d="M16 21C15.767 18.069 13.342 15.748 10.309 15.552L9.5 15.5C9.211 15.508 8.942 15.518 8.688 15.53C5.681 15.672 3.231 18.097 3 21" />
-        <path d="M12.75 9.75C12.75 11.545 11.295 13 9.5 13C7.705 13 6.25 11.545 6.25 9.75C6.25 7.955 7.705 6.5 9.5 6.5C11.295 6.5 12.75 7.955 12.75 9.75Z" />
-        <path d="M21 17.501C20.771 14.631 18.454 12.275 15.5 11.996" />
-        <path d="M15.988 9C16.896 8.424 17.5 7.408 17.5 6.25C17.5 4.455 16.05 3 14.26 3C13.381 3 12.584 3.351 12 3.921" />
-      </>
-    ),
-  },
+const LOG_SOURCES: { label: string; top: number; y: number; path: string; icon: IconSvgElement }[] = [
+  { label: "Products", top: 43, y: 69, path: "M162 69C236 69 244 159 330 159", icon: CubeIcon },
+  { label: "Workflows", top: 133, y: 159, path: "M162 159H330", icon: CheckmarkBadge01Icon },
+  { label: "Team", top: 223, y: 249, path: "M162 249C236 249 244 159 330 159", icon: UserMultipleIcon },
 ];
 
 const LOG_ENTRIES: {
@@ -486,9 +407,7 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
           >
             <div className="size-[52px] rounded-[14px] border border-foreground/5 bg-[#F5F5F5BF] p-[3px] dark:border-separator dark:bg-[#1A1A1ABF]">
               <div className="flex size-full items-center justify-center rounded-[11px] bg-card shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2)]">
-                <Svg size={18} strokeWidth={1.6} className="text-foreground">
-                  {source.icon}
-                </Svg>
+                <Icon icon={source.icon} size={18} strokeWidth={1.6} className="shrink-0 text-foreground" />
               </div>
             </div>
             <span className="font-ui text-[11px] leading-[14px] text-placeholder">
@@ -743,33 +662,15 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
 
           <div className="flex flex-col gap-2">
             {[
-              {
-                label: "Products",
-                icon: (
-                  <>
-                    <path d="M12 19C12.209 19 12.404 18.901 12.793 18.703L15.923 17.113C17.308 16.409 18 16.057 18 15.5V8.5M12 19C11.791 19 11.596 18.901 11.207 18.703L8.077 17.113C6.692 16.409 6 16.057 6 15.5V8.5M12 19V12M6 8.5C6 9.057 6.692 9.409 8.077 10.113L11.207 11.703C11.596 11.901 11.791 12 12 12C12.209 12 12.404 11.901 12.793 11.703L15.923 10.113C17.308 9.409 18 9.057 18 8.5C18 7.943 17.308 7.591 15.923 6.887L12.793 5.297C12.404 5.099 12.209 5 12 5C11.791 5 11.596 5.099 11.207 5.297L8.077 6.887C6.692 7.591 6 7.943 6 8.5Z" />
-                    <path d="M13.19 21.576L17.884 19.304C19.961 18.299 21 17.796 21 17V7C21 6.204 19.961 5.701 17.884 4.696L13.19 2.424L13.19 2.424C12.606 2.141 12.314 2 12 2C11.686 2 11.394 2.141 10.81 2.424L6.116 4.696C4.039 5.701 3 6.204 3 7V17C3 17.796 4.039 18.299 6.116 19.304L6.116 19.304L10.81 21.576C11.394 21.859 11.686 22 12 22C12.314 22 12.606 21.859 13.19 21.576Z" />
-                  </>
-                ),
-              },
-              {
-                label: "Labels",
-                icon: (
-                  <>
-                    <path d="M8 2H9.015C10.241 2 10.854 2 11.405 2.228C11.957 2.457 12.39 2.89 13.257 3.757L21.126 11.626C21.684 12.187 21.998 12.945 22 13.736L22 13.75L22 13.764C21.998 14.555 21.684 15.313 21.126 15.874L15.874 21.126C15.313 21.684 14.555 21.998 13.764 22L13.75 22L13.736 22C12.945 21.998 12.187 21.684 11.626 21.126L3.757 13.257C2.89 12.39 2.457 11.957 2.228 11.405C2 10.854 2 10.241 2 9.015V8C2 5.172 2 3.757 2.879 2.879C3.757 2 5.172 2 8 2Z" />
-                    <path d="M7.5 7.25V7.5M8 7.5C8 7.776 7.776 8 7.5 8C7.224 8 7 7.776 7 7.5C7 7.224 7.224 7 7.5 7C7.776 7 8 7.224 8 7.5Z" />
-                  </>
-                ),
-              },
+              { label: "Products", icon: CubeIcon },
+              { label: "Labels", icon: Tag01Icon },
             ].map((card) => (
               <div
                 key={card.label}
                 className="flex h-[86px] w-24 shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl bg-card shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2)]"
               >
                 <span className="flex size-[30px] shrink-0 items-center justify-center rounded-md bg-muted shadow-[inset_0_0_0_1px_var(--stroke-primary)] dark:bg-surface-3 dark:shadow-[inset_0_0_0_1px_var(--edge-2)]">
-                  <Svg size={16} strokeWidth={1.6} className="text-foreground">
-                    {card.icon}
-                  </Svg>
+                  <Icon icon={card.icon} size={16} strokeWidth={1.6} className="shrink-0 text-foreground" />
                 </span>
                 <span className="font-ui text-[11px] leading-[14px] text-muted-foreground">
                   {card.label}
@@ -860,14 +761,6 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
 
 /* ----------------------------- Single sign-on ----------------------------- */
 
-const FINGERPRINT_PATHS = (
-  <>
-    <path d="M7.429 3.362C11.4 0.664 17.136 2.124 19.23 6.418M10.857 21.924C15.584 22.582 20 18.895 20 14.21V10.333M7.429 20.606C5.356 19.198 4 16.858 4 14.21V9.758C4 8.573 4.271 7.45 4.757 6.444" />
-    <path d="M16 13.8C16 16.12 14.209 18 12 18C9.791 18 8 16.12 8 13.8V10.2C8 9.556 8.138 8.946 8.385 8.4M12 6C14.209 6 16 7.88 16 10.2" />
-    <path d="M12 10.5L12 13.5" />
-  </>
-);
-
 function SingleSignOn({ reduceMotion }: { reduceMotion: boolean }) {
   const [ref, on] = usePlayback(reduceMotion, 7600);
   const [scanDone, setScanDone] = React.useState(false);
@@ -909,16 +802,15 @@ function SingleSignOn({ reduceMotion }: { reduceMotion: boolean }) {
       />
       <div className="absolute left-[156px] top-[78px] size-[124px] rounded-full bg-white/60 p-[5px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_12px_28px_-12px_rgba(0,0,0,0.25)] dark:bg-[#14141499] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_12px_28px_-12px_rgba(0,0,0,0.4)]">
         <div className="relative flex size-full items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(180deg,#F7F7F7_0%,#E6E6E6_100%)] shadow-[inset_0_0_0_1px_#FFFFFF] dark:bg-[linear-gradient(180deg,#191919_0%,#232323_100%)] dark:shadow-[inset_0_0_0_1px_#141414]">
-          <Svg
+          <Icon
+            icon={FingerPrintIcon}
             size={52}
             strokeWidth={1.4}
             className={cn(
-              "transition-colors duration-500 ease-out",
+              "shrink-0 transition-colors duration-500 ease-out",
               verified ? "text-foreground/75" : "text-foreground/30",
             )}
-          >
-            {FINGERPRINT_PATHS}
-          </Svg>
+          />
           {!reduceMotion && (
             <motion.span
               aria-hidden="true"

@@ -11,6 +11,16 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react";
+import {
+  GridTableIcon,
+  HourglassIcon,
+  SecurityCheckIcon,
+  SquareLock02Icon,
+  Tag01Icon,
+  Tick02Icon,
+  Upload04Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { TileRow } from "@/components/TileGrid";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
@@ -25,45 +35,13 @@ const STAGE_W = 873;
 const STAGE_H = 680;
 
 const ICONS = {
-  upload: (
-    <>
-      <path d="M5.25 21H18.75C18.982 21 19.098 21 19.196 20.99C20.146 20.897 20.897 20.146 20.99 19.196C21 19.098 21 18.982 21 18.75C21 18.518 21 18.402 20.99 18.304C20.897 17.354 20.146 16.603 19.196 16.51C19.098 16.5 18.982 16.5 18.75 16.5H17.061C16.832 16.5 16.718 16.5 16.609 16.512C16.232 16.554 15.874 16.702 15.578 16.939C15.492 17.008 15.411 17.089 15.25 17.25C15.089 17.411 15.008 17.492 14.922 17.561C14.626 17.798 14.268 17.946 13.891 17.988C13.782 18 13.668 18 13.439 18H10.561C10.332 18 10.218 18 10.109 17.988C9.732 17.946 9.374 17.798 9.078 17.561C8.992 17.492 8.911 17.411 8.75 17.25C8.589 17.089 8.508 17.008 8.422 16.939C8.126 16.702 7.768 16.554 7.391 16.512C7.282 16.5 7.168 16.5 6.939 16.5H5.25C5.018 16.5 4.902 16.5 4.804 16.51C3.854 16.603 3.103 17.354 3.01 18.304C3 18.402 3 18.518 3 18.75C3 18.982 3 19.098 3.01 19.196C3.103 20.146 3.854 20.897 4.804 20.99C4.902 21 5.018 21 5.25 21Z" />
-      <path d="M16.5 7.5C16.5 7.5 13.186 3 12 3C10.814 3 7.5 7.5 7.5 7.5M12 4V15" />
-    </>
-  ),
-  table: (
-    <>
-      <path d="M3.891 20.109C2.5 18.718 2.5 16.478 2.5 12C2.5 7.522 2.5 5.282 3.891 3.891C5.282 2.5 7.522 2.5 12 2.5C16.478 2.5 18.718 2.5 20.109 3.891C21.5 5.282 21.5 7.522 21.5 12C21.5 16.478 21.5 18.718 20.109 20.109C18.718 21.5 16.478 21.5 12 21.5C7.522 21.5 5.282 21.5 3.891 20.109Z" />
-      <path d="M2.5 9L21.5 9M16 21.5L16 2.5M8 21.5L8 2.5" />
-    </>
-  ),
-  shield: (
-    <>
-      <path d="M18.709 3.495C16.817 2.554 14.501 2 12 2C9.499 2 7.184 2.554 5.291 3.495C4.363 3.957 3.899 4.188 3.45 4.914C3 5.64 3 6.342 3 7.748V11.237C3 16.921 7.542 20.08 10.173 21.434C10.907 21.811 11.274 22 12 22C12.726 22 13.093 21.811 13.827 21.434C16.458 20.08 21 16.921 21 11.237L21 7.748C21 6.342 21 5.64 20.55 4.914C20.101 4.188 19.637 3.957 18.709 3.495Z" />
-      <path d="M9 11.5C9 11.5 10.408 11.752 11 13.5C11 13.5 12.5 10.5 15 9.5" />
-    </>
-  ),
-  lock: (
-    <>
-      <path d="M12 14.5V17.5M13 14.5C13 15.052 12.552 15.5 12 15.5C11.448 15.5 11 15.052 11 14.5C11 13.948 11.448 13.5 12 13.5C12.552 13.5 13 13.948 13 14.5Z" />
-      <path d="M16.5 9V6.5C16.5 4.015 14.485 2 12 2C9.515 2 7.5 4.015 7.5 6.5V9" />
-      <path d="M4.268 18.845C4.493 20.515 5.876 21.823 7.56 21.901C8.976 21.966 10.415 22 12 22C13.585 22 15.024 21.966 16.44 21.901C18.124 21.823 19.507 20.515 19.732 18.845C19.879 17.755 20 16.638 20 15.5C20 14.362 19.879 13.245 19.732 12.155C19.507 10.485 18.124 9.176 16.44 9.099C15.024 9.034 13.585 9 12 9C10.415 9 8.976 9.034 7.56 9.099C5.876 9.176 4.493 10.485 4.268 12.155C4.121 13.245 4 14.362 4 15.5C4 16.638 4.121 17.755 4.268 18.845Z" />
-    </>
-  ),
-  hourglass: (
-    <>
-      <path d="M4 3H20M4 21H20" />
-      <path d="M5.5 3V5.03C5.5 6.272 6.077 7.444 7.061 8.201L12 12L16.939 8.201C17.923 7.444 18.5 6.272 18.5 5.03V3" />
-      <path d="M5.5 21V18.97C5.5 17.728 6.077 16.556 7.061 15.799L12 12L16.939 15.799C17.923 16.556 18.5 17.728 18.5 18.97V21" />
-    </>
-  ),
-  tag: (
-    <>
-      <path d="M8 2H9.015C10.241 2 10.854 2 11.405 2.228C11.957 2.457 12.39 2.89 13.257 3.757L21.126 11.626C21.684 12.187 21.998 12.945 22 13.736L22 13.75L22 13.764C21.998 14.555 21.684 15.313 21.126 15.874L15.874 21.126C15.313 21.684 14.555 21.998 13.764 22L13.75 22L13.736 22C12.945 21.998 12.187 21.684 11.626 21.126L3.757 13.257C2.89 12.39 2.457 11.957 2.228 11.405C2 10.854 2 10.241 2 9.015V8C2 5.172 2 3.757 2.879 2.879C3.757 2 5.172 2 8 2Z" />
-      <path d="M7.5 7.25V7.5M8 7.5C8 7.776 7.776 8 7.5 8C7.224 8 7 7.776 7 7.5C7 7.224 7.224 7 7.5 7C7.776 7 8 7.224 8 7.5Z" />
-    </>
-  ),
-  check: <path d="M5 14L8.5 17.5L19 6.5" />,
+  upload: Upload04Icon,
+  table: GridTableIcon,
+  shield: SecurityCheckIcon,
+  lock: SquareLock02Icon,
+  hourglass: HourglassIcon,
+  tag: Tag01Icon,
+  check: Tick02Icon,
 };
 
 type IconName = keyof typeof ICONS;
@@ -80,20 +58,12 @@ function Glyph({
   className?: string;
 }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
+    <Icon
+      icon={ICONS[name]}
+      size={size}
       strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
       className={cn("shrink-0", className)}
-    >
-      {ICONS[name]}
-    </svg>
+    />
   );
 }
 
@@ -763,6 +733,8 @@ const TIMELINE: {
 ];
 
 function ReleaseStage() {
+  const reduceMotion = usePrefersReducedMotion();
+
   return (
     <motion.div
       {...rise(0.05, 10)}
@@ -789,12 +761,14 @@ function ReleaseStage() {
                 )}
                 {item.state === "active" && (
                   <span className="relative flex size-7 shrink-0 items-center justify-center rounded-full bg-primary shadow-[0_0_0_4px_var(--primary-100)] dark:shadow-[0_0_0_4px_rgba(143,64,255,0.25)]">
-                    <motion.span
-                      aria-hidden="true"
-                      className="absolute inset-0 rounded-full bg-primary"
-                      animate={{ scale: [1, 1.8], opacity: [0, 0.28, 0] }}
-                      transition={{ duration: 2.4, ease: "easeOut", times: [0, 0.25, 1], repeat: Infinity, delay: 0.9 }}
-                    />
+                    {!reduceMotion && (
+                      <motion.span
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded-full bg-primary"
+                        animate={{ scale: [1, 1.8], opacity: [0, 0.28, 0] }}
+                        transition={{ duration: 2.4, ease: "easeOut", times: [0, 0.25, 1], repeat: Infinity, delay: 0.9 }}
+                      />
+                    )}
                     <span className="relative size-2 rounded-full bg-card" />
                   </span>
                 )}

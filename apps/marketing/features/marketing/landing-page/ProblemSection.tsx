@@ -2,6 +2,12 @@
 
 import * as React from "react";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
+import {
+  Attachment01Icon,
+  PencilEdit02Icon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { TileRow } from "@/components/TileGrid";
 import { DotsBackdrop } from "./DotsBackdrop";
@@ -459,10 +465,12 @@ function RedlinesVisual({ reduceMotion }: { reduceMotion: boolean }) {
             ))}
           </div>
           <div className="flex flex-1 items-center justify-center gap-[5px]">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" className="text-foreground/60">
-              <path d="M16.425 4.605L17.415 3.615C18.235 2.795 19.565 2.795 20.385 3.615C21.205 4.435 21.205 5.765 20.385 6.585L19.395 7.575M16.425 4.605L9.766 11.264C9.258 11.772 8.898 12.408 8.724 13.104L8 16L10.896 15.276C11.592 15.102 12.228 14.742 12.736 14.234L19.395 7.575M16.425 4.605L19.395 7.575" />
-              <path strokeLinecap="round" d="M19 13.5C19 16.788 19 18.431 18.092 19.538C17.926 19.74 17.74 19.926 17.538 20.092C16.431 21 14.787 21 11.5 21H11C7.229 21 5.343 21 4.172 19.828C3 18.657 3 16.771 3 13V12.5C3 9.213 3 7.569 3.908 6.462C4.074 6.26 4.26 6.074 4.462 5.908C5.569 5 7.213 5 10.5 5" />
-            </svg>
+            <Icon
+              icon={PencilEdit02Icon}
+              size={10}
+              strokeWidth={2.2}
+              className="shrink-0 text-foreground/60"
+            />
             <span className="font-ui text-[9px] font-medium leading-[14px] text-muted-foreground">
               Document redlines
             </span>
@@ -672,9 +680,12 @@ const INCOMING_MAIL: typeof MAIL_ROWS = [
 
 function AttachmentIcon() {
   return (
-    <svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-foreground/60">
-      <path d="M9.5 8V14.5C9.5 15.881 10.619 17 12 17C13.381 17 14.5 15.881 14.5 14.5V6.5C14.5 4.015 12.485 2 10 2C7.515 2 5.5 4.015 5.5 6.5V15.5C5.5 19.09 8.41 22 12 22C15.59 22 18.5 19.09 18.5 15.5V6" />
-    </svg>
+    <Icon
+      icon={Attachment01Icon}
+      size={10}
+      strokeWidth={2.2}
+      className="shrink-0 text-foreground/60"
+    />
   );
 }
 
@@ -696,10 +707,12 @@ function EmailVisual({ reduceMotion }: { reduceMotion: boolean }) {
             </span>
           </div>
           <div className="flex h-6 w-[132px] shrink-0 items-center gap-1.5 rounded-sm border border-border bg-card pl-2 pr-1 shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-3">
-            <svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="shrink-0 text-foreground/50">
-              <circle cx="10" cy="10" r="7" />
-              <path d="M15 15L21 21" />
-            </svg>
+            <Icon
+              icon={Search01Icon}
+              size={11}
+              strokeWidth={2.2}
+              className="shrink-0 text-foreground/50"
+            />
             <span className="flex-1 font-ui text-[10px] leading-[14px] text-faint-foreground">
               Search mail
             </span>

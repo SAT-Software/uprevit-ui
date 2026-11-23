@@ -2,6 +2,13 @@
 
 import Image from "next/image";
 import { MotionConfig, motion } from "motion/react";
+import {
+  ArrowDataTransferHorizontalIcon,
+  FileAddIcon,
+  Layers01Icon,
+  Notification01Icon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { TileRow } from "@/components/TileGrid";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
@@ -174,10 +181,12 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
       <div className="absolute left-[225px] top-[72px] w-[860px] rounded-[22px] border border-border/50 bg-[#F5F5F5BF] p-1.5 dark:border-edge-2 dark:bg-surface-1/75">
         <div className="overflow-hidden rounded-[18px] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2">
           <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 dark:border-edge-2">
-            <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-foreground">
-              <path d="M4 12.001L4 14.545C4 17.79 4 19.412 4.886 20.511C5.065 20.733 5.267 20.935 5.489 21.114C6.588 22 8.211 22 11.456 22C12.161 22 12.514 22 12.837 21.887C12.904 21.863 12.97 21.835 13.034 21.805C13.344 21.657 13.593 21.407 14.092 20.909L18.828 16.172C19.407 15.594 19.695 15.305 19.848 14.937C20 14.57 20 14.161 20 13.344V10.001C20 6.229 20 4.344 18.828 3.172C17.769 2.113 16.127 2.011 13.034 2.002M13 21.5V21C13 18.172 13 16.758 13.879 15.879C14.757 15.001 16.172 15.001 19 15.001H19.5" />
-              <path d="M12 6H4M8 2V10" />
-            </svg>
+            <Icon
+              icon={FileAddIcon}
+              size={15}
+              strokeWidth={1.8}
+              className="shrink-0 text-foreground"
+            />
             <span className="flex min-w-0 flex-1 items-center gap-1.5 font-ui text-[13px] leading-4">
               <span className="font-semibold text-foreground">IV Extension Set</span>
               <span className="text-faint-foreground">/</span>
@@ -315,32 +324,17 @@ const POINTS: SectionPoint[] = [
   {
     title: "All product information compared",
     body: "Specs, label text, symbols and compliance details in one redline.",
-    icon: (
-      <>
-        <path d="M9.606 4.813C10.786 4.271 11.376 4 12 4C12.624 4 13.214 4.271 14.394 4.813L19.287 7.061C21.096 7.891 22 8.307 22 9C22 9.693 21.096 10.109 19.287 10.939L14.394 13.187C13.214 13.729 12.624 14 12 14C11.376 14 10.786 13.729 9.606 13.187L4.713 10.939C2.904 10.109 2 9.693 2 9C2 8.307 2.904 7.891 4.713 7.061L9.606 4.813Z" />
-        <path d="M20.233 13.5C21.411 14.062 22 14.441 22 15C22 15.693 21.096 16.109 19.287 16.939L14.394 19.187C13.214 19.729 12.624 20 12 20C11.376 20 10.786 19.729 9.606 19.187L4.713 16.939C2.904 16.109 2 15.693 2 15C2 14.441 2.589 14.062 3.767 13.5" />
-      </>
-    ),
+    icon: Layers01Icon,
   },
   {
     title: "Compare any two versions",
     body: "Check against the last release, or any earlier version.",
-    icon: (
-      <>
-        <path d="M19 9H6.659C5.653 9 5.15 9 5.025 8.691C4.9 8.383 5.255 8.019 5.966 7.293L8.211 5" />
-        <path d="M5 15H17.341C18.347 15 18.85 15 18.975 15.309C19.1 15.617 18.745 15.981 18.034 16.707L15.789 19" />
-      </>
-    ),
+    icon: ArrowDataTransferHorizontalIcon,
   },
   {
     title: "Approvers alerted to edits",
     body: "If a label changes during review, every approver gets a change notice.",
-    icon: (
-      <>
-        <path d="M15.5 18C15.5 19.933 13.933 21.5 12 21.5C10.067 21.5 8.5 19.933 8.5 18" />
-        <path d="M19.231 18H4.769C3.792 18 3 17.208 3 16.231C3 15.762 3.186 15.312 3.518 14.98L4.121 14.377C4.684 13.815 5 13.051 5 12.256V9.5C5 5.634 8.134 2.5 12 2.5C15.866 2.5 19 5.634 19 9.5V12.256C19 13.051 19.316 13.815 19.879 14.377L20.482 14.98C20.814 15.312 21 15.762 21 16.231C21 17.208 20.208 18 19.231 18Z" />
-      </>
-    ),
+    icon: Notification01Icon,
   },
 ];
 

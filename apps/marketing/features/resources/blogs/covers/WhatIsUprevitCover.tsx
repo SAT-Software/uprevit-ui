@@ -8,20 +8,20 @@ const statuses = [
   {
     label: "Draft",
     width: 54,
-    fill: "var(--badge-neutral)",
-    color: "var(--badge-neutral-foreground)",
+    fill: "var(--muted)",
+    color: "var(--muted-foreground)",
   },
   {
     label: "In review",
     width: 74,
-    fill: "var(--badge-warning)",
-    color: "var(--badge-warning-foreground)",
+    fill: "var(--warning-soft)",
+    color: "var(--warning-strong)",
   },
   {
     label: "Released",
     width: 72,
-    fill: "var(--badge-feature)",
-    color: "var(--badge-feature-foreground)",
+    fill: "var(--success-soft)",
+    color: "var(--success-strong)",
   },
 ];
 

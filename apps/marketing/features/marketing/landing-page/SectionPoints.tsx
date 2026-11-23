@@ -1,12 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import type { IconSvgElement } from "@hugeicons/react";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { TileRow } from "@/components/TileGrid";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-export type SectionPoint = { title: string; body: string; icon: ReactNode };
+export type SectionPoint = { title: string; body: string; icon: IconSvgElement };
 
 export function SectionPoints({ points }: { points: SectionPoint[] }) {
   return (
@@ -22,20 +23,12 @@ export function SectionPoints({ points }: { points: SectionPoint[] }) {
         >
           <span className="flex shrink-0 rounded-xl border border-separator bg-file-frame p-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
             <span className="flex size-9 items-center justify-center rounded-[9px] bg-card shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] dark:bg-surface-2">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <Icon
+                icon={point.icon}
+                size={18}
+                strokeWidth={1.8}
                 className="shrink-0 text-muted-foreground transition-colors duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-foreground"
-              >
-                {point.icon}
-              </svg>
+              />
             </span>
           </span>
           <div className="flex flex-col gap-1.5">

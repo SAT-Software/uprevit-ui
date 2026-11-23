@@ -3,8 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { MotionConfig, motion, useInView } from "motion/react";
-import { ArrowDown01Icon, ArrowRight02Icon, CustomerSupportIcon } from "@hugeicons/core-free-icons";
+import { ArrowRight02Icon, CustomerSupportIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@uprevit/ui/components/ui/accordion";
 import { TileRow } from "@/components/TileGrid";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { SectionHeader } from "./SectionHeader";
@@ -111,7 +117,6 @@ function ContactEmblem({ reduceMotion }: { reduceMotion: boolean }) {
 
 export default function FAQSection() {
   const reduceMotion = usePrefersReducedMotion();
-  const [openId, setOpenId] = React.useState<string | null>(FAQS[0].id);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -169,58 +174,27 @@ export default function FAQSection() {
             transition={{ duration: 0.45, ease: EASE_OUT }}
             className="order-1 flex min-w-0 flex-col rounded-tile bg-tile px-5 py-2 sm:px-8 sm:py-5 lg:order-2 lg:px-10 lg:py-6"
           >
-            <div className="w-full">
-              {FAQS.map((faq) => {
-                const isOpen = openId === faq.id;
-                const triggerId = `faq-trigger-${faq.id}`;
-                const panelId = `faq-panel-${faq.id}`;
-
-                return (
-                  <div
-                    key={faq.id}
-                    className="border-b border-separator last:border-b-0 dark:border-edge-1"
-                  >
-                    <h3 className="flex">
-                      <button
-                        type="button"
-                        id={triggerId}
-                        aria-expanded={isOpen}
-                        aria-controls={panelId}
-                        onClick={() =>
-                          setOpenId((prev) => (prev === faq.id ? null : faq.id))
-                        }
-                        className="flex flex-1 cursor-pointer items-center justify-between gap-4 py-4.5 text-left font-ui text-[15px] font-medium leading-[22px] text-foreground outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring sm:gap-6 sm:py-5 sm:text-[16px] sm:leading-6"
-                      >
-                        <span>{faq.question}</span>
-                        <Icon
-                          icon={ArrowDown01Icon}
-                          size={18}
-                          strokeWidth={2}
-                          className={`pointer-events-none size-[18px] shrink-0 transition-[transform,color] duration-220 ease-out ${
-                            isOpen
-                              ? "rotate-180 text-foreground"
-                              : "text-icon"
-                          }`}
-                        />
-                      </button>
-                    </h3>
-                    <div
-                      id={panelId}
-                      role="region"
-                      aria-labelledby={triggerId}
-                      data-state={isOpen ? "open" : "closed"}
-                      className="grid transition-[grid-template-rows,opacity] duration-220 ease-out data-[state=closed]:grid-rows-[0fr] data-[state=closed]:opacity-0 data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100 motion-reduce:transition-none"
-                    >
-                      <div className="min-h-0 overflow-hidden">
-                        <p className="max-w-prose pb-5 font-ui text-[14px] leading-[21px] text-muted-foreground lg:min-h-[86px] lg:leading-[22px]">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <Accordion
+              type="single"
+              collapsible
+              defaultValue={FAQS[0].id}
+              className="w-full"
+            >
+              {FAQS.map((faq) => (
+                <AccordionItem
+                  key={faq.id}
+                  value={faq.id}
+                  className="border-separator last:border-b-0 dark:border-edge-1"
+                >
+                  <AccordionTrigger className="cursor-pointer items-center gap-4 rounded-none py-4.5 font-ui text-[15px] font-medium leading-[22px] text-foreground hover:no-underline sm:gap-6 sm:py-5 sm:text-[16px] sm:leading-6 [&>svg]:size-[18px] [&>svg]:translate-y-0 [&>svg]:text-icon [&[data-state=open]>svg]:text-foreground">
+                    <span>{faq.question}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-5 font-ui text-[14px] leading-[21px] text-muted-foreground lg:min-h-[86px] lg:leading-[22px]">
+                    <p className="max-w-prose">{faq.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </motion.div>
         </TileRow>
       </section>

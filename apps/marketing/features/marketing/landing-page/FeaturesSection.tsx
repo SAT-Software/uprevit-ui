@@ -3,10 +3,24 @@
 import * as React from "react";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
 import {
+  ArchiveIcon,
+  ArrowLeft01Icon,
+  ArrowReloadHorizontalIcon,
+  ArrowRight01Icon,
+  Bookmark01Icon,
   BubbleChatIcon,
   CheckmarkBadge01Icon,
+  DashboardSquare01Icon,
   FileEditIcon,
+  Folder02Icon,
+  GitBranchIcon,
+  GridTableIcon,
+  Image01Icon,
   PencilEdit02Icon,
+  Search01Icon,
+  SentIcon,
+  SquareLock02Icon,
+  ViewIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon, type IconProps } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
@@ -139,6 +153,7 @@ function FeatureCopy({ title, body, maxWidth }: { title: string; body: string; m
 }
 
 function FeatureTile({
+  id,
   title,
   body,
   maxWidth,
@@ -146,6 +161,7 @@ function FeatureTile({
   className,
   children,
 }: {
+  id?: string;
   title: string;
   body: string;
   maxWidth: number;
@@ -154,7 +170,14 @@ function FeatureTile({
   children: React.ReactNode;
 }) {
   return (
-    <article className={cn("relative flex min-w-0 flex-col gap-5 overflow-hidden rounded-tile bg-tile pt-6 sm:gap-8 sm:pt-10", className)}>
+    <article
+      id={id}
+      className={cn(
+        "relative flex min-w-0 flex-col gap-5 overflow-hidden rounded-tile bg-tile pt-6 sm:gap-8 sm:pt-10",
+        id && "scroll-mt-14",
+        className,
+      )}
+    >
       <DotsBackdrop
         className="top-24 opacity-30"
         dotsClassName={
@@ -245,10 +268,7 @@ function ReviewCycles({ reduceMotion }: { reduceMotion: boolean }) {
       <div className={cn("absolute left-[1023px] top-[115px] opacity-45", stepTone("idle").frame)}>
         <div className={cn("flex h-[52px] w-44 items-center gap-2.5 rounded-xl pl-2 pr-3", stepTone("idle").card)}>
           <span className={cn("size-[34px] rounded-[9px]", stepTone("idle").icon)}>
-            <Svg size={16}>
-              <path d="M16.388 3L17.391 3.976C17.839 4.412 18.063 4.63 17.984 4.815C17.906 5 17.589 5 16.955 5H9.194C5.221 5 2 8.134 2 12C2 13.487 2.477 14.866 3.289 16" />
-              <path d="M7.612 21L6.609 20.024C6.161 19.588 5.937 19.37 6.016 19.185C6.094 19 6.411 19 7.045 19H14.806C18.779 19 22 15.866 22 12C22 10.513 21.523 9.134 20.71 8" />
-            </Svg>
+            <Icon icon={ArrowReloadHorizontalIcon} size={16} strokeWidth={1.8} />
           </span>
           <span className="flex flex-col">
             <span className="font-ui text-[13px] font-semibold leading-[17px] text-foreground">Rejected</span>
@@ -507,16 +527,6 @@ function SymbolLibrary({ reduceMotion }: { reduceMotion: boolean }) {
 
 /* ------------------------------ Version control ---------------------------- */
 
-const BRANCH_ICON = (
-  <>
-    <path d="M7 19H13C15.828 19 17.243 19 18.121 18.121C19 17.243 19 15.828 19 13V10M19 10C19.7 10 21.009 11.994 21.5 12.5M19 10C18.3 10 16.991 11.994 16.5 12.5" />
-    <path d="M5 7L5 17" />
-    <circle cx="5" cy="5" r="2" />
-    <circle cx="19" cy="5" r="2" />
-    <circle cx="5" cy="19" r="2" />
-  </>
-);
-
 function VersionTag({ children, style }: { children: React.ReactNode; style: React.CSSProperties }) {
   return (
     <span
@@ -547,9 +557,7 @@ function BranchLabel({
       className={cn("absolute flex h-[22px] origin-bottom-left items-center gap-[5px] rounded-sm px-2 font-ui text-[11px] font-medium leading-[14px] text-foreground", CARD)}
       style={style}
     >
-      <Svg size={11} strokeWidth={2} className={color}>
-        {BRANCH_ICON}
-      </Svg>
+      <Icon icon={GitBranchIcon} size={11} strokeWidth={2} className={cn("shrink-0", color)} />
       {children}
     </motion.span>
   );
@@ -669,18 +677,21 @@ function RevisionHistory({ reduceMotion }: { reduceMotion: boolean }) {
           animate={{ opacity: stage >= 4 ? 1 : 0 }}
           transition={{ duration: 0.3, delay: stage >= 4 ? 0.4 : 0 }}
         />
-        {stage >= 4 && (
-          <motion.circle
-            cx="681"
-            cy="102"
-            r="13"
-            className="fill-info"
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: [0, 0.14, 0], scale: [0.6, 1.2, 1.3] }}
-            transition={{ duration: 2.2, ease: "easeOut", repeat: Infinity, delay: 0.5 }}
-            style={{ transformOrigin: "681px 102px" }}
-          />
-        )}
+        {stage >= 4 &&
+          (reduceMotion ? (
+            <circle cx="681" cy="102" r="11" className="fill-info/15" />
+          ) : (
+            <motion.circle
+              cx="681"
+              cy="102"
+              r="13"
+              className="fill-info"
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: [0, 0.14, 0], scale: [0.6, 1.2, 1.3] }}
+              transition={{ duration: 2.2, ease: "easeOut", repeat: Infinity, delay: 0.5 }}
+              style={{ transformOrigin: "681px 102px" }}
+            />
+          ))}
         <circle cx="471" cy="262" r="10" strokeWidth="1.2" className="fill-card stroke-foreground/25 dark:fill-surface-2" />
         <g transform="translate(465 256) scale(.5)" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="7" cy="18" r="2" />
@@ -779,51 +790,12 @@ const LIBRARY_FILES: { name: string; kind: FileKind }[] = [
   { name: "UDI_list", kind: "csv" },
 ];
 
-const LIBRARY_NAV: { label: string; count?: number; icon: React.ReactNode }[] = [
-  {
-    label: "All files",
-    count: 48,
-    icon: (
-      <path d="M13.666 6.494H16C18.828 6.494 20.243 6.494 21.121 7.373C22 8.252 22 9.666 22 12.495V14.5C22 17.328 22 18.743 21.121 19.621C20.243 20.5 18.828 20.5 16 20.5H8C5.172 20.5 3.757 20.5 2.879 19.621C2 18.743 2 17.328 2 14.5V8.992C2 6.654 2 5.485 2.616 4.679C2.778 4.467 2.967 4.278 3.179 4.116C3.985 3.5 5.154 3.5 7.492 3.5C8.166 3.5 8.504 3.5 8.814 3.604C8.898 3.633 8.979 3.666 9.059 3.705C9.352 3.85 9.592 4.087 10.071 4.562L10.848 5.334C11.425 5.907 11.714 6.193 12.08 6.344C12.446 6.494 12.852 6.494 13.666 6.494Z" />
-    ),
-  },
-  {
-    label: "Artwork",
-    count: 12,
-    icon: (
-      <>
-        <circle cx="7.5" cy="7.5" r="1.5" />
-        <path d="M2.5 12C2.5 7.522 2.5 5.282 3.891 3.891C5.282 2.5 7.522 2.5 12 2.5C16.478 2.5 18.718 2.5 20.109 3.891C21.5 5.282 21.5 7.522 21.5 12C21.5 16.478 21.5 18.718 20.109 20.109C18.718 21.5 16.478 21.5 12 21.5C7.522 21.5 5.282 21.5 3.891 20.109C2.5 18.718 2.5 16.478 2.5 12Z" />
-        <path d="M5 21C9.372 15.775 14.274 8.884 21.497 13.542" />
-      </>
-    ),
-  },
-  {
-    label: "IFU",
-    count: 9,
-    icon: (
-      <>
-        <path d="M13 20.827V22H14.173C14.583 22 14.787 22 14.972 21.924C15.155 21.848 15.3 21.703 15.59 21.413L20.413 16.589C20.686 16.316 20.823 16.18 20.896 16.033C21.035 15.752 21.035 15.424 20.896 15.143C20.823 14.996 20.686 14.86 20.413 14.587C20.14 14.314 20.004 14.177 19.857 14.104C19.576 13.965 19.247 13.965 18.967 14.104C18.82 14.177 18.683 14.314 18.41 14.587L13.587 19.411C13.297 19.7 13.152 19.845 13.076 20.029C13 20.213 13 20.417 13 20.827Z" />
-        <path d="M19 11C19 11 19 9.431 18.848 9.063C18.695 8.696 18.407 8.406 17.828 7.828L13.092 3.092C12.593 2.593 12.344 2.344 12.034 2.196C11.97 2.165 11.904 2.138 11.837 2.114C11.514 2 11.161 2 10.456 2C7.211 2 5.588 2 4.489 2.886C4.267 3.065 4.065 3.267 3.886 3.489C3 4.588 3 6.211 3 9.456V14C3 17.771 3 19.657 4.172 20.828C5.235 21.892 6.886 21.99 10 21.999M12 2.5V3C12 5.828 12 7.243 12.879 8.121C13.757 9 15.172 9 18 9H18.5" />
-      </>
-    ),
-  },
-  {
-    label: "Specs",
-    count: 14,
-    icon: (
-      <>
-        <path d="M12.5 20.5H10.5C6.729 20.5 4.843 20.5 3.672 19.328C2.5 18.157 2.5 16.271 2.5 12.5V10.5C2.5 6.729 2.5 4.843 3.672 3.672C4.843 2.5 6.729 2.5 10.5 2.5H12.5C16.271 2.5 18.157 2.5 19.328 3.672C20.5 4.843 20.5 6.729 20.5 10.5V12.5" />
-        <path d="M3 8.5H20M3 14.5H12.5M8.5 3V20" />
-      </>
-    ),
-  },
-  {
-    label: "Bookmarked",
-    icon: (
-      <path d="M4.5 18.212V8.235C4.5 5.532 4.5 4.18 5.324 3.34C6.148 2.5 7.473 2.5 10.125 2.5H13.875C16.527 2.5 17.852 2.5 18.676 3.34C19.5 4.18 19.5 5.532 19.5 8.235V18.212C19.5 20.127 19.5 21.085 18.899 21.408C18.297 21.73 17.523 21.188 15.975 20.102L14.124 18.805C13.096 18.084 12.582 17.724 12 17.724C11.418 17.724 10.904 18.084 9.876 18.805L8.025 20.102C6.477 21.188 5.703 21.73 5.101 21.408C4.5 21.085 4.5 20.127 4.5 18.212Z" />
-    ),
-  },
+const LIBRARY_NAV: { label: string; count?: number; icon: IconProps["icon"] }[] = [
+  { label: "All files", count: 48, icon: Folder02Icon },
+  { label: "Artwork", count: 12, icon: Image01Icon },
+  { label: "IFU", count: 9, icon: FileEditIcon },
+  { label: "Specs", count: 14, icon: GridTableIcon },
+  { label: "Bookmarked", icon: Bookmark01Icon },
 ];
 
 function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
@@ -845,28 +817,16 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
             ))}
           </div>
           <div className="mx-0.5 flex gap-0.5 text-foreground/40">
-            <Svg size={16}>
-              <path d="M15 6C15 6 9 10.419 9 12C9 13.581 15 18 15 18" />
-            </Svg>
-            <Svg size={16}>
-              <path d="M9 6C9 6 15 10.419 15 12C15 13.581 9 18 9 18" />
-            </Svg>
+            <Icon icon={ArrowLeft01Icon} size={16} strokeWidth={1.8} />
+            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={1.8} />
           </div>
           <div className={cn("flex h-7 flex-1 items-center gap-2 rounded-sm px-2.5", CARD, "shadow-none")}>
-            <Svg size={13} className="text-foreground/50">
-              <circle cx="10" cy="10" r="7" />
-              <path d="M15 15L21 21" />
-            </Svg>
+            <Icon icon={Search01Icon} size={13} strokeWidth={1.8} className="shrink-0 text-foreground/50" />
             <span className="flex-1 font-ui text-[12px] leading-4 text-faint-foreground">Search source files</span>
             <span className="font-ui text-[10px] leading-3 text-faint-foreground">⌘K</span>
           </div>
           <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full text-foreground", CARD)}>
-            <Svg size={13} strokeWidth={1.8}>
-              <rect x="3" y="3" width="7.5" height="7.5" rx="2" />
-              <rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
-              <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" />
-              <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
-            </Svg>
+            <Icon icon={DashboardSquare01Icon} size={13} strokeWidth={1.8} />
           </span>
         </div>
         <div className={cn("flex h-[340px] overflow-hidden rounded-[14px]", CARD, "shadow-none")}>
@@ -880,9 +840,12 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
                   index === 0 && "bg-muted dark:bg-surface-3",
                 )}
               >
-                <Svg size={14} strokeWidth={1.6} className={index === 0 ? "text-foreground" : "text-foreground/60"}>
-                  {item.icon}
-                </Svg>
+                <Icon
+                  icon={item.icon}
+                  size={14}
+                  strokeWidth={1.6}
+                  className={cn("shrink-0", index === 0 ? "text-foreground" : "text-foreground/60")}
+                />
                 <span
                   className={cn(
                     "flex-1 font-ui text-[12px] font-medium leading-4",
@@ -973,40 +936,10 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
 
 /* ---------------------------------- Status --------------------------------- */
 
-const STATUS_NODES: { kicker: string; title: string; top: number; icon: React.ReactNode }[] = [
-  {
-    kicker: "DRAFT",
-    title: "Label being prepared",
-    top: 16,
-    icon: (
-      <>
-        <path d="M13.435 7L7.159 13.276M7.159 13.276L4.827 15.608C3.926 16.509 3.475 16.96 3.237 17.533C3 18.107 3 18.744 3 20.019V21H3.981C5.256 21 5.893 21 6.467 20.763C7.04 20.525 7.491 20.074 8.392 19.173L14.289 13.276M7.159 13.276H14.289M14.289 13.276L17 10.565" />
-        <path d="M19.209 8.389L20.82 10M19.209 8.389L20.07 7.527C20.363 7.234 20.509 7.088 20.611 6.945C21.13 6.217 21.13 5.24 20.611 4.511C20.509 4.368 20.363 4.222 20.07 3.929C19.778 3.637 19.632 3.491 19.489 3.389C18.761 2.87 17.783 2.87 17.055 3.389C16.912 3.491 16.766 3.637 16.473 3.929L15.611 4.791M19.209 8.389L15.611 4.791M14 3.18L15.611 4.791" />
-      </>
-    ),
-  },
-  {
-    kicker: "SUBMITTED",
-    title: "Sent to reviewers",
-    top: 128,
-    icon: (
-      <>
-        <path d="M21.048 3.053C18.87 0.707 2.486 6.453 2.5 8.551C2.515 10.93 8.898 11.662 10.667 12.158C11.731 12.457 12.016 12.762 12.261 13.878C13.372 18.93 13.93 21.444 15.201 21.5C17.228 21.589 23.173 5.342 21.048 3.053Z" />
-        <path d="M11.5 12.5L15 9" />
-      </>
-    ),
-  },
-  {
-    kicker: "IN REVIEW",
-    title: "Checked and approved",
-    top: 240,
-    icon: (
-      <>
-        <path d="M21.544 11.045C21.848 11.471 22 11.684 22 12C22 12.316 21.848 12.529 21.544 12.955C20.178 14.871 16.689 19 12 19C7.311 19 3.822 14.871 2.456 12.955C2.152 12.529 2 12.316 2 12C2 11.684 2.152 11.471 2.456 11.045C3.822 9.129 7.311 5 12 5C16.689 5 20.178 9.129 21.544 11.045Z" />
-        <path d="M15 12C15 10.343 13.657 9 12 9C10.343 9 9 10.343 9 12C9 13.657 10.343 15 12 15C13.657 15 15 13.657 15 12Z" />
-      </>
-    ),
-  },
+const STATUS_NODES: { kicker: string; title: string; top: number; icon: IconProps["icon"] }[] = [
+  { kicker: "DRAFT", title: "Label being prepared", top: 16, icon: PencilEdit02Icon },
+  { kicker: "SUBMITTED", title: "Sent to reviewers", top: 128, icon: SentIcon },
+  { kicker: "IN REVIEW", title: "Checked and approved", top: 240, icon: ViewIcon },
 ];
 
 const STATUS_HOLD = 4;
@@ -1025,7 +958,7 @@ function StatusCard({
   state: StepState;
   kicker: string;
   title: string;
-  icon: React.ReactNode;
+  icon: IconProps["icon"];
   className?: string;
   style?: React.CSSProperties;
   iconSlot?: React.ReactNode;
@@ -1035,11 +968,7 @@ function StatusCard({
     <div className={cn("absolute", tone.frame, className)} style={style}>
       <div className={cn("flex h-[58px] w-[262px] items-center gap-3 rounded-xl pl-[9px] pr-3.5", tone.card)}>
         <span className={cn("relative size-[38px] rounded-lg", tone.icon)}>
-          {iconSlot ?? (
-            <Svg size={17} strokeWidth={1.7}>
-              {icon}
-            </Svg>
-          )}
+          {iconSlot ?? <Icon icon={icon} size={17} strokeWidth={1.7} />}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className={cn("font-ui text-[10px] font-semibold leading-3 tracking-[0.08em]", tone.meta)}>{kicker}</span>
@@ -1049,14 +978,6 @@ function StatusCard({
     </div>
   );
 }
-
-const RELEASE_ICON = (
-  <>
-    <path d="M12 14.5V17.5M13 14.5C13 15.052 12.552 15.5 12 15.5C11.448 15.5 11 15.052 11 14.5C11 13.948 11.448 13.5 12 13.5C12.552 13.5 13 13.948 13 14.5Z" />
-    <path d="M16.5 9V6.5C16.5 4.015 14.485 2 12 2C9.515 2 7.5 4.015 7.5 6.5V9" />
-    <path d="M4.268 18.845C4.493 20.515 5.876 21.823 7.56 21.901C8.976 21.966 10.415 22 12 22C13.585 22 15.024 21.966 16.44 21.901C18.124 21.823 19.507 20.515 19.732 18.845C19.879 17.755 20 16.638 20 15.5C20 14.362 19.879 13.245 19.732 12.155C19.507 10.485 18.124 9.176 16.44 9.099C15.024 9.034 13.585 9 12 9C10.415 9 8.976 9.034 7.56 9.099C5.876 9.176 4.493 10.485 4.268 12.155C4.121 13.245 4 14.362 4 15.5C4 16.638 4.121 17.755 4.268 18.845Z" />
-  </>
-);
 
 const STATUS_LINKS = [
   [87.25, 124.75],
@@ -1094,13 +1015,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
         kicker="OBSOLETE"
         title="v4 retired, kept on file"
         className={cn("left-10 top-[380px] transition-opacity duration-500", branched ? "opacity-50" : "opacity-30")}
-        icon={
-          <>
-            <path d="M4.5 8H19.5C19.965 8 20.197 8 20.39 7.962C21.184 7.804 21.804 7.184 21.962 6.39C22 6.197 22 5.965 22 5.5C22 5.035 22 4.803 21.962 4.61C21.804 3.816 21.184 3.196 20.39 3.038C20.197 3 19.965 3 19.5 3H4.5C4.035 3 3.803 3 3.61 3.038C2.816 3.196 2.196 3.816 2.038 4.61C2 4.803 2 5.035 2 5.5C2 5.965 2 6.197 2.038 6.39C2.196 7.184 2.816 7.804 3.61 7.962C3.803 8 4.035 8 4.5 8Z" />
-            <path d="M14 12H10" />
-            <path d="M3.5 8H20.5L19.926 15.46C19.724 18.088 19.623 19.402 18.76 20.201C17.898 21 16.58 21 13.944 21H10.056C7.42 21 6.102 21 5.24 20.201C4.377 19.402 4.276 18.088 4.074 15.46L3.5 8Z" />
-          </>
-        }
+        icon={ArchiveIcon}
       />
 
       <StatusCard
@@ -1108,7 +1023,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
         kicker="RELEASED"
         title="v5 approved and locked"
         className="left-[342px] top-[380px]"
-        icon={RELEASE_ICON}
+        icon={SquareLock02Icon}
         iconSlot={
           <>
             <motion.svg
@@ -1132,9 +1047,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
               animate={releasing ? { opacity: 0, scale: 0.5, filter: "blur(4px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
               transition={{ type: "spring", duration: 0.35, bounce: 0, delay: locked ? 0.1 : releasing ? 0.2 : 0 }}
             >
-              <Svg size={17} strokeWidth={1.7}>
-                {RELEASE_ICON}
-              </Svg>
+              <Icon icon={SquareLock02Icon} size={17} strokeWidth={1.7} />
             </motion.span>
           </>
         }
@@ -1223,6 +1136,7 @@ export default function FeaturesSection() {
 
         <TileRow splitCenter centerClassName="grid grid-cols-1">
           <FeatureTile
+            id="approvals"
             title="Review cycles, on the record"
             body="Route every labeling change through review rounds until each approver approves. Comments, revisions and approvals stay on the change record."
             maxWidth={540}

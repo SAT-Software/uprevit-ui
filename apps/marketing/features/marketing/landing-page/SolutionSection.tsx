@@ -2,6 +2,16 @@
 
 import * as React from "react";
 import { MotionConfig, motion } from "motion/react";
+import type { IconSvgElement } from "@hugeicons/react";
+import {
+  Book01Icon,
+  Clock01Icon,
+  Folder02Icon,
+  GitCompareIcon,
+  GridTableIcon,
+  SecurityCheckIcon,
+} from "@hugeicons/core-free-icons";
+import { Icon } from "@uprevit/ui/components/common/Icon";
 import { BrandMark } from "@/components/BrandLogo";
 import { TileRow } from "@/components/TileGrid";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
@@ -12,78 +22,10 @@ import { SectionPoints, type SectionPoint } from "./SectionPoints";
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const IN_VIEW = { once: true, margin: "-80px" } as const;
 
-const ICON_PATHS = {
-  table: (
-    <>
-      <path d="M3.891 20.109C2.5 18.718 2.5 16.478 2.5 12C2.5 7.522 2.5 5.282 3.891 3.891C5.282 2.5 7.522 2.5 12 2.5C16.478 2.5 18.718 2.5 20.109 3.891C21.5 5.282 21.5 7.522 21.5 12C21.5 16.478 21.5 18.718 20.109 20.109C18.718 21.5 16.478 21.5 12 21.5C7.522 21.5 5.282 21.5 3.891 20.109Z" />
-      <path d="M2.5 9L21.5 9M16 21.5L16 2.5M8 21.5L8 2.5" />
-    </>
-  ),
-  book: (
-    <>
-      <path d="M15.5 7H8.5M12.499 11H8.499" />
-      <path d="M20 22H6C4.895 22 4 21.105 4 20M4 20C4 18.895 4.895 18 6 18H20V6C20 4.114 20 3.172 19.414 2.586C18.828 2 17.886 2 16 2H10C7.172 2 5.757 2 4.879 2.879C4 3.757 4 5.172 4 8V20Z" />
-      <path d="M19.5 18C19.5 18 18.5 18.763 18.5 20C18.5 21.237 19.5 22 19.5 22" />
-    </>
-  ),
-  folder: (
-    <path d="M11 4L16 4C18.828 4 20.243 4 21.121 4.879C21.762 5.519 21.936 6.444 21.983 7.994C22 8.571 22 9.233 22 10V14M22 14V15C22 17.828 22 19.243 21.121 20.121C20.243 21 18.828 21 16 21L8 21C5.172 21 3.757 21 2.879 20.121C2 19.243 2 17.828 2 15V9C2 6.172 2 4.757 2.879 3.879C3.757 3 5.172 3 8 3H8.308C9.134 3 9.548 3 9.891 3.194C10.234 3.387 10.448 3.741 10.875 4.448L12.143 6.546C12.57 7.254 12.784 7.607 13.127 7.801C13.47 7.994 13.884 7.994 14.71 7.994H16C18.828 7.994 20.243 7.994 21.121 8.873C22 9.752 22 11.168 22 14Z" />
-  ),
-  compare: (
-    <>
-      <path d="M19 17L19 11C19 8.172 19 6.757 18.121 5.879C17.243 5 15.828 5 13 5H10M10 5C10 4.3 11.994 2.992 12.5 2.5M10 5C10 5.7 11.994 7.008 12.5 7.5" />
-      <path d="M5 7.5L5 13.5C5 16.328 5 17.743 5.879 18.621C6.757 19.5 8.172 19.5 11 19.5H14M14 19.5C14 20.2 12.006 21.509 11.5 22M14 19.5C14 18.8 12.006 17.491 11.5 17" />
-      <circle cx="19" cy="19" r="2" />
-      <circle cx="5" cy="5" r="2" />
-    </>
-  ),
-  shield: (
-    <>
-      <path d="M18.709 3.495C16.817 2.554 14.501 2 12 2C9.499 2 7.184 2.554 5.291 3.495C4.363 3.957 3.899 4.188 3.45 4.914C3 5.64 3 6.342 3 7.748V11.237C3 16.921 7.542 20.08 10.173 21.434C10.907 21.811 11.274 22 12 22C12.726 22 13.093 21.811 13.827 21.434C16.458 20.08 21 16.921 21 11.237L21 7.748C21 6.342 21 5.64 20.55 4.914C20.101 4.188 19.637 3.957 18.709 3.495Z" />
-      <path d="M9 11.5C9 11.5 10.408 11.752 11 13.5C11 13.5 12.5 10.5 15 9.5" />
-    </>
-  ),
-  clock: (
-    <>
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 8V12L14 14" />
-    </>
-  ),
-};
-
-type IconName = keyof typeof ICON_PATHS;
-
-function LineIcon({
-  name,
-  size,
-  className = "text-foreground",
-}: {
-  name: IconName;
-  size: number;
-  className?: string;
-}) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`shrink-0 ${className}`}
-    >
-      {ICON_PATHS[name]}
-    </svg>
-  );
-}
-
 const NODES: {
   title: string;
   meta: string;
-  icon: IconName;
+  icon: IconSvgElement;
   left: number;
   top: number;
   connector: string;
@@ -92,7 +34,7 @@ const NODES: {
   {
     title: "Product data",
     meta: "1,248 fields",
-    icon: "table",
+    icon: GridTableIcon,
     left: 356,
     top: 98,
     connector: "M484 150 C544.0 150.0 512.5 220.2 561.6 254.6",
@@ -101,7 +43,7 @@ const NODES: {
   {
     title: "Glossary",
     meta: "Symbols & terms",
-    icon: "book",
+    icon: Book01Icon,
     left: 826,
     top: 98,
     connector: "M826 150 C766.0 150.0 797.5 220.2 748.4 254.6",
@@ -110,7 +52,7 @@ const NODES: {
   {
     title: "Source files",
     meta: "xlsx · docx · pdf",
-    icon: "folder",
+    icon: Folder02Icon,
     left: 266,
     top: 268,
     connector: "M394 320 L541 320",
@@ -119,7 +61,7 @@ const NODES: {
   {
     title: "Versions",
     meta: "v4 · 3 changes",
-    icon: "compare",
+    icon: GitCompareIcon,
     left: 916,
     top: 268,
     connector: "M916 320 L769 320",
@@ -128,7 +70,7 @@ const NODES: {
   {
     title: "Reviews",
     meta: "2 of 3 approved",
-    icon: "shield",
+    icon: SecurityCheckIcon,
     left: 356,
     top: 438,
     connector: "M484 490 C544.0 490.0 512.5 419.8 561.6 385.4",
@@ -137,7 +79,7 @@ const NODES: {
   {
     title: "Audit trail",
     meta: "Every edit logged",
-    icon: "clock",
+    icon: Clock01Icon,
     left: 826,
     top: 438,
     connector: "M826 490 C766.0 490.0 797.5 419.8 748.4 385.4",
@@ -358,10 +300,11 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
         >
           <span className="flex rounded-[10px] border border-separator bg-file-frame p-[2px]">
             <span className="flex size-[30px] items-center justify-center rounded-[8px] bg-card shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-surface-3">
-              <LineIcon
-                name={node.icon}
+              <Icon
+                icon={node.icon}
                 size={17}
-                className="text-muted-foreground transition-colors duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-foreground"
+                strokeWidth={1.8}
+                className="shrink-0 text-muted-foreground transition-colors duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-foreground"
               />
             </span>
           </span>
@@ -384,17 +327,17 @@ const POINTS: SectionPoint[] = [
   {
     title: "One record per product",
     body: "Specs, symbols, artwork and files sit together, versioned.",
-    icon: ICON_PATHS.table,
+    icon: GridTableIcon,
   },
   {
     title: "Changes compared for you",
     body: "Every edit is redlined against the last release.",
-    icon: ICON_PATHS.compare,
+    icon: GitCompareIcon,
   },
   {
     title: "Reviews in one place",
     body: "Each function approves, with names and times recorded.",
-    icon: ICON_PATHS.shield,
+    icon: SecurityCheckIcon,
   },
 ];
 
