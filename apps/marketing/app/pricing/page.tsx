@@ -1,447 +1,98 @@
-"use client";
-
-import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
-import FooterSection from "@/features/marketing/landing-page/FooterSection";
+import { TileGrid, TileSpacerRow } from "@/components/TileGrid";
 import MarketingHeader from "@/features/marketing/marketing-header";
-import { ScrollProvider } from "@/lib/scroll-context";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@uprevit/ui/components/ui/accordion";
-import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
-import { Button } from "@uprevit/ui/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@uprevit/ui/components/ui/card";
-import Link from "next/link";
-import {
-  ArrowRight01Icon,
-  CheckmarkCircle01Icon,
-  Coins01Icon,
-  HelpCircleIcon,
-} from "@hugeicons/core-free-icons";
-import { Icon } from "@uprevit/ui/components/common/Icon";
+import PricingHeroSection from "@/features/marketing/pricing/PricingHeroSection";
+import PricingPlansSection from "@/features/marketing/pricing/PricingPlansSection";
+import PricingUsageSection from "@/features/marketing/pricing/PricingUsageSection";
+import PricingAddOnsSection from "@/features/marketing/pricing/PricingAddOnsSection";
+import PricingRolesSection from "@/features/marketing/pricing/PricingRolesSection";
+import FAQSection, { type FAQItem } from "@/features/marketing/landing-page/FAQSection";
+import CTASection from "@/features/marketing/landing-page/CTASection";
+import FooterSection from "@/features/marketing/landing-page/FooterSection";
 
-const pricingFAQs = [
+const PRICING_FAQS: FAQItem[] = [
   {
+    id: "how-priced",
     question: "How is Uprevit priced?",
     answer:
-      "Uprevit pricing combines a one-time platform fee, seats, and optional usage add-ons for uploads and exports. SSO (SAML/OIDC) sign-in is coming soon — contact us to plan it. Larger rollouts or advanced requirements can be reviewed with our team.",
+      "Three parts: a fixed platform fee each billing cycle, seats for the people who use Uprevit, and usage add-ons for uploads and exports beyond what's included. Larger rollouts can be reviewed with our team.",
   },
   {
+    id: "what-counts-as-seat",
     question: "What counts as a seat?",
     answer:
-      "Admins and Users who create and edit products use a seat. Approvers, who review products and act on their assigned workflows, use a lower-priced Approver seat. Manager-only members, who need billing access but no Products or workflows, are free.",
+      "Admins and Users who create and edit products take a full seat. Approvers, who review products and act on their assigned workflows, use a half-price Approver seat. Billing-only Managers are free.",
   },
   {
+    id: "what-counts-as-export",
     question: "What counts as an export?",
     answer:
-      "An export is one completed PDF or XLSX product export or report export job. Uprevit includes a cycle-based export allowance, with additional usage priced per export.",
+      "An export is one completed PDF or XLSX product export or report export job. Every workspace includes 50 exports per month, with additional usage billed as a metered add-on.",
   },
   {
+    id: "how-uploads-calculated",
     question: "How are uploads calculated?",
     answer:
-      "Uploads are based on committed upload volume for the workspace. Uprevit includes a base upload allowance for the selected billing cycle, and any additional usage is priced from the metered MB total.",
+      "Uploads are based on source files, artwork and attachments committed to the workspace. Every workspace includes 10 GB per month, with additional volume billed as a metered add-on.",
   },
   {
+    id: "how-billing-works",
+    question: "How does billing work?",
+    answer:
+      "Plans are quoted for your team and billed monthly on one clear invoice covering your platform fee, seats and any metered usage or optional add-ons like SSO. Annual agreements are also available on request.",
+  },
+  {
+    id: "when-talk-to-us",
     question: "When should we talk to you?",
     answer:
-      "Talk to us when you expect a larger rollout, need advanced security or SSO planning, want custom workflows or integrations, or need a tailored agreement.",
-  },
-  {
-    question: "Do you offer annual billing?",
-    answer:
-      "Yes. Annual billing is the default buying path for most organizations and offers a lower effective monthly cost. Monthly billing is also available for teams that prefer more flexibility.",
+      "Talk to us when you are ready for a quote, expect a larger rollout, need SSO or security review planning, or want a tailored agreement.",
   },
 ];
 
-function PricingPageContent() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
-      <MarketingHeader />
-      <div className="relative w-full">
-        <DottedVerticalLines />
-        <main className="relative z-10 w-full pt-20 md:pt-24">
-          <div className="relative w-full mt-10 mb-20 pointer-events-auto">
-            <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-            <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-              <MarketingSectionBadge icon={Coins01Icon} label="Pricing" />
-              <div className="w-full flex flex-col md:flex-row items-start gap-4">
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium">
-                  Pricing built for regulated teams
-                </h1>
-              </div>
-              <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-                Transparent, scalable pricing designed for medical device
-                organizations. Start small, grow confidently, and keep
-                compliance airtight at every stage.
-              </p>
-            </div>
-
-            <div className="relative">
-              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto px-2 md:px-2 lg:px-0">
-                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)]">
-                  <div className="hidden lg:block min-w-0 self-stretch border-r border-dashed border-muted-foreground/10 relative overflow-hidden">
-                    <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
-                      {Array.from({ length: 44 }).map((_, index) => (
-                        <span
-                          key={`h-left-${index}`}
-                          className="w-full border-t border-dashed border-muted-foreground/10"
-                        />
-                      ))}
-                    </div>
-                    <div className="pointer-events-none absolute inset-0 flex justify-between">
-                      {Array.from({ length: 30 }).map((_, index) => (
-                        <span
-                          key={`v-left-${index}`}
-                          className="h-full w-px border-l border-dashed border-muted-foreground/10"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <Card className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl border-border bg-background shadow-bottom-lg">
-                    <CardHeader className="pb-4 md:pb-5">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base font-normal">
-                          Pricing
-                        </CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-start gap-2">
-                        <span className="text-3xl font-semibold">
-                          Custom pricing
-                        </span>
-                      </div>
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        One plan for regulated labeling teams: a one-time
-                        platform fee + seats + transparent upload and export usage. SSO
-                        (SAML/OIDC) is coming soon — contact us to plan it.
-                      </p>
-                      <div className="mt-5 grid gap-3">
-                        <Button asChild className="h-11 rounded-lg text-base">
-                          <Link href="/contact" data-attr="pricing-talk-to-us">
-                            Talk to Us
-                            <Icon
-                              icon={ArrowRight01Icon}
-                              size={16}
-                              strokeWidth={2}
-                              className="ml-2"
-                            />
-                          </Link>
-                        </Button>
-                        {/* <Button
-                          variant="secondary"
-                          className="h-11 rounded-lg text-base"
-                          onClick={() => scrollTo("pricing-calculator")}
-                        >
-                          View Pricing
-                          <PiArrowDownDuotone className="ml-2 h-4 w-4" />
-                        </Button> */}
-                      </div>
-                      <ul className="mt-5 space-y-2.5 border-t border-border/70 pt-5 text-sm">
-                        {[
-                          "Workspace platform included",
-                          "Audit-ready change history",
-                          "Regulatory templates and symbol library",
-                          "Product and report exports",
-                          "Transparent upload and export add-ons",
-                          "Annual billing with monthly option",
-                          "SSO (SAML/OIDC): coming soon — contact us",
-                        ].map((item) => (
-                          <li key={item} className="flex items-start gap-2">
-                            <Icon
-                              icon={CheckmarkCircle01Icon}
-                              size={20}
-                              strokeWidth={2}
-                              className="mt-0.5 text-foreground"
-                            />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                  <div className="hidden lg:block min-w-0 self-stretch border-l border-dashed border-muted-foreground/10 relative overflow-hidden">
-                    <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
-                      {Array.from({ length: 44 }).map((_, index) => (
-                        <span
-                          key={`h-right-${index}`}
-                          className="w-full border-t border-dashed border-muted-foreground/10"
-                        />
-                      ))}
-                    </div>
-                    <div className="pointer-events-none absolute inset-0 flex justify-between">
-                      {Array.from({ length: 30 }).map((_, index) => (
-                        <span
-                          key={`v-right-${index}`}
-                          className="h-full w-px border-l border-dashed border-muted-foreground/10"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* <div className="relative">
-              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div
-                ref={pricingCalculatorRef}
-                className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0"
-              >
-                <div className="flex flex-col items-center text-center mb-10">
-                  <Badge variant="outline" className={pricingBadgeClassName}>
-                    <PiCoinsDuotone className="mr-1 text-foreground/60" />
-                    <span className="font-medium">Pricing Calculator</span>
-                  </Badge>
-                  <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
-                    Calculate your cost
-                  </h2>
-                  <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
-                    Use our pricing calculator to estimate costs based on your
-                    team size, upload volume, and security requirements. Contact
-                    us for larger rollouts or tailored agreements.
-                  </p>
-                </div>
-                <PricingCalculatorCards />
-              </div>
-            </div> */}
-
-            {/* TODO - Later on check this section. See if we need to keep it or remove it, but fix the cluttered UI if we are keeping it */}
-            {/* <div className="relative">
-              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto mt-16 px-2 md:px-2 lg:px-0">
-                <div className="rounded-2xl border bg-background/80 p-6 md:p-8 lg:p-12">
-                  <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 items-stretch">
-                    <div className="flex flex-col">
-                      <Badge
-                        variant="outline"
-                        className="w-fit border-border/60 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
-                      >
-                        For medical device teams
-                      </Badge>
-                      <h2 className="mt-6 text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tightest">
-                        Optimized for medical device organizations
-                      </h2>
-                      <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-xl leading-tight">
-                        Use Uprevit to unify label data, approvals, and
-                        compliance evidence in one controlled workspace. Reduce
-                        regulatory risk while accelerating release cycles.
-                      </p>
-                      <div className="mt-4 h-px w-full bg-border/70" />
-                      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <PiShieldCheckDuotone className="h-4 w-4 text-primary" />
-                          ISO 15223-1
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PiFilesDuotone className="h-4 w-4 text-primary" />
-                          FDA UDI
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PiClockCountdownDuotone className="h-4 w-4 text-primary" />
-                          EU MDR
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PiShieldCheckDuotone className="h-4 w-4 text-primary" />
-                          ISO 13485
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PiFilesDuotone className="h-4 w-4 text-primary" />
-                          Health Canada
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PiClockCountdownDuotone className="h-4 w-4 text-primary" />
-                          UKCA
-                        </div>
-                      </div>
-                      <div className="mt-8 flex flex-wrap items-center gap-2">
-                        <Button asChild size="lg" variant="outline">
-                          <Link href="/resources/templates">
-                            <PiFilesDuotone />
-                            View Templates
-                          </Link>
-                        </Button>
-                        <Button asChild size="lg">
-                          <Link href="/resources">
-                            <PiStackDuotone />
-                            Explore Resources
-                          </Link>
-                        </Button>
-                      </div>
-                      <p className="mt-3 text-xs text-muted-foreground">
-                        Built for FDA UDI, EU MDR, and global labeling rollouts.
-                      </p>
-                    </div>
-
-                    <div className="relative">
-                      <div className="h-full rounded-3xl border bg-muted/20 p-2">
-                        <div className="rounded-2xl border bg-background p-5 md:p-6 lg:p-8 shadow-sm">
-                          <div className="flex items-center justify-between">
-                            <div className="text-base font-semibold">
-                              Regulatory Workspaces
-                            </div>
-                            <Badge variant="secondary" className="text-[11px]">
-                              Live
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Assemble label evidence, approvals, and audit trails
-                            in one workspace.
-                          </p>
-                          <div className="mt-5 space-y-3">
-                            {[
-                              {
-                                title: "UDI Label Pack",
-                                subtitle: "EU MDR · FDA UDI",
-                                status: "Approved",
-                                icon: PiFilesDuotone,
-                                tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
-                              },
-                              {
-                                title: "Symbols Library",
-                                subtitle: "ISO 15223-1",
-                                status: "Active",
-                                icon: PiShieldCheckDuotone,
-                                tone: "border-border/60 bg-background text-muted-foreground",
-                              },
-                              {
-                                title: "Change Review",
-                                subtitle: "Audit trail · QMS",
-                                status: "In Review",
-                                icon: PiClockCountdownDuotone,
-                                tone: "border-amber-200 bg-amber-50 text-amber-700",
-                              },
-                            ].map((item) => (
-                              <div
-                                key={item.title}
-                                className="flex items-center justify-between rounded-xl border bg-muted/30 px-3 py-2"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                                    <item.icon className="h-4 w-4 text-primary" />
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-medium">
-                                      {item.title}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {item.subtitle}
-                                    </p>
-                                  </div>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[11px] ${item.tone}`}
-                                >
-                                  {item.status}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <p className="ml-4 mt-2 text-sm text-muted-foreground">
-                          Incorporate Uprevit in your QMS for audit-ready
-                          labeling documentation and traceability.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> */}
-
-            <div className="relative">
-              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div
-                id="faq"
-                className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0"
-              >
-                <div className="flex flex-col items-center text-center mb-10">
-                  <MarketingSectionBadge
-                    icon={HelpCircleIcon}
-                    label="FAQ"
-                    className="mb-6"
-                  />
-                  <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium">
-                    Pricing questions, answered
-                  </h2>
-                  <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
-                    Clear, direct answers for regulated teams evaluating Uprevit
-                    pricing.
-                  </p>
-                </div>
-                <div className="max-w-3xl mx-auto">
-                  <Accordion type="single" collapsible defaultValue="item-0">
-                    {pricingFAQs.map((faq, index) => (
-                      <AccordionItem key={faq.question} value={`item-${index}`}>
-                        <AccordionTrigger>{faq.question}</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground leading-relaxed">
-                          {faq.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-              <div className="max-w-6xl mx-auto mt-20 px-2 md:px-2 lg:px-0">
-                <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
-                  <div className="relative overflow-hidden rounded-xl border border-border bg-foreground dark:bg-background dark:text-foreground text-background shadow-none">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_60%)]" />
-                    <div className="relative p-6 md:p-8 lg:p-12 flex flex-col items-start justify-center gap-4 min-h-80">
-                      <div className="max-w-2xl">
-                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-semibold">
-                          Align every label with global compliance in weeks, not
-                          months
-                        </h2>
-                        <p className="mt-3 text-base md:text-lg text-background/70 dark:text-foreground/70 leading-relaxed">
-                          Contact us at{" "}
-                          <Link
-                            href="mailto:contact@uprevit.com"
-                            className="font-medium text-background dark:text-foreground underline underline-offset-4 hover:opacity-80"
-                          >
-                            contact@uprevit.com
-                          </Link>{" "}
-                          to book a demo and see how Uprevit compresses labeling
-                          timelines while keeping regulatory confidence high
-                          across departments and geographies.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-        <div className="relative z-35 w-full">
-          <FooterSection />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function PricingPage() {
   return (
-    <ScrollProvider>
-      <PricingPageContent />
-    </ScrollProvider>
+    <TileGrid>
+      <MarketingHeader inTileGrid />
+      <TileSpacerRow />
+      <main className="contents">
+        <PricingHeroSection />
+        <PricingPlansSection />
+        <TileSpacerRow />
+        <PricingUsageSection />
+        <TileSpacerRow />
+        <PricingAddOnsSection />
+        <TileSpacerRow />
+        <PricingRolesSection />
+        <TileSpacerRow />
+        <FAQSection
+          title="Frequently asked"
+          mutedTitle="questions."
+          description="What teams usually ask about seats, usage and billing before they sign."
+          faqs={PRICING_FAQS}
+          contactTitle="Still have questions?"
+          contactBody="Talk to our team about seats, usage and the right setup for your rollout."
+          contactCtaLabel="Contact us"
+          contactCtaHref="/contact?topic=pricing"
+          contactCtaAttr="pricing-faq-contact-us"
+          showCtaArrow={false}
+        />
+        <TileSpacerRow />
+        <CTASection
+          title="Start with one workspace."
+          mutedTitle="Grow seat by seat."
+          description="Walk through pricing for your team with us, and see your labels in Uprevit on the same call."
+          primaryCta={{
+            label: "Book a demo",
+            href: "/contact?topic=demo",
+            dataAttr: "pricing-cta-book-demo",
+          }}
+          secondaryCta={{
+            label: "Contact us",
+            href: "/contact",
+            dataAttr: "pricing-cta-contact-us",
+          }}
+        />
+      </main>
+      <FooterSection inTileGrid />
+    </TileGrid>
   );
 }

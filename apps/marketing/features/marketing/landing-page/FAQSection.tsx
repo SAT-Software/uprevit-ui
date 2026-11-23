@@ -17,7 +17,13 @@ import { SectionHeader } from "./SectionHeader";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-const FAQS: { id: string; question: string; answer: string }[] = [
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+const DEFAULT_FAQS: FAQItem[] = [
   {
     id: "qms",
     question: "Does Uprevit replace our QMS or document control system?",
@@ -66,7 +72,7 @@ const PULSE_OFFSETS = ["0s", "-1.2s", "-2.4s"];
 
 function ContactEmblem({ reduceMotion }: { reduceMotion: boolean }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-80px" });
+  const inView = useInView(ref, { margin: "-40px" });
 
   return (
     <div
@@ -115,7 +121,31 @@ function ContactEmblem({ reduceMotion }: { reduceMotion: boolean }) {
   );
 }
 
-export default function FAQSection() {
+export interface FAQSectionProps {
+  title?: React.ReactNode;
+  mutedTitle?: React.ReactNode;
+  description?: React.ReactNode;
+  faqs?: FAQItem[];
+  contactTitle?: string;
+  contactBody?: string;
+  contactCtaLabel?: string;
+  contactCtaHref?: string;
+  contactCtaAttr?: string;
+  showCtaArrow?: boolean;
+}
+
+export default function FAQSection({
+  title = "Frequently asked",
+  mutedTitle = "questions.",
+  description = "What regulatory, quality and IT teams usually ask before moving their label documentation into Uprevit.",
+  faqs = DEFAULT_FAQS,
+  contactTitle = "Still have questions?",
+  contactBody = "Talk to our team about your products, markets and review process.",
+  contactCtaLabel = "Contact us",
+  contactCtaHref = "/contact",
+  contactCtaAttr = "faq-contact-us",
+  showCtaArrow = true,
+}: FAQSectionProps) {
   const reduceMotion = usePrefersReducedMotion();
 
   return (
@@ -124,11 +154,10 @@ export default function FAQSection() {
         <SectionHeader
           id="faq-heading"
           anchorId="faq"
-          title="Frequently asked"
-          mutedTitle="questions."
+          title={title}
+          mutedTitle={mutedTitle}
         >
-          What regulatory, quality and IT teams usually ask before moving their
-          label documentation into Uprevit.
+          {description}
         </SectionHeader>
 
         <TileRow
@@ -138,11 +167,10 @@ export default function FAQSection() {
           <div className="order-2 flex min-w-0 flex-row items-center justify-between gap-4 rounded-tile bg-tile p-5 sm:px-8 sm:py-6 lg:order-1 lg:flex-col lg:items-stretch lg:justify-between lg:gap-10 lg:p-10">
             <div className="flex flex-col gap-1 lg:gap-1.5">
               <h3 className="font-ui text-[14px] font-medium leading-5 text-foreground lg:text-[16px] lg:leading-[22px]">
-                Still have questions?
+                {contactTitle}
               </h3>
               <p className="max-w-[320px] font-ui text-[13px] leading-[19px] text-muted-foreground lg:text-[14px] lg:leading-[22px]">
-                Talk to our team about your products, markets and review
-                process.
+                {contactBody}
               </p>
             </div>
 
@@ -152,17 +180,19 @@ export default function FAQSection() {
 
             <div className="flex shrink-0 items-center gap-2">
               <Link
-                href="/contact"
-                data-attr="faq-contact-us"
+                href={contactCtaHref}
+                data-attr={contactCtaAttr}
                 className="group/cta inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-card px-3.5 font-ui text-[14px] font-medium leading-[18px] text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)] outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:border-stroke-strong hover:bg-subtle focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] lg:h-10 lg:rounded-sm lg:border-primary-700 lg:bg-primary lg:bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] lg:px-4 lg:text-primary-foreground lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] lg:hover:border-primary-700 lg:hover:bg-[#8A33FF] lg:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] lg:active:bg-primary-700 dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3 dark:lg:border-primary-700 dark:lg:bg-primary dark:lg:hover:bg-primary-hover"
               >
-                <span>Contact us</span>
-                <Icon
-                  icon={ArrowRight02Icon}
-                  size={14}
-                  strokeWidth={1.8}
-                  className="hidden transition-transform duration-150 ease-out lg:inline-block [@media(hover:hover)_and_(pointer:fine)]:group-hover/cta:translate-x-0.5"
-                />
+                <span>{contactCtaLabel}</span>
+                {showCtaArrow && (
+                  <Icon
+                    icon={ArrowRight02Icon}
+                    size={14}
+                    strokeWidth={1.8}
+                    className="hidden transition-transform duration-150 ease-out lg:inline-block [@media(hover:hover)_and_(pointer:fine)]:group-hover/cta:translate-x-0.5"
+                  />
+                )}
               </Link>
             </div>
           </div>
@@ -170,17 +200,17 @@ export default function FAQSection() {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.45, ease: EASE_OUT }}
             className="order-1 flex min-w-0 flex-col rounded-tile bg-tile px-5 py-2 sm:px-8 sm:py-5 lg:order-2 lg:px-10 lg:py-6"
           >
             <Accordion
               type="single"
               collapsible
-              defaultValue={FAQS[0].id}
+              defaultValue={faqs[0]?.id}
               className="w-full"
             >
-              {FAQS.map((faq) => (
+              {faqs.map((faq) => (
                 <AccordionItem
                   key={faq.id}
                   value={faq.id}

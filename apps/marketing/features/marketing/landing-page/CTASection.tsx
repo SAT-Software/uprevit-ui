@@ -590,7 +590,37 @@ function WorkspacePreviewCard({
   );
 }
 
-export default function CTASection() {
+export interface CTAButtonSpec {
+  label: string;
+  href: string;
+  dataAttr?: string;
+}
+
+export interface CTASectionProps {
+  title?: React.ReactNode;
+  mutedTitle?: React.ReactNode;
+  description?: React.ReactNode;
+  primaryCta?: CTAButtonSpec;
+  secondaryCta?: CTAButtonSpec;
+  onPrimaryClick?: () => void;
+}
+
+export default function CTASection({
+  title = "Release your next label",
+  mutedTitle = "with full traceability.",
+  description = "See your product data, reviews and redlines in one place, in a demo built around your own products.",
+  primaryCta = {
+    label: "Book a demo",
+    href: "/contact",
+    dataAttr: "cta-book-demo",
+  },
+  secondaryCta = {
+    label: "Contact us",
+    href: "/contact",
+    dataAttr: "cta-contact-us",
+  },
+  onPrimaryClick,
+}: CTASectionProps) {
   return (
     <MotionConfig reducedMotion="user">
       <TileRow
@@ -644,7 +674,7 @@ export default function CTASection() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, margin: "-40px" }}
           transition={{ duration: 0.45, ease: EASE_OUT }}
           className="relative z-10 flex h-full max-w-[640px] flex-col justify-center gap-6 px-6 pb-[208px] pt-11 sm:gap-7 sm:px-10 md:py-12 lg:py-0 lg:pl-[72px] lg:pr-0"
         >
@@ -652,32 +682,41 @@ export default function CTASection() {
             id="cta-heading"
             className="font-sans text-[28px] font-medium leading-[32px] tracking-[-0.04em] text-white sm:text-[36px] sm:leading-[1.15] sm:tracking-[-0.035em] lg:text-[40px] lg:leading-[46px]"
           >
-            Release your next label
-            <span className="sm:hidden"> </span>
-            <br className="hidden sm:inline" />
-            <span className="text-white/65">with full traceability.</span>
+            {title}
+            <br />
+            <span className="text-white/65">{mutedTitle}</span>
           </h2>
 
           <p className="max-w-[460px] font-ui text-[14px] leading-[21px] text-white/80 sm:text-[16px] sm:leading-6">
-            See your product data, reviews and redlines in one place, in a demo
-            built around your own products.
+            {description}
           </p>
 
           <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 sm:pt-0">
-            <Link
-              href="/contact"
-              data-attr="cta-book-demo"
-              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm dark:hover:bg-primary-hover"
-            >
-              Book a demo
-            </Link>
+            {onPrimaryClick ? (
+              <button
+                type="button"
+                onClick={onPrimaryClick}
+                data-attr={primaryCta.dataAttr}
+                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm dark:hover:bg-primary-hover"
+              >
+                {primaryCta.label}
+              </button>
+            ) : (
+              <Link
+                href={primaryCta.href}
+                data-attr={primaryCta.dataAttr}
+                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm dark:hover:bg-primary-hover"
+              >
+                {primaryCta.label}
+              </Link>
+            )}
 
             <Link
-              href="/contact"
-              data-attr="cta-contact-us"
+              href={secondaryCta.href}
+              data-attr={secondaryCta.dataAttr}
               className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-[#17171714] bg-white px-4 font-ui text-[14px] font-medium leading-[18px] text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#F5F5F5] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] sm:h-10 sm:w-auto sm:rounded-sm"
             >
-              Contact us
+              {secondaryCta.label}
             </Link>
           </div>
         </motion.div>
