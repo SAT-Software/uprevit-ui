@@ -77,7 +77,7 @@ function GovTile({
   return (
     <article
       className={cn(
-        "relative flex min-w-0 flex-col gap-7 overflow-hidden rounded-tile bg-tile pt-10",
+        "relative flex min-w-0 flex-col gap-5 overflow-hidden rounded-tile bg-tile pt-6 sm:gap-7 sm:pt-10",
         className,
       )}
     >
@@ -85,7 +85,7 @@ function GovTile({
         className="top-24 opacity-30"
         dotsClassName="[mask-image:radial-gradient(ellipse_76%_72%_at_50%_50%,transparent_58%,#000_78%,transparent_96%)]"
       />
-      <div className="relative flex flex-col gap-1.5 px-6 sm:px-10">
+      <div className="relative flex flex-col gap-1.5 px-5 sm:px-8 lg:px-10">
         <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">
           {title}
         </h3>
@@ -415,6 +415,9 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
       ref={ref}
       width={873}
       height={340}
+      minScale={0.68}
+      panX={600}
+      panBelow={640}
       className="[mask-image:linear-gradient(#000_85%,transparent_100%)]"
     >
       <div className="relative ml-[30px] h-[340px] w-[873px]">
@@ -651,6 +654,9 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
       ref={ref}
       width={873}
       height={340}
+      minScale={0.86}
+      panX={436}
+      panBelow={640}
       className="[mask-image:linear-gradient(#000_85%,transparent_100%)]"
     >
       {[72, 277].map((top) => (
@@ -1099,9 +1105,10 @@ export default function GovernanceSection() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section id="workspace" aria-labelledby="governance-heading" className="contents">
+      <section aria-labelledby="governance-heading" className="contents">
         <SectionHeader
           id="governance-heading"
+          anchorId="workspace"
           title="Access control and audit trail,"
           mutedTitle="built in."
         >

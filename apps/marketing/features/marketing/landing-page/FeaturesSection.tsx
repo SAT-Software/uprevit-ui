@@ -129,7 +129,7 @@ function GuideLine({
 
 function FeatureCopy({ title, body, maxWidth }: { title: string; body: string; maxWidth: number }) {
   return (
-    <div className="flex flex-col gap-1.5 px-6 sm:px-10">
+    <div className="flex flex-col gap-1.5 px-5 sm:px-8 lg:px-10">
       <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">{title}</h3>
       <p className="font-ui text-[14px] leading-[22px] text-muted-foreground" style={{ maxWidth }}>
         {body}
@@ -154,7 +154,7 @@ function FeatureTile({
   children: React.ReactNode;
 }) {
   return (
-    <article className={cn("relative flex min-w-0 flex-col gap-8 overflow-hidden rounded-tile bg-tile pt-10", className)}>
+    <article className={cn("relative flex min-w-0 flex-col gap-5 overflow-hidden rounded-tile bg-tile pt-6 sm:gap-8 sm:pt-10", className)}>
       <DotsBackdrop
         className="top-24 opacity-30"
         dotsClassName={
@@ -185,6 +185,8 @@ const REVIEW_LINKS = [
 ];
 const BRANCH_YES = "M956.25 190C989 190 989 234 1019.75 234";
 
+const REVIEW_PAN_X = [193, 415, 637, 859, 1020];
+
 function ReviewCycles({ reduceMotion }: { reduceMotion: boolean }) {
   const [ref, tick] = useTicker(1400, !reduceMotion);
   const cycle = REVIEW_NODES.length + 1 + REVIEW_HOLD;
@@ -192,7 +194,15 @@ function ReviewCycles({ reduceMotion }: { reduceMotion: boolean }) {
   const approved = step >= REVIEW_NODES.length;
 
   return (
-    <ScaledCanvas ref={ref} width={1310} height={380} className="[mask-image:linear-gradient(#000_82%,transparent_100%)]">
+    <ScaledCanvas
+      ref={ref}
+      width={1310}
+      height={380}
+      minScale={0.68}
+      panX={REVIEW_PAN_X[step]}
+      panBelow={890}
+      className="[mask-image:linear-gradient(#000_82%,transparent_100%)]"
+    >
       <div
         aria-hidden="true"
         className="absolute left-[630px] top-[-40px] size-[460px] rounded-full bg-[radial-gradient(circle,rgba(23,23,23,0.11)_0%,rgba(23,23,23,0.04)_38%,transparent_66%)] dark:bg-[radial-gradient(circle,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.025)_38%,transparent_66%)]"
@@ -564,12 +574,23 @@ const HISTORY_DOTS: [number, number, string, number][] = [
   [751, 262, "fill-foreground", 4],
 ];
 
+const HISTORY_PAN_X = [240, 240, 360, 560, 620];
+
 function RevisionHistory({ reduceMotion }: { reduceMotion: boolean }) {
   const [ref, tick] = useTicker(1300, !reduceMotion);
   const stage = reduceMotion ? 4 : tick % HISTORY_CYCLE;
+  const panIndex = Math.min(stage, HISTORY_PAN_X.length - 1);
 
   return (
-    <ScaledCanvas ref={ref} width={873} height={360} className="[mask-image:linear-gradient(#000_82%,transparent_100%)]">
+    <ScaledCanvas
+      ref={ref}
+      width={873}
+      height={360}
+      minScale={0.6}
+      panX={HISTORY_PAN_X[panIndex]}
+      panBelow={640}
+      className="[mask-image:linear-gradient(#000_82%,transparent_100%)]"
+    >
       {[121, 191, 261, 331, 401, 471, 541, 611, 681, 751].map((x) => (
         <GuideLine key={x} orientation="v" style={{ left: x, top: 30, height: 300 }} className="border-foreground/[0.07]" />
       ))}
@@ -811,7 +832,7 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
   const selected = hovered ?? (1 + tick) % LIBRARY_FILES.length;
 
   return (
-    <ScaledCanvas ref={ref} width={654} height={420}>
+    <ScaledCanvas ref={ref} width={654} height={420} minScale={0.62} panX={327} panBelow={640}>
       <GuideLine orientation="h" style={{ left: 0, top: 27, width: 654 }} className="border-border" />
       {[57, 597].map((x) => (
         <GuideLine key={x} orientation="v" style={{ left: x, top: 0, height: 380 }} className="border-border" />
@@ -1052,7 +1073,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
   const releasing = branched && !locked;
 
   return (
-    <ScaledCanvas ref={ref} width={654} height={480}>
+    <ScaledCanvas ref={ref} width={654} height={480} minScale={0.6} panX={327} panBelow={640}>
       <span aria-hidden="true" className="absolute left-[207px] top-[50px] size-60 rounded-full border border-dashed border-stroke-primary" />
       <span aria-hidden="true" className="absolute left-[132px] top-[-25px] size-[390px] rounded-full border border-dashed border-foreground/5" />
 
@@ -1193,8 +1214,8 @@ export default function FeaturesSection() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section id="features" aria-labelledby="features-heading" className="contents">
-        <SectionHeader id="features-heading" title="Everything around the label," mutedTitle="handled.">
+      <section aria-labelledby="features-heading" className="contents">
+        <SectionHeader id="features-heading" anchorId="features" title="Everything around the label," mutedTitle="handled.">
           Review cycles, revision history, source files, ISO symbols and label
           status are managed for every product, so your team stays audit-ready
           without chasing documents.

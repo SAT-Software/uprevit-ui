@@ -849,7 +849,7 @@ function LiveDiscussionCard({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       className={cn(
-        "hero-enter-float pointer-events-auto absolute left-8 top-[236px] z-30 hidden h-[460px] w-[262px] flex-col overflow-hidden rounded-[14px] bg-card shadow-[0_0_0_1px_rgba(23,23,23,0.1),0_0_0_6px_rgba(255,255,255,0.4),0_0_0_7px_rgba(255,255,255,0.6),0_0_28px_10px_rgba(255,255,255,0.35),0_1px_2px_rgba(0,0,0,0.05),0_12px_24px_-8px_rgba(27,16,58,0.18),0_40px_80px_-24px_rgba(27,16,58,0.35)] transition-shadow duration-200 lg:left-[44px] lg:flex xl:left-[76px] xl:w-[276px] dark:bg-surface-2 dark:shadow-[0_0_0_1px_rgba(237,237,237,0.1),0_0_0_6px_rgba(20,20,20,0.4),0_0_0_7px_rgba(20,20,20,0.6),0_0_28px_10px_rgba(20,20,20,0.35),0_1px_2px_rgba(0,0,0,0.2),0_12px_24px_-8px_rgba(0,0,0,0.45),0_40px_80px_-24px_rgba(0,0,0,0.65)]",
+        "hero-enter-float pointer-events-auto absolute right-3 top-4 z-30 flex h-[380px] w-[256px] flex-col overflow-hidden rounded-[14px] bg-card shadow-[0_0_0_1px_rgba(23,23,23,0.1),0_0_0_5px_rgba(255,255,255,0.4),0_0_0_6px_rgba(255,255,255,0.6),0_0_28px_10px_rgba(255,255,255,0.35),0_1px_2px_rgba(0,0,0,0.05),0_12px_24px_-8px_rgba(27,16,58,0.18),0_40px_80px_-24px_rgba(27,16,58,0.35)] transition-shadow duration-200 sm:hidden lg:left-[44px] lg:right-auto lg:top-[236px] lg:flex lg:h-[460px] lg:w-[262px] xl:left-[76px] xl:w-[276px] dark:bg-surface-2 dark:shadow-[0_0_0_1px_rgba(237,237,237,0.1),0_0_0_5px_rgba(20,20,20,0.4),0_0_0_6px_rgba(20,20,20,0.6),0_0_28px_10px_rgba(20,20,20,0.35),0_1px_2px_rgba(0,0,0,0.2),0_12px_24px_-8px_rgba(0,0,0,0.45),0_40px_80px_-24px_rgba(0,0,0,0.65)]",
         highlighted &&
           "ring-2 ring-primary/50 ring-offset-2 ring-offset-transparent",
       )}
@@ -1021,7 +1021,7 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
 
   return (
     <div className="relative w-full">
-      <div className="relative h-[540px] w-full overflow-hidden rounded-tile sm:h-[620px] lg:h-[680px]">
+      <div className="relative h-[412px] w-full overflow-hidden rounded-tile sm:h-[540px] md:h-[620px] lg:h-[680px]">
         <BrandBlindsBackdrop anchorY={0.12} />
 
         <div
@@ -1034,9 +1034,9 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
             } as React.CSSProperties
           }
         >
-          <div className="absolute inset-x-3 top-6 h-[680px] overflow-hidden rounded-2xl bg-background shadow-[0_0_0_1px_rgba(255,255,255,0.4),0_0_0_6px_rgba(255,255,255,0.16),0_30px_80px_-20px_rgba(11,9,41,0.42),0_12px_24px_-12px_rgba(11,9,41,0.26)] sm:inset-x-6 sm:top-10 lg:left-[56px] lg:right-[56px] lg:top-[56px] lg:h-[780px] dark:bg-surface-0 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_0_0_6px_rgba(20,20,20,0.28),0_30px_80px_-20px_rgba(0,0,0,0.68),0_12px_24px_-12px_rgba(0,0,0,0.48)]">
+          <div className="absolute left-3 top-7 h-[640px] w-[720px] overflow-hidden rounded-2xl bg-background shadow-[0_0_0_1px_rgba(255,255,255,0.4),0_0_0_6px_rgba(255,255,255,0.16),0_30px_80px_-20px_rgba(11,9,41,0.42),0_12px_24px_-12px_rgba(11,9,41,0.26)] sm:inset-x-6 sm:top-10 sm:h-[680px] sm:w-auto lg:left-[56px] lg:right-[56px] lg:top-[56px] lg:h-[780px] dark:bg-surface-0 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_0_0_6px_rgba(20,20,20,0.28),0_30px_80px_-20px_rgba(0,0,0,0.68),0_12px_24px_-12px_rgba(0,0,0,0.48)]">
             <div className="flex h-full w-full">
-              <aside className="hidden w-[204px] shrink-0 flex-col gap-1 border-r border-border bg-muted p-2.5 lg:flex xl:w-[216px] dark:border-edge-1 dark:bg-surface-1">
+              <aside className="flex w-[160px] shrink-0 flex-col gap-1 border-r border-border bg-muted p-2.5 sm:hidden lg:flex lg:w-[204px] xl:w-[216px] dark:border-edge-1 dark:bg-surface-1">
                 <div className="flex h-10 shrink-0 items-center gap-2 rounded-lg px-1.5 transition-colors duration-150 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-foreground/[0.04]">
                   <span
                     className="inline-flex size-6 shrink-0 items-center justify-center rounded-md border pt-px"

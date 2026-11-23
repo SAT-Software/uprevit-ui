@@ -51,10 +51,10 @@ export default function StandardsSection() {
   return (
     <MotionConfig reducedMotion="user">
     <section aria-labelledby="standards-heading" className="contents">
-      <TileRow centerClassName="flex items-center justify-center px-6 py-5 sm:px-12">
+      <TileRow centerClassName="flex items-center justify-center px-6 py-[18px] sm:px-12 sm:py-5">
         <h2
           id="standards-heading"
-          className="text-center font-ui text-[14px] font-normal leading-5 text-icon"
+          className="max-w-[260px] text-center font-ui text-[14px] font-normal leading-5 text-icon sm:max-w-none"
         >
           Built around the standards your labels answer to
         </h2>
@@ -75,20 +75,27 @@ export default function StandardsSection() {
               ease: [0.23, 1, 0.32, 1],
               delay: index * 0.06,
             }}
-            className="group flex flex-col gap-5 rounded-tile bg-tile px-8 pb-9 pt-8"
+            className={`group flex flex-row items-center gap-4 rounded-tile bg-tile px-5 py-5 sm:flex-col sm:items-start sm:gap-5 sm:px-7 sm:py-7 lg:px-8 lg:pb-9 lg:pt-8 ${
+              index === STANDARDS.length - 1 ? "sm:col-span-2 lg:col-span-1" : ""
+            }`}
           >
-            <div className="flex h-14 shrink-0 items-center">
+            <div className="flex h-12 w-[88px] shrink-0 items-center justify-center sm:h-14 sm:w-auto sm:justify-start">
               <Image
                 src={standard.logo}
                 alt={standard.alt}
                 width={standard.width}
                 height={standard.height}
                 unoptimized
-                style={{ width: standard.width, height: standard.height }}
-                className="opacity-[0.72] [filter:grayscale(1)_contrast(1.6)] transition-[filter,opacity] duration-200 ease-out dark:[filter:grayscale(1)_contrast(1.6)_invert(1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-hover:[filter:grayscale(1)_contrast(12)] dark:[@media(hover:hover)_and_(pointer:fine)]:group-hover:[filter:grayscale(1)_contrast(12)_invert(1)]"
+                style={
+                  {
+                    "--logo-w": `${standard.width}px`,
+                    "--logo-h": `${standard.height}px`,
+                  } as React.CSSProperties
+                }
+                className="h-auto max-h-9 w-auto max-w-full object-contain opacity-[0.72] [filter:grayscale(1)_contrast(1.6)] transition-[filter,opacity] duration-200 ease-out sm:h-[var(--logo-h)] sm:max-h-none sm:w-[var(--logo-w)] sm:max-w-none dark:[filter:grayscale(1)_contrast(1.6)_invert(1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-hover:[filter:grayscale(1)_contrast(12)] dark:[@media(hover:hover)_and_(pointer:fine)]:group-hover:[filter:grayscale(1)_contrast(12)_invert(1)]"
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <h3 className="font-ui text-[14px] font-medium leading-[18px] text-foreground">
                 {standard.title}
               </h3>

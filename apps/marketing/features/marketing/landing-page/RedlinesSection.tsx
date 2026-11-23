@@ -153,7 +153,7 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
   const done = rowDelay(ROWS.length);
 
   return (
-    <ScaledCanvas ref={ref} width={1310} height={540}>
+    <ScaledCanvas ref={ref} width={1310} height={540} minScale={0.62} panX={315} panBelow={640}>
       {[225, 1084].map((left) => (
         <span
           key={left}
@@ -349,8 +349,8 @@ export default function RedlinesSection() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section id="redlines" aria-labelledby="redlines-heading" className="contents">
-        <SectionHeader id="redlines-heading" title="Automatic redlines" mutedTitle="between any two versions.">
+      <section aria-labelledby="redlines-heading" className="contents">
+        <SectionHeader id="redlines-heading" anchorId="redlines" title="Automatic redlines" mutedTitle="between any two versions.">
           Uprevit compares versions for you and marks every added, changed or removed value, so reviewers see exactly what
           is new.
         </SectionHeader>

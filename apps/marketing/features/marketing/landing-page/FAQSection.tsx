@@ -115,9 +115,10 @@ export default function FAQSection() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section id="faq" aria-labelledby="faq-heading" className="contents">
+      <section aria-labelledby="faq-heading" className="contents">
         <SectionHeader
           id="faq-heading"
+          anchorId="faq"
           title="Frequently asked"
           mutedTitle="questions."
         >
@@ -129,31 +130,33 @@ export default function FAQSection() {
           splitCenter
           centerClassName="grid grid-cols-1 gap-px lg:grid-cols-[436px_minmax(0,1fr)]"
         >
-          <div className="flex min-w-0 flex-col justify-between gap-10 rounded-tile bg-tile p-6 sm:p-10">
-            <div className="flex flex-col gap-1.5">
-              <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">
+          <div className="order-2 flex min-w-0 flex-row items-center justify-between gap-4 rounded-tile bg-tile p-5 sm:px-8 sm:py-6 lg:order-1 lg:flex-col lg:items-stretch lg:justify-between lg:gap-10 lg:p-10">
+            <div className="flex flex-col gap-1 lg:gap-1.5">
+              <h3 className="font-ui text-[14px] font-medium leading-5 text-foreground lg:text-[16px] lg:leading-[22px]">
                 Still have questions?
               </h3>
-              <p className="max-w-[320px] font-ui text-[14px] leading-[22px] text-muted-foreground">
+              <p className="max-w-[320px] font-ui text-[13px] leading-[19px] text-muted-foreground lg:text-[14px] lg:leading-[22px]">
                 Talk to our team about your products, markets and review
                 process.
               </p>
             </div>
 
-            <ContactEmblem reduceMotion={reduceMotion} />
+            <div className="hidden lg:block">
+              <ContactEmblem reduceMotion={reduceMotion} />
+            </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <Link
                 href="/contact"
                 data-attr="faq-contact-us"
-                className="group/cta inline-flex h-10 items-center justify-center gap-2 rounded-sm border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-4 font-ui text-[14px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 dark:hover:bg-primary-hover"
+                className="group/cta inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-card px-3.5 font-ui text-[14px] font-medium leading-[18px] text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)] outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:border-stroke-strong hover:bg-subtle focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] lg:h-10 lg:rounded-sm lg:border-primary-700 lg:bg-primary lg:bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] lg:px-4 lg:text-primary-foreground lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] lg:hover:border-primary-700 lg:hover:bg-[#8A33FF] lg:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] lg:active:bg-primary-700 dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3 dark:lg:border-primary-700 dark:lg:bg-primary dark:lg:hover:bg-primary-hover"
               >
                 <span>Contact us</span>
                 <Icon
                   icon={ArrowRight02Icon}
                   size={14}
                   strokeWidth={1.8}
-                  className="transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover/cta:translate-x-0.5"
+                  className="hidden transition-transform duration-150 ease-out lg:inline-block [@media(hover:hover)_and_(pointer:fine)]:group-hover/cta:translate-x-0.5"
                 />
               </Link>
             </div>
@@ -164,7 +167,7 @@ export default function FAQSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.45, ease: EASE_OUT }}
-            className="flex min-w-0 flex-col rounded-tile bg-tile px-6 py-4 sm:px-10 sm:py-6"
+            className="order-1 flex min-w-0 flex-col rounded-tile bg-tile px-5 py-2 sm:px-8 sm:py-5 lg:order-2 lg:px-10 lg:py-6"
           >
             <div className="w-full">
               {FAQS.map((faq) => {
@@ -186,7 +189,7 @@ export default function FAQSection() {
                         onClick={() =>
                           setOpenId((prev) => (prev === faq.id ? null : faq.id))
                         }
-                        className="flex flex-1 cursor-pointer items-center justify-between gap-6 py-5 text-left font-ui text-[16px] font-medium leading-6 text-foreground outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring"
+                        className="flex flex-1 cursor-pointer items-center justify-between gap-4 py-4.5 text-left font-ui text-[15px] font-medium leading-[22px] text-foreground outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring sm:gap-6 sm:py-5 sm:text-[16px] sm:leading-6"
                       >
                         <span>{faq.question}</span>
                         <Icon
@@ -209,7 +212,7 @@ export default function FAQSection() {
                       className="grid transition-[grid-template-rows,opacity] duration-220 ease-out data-[state=closed]:grid-rows-[0fr] data-[state=closed]:opacity-0 data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100 motion-reduce:transition-none"
                     >
                       <div className="min-h-0 overflow-hidden">
-                        <p className="max-w-prose pb-5 font-ui text-[14px] leading-[22px] text-muted-foreground sm:min-h-[86px]">
+                        <p className="max-w-prose pb-5 font-ui text-[14px] leading-[21px] text-muted-foreground lg:min-h-[86px] lg:leading-[22px]">
                           {faq.answer}
                         </p>
                       </div>

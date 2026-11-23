@@ -846,14 +846,21 @@ function ReleaseStage() {
 }
 
 const STAGES = [ImportStage, BuildStage, ReviewStage, ReleaseStage];
+const STAGE_FOCUS = [
+  { minScale: 0.66, panX: 604 },
+  { minScale: 0.56, panX: 436 },
+  { minScale: 0.58, panX: 436 },
+  { minScale: 0.66, panX: 436 },
+];
 
 export default function HowItWorksSection() {
   const reduceMotion = usePrefersReducedMotion();
   const [active, setActive] = React.useState(0);
   const stageRef = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(stageRef, { margin: "-120px" });
-  const seen = useInView(stageRef, { margin: "-120px", once: true });
+  const inView = useInView(stageRef, { margin: "-40px" });
+  const seen = useInView(stageRef, { margin: "-40px", once: true });
   const Stage = STAGES[active];
+  const focus = STAGE_FOCUS[active];
   const autoplay = !reduceMotion && inView;
   const showStage = reduceMotion || inView || seen;
 
@@ -862,6 +869,7 @@ export default function HowItWorksSection() {
       <section aria-labelledby="how-heading" className="contents">
         <SectionHeader
           id="how-heading"
+          anchorId="how-it-works"
           title="Four steps"
           mutedTitle="from data to release."
         >
@@ -878,7 +886,7 @@ export default function HowItWorksSection() {
             role="tablist"
             aria-label="How Uprevit works"
             aria-orientation="vertical"
-            className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-1 lg:grid-rows-4"
+            className="flex flex-col divide-y divide-separator rounded-tile bg-tile px-5 py-2 sm:grid sm:grid-cols-2 sm:gap-px sm:divide-y-0 sm:bg-transparent sm:p-0 lg:grid-cols-1 lg:grid-rows-4"
           >
             {STEPS.map((step, index) => {
               const selected = index === active;
@@ -892,13 +900,13 @@ export default function HowItWorksSection() {
                   aria-controls="how-panel"
                   onClick={() => setActive(index)}
                   className={cn(
-                    "flex cursor-pointer items-center rounded-tile px-8 py-7 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring lg:px-10 lg:py-0",
+                    "flex cursor-pointer items-center py-4 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:rounded-tile sm:px-7 sm:py-6 lg:px-10 lg:py-0",
                     selected
-                      ? "bg-card dark:bg-surface-2"
-                      : "bg-tile [@media(hover:hover)_and_(pointer:fine)]:hover:bg-card/60 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-1",
+                      ? "sm:bg-card dark:sm:bg-surface-2"
+                      : "sm:bg-tile [@media(hover:hover)_and_(pointer:fine)]:hover:bg-card/60 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-1",
                   )}
                 >
-                  <span className="flex gap-[18px]">
+                  <span className="flex gap-3.5 sm:gap-[18px]">
                     <span className="relative w-0.5 shrink-0 overflow-hidden rounded-full bg-border">
                       {selected && (
                         <span
@@ -917,26 +925,32 @@ export default function HowItWorksSection() {
                         />
                       )}
                     </span>
-                    <span className="flex flex-col gap-2 py-0.5">
+                    <span className="flex flex-col gap-1 py-0.5 sm:gap-2">
                       <span className="flex items-center gap-2">
                         <Glyph
                           name={step.icon}
                           size={18}
-                          className={cn("transition-colors duration-200", selected ? "text-foreground" : "text-muted-foreground")}
+                          className={cn(
+                            "hidden transition-colors duration-200 sm:inline-block",
+                            selected ? "text-foreground" : "text-muted-foreground",
+                          )}
                         />
                         <span
                           className={cn(
-                            "font-ui text-[16px] font-medium leading-[22px] transition-colors duration-200",
-                            selected ? "text-foreground" : "text-muted-foreground",
+                            "font-ui text-[15px] font-medium leading-[21px] transition-colors duration-200 sm:text-[16px] sm:leading-[22px]",
+                            selected ? "text-foreground" : "text-faint-foreground sm:text-muted-foreground",
                           )}
                         >
+                          <span className="mr-1.5 font-mono text-[13px] tabular-nums sm:hidden">
+                            {String(index + 1).padStart(2, "0")} ·
+                          </span>
                           {step.title}
                         </span>
                       </span>
                       <span
                         className={cn(
-                          "max-w-[300px] font-ui text-[14px] leading-[22px] transition-colors duration-200",
-                          selected ? "text-muted-foreground" : "text-faint-foreground",
+                          "max-w-[300px] font-ui text-[14px] leading-[21px] transition-colors duration-200 sm:leading-[22px]",
+                          selected ? "text-muted-foreground" : "hidden text-faint-foreground sm:block",
                         )}
                       >
                         {step.body}
@@ -952,6 +966,9 @@ export default function HowItWorksSection() {
             <ScaledCanvas
               width={STAGE_W}
               height={STAGE_H}
+              minScale={focus.minScale}
+              panX={focus.panX}
+              panBelow={640}
               id="how-panel"
               role="tabpanel"
               aria-labelledby={`how-tab-${active}`}

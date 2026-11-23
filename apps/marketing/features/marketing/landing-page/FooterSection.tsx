@@ -146,7 +146,7 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
       centerClassName="overflow-hidden rounded-tile bg-[#0E0E0E]"
     >
       <div className="grid grid-cols-1 lg:grid-cols-[436px_minmax(0,1fr)]">
-        <div className="flex flex-col justify-between gap-12 px-6 py-10 sm:px-10 sm:py-12">
+        <div className="flex flex-col gap-4 px-6 pb-2 pt-10 sm:px-10 sm:py-10 lg:justify-between lg:gap-12 lg:py-12">
           <Link
             href="/"
             aria-label="Uprevit home"
@@ -160,16 +160,16 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-10 px-6 py-10 sm:px-10 sm:py-12">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-7 px-6 pb-8 pt-6 sm:grid-cols-3 sm:px-10 sm:py-10 lg:flex lg:flex-wrap lg:gap-10 lg:py-12">
           {FOOTER_COLUMNS.map((col) => (
             <div
               key={col.title}
-              className="flex w-[160px] shrink-0 flex-col gap-3.5 sm:w-[180px]"
+              className="flex flex-col gap-3 lg:w-[180px] lg:shrink-0 lg:gap-3.5"
             >
               <h2 className="font-ui text-[12px] font-medium leading-4 text-[#6E6E6E]">
                 {col.title}
               </h2>
-              <ul className="flex flex-col gap-3.5">
+              <ul className="flex flex-col gap-3 lg:gap-3.5">
                 {col.links.map((item) => (
                   <li key={item.label}>
                     <Link
@@ -188,7 +188,7 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
         </div>
       </div>
 
-      <div className="flex flex-col items-start justify-between gap-4 border-y border-white/[0.08] px-6 py-5 sm:flex-row sm:items-center sm:px-10">
+      <div className="flex flex-col-reverse items-start justify-between gap-3 border-y border-white/[0.08] px-6 py-5 sm:flex-row sm:items-center sm:gap-4 sm:px-10">
         <p
           suppressHydrationWarning
           className="font-ui text-[13px] leading-4 text-[#A1A1A1]"
@@ -196,7 +196,7 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
           © {new Date().getFullYear()} Uprevit. All rights reserved.
         </p>
 
-        <div className="flex flex-wrap items-center gap-6 font-ui text-[13px] leading-4 text-[#A1A1A1]">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 font-ui text-[13px] leading-4 text-[#A1A1A1] sm:gap-6">
           <Link
             href="/privacy-policy"
             className="transition-colors duration-150 hover:text-[#EDEDED]"

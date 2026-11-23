@@ -164,9 +164,36 @@ const TICKS_MINOR = "M660.02 224.13L660.55 214.15 M665.03 224.53L666.08 214.58 M
 
 function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
   const [hovered, setHovered] = React.useState<number | null>(null);
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = React.useState(860);
+
+  React.useEffect(() => {
+    const element = stageRef.current;
+    if (!element) return;
+    const update = (nextWidth: number) => {
+      if (nextWidth > 0) setContainerWidth(nextWidth);
+    };
+    update(element.getBoundingClientRect().width);
+    const observer = new ResizeObserver(([entry]) => {
+      update(entry.contentRect.width);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const scale = Math.min(1, containerWidth / 860);
+  const stageHeight = Math.max(290, Math.round(640 * scale));
 
   return (
-    <div className="absolute left-1/2 top-1/2 h-[640px] w-[1310px] -translate-x-1/2 -translate-y-1/2 scale-[0.44] sm:scale-[0.62] md:scale-100">
+    <div
+      ref={stageRef}
+      className="relative w-full overflow-hidden"
+      style={{ height: stageHeight }}
+    >
+      <div
+        className="absolute left-1/2 top-1/2 h-[640px] w-[1310px]"
+        style={{ transform: `translate(-50%, -50%) scale(${scale})` }}
+      >
       <svg
         width="1310"
         height="640"
@@ -348,6 +375,7 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
           </div>
         </motion.div>
       ))}
+      </div>
     </div>
   );
 }
@@ -386,7 +414,7 @@ export default function SolutionSection() {
           gets printed.
         </SectionHeader>
 
-        <TileRow centerClassName="relative h-[640px] overflow-hidden max-md:h-[420px] max-sm:h-[300px]">
+        <TileRow centerClassName="relative overflow-hidden">
           <DotsBackdrop
             className="opacity-45"
             dotsClassName="[mask-image:radial-gradient(ellipse_78%_74%_at_50%_50%,transparent_64%,#000_82%,transparent_98%)]"

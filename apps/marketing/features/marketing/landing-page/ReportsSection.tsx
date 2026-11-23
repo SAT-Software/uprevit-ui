@@ -169,7 +169,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
   });
 
   return (
-    <ScaledCanvas ref={ref} width={1310} height={680}>
+    <ScaledCanvas ref={ref} width={1310} height={680} minScale={0.64} panX={312} panBelow={640}>
       <div className={cn(GLASS, "left-[62px] top-[54px] h-[298px] w-[500px] rounded-[20px] p-1.5")}>
         <div className="flex h-full flex-col gap-1.5">
           <div className={cn(CARD, "flex flex-1 flex-col rounded-[14px]")}>
@@ -583,8 +583,8 @@ export default function ReportsSection() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section id="reports" aria-labelledby="reports-heading" className="contents">
-        <SectionHeader id="reports-heading" title="Find every affected product" mutedTitle="in minutes, not weeks.">
+      <section aria-labelledby="reports-heading" className="contents">
+        <SectionHeader id="reports-heading" anchorId="reports" title="Find every affected product" mutedTitle="in minutes, not weeks.">
           When a regulation or standard changes, build a report to list every product it touches, then export the list for
           your impact assessment.
         </SectionHeader>
