@@ -138,7 +138,7 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
                 </span>
               </div>
 
-              <CopyArticleLinkButton className="sm:hidden" />
+              <CopyArticleLinkButton className="lg:hidden" />
             </footer>
           </div>
         </div>

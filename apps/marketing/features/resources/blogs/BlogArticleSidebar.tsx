@@ -66,22 +66,31 @@ export function BlogArticleSidebar({ items }: { items: BlogTocItem[] }) {
 
     if (elements.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
-          );
-        if (visible[0]?.target.id) {
-          setActiveId(visible[0].target.id);
+    const updateActive = () => {
+      let current = elements[0].id;
+      for (const el of elements) {
+        if (el.getBoundingClientRect().top <= 120) {
+          current = el.id;
+        } else {
+          break;
         }
-      },
-      { rootMargin: "-88px 0px -65% 0px", threshold: 0 },
-    );
+      }
+      setActiveId(current);
+    };
+
+    updateActive();
+
+    const observer = new IntersectionObserver(updateActive, {
+      rootMargin: "-88px 0px -65% 0px",
+      threshold: 0,
+    });
 
     elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    window.addEventListener("scroll", updateActive, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", updateActive);
+    };
   }, [items]);
 
   return (

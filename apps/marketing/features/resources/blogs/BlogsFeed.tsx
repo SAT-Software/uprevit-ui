@@ -27,18 +27,8 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
   }, [posts, activeCategory]);
 
   const gridPosts = React.useMemo(() => {
-    if (activeCategory === ALL_CATEGORY) {
-      return posts.slice(1);
-    }
-    if (
-      featuredPost &&
-      matchingPosts.length === 1 &&
-      matchingPosts[0]?.slug === featuredPost.slug
-    ) {
-      return [];
-    }
-    return matchingPosts;
-  }, [activeCategory, featuredPost, matchingPosts, posts]);
+    return matchingPosts.filter((post) => post.slug !== featuredPost?.slug);
+  }, [featuredPost, matchingPosts]);
 
   const visibleGridPosts = gridPosts.slice(0, visibleCount);
   const hasMore = visibleCount < gridPosts.length;
@@ -72,7 +62,7 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
         </div>
 
         <div
-          role="tablist"
+          role="group"
           aria-label="Filter articles by category"
           className="flex items-center gap-1.5 overflow-x-auto pr-5 sm:flex-wrap sm:overflow-visible sm:pr-0"
         >
@@ -82,8 +72,7 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
               <button
                 key={category}
                 type="button"
-                role="tab"
-                aria-selected={isActive}
+                aria-pressed={isActive}
                 onClick={() => handleSelectCategory(category)}
                 className={cn(
                   "inline-flex h-7 shrink-0 cursor-pointer items-center rounded-md px-2.5 font-ui text-[12px] font-medium leading-4 outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring",
