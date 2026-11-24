@@ -14,7 +14,7 @@ const PRICING_FAQS: FAQItem[] = [
     id: "how-priced",
     question: "How is Uprevit priced?",
     answer:
-      "Three parts: a fixed platform fee each billing cycle, seats for the people who use Uprevit, and usage add-ons for uploads and exports beyond what's included. Larger rollouts can be reviewed with our team.",
+      "Three parts: a fixed monthly platform fee, role-based seats for your team, and metered usage for stored files and exports. Larger rollouts can be reviewed with our team.",
   },
   {
     id: "what-counts-as-seat",
@@ -26,19 +26,19 @@ const PRICING_FAQS: FAQItem[] = [
     id: "what-counts-as-export",
     question: "What counts as an export?",
     answer:
-      "An export is one completed PDF or XLSX product export or report export job. Every workspace includes 50 exports per month, with additional usage billed as a metered add-on.",
+      "An export is one completed PDF or XLSX product dossier or report export job. Exports are metered per completed file, so you pay nothing in months you don't run them.",
   },
   {
-    id: "how-uploads-calculated",
-    question: "How are uploads calculated?",
+    id: "how-storage-calculated",
+    question: "How are stored files calculated?",
     answer:
-      "Uploads are based on source files, artwork and attachments committed to the workspace. Every workspace includes 10 GB per month, with additional volume billed as a metered add-on.",
+      "Stored files cover source files, artwork and attachments kept in your workspace. Storage is measured once a month on your billing date and billed per GB, with no extra fee for uploading or viewing files.",
   },
   {
     id: "how-billing-works",
     question: "How does billing work?",
     answer:
-      "Plans are quoted for your team and billed monthly on one clear invoice covering your platform fee, seats and any metered usage or optional add-ons like SSO. Annual agreements are also available on request.",
+      "Plans are quoted for your team and billed monthly on one clear invoice covering your platform fee, seats and any metered usage or optional add-ons like SSO.",
   },
   {
     id: "when-talk-to-us",

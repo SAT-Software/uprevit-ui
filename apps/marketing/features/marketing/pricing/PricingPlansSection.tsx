@@ -28,7 +28,7 @@ const PRICE_PARTS: StepItem[] = [
   {
     number: "3",
     title: "Usage",
-    description: "Uploads and exports past your monthly allowance.",
+    description: "Stored files billed monthly and metered exports.",
   },
 ];
 
@@ -41,7 +41,7 @@ const QUOTE_STEPS: StepItem[] = [
   {
     number: "2",
     title: "Size your usage",
-    description: "Expected uploads and exports each month.",
+    description: "Expected stored files and exports each month.",
   },
   {
     number: "3",
@@ -144,8 +144,8 @@ export default function PricingPlansSection() {
               Uprevit
             </h2>
             <p className="font-ui text-body-m leading-5 text-muted-foreground">
-              One plan for regulated documentation teams: a platform fee each
-              billing cycle, seats, and transparent upload and export usage.
+              One plan for regulated documentation teams: a monthly platform
+              fee, role-based seats, and transparent storage and export usage.
             </p>
           </div>
 
