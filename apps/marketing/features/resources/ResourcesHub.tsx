@@ -1,34 +1,26 @@
-"use client";
-
-import { MarketingSectionBadge } from "@/components/MarketingSectionBadge";
-import { Badge } from "@uprevit/ui/components/ui/badge";
-import { DecorativeCornerCircleCustom } from "@uprevit/ui/components/ui/DecorativeCornerCircle";
 import Link from "next/link";
-import { Button } from "@uprevit/ui/components/ui/button";
 import {
+  ArrowRight02Icon,
   BookOpen02Icon,
   File02Icon,
-  Layers01Icon,
   News01Icon,
   Wrench01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
+import { TileRow, TileSpacerRow } from "@/components/TileGrid";
 
-const resources = [
+const RESOURCES = [
   {
-    id: "templates",
-    title: "Templates",
+    id: "blogs",
+    title: "Blog",
     description:
-      "Battle-tested checklists and templates built by regulatory experts to keep documentation audit-ready.",
-    icon: File02Icon,
-    href: "/resources/templates",
-    meta: "Checklists, validation kits, naming guides",
-    highlights: [
-      "Gap assessments",
-      "Validation templates",
-      "Project timelines",
-    ],
-    cta: "Browse templates",
+      "Regulatory updates, how-to guides and product news for teams that write, review and release medical device labels.",
+    icon: News01Icon,
+    href: "/resources/blogs",
+    meta: "Regulatory updates and field notes",
+    highlights: ["Product guides", "FDA + EU MDR updates", "Release notes"],
+    cta: "Read articles",
+    available: true,
   },
   {
     id: "standards-symbols",
@@ -37,177 +29,148 @@ const resources = [
       "Centralized ISO references and standardized medical device symbols for global regulatory alignment.",
     icon: BookOpen02Icon,
     href: "/resources/standards-symbols",
-    meta: "ISO library + symbol usage guidance",
+    meta: "ISO library and symbol usage guidance",
     highlights: ["ISO 15223-1", "Device symbol library", "Usage references"],
-    cta: "Explore standards",
+    cta: "View preview",
+    available: false,
   },
   {
-    id: "blogs",
-    title: "Blogs",
+    id: "templates",
+    title: "Templates",
     description:
-      "Expert analysis of regulatory shifts with clear, actionable takeaways for labeling teams.",
-    icon: News01Icon,
-    href: "/resources/blogs",
-    meta: "Regulatory updates and field notes",
-    highlights: [
-      "FDA + EU MDR updates",
-      "Implementation guides",
-      "Release notes",
-    ],
-    cta: "Read insights",
-    available: true,
+      "Checklists and structured templates built by regulatory experts to keep labeling documentation audit-ready.",
+    icon: File02Icon,
+    href: "/resources/templates",
+    meta: "Checklists, validation kits and naming guides",
+    highlights: ["Gap assessments", "Validation templates", "Project timelines"],
+    cta: "View preview",
+    available: false,
   },
   {
     id: "toolkits",
     title: "Toolkits",
     description:
-      "Free compliance tools to streamline labeling workflows, validation, and symbol management.",
+      "Free compliance tools to streamline labeling workflows, validation and symbol management.",
     icon: Wrench01Icon,
     href: "/resources/toolkits",
     meta: "Free tools, rolling releases",
     highlights: ["Label generator", "Compliance checker", "Symbol manager"],
-    cta: "See toolkits",
+    cta: "View preview",
+    available: false,
   },
 ];
 
-// const resourcePillars = [
-//   {
-//     title: "Curated by regulatory experts",
-//     description: "Practical resources shaped by real audits and label reviews.",
-//   },
-//   {
-//     title: "Always aligned to standards",
-//     description: "ISO, FDA, and EU MDR updates distilled for quick action.",
-//   },
-//   {
-//     title: "Made to ship fast",
-//     description: "Download-ready assets that plug into your workflows.",
-//   },
-// ];
-
 export default function ResourcesHub() {
   return (
-    <div className="w-full mt-16 mb-24 pointer-events-auto relative">
-      <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      <div className="max-w-6xl mx-auto mb-10 px-2 md:px-2 lg:px-0">
-        <MarketingSectionBadge icon={Layers01Icon} label="Resources" />
-        <div className="w-full flex flex-col lg:flex-row items-start gap-8">
-          <h1 className="text-2xl md:text-4xl lg:text-6xl font-medium leading-tightest">
-            The library built for labeling teams
+    <>
+      <TileRow
+        as="section"
+        aria-labelledby="resources-hero-heading"
+        centerClassName="relative overflow-hidden px-5 pt-12 pb-9 sm:px-10 sm:pt-16 sm:pb-12 lg:px-12 lg:pt-[88px] lg:pb-16"
+      >
+        <div
+          aria-hidden="true"
+          className="tile-dots pointer-events-none absolute bottom-0 right-0 h-[280px] w-full overflow-hidden sm:h-[360px] lg:h-[420px]"
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(ellipse 90% 85% at 100% 100%, transparent 0%, color-mix(in srgb, var(--tile-surface-solid) 70%, transparent) 55%, var(--tile-surface-solid) 100%)",
+            }}
+          />
+        </div>
+
+        <div className="relative flex flex-col gap-4 sm:gap-5">
+          <h1
+            id="resources-hero-heading"
+            className="font-sans text-[30px] font-medium leading-[33px] tracking-[-0.04em] text-foreground sm:text-[46px] sm:leading-[52px] lg:text-[60px] lg:leading-[64px]"
+          >
+            Resources
+            <br />
+            <span className="text-foreground/40">
+              Built for labeling teams
+            </span>
           </h1>
-          <div className="hidden lg:block h-24 w-px bg-border" />
-          <p className="text-base md:text-lg font-normal text-muted-foreground max-w-md leading-relaxed">
-            Templates, standards, and expert analysis organized into a single
-            hub. Everything you need to move from draft to approved label with
+          <p className="max-w-[560px] font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]">
+            Guides, standards references and practical templates organized in
+            one place so your team moves from draft to approved label with
             confidence.
           </p>
         </div>
-        {/* <div className="mt-8 flex flex-wrap items-center gap-4">
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/resources/standards-symbols">
-              <Icon icon={BookOpen02Icon} size={16} strokeWidth={2} /> Explore standards
-            </Link>
-          </Button>
-          <Button size="lg" asChild>
-            <Link href="/resources/templates">
-              <Icon icon={File02Icon} size={16} strokeWidth={2} />
-              Browse templates
-            </Link>
-          </Button>
-        </div> */}
-        {/* <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {resourcePillars.map((pillar) => (
-            <div
-              key={pillar.title}
-              className="rounded-xl border border-border bg-background/70 p-5"
-            >
-              <p className="text-xs uppercase text-muted-foreground">Pillar</p>
-              <h3 className="mt-2 text-base font-semibold">{pillar.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {pillar.description}
-              </p>
-            </div>
-          ))}
-        </div> */}
-      </div>
+      </TileRow>
 
-      <div className="relative w-full">
-        <div className="max-w-6xl mx-auto relative px-2 md:px-2 lg:px-0">
-          <DecorativeCornerCircleCustom
-            positionClassName="-bottom-15 -left-15"
-            rotation={270}
-          />
-          <DecorativeCornerCircleCustom
-            positionClassName="-bottom-15 -right-15"
-            rotation={180}
-          />
-          <DecorativeCornerCircleCustom
-            positionClassName="-top-15 -right-15"
-            rotation={90}
-          />
-
-          <div className="p-1 bg-muted rounded-2xl border border-border shadow-bottom-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-              {resources.map((resource) => (
-                <div
-                  key={resource.id}
-                  className="flex h-full flex-col justify-between rounded-xl border border-border bg-background/80 p-4 md:p-6 shadow-none"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-9 md:size-11 shrink-0 items-center justify-center rounded-lg md:rounded-xl bg-foreground text-background">
-                          <Icon
-                            icon={resource.icon}
-                            size={20}
-                            strokeWidth={2}
-                          />
-                        </div>
-                        <div>
-                          <h2 className="text-lg md:text-xl font-semibold">
-                            {resource.title}
-                          </h2>
-                          <p className="text-xs font-normal text-muted-foreground">
-                            {resource.meta}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm font-normal text-muted-foreground leading-relaxed">
-                      {resource.description}
-                    </p>
-                    <div className="mt-4 space-y-2">
-                      {resource.highlights.map((highlight) => (
-                        <div
-                          key={highlight}
-                          className="flex items-center gap-2 text-sm font-normal text-muted-foreground"
-                        >
-                          <span className="size-1.5 rounded-full bg-foreground/60" />
-                          {highlight}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <p className="text-xs uppercase tracking-wide font-normal text-muted-foreground">
-                      Updated regularly
-                    </p>
-                    {resource.available ? (
-                      <Button variant="outline" asChild>
-                        <Link href={resource.href}>{resource.cta}</Link>
-                      </Button>
-                    ) : (
-                      <Badge variant="outline">Coming soon</Badge>
-                    )}
+      <TileRow
+        as="section"
+        aria-label="Resource categories"
+        splitCenter
+        centerClassName="grid grid-cols-1 gap-px md:grid-cols-2"
+      >
+        {RESOURCES.map((resource) => (
+          <Link
+            key={resource.id}
+            href={resource.href}
+            className="group flex flex-col justify-between gap-8 rounded-tile bg-tile px-5 py-7 outline-none transition-colors duration-150 hover:bg-surface-hover/50 focus-visible:ring-2 focus-visible:ring-ring sm:px-8 sm:py-9 lg:px-10 lg:py-10 dark:hover:bg-surface-2"
+          >
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors group-hover:border-stroke-strong dark:border-edge-2 dark:bg-surface-2">
+                    <Icon icon={resource.icon} size={20} strokeWidth={1.8} />
+                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <h2 className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground transition-colors group-hover:text-primary dark:group-hover:text-primary-text">
+                      {resource.title}
+                    </h2>
+                    <span className="font-ui text-body-s leading-[18px] text-muted-foreground">
+                      {resource.meta}
+                    </span>
                   </div>
                 </div>
-              ))}
+
+                <span
+                  className={
+                    resource.available
+                      ? "inline-flex h-6 shrink-0 items-center rounded-sm bg-primary/10 px-2 font-mono text-caption font-medium text-primary-700 dark:bg-primary-soft dark:text-primary-text"
+                      : "inline-flex h-6 shrink-0 items-center rounded-sm bg-muted px-2 font-mono text-caption text-muted-foreground dark:bg-surface-4"
+                  }
+                >
+                  {resource.available ? "Available" : "Coming soon"}
+                </span>
+              </div>
+
+              <p className="font-ui text-body-m leading-[22px] text-muted-foreground sm:text-body-l sm:leading-[26px]">
+                {resource.description}
+              </p>
+
+              <ul className="flex flex-wrap gap-2">
+                {resource.highlights.map((highlight) => (
+                  <li
+                    key={highlight}
+                    className="inline-flex h-6 items-center rounded-sm bg-muted px-2 font-ui text-body-s font-medium text-foreground dark:bg-surface-4"
+                  >
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-        </div>
-        <div className="absolute top-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-        <div className="absolute bottom-0 left-0 w-full h-0 border-b border-dashed border-border/80" />
-      </div>
-    </div>
+
+            <div className="flex items-center justify-between border-t border-separator pt-5">
+              <span className="font-ui text-body-m font-medium text-foreground transition-colors group-hover:text-primary dark:group-hover:text-primary-text">
+                {resource.cta}
+              </span>
+              <Icon
+                icon={ArrowRight02Icon}
+                size={15}
+                strokeWidth={1.8}
+                className="text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-foreground"
+              />
+            </div>
+          </Link>
+        ))}
+      </TileRow>
+
+      <TileSpacerRow />
+    </>
   );
 }

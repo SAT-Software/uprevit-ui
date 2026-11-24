@@ -1,7 +1,8 @@
 import { pageMetadata } from "@/lib/metadata";
+import { TileGrid, TileSpacerRow } from "@/components/TileGrid";
 import MarketingHeader from "@/features/marketing/marketing-header";
+import CTASection from "@/features/marketing/landing-page/CTASection";
 import FooterSection from "@/features/marketing/landing-page/FooterSection";
-import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
 import ResourcesHub from "@/features/resources/ResourcesHub";
 
 export const metadata = pageMetadata(
@@ -12,17 +13,28 @@ export const metadata = pageMetadata(
 
 export default function ResourcesPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
-      <MarketingHeader />
-      <div className="relative w-full">
-        <DottedVerticalLines />
-        <main className="relative z-10 w-full pt-8 md:pt-24">
-          <ResourcesHub />
-        </main>
-        <div className="relative z-35 w-full">
-          <FooterSection />
-        </div>
-      </div>
-    </div>
+    <TileGrid>
+      <MarketingHeader inTileGrid />
+      <TileSpacerRow className="hidden sm:grid" />
+      <main className="contents">
+        <ResourcesHub />
+        <CTASection
+          title="See your own labels"
+          mutedTitle="in Uprevit."
+          description="Bring one product. We'll set it up live, run it through review and export the release on the call."
+          primaryCta={{
+            label: "Book a demo",
+            href: "/contact?topic=demo",
+            dataAttr: "resources-cta-book-demo",
+          }}
+          secondaryCta={{
+            label: "Learn more",
+            href: "/#product-preview",
+            dataAttr: "resources-cta-learn-more",
+          }}
+        />
+      </main>
+      <FooterSection inTileGrid />
+    </TileGrid>
   );
 }
