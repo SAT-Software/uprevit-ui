@@ -8,24 +8,28 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
 const USAGE_CARDS = [
   {
-    eyebrow: "Uploads",
+    eyebrow: "Stored files",
+    tag: "MONTHLY",
     description:
-      "Source files, artwork and attachments committed to the workspace.",
+      "Source files, artwork and attachments kept in your workspace. Measured once on your billing date.",
     rows: [
-      { label: "Included", value: "10 GB / month" },
-      { label: "Beyond that", value: "Metered add-on" },
+      { label: "Billed by", value: "Per GB / month" },
+      { label: "Uploads & viewing", value: "No extra fee" },
     ],
   },
   {
     eyebrow: "Exports",
-    description: "Each completed PDF or XLSX product or report export.",
+    tag: "METERED",
+    description:
+      "Each completed PDF or XLSX product dossier or report export. Pay only when you generate them.",
     rows: [
-      { label: "Included", value: "50 / month" },
-      { label: "Beyond that", value: "Metered add-on" },
+      { label: "Billed by", value: "Per export" },
+      { label: "Quiet months", value: "No charge" },
     ],
   },
   {
-    eyebrow: "Other seats",
+    eyebrow: "Role-based seats",
+    tag: "PER ROLE",
     description:
       "Not everyone needs a full seat. Approvers cost half a User seat; billing-only Managers are free.",
     rows: [
@@ -41,12 +45,12 @@ export default function PricingUsageSection() {
       <section aria-labelledby="pricing-usage-heading" className="contents">
         <SectionHeader
           id="pricing-usage-heading"
-          anchorId="allowances"
-          title="Generous allowances."
-          mutedTitle="Usage only past them."
+          anchorId="usage"
+          title="Pay for what you use."
+          mutedTitle="Nothing bundled in."
         >
-          Every workspace includes uploads and exports each month. Past that,
-          usage is metered as a transparent add-on. No tiers to outgrow.
+          Storage, exports and seats are billed transparently each month — no
+          free caps to track and no tiers to outgrow.
         </SectionHeader>
 
         <TileRow
@@ -62,10 +66,15 @@ export default function PricingUsageSection() {
               transition={{ duration: 0.45, ease: EASE_OUT, delay: index * 0.05 }}
               className="flex min-w-0 flex-col justify-between gap-8 rounded-tile bg-tile p-6 sm:gap-10 sm:p-8"
             >
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-ui text-label font-medium uppercase leading-4 tracking-label text-faint-foreground">
-                  {card.eyebrow}
-                </h3>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-ui text-label font-medium uppercase leading-4 tracking-label text-faint-foreground">
+                    {card.eyebrow}
+                  </h3>
+                  <span className="inline-flex shrink-0 items-center rounded-sm border border-stroke-primary bg-muted px-2 py-[3px] font-mono text-caption leading-[14px] text-muted-foreground dark:border-edge-2 dark:bg-surface-2">
+                    {card.tag}
+                  </span>
+                </div>
                 <p className="font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
                   {card.description}
                 </p>
@@ -84,7 +93,7 @@ export default function PricingUsageSection() {
                     <dt className="font-ui text-body-m leading-5 text-muted-foreground">
                       {row.label}
                     </dt>
-                    <dd className="text-right font-sans text-[20px] font-medium leading-7 tracking-[-0.02em] text-foreground sm:text-[22px] lg:text-[18px] xl:text-[22px]">
+                    <dd className="text-right font-sans text-[19px] font-medium leading-7 tracking-[-0.02em] text-foreground sm:text-[21px] lg:text-[18px] xl:text-[21px]">
                       {row.value}
                     </dd>
                   </div>

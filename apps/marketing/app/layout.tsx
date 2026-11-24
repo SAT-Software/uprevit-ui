@@ -36,12 +36,6 @@ export const metadata: Metadata = {
   ),
   title: { default: homeTitle, template: "%s | Uprevit" },
   twitter: { card: "summary_large_image", images: ogImage },
-  icons: {
-    icon: [
-      { url: "/favicon-black.ico", media: "(prefers-color-scheme: light)" },
-      { url: "/favicon-white.ico", media: "(prefers-color-scheme: dark)" },
-    ],
-  },
 };
 
 const organizationJsonLd = {
