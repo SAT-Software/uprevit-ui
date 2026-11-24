@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import MarketingHeader from "@/features/marketing/marketing-header";
-import FooterSection from "@/features/marketing/landing-page/FooterSection";
+import { JsonLd } from "@/components/JsonLd";
+import { TileGrid, TileSpacerRow } from "@/components/TileGrid";
 import CTASection from "@/features/marketing/landing-page/CTASection";
-import { DottedVerticalLines } from "@/features/marketing/landing-page/DottedVerticalLines";
+import FooterSection from "@/features/marketing/landing-page/FooterSection";
+import MarketingHeader from "@/features/marketing/marketing-header";
 import { BlogPostArticle } from "@/features/resources/blogs/BlogPostArticle";
 import { blogPosts, getBlogPost } from "@/lib/blog";
-import { JsonLd } from "@/components/JsonLd";
 import { pageMetadata, siteUrl } from "@/lib/metadata";
 
 type BlogPostPageProps = { params: Promise<{ slug: string }> };
@@ -48,33 +48,43 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const url = `${siteUrl}/resources/blogs/${post.slug}`;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative bg-accent/50">
-      <MarketingHeader />
-      <div className="relative w-full">
-        <DottedVerticalLines />
-        <main className="relative z-10 w-full pt-8 md:pt-24">
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "BlogPosting",
-              "@id": `${url}#article`,
-              mainEntityOfPage: url,
-              headline: post.title,
-              description: post.description,
-              datePublished: post.date,
-              dateModified: post.date,
-              author: { "@id": `${siteUrl}/#organization` },
-              publisher: { "@id": `${siteUrl}/#organization` },
-              image: `${siteUrl}/og-image.png`,
-            }}
-          />
-          <BlogPostArticle post={post} />
-          <CTASection />
-        </main>
-        <div className="relative z-35 w-full">
-          <FooterSection />
-        </div>
-      </div>
-    </div>
+    <TileGrid>
+      <MarketingHeader inTileGrid />
+      <TileSpacerRow className="hidden sm:grid" />
+      <main className="contents">
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "@id": `${url}#article`,
+            mainEntityOfPage: url,
+            headline: post.title,
+            description: post.description,
+            datePublished: post.date,
+            dateModified: post.date,
+            author: { "@id": `${siteUrl}/#organization` },
+            publisher: { "@id": `${siteUrl}/#organization` },
+            image: `${siteUrl}/og-image.png`,
+          }}
+        />
+        <BlogPostArticle post={post} />
+        <CTASection
+          title="See your own labels"
+          mutedTitle="in Uprevit."
+          description="Bring one product. We'll set it up live, run it through review and export the release on the call."
+          primaryCta={{
+            label: "Book a demo",
+            href: "/contact?topic=demo",
+            dataAttr: "blog-article-cta-book-demo",
+          }}
+          secondaryCta={{
+            label: "Learn more",
+            href: "/#product-preview",
+            dataAttr: "blog-article-cta-learn-more",
+          }}
+        />
+      </main>
+      <FooterSection inTileGrid />
+    </TileGrid>
   );
 }
