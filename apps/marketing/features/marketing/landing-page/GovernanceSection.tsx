@@ -43,7 +43,7 @@ function useTicker(intervalMs: number, enabled: boolean) {
   return [ref, tick] as const;
 }
 
-function GovTile({
+export function GovTile({
   title,
   body,
   maxWidth = 420,
@@ -87,6 +87,7 @@ function GovTile({
 
 const ROLES: {
   label: string;
+  description: string;
   left: number;
   top: number;
   labelLeft: number;
@@ -98,6 +99,7 @@ const ROLES: {
 }[] = [
   {
     label: "Admin",
+    description: "Manage workspace, members & approvals",
     left: 192,
     top: 24,
     labelLeft: 250,
@@ -109,6 +111,7 @@ const ROLES: {
   },
   {
     label: "User",
+    description: "Create and edit product records",
     left: 292,
     top: 124,
     labelLeft: 350,
@@ -120,6 +123,7 @@ const ROLES: {
   },
   {
     label: "Approver",
+    description: "Review and approve assigned workflows",
     left: 192,
     top: 224,
     labelLeft: 250,
@@ -131,6 +135,7 @@ const ROLES: {
   },
   {
     label: "Manager",
+    description: "Manage billing and invoices",
     left: 92,
     top: 124,
     labelLeft: 36,
@@ -143,8 +148,263 @@ const ROLES: {
 ];
 
 const PULSE_EASE = [0.45, 0, 0.25, 1] as const;
+const WHEEL_SPRING = { type: "spring" as const, duration: 0.65, bounce: 0.08 };
+const ORBIT_SLOTS = [
+  { left: 74, top: -26 },
+  { left: 174, top: 74 },
+  { left: 74, top: 174 },
+  { left: -26, top: 74 },
+] as const;
+
+function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-40px" });
+  const [rotationStep, setRotationStep] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const measureRef = React.useRef<HTMLSpanElement>(null);
+  const [pillWidth, setPillWidth] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (reduceMotion || !inView || paused) return;
+    const id = setInterval(() => setRotationStep((value) => value + 1), 2600);
+    return () => clearInterval(id);
+  }, [reduceMotion, inView, paused]);
+
+  const active = ((rotationStep % ROLES.length) + ROLES.length) % ROLES.length;
+  const activeRole = ROLES[active];
+  const wheelAngle = reduceMotion ? 0 : -rotationStep * 90;
+
+  React.useLayoutEffect(() => {
+    const el = measureRef.current;
+    if (!el) return;
+    setPillWidth(Math.ceil(el.offsetWidth));
+  }, [active]);
+
+  const handleSelectRole = (targetIndex: number) => {
+    const diff = ((targetIndex - active + 5) % ROLES.length) - 1;
+    if (diff === 0) return;
+    setRotationStep((value) => value + diff);
+  };
+
+  return (
+    <ScaledCanvas
+      ref={ref}
+      width={436}
+      height={356}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
+      className="[mask-image:linear-gradient(#000_92%,transparent_100%)]"
+    >
+      <div
+        role="status"
+        aria-live="polite"
+        className="absolute inset-x-0 top-1.5 flex flex-col items-center"
+      >
+        <span
+          ref={measureRef}
+          aria-hidden="true"
+          className="pointer-events-none invisible absolute flex h-[30px] items-center gap-2 whitespace-nowrap px-3"
+        >
+          <span className="font-mono text-[10px] uppercase leading-3">{activeRole.label}</span>
+          <span className="h-2.5 w-px shrink-0" />
+          <span className="font-ui text-[12px] font-medium leading-4">{activeRole.description}</span>
+        </span>
+
+        <motion.div
+          initial={false}
+          animate={pillWidth ? { width: pillWidth } : undefined}
+          transition={{ type: "spring", duration: 0.24, bounce: 0 }}
+          className="relative flex h-[30px] items-center justify-center overflow-hidden rounded-md bg-tooltip shadow-[0_8px_20px_-8px_rgba(0,0,0,0.4)]"
+        >
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              key={activeRole.label}
+              className="flex items-center gap-2 whitespace-nowrap px-3"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 5, filter: "blur(3px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -5, filter: "blur(3px)" }}
+              transition={{ duration: 0.22, ease: EASE_OUT }}
+            >
+              <span className="font-mono text-[10px] uppercase leading-3 text-white/60">
+                {activeRole.label}
+              </span>
+              <span className="h-2.5 w-px shrink-0 bg-white/15" />
+              <span className="font-ui text-[12px] font-medium leading-4 text-tooltip-foreground">
+                {activeRole.description}
+              </span>
+            </motion.span>
+          </AnimatePresence>
+        </motion.div>
+
+        <svg
+          width="12"
+          height="6"
+          viewBox="0 0 12 6"
+          aria-hidden="true"
+          className="text-tooltip"
+        >
+          <path d="M0 0L6 6L12 0z" fill="currentColor" />
+        </svg>
+      </div>
+
+      <div className="absolute inset-x-0 top-6 h-[340px]">
+        <div
+          aria-hidden="true"
+          className="absolute left-12 top-[-20px] size-[340px] rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(23,23,23,0.08)_0%,transparent_65%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(237,237,237,0.08)_0%,transparent_65%)]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute left-[118px] top-[50px] size-[200px] rounded-full border border-dashed border-stroke-strong dark:border-edge-3"
+        />
+
+        <svg
+          width="436"
+          height="340"
+          viewBox="0 0 436 340"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 text-foreground"
+        >
+          {ROLES.map((role, index) => (
+            <DottedConnector
+              key={role.label}
+              d={role.spoke}
+              active={index === 0}
+              canvasWidth={436}
+              canvasHeight={340}
+              baseOpacity={0.18}
+              activeOpacity={0.78}
+              transition={{ duration: 0.35, ease: PULSE_EASE }}
+            />
+          ))}
+          {!reduceMotion && rotationStep > 0 && (
+            <motion.g
+              key={rotationStep}
+              initial={{ x: 218, y: 98, opacity: 0 }}
+              animate={{ x: 218, y: 72, opacity: [0, 1, 1, 0] }}
+              transition={{
+                x: { duration: 0.38, delay: 0.14, ease: PULSE_EASE },
+                y: { duration: 0.38, delay: 0.14, ease: PULSE_EASE },
+                opacity: { duration: 0.38, delay: 0.14, times: [0, 0.16, 0.84, 1], ease: "linear" },
+              }}
+            >
+              <circle cx="0" cy="0" r="4.5" fill="currentColor" fillOpacity={0.09} />
+              <circle cx="0" cy="0" r="2" fill="currentColor" />
+            </motion.g>
+          )}
+        </svg>
+
+        <div className="absolute left-[162px] top-[94px] size-28 rounded-full bg-white/60 p-[5px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_12px_28px_-12px_rgba(0,0,0,0.25)] dark:bg-[#14141499] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_12px_28px_-12px_rgba(0,0,0,0.4)]">
+          <div className="flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7F7F7_0%,#E9E9E9_100%)] shadow-[inset_0_0_0_1px_#FFFFFF,inset_0_-2px_6px_rgba(0,0,0,0.06)] dark:bg-[linear-gradient(180deg,#191919_0%,#212121_100%)] dark:shadow-[inset_0_0_0_1px_#141414,inset_0_-2px_6px_rgba(0,0,0,0.1)]">
+            <Icon icon={SecurityCheckIcon} size={36} strokeWidth={1.5} className="shrink-0 text-foreground" />
+          </div>
+        </div>
+
+        <motion.div
+          initial={false}
+          animate={{ rotate: wheelAngle }}
+          transition={WHEEL_SPRING}
+          className="absolute left-[118px] top-[50px] size-[200px]"
+        >
+          {ROLES.map((role, index) => {
+            const isActive = index === active;
+            const slot = ORBIT_SLOTS[index];
+            return (
+              <div
+                key={role.label}
+                className="absolute size-[52px]"
+                style={{ left: slot.left, top: slot.top }}
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: -wheelAngle }}
+                  transition={WHEEL_SPRING}
+                  className="relative size-full"
+                >
+                  <motion.button
+                    type="button"
+                    aria-label={`${role.label}: ${role.description}`}
+                    aria-pressed={isActive}
+                    onClick={() => handleSelectRole(index)}
+                    animate={{ scale: isActive ? 1.08 : 1 }}
+                    whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+                    transition={{ type: "spring", duration: 0.24, bounce: 0 }}
+                    className="size-full cursor-pointer rounded-full bg-white/70 p-[3px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_4px_10px_-4px_rgba(0,0,0,0.18)] outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[#141414B3] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_4px_10px_-4px_rgba(0,0,0,0.3)]"
+                  >
+                    <span className="relative flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F4F4_100%)] shadow-[inset_0_0_0_1px_rgba(23,23,23,0.08)] dark:bg-[linear-gradient(180deg,#141414_0%,#1B1B1B_100%)] dark:shadow-[inset_0_0_0_1px_rgba(237,237,237,0.08)]">
+                      <motion.span
+                        aria-hidden="true"
+                        initial={false}
+                        animate={{
+                          opacity: isActive ? 1 : 0,
+                          scale: isActive ? 1 : 0.9,
+                        }}
+                        transition={{ duration: 0.28, ease: EASE_OUT }}
+                        className="absolute inset-0 rounded-full bg-[#1A1A1A] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_0_0_5px_rgba(23,23,23,0.08)] dark:bg-[#EDEDED] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_0_0_5px_rgba(237,237,237,0.1)]"
+                      />
+                      <span
+                        className={cn(
+                          "relative z-10 flex transition-colors duration-300 ease-out",
+                          isActive ? "text-white dark:text-[#141414]" : "text-foreground/75",
+                        )}
+                      >
+                        <Icon icon={role.icon} size={18} strokeWidth={1.6} />
+                      </span>
+                    </span>
+                  </motion.button>
+                  <motion.span
+                    aria-hidden="true"
+                    initial={false}
+                    animate={{
+                      opacity: isActive && !reduceMotion ? 0 : isActive ? 1 : 0.65,
+                      y: isActive && !reduceMotion ? -3 : 0,
+                    }}
+                    transition={{ duration: 0.22, ease: EASE_OUT }}
+                    className="pointer-events-none absolute left-1/2 top-[57px] -translate-x-1/2 whitespace-nowrap font-ui text-[11px] font-medium leading-[14px] text-muted-foreground"
+                  >
+                    {role.label}
+                  </motion.span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </ScaledCanvas>
+  );
+}
 
 export function RoleBasedAccess({
+  reduceMotion,
+  badgeVariant = "simple",
+  activeRoleIndex,
+  onRoleHover,
+}: {
+  reduceMotion: boolean;
+  badgeVariant?: "simple" | "detailed" | "tooltip";
+  activeRoleIndex?: number | null;
+  onRoleHover?: (index: number | null) => void;
+}) {
+  if (badgeVariant === "tooltip") {
+    return <RotatingRoleWheel reduceMotion={reduceMotion} />;
+  }
+
+  return (
+    <StaticRoleBasedAccess
+      reduceMotion={reduceMotion}
+      badgeVariant={badgeVariant}
+      activeRoleIndex={activeRoleIndex}
+      onRoleHover={onRoleHover}
+    />
+  );
+}
+
+function StaticRoleBasedAccess({
   reduceMotion,
   badgeVariant = "simple",
   activeRoleIndex,
@@ -183,131 +443,134 @@ export function RoleBasedAccess({
       height={340}
       className="[mask-image:linear-gradient(#000_85%,transparent_100%)]"
     >
-      <div
-        aria-hidden="true"
-        className="absolute left-12 top-[-20px] size-[340px] rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(23,23,23,0.08)_0%,transparent_65%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(237,237,237,0.08)_0%,transparent_65%)]"
-      />
-      <span
-        aria-hidden="true"
-        className="absolute left-[118px] top-[50px] size-[200px] rounded-full border border-dashed border-stroke-strong dark:border-edge-3"
-      />
+      <div className="absolute inset-x-0 top-0 h-[340px]">
+        <div
+          aria-hidden="true"
+          className="absolute left-12 top-[-20px] size-[340px] rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(23,23,23,0.08)_0%,transparent_65%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(237,237,237,0.08)_0%,transparent_65%)]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute left-[118px] top-[50px] size-[200px] rounded-full border border-dashed border-stroke-strong dark:border-edge-3"
+        />
 
-      <svg
-        width="436"
-        height="340"
-        viewBox="0 0 436 340"
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 text-foreground"
-      >
-        {ROLES.map((role, index) => (
-          <DottedConnector
-            key={role.label}
-            d={role.spoke}
-            active={index === active}
-            canvasWidth={436}
-            canvasHeight={340}
-            baseOpacity={0.18}
-            activeOpacity={0.78}
-            transition={{
-              duration: index === active ? pulseDuration * 0.9 : 0.25,
-              ease: PULSE_EASE,
-            }}
-          />
-        ))}
-        {!reduceMotion && hasTransitioned && (
-          <g key={`${active}-${tick}`}>
-            <motion.circle
-              r="4.5"
-              fill="currentColor"
-              fillOpacity={0.09}
-              initial={{ cx: activeRole.pulseFrom[0], cy: activeRole.pulseFrom[1], opacity: 0 }}
-              animate={{
-                cx: activeRole.pulseTo[0],
-                cy: activeRole.pulseTo[1],
-                opacity: [0, 1, 1, 0],
+        <svg
+          width="436"
+          height="340"
+          viewBox="0 0 436 340"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 text-foreground"
+        >
+          {ROLES.map((role, index) => (
+            <DottedConnector
+              key={role.label}
+              d={role.spoke}
+              active={index === active}
+              canvasWidth={436}
+              canvasHeight={340}
+              baseOpacity={0.18}
+              activeOpacity={0.78}
+              transition={{
+                duration: index === active ? pulseDuration * 0.9 : 0.25,
+                ease: PULSE_EASE,
               }}
-              transition={pulseTransition}
             />
-            <motion.circle
-              r="2"
-              fill="currentColor"
-              initial={{ cx: activeRole.pulseFrom[0], cy: activeRole.pulseFrom[1], opacity: 0 }}
-              animate={{
-                cx: activeRole.pulseTo[0],
-                cy: activeRole.pulseTo[1],
-                opacity: [0, 1, 1, 0],
-              }}
-              transition={pulseTransition}
-            />
-          </g>
-        )}
-      </svg>
+          ))}
+          {!reduceMotion && hasTransitioned && (
+            <g key={`${active}-${tick}`}>
+              <motion.circle
+                r="4.5"
+                fill="currentColor"
+                fillOpacity={0.09}
+                initial={{ cx: activeRole.pulseFrom[0], cy: activeRole.pulseFrom[1], opacity: 0 }}
+                animate={{
+                  cx: activeRole.pulseTo[0],
+                  cy: activeRole.pulseTo[1],
+                  opacity: [0, 1, 1, 0],
+                }}
+                transition={pulseTransition}
+              />
+              <motion.circle
+                r="2"
+                fill="currentColor"
+                initial={{ cx: activeRole.pulseFrom[0], cy: activeRole.pulseFrom[1], opacity: 0 }}
+                animate={{
+                  cx: activeRole.pulseTo[0],
+                  cy: activeRole.pulseTo[1],
+                  opacity: [0, 1, 1, 0],
+                }}
+                transition={pulseTransition}
+              />
+            </g>
+          )}
+        </svg>
 
-      <div className="absolute left-[162px] top-[94px] size-28 rounded-full bg-white/60 p-[5px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_12px_28px_-12px_rgba(0,0,0,0.25)] dark:bg-[#14141499] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_12px_28px_-12px_rgba(0,0,0,0.4)]">
-        <div className="flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7F7F7_0%,#E9E9E9_100%)] shadow-[inset_0_0_0_1px_#FFFFFF,inset_0_-2px_6px_rgba(0,0,0,0.06)] dark:bg-[linear-gradient(180deg,#191919_0%,#212121_100%)] dark:shadow-[inset_0_0_0_1px_#141414,inset_0_-2px_6px_rgba(0,0,0,0.1)]">
-          <Icon icon={SecurityCheckIcon} size={36} strokeWidth={1.5} className="shrink-0 text-foreground" />
+        <div className="absolute left-[162px] top-[94px] size-28 rounded-full bg-white/60 p-[5px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_12px_28px_-12px_rgba(0,0,0,0.25)] dark:bg-[#14141499] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_12px_28px_-12px_rgba(0,0,0,0.4)]">
+          <div className="flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7F7F7_0%,#E9E9E9_100%)] shadow-[inset_0_0_0_1px_#FFFFFF,inset_0_-2px_6px_rgba(0,0,0,0.06)] dark:bg-[linear-gradient(180deg,#191919_0%,#212121_100%)] dark:shadow-[inset_0_0_0_1px_#141414,inset_0_-2px_6px_rgba(0,0,0,0.1)]">
+            <Icon icon={SecurityCheckIcon} size={36} strokeWidth={1.5} className="shrink-0 text-foreground" />
+          </div>
         </div>
-      </div>
 
-      {ROLES.map((role, index) => {
-        const isActive = index === active;
-        const delay = isActive ? activationDelay : 0;
-        return (
-          <React.Fragment key={role.label}>
-            <motion.button
-              type="button"
-              aria-label={role.label}
-              onMouseEnter={() => setHovered(index)}
-              onMouseLeave={() => setHovered(null)}
-              onFocus={() => setHovered(index)}
-              onBlur={() => setHovered(null)}
-              animate={{ scale: isActive ? 1.08 : 1 }}
-              transition={{ type: "spring", duration: 0.55, bounce: 0.16, delay }}
-              className="absolute size-[52px] cursor-default rounded-full bg-white/70 p-[3px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_4px_10px_-4px_rgba(0,0,0,0.18)] outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[#141414B3] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_4px_10px_-4px_rgba(0,0,0,0.3)]"
-              style={{ left: role.left, top: role.top }}
-            >
-              <span className="relative flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F4F4_100%)] shadow-[inset_0_0_0_1px_rgba(23,23,23,0.08)] dark:bg-[linear-gradient(180deg,#141414_0%,#1B1B1B_100%)] dark:shadow-[inset_0_0_0_1px_rgba(237,237,237,0.08)]">
-                <motion.span
-                  aria-hidden="true"
-                  initial={false}
-                  animate={{
-                    opacity: isActive ? 1 : 0,
-                    scale: isActive ? 1 : 0.86,
-                  }}
-                  transition={{ type: "spring", duration: 0.5, bounce: 0, delay }}
-                  className="absolute inset-0 rounded-full bg-[#1A1A1A] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_0_0_5px_rgba(23,23,23,0.08)] dark:bg-[#EDEDED] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_0_0_5px_rgba(237,237,237,0.1)]"
-                />
-                <span
-                  className={cn(
-                    "relative z-10 flex transition-colors duration-400 ease-out",
-                    isActive
-                      ? "text-white dark:text-[#141414]"
-                      : "text-foreground/75",
-                  )}
-                  style={{ transitionDelay: `${delay}s` }}
-                >
-                  <Icon icon={role.icon} size={18} strokeWidth={1.6} />
+        {ROLES.map((role, index) => {
+          const isActive = index === active;
+          const delay = isActive ? activationDelay : 0;
+          return (
+            <React.Fragment key={role.label}>
+              <motion.button
+                type="button"
+                aria-label={role.label}
+                onMouseEnter={() => setHovered(index)}
+                onMouseLeave={() => setHovered(null)}
+                onFocus={() => setHovered(index)}
+                onBlur={() => setHovered(null)}
+                animate={{ scale: isActive ? 1.08 : 1 }}
+                transition={{ type: "spring", duration: 0.55, bounce: 0.16, delay }}
+                className="absolute size-[52px] cursor-default rounded-full bg-white/70 p-[3px] shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_4px_10px_-4px_rgba(0,0,0,0.18)] outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[#141414B3] dark:shadow-[0_0_0_1px_rgba(237,237,237,0.06),0_4px_10px_-4px_rgba(0,0,0,0.3)]"
+                style={{ left: role.left, top: role.top }}
+              >
+                <span className="relative flex size-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F4F4_100%)] shadow-[inset_0_0_0_1px_rgba(23,23,23,0.08)] dark:bg-[linear-gradient(180deg,#141414_0%,#1B1B1B_100%)] dark:shadow-[inset_0_0_0_1px_rgba(237,237,237,0.08)]">
+                  <motion.span
+                    aria-hidden="true"
+                    initial={false}
+                    animate={{
+                      opacity: isActive ? 1 : 0,
+                      scale: isActive ? 1 : 0.86,
+                    }}
+                    transition={{ type: "spring", duration: 0.5, bounce: 0, delay }}
+                    className="absolute inset-0 rounded-full bg-[#1A1A1A] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_0_0_5px_rgba(23,23,23,0.08)] dark:bg-[#EDEDED] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_0_0_5px_rgba(237,237,237,0.1)]"
+                  />
+                  <span
+                    className={cn(
+                      "relative z-10 flex transition-colors duration-400 ease-out",
+                      isActive
+                        ? "text-white dark:text-[#141414]"
+                        : "text-foreground/75",
+                    )}
+                    style={{ transitionDelay: `${delay}s` }}
+                  >
+                    <Icon icon={role.icon} size={18} strokeWidth={1.6} />
+                  </span>
                 </span>
-              </span>
-            </motion.button>
-            <motion.span
-              initial={false}
-              animate={{
-                opacity: isActive ? 1 : 0.55,
-                y: isActive ? -1 : 0,
-              }}
-              transition={{ duration: 0.35, ease: EASE_OUT, delay }}
-              className={cn(
-                "absolute font-ui text-[11px] font-medium leading-[14px] transition-colors duration-400",
-                isActive ? "text-foreground" : "text-muted-foreground",
-              )}
-              style={{ left: role.labelLeft, top: role.labelTop, transitionDelay: `${delay}s` }}
-            >
-              {role.label}
-            </motion.span>
-          </React.Fragment>
-        );
-      })}
+              </motion.button>
+              <motion.span
+                initial={false}
+                animate={{
+                  opacity: isActive ? 1 : 0.55,
+                  y: isActive ? -1 : 0,
+                }}
+                transition={{ duration: 0.35, ease: EASE_OUT, delay }}
+                className={cn(
+                  "absolute font-ui text-[11px] font-medium leading-[14px] transition-colors duration-400",
+                  isActive ? "text-foreground" : "text-muted-foreground",
+                )}
+                style={{ left: role.labelLeft, top: role.labelTop, transitionDelay: `${delay}s` }}
+              >
+                {role.label}
+              </motion.span>
+            </React.Fragment>
+          );
+        })}
+
+      </div>
 
       {badgeVariant === "detailed" ? (
         <div className="absolute inset-x-0 top-[296px] flex justify-center">
@@ -330,8 +593,10 @@ export function RoleBasedAccess({
           </div>
         </div>
       ) : (
-        <div className="absolute left-[162px] top-[292px] flex h-7 items-center gap-1.5 rounded-sm border border-stroke-primary bg-card px-3 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:border-edge-2 dark:bg-surface-2">
-          Access by role
+        <div className="absolute inset-x-0 top-[292px] flex justify-center">
+          <div className="flex h-7 items-center gap-1.5 rounded-sm border border-stroke-primary bg-card px-3 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:border-edge-2 dark:bg-surface-2">
+            Access by role
+          </div>
         </div>
       )}
     </ScaledCanvas>
@@ -340,11 +605,22 @@ export function RoleBasedAccess({
 
 /* ------------------------ Timestamped activity log ------------------------ */
 
-const LOG_SOURCES: { label: string; top: number; y: number; path: string; icon: IconSvgElement }[] = [
-  { label: "Products", top: 43, y: 69, path: "M162 69C236 69 244 159 330 159", icon: CubeIcon },
-  { label: "Workflows", top: 133, y: 159, path: "M162 159H330", icon: CheckmarkBadge01Icon },
-  { label: "Team", top: 223, y: 249, path: "M162 249C236 249 244 159 330 159", icon: UserMultipleIcon },
+const LOG_SOURCES: { label: string; top: number; y: number; icon: IconSvgElement }[] = [
+  { label: "Products", top: 43, y: 69, icon: CubeIcon },
+  { label: "Workflows", top: 133, y: 159, icon: CheckmarkBadge01Icon },
+  { label: "Team", top: 223, y: 249, icon: UserMultipleIcon },
 ];
+
+const LOG_LAYOUT = {
+  default: { width: 873, offset: 0, sourceLeft: 140, lineX: 192, panelLeft: 360, panelWidth: 480, curve: [74, 86], panX: 600 },
+  compact: { width: 582, offset: 0, sourceLeft: 12, lineX: 64, panelLeft: 154, panelWidth: 422, curve: [42, 42], panX: 380 },
+};
+
+function logPath(y: number, layout: (typeof LOG_LAYOUT)["default"]) {
+  const { lineX, panelLeft, curve } = layout;
+  if (y === 159) return `M${lineX} 159H${panelLeft}`;
+  return `M${lineX} ${y}C${lineX + curve[0]} ${y} ${panelLeft - curve[1]} 159 ${panelLeft} 159`;
+}
 
 const LOG_ENTRIES: {
   time: string;
@@ -353,58 +629,66 @@ const LOG_ENTRIES: {
   text: string;
   source: number;
 }[] = [
-  { time: "10:42:08", tag: "RELEASED", tone: "success", text: "IV Extension Set v5 released", source: 0 },
-  { time: "10:31:55", tag: "APPROVED", tone: "info", text: "Ravi K. approved review round 2", source: 1 },
-  { time: "10:12:40", tag: "EDITED", tone: "neutral", text: "Shelf life changed from 3 to 5 years", source: 0 },
-  { time: "09:58:17", tag: "IMPORTED", tone: "neutral", text: "48 rows from PX-2042_specs.xlsx", source: 0 },
-  { time: "09:41:02", tag: "INVITED", tone: "neutral", text: "Marta L. invited as Approver", source: 2 },
+  { time: "10:42:08", tag: "Released", tone: "success", text: "IV Extension Set v5 released", source: 0 },
+  { time: "10:31:55", tag: "Approved", tone: "info", text: "Ravi K. approved review round 2", source: 1 },
+  { time: "10:12:40", tag: "Edited", tone: "neutral", text: "Shelf life changed from 3 to 5 years", source: 0 },
+  { time: "09:58:17", tag: "Imported", tone: "neutral", text: "48 rows from PX-2042_specs.xlsx", source: 0 },
+  { time: "09:41:02", tag: "Invited", tone: "neutral", text: "Marta L. invited as Approver", source: 2 },
 ];
 
 const LOG_BADGE = {
   success:
-    "border-[#22C55E33] bg-success-soft text-success-strong dark:border-[#34D39944] dark:bg-success-soft dark:text-success",
-  info: "border-[#3B82F633] bg-info-soft text-info-strong dark:border-[#60A5FA44] dark:bg-info-soft dark:text-diff-added",
+    "border-stage-released/25 bg-success-soft text-success-strong uppercase dark:border-stage-released/30 dark:text-success",
+  info: "border-stage-submitted/25 bg-info-soft text-info-strong uppercase dark:border-stage-submitted/30 dark:text-diff-added",
   neutral:
-    "border-stroke-primary bg-muted text-muted-foreground dark:border-edge-2 dark:bg-surface-3 dark:text-muted-foreground",
+    "border-stroke-primary bg-muted text-muted-foreground uppercase dark:border-edge-2 dark:bg-surface-3 dark:text-muted-foreground",
 };
 
-function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
-  const [ref, on] = usePlayback(reduceMotion, 8500);
+export function ActivityLog({
+  reduceMotion,
+  variant = "default",
+}: {
+  reduceMotion: boolean;
+  variant?: keyof typeof LOG_LAYOUT;
+}) {
+  const [ref, on, inView] = usePlayback(reduceMotion, 8500);
+  const layout = LOG_LAYOUT[variant];
 
   return (
     <ScaledCanvas
       ref={ref}
-      width={873}
+      aria-hidden="true"
+      width={layout.width}
       height={340}
       minScale={0.68}
-      panX={600}
+      panX={layout.panX}
       panBelow={640}
       className="[mask-image:linear-gradient(#000_85%,transparent_100%)]"
     >
-      <div className="relative ml-[30px] h-[340px] w-[873px]">
+      <div className="relative h-[340px]" style={{ width: layout.width }}>
         <svg
-          width="873"
+          width={layout.width}
           height="340"
-          viewBox="0 0 873 340"
+          viewBox={`0 0 ${layout.width} 340`}
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 text-foreground"
         >
           {LOG_SOURCES.map((source, index) => (
             <g key={source.label}>
               <path
-                d={source.path}
+                d={logPath(source.y, layout)}
                 fill="none"
                 stroke="currentColor"
                 strokeOpacity={0.22}
                 strokeWidth="1.2"
                 strokeDasharray="3 4"
               />
-              {!reduceMotion && on && (
+              {!reduceMotion && on && inView && (
                 <g opacity="0">
                   <circle r="4.5" fill="currentColor" fillOpacity={0.09} />
                   <circle r="2" fill="currentColor" />
                   <animateMotion
-                    path={source.path}
+                    path={logPath(source.y, layout)}
                     dur="2.8s"
                     begin={`${0.15 + index * 0.75}s`}
                     repeatCount="indefinite"
@@ -427,13 +711,13 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
           {LOG_SOURCES.map((source) => (
             <path
               key={source.y}
-              d={`M162 ${source.y - 3.25}A3.25 3.25 0 0 1 162 ${source.y + 3.25}`}
+              d={`M${layout.lineX} ${source.y - 3.25}A3.25 3.25 0 0 1 ${layout.lineX} ${source.y + 3.25}`}
               strokeWidth="1.2"
               className="fill-card stroke-foreground/40 dark:fill-surface-2"
             />
           ))}
           <path
-            d="M330 155.75A3.25 3.25 0 0 0 330 162.25"
+            d={`M${layout.panelLeft} 155.75A3.25 3.25 0 0 0 ${layout.panelLeft} 162.25`}
             strokeWidth="1.2"
             className="fill-card stroke-foreground/40 dark:fill-surface-2"
           />
@@ -442,8 +726,8 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
         {LOG_SOURCES.map((source) => (
           <div
             key={source.label}
-            className="absolute left-[110px] flex flex-col items-center gap-1.5"
-            style={{ top: source.top }}
+            className="absolute flex flex-col items-center gap-1.5"
+            style={{ left: layout.sourceLeft, top: source.top }}
           >
             <div className="size-[52px] rounded-[14px] border border-foreground/5 bg-[#F5F5F5BF] p-[3px] dark:border-separator dark:bg-[#1A1A1ABF]">
               <div className="flex size-full items-center justify-center rounded-[11px] bg-card shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2)]">
@@ -456,7 +740,10 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
           </div>
         ))}
 
-        <div className="absolute left-[330px] top-6 w-[480px] rounded-2xl border border-foreground/5 bg-[#F5F5F5BF] p-[5px] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.18)] dark:border-separator dark:bg-[#1A1A1ABF]">
+        <div
+          className="absolute top-6 rounded-2xl border border-foreground/5 bg-[#F5F5F5BF] p-[5px] shadow-[0_12px_28px_-14px_rgba(0,0,0,0.18)] dark:border-separator dark:bg-[#1A1A1ABF]"
+          style={{ left: layout.panelLeft, width: layout.panelWidth }}
+        >
           <div className="flex flex-col overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2)]">
             <div className="flex h-10 shrink-0 items-center gap-2 border-b border-separator bg-subtle px-4 dark:border-edge-1 dark:bg-[#171717]">
               {[0, 1, 2].map((dot) => (
@@ -485,14 +772,15 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
                       : { duration: 0.2 }
                   }
                   className={cn(
-                    "flex h-10 shrink-0 items-center gap-3 px-4",
+                    "flex h-10 shrink-0 items-center",
+                    variant === "compact" ? "gap-2.5 px-3.5" : "gap-3 px-4",
                     index < LOG_ENTRIES.length - 1 && "border-b border-separator dark:border-edge-1",
                   )}
                 >
-                  <span className="font-mono text-[12px] leading-4 text-placeholder">
+                  <span className={cn("font-mono leading-4 text-placeholder", variant === "compact" ? "text-[11px]" : "text-[12px]")}>
                     {entry.time}
                   </span>
-                  <span className="flex w-[72px] shrink-0">
+                  <span className={cn("flex shrink-0", variant === "compact" ? "w-[68px]" : "w-[72px]")}>
                     <span
                       className={cn(
                         "flex h-5 items-center rounded-[5px] border px-1.5 font-mono text-[10px] leading-3",
@@ -502,7 +790,7 @@ function ActivityLog({ reduceMotion }: { reduceMotion: boolean }) {
                       {entry.tag}
                     </span>
                   </span>
-                  <span className="whitespace-nowrap font-ui text-[13px] leading-4 text-foreground">
+                  <span className={cn("whitespace-nowrap font-ui leading-4 text-foreground", variant === "compact" ? "text-[12.5px]" : "text-[13px]")}>
                     {entry.text}
                   </span>
                 </motion.div>
@@ -611,9 +899,10 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
   return (
     <ScaledCanvas
       ref={ref}
+      aria-hidden="true"
       width={873}
       height={340}
-      minScale={0.86}
+      minScale={0.54}
       panX={436}
       panBelow={640}
       className="[mask-image:linear-gradient(#000_85%,transparent_100%)]"
@@ -635,8 +924,8 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
         />
       ))}
 
-      <div className="absolute left-[276px] top-[72px] w-80 rounded-[20px] border border-foreground/5 bg-[#F5F5F5BF] p-1.5 shadow-[0_16px_36px_-18px_rgba(0,0,0,0.25)] dark:border-separator dark:bg-[#1A1A1ABF]">
-        <div className="flex gap-2 rounded-[15px] bg-[#EEEEEE] p-1.5 shadow-[inset_0_0_0_1px_rgba(23,23,23,0.04)] dark:bg-[#1E1E1E] dark:shadow-[inset_0_0_0_1px_rgba(237,237,237,0.04)]">
+      <div className="absolute left-[276px] top-[72px] w-80 rounded-[24px] border border-foreground/5 bg-frame-surface p-1.5 shadow-[0_16px_36px_-18px_rgba(0,0,0,0.25)] dark:border-separator">
+        <div className="flex gap-2 rounded-[18px] bg-[#EEEEEE] p-1.5 shadow-[inset_0_0_0_1px_rgba(23,23,23,0.04)] dark:bg-[#1E1E1E] dark:shadow-[inset_0_0_0_1px_rgba(237,237,237,0.04)]">
           <div className="relative flex h-[180px] w-[196px] shrink-0 flex-col justify-between rounded-xl bg-card px-3 py-2.5 shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2)]">
             <div className="flex items-center justify-between">
               <span className="size-1.5 rounded-full border border-foreground/20 bg-subtle dark:bg-[#171717]" />
@@ -647,7 +936,7 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
             </div>
             <div className="flex items-center justify-between">
               <span className="size-1.5 rounded-full border border-foreground/20 bg-subtle dark:bg-[#171717]" />
-              <span className="font-mono text-[9px] leading-3 text-foreground/40">UPREVIT</span>
+              <span className="font-mono text-[9px] uppercase leading-3 text-foreground/40">Uprevit</span>
               <span className="flex gap-1">
                 {[0, 1, 2].map((dot) => {
                   const lit = dot < litLeds;
@@ -750,7 +1039,7 @@ function DataInOut({ reduceMotion }: { reduceMotion: boolean }) {
               strokeWidth="1.2"
               strokeDasharray="4 4"
             />
-            {!reduceMotion && on && (
+            {!reduceMotion && on && inView && (
               <g opacity="0">
                 <circle r="4.5" fill="currentColor" fillOpacity={0.08} />
                 <circle r="2" fill="currentColor" />
@@ -808,7 +1097,7 @@ export function SingleSignOn({
   reduceMotion: boolean;
   caption?: string;
 }) {
-  const [ref, on] = usePlayback(reduceMotion, 7600);
+  const [ref, on, inView] = usePlayback(reduceMotion, 7600);
   const [scanDone, setScanDone] = React.useState(false);
 
   React.useEffect(() => {
@@ -826,6 +1115,7 @@ export function SingleSignOn({
   return (
     <ScaledCanvas
       ref={ref}
+      aria-hidden="true"
       width={436}
       height={340}
       className="[mask-image:linear-gradient(#000_85%,transparent_100%)]"
@@ -899,7 +1189,7 @@ export function SingleSignOn({
       <motion.div
         initial={false}
         animate={{ scale: verified ? 1 : 0.95 }}
-        transition={{ type: "spring", duration: 0.45, bounce: 0.24 }}
+        transition={{ type: "spring", duration: 0.3, bounce: 0 }}
         className="absolute left-[248px] top-[170px] flex size-8 items-center justify-center rounded-full border-2 border-white bg-[#EAEAEA] shadow-[0_4px_10px_-2px_rgba(0,0,0,0.22)] dark:border-surface-1 dark:bg-[#262626]"
       >
         <motion.span
@@ -910,7 +1200,7 @@ export function SingleSignOn({
             opacity: verified ? 1 : 0,
           }}
           transition={{ duration: verified ? 0.24 : 0.18, ease: EASE_OUT }}
-          className="absolute inset-0 rounded-full bg-[#1A1A1A] dark:bg-[#EDEDED]"
+          className="absolute inset-0 rounded-full bg-invert"
         />
         <svg
           width="18"
@@ -919,7 +1209,7 @@ export function SingleSignOn({
           aria-hidden="true"
           className="relative z-10"
         >
-          {!reduceMotion && (
+          {!reduceMotion && inView && (
             <motion.g
               initial={false}
               animate={{ opacity: verified ? 0 : 1 }}
@@ -939,7 +1229,7 @@ export function SingleSignOn({
                 strokeOpacity={0.2}
                 strokeWidth="2"
               />
-              <g className="origin-center animate-spin [animation-duration:850ms] [transform-box:fill-box]">
+              <g className="origin-center animate-spin motion-reduce:animate-none [animation-duration:850ms] [transform-box:fill-box]">
                 <motion.circle
                   cx="10"
                   cy="10"
@@ -1021,7 +1311,7 @@ export function SingleSignOn({
                 transition={{ duration: 0.22, ease: EASE_OUT }}
                 className="flex items-center gap-1.5 whitespace-nowrap text-muted-foreground"
               >
-                <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-foreground/45" />
+                <span className="size-1.5 shrink-0 animate-pulse motion-reduce:animate-none rounded-full bg-foreground/45" />
                 Verifying…
               </motion.span>
             )}

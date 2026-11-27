@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { MotionConfig, motion } from "motion/react";
+import { MotionConfig, motion, useInView } from "motion/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   Book01Icon,
@@ -107,6 +107,7 @@ const TICKS_MINOR = "M660.02 224.13L660.55 214.15 M665.03 224.53L666.08 214.58 M
 function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
   const [hovered, setHovered] = React.useState<number | null>(null);
   const stageRef = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(stageRef, { amount: 0.15 });
   const [containerWidth, setContainerWidth] = React.useState(860);
 
   React.useEffect(() => {
@@ -129,6 +130,7 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
   return (
     <div
       ref={stageRef}
+      aria-hidden="true"
       className="relative w-full overflow-hidden"
       style={{ height: stageHeight }}
     >
@@ -175,10 +177,14 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
                 fill="none"
                 stroke="#fff"
                 strokeWidth="6"
-                initial={{ pathLength: 0 }}
+                initial={reduceMotion ? false : { pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
                 viewport={IN_VIEW}
-                transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.35 + index * 0.06 }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.7, ease: EASE_OUT, delay: 0.35 + index * 0.06 }
+                }
               />
             </mask>
             <motion.path
@@ -196,7 +202,7 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
           </g>
         ))}
 
-        {reduceMotion
+        {reduceMotion || !inView
           ? [
               [518.7, 199.5],
               [518.7, 440.5],
@@ -259,7 +265,7 @@ function HubStage({ reduceMotion }: { reduceMotion: boolean }) {
         <circle cx="655" cy="320" r="90" fill="none" stroke="currentColor" strokeOpacity={0.07} />
         <motion.g
           style={{ transformOrigin: "655px 320px", transformBox: "view-box" }}
-          animate={reduceMotion ? undefined : { rotate: 360 }}
+          animate={reduceMotion || !inView ? undefined : { rotate: 360 }}
           transition={{ duration: 120, ease: "linear", repeat: Infinity }}
           stroke="currentColor"
           strokeLinecap="round"

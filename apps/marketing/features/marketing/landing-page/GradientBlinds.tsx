@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 
 export type BlindsShineDirection = "left" | "right";
 export type BlindsClickEffect = "ripple" | "none";
@@ -377,38 +377,71 @@ const GradientBlinds = ({
       ? gradientColors
       : ["#FF9FFC", "#5227FF"]
   ).join(",");
-  const settings: Settings = {
-    paused,
-    colorKey,
-    gradientColors,
-    angle,
-    noise: clamp(noise, 0, 2),
-    blindCount: Math.max(1, blindCount || 1),
-    blindMinWidth,
-    mouseDampening: Math.max(0, mouseDampening),
-    mirrorGradient,
-    spotlightRadius,
-    spotlightSoftness,
-    spotlightOpacity,
-    distortAmount,
-    shineDirection,
-    lightColor,
-    perspective: clamp(perspective, -1, 1),
-    gradientSpeed,
-    shine: clamp(shine, 0, 2),
-    relief: clamp(relief, 0, 1),
-    glow: clamp(glow, 0, 2),
-    sway: clamp(sway, 0, 1),
-    speed: clamp(speed, 0, 4),
-    hoverTilt: clamp(hoverTilt, 0, 1.5),
-    clickEffect,
-    idle,
-    anchorX,
-    anchorY,
-    intro,
-    lightMode,
-    dpr,
-  };
+  const settings: Settings = useMemo(
+    () => ({
+      paused,
+      colorKey,
+      gradientColors: colorKey.split(","),
+      angle,
+      noise: clamp(noise, 0, 2),
+      blindCount: Math.max(1, blindCount || 1),
+      blindMinWidth,
+      mouseDampening: Math.max(0, mouseDampening),
+      mirrorGradient,
+      spotlightRadius,
+      spotlightSoftness,
+      spotlightOpacity,
+      distortAmount,
+      shineDirection,
+      lightColor,
+      perspective: clamp(perspective, -1, 1),
+      gradientSpeed,
+      shine: clamp(shine, 0, 2),
+      relief: clamp(relief, 0, 1),
+      glow: clamp(glow, 0, 2),
+      sway: clamp(sway, 0, 1),
+      speed: clamp(speed, 0, 4),
+      hoverTilt: clamp(hoverTilt, 0, 1.5),
+      clickEffect,
+      idle,
+      anchorX,
+      anchorY,
+      intro,
+      lightMode,
+      dpr,
+    }),
+    [
+      paused,
+      colorKey,
+      angle,
+      noise,
+      blindCount,
+      blindMinWidth,
+      mouseDampening,
+      mirrorGradient,
+      spotlightRadius,
+      spotlightSoftness,
+      spotlightOpacity,
+      distortAmount,
+      shineDirection,
+      lightColor,
+      perspective,
+      gradientSpeed,
+      shine,
+      relief,
+      glow,
+      sway,
+      speed,
+      hoverTilt,
+      clickEffect,
+      idle,
+      anchorX,
+      anchorY,
+      intro,
+      lightMode,
+      dpr,
+    ],
+  );
   const settingsRef = useRef(settings);
 
   useEffect(() => {
@@ -427,8 +460,8 @@ const GradientBlinds = ({
     const u = shader.uniforms;
     const vao = gl.createVertexArray();
 
-    const reduce =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    let reduce = motionQuery?.matches ?? false;
     const view = { width: 1, height: 1, ratio: 1, count: 1 };
     const pointer = { x: 0, y: 0, inside: false };
     const light = { x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, ready: false };
@@ -572,10 +605,17 @@ const GradientBlinds = ({
         swayTime += dt * s.speed;
         shift = (shift + dt * s.gradientSpeed * 0.06) % 2;
       }
-      grainTime = Math.floor(time * 24) * 17.13;
+      const hasContinuousMotion =
+        !reduce &&
+        (s.gradientSpeed !== 0 ||
+          (s.sway > 0 && s.speed > 0) ||
+          (s.idle === "drift" && !pointer.inside));
+      if (hasContinuousMotion) {
+        grainTime = Math.floor(time * 24) * 17.13;
+      }
       if (introClock < 1)
         introClock = Math.min(1, introClock + dt / INTRO_SECONDS);
-      hover += ((pointer.inside ? 1 : 0) - hover) * (1 - Math.exp(-dt / 0.35));
+      hover += ((pointer.inside && !reduce ? 1 : 0) - hover) * (1 - Math.exp(-dt / 0.35));
       aim(s);
       follow(s, dt);
       for (let i = 0; i < MAX_WAVES; i++) {
@@ -587,20 +627,20 @@ const GradientBlinds = ({
         Math.abs(light.tx - light.x) > 0.05 ||
         Math.abs(light.ty - light.y) > 0.05 ||
         Math.abs(light.vx) + Math.abs(light.vy) > 0.05 ||
-        Math.abs((pointer.inside ? 1 : 0) - hover) > 0.002;
+        Math.abs((pointer.inside && !reduce ? 1 : 0) - hover) > 0.002;
       const active =
         settling ||
         introClock < 1 ||
         waves.some((value, index) => index % 4 === 3 && value > 0) ||
-        (!reduce &&
-          (s.noise > 0 ||
-            s.gradientSpeed !== 0 ||
-            (s.sway > 0 && s.speed > 0) ||
-            (s.idle === "drift" && !pointer.inside)));
+        hasContinuousMotion;
       if (active) raf = requestAnimationFrame(frame);
     };
 
     function wake() {
+      if (reduce) {
+        draw();
+        return;
+      }
       if (!raf && visible && !document.hidden) {
         last = 0;
         raf = requestAnimationFrame(frame);
@@ -619,6 +659,7 @@ const GradientBlinds = ({
     };
 
     const onPointerMove = (event: PointerEvent) => {
+      if (!visible || reduce) return;
       const { x, y, inside } = locate(event);
       pointer.x = x;
       pointer.y = y;
@@ -627,9 +668,10 @@ const GradientBlinds = ({
     };
 
     const onPointerDown = (event: PointerEvent) => {
+      if (!visible || reduce) return;
       const s = settingsRef.current;
       const { x, y, inside } = locate(event);
-      if (!inside || reduce || s.clickEffect !== "ripple") return;
+      if (!inside || s.clickEffect !== "ripple") return;
       const o = waveIndex * 4;
       waves[o] = x * view.ratio;
       waves[o + 1] = (view.height - y) * view.ratio;
@@ -640,6 +682,7 @@ const GradientBlinds = ({
     };
 
     const onPointerLeave = () => {
+      if (reduce) return;
       pointer.inside = false;
       wake();
     };
@@ -649,6 +692,20 @@ const GradientBlinds = ({
       wake();
     };
 
+    const onReducedMotionChange = (event: MediaQueryListEvent) => {
+      reduce = event.matches;
+      if (reduce) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        pointer.inside = false;
+        hover = 0;
+        introClock = 1;
+        draw();
+      } else {
+        wake();
+      }
+    };
+
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
     const intersection = new IntersectionObserver((entries) => {
@@ -656,6 +713,7 @@ const GradientBlinds = ({
       if (visible) wake();
     });
     intersection.observe(container);
+    motionQuery?.addEventListener("change", onReducedMotionChange);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
@@ -668,6 +726,7 @@ const GradientBlinds = ({
       wakeRef.current = null;
       resizeObserver.disconnect();
       intersection.disconnect();
+      motionQuery?.removeEventListener("change", onReducedMotionChange);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
       document.documentElement.removeEventListener(
@@ -685,7 +744,7 @@ const GradientBlinds = ({
   useEffect(() => {
     settingsRef.current = settings;
     wakeRef.current?.();
-  });
+  }, [settings]);
 
   return (
     <div

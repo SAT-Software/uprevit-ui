@@ -47,10 +47,14 @@ const HERO_PILLS: HeroPill[] = [
   },
 ];
 
-const PILL_SPRING = { type: "spring" as const, duration: 0.35, bounce: 0.15 };
+const PILL_SPRING = { type: "spring" as const, duration: 0.2, bounce: 0 };
 
 export default function HeroSection() {
-  const [spotlight, setSpotlight] = React.useState<HeroSpotlight>(null);
+  const [hoveredSpotlight, setHoveredSpotlight] =
+    React.useState<HeroSpotlight>(null);
+  const [pinnedSpotlight, setPinnedSpotlight] =
+    React.useState<HeroSpotlight>(null);
+  const spotlight = hoveredSpotlight ?? pinnedSpotlight;
   const reduceMotion = usePrefersReducedMotion();
 
   const handleScrollToPreview = React.useCallback(() => {
@@ -58,15 +62,19 @@ export default function HeroSection() {
       document.getElementById("how-it-works") ??
       document.getElementById("product-preview");
     if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      });
     }
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <MotionConfig reducedMotion="user">
       <TileRow
         as="section"
-        centerClassName="relative flex flex-col items-center overflow-hidden px-5 pt-14 pb-12 sm:px-8 sm:pt-18 sm:pb-24 lg:pt-[76px] lg:pb-[196px]"
+        aria-labelledby="hero-heading"
+        centerClassName="relative flex flex-col items-center overflow-hidden px-5 pt-14 pb-12 sm:px-8 sm:pt-18 sm:pb-24 lg:px-10 lg:pt-[76px] lg:pb-[196px]"
       >
         <div
           aria-hidden="true"
@@ -81,37 +89,6 @@ export default function HeroSection() {
           />
         </div>
 
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 1310 612"
-          preserveAspectRatio="xMidYMin slice"
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <ellipse
-            cx="655"
-            cy="122"
-            rx="790"
-            ry="422"
-            fill="none"
-            className="stroke-[#F1F1F1] dark:stroke-transparent"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeDasharray="0.1 8"
-          />
-          <ellipse
-            cx="655"
-            cy="122"
-            rx="930"
-            ry="520"
-            fill="none"
-            className="stroke-[#17171714] dark:stroke-[#EDEDED1F]"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeDasharray="0.1 8"
-          />
-        </svg>
-
         <div className="relative z-10 flex w-full max-w-[1040px] flex-col items-center gap-6 sm:gap-5">
           <div
             className="hero-enter w-full pb-1 text-center"
@@ -123,10 +100,13 @@ export default function HeroSection() {
               } as React.CSSProperties
             }
           >
-            <h1 className="font-sans text-[32px] font-medium leading-[35px] tracking-[-0.04em] text-foreground sm:text-[44px] sm:leading-[1.06] lg:text-[56px] lg:leading-[60px]">
+            <h1
+              id="hero-heading"
+              className="text-balance font-sans text-[32px] font-medium leading-[1.08] tracking-[-0.04em] text-foreground sm:text-[44px] sm:leading-[1.06] lg:text-[56px]"
+            >
               From raw data
               <br />
-              <span className="text-foreground/40">
+              <span className="text-foreground/55">
                 to Notified Body–ready labels
               </span>
             </h1>
@@ -142,18 +122,18 @@ export default function HeroSection() {
               } as React.CSSProperties
             }
           >
-            <p className="max-w-[300px] font-ui text-[14px] leading-[21px] text-muted-foreground sm:max-w-none sm:text-[16px] sm:leading-[26px]">
+            <p className="max-w-[300px] text-pretty font-ui text-[14px] leading-[1.5] text-muted-foreground sm:max-w-none sm:text-[16px]">
               The unified cloud-based platform for total labeling governance.
             </p>
-            <div className="flex max-w-[310px] flex-wrap items-center justify-center gap-y-2 font-ui text-[14px] leading-[21px] text-muted-foreground sm:max-w-none sm:text-[16px] sm:leading-[26px]">
-              <span className="pr-1.5">Track every</span>
+            <div className="flex max-w-[310px] flex-wrap items-center justify-center gap-y-2 font-ui text-[14px] leading-[1.5] text-muted-foreground sm:max-w-none sm:text-[16px]">
+              <span className="pe-1.5">Track every</span>
               <HeroInlinePill
                 pill={HERO_PILLS[0]}
                 active={spotlight === "spec-change"}
                 reduceMotion={reduceMotion}
-                onHover={setSpotlight}
+                onHover={setHoveredSpotlight}
                 onToggle={(id) =>
-                  setSpotlight((prev) => (prev === id ? null : id))
+                  setPinnedSpotlight((prev) => (prev === id ? null : id))
                 }
               />
               <span className="px-1.5">through</span>
@@ -161,9 +141,9 @@ export default function HeroSection() {
                 pill={HERO_PILLS[1]}
                 active={spotlight === "review"}
                 reduceMotion={reduceMotion}
-                onHover={setSpotlight}
+                onHover={setHoveredSpotlight}
                 onToggle={(id) =>
-                  setSpotlight((prev) => (prev === id ? null : id))
+                  setPinnedSpotlight((prev) => (prev === id ? null : id))
                 }
               />
               <span className="px-1.5">to</span>
@@ -171,9 +151,9 @@ export default function HeroSection() {
                 pill={HERO_PILLS[2]}
                 active={spotlight === "release"}
                 reduceMotion={reduceMotion}
-                onHover={setSpotlight}
+                onHover={setHoveredSpotlight}
                 onToggle={(id) =>
-                  setSpotlight((prev) => (prev === id ? null : id))
+                  setPinnedSpotlight((prev) => (prev === id ? null : id))
                 }
               />
             </div>
@@ -200,7 +180,7 @@ export default function HeroSection() {
               <Link
                 href="/contact"
                 data-attr="hero-book-demo"
-                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-[18px] font-ui text-[14px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto dark:hover:bg-primary-hover"
+                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-[18px] font-ui text-[14px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto [@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)]"
               >
                 Book a demo
               </Link>
@@ -209,7 +189,7 @@ export default function HeroSection() {
                 type="button"
                 onClick={handleScrollToPreview}
                 data-attr="hero-see-how-it-works"
-                className="group/cta inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 font-ui text-[14px] font-medium leading-[18px] text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)] outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:border-stroke-strong hover:bg-subtle focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] sm:h-10 sm:w-auto dark:bg-surface-2 dark:hover:bg-surface-3"
+                className="group/cta inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 font-ui text-[14px] font-medium leading-[18px] text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)] outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] sm:h-10 sm:w-auto [@media(hover:hover)_and_(pointer:fine)]:hover:border-stroke-strong [@media(hover:hover)_and_(pointer:fine)]:hover:bg-subtle dark:bg-surface-2 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-3"
               >
                 <span>See how it works</span>
                 <Icon
@@ -234,7 +214,8 @@ export default function HeroSection() {
       <TileRow
         as="section"
         id="product-preview"
-        className="relative"
+        aria-label="Product preview"
+        className="relative scroll-mt-14"
         centerClassName="relative overflow-visible bg-transparent p-0"
       >
         <HeroProductPreview spotlight={spotlight} />
@@ -259,15 +240,18 @@ function HeroInlinePill({
   return (
     <motion.button
       type="button"
-      onHoverStart={() => onHover(pill.id)}
-      onHoverEnd={() => onHover(null)}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") onHover(pill.id);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") onHover(null);
+      }}
       onClick={() => onToggle(pill.id)}
       aria-pressed={active}
-      whileHover={reduceMotion ? undefined : { y: -1.5, scale: 1.015 }}
       whileTap={reduceMotion ? undefined : { y: 0, scale: 0.97 }}
       transition={PILL_SPRING}
       className={cn(
-        "inline-flex h-[28px] cursor-pointer items-center gap-1.5 rounded-md border border-foreground/[0.09] bg-card pl-2 pr-2.5 font-ui text-[14px] font-medium leading-none text-foreground shadow-[inset_0_-1px_0_rgba(23,23,23,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)] outline-none transition-[border-color,background-color,box-shadow] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring dark:border-foreground/[0.09] dark:bg-surface-2 dark:shadow-[inset_0_-1px_0_rgba(237,237,237,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)]",
+        "inline-flex h-[28px] cursor-pointer items-center gap-1.5 rounded-md border border-foreground/[0.09] bg-card ps-2 pe-2.5 font-ui text-[14px] font-medium leading-none text-foreground shadow-[inset_0_-1px_0_rgba(23,23,23,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)] outline-none transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-[1.5px] [@media(hover:hover)_and_(pointer:fine)]:hover:scale-[1.015] motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 dark:border-foreground/[0.09] dark:bg-surface-2 dark:shadow-[inset_0_-1px_0_rgba(237,237,237,0.04),0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.08)]",
         active &&
           "border-foreground/[0.16] bg-subtle shadow-[inset_0_-1px_0_rgba(23,23,23,0.04),0_2px_4px_rgba(0,0,0,0.07),0_6px_14px_-4px_rgba(0,0,0,0.1)] dark:border-foreground/[0.18] dark:bg-surface-3 dark:shadow-[inset_0_-1px_0_rgba(237,237,237,0.05),0_2px_6px_rgba(0,0,0,0.22),0_6px_14px_-4px_rgba(0,0,0,0.3)]",
       )}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useInView } from "motion/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   Activity03Icon,
@@ -275,9 +275,9 @@ function KpiHoverCard({
         {kpi.hoverFooter && (
           <motion.div
             key="footer"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 34, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ clipPath: "inset(0 0 100% 0)", opacity: 0 }}
+            animate={{ clipPath: "inset(0 0 0% 0)", opacity: 1 }}
+            exit={{ clipPath: "inset(0 0 100% 0)", opacity: 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: EASE_OUT }}
             className="overflow-hidden"
           >
@@ -474,27 +474,27 @@ const PEOPLE: Record<
   SP: {
     name: "Sara P.",
     src: "/images/avatars/sara.webp",
-    role: "Regulatory Lead",
+    role: "Labeling Lead",
   },
   ML: {
     name: "Marta L.",
     src: "/images/avatars/marta.webp",
-    role: "Quality Assurance",
+    role: "Regulatory Affairs",
   },
   RK: {
     name: "Ravi K.",
     src: "/images/avatars/ravi.webp",
-    role: "Labeling Engineer",
+    role: "Quality Assurance",
   },
   DK: {
     name: "Daniel K.",
     src: "/images/avatars/daniel.webp",
-    role: "QA Reviewer",
+    role: "Packaging Engineering",
   },
   AM: {
-    name: "Arjun M.",
+    name: "Ravi K.",
     src: "/images/avatars/ravi.webp",
-    role: "QA Lead",
+    role: "Quality Assurance",
   },
 };
 
@@ -657,31 +657,33 @@ function LiveDiscussionCard({
   highlighted: boolean;
   reduceMotion: boolean;
 }) {
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(cardRef, { amount: 0.15 });
   const [step, setStep] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
   const [typedCount, setTypedCount] = React.useState(0);
 
   React.useEffect(() => {
-    if (reduceMotion || paused) return;
+    if (reduceMotion || paused || !inView) return;
 
     const timer = setTimeout(() => {
       setStep((prev) => (prev >= LAST_DISCUSSION_STEP ? 0 : prev + 1));
     }, DISCUSSION_STEP_DELAYS[step]);
 
     return () => clearTimeout(timer);
-  }, [step, paused, reduceMotion]);
+  }, [step, paused, reduceMotion, inView]);
 
   const draft = SARA_DRAFTS[step];
 
   React.useEffect(() => {
-    if (reduceMotion || paused || !draft) return;
+    if (reduceMotion || paused || !inView || !draft) return;
 
     const interval = setInterval(() => {
       setTypedCount((prev) => Math.min(prev + 1, draft.length));
     }, 32);
 
     return () => clearInterval(interval);
-  }, [draft, paused, reduceMotion]);
+  }, [draft, paused, reduceMotion, inView]);
 
   const [prevStep, setPrevStep] = React.useState(step);
   if (prevStep !== step) {
@@ -782,10 +784,10 @@ function LiveDiscussionCard({
           <ProfileAvatar code="AM" size={22} />
           <div className="flex max-w-[200px] flex-col items-start gap-[3px]">
             <span className="pl-1 font-ui text-[10.5px] font-medium leading-3.5 text-foreground">
-              Arjun M.
+              Ravi K.
             </span>
             <div className="rounded-t-2xl rounded-bl-[4px] rounded-br-2xl border border-border bg-file-frame px-[11px] py-[7px] font-ui text-[11.5px] leading-4 text-foreground dark:border-edge-2 dark:bg-surface-3">
-              IFU redlines aren&apos;t attached. Add them and I&apos;ll approve.
+              IFU redlines aren’t attached. Add them and I’ll approve.
             </div>
             <AnimatePresence mode="popLayout" initial={false}>
               {s >= 9 && !arjunResolved && (
@@ -840,16 +842,18 @@ function LiveDiscussionCard({
     {
       key: "arjun-approved",
       show: s >= 12,
-      node: <DiscussionEventRow name="Arjun" text=" approved · 13:11" />,
+      node: <DiscussionEventRow name="Ravi" text=" approved · 13:11" />,
     },
   ];
 
   return (
     <div
+      ref={cardRef}
+      aria-hidden="true"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       className={cn(
-        "hero-enter-float pointer-events-auto absolute right-3 top-4 z-30 flex h-[380px] w-[256px] flex-col overflow-hidden rounded-[14px] bg-card shadow-[0_0_0_1px_rgba(23,23,23,0.1),0_0_0_5px_rgba(255,255,255,0.4),0_0_0_6px_rgba(255,255,255,0.6),0_0_28px_10px_rgba(255,255,255,0.35),0_1px_2px_rgba(0,0,0,0.05),0_12px_24px_-8px_rgba(27,16,58,0.18),0_40px_80px_-24px_rgba(27,16,58,0.35)] transition-shadow duration-200 sm:hidden lg:left-[44px] lg:right-auto lg:top-[236px] lg:flex lg:h-[460px] lg:w-[262px] xl:left-[76px] xl:w-[276px] dark:bg-surface-2 dark:shadow-[0_0_0_1px_rgba(237,237,237,0.1),0_0_0_5px_rgba(20,20,20,0.4),0_0_0_6px_rgba(20,20,20,0.6),0_0_28px_10px_rgba(20,20,20,0.35),0_1px_2px_rgba(0,0,0,0.2),0_12px_24px_-8px_rgba(0,0,0,0.45),0_40px_80px_-24px_rgba(0,0,0,0.65)]",
+        "hero-enter-float pointer-events-auto absolute left-[44px] top-[236px] z-30 hidden h-[460px] w-[262px] flex-col overflow-hidden rounded-[14px] bg-card shadow-[0_0_0_1px_rgba(23,23,23,0.1),0_0_0_5px_rgba(255,255,255,0.4),0_0_0_6px_rgba(255,255,255,0.6),0_0_28px_10px_rgba(255,255,255,0.35),0_1px_2px_rgba(0,0,0,0.05),0_12px_24px_-8px_rgba(27,16,58,0.18),0_40px_80px_-24px_rgba(27,16,58,0.35)] transition-shadow duration-200 lg:flex xl:left-[76px] xl:w-[276px] dark:bg-surface-2 dark:shadow-[0_0_0_1px_rgba(237,237,237,0.1),0_0_0_5px_rgba(20,20,20,0.4),0_0_0_6px_rgba(20,20,20,0.6),0_0_28px_10px_rgba(20,20,20,0.35),0_1px_2px_rgba(0,0,0,0.2),0_12px_24px_-8px_rgba(0,0,0,0.45),0_40px_80px_-24px_rgba(0,0,0,0.65)]",
         highlighted &&
           "ring-2 ring-primary/50 ring-offset-2 ring-offset-transparent",
       )}
@@ -912,7 +916,11 @@ function LiveDiscussionCard({
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col justify-end gap-3.5 overflow-hidden px-3 pb-3 pt-4 [mask-image:linear-gradient(to_bottom,transparent_0,black_56px)]">
+      <div className="relative flex min-h-0 flex-1 flex-col justify-end gap-3.5 overflow-hidden px-3 pb-3 pt-4">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-gradient-to-b from-card from-15% to-transparent backdrop-blur-[1px] [mask-image:linear-gradient(to_bottom,black_40%,transparent)] dark:from-surface-2"
+        />
         <AnimatePresence mode="popLayout" initial={false}>
           {items
             .filter((item) => item.show)
@@ -938,7 +946,7 @@ function LiveDiscussionCard({
                 <span className="truncate">{draft.slice(0, typedCount)}</span>
                 <span
                   aria-hidden="true"
-                  className="ml-px inline-block h-3.5 w-[1.5px] shrink-0 animate-pulse bg-foreground/70"
+                  className="ml-px inline-block h-3.5 w-[1.5px] shrink-0 animate-pulse motion-reduce:animate-none bg-foreground/70"
                 />
               </span>
             ) : (
@@ -958,6 +966,9 @@ function LiveDiscussionCard({
     </div>
   );
 }
+
+const cardHalos = (color: string) =>
+  `radial-gradient(280px 320px at 110px 480px, ${color} 50%, transparent), radial-gradient(330px 250px at calc(100% - 170px) 500px, ${color} 55%, transparent)`;
 
 export interface HeroProductPreviewProps {
   spotlight?: HeroSpotlight;
@@ -1139,14 +1150,13 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      aria-label="Notifications"
-                      className="relative inline-flex size-7 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-fg-secondary shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[background-color,border-color,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] [@media(hover:hover)_and_(pointer:fine)]:hover:border-stroke-strong [@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-hover [@media(hover:hover)_and_(pointer:fine)]:hover:text-foreground dark:border-edge-2 dark:bg-surface-2 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-3"
+                    <span
+                      aria-hidden="true"
+                      className="relative inline-flex size-7 items-center justify-center rounded-md border border-border bg-card text-fg-secondary shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:border-edge-2 dark:bg-surface-2"
                     >
                       <Icon icon={Notification02Icon} size={14} strokeWidth={1.9} />
                       <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-primary ring-[1.5px] ring-card dark:ring-surface-2" />
-                    </button>
+                    </span>
                     <ProfileAvatar code="SP" size={26} />
                   </div>
                 </div>
@@ -1196,11 +1206,8 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                     </div>
                   </div>
 
-                  <div className="relative hidden shrink-0 items-center gap-1.5 sm:flex">
-                    <button
-                      type="button"
-                      className="inline-flex h-[30px] cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card pl-2.5 pr-3 font-ui text-[12px] font-medium text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none transition-[background-color,border-color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] [@media(hover:hover)_and_(pointer:fine)]:hover:border-stroke-strong [@media(hover:hover)_and_(pointer:fine)]:hover:bg-subtle dark:border-white/12 dark:bg-surface-3 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-4"
-                    >
+                  <div aria-hidden="true" className="relative hidden shrink-0 items-center gap-1.5 sm:flex">
+                    <span className="inline-flex h-[30px] items-center gap-1.5 rounded-md border border-border bg-card pl-2.5 pr-3 font-ui text-[12px] font-medium text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-white/12 dark:bg-surface-3">
                       <Icon
                         icon={Upload04Icon}
                         size={13}
@@ -1208,14 +1215,11 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                         className="text-fg-secondary"
                       />
                       Import
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex h-[30px] cursor-pointer items-center gap-1.5 rounded-md border border-primary-700 bg-primary pl-2.5 pr-3 font-ui text-[12px] font-medium text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[#8A33FF] [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_16px_-6px_rgba(127,34,254,0.55)] dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover"
-                    >
+                    </span>
+                    <span className="inline-flex h-[30px] items-center gap-1.5 rounded-md border border-primary-700 bg-primary pl-2.5 pr-3 font-ui text-[12px] font-medium text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)]">
                       <Icon icon={Add01Icon} size={13} strokeWidth={2.2} />
                       New product
-                    </button>
+                    </span>
                   </div>
                 </div>
 
@@ -1464,14 +1468,14 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                               {activePoint.full}
                             </span>
                             <span className="flex items-center gap-1.5 font-ui text-[10px] leading-3.5">
-                              <span className="size-1.5 rounded-[2px] bg-[#60A5FA]" />
+                              <span className="size-1.5 rounded-[2px] bg-stage-submitted" />
                               <span className="opacity-70">Created</span>
                               <span className="ml-auto font-medium tabular-nums">
                                 {activePoint.created}
                               </span>
                             </span>
                             <span className="flex items-center gap-1.5 font-ui text-[10px] leading-3.5">
-                              <span className="size-1.5 rounded-[2px] bg-[#4ADE80]" />
+                              <span className="size-1.5 rounded-[2px] bg-stage-released" />
                               <span className="opacity-70">Released</span>
                               <span className="ml-auto font-medium tabular-nums">
                                 {activePoint.released}
@@ -1485,13 +1489,14 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                             <button
                               key={point.month}
                               type="button"
+                              aria-pressed={index === activeMonthIndex}
                               onMouseEnter={() => setActiveMonthIndex(index)}
                               onClick={() => setActiveMonthIndex(index)}
                               className={cn(
-                                "cursor-pointer font-ui text-[10px] leading-3.5 transition-colors duration-150",
+                                "inline-flex min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-xs font-ui text-[10px] leading-3.5 outline-none transition-[color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]",
                                 index === activeMonthIndex
                                   ? "font-medium text-foreground"
-                                  : "text-foreground/40 hover:text-foreground/70",
+                                  : "text-muted-foreground hover:text-foreground",
                               )}
                             >
                               {point.month}
@@ -1570,9 +1575,9 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
 
                       <div className="flex items-center gap-1.5">
                         <div
-                          role="tablist"
+                          role="group"
                           aria-label="Filter recent products"
-                          className="flex h-6 items-center gap-0.5 rounded-sm border border-stroke-primary bg-muted p-0.5 dark:border-edge-2 dark:bg-surface-2"
+                          className="flex h-7 items-center gap-0.5 rounded-sm border border-stroke-primary bg-muted p-0.5 dark:border-edge-2 dark:bg-surface-2"
                         >
                           {PRODUCT_FILTER_OPTIONS.map((tab) => {
                             const active = productFilter === tab.id;
@@ -1580,13 +1585,12 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                               <button
                                 key={tab.id}
                                 type="button"
-                                role="tab"
-                                aria-selected={active}
+                                aria-pressed={active}
                                 aria-label={tab.label}
                                 title={tab.label}
                                 onClick={() => setProductFilter(tab.id)}
                                 className={cn(
-                                  "relative inline-flex h-5 w-[22px] cursor-pointer items-center justify-center rounded-[4px] transition-colors duration-150",
+                                  "relative inline-flex size-6 cursor-pointer items-center justify-center rounded-[4px] outline-none transition-[color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]",
                                   active
                                     ? "text-foreground"
                                     : "text-icon hover:text-foreground",
@@ -1753,7 +1757,29 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                 </div>
               </div>
             </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 hidden [--card-halo:rgba(27,16,58,0.1)] lg:block dark:[--card-halo:color-mix(in_srgb,var(--background)_75%,transparent)]"
+            >
+              <div
+                className="absolute inset-0 backdrop-blur-[3px]"
+                style={{
+                  maskImage: cardHalos("black"),
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: cardHalos("var(--card-halo)"),
+                }}
+              />
+            </div>
           </div>
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-0 left-3 z-10 h-28 w-[720px] bg-gradient-to-b from-transparent to-background/90 backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,transparent,black_70%)] sm:inset-x-6 sm:w-auto lg:left-[56px] lg:right-[56px]"
+          />
 
           <motion.div
             layout
@@ -1770,7 +1796,7 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
               } as React.CSSProperties
             }
           >
-            <div className="flex flex-col overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2),0_1px_2px_rgba(0,0,0,0.2)]">
+            <div className="flex flex-col overflow-hidden rounded-[11px] bg-card shadow-[0_0_0_1px_var(--stroke-primary),0_1px_2px_rgba(0,0,0,0.05)] dark:bg-surface-2 dark:shadow-[0_0_0_1px_var(--edge-2),0_1px_2px_rgba(0,0,0,0.2)]">
               <div className="flex items-center gap-2.5 border-b border-separator px-3.5 py-2.5">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-stroke-primary bg-card text-fg-secondary shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2">
                   <Icon icon={FileAddIcon} size={15} strokeWidth={1.6} />
@@ -1798,7 +1824,7 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
 
               <div className="flex items-center justify-between border-b border-separator px-3.5 py-2">
                 <div
-                  role="tablist"
+                  role="group"
                   aria-label="Filter redline changes"
                   className="flex items-center gap-1"
                 >
@@ -1808,11 +1834,10 @@ export function HeroProductPreview({ spotlight = null }: HeroProductPreviewProps
                       <button
                         key={tab}
                         type="button"
-                        role="tab"
-                        aria-selected={active}
+                        aria-pressed={active}
                         onClick={() => setRedlineFilter(tab)}
                         className={cn(
-                          "relative cursor-pointer rounded-sm px-2 py-[3px] font-ui text-[11px] leading-3.5 transition-colors duration-150 active:scale-[0.97]",
+                          "relative min-h-6 cursor-pointer rounded-sm px-2 py-[3px] font-ui text-[11px] leading-3.5 outline-none transition-[color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]",
                           active
                             ? "font-medium text-invert-foreground"
                             : "text-fg-secondary shadow-[inset_0_0_0_1px_var(--stroke-primary)] hover:text-foreground dark:shadow-[inset_0_0_0_1px_var(--edge-2)]",
@@ -1938,7 +1963,7 @@ const STATUS_TONE: Record<ProductRow["status"], StatusTone> = {
 
 function StatusPill({ status }: { status: ProductRow["status"] }) {
   return (
-    <StatusBadge tone={STATUS_TONE[status]} className="gap-1 px-1.5 py-0.5 text-[10.5px] leading-3">
+    <StatusBadge tone={STATUS_TONE[status]} size="xs">
       {status}
     </StatusBadge>
   );

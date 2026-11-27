@@ -13,18 +13,18 @@ const FOOTER_COLUMNS: {
   {
     title: "Product",
     links: [
-      { label: "Features", href: "/#features" },
-      { label: "Automatic redlines", href: "/#redlines" },
-      { label: "Reports", href: "/#reports" },
+      { label: "Platform overview", href: "/platform/overview" },
+      { label: "Automatic redlines", href: "/platform/redlining" },
+      { label: "Reports & exports", href: "/platform/reports-exports" },
       { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Company",
     links: [
+      { label: "Resources", href: "/resources" },
       { label: "Blog", href: "/resources/blogs" },
       { label: "Contact", href: "/contact" },
-      { label: "Book a demo", href: "/contact" },
     ],
   },
   {
@@ -146,27 +146,27 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
       centerClassName="overflow-hidden rounded-tile bg-[#0E0E0E]"
     >
       <div className="grid grid-cols-1 lg:grid-cols-[436px_minmax(0,1fr)]">
-        <div className="flex flex-col gap-4 px-6 pb-2 pt-10 sm:px-10 sm:py-10 lg:justify-between lg:gap-12 lg:py-12">
+        <div className="flex flex-col gap-4 px-5 pb-2 pt-10 sm:px-8 sm:py-10 lg:justify-between lg:gap-12 lg:px-10 lg:py-12">
           <Link
             href="/"
             aria-label="Uprevit home"
-            className="inline-flex self-start rounded-md outline-none transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.98]"
+            className="inline-flex self-start rounded-md outline-none transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] active:scale-[0.98]"
           >
-            <BrandLogo size="lg" appearance="dark" />
+            <BrandLogo size="xs" appearance="dark" />
           </Link>
 
-          <p className="max-w-[300px] font-ui text-[14px] leading-[22px] text-[#A1A1A1]">
+          <p className="max-w-[300px] text-pretty font-ui text-[14px] leading-[1.55] text-[#A1A1A1]">
             Label documentation, review and release for medical device teams.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-7 px-6 pb-8 pt-6 sm:grid-cols-3 sm:px-10 sm:py-10 lg:flex lg:flex-wrap lg:gap-10 lg:py-12">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-7 px-5 pb-8 pt-6 sm:grid-cols-3 sm:px-8 sm:py-10 lg:flex lg:flex-wrap lg:gap-10 lg:px-10 lg:py-12">
           {FOOTER_COLUMNS.map((col) => (
             <div
               key={col.title}
               className="flex flex-col gap-3 lg:w-[180px] lg:shrink-0 lg:gap-3.5"
             >
-              <h2 className="font-ui text-[12px] font-medium leading-4 text-[#6E6E6E]">
+              <h2 className="font-ui text-[12px] font-medium leading-4 text-[#8C8C8C]">
                 {col.title}
               </h2>
               <ul className="flex flex-col gap-3 lg:gap-3.5">
@@ -176,7 +176,7 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
                       href={item.href}
                       target={item.external ? "_blank" : undefined}
                       rel={item.external ? "noopener noreferrer" : undefined}
-                      className="font-ui text-[14px] leading-[18px] text-[#EDEDED] outline-none transition-colors duration-150 hover:text-white/75 focus-visible:underline"
+                      className="inline-flex min-h-6 items-center rounded-xs font-ui text-[14px] leading-[18px] text-[#EDEDED] outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] [@media(hover:hover)_and_(pointer:fine)]:hover:text-white/75"
                     >
                       {item.label}
                     </Link>
@@ -188,7 +188,7 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
         </div>
       </div>
 
-      <div className="flex flex-col-reverse items-start justify-between gap-3 border-y border-white/[0.08] px-6 py-5 sm:flex-row sm:items-center sm:gap-4 sm:px-10">
+      <div className="flex flex-col-reverse items-start justify-between gap-3 border-y border-white/[0.08] px-5 py-5 sm:flex-row sm:items-center sm:gap-4 sm:px-8 lg:px-10">
         <p
           suppressHydrationWarning
           className="font-ui text-[13px] leading-4 text-[#A1A1A1]"
@@ -199,20 +199,20 @@ export default function FooterSection({ inTileGrid = false }: FooterSectionProps
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 font-ui text-[13px] leading-4 text-[#A1A1A1] sm:gap-6">
           <Link
             href="/privacy-policy"
-            className="transition-colors duration-150 hover:text-[#EDEDED]"
+            className="inline-flex min-h-6 items-center rounded-xs outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] [@media(hover:hover)_and_(pointer:fine)]:hover:text-[#EDEDED]"
           >
             Privacy policy
           </Link>
           <Link
             href="/terms-of-service"
-            className="transition-colors duration-150 hover:text-[#EDEDED]"
+            className="inline-flex min-h-6 items-center rounded-xs outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] [@media(hover:hover)_and_(pointer:fine)]:hover:text-[#EDEDED]"
           >
             Terms of service
           </Link>
           <button
             type="button"
             onClick={openCookieConsent}
-            className="cursor-pointer transition-colors duration-150 hover:text-[#EDEDED]"
+            className="inline-flex min-h-6 cursor-pointer items-center rounded-xs outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] [@media(hover:hover)_and_(pointer:fine)]:hover:text-[#EDEDED]"
           >
             Cookie settings
           </button>

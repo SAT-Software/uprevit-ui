@@ -347,7 +347,7 @@ function ReviewCycles({ reduceMotion }: { reduceMotion: boolean }) {
 
 /* ------------------------------ Symbol library ----------------------------- */
 
-const SYMBOLS: {
+export interface LibrarySymbol {
   code: string;
   label: string;
   left: number;
@@ -355,8 +355,11 @@ const SYMBOLS: {
   bg: string;
   ink: string;
   ring: string;
-  glyph: React.ReactNode;
-}[] = [
+  glyph?: React.ReactNode;
+  icon?: React.ReactNode;
+}
+
+const SYMBOLS: LibrarySymbol[] = [
   {
     code: "5.1.1",
     label: "Manufacturer",
@@ -439,13 +442,21 @@ const SYMBOLS: {
   },
 ];
 
-function SymbolLibrary({ reduceMotion }: { reduceMotion: boolean }) {
+export function SymbolLibrary({
+  reduceMotion,
+  symbols = SYMBOLS,
+  activeClassName,
+}: {
+  reduceMotion: boolean;
+  symbols?: LibrarySymbol[];
+  activeClassName?: string;
+}) {
   const [hovered, setHovered] = React.useState<number | null>(null);
   const [ref, tick] = useTicker(2200, !reduceMotion && hovered === null);
   const [base, setBase] = React.useState(4);
-  const auto = (base + tick) % SYMBOLS.length;
+  const auto = (base + tick) % symbols.length;
   const active = hovered ?? auto;
-  const symbol = SYMBOLS[active];
+  const symbol = symbols[active];
   const below = symbol.top > 100;
 
   return (
@@ -457,7 +468,7 @@ function SymbolLibrary({ reduceMotion }: { reduceMotion: boolean }) {
         <GuideLine key={x} orientation="v" style={{ left: x, top: 10, height: 320 }} className="border-foreground/15" />
       ))}
 
-      {SYMBOLS.map((item, index) => (
+      {symbols.map((item, index) => (
         <motion.button
           key={item.code}
           type="button"
@@ -465,16 +476,15 @@ function SymbolLibrary({ reduceMotion }: { reduceMotion: boolean }) {
           onMouseEnter={() => setHovered(index)}
           onMouseLeave={() => {
             setHovered(null);
-            setBase((current) => current + index - ((current + tick) % SYMBOLS.length));
+            setBase((current) => current + index - ((current + tick) % symbols.length));
           }}
           onFocus={() => setHovered(index)}
           onBlur={() => setHovered(null)}
           animate={{ scale: index === active ? 1.04 : 1 }}
           transition={SPRING}
           className={cn(
-            "absolute flex size-[76px] cursor-default items-center justify-center rounded-full border-[3px] border-white outline-none transition-shadow duration-300 focus-visible:ring-2 focus-visible:ring-ring dark:border-surface-2",
-            item.bg,
-            item.ink,
+            "absolute flex size-[76px] cursor-default items-center justify-center rounded-full border-[3px] border-white outline-none transition-[background-color,color,box-shadow] duration-300 focus-visible:ring-2 focus-visible:ring-ring dark:border-surface-2",
+            index === active && activeClassName ? activeClassName : cn(item.bg, item.ink),
           )}
           style={{
             left: item.left,
@@ -482,25 +492,27 @@ function SymbolLibrary({ reduceMotion }: { reduceMotion: boolean }) {
             boxShadow: `0 0 0 1px rgba(23,23,23,0.05), 0 6px 14px -4px rgba(0,0,0,0.12)${index === active ? `, 0 0 0 7px ${item.ring}` : ""}`,
           }}
         >
-          <Svg size={30} viewBox="0 0 18 18" strokeWidth={1.4}>
-            {item.glyph}
-          </Svg>
+          {item.icon ?? (
+            <Svg size={30} viewBox="0 0 18 18" strokeWidth={1.4}>
+              {item.glyph}
+            </Svg>
+          )}
         </motion.button>
       ))}
 
       <motion.div
         aria-hidden="true"
-        className="pointer-events-none absolute flex w-56 flex-col items-center"
+        className="pointer-events-none absolute left-0 top-0 flex w-56 flex-col items-center"
         initial={false}
-        animate={{ left: symbol.left + 38 - 112, top: below ? symbol.top + 88 : symbol.top - 44 }}
+        animate={{ x: symbol.left + 38 - 112, y: below ? symbol.top + 88 : symbol.top - 44 }}
         transition={SPRING}
       >
         {below && (
-          <svg width="12" height="6" viewBox="0 0 12 6" className="text-[#1A1A1A] dark:text-[#2A2A2A]">
+          <svg width="12" height="6" viewBox="0 0 12 6" className="text-tooltip">
             <path d="M0 6L6 0L12 6z" fill="currentColor" />
           </svg>
         )}
-        <span className="flex h-[30px] shrink-0 items-center gap-2 rounded-md bg-[#1A1A1A] px-2.5 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.4)] dark:bg-[#2A2A2A]">
+        <span className="flex h-[30px] shrink-0 items-center gap-2 rounded-md bg-tooltip px-2.5 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.4)]">
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               key={symbol.code}
@@ -511,12 +523,12 @@ function SymbolLibrary({ reduceMotion }: { reduceMotion: boolean }) {
               transition={{ duration: 0.2, ease: EASE_OUT }}
             >
               <span className="font-mono text-[10px] leading-3 text-white/60">{symbol.code}</span>
-              <span className="font-ui text-[12px] font-medium leading-4 text-white">{symbol.label}</span>
+              <span className="font-ui text-[12px] font-medium leading-4 text-tooltip-foreground">{symbol.label}</span>
             </motion.span>
           </AnimatePresence>
         </span>
         {!below && (
-          <svg width="12" height="6" viewBox="0 0 12 6" className="rotate-180 text-[#1A1A1A] dark:text-[#2A2A2A]">
+          <svg width="12" height="6" viewBox="0 0 12 6" className="rotate-180 text-tooltip">
             <path d="M0 6L6 0L12 6z" fill="currentColor" />
           </svg>
         )}
@@ -592,6 +604,7 @@ function RevisionHistory({ reduceMotion }: { reduceMotion: boolean }) {
   return (
     <ScaledCanvas
       ref={ref}
+      aria-hidden="true"
       width={873}
       height={360}
       minScale={0.6}
@@ -659,8 +672,8 @@ function RevisionHistory({ reduceMotion }: { reduceMotion: boolean }) {
               r="5.5"
               className={fill}
               initial={false}
-              animate={{ scale: shown ? 1 : 0, opacity: shown ? 1 : 0 }}
-              transition={{ ...SPRING, duration: 0.35, delay: shown && stage === at ? (at === 1 ? 0.1 : 0.25) + order * 0.15 : 0 }}
+              animate={{ scale: shown ? 1 : 0.85, opacity: shown ? 1 : 0 }}
+              transition={{ ...SPRING, duration: 0.3, delay: shown && stage === at ? (at === 1 ? 0.1 : 0.25) + order * 0.15 : 0 }}
               style={{ transformOrigin: `${cx}px ${cy}px` }}
             />
           );
@@ -790,6 +803,12 @@ const LIBRARY_FILES: { name: string; kind: FileKind }[] = [
   { name: "UDI_list", kind: "csv" },
 ];
 
+const LIBRARY_TAGS = [
+  ["EU MDR", "bg-info"],
+  ["FDA 21 CFR 801", "bg-success"],
+  ["Pending review", "bg-primary"],
+] as const;
+
 const LIBRARY_NAV: { label: string; count?: number; icon: IconProps["icon"] }[] = [
   { label: "All files", count: 48, icon: Folder02Icon },
   { label: "Artwork", count: 12, icon: Image01Icon },
@@ -798,57 +817,104 @@ const LIBRARY_NAV: { label: string; count?: number; icon: IconProps["icon"] }[] 
   { label: "Bookmarked", icon: Bookmark01Icon },
 ];
 
-function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
+export function SourceLibrary({
+  reduceMotion,
+  variant = "default",
+}: {
+  reduceMotion: boolean;
+  variant?: "default" | "compact";
+}) {
   const [hovered, setHovered] = React.useState<number | null>(null);
   const [ref, tick] = useTicker(1800, !reduceMotion && hovered === null);
   const selected = hovered ?? (1 + tick) % LIBRARY_FILES.length;
+  const compact = variant === "compact";
+  const nav = compact ? LIBRARY_NAV.slice(0, 4) : LIBRARY_NAV;
+  const tags = compact ? LIBRARY_TAGS.slice(0, 2) : LIBRARY_TAGS;
 
   return (
-    <ScaledCanvas ref={ref} width={654} height={420} minScale={0.62} panX={327} panBelow={640}>
-      <GuideLine orientation="h" style={{ left: 0, top: 27, width: 654 }} className="border-border" />
-      {[57, 597].map((x) => (
-        <GuideLine key={x} orientation="v" style={{ left: x, top: 0, height: 380 }} className="border-border" />
-      ))}
-      <div className="absolute left-[57px] top-1 w-[540px] rounded-[20px] border border-separator bg-[#F3F3F3] px-1.5 pb-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_24px_48px_-24px_rgba(0,0,0,0.15)] dark:bg-surface-1">
-        <div className="flex h-[46px] items-center gap-2.5 px-1.5">
-          <div className="flex gap-1.5">
+    <ScaledCanvas
+      ref={ref}
+      width={compact ? 576 : 654}
+      height={compact ? 310 : 420}
+      minScale={0.62}
+      panX={compact ? 288 : 327}
+      panBelow={640}
+    >
+      {!compact && (
+        <>
+          <GuideLine orientation="h" style={{ left: 0, top: 27, width: 654 }} className="border-border" />
+          {[57, 597].map((x) => (
+            <GuideLine key={x} orientation="v" style={{ left: x, top: 0, height: 380 }} className="border-border" />
+          ))}
+        </>
+      )}
+      <div
+        className={cn(
+          "absolute border border-separator bg-[#F3F3F3] dark:bg-surface-1",
+          compact
+            ? "inset-x-0 top-0 rounded-[18px] px-[5px] pb-[5px] shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_36px_-20px_rgba(0,0,0,0.14)]"
+            : "left-[57px] top-1 w-[540px] rounded-[20px] px-1.5 pb-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_24px_48px_-24px_rgba(0,0,0,0.15)]",
+        )}
+      >
+        <div className={cn("flex items-center", compact ? "h-[38px] gap-2 px-1.5" : "h-[46px] gap-2.5 px-1.5")}>
+          <div className={cn("flex", compact ? "gap-[5px]" : "gap-1.5")}>
             {[0, 1, 2].map((dot) => (
-              <span key={dot} className="size-2.5 rounded-full bg-foreground/[0.13]" />
+              <span key={dot} className={cn("rounded-full bg-foreground/[0.13]", compact ? "size-2" : "size-2.5")} />
             ))}
           </div>
-          <div className="mx-0.5 flex gap-0.5 text-foreground/40">
-            <Icon icon={ArrowLeft01Icon} size={16} strokeWidth={1.8} />
-            <Icon icon={ArrowRight01Icon} size={16} strokeWidth={1.8} />
-          </div>
-          <div className={cn("flex h-7 flex-1 items-center gap-2 rounded-sm px-2.5", CARD, "shadow-none")}>
-            <Icon icon={Search01Icon} size={13} strokeWidth={1.8} className="shrink-0 text-foreground/50" />
-            <span className="flex-1 font-ui text-[12px] leading-4 text-faint-foreground">Search source files</span>
+          {!compact && (
+            <div className="mx-0.5 flex gap-0.5 text-foreground/40">
+              <Icon icon={ArrowLeft01Icon} size={16} strokeWidth={1.8} />
+              <Icon icon={ArrowRight01Icon} size={16} strokeWidth={1.8} />
+            </div>
+          )}
+          <div className={cn("flex flex-1 items-center rounded-sm", compact ? "h-6 gap-1.5 px-2" : "h-7 gap-2 px-2.5", CARD, "shadow-none")}>
+            <Icon icon={Search01Icon} size={compact ? 11 : 13} strokeWidth={1.8} className="shrink-0 text-foreground/50" />
+            <span className={cn("flex-1 font-ui text-faint-foreground", compact ? "text-[11px] leading-[14px]" : "text-[12px] leading-4")}>
+              Search source files
+            </span>
             <span className="font-ui text-[10px] leading-3 text-faint-foreground">⌘K</span>
           </div>
-          <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full text-foreground", CARD)}>
-            <Icon icon={DashboardSquare01Icon} size={13} strokeWidth={1.8} />
-          </span>
+          {!compact && (
+            <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full text-foreground", CARD)}>
+              <Icon icon={DashboardSquare01Icon} size={13} strokeWidth={1.8} />
+            </span>
+          )}
         </div>
-        <div className={cn("flex h-[340px] overflow-hidden rounded-[14px]", CARD, "shadow-none")}>
-          <div className="flex w-[150px] shrink-0 flex-col gap-0.5 border-r border-separator px-2 py-3.5">
-            <span className="px-2 pb-1.5 font-ui text-[10px] font-medium leading-3 tracking-[0.08em] text-faint-foreground">LIBRARY</span>
-            {LIBRARY_NAV.map((item, index) => (
+        <div className={cn("flex overflow-hidden", compact ? "h-[264px] rounded-[13px]" : "h-[340px] rounded-[14px]", CARD, "shadow-none")}>
+          <div
+            className={cn(
+              "flex shrink-0 flex-col gap-0.5 border-r border-separator",
+              compact ? "w-[126px] px-1.5 py-2.5" : "w-[150px] px-2 py-3.5",
+            )}
+          >
+            <span
+              className={cn(
+                "font-ui font-medium leading-3 tracking-[0.08em] text-faint-foreground",
+                compact ? "px-1.5 pb-1 text-[9.5px]" : "px-2 pb-1.5 text-[10px]",
+              )}
+            >
+              LIBRARY
+            </span>
+            {nav.map((item, index) => (
               <span
                 key={item.label}
                 className={cn(
-                  "flex h-7 shrink-0 items-center gap-2 rounded-sm px-2",
+                  "flex shrink-0 items-center rounded-sm",
+                  compact ? "h-6 gap-1.5 px-1.5" : "h-7 gap-2 px-2",
                   index === 0 && "bg-muted dark:bg-surface-3",
                 )}
               >
                 <Icon
                   icon={item.icon}
-                  size={14}
+                  size={compact ? 12 : 14}
                   strokeWidth={1.6}
                   className={cn("shrink-0", index === 0 ? "text-foreground" : "text-foreground/60")}
                 />
                 <span
                   className={cn(
-                    "flex-1 font-ui text-[12px] font-medium leading-4",
+                    "flex-1 font-ui font-medium",
+                    compact ? "text-[11px] leading-[14px]" : "text-[12px] leading-4",
                     index === 0 ? "text-foreground" : "text-muted-foreground",
                   )}
                 >
@@ -857,31 +923,43 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
                 {item.count && <span className="font-ui text-[10px] leading-3 text-faint-foreground">{item.count}</span>}
               </span>
             ))}
-            <span className="h-3.5 shrink-0" />
-            <span className="px-2 pb-1.5 font-ui text-[10px] font-medium leading-3 tracking-[0.08em] text-faint-foreground">TAGS</span>
-            {[
-              ["EU MDR", "bg-info"],
-              ["FDA 21 CFR 801", "bg-success"],
-              ["Pending review", "bg-primary"],
-            ].map(([label, dot]) => (
-              <span key={label} className="flex h-[22px] shrink-0 items-center gap-2 px-2">
-                <span className={cn("size-[7px] rounded-full", dot)} />
-                <span className="font-ui text-[11px] leading-[14px] text-muted-foreground">{label}</span>
+            <span className={cn("shrink-0", compact ? "h-2" : "h-3.5")} />
+            <span
+              className={cn(
+                "font-ui font-medium leading-3 tracking-[0.08em] text-faint-foreground",
+                compact ? "px-1.5 pb-1 text-[9.5px]" : "px-2 pb-1.5 text-[10px]",
+              )}
+            >
+              TAGS
+            </span>
+            {tags.map(([label, dot]) => (
+              <span
+                key={label}
+                className={cn("flex shrink-0 items-center", compact ? "h-5 gap-1.5 px-1.5" : "h-[22px] gap-2 px-2")}
+              >
+                <span className={cn("rounded-full", compact ? "size-1.5" : "size-[7px]", dot)} />
+                <span className={cn("font-ui leading-[14px] text-muted-foreground", compact ? "text-[10.5px]" : "text-[11px]")}>
+                  {label}
+                </span>
               </span>
             ))}
           </div>
-          <div className="flex flex-1 flex-col gap-2.5 p-3.5">
-            <div className="flex h-5 shrink-0 items-center gap-1.5">
+          <div className={cn("flex flex-1 flex-col", compact ? "gap-2 px-3 py-2.5" : "gap-2.5 p-3.5")}>
+            <div className={cn("flex shrink-0 items-center gap-1.5", compact ? "h-4" : "h-5")}>
               <span className="font-ui text-[11px] leading-[14px] text-muted-foreground">IV Extension Set</span>
               <span className="font-ui text-[11px] leading-[14px] text-faint-foreground">›</span>
               <span className="flex-1 font-ui text-[11px] font-medium leading-[14px] text-foreground">All files</span>
-              <span className="flex gap-[3px]">
-                {[0, 1, 2].map((dot) => (
-                  <span key={dot} className="size-1 rounded-full bg-ring" />
-                ))}
-              </span>
+              {compact ? (
+                <span className="font-mono text-[9.5px] leading-3 text-faint-foreground">8 files · Synced</span>
+              ) : (
+                <span className="flex gap-[3px]">
+                  {[0, 1, 2].map((dot) => (
+                    <span key={dot} className="size-1 rounded-full bg-ring" />
+                  ))}
+                </span>
+              )}
             </div>
-            <div className="flex flex-wrap gap-x-1 gap-y-1.5 pt-1">
+            <div className={cn("flex flex-wrap", compact ? "gap-x-2 gap-y-1.5" : "gap-x-1 gap-y-1.5 pt-1")}>
               {LIBRARY_FILES.map((file, index) => {
                 const isSelected = index === selected;
                 return (
@@ -889,11 +967,14 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
                     key={file.name}
                     onMouseEnter={() => setHovered(index)}
                     onMouseLeave={() => setHovered(null)}
-                    className="relative flex w-20 shrink-0 cursor-default flex-col items-center gap-2 rounded-xl pb-2 pt-3"
+                    className={cn(
+                      "relative flex w-20 shrink-0 cursor-default flex-col items-center rounded-xl",
+                      compact ? "gap-1.5 py-1.5" : "gap-2 pb-2 pt-3",
+                    )}
                   >
                     {isSelected && (
                       <motion.span
-                        layoutId="source-file-selection"
+                        layoutId={`source-file-selection-${variant}`}
                         transition={SPRING}
                         className="absolute inset-0 z-0 rounded-xl border border-border bg-muted dark:border-edge-2 dark:bg-surface-3"
                       />
@@ -904,7 +985,7 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
                       </span>
                       <span
                         className={cn(
-                          "absolute -left-2.5 bottom-2 rounded-sm border px-[5px] py-0.5 font-ui text-[10px] font-medium leading-3 text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]",
+                          "absolute -left-2.5 bottom-2 rounded-sm border px-[5px] py-0.5 font-ui text-[10px] font-medium leading-3 text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] dark:text-surface-0",
                           FILE_BADGE[file.kind],
                         )}
                       >
@@ -923,10 +1004,12 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
                 );
               })}
             </div>
-            <div className="mt-auto flex justify-between border-t border-separator pt-2.5 font-ui text-[10px] leading-3 text-faint-foreground">
-              <span>8 files · 24.6 MB</span>
-              <span>Synced</span>
-            </div>
+            {!compact && (
+              <div className="mt-auto flex justify-between border-t border-separator pt-2.5 font-ui text-[10px] leading-3 text-faint-foreground">
+                <span>8 files · 24.6 MB</span>
+                <span>Synced</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -937,9 +1020,9 @@ function SourceLibrary({ reduceMotion }: { reduceMotion: boolean }) {
 /* ---------------------------------- Status --------------------------------- */
 
 const STATUS_NODES: { kicker: string; title: string; top: number; icon: IconProps["icon"] }[] = [
-  { kicker: "DRAFT", title: "Label being prepared", top: 16, icon: PencilEdit02Icon },
-  { kicker: "SUBMITTED", title: "Sent to reviewers", top: 128, icon: SentIcon },
-  { kicker: "IN REVIEW", title: "Checked and approved", top: 240, icon: ViewIcon },
+  { kicker: "Draft", title: "Label being prepared", top: 16, icon: PencilEdit02Icon },
+  { kicker: "Submitted", title: "Sent to reviewers", top: 128, icon: SentIcon },
+  { kicker: "In review", title: "Checked and approved", top: 240, icon: ViewIcon },
 ];
 
 const STATUS_HOLD = 4;
@@ -971,7 +1054,7 @@ function StatusCard({
           {iconSlot ?? <Icon icon={icon} size={17} strokeWidth={1.7} />}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className={cn("font-ui text-[10px] font-semibold leading-3 tracking-[0.08em]", tone.meta)}>{kicker}</span>
+          <span className={cn("font-ui text-[10px] font-semibold uppercase leading-3 tracking-[0.08em]", tone.meta)}>{kicker}</span>
           <span className={cn("whitespace-nowrap font-ui text-[14px] font-medium leading-[18px]", tone.title)}>{title}</span>
         </span>
       </div>
@@ -994,7 +1077,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
   const releasing = branched && !locked;
 
   return (
-    <ScaledCanvas ref={ref} width={654} height={480} minScale={0.6} panX={327} panBelow={640}>
+    <ScaledCanvas ref={ref} aria-hidden="true" width={654} height={480} minScale={0.6} panX={327} panBelow={640}>
       <span aria-hidden="true" className="absolute left-[207px] top-[50px] size-60 rounded-full border border-dashed border-stroke-primary" />
       <span aria-hidden="true" className="absolute left-[132px] top-[-25px] size-[390px] rounded-full border border-dashed border-foreground/5" />
 
@@ -1012,7 +1095,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
 
       <StatusCard
         state="idle"
-        kicker="OBSOLETE"
+        kicker="Obsolete"
         title="v4 retired, kept on file"
         className={cn("left-10 top-[380px] transition-opacity duration-500", branched ? "opacity-50" : "opacity-30")}
         icon={ArchiveIcon}
@@ -1020,32 +1103,34 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
 
       <StatusCard
         state={branched ? "active" : "idle"}
-        kicker="RELEASED"
+        kicker="Released"
         title="v5 approved and locked"
         className="left-[342px] top-[380px]"
         icon={SquareLock02Icon}
         iconSlot={
           <>
-            <motion.svg
-              width="17"
-              height="17"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-              className="absolute"
-              initial={false}
-              animate={{ opacity: releasing ? 1 : 0, scale: releasing ? 1 : 0.5 }}
-              transition={{ duration: 0.25, ease: EASE_OUT, delay: releasing ? 0.4 : 0 }}
-            >
-              <g className="origin-center animate-spin [animation-duration:900ms] [transform-box:fill-box]">
-                <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" strokeOpacity={0.2} strokeWidth="2" />
-                <path d="M10 3a7 7 0 0 1 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </g>
-            </motion.svg>
+            {!reduceMotion && releasing && (
+              <motion.svg
+                width="17"
+                height="17"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+                className="absolute"
+                initial={{ opacity: 0, scale: 0.88 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.22, ease: EASE_OUT, delay: 0.25 }}
+              >
+                <g className="origin-center animate-spin motion-reduce:animate-none [animation-duration:900ms] [transform-box:fill-box]">
+                  <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" strokeOpacity={0.2} strokeWidth="2" />
+                  <path d="M10 3a7 7 0 0 1 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </g>
+              </motion.svg>
+            )}
             <motion.span
               className="flex"
               initial={false}
-              animate={releasing ? { opacity: 0, scale: 0.5, filter: "blur(4px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ type: "spring", duration: 0.35, bounce: 0, delay: locked ? 0.1 : releasing ? 0.2 : 0 }}
+              animate={releasing && !reduceMotion ? { opacity: 0, scale: 0.88, filter: "blur(2px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ type: "spring", duration: 0.24, bounce: 0, delay: locked ? 0.1 : releasing ? 0.2 : 0 }}
             >
               <Icon icon={SquareLock02Icon} size={17} strokeWidth={1.7} />
             </motion.span>
@@ -1053,26 +1138,25 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
         }
       />
 
-      <svg width="654" height="520" viewBox="0 0 654 520" aria-hidden="true" className="pointer-events-none absolute inset-0 text-foreground">
+      <svg width="654" height="480" viewBox="0 0 654 480" aria-hidden="true" className="pointer-events-none absolute inset-0 text-foreground">
         {STATUS_LINKS.map(([from, to], index) => (
           <g key={from}>
             <DottedConnector
               d={`M327 ${from}V${to}`}
               active={step > index}
               canvasWidth={654}
-              canvasHeight={520}
+              canvasHeight={480}
               transition={{ duration: step > index ? 0.5 : 0.3, ease: FLOW_EASE }}
             />
             {step === index + 1 && !reduceMotion && (
-              <motion.circle
+              <motion.g
                 key={tick}
-                cx="327"
-                r="2"
-                className="fill-foreground"
-                initial={{ cy: from - 3, opacity: 0 }}
-                animate={{ cy: to + 3, opacity: [0, 1, 1, 0] }}
+                initial={{ x: 327, y: from - 3, opacity: 0 }}
+                animate={{ x: 327, y: to + 3, opacity: [0, 1, 1, 0] }}
                 transition={{ duration: 0.55, ease: FLOW_EASE }}
-              />
+              >
+                <circle cx="0" cy="0" r="2" className="fill-foreground" />
+              </motion.g>
             )}
           </g>
         ))}
@@ -1089,7 +1173,7 @@ function StatusFlow({ reduceMotion }: { reduceMotion: boolean }) {
           d={RELEASE_BRANCH}
           active={branched}
           canvasWidth={654}
-          canvasHeight={520}
+          canvasHeight={480}
           transition={{ duration: branched ? 0.55 : 0.3, ease: FLOW_EASE }}
         />
         {[84, 196, 308].map((y) => (
@@ -1138,7 +1222,7 @@ export default function FeaturesSection() {
           <FeatureTile
             id="approvals"
             title="Review cycles, on the record"
-            body="Route every labeling change through review rounds until each approver approves. Comments, revisions and approvals stay on the change record."
+            body="Route every labeling change through review rounds until every reviewer signs off. Comments, revisions and approvals stay on the change record."
             maxWidth={540}
           >
             <ReviewCycles reduceMotion={reduceMotion} />

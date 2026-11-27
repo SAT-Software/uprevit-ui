@@ -29,7 +29,7 @@ const FLOW_EASE = [0.645, 0.045, 0.355, 1] as const;
 const SPRING = { type: "spring" as const, duration: 0.45, bounce: 0 };
 
 const GLASS =
-  "absolute border border-white/50 bg-white/30 shadow-[0_30px_60px_-24px_rgba(42,5,96,0.3)] backdrop-blur-xl dark:border-white/15 dark:bg-white/[0.06]";
+  "absolute border border-white/50 bg-white/30 shadow-[0_30px_60px_-24px_rgba(42,5,96,0.3)] backdrop-blur-md dark:border-white/15 dark:bg-white/[0.06]";
 const CARD = "overflow-hidden border border-border bg-card dark:border-edge-2 dark:bg-surface-2";
 
 const CONDITIONS = [
@@ -124,7 +124,7 @@ function AppFileIcon({ kind, large }: { kind: "pdf" | "xlsx"; large?: boolean })
       <span
         className={cn(
           "absolute flex items-center justify-center font-ui font-bold text-white",
-          isPdf ? "bg-[#EA580C]" : "bg-[#16A34A]",
+          isPdf ? "bg-[#C2410C]" : "bg-[#047857]",
           large
             ? "left-[0.5px] top-[14px] h-[11.5px] rounded-[3px] px-[3.5px] text-[6.5px] leading-[8px] tracking-[0.01em]"
             : "left-0 top-[8.5px] h-[7.5px] rounded-[2px] px-[2px] text-[5px] leading-[6px] tracking-[0.02em]",
@@ -137,7 +137,7 @@ function AppFileIcon({ kind, large }: { kind: "pdf" | "xlsx"; large?: boolean })
 }
 
 function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
-  const [ref, on] = usePlayback(reduceMotion, 9500);
+  const [ref, on, inView] = usePlayback(reduceMotion, 9500);
   const enter = (delay: number, from: { x?: number; y?: number } = { y: 4 }) => ({
     initial: false as const,
     animate: on ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, ...from },
@@ -145,7 +145,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
   });
 
   return (
-    <ScaledCanvas ref={ref} width={1310} height={680} minScale={0.64} panX={312} panBelow={640}>
+    <ScaledCanvas ref={ref} aria-hidden="true" width={1310} height={680} minScale={0.64} panX={312} panBelow={640}>
       <div className={cn(GLASS, "left-[62px] top-[54px] h-[298px] w-[500px] rounded-[20px] p-1.5")}>
         <div className="flex h-full flex-col gap-1.5">
           <div className={cn(CARD, "flex flex-1 flex-col rounded-[14px]")}>
@@ -157,15 +157,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                 initial={false}
                 animate={
                   on && !reduceMotion
-                    ? {
-                        scale: [1, 0.93, 1.02, 1],
-                        boxShadow: [
-                          "inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(23,23,23,0.2), 0 0 0 0px rgba(23,23,23,0)",
-                          "inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(23,23,23,0.2), 0 0 0 4px rgba(23,23,23,0.18)",
-                          "inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(23,23,23,0.2), 0 0 0 0px rgba(23,23,23,0)",
-                          "inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(23,23,23,0.2), 0 0 0 0px rgba(23,23,23,0)",
-                        ],
-                      }
+                    ? { scale: [1, 0.94, 1.02, 1] }
                     : { scale: 1 }
                 }
                 transition={{ duration: 0.42, ease: EASE_OUT, delay: on ? 1.05 : 0 }}
@@ -181,7 +173,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                     initial={false}
                     animate={
                       on && !reduceMotion
-                        ? { opacity: [1, 0, 0, 1], scale: [1, 0.5, 0.5, 1] }
+                        ? { opacity: [1, 0, 0, 1], scale: [1, 0.88, 0.88, 1] }
                         : { opacity: 1, scale: 1 }
                     }
                     transition={{
@@ -193,7 +185,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                   >
                     <path d="M8 5.5v13l10.5-6.5z" />
                   </motion.svg>
-                  {!reduceMotion && (
+                  {!reduceMotion && inView && (
                     <motion.svg
                       width="13"
                       height="13"
@@ -203,8 +195,8 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                       initial={false}
                       animate={
                         on
-                          ? { opacity: [0, 1, 1, 0], scale: [0.6, 1, 1, 0.6] }
-                          : { opacity: 0, scale: 0.6 }
+                          ? { opacity: [0, 1, 1, 0], scale: [0.88, 1, 1, 0.88] }
+                          : { opacity: 0, scale: 0.88 }
                       }
                       transition={{
                         duration: 0.65,
@@ -213,7 +205,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                         delay: on ? 1.08 : 0,
                       }}
                     >
-                      <g className="origin-center animate-spin [animation-duration:700ms] [transform-box:fill-box]">
+                      <g className="origin-center animate-spin motion-reduce:animate-none [animation-duration:700ms] [transform-box:fill-box]">
                         <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" strokeOpacity={0.25} strokeWidth="2.2" />
                         <path d="M10 3a7 7 0 0 1 7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
                       </g>
@@ -263,25 +255,25 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
               ))}
             </div>
           </div>
-          <div className="flex h-10 shrink-0 items-center justify-between rounded-xl border border-border bg-card px-3 font-ui text-[13px] leading-[18px] text-muted-foreground dark:border-edge-2 dark:bg-surface-2">
+          <div className="flex h-10 shrink-0 items-center justify-between rounded-xl border border-border bg-card px-3 font-ui text-[13px] leading-[18px] text-muted-foreground tabular-nums dark:border-edge-2 dark:bg-surface-2">
             <motion.span {...enter(1.4)} className="flex items-center gap-2">
               <Icon icon={LayoutTable01Icon} size={15} strokeWidth={1.8} className="shrink-0 text-muted-foreground" />
               24 products match
             </motion.span>
             <motion.span {...enter(1.4)} className="flex items-center gap-1.5">
               <Icon icon={DashboardSpeed01Icon} size={15} strokeWidth={1.8} className="shrink-0 text-muted-foreground" />
-              0.4 s
+              0.4{"\u00A0"}s
             </motion.span>
           </div>
         </div>
       </div>
 
       <div className={cn(GLASS, "left-[142px] top-[432px] h-[192px] w-[340px] rounded-2xl p-[5px]")}>
-        <div className={cn(CARD, "flex h-full flex-col rounded-xl")}>
+        <div className={cn(CARD, "flex h-full flex-col rounded-[11px]")}>
           <div className="flex h-[46px] shrink-0 items-center gap-2 px-3.5">
             <Icon icon={Bookmark01Icon} size={14} strokeWidth={1.8} className="shrink-0 text-foreground" />
             <span className="flex-1 font-ui text-[13px] font-semibold leading-[18px] text-foreground">Saved queries</span>
-            <span className="font-ui text-[11px] leading-[14px] text-faint-foreground">3</span>
+            <span className="font-ui text-[11px] leading-[14px] text-faint-foreground tabular-nums">3</span>
           </div>
           {SAVED.map((query, index) => (
             <motion.div
@@ -326,19 +318,11 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                   initial={false}
                   animate={
                     on && !reduceMotion
-                      ? {
-                          scale: [1, 0.94, 1.02, 1],
-                          boxShadow: [
-                            "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.08), 0 0 0 0px rgba(23,23,23,0)",
-                            "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.08), 0 0 0 3px rgba(23,23,23,0.12)",
-                            "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.08), 0 0 0 0px rgba(23,23,23,0)",
-                            "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.08), 0 0 0 0px rgba(23,23,23,0)",
-                          ],
-                        }
+                      ? { scale: [1, 0.94, 1.02, 1] }
                       : { scale: 1 }
                   }
                   transition={{ duration: 0.38, ease: EASE_OUT, delay: on ? 2.4 + index * 0.22 : 0 }}
-                  className="flex h-[34px] items-center gap-2 rounded-lg border border-stroke-strong bg-gradient-to-b from-white to-[#F7F7F7] px-3 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[inset_0_1px_0_#FFFFFF,0_1px_2px_rgba(0,0,0,0.08)] dark:border-edge-3 dark:from-[#1A1A1A] dark:to-[#141414] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_1px_2px_rgba(0,0,0,0.35)]"
+                  className="flex h-[34px] items-center gap-2 rounded-lg border border-stroke-strong bg-gradient-to-b from-white to-[#F7F7F7] px-3 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[inset_0_1px_0_#FFFFFF,0_1px_2px_rgba(0,0,0,0.08)] dark:border-edge-3 dark:from-surface-3 dark:to-surface-2 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_1px_2px_rgba(0,0,0,0.35)]"
                 >
                   <AppFileIcon kind={kind} />
                   Export
@@ -396,7 +380,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
       </div>
 
       <div className={cn(GLASS, "left-[768px] top-[432px] h-[192px] w-[340px] rounded-2xl p-[5px]")}>
-        <div className={cn(CARD, "flex h-full flex-col rounded-xl")}>
+        <div className={cn(CARD, "flex h-full flex-col rounded-[11px]")}>
           <div className="flex h-[46px] shrink-0 items-center justify-between px-3.5">
             <span className="font-ui text-[13px] font-semibold leading-[18px] text-foreground">Report exports</span>
             <motion.span
@@ -405,7 +389,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
               transition={on ? { ...SPRING, delay: 4.1 } : { duration: 0.2 }}
               className="flex"
             >
-              <StatusBadge tone="neutral" className="px-2 py-0.5 text-[11px] leading-4">
+              <StatusBadge tone="neutral" size="sm">
                 2 ready
               </StatusBadge>
             </motion.span>
@@ -448,7 +432,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                 </span>
               </span>
               <span className="relative flex size-7 shrink-0 items-center justify-center">
-                {!reduceMotion && (
+                {!reduceMotion && inView && (
                   <motion.svg
                     width="16"
                     height="16"
@@ -458,12 +442,12 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                     initial={false}
                     animate={
                       on
-                        ? { opacity: 0, scale: 0.5, filter: "blur(3px)" }
+                        ? { opacity: 0, scale: 0.88, filter: "blur(2px)" }
                         : { opacity: 1, scale: 1, filter: "blur(0px)" }
                     }
                     transition={on ? { duration: 0.22, ease: EASE_OUT, delay: file.readyDelay } : { duration: 0 }}
                   >
-                    <g className="origin-center animate-spin [animation-duration:900ms] [transform-box:fill-box]">
+                    <g className="origin-center animate-spin motion-reduce:animate-none [animation-duration:900ms] [transform-box:fill-box]">
                       <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" strokeOpacity={0.12} strokeWidth="2" />
                       <path d="M10 3a7 7 0 0 1 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </g>
@@ -474,7 +458,7 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
                   animate={
                     on
                       ? { opacity: 1, scale: 1, filter: "blur(0px)" }
-                      : { opacity: 0, scale: 0.5, filter: "blur(4px)" }
+                      : { opacity: 0, scale: 0.88, filter: "blur(2px)" }
                   }
                   transition={on ? { ...SPRING, delay: file.readyDelay } : { duration: 0.15 }}
                   className="flex size-7 items-center justify-center rounded-sm bg-foreground text-background shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
@@ -497,18 +481,18 @@ function ReportsStage({ reduceMotion }: { reduceMotion: boolean }) {
               canvasHeight={680}
               transition={on ? { duration: 0.5, ease: FLOW_EASE, delay: link.delay } : { duration: 0.25 }}
             />
-            {!reduceMotion && (
-              <motion.circle
-                r="2"
-                className="fill-foreground"
+            {!reduceMotion && inView && (
+              <motion.g
                 initial={false}
                 animate={
                   on
-                    ? { cx: [link.from[0], link.to[0]], cy: [link.from[1], link.to[1]], opacity: [0, 1, 1, 0] }
-                    : { cx: link.from[0], cy: link.from[1], opacity: 0 }
+                    ? { x: [link.from[0], link.to[0]], y: [link.from[1], link.to[1]], opacity: [0, 1, 1, 0] }
+                    : { x: link.from[0], y: link.from[1], opacity: 0 }
                 }
                 transition={on ? { duration: 0.55, ease: FLOW_EASE, delay: link.delay } : { duration: 0 }}
-              />
+              >
+                <circle cx="0" cy="0" r="2" className="fill-foreground" />
+              </motion.g>
             )}
             <path d={link.startArc} strokeWidth="1.2" className="fill-card stroke-foreground/35 dark:fill-surface-2" />
             <path d={link.endArc} strokeWidth="1.2" className="fill-card stroke-foreground/35 dark:fill-surface-2" />
