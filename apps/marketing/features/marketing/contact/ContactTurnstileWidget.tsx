@@ -49,6 +49,7 @@ function loadTurnstileScript(): Promise<void> {
       existing.addEventListener(
         "error",
         () => {
+          existing.remove();
           scriptLoadPromise = null;
           reject(new Error("Failed to load verification script."));
         },
@@ -64,6 +65,7 @@ function loadTurnstileScript(): Promise<void> {
     script.defer = true;
     script.onload = () => resolve();
     script.onerror = () => {
+      script.remove();
       scriptLoadPromise = null;
       reject(new Error("Failed to load verification script."));
     };

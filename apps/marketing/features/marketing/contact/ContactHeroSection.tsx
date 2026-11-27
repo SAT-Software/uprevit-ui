@@ -20,6 +20,10 @@ import { ContactTurnstileWidget } from "./ContactTurnstileWidget";
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? "";
+const TURNSTILE_LOAD_ERROR_MESSAGE =
+  "Verification failed to load. Please refresh the page or email contact@uprevit.com.";
+const TURNSTILE_WAITING_MESSAGE =
+  "Please wait a moment for the verification check to finish and try again.";
 
 const TOPICS: { id: ContactTopicId; label: string }[] = [
   { id: "demo", label: "Book a demo" },
@@ -135,7 +139,12 @@ export default function ContactHeroSection({
   const handleTurnstileToken = React.useCallback((token: string) => {
     setTurnstileToken(token);
     setTurnstileError(false);
-    setSubmitError(null);
+    setSubmitError((prev) =>
+      prev === TURNSTILE_WAITING_MESSAGE ||
+      prev === TURNSTILE_LOAD_ERROR_MESSAGE
+        ? null
+        : prev,
+    );
   }, []);
 
   const handleTurnstileExpire = React.useCallback(() => {
@@ -170,8 +179,8 @@ export default function ContactHeroSection({
     if (TURNSTILE_SITE_KEY && !turnstileToken) {
       setSubmitError(
         turnstileError
-          ? "Verification failed to load. Please refresh the page or email contact@uprevit.com."
-          : "Please wait a moment for the verification check to finish and try again.",
+          ? TURNSTILE_LOAD_ERROR_MESSAGE
+          : TURNSTILE_WAITING_MESSAGE,
       );
       return;
     }
