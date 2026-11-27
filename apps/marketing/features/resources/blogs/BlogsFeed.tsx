@@ -50,13 +50,13 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
 
       <TileRow
         as="div"
-        centerClassName="flex flex-col gap-3 overflow-hidden py-3.5 pl-5 sm:flex-row sm:items-center sm:justify-between sm:overflow-visible sm:px-8 sm:py-3.5"
+        centerClassName="flex flex-col gap-3 overflow-hidden py-3.5 pl-5 sm:flex-row sm:items-center sm:justify-between sm:overflow-visible sm:px-8 sm:py-3.5 lg:px-10"
       >
         <div className="flex items-center justify-between pr-5 sm:hidden">
           <span className="font-ui text-label font-medium leading-4 text-foreground">
             Latest posts
           </span>
-          <span className="font-ui text-label leading-4 text-faint-foreground">
+          <span className="font-ui text-label leading-4 text-faint-foreground tabular-nums">
             {countLabel}
           </span>
         </div>
@@ -75,9 +75,9 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
                 aria-pressed={isActive}
                 onClick={() => handleSelectCategory(category)}
                 className={cn(
-                  "inline-flex h-7 shrink-0 cursor-pointer items-center rounded-md px-2.5 font-ui text-[12px] font-medium leading-4 outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring",
+                  "inline-flex h-7 shrink-0 cursor-pointer items-center rounded-md px-2.5 font-ui text-[12px] font-medium leading-4 outline-none transition-[color,background-color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]",
                   isActive
-                    ? "border border-primary-700 bg-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
+                    ? "border border-primary-700 bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
                     : "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:bg-surface-hover dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3",
                 )}
               >
@@ -87,7 +87,7 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
           })}
         </div>
 
-        <div className="hidden shrink-0 font-ui text-label leading-4 text-faint-foreground sm:block">
+        <div className="hidden shrink-0 font-ui text-label leading-4 text-faint-foreground tabular-nums sm:block">
           {countLabel}
         </div>
       </TileRow>

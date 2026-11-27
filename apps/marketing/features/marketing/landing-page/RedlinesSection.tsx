@@ -27,23 +27,23 @@ type Cell = { line: number; label: string; parts: Part[]; tone?: Tone } | null;
 
 const TONE: Record<Tone, { row: string; line: string; chip: string; text: string; strike?: boolean }> = {
   removed: {
-    row: "border-l-destructive/50 bg-destructive/5",
-    line: "text-destructive-strong",
-    chip: "bg-destructive/12",
-    text: "text-destructive-strong",
+    row: "border-l-diff-removed/60 bg-diff-removed-soft/70",
+    line: "text-diff-removed",
+    chip: "bg-diff-removed-soft",
+    text: "text-diff-removed",
     strike: true,
   },
   updated: {
-    row: "border-l-success/60 bg-success/[0.07]",
-    line: "text-success-strong",
-    chip: "bg-success/15",
-    text: "text-success-strong",
+    row: "border-l-diff-updated/60 bg-diff-updated-soft/70",
+    line: "text-diff-updated",
+    chip: "bg-diff-updated-soft",
+    text: "text-diff-updated",
   },
   added: {
-    row: "border-l-info/50 bg-info/5",
-    line: "text-info-strong",
-    chip: "bg-info/12",
-    text: "text-info-strong",
+    row: "border-l-diff-added/60 bg-diff-added-soft/70",
+    line: "text-diff-added",
+    chip: "bg-diff-added-soft",
+    text: "text-diff-added",
   },
 };
 
@@ -91,7 +91,7 @@ const SUMMARY = [
 const HATCH =
   "bg-subtle bg-[repeating-linear-gradient(135deg,rgba(23,23,23,0.04)_0px,rgba(23,23,23,0.04)_1px,transparent_1px,transparent_6px)] dark:bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_6px)]";
 const FLOAT_FRAME =
-  "absolute rounded-[18px] border border-border/50 bg-[#F5F5F5BF] p-[5px] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.2)] backdrop-blur-md dark:border-edge-2 dark:bg-surface-1/75";
+  "absolute rounded-[19px] border border-border/50 bg-frame-surface p-[5px] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.2)] backdrop-blur-md dark:border-edge-2";
 const FLOAT_CARD = "rounded-[14px] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2";
 
 function DiffCell({ cell, on, delay }: { cell: Cell; on: boolean; delay: number }) {
@@ -160,7 +160,7 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
   const done = rowDelay(ROWS.length);
 
   return (
-    <ScaledCanvas ref={ref} width={1310} height={540} minScale={0.62} panX={315} panBelow={640}>
+    <ScaledCanvas ref={ref} aria-hidden="true" width={1310} height={540} minScale={0.62} panX={315} panBelow={640}>
       {[225, 1084].map((left) => (
         <span
           key={left}
@@ -178,7 +178,7 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
         />
       ))}
 
-      <div className="absolute left-[225px] top-[72px] w-[860px] rounded-[22px] border border-border/50 bg-[#F5F5F5BF] p-1.5 dark:border-edge-2 dark:bg-surface-1/75">
+      <div className="absolute left-[225px] top-[72px] w-[860px] rounded-[24px] border border-border/50 bg-frame-surface p-1.5 dark:border-edge-2">
         <div className="overflow-hidden rounded-[18px] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2">
           <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 dark:border-edge-2">
             <Icon
@@ -201,7 +201,7 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
                   transition={on ? { ...SPRING, delay: done + index * 0.06 } : { duration: 0.2 }}
                   className="flex"
                 >
-                  <StatusBadge tone={badge.tone} className="px-2 py-0.5 text-[11px] leading-4">
+                  <StatusBadge tone={badge.tone} size="sm">
                     {badge.label}
                   </StatusBadge>
                 </motion.span>
@@ -255,10 +255,10 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
           <div className="flex flex-col gap-2.5 p-3.5">
             <div className="flex items-end justify-between">
               <div className="flex flex-col gap-0.5">
-                <span className="font-ui text-[11px] leading-[14px] text-icon">Changes since v4</span>
-                <span className="font-sans text-[28px] font-medium leading-[30px] tracking-[-0.03em] text-foreground">4</span>
+                <span className="font-ui text-[11px] leading-[14px] text-muted-foreground">Changes since v4</span>
+                <span className="font-sans text-[28px] font-medium leading-[30px] tracking-[-0.03em] text-foreground tabular-nums">4</span>
               </div>
-              <span className="font-ui text-[11px] leading-[14px] text-placeholder">Pouch label</span>
+              <span className="font-ui text-[11px] leading-[14px] text-muted-foreground">Pouch label</span>
             </div>
             <div className="flex h-1.5 gap-[3px]">
               {SUMMARY.map((item, index) => (
@@ -279,7 +279,7 @@ function RedlinesStage({ reduceMotion }: { reduceMotion: boolean }) {
                 <span className={cn("size-1.5 rounded-full", item.dot)} />
                 {item.label}
               </span>
-              <span className="font-medium text-muted-foreground">{item.count}</span>
+              <span className="font-medium text-muted-foreground tabular-nums">{item.count}</span>
             </div>
           ))}
         </div>

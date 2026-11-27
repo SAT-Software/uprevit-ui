@@ -91,7 +91,7 @@ const STEPS: { title: string; body: string; icon: IconName }[] = [
 ];
 
 const FRAME =
-  "border border-foreground/5 bg-[#F5F5F5BF] dark:bg-surface-1/75";
+  "border border-foreground/5 bg-frame-surface";
 const CARD =
   "border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2";
 const HALO =
@@ -112,7 +112,7 @@ function Spinner() {
       height="14"
       viewBox="0 0 24 24"
       aria-hidden="true"
-      className="animate-spin [animation-duration:900ms]"
+      className="animate-spin motion-reduce:animate-none [animation-duration:900ms]"
     >
       <circle cx="12" cy="12" r="8" fill="none" stroke="#FFFFFF40" strokeWidth="2.4" />
       <path d="M12 4a8 8 0 0 1 8 8" fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" />
@@ -121,12 +121,14 @@ function Spinner() {
 }
 
 const FILES: {
+  id: string;
   ext: string;
   top: number;
   doneAt: number;
   sheet: React.ReactNode;
 }[] = [
   {
+    id: "specs-xlsx",
     ext: ".xlsx",
     top: 123,
     doneAt: 0.9,
@@ -145,42 +147,57 @@ const FILES: {
     )),
   },
   {
-    ext: ".docx",
+    id: "catalog-xlsx",
+    ext: ".xlsx",
     top: 241,
     doneAt: 1.6,
-    sheet: (
-      <>
-        <span className="h-[3px] w-[60%] rounded-full bg-[#155EEF4D]" />
-        {[92, 80, 86, 70].map((w) => (
-          <span key={w} className="h-[3px] rounded-full bg-file-line" style={{ width: `${w}%` }} />
+    sheet: [true, false, false, false, false].map((head, row) => (
+      <div key={row} className="flex gap-0.5">
+        {[0, 1, 2].map((cell) => (
+          <span
+            key={cell}
+            className={cn(
+              "h-[5px] flex-1 rounded-[1px]",
+              head ? "bg-info/30" : "bg-file-line",
+            )}
+          />
         ))}
-      </>
-    ),
+      </div>
+    )),
   },
   {
-    ext: ".pdf",
+    id: "markets-xlsx",
+    ext: ".xlsx",
     top: 359,
     doneAt: 2.8,
-    sheet: (
-      <>
-        <span className="h-3.5 rounded-[2px] bg-[#E7000B14]" />
-        {[86, 92, 64].map((w) => (
-          <span key={w} className="h-[3px] rounded-full bg-file-line" style={{ width: `${w}%` }} />
+    sheet: [true, false, false, false, false].map((head, row) => (
+      <div key={row} className="flex gap-0.5">
+        {[0, 1, 2].map((cell) => (
+          <span
+            key={cell}
+            className={cn(
+              "h-[5px] flex-1 rounded-[1px]",
+              head ? "bg-[#05966940]" : "bg-file-line",
+            )}
+          />
         ))}
-      </>
-    ),
+      </div>
+    )),
   },
   {
-    ext: ".csv",
+    id: "params-xlsx",
+    ext: ".xlsx",
     top: 477,
     doneAt: 4.0,
     sheet: [true, false, false, false, false].map((head, row) => (
       <div key={row} className="flex gap-0.5">
-        {[8, 12, 7].map((w) => (
+        {[0, 1, 2].map((cell) => (
           <span
-            key={w}
-            className={cn("h-[3px] rounded-full", head ? "bg-teal/40" : "bg-border")}
-            style={{ width: w }}
+            key={cell}
+            className={cn(
+              "h-[5px] flex-1 rounded-[1px]",
+              head ? "bg-teal/35" : "bg-file-line",
+            )}
           />
         ))}
       </div>
@@ -188,13 +205,26 @@ const FILES: {
   },
 ];
 
-function ImportFile({ file, index }: { file: (typeof FILES)[number]; index: number }) {
-  const [done, setDone] = React.useState(false);
+function ImportFile({
+  file,
+  index,
+  reduceMotion,
+  inView,
+}: {
+  file: (typeof FILES)[number];
+  index: number;
+  reduceMotion: boolean;
+  inView: boolean;
+}) {
+  const [done, setDone] = React.useState(reduceMotion);
 
   React.useEffect(() => {
+    if (reduceMotion) return;
     const id = setTimeout(() => setDone(true), file.doneAt * 1000);
     return () => clearTimeout(id);
-  }, [file.doneAt]);
+  }, [file.doneAt, reduceMotion]);
+
+  const isDone = reduceMotion || done;
 
   return (
     <motion.div
@@ -210,37 +240,41 @@ function ImportFile({ file, index }: { file: (typeof FILES)[number]; index: numb
           <motion.div
             className={cn(
               "h-full origin-left rounded-full transition-colors duration-300",
-              done ? "bg-success" : "bg-foreground",
+              isDone ? "bg-success" : "bg-foreground",
             )}
-            initial={{ scaleX: 0.08 }}
+            initial={reduceMotion ? false : { scaleX: 0.08 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: file.doneAt, ease: [0.4, 0, 0.2, 1] }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { duration: file.doneAt, ease: [0.4, 0, 0.2, 1] }
+            }
           />
         </div>
       </div>
       <span
         className={cn(
           "absolute -left-3 top-[34px] flex size-[26px] items-center justify-center rounded-md text-white shadow-[0_0_0_2px_var(--card),0_2px_6px_rgba(0,0,0,0.15)] transition-colors duration-300",
-          done ? "bg-success" : "bg-[#1A1A1A]",
+          isDone ? "bg-success" : "bg-tooltip",
         )}
       >
         <AnimatePresence initial={false} mode="popLayout">
-          {done ? (
+          {isDone ? (
             <motion.span
               key="done"
-              initial={{ opacity: 0, scale: 0.25, filter: "blur(4px)" }}
+              initial={{ opacity: 0, scale: 0.88, filter: "blur(2px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+              transition={{ type: "spring", duration: 0.24, bounce: 0 }}
             >
               <Glyph name="check" size={14} strokeWidth={2.6} />
             </motion.span>
           ) : (
             <motion.span
               key="busy"
-              exit={{ opacity: 0, scale: 0.25, filter: "blur(4px)" }}
-              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+              exit={{ opacity: 0, scale: 0.88, filter: "blur(2px)" }}
+              transition={{ type: "spring", duration: 0.24, bounce: 0 }}
             >
-              <Spinner />
+              {inView && !reduceMotion && <Spinner />}
             </motion.span>
           )}
         </AnimatePresence>
@@ -261,19 +295,23 @@ const MAPPINGS = [
   ["UDI-DI", "UDI"],
 ];
 
-function RowCounter({ to }: { to: number }) {
-  const count = useMotionValue(0);
+function RowCounter({ to, reduceMotion }: { to: number; reduceMotion: boolean }) {
+  const count = useMotionValue(reduceMotion ? to : 0);
   const rounded = useTransform(count, (value) => Math.round(value));
 
   React.useEffect(() => {
+    if (reduceMotion) {
+      count.set(to);
+      return;
+    }
     const controls = animate(count, to, { duration: 1.4, ease: EASE_OUT, delay: 0.5 });
     return () => controls.stop();
-  }, [count, to]);
+  }, [count, to, reduceMotion]);
 
   return <motion.span>{rounded}</motion.span>;
 }
 
-function ImportStage() {
+function ImportStage({ reduceMotion, inView }: { reduceMotion: boolean; inView: boolean }) {
   return (
     <>
       <svg width={STAGE_W} height={STAGE_H} viewBox={`0 0 ${STAGE_W} ${STAGE_H}`} aria-hidden="true" className="absolute inset-0 text-foreground">
@@ -296,22 +334,32 @@ function ImportStage() {
               strokeLinecap="round"
               strokeDasharray="3 5"
               initial={{ strokeDashoffset: 0 }}
-              animate={{ strokeDashoffset: -16 }}
-              transition={{ duration: 1.2, ease: "linear", repeat: Infinity }}
+              animate={reduceMotion || !inView ? { strokeDashoffset: 0 } : { strokeDashoffset: -16 }}
+              transition={
+                reduceMotion || !inView
+                  ? { duration: 0 }
+                  : { duration: 1.2, ease: "linear", repeat: Infinity }
+              }
             />
           )),
         )}
       </svg>
 
       {FILES.map((file, index) => (
-        <ImportFile key={file.ext} file={file} index={index} />
+        <ImportFile
+          key={file.id}
+          file={file}
+          index={index}
+          reduceMotion={reduceMotion}
+          inView={inView}
+        />
       ))}
 
       <motion.div
         {...rise(0.15, 10)}
         className={cn("absolute left-[402px] top-[103px] flex w-[410px] rounded-2xl p-[5px]", FRAME)}
       >
-        <div className={cn("flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl", CARD)}>
+        <div className={cn("flex min-w-0 flex-1 flex-col overflow-hidden rounded-[11px]", CARD)}>
           <div className="flex items-center gap-2.5 border-b border-separator p-4">
             <Glyph name="table" size={18} className="text-foreground" />
             <span className="flex-1 font-ui text-[14px] font-semibold leading-5 text-foreground">
@@ -358,7 +406,7 @@ function ImportStage() {
           <div className="flex items-center justify-between border-t border-separator px-4 py-3.5">
             <div className="flex items-baseline gap-1.5">
               <span className="font-ui text-[20px] font-semibold leading-6 tabular-nums text-foreground">
-                <RowCounter to={48} />
+                <RowCounter to={48} reduceMotion={reduceMotion} />
               </span>
               <span className="font-ui text-[13px] leading-4 text-muted-foreground">rows ready</span>
             </div>
@@ -410,7 +458,8 @@ function FlowDot({ path, dur, begin }: { path: string; dur: number; begin: numbe
   );
 }
 
-function BuildStage() {
+function BuildStage({ reduceMotion, inView }: { reduceMotion: boolean; inView: boolean }) {
+  const animateDots = !reduceMotion && inView;
   return (
     <>
       <svg width={STAGE_W} height={STAGE_H} viewBox={`0 0 ${STAGE_W} ${STAGE_H}`} aria-hidden="true" className="absolute inset-0 text-foreground">
@@ -424,19 +473,24 @@ function BuildStage() {
             stroke="currentColor"
             strokeOpacity={0.15}
             strokeWidth="1.25"
-            initial={{ pathLength: 0 }}
+            initial={reduceMotion ? false : { pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 0.4, ease: EASE_OUT, delay: 0.2 + index * 0.06 }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { duration: 0.4, ease: EASE_OUT, delay: 0.2 + index * 0.06 }
+            }
           />
         ))}
-        {[230, 436, 642].map((x, index) => (
-          <FlowDot
-            key={`top-${x}`}
-            path={`M${x} 170 L${x} 230`}
-            dur={1.4}
-            begin={0.7 + index * 0.25}
-          />
-        ))}
+        {animateDots &&
+          [230, 436, 642].map((x, index) => (
+            <FlowDot
+              key={`top-${x}`}
+              path={`M${x} 170 L${x} 230`}
+              dur={1.4}
+              begin={0.7 + index * 0.25}
+            />
+          ))}
         {BUILD_PATHS.map((d, index) => (
           <g key={d}>
             <motion.path
@@ -445,11 +499,15 @@ function BuildStage() {
               stroke="currentColor"
               strokeOpacity={0.15}
               strokeWidth="1.25"
-              initial={{ pathLength: 0 }}
+              initial={reduceMotion ? false : { pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.6 + index * 0.08 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { duration: 0.5, ease: EASE_OUT, delay: 0.6 + index * 0.08 }
+              }
             />
-            <FlowDot path={d} dur={2.4} begin={1.3 + index * 0.35} />
+            {animateDots && <FlowDot path={d} dur={2.4} begin={1.3 + index * 0.35} />}
           </g>
         ))}
       </svg>
@@ -509,7 +567,7 @@ function BuildStage() {
           <span className="flex-1 font-ui text-[11px] font-medium uppercase leading-[14px] tracking-[0.08em] text-muted-foreground">
             Label part
           </span>
-          <StatusBadge tone="draft" className="px-2 text-[11px] leading-4">
+          <StatusBadge tone="draft" size="sm">
             Draft
           </StatusBadge>
         </div>
@@ -598,12 +656,12 @@ const CURSORS: {
   drift: { x: number[]; y: number[] };
   delay: number;
 }[] = [
-  { label: "Sarah · Regulatory", avatar: "/images/avatars/sara.webp", color: "bg-info", fill: "#155EEF", arrow: [206, 276], drift: { x: [-40, 0], y: [-30, 0] }, delay: 0.5 },
-  { label: "Marta · Quality", avatar: "/images/avatars/marta.webp", color: "bg-primary", fill: "#7F22FE", arrow: [470, 340], drift: { x: [0, 12, -8, 0], y: [0, -5, 3, 0] }, delay: 0.7 },
-  { label: "You", avatar: "/images/avatars/daniel.webp", color: "bg-[#171717] dark:bg-[#2A2A2A]", fill: "#171717", arrow: [700, 296], drift: { x: [0, -8, 6, 0], y: [0, 6, -4, 0] }, delay: 0.9 },
+  { label: "Sara · Labeling", avatar: "/images/avatars/sara.webp", color: "bg-info", fill: "#155EEF", arrow: [206, 276], drift: { x: [-40, 0], y: [-30, 0] }, delay: 0.5 },
+  { label: "Marta · Regulatory", avatar: "/images/avatars/marta.webp", color: "bg-primary", fill: "#7F22FE", arrow: [470, 340], drift: { x: [0, 12, -8, 0], y: [0, -5, 3, 0] }, delay: 0.7 },
+  { label: "You", avatar: "/images/avatars/daniel.webp", color: "bg-tooltip", fill: "#171717", arrow: [700, 296], drift: { x: [0, -8, 6, 0], y: [0, 6, -4, 0] }, delay: 0.9 },
 ];
 
-function ReviewStage() {
+function ReviewStage({ reduceMotion, inView }: { reduceMotion: boolean; inView: boolean }) {
   return (
     <>
       {WINDOWS.map((win, index) => (
@@ -666,7 +724,7 @@ function ReviewStage() {
               transition={{ duration: 0.3, ease: EASE_OUT, delay: 1.1 + index * 0.25 }}
               className="flex"
             >
-              <StatusBadge tone={win.tone} className="px-2 text-[11px] leading-4">
+              <StatusBadge tone={win.tone} size="sm">
                 {win.status}
               </StatusBadge>
             </motion.span>
@@ -679,19 +737,27 @@ function ReviewStage() {
           key={cursor.label}
           className="absolute"
           style={{ left: cursor.arrow[0], top: cursor.arrow[1] }}
-          initial={{ opacity: 0, x: cursor.drift.x[0], y: cursor.drift.y[0] }}
-          animate={{ opacity: 1, x: cursor.drift.x, y: cursor.drift.y }}
-          transition={{
-            opacity: { duration: 0.3, delay: cursor.delay },
-            x:
-              index === 0
-                ? { duration: 0.9, ease: [0.77, 0, 0.175, 1], delay: cursor.delay }
-                : { duration: 5, ease: "easeInOut", repeat: Infinity, delay: cursor.delay },
-            y:
-              index === 0
-                ? { duration: 0.9, ease: [0.77, 0, 0.175, 1], delay: cursor.delay }
-                : { duration: 5, ease: "easeInOut", repeat: Infinity, delay: cursor.delay },
-          }}
+          initial={reduceMotion ? false : { opacity: 0, x: cursor.drift.x[0], y: cursor.drift.y[0] }}
+          animate={
+            reduceMotion || !inView
+              ? { opacity: 1, x: 0, y: 0 }
+              : { opacity: 1, x: cursor.drift.x, y: cursor.drift.y }
+          }
+          transition={
+            reduceMotion || !inView
+              ? { duration: 0.2 }
+              : {
+                  opacity: { duration: 0.3, delay: cursor.delay },
+                  x:
+                    index === 0
+                      ? { duration: 0.9, ease: [0.77, 0, 0.175, 1], delay: cursor.delay }
+                      : { duration: 5, ease: "easeInOut", repeat: Infinity, delay: cursor.delay },
+                  y:
+                    index === 0
+                      ? { duration: 0.9, ease: [0.77, 0, 0.175, 1], delay: cursor.delay }
+                      : { duration: 5, ease: "easeInOut", repeat: Infinity, delay: cursor.delay },
+                }
+          }
         >
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
             <path d="M4 3l15 7.5-6.5 1.8L10 19z" fill={cursor.fill} stroke="#FFFFFF" strokeWidth="1.8" strokeLinejoin="round" />
@@ -732,9 +798,7 @@ const TIMELINE: {
   { title: "v5 draft", body: "The next edit starts here", meta: "Fri", state: "next" },
 ];
 
-function ReleaseStage() {
-  const reduceMotion = usePrefersReducedMotion();
-
+function ReleaseStage({ reduceMotion, inView }: { reduceMotion: boolean; inView: boolean }) {
   return (
     <motion.div
       {...rise(0.05, 10)}
@@ -761,7 +825,7 @@ function ReleaseStage() {
                 )}
                 {item.state === "active" && (
                   <span className="relative flex size-7 shrink-0 items-center justify-center rounded-full bg-primary shadow-[0_0_0_4px_var(--primary-100)] dark:shadow-[0_0_0_4px_rgba(143,64,255,0.25)]">
-                    {!reduceMotion && (
+                    {!reduceMotion && inView && (
                       <motion.span
                         aria-hidden="true"
                         className="absolute inset-0 rounded-full bg-primary"
@@ -830,13 +894,35 @@ const STAGE_FOCUS = [
 export default function HowItWorksSection() {
   const reduceMotion = usePrefersReducedMotion();
   const [active, setActive] = React.useState(0);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
   const stageRef = React.useRef<HTMLDivElement>(null);
+  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const inView = useInView(stageRef, { margin: "-40px" });
   const seen = useInView(stageRef, { margin: "-40px", once: true });
   const Stage = STAGES[active];
   const focus = STAGE_FOCUS[active];
-  const autoplay = !reduceMotion && inView;
+  const paused = isHovered || isFocused;
+  const autoplay = !reduceMotion && inView && !paused;
   const showStage = reduceMotion || inView || seen;
+
+  const handleTabKeyDown = (event: React.KeyboardEvent, index: number) => {
+    let next = index;
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+      next = (index + 1) % STEPS.length;
+    } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+      next = (index - 1 + STEPS.length) % STEPS.length;
+    } else if (event.key === "Home") {
+      next = 0;
+    } else if (event.key === "End") {
+      next = STEPS.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    setActive(next);
+    tabRefs.current[next]?.focus();
+  };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -860,6 +946,14 @@ export default function HowItWorksSection() {
             role="tablist"
             aria-label="How Uprevit works"
             aria-orientation="vertical"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onFocusCapture={() => setIsFocused(true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                setIsFocused(false);
+              }
+            }}
             className="flex flex-col divide-y divide-separator rounded-tile bg-tile px-5 py-2 sm:grid sm:grid-cols-2 sm:gap-px sm:divide-y-0 sm:bg-transparent sm:p-0 lg:grid-cols-1 lg:grid-rows-4"
           >
             {STEPS.map((step, index) => {
@@ -867,14 +961,19 @@ export default function HowItWorksSection() {
               return (
                 <button
                   key={step.title}
+                  ref={(el) => {
+                    tabRefs.current[index] = el;
+                  }}
                   type="button"
                   role="tab"
                   id={`how-tab-${index}`}
                   aria-selected={selected}
                   aria-controls="how-panel"
+                  tabIndex={selected ? 0 : -1}
                   onClick={() => setActive(index)}
+                  onKeyDown={(event) => handleTabKeyDown(event, index)}
                   className={cn(
-                    "flex cursor-pointer items-center py-4 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:rounded-tile sm:px-7 sm:py-6 lg:px-10 lg:py-0",
+                    "flex cursor-pointer items-center py-4 text-left outline-none transition-[background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:scale-[0.99] sm:rounded-tile sm:px-8 sm:py-6 lg:px-10 lg:py-0",
                     selected
                       ? "sm:bg-card dark:sm:bg-surface-2"
                       : "sm:bg-tile [@media(hover:hover)_and_(pointer:fine)]:hover:bg-card/60 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-1",
@@ -887,7 +986,7 @@ export default function HowItWorksSection() {
                           key={`${active}-${reduceMotion}`}
                           className={cn(
                             "absolute inset-0 rounded-full bg-foreground",
-                            autoplay ? "how-progress" : "",
+                            !reduceMotion && inView ? "how-progress" : "",
                           )}
                           style={
                             {
@@ -912,7 +1011,7 @@ export default function HowItWorksSection() {
                         <span
                           className={cn(
                             "font-ui text-[15px] font-medium leading-[21px] transition-colors duration-200 sm:text-[16px] sm:leading-[22px]",
-                            selected ? "text-foreground" : "text-faint-foreground sm:text-muted-foreground",
+                            selected ? "text-foreground" : "text-muted-foreground",
                           )}
                         >
                           <span className="mr-1.5 font-mono text-[13px] tabular-nums sm:hidden">
@@ -923,7 +1022,7 @@ export default function HowItWorksSection() {
                       </span>
                       <span
                         className={cn(
-                          "max-w-[300px] font-ui text-[14px] leading-[21px] transition-colors duration-200 sm:leading-[22px]",
+                          "max-w-[300px] text-pretty font-ui text-[14px] leading-[1.5] transition-colors duration-200",
                           selected ? "text-muted-foreground" : "hidden text-faint-foreground sm:block",
                         )}
                       >
@@ -960,7 +1059,7 @@ export default function HowItWorksSection() {
                       exit={{ opacity: 0, filter: "blur(4px)", transition: { duration: 0.18, ease: EASE_OUT } }}
                       transition={{ duration: 0.3, ease: EASE_OUT }}
                     >
-                      <Stage />
+                      <Stage reduceMotion={reduceMotion} inView={inView} />
                     </motion.div>
                   )}
                 </AnimatePresence>

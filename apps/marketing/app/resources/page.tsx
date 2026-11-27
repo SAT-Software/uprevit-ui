@@ -15,8 +15,8 @@ export default function ResourcesPage() {
   return (
     <TileGrid>
       <MarketingHeader inTileGrid />
-      <TileSpacerRow className="hidden sm:grid" />
-      <main className="contents">
+      <TileSpacerRow />
+      <main id="main-content" className="contents">
         <ResourcesHub />
         <CTASection
           title="See your own labels"
@@ -28,9 +28,9 @@ export default function ResourcesPage() {
             dataAttr: "resources-cta-book-demo",
           }}
           secondaryCta={{
-            label: "Learn more",
-            href: "/#product-preview",
-            dataAttr: "resources-cta-learn-more",
+            label: "Explore the platform",
+            href: "/platform/overview",
+            dataAttr: "resources-cta-platform",
           }}
         />
       </main>

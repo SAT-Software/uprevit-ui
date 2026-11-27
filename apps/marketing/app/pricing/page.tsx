@@ -53,7 +53,7 @@ export default function PricingPage() {
     <TileGrid>
       <MarketingHeader inTileGrid />
       <TileSpacerRow />
-      <main className="contents">
+      <main id="main-content" className="contents">
         <PricingHeroSection />
         <PricingPlansSection />
         <TileSpacerRow />
@@ -86,9 +86,9 @@ export default function PricingPage() {
             dataAttr: "pricing-cta-book-demo",
           }}
           secondaryCta={{
-            label: "Contact us",
-            href: "/contact",
-            dataAttr: "pricing-cta-contact-us",
+            label: "Explore the platform",
+            href: "/platform/overview",
+            dataAttr: "pricing-cta-platform",
           }}
         />
       </main>

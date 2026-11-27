@@ -74,7 +74,7 @@ function StepColumn({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.45, ease: EASE_OUT, delay }}
-      className={`flex min-w-0 flex-col justify-between gap-7 rounded-tile bg-tile px-6 py-7 sm:gap-8 sm:px-8 sm:pb-8 sm:pt-10 ${className ?? ""}`}
+      className={`flex min-w-0 flex-col justify-between gap-7 rounded-tile bg-tile px-5 py-7 sm:gap-8 sm:px-8 sm:pb-8 sm:pt-10 lg:px-10 ${className ?? ""}`}
     >
       <div className="font-ui text-label font-medium uppercase leading-4 tracking-label text-faint-foreground">
         {eyebrow}
@@ -120,7 +120,7 @@ export default function PricingPlansSection() {
       <TileRow
         as="section"
         id="whats-included"
-        aria-label="Pricing structure and plan details"
+        aria-labelledby="pricing-plan-heading"
         className="scroll-mt-14"
         splitCenter
         centerClassName="grid grid-cols-1 gap-px lg:grid-cols-[minmax(0,1fr)_420px_minmax(0,1fr)] xl:grid-cols-[minmax(0,1fr)_460px_minmax(0,1fr)]"
@@ -140,10 +140,13 @@ export default function PricingPlansSection() {
           className="order-1 flex min-w-0 flex-col gap-7 rounded-tile bg-card p-6 shadow-[inset_0_0_0_1px_var(--border),0_4px_16px_rgba(0,0,0,0.04)] sm:p-8 lg:order-2 dark:bg-surface-2 dark:shadow-[inset_0_0_0_1px_var(--edge-3),0_4px_16px_rgba(0,0,0,0.4)]"
         >
           <div className="flex flex-col gap-1.5">
-            <h2 className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground">
+            <h2
+              id="pricing-plan-heading"
+              className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground"
+            >
               Uprevit
             </h2>
-            <p className="font-ui text-body-m leading-5 text-muted-foreground">
+            <p className="text-pretty font-ui text-body-m leading-5 text-muted-foreground">
               One plan for regulated documentation teams: a monthly platform
               fee, role-based seats, and transparent storage and export usage.
             </p>
@@ -166,7 +169,7 @@ export default function PricingPlansSection() {
           <Link
             href="/contact?topic=pricing"
             data-attr="pricing-talk-to-us"
-            className="inline-flex h-[42px] w-full shrink-0 items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-4 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] active:bg-primary-700 dark:hover:bg-primary-hover"
+            className="inline-flex h-[42px] w-full shrink-0 items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-4 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700"
           >
             Talk to us
           </Link>

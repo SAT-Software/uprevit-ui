@@ -35,22 +35,27 @@ export function CopyArticleLinkButton({ className }: { className?: string }) {
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className={cn(
-        "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-2.5 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors duration-150 hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-ring dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3",
-        className,
-      )}
-    >
-      <Icon
-        icon={copied ? Tick02Icon : Copy01Icon}
-        size={12}
-        strokeWidth={2}
-        className={copied ? "text-success" : "text-icon"}
-      />
-      <span>{copied ? "Copied link" : "Copy link"}</span>
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={cn(
+          "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-2.5 font-ui text-[12px] font-medium leading-4 text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[color,background-color,transform] duration-150 hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3",
+          className,
+        )}
+      >
+        <Icon
+          icon={copied ? Tick02Icon : Copy01Icon}
+          size={12}
+          strokeWidth={2}
+          className={copied ? "text-success" : "text-icon"}
+        />
+        <span>{copied ? "Copied link" : "Copy link"}</span>
+      </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {copied ? "Article link copied to clipboard." : ""}
+      </span>
+    </>
   );
 }
 
@@ -147,19 +152,19 @@ export function BlogArticleMobileToc({ items }: { items: BlogTocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <TileRow as="div" className="lg:hidden" centerClassName="px-5 py-3.5 sm:px-10">
+    <TileRow as="div" className="lg:hidden" centerClassName="px-5 py-3.5 sm:px-8">
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full cursor-pointer items-center justify-between gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="flex items-center gap-2.5">
-          <span className="size-1.5 rounded-full bg-primary" />
+          <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
           <span className="font-ui text-body-s font-medium text-foreground">
             On this page
           </span>
-          <span className="font-ui text-body-s text-faint-foreground">
+          <span className="font-ui text-body-s text-faint-foreground tabular-nums">
             {items.length} sections
           </span>
         </span>

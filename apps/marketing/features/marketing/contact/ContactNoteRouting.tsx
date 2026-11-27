@@ -16,8 +16,9 @@ interface RouteChipSpec {
   id: ContactTopicId;
   label: string;
   dotClass: string;
-  left: number;
-  top: number;
+  anchorX: number;
+  anchorY: number;
+  anchorEdge: "bottom" | "top";
   spoke: string;
   pulseFrom: readonly [number, number];
   pulseTo: readonly [number, number];
@@ -28,41 +29,45 @@ const ROUTE_CHIPS: RouteChipSpec[] = [
     id: "demo",
     label: "Demo",
     dotClass: "bg-primary",
-    left: 26,
-    top: 100,
-    spoke: "M191 161L128 122",
-    pulseFrom: [191, 161],
-    pulseTo: [128, 122],
+    anchorX: 104,
+    anchorY: 112,
+    anchorEdge: "bottom",
+    spoke: "M188 161L104 112",
+    pulseFrom: [188, 161],
+    pulseTo: [104, 112],
   },
   {
     id: "pricing",
     label: "Pricing",
-    dotClass: "bg-chart-2",
-    left: 274,
-    top: 80,
-    spoke: "M248 160L322 106",
-    pulseFrom: [248, 160],
-    pulseTo: [322, 106],
+    dotClass: "bg-success",
+    anchorX: 338,
+    anchorY: 104,
+    anchorEdge: "bottom",
+    spoke: "M251 160L338 104",
+    pulseFrom: [251, 160],
+    pulseTo: [338, 104],
   },
   {
     id: "support",
     label: "Support",
-    dotClass: "bg-chart-3",
-    left: 6,
-    top: 252,
-    spoke: "M191 199L108 254",
-    pulseFrom: [191, 199],
-    pulseTo: [108, 254],
+    dotClass: "bg-info",
+    anchorX: 98,
+    anchorY: 252,
+    anchorEdge: "top",
+    spoke: "M188 199L98 252",
+    pulseFrom: [188, 199],
+    pulseTo: [98, 252],
   },
   {
     id: "security",
     label: "Security review",
-    dotClass: "bg-chart-1",
-    left: 254,
-    top: 232,
-    spoke: "M249 198L310 234",
-    pulseFrom: [249, 198],
-    pulseTo: [310, 234],
+    dotClass: "bg-foreground/70",
+    anchorX: 334,
+    anchorY: 246,
+    anchorEdge: "top",
+    spoke: "M252 199L334 246",
+    pulseFrom: [252, 199],
+    pulseTo: [334, 246],
   },
 ];
 
@@ -85,7 +90,7 @@ export function ContactNoteRouting({
     if (reduceMotion || !inView) return;
     const id = setInterval(() => {
       setPulseCount((count) => count + 1);
-    }, 3400);
+    }, 3200);
     return () => clearInterval(id);
   }, [inView, reduceMotion]);
 
@@ -124,7 +129,7 @@ export function ContactNoteRouting({
             {PULSE_OFFSETS.map((delay) => (
               <span
                 key={delay}
-                className="faq-pulse-ring absolute size-[68px] rounded-full border border-primary/35 dark:border-primary/40"
+                className="faq-pulse-ring absolute size-[68px] rounded-full border border-foreground/30 dark:border-foreground/35"
                 style={{
                   animationDelay: delay,
                   animationPlayState: inView ? "running" : "paused",
@@ -144,71 +149,77 @@ export function ContactNoteRouting({
           {ROUTE_CHIPS.map((chip) => {
             const isActive = chip.id === selectedTopic;
             return (
-              <DottedConnector
-                key={chip.id}
-                d={chip.spoke}
-                active={isActive}
-                canvasWidth={440}
-                canvasHeight={360}
-                baseOpacity={0}
-                activeOpacity={0.34}
-                transition={{
-                  duration: isActive ? 0.38 : 0.2,
-                  ease: PULSE_EASE,
-                }}
-              />
+              <g key={chip.id}>
+                <DottedConnector
+                  d={chip.spoke}
+                  active={isActive}
+                  canvasWidth={440}
+                  canvasHeight={360}
+                  baseOpacity={0.22}
+                  activeOpacity={0.78}
+                  transition={{
+                    duration: isActive ? 0.5 : 0.25,
+                    ease: PULSE_EASE,
+                  }}
+                />
+                <circle
+                  cx={chip.pulseFrom[0]}
+                  cy={chip.pulseFrom[1]}
+                  r="3"
+                  strokeWidth="1.2"
+                  className={cn(
+                    "fill-card transition-colors duration-300 dark:fill-surface-2",
+                    isActive ? "stroke-foreground/70" : "stroke-foreground/30",
+                  )}
+                />
+                <circle
+                  cx={chip.pulseTo[0]}
+                  cy={chip.pulseTo[1]}
+                  r="3"
+                  strokeWidth="1.2"
+                  className={cn(
+                    "fill-card transition-colors duration-300 dark:fill-surface-2",
+                    isActive ? "stroke-foreground/70" : "stroke-foreground/30",
+                  )}
+                />
+              </g>
             );
           })}
+
           {!reduceMotion && inView && (
-            <g key={`${activeChip.id}-${pulseCount}`}>
-              <motion.circle
+            <motion.g
+              key={`${activeChip.id}-${pulseCount}`}
+              initial={{ x: 0, y: 0, opacity: 0 }}
+              animate={{
+                x: activeChip.pulseTo[0] - activeChip.pulseFrom[0],
+                y: activeChip.pulseTo[1] - activeChip.pulseFrom[1],
+                opacity: [0, 1, 1, 0],
+              }}
+              transition={{
+                x: { duration: 0.72, delay: 0.12, ease: PULSE_EASE },
+                y: { duration: 0.72, delay: 0.12, ease: PULSE_EASE },
+                opacity: {
+                  duration: 0.72,
+                  delay: 0.12,
+                  times: [0, 0.16, 0.84, 1],
+                  ease: "linear",
+                },
+              }}
+            >
+              <circle
+                cx={activeChip.pulseFrom[0]}
+                cy={activeChip.pulseFrom[1]}
                 r="4.5"
-                fill="var(--primary)"
-                fillOpacity={0.18}
-                initial={{
-                  cx: activeChip.pulseFrom[0],
-                  cy: activeChip.pulseFrom[1],
-                  opacity: 0,
-                }}
-                animate={{
-                  cx: activeChip.pulseTo[0],
-                  cy: activeChip.pulseTo[1],
-                  opacity: [0, 1, 1, 0],
-                }}
-                transition={{
-                  cx: { duration: 0.55, ease: PULSE_EASE },
-                  cy: { duration: 0.55, ease: PULSE_EASE },
-                  opacity: {
-                    duration: 0.55,
-                    times: [0, 0.15, 0.85, 1],
-                    ease: "linear",
-                  },
-                }}
+                fill="currentColor"
+                fillOpacity={0.1}
               />
-              <motion.circle
+              <circle
+                cx={activeChip.pulseFrom[0]}
+                cy={activeChip.pulseFrom[1]}
                 r="2.2"
-                fill="var(--primary)"
-                initial={{
-                  cx: activeChip.pulseFrom[0],
-                  cy: activeChip.pulseFrom[1],
-                  opacity: 0,
-                }}
-                animate={{
-                  cx: activeChip.pulseTo[0],
-                  cy: activeChip.pulseTo[1],
-                  opacity: [0, 1, 1, 0],
-                }}
-                transition={{
-                  cx: { duration: 0.55, ease: PULSE_EASE },
-                  cy: { duration: 0.55, ease: PULSE_EASE },
-                  opacity: {
-                    duration: 0.55,
-                    times: [0, 0.15, 0.85, 1],
-                    ease: "linear",
-                  },
-                }}
+                fill="currentColor"
               />
-            </g>
+            </motion.g>
           )}
         </svg>
 
@@ -223,8 +234,8 @@ export function ContactNoteRouting({
             key={selectedTopic}
             initial={reduceMotion ? false : { scale: 0.9 }}
             animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.4, bounce: 0.2 }}
-            className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-primary text-white shadow-[0_0_0_2px_#FFFFFF,0_4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_0_2px_#141414,0_4px_6px_-1px_rgba(0,0,0,0.3)]"
+            transition={{ type: "spring", duration: 0.24, bounce: 0 }}
+            className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-success text-white shadow-[0_0_0_2px_#FFFFFF,0_4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_0_2px_#141414,0_4px_6px_-1px_rgba(0,0,0,0.3)]"
           >
             <Icon icon={Tick02Icon} size={12} strokeWidth={2.5} />
           </motion.span>
@@ -232,11 +243,12 @@ export function ContactNoteRouting({
 
         {ROUTE_CHIPS.map((chip) => {
           const isActive = chip.id === selectedTopic;
+          const top = chip.anchorEdge === "bottom" ? chip.anchorY - 28 : chip.anchorY;
           return (
             <div
               key={chip.id}
-              className="absolute flex h-7 w-[160px] justify-center"
-              style={{ left: chip.left, top: chip.top }}
+              className="absolute -translate-x-1/2"
+              style={{ left: chip.anchorX, top }}
             >
               <motion.button
                 type="button"
@@ -247,17 +259,17 @@ export function ContactNoteRouting({
                     ? undefined
                     : { scale: isActive ? 1.04 : 1, y: isActive ? -1 : 0 }
                 }
-                transition={{ type: "spring", duration: 0.35, bounce: 0.15 }}
+                transition={{ type: "spring", duration: 0.22, bounce: 0 }}
                 className={cn(
-                  "flex h-7 cursor-pointer items-center gap-1.5 rounded-sm border bg-card px-2.5 font-ui text-body-s leading-4 shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring dark:bg-surface-3 dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]",
+                  "inline-flex h-7 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[6px] bg-card px-2.5 font-ui text-body-s leading-4 outline-none transition-[box-shadow,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:bg-surface-2",
                   isActive
-                    ? "border-foreground/20 font-medium text-foreground dark:border-foreground/25 dark:text-foreground"
-                    : "border-border text-muted-foreground hover:border-stroke-strong hover:text-foreground dark:border-edge-3 dark:hover:border-edge-4",
+                    ? "font-medium text-foreground shadow-[inset_0_0_0_1px_rgba(23,23,23,0.22),0_4px_12px_-4px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24),0_4px_12px_-4px_rgba(0,0,0,0.35)]"
+                    : "text-muted-foreground shadow-[inset_0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.03)] hover:text-foreground dark:shadow-[inset_0_0_0_1px_var(--edge-3)]",
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className={cn("size-1.5 shrink-0 rounded-full", chip.dotClass)}
+                  className={cn("size-[5.5px] shrink-0 rounded-full", chip.dotClass)}
                 />
                 <span>{chip.label}</span>
               </motion.button>

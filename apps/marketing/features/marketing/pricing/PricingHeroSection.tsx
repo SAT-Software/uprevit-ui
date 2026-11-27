@@ -26,7 +26,7 @@ export default function PricingHeroSection() {
       <TileRow
         as="section"
         aria-labelledby="pricing-hero-heading"
-        centerClassName="relative flex flex-col items-center overflow-hidden px-5 pt-14 pb-12 sm:px-8 sm:pt-18 sm:pb-20 lg:pt-[88px] lg:pb-[120px]"
+        centerClassName="relative flex flex-col items-center overflow-hidden px-5 pt-14 pb-12 sm:px-8 sm:pt-18 sm:pb-20 lg:px-10 lg:pt-[88px] lg:pb-[120px]"
       >
         <div
           aria-hidden="true"
@@ -85,18 +85,18 @@ export default function PricingHeroSection() {
           >
             <h1
               id="pricing-hero-heading"
-              className="font-sans text-[32px] font-medium leading-[36px] tracking-[-0.04em] text-foreground sm:text-[46px] sm:leading-[52px] lg:text-[60px] lg:leading-[64px]"
+              className="text-balance font-sans text-[32px] font-medium leading-[1.12] tracking-[-0.04em] text-foreground sm:text-[46px] lg:text-[60px] lg:leading-[1.07]"
             >
               Simple pricing
               <br />
-              <span className="text-foreground/40">
+              <span className="text-foreground/55">
                 for audit-ready documentation
               </span>
             </h1>
           </div>
 
           <p
-            className="hero-enter max-w-[300px] text-center font-ui text-[14px] leading-[21px] text-muted-foreground sm:max-w-[640px] sm:text-[17px] sm:leading-[27px] lg:max-w-none lg:text-[18px] lg:leading-[30px]"
+            className="hero-enter max-w-[300px] text-pretty text-center font-ui text-[14px] leading-[21px] text-muted-foreground sm:max-w-[640px] sm:text-[17px] sm:leading-[27px] lg:max-w-none lg:text-[18px] lg:leading-[30px]"
             style={
               {
                 "--hero-delay": "70ms",
@@ -122,7 +122,7 @@ export default function PricingHeroSection() {
             <Link
               href="/contact?topic=pricing"
               data-attr="pricing-hero-talk-to-us"
-              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-5 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:w-auto dark:hover:bg-primary-hover"
+              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-5 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:w-auto"
             >
               Talk to us
             </Link>

@@ -51,10 +51,10 @@ export default function StandardsSection() {
   return (
     <MotionConfig reducedMotion="user">
     <section aria-labelledby="standards-heading" className="contents">
-      <TileRow centerClassName="flex items-center justify-center px-6 py-[18px] sm:px-12 sm:py-5">
+      <TileRow centerClassName="flex items-center justify-center px-5 py-[18px] sm:px-8 sm:py-5 lg:px-10">
         <h2
           id="standards-heading"
-          className="max-w-[260px] text-center font-ui text-[14px] font-normal leading-5 text-icon sm:max-w-none"
+          className="max-w-[260px] text-balance text-center font-ui text-[14px] font-medium leading-5 text-muted-foreground sm:max-w-none"
         >
           Built around the standards your labels answer to
         </h2>
@@ -75,7 +75,7 @@ export default function StandardsSection() {
               ease: [0.23, 1, 0.32, 1],
               delay: index * 0.06,
             }}
-            className={`group flex flex-row items-center gap-4 rounded-tile bg-tile px-5 py-5 sm:flex-col sm:items-start sm:gap-5 sm:px-7 sm:py-7 lg:px-8 lg:pb-9 lg:pt-8 ${
+            className={`group flex flex-row items-center gap-4 rounded-tile bg-tile px-5 py-5 sm:flex-col sm:items-start sm:gap-5 sm:px-8 sm:py-7 lg:px-6 lg:pb-9 lg:pt-8 xl:px-8 ${
               index === STANDARDS.length - 1 ? "sm:col-span-2 lg:col-span-1" : ""
             }`}
           >

@@ -13,9 +13,9 @@ export function usePlayback(reduceMotion: boolean, shownMs = 8000, hiddenMs = 90
       setShown(next);
       id = setTimeout(() => play(!next), next ? shownMs : hiddenMs);
     };
-    play(true);
+    id = setTimeout(() => play(true), 0);
     return () => clearTimeout(id);
   }, [inView, reduceMotion, shownMs, hiddenMs]);
 
-  return [ref, reduceMotion || shown] as const;
+  return [ref, reduceMotion || (inView && shown), inView] as const;
 }

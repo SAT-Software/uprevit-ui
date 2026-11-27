@@ -21,7 +21,7 @@ export default function BlogsSection() {
       <TileRow
         as="section"
         aria-labelledby="blog-hero-heading"
-        centerClassName="relative overflow-hidden px-5 pt-12 pb-9 sm:px-10 sm:pt-16 sm:pb-12 lg:px-12 lg:pt-[88px] lg:pb-16"
+        centerClassName="relative overflow-hidden px-5 pt-12 pb-9 sm:px-8 sm:pt-16 sm:pb-12 lg:px-10 lg:pt-[88px] lg:pb-16"
       >
         <div
           aria-hidden="true"
@@ -39,15 +39,15 @@ export default function BlogsSection() {
         <div className="relative flex flex-col gap-4 sm:gap-5">
           <h1
             id="blog-hero-heading"
-            className="font-sans text-[30px] font-medium leading-[33px] tracking-[-0.04em] text-foreground sm:text-[46px] sm:leading-[52px] lg:text-[60px] lg:leading-[64px]"
+            className="text-balance font-sans text-[30px] font-medium leading-[1.1] tracking-[-0.04em] text-foreground sm:text-[46px] lg:text-[60px] lg:leading-[1.07]"
           >
             The Uprevit blog
             <br />
-            <span className="text-foreground/40">
+            <span className="text-foreground/55">
               Insights for labeling teams
             </span>
           </h1>
-          <p className="max-w-[560px] font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]">
+          <p className="max-w-[560px] text-pretty font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]">
             Regulatory updates, practical guides and product news for medical
             device labeling teams.
           </p>

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@uprevit/ui/lib/theme-provider";
 import { TooltipProvider } from "@uprevit/ui/components/ui/tooltip";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { JsonLd } from "@/components/JsonLd";
+import { MotionProvider } from "@/components/MotionProvider";
 import { ogImage, pageMetadata, siteUrl } from "@/lib/metadata";
 
 const outfit = Outfit({
@@ -72,6 +73,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:font-ui focus:text-sm focus:font-medium focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          Skip to content
+        </a>
         <JsonLd data={organizationJsonLd} />
         <ThemeProvider
           attribute="class"
@@ -79,8 +86,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>{children}</TooltipProvider>
-          <CookieConsentBanner />
+          <MotionProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+            <CookieConsentBanner />
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

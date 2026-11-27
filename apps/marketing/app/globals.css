@@ -17,7 +17,7 @@
   --popover-foreground: #171717;
   --primary: #7F22FE;
   --primary-foreground: #FFFFFF;
-  --primary-hover: #6A12DC;
+  --primary-hover: #8A33FF;
   --primary-text: #7F22FE;
   --primary-soft: #F7F2FF;
   --primary-50: #F7F2FF;
@@ -43,7 +43,7 @@
   --destructive-strong: #B91C1C;
   --border: #1717171A;
   --input: #1717171A;
-  --ring: #17171733;
+  --ring: #1717178C;
 
   --subtle: #FAFAFA;
   --surface-0: #FDFDFD;
@@ -56,6 +56,9 @@
   --surface-hover: #F7F7F7;
   --surface-selected: #17171714;
   --surface-highlight: transparent;
+  --frame-surface: #F5F5F5BF;
+  --tooltip: #1A1A1A;
+  --tooltip-foreground: #FFFFFF;
   --tile: #FFFFFFBF;
   --tile-surface-solid: #FBFBFB;
   --tile-dot: rgb(23 23 23 / 0.11);
@@ -67,8 +70,8 @@
 
   --fg-secondary: #171717B3;
   --icon: #17171780;
-  --placeholder: #17171773;
-  --faint-foreground: #17171752;
+  --placeholder: #17171799;
+  --faint-foreground: #6B6B6B;
   --fg-tertiary: var(--muted-foreground);
   --fg-quaternary: var(--faint-foreground);
 
@@ -101,10 +104,10 @@
   --invert: #171717;
   --invert-foreground: #FDFDFD;
 
-  --stage-draft: #9CA3AF;
-  --stage-submitted: #3B82F6;
-  --stage-review: #F59E0B;
-  --stage-released: #22C55E;
+  --stage-draft: #6B7280;
+  --stage-submitted: #2563EB;
+  --stage-review: #D97706;
+  --stage-released: #16A34A;
 
   --diff-added: #1D4ED8;
   --diff-added-soft: #EFF6FF;
@@ -134,7 +137,7 @@
   --sidebar-accent: #17171714;
   --sidebar-accent-foreground: #171717;
   --sidebar-border: #1717171A;
-  --sidebar-ring: #17171733;
+  --sidebar-ring: #1717178C;
 
   --logo-tile-bg-light: linear-gradient(180deg, #2A2A2A 0%, #1A1A1A 55%, #111111 100%);
   --logo-tile-border-light: #000000;
@@ -214,7 +217,7 @@
   --destructive-strong: #F87171;
   --border: #FFFFFF14;
   --input: #FFFFFF14;
-  --ring: #FFFFFF3D;
+  --ring: #FFFFFF80;
 
   --subtle: #141414;
   --surface-0: #090909;
@@ -227,6 +230,9 @@
   --surface-hover: #FFFFFF0A;
   --surface-selected: #FFFFFF14;
   --surface-highlight: #FFFFFF0A;
+  --frame-surface: #1A1A1ABF;
+  --tooltip: #2A2A2A;
+  --tooltip-foreground: #FFFFFF;
   --tile: #0E0E0E;
   --tile-surface-solid: #0E0E0E;
   --tile-dot: rgb(255 255 255 / 0.15);
@@ -235,8 +241,8 @@
 
   --fg-secondary: #EDEDEDB3;
   --icon: #EDEDED80;
-  --placeholder: #EDEDED73;
-  --faint-foreground: #6E6E6E;
+  --placeholder: #919191;
+  --faint-foreground: #8C8C8C;
   --fg-tertiary: var(--muted-foreground);
   --fg-quaternary: var(--faint-foreground);
 
@@ -267,6 +273,11 @@
   --invert: #EDEDED;
   --invert-foreground: #090909;
 
+  --stage-draft: #9CA3AF;
+  --stage-submitted: #60A5FA;
+  --stage-review: #FBBF24;
+  --stage-released: #34D399;
+
   --diff-added: #7DB4FF;
   --diff-added-soft: #3B82F624;
   --diff-updated: #5EE38D;
@@ -287,7 +298,7 @@
   --sidebar-accent: #FFFFFF14;
   --sidebar-accent-foreground: #EDEDED;
   --sidebar-border: #FFFFFF0F;
-  --sidebar-ring: #FFFFFF3D;
+  --sidebar-ring: #FFFFFF80;
 
   --logo-tile-bg: var(--logo-tile-bg-dark);
   --logo-tile-border: var(--border);
@@ -380,6 +391,9 @@
   --color-surface-hover: var(--surface-hover);
   --color-surface-selected: var(--surface-selected);
   --color-surface-highlight: var(--surface-highlight);
+  --color-frame-surface: var(--frame-surface);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
   --color-tile: var(--tile);
   --color-grid: var(--grid);
   --color-overlay: var(--overlay);
@@ -535,36 +549,8 @@
 }
 
 @layer utilities {
-  .pulse-animation {
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .blog-cover-flow {
-    stroke-dasharray: 12 120;
-    animation: blog-cover-flow 3s linear infinite;
-  }
-
   .blog-cover-status {
     animation: blog-cover-status 9s infinite;
-  }
-
-  @keyframes blog-cover-flow {
-    from {
-      stroke-dashoffset: 12;
-    }
-    to {
-      stroke-dashoffset: -100;
-    }
   }
 
   @keyframes blog-cover-status {
@@ -579,10 +565,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .blog-cover-flow {
-      display: none;
-    }
-
     .blog-cover-status {
       animation: none;
     }
@@ -684,6 +666,11 @@
     .hero-enter,
     .hero-enter-float {
       animation: hero-enter-fade 200ms ease-out both;
+    }
+
+    .how-progress {
+      animation: none;
+      transform: scaleY(1);
     }
 
     .typing-dot,

@@ -15,7 +15,7 @@ export default function ContactPage() {
     <TileGrid>
       <MarketingHeader inTileGrid />
       <TileSpacerRow />
-      <main className="contents">
+      <main id="main-content" className="contents">
         <ContactPageContent />
       </main>
       <FooterSection inTileGrid />

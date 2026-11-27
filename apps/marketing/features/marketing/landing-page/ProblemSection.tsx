@@ -68,7 +68,7 @@ function FileTile({
       </div>
       <span
         className={cn(
-          "absolute -left-2.5 bottom-2 rounded-[6px] border px-[5px] py-0.5 font-ui text-[10px] font-medium leading-3 text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]",
+          "absolute -left-2.5 bottom-2 rounded-[6px] border px-[5px] py-0.5 font-ui text-[10px] font-medium leading-3 text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] dark:text-surface-0",
           badgeClassName,
         )}
       >
@@ -113,8 +113,11 @@ function dotTiming(start: number) {
 }
 
 function SpreadsheetsVisual({ reduceMotion }: { reduceMotion: boolean }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { amount: 0.15 });
+
   return (
-    <div aria-hidden="true" className="relative h-[300px] shrink-0 overflow-hidden [mask-image:linear-gradient(#000_82%,transparent_100%)]">
+    <div ref={ref} aria-hidden="true" className="relative h-[300px] shrink-0 overflow-hidden [mask-image:linear-gradient(#000_82%,transparent_100%)]">
       <svg
         width="436"
         height="300"
@@ -133,7 +136,7 @@ function SpreadsheetsVisual({ reduceMotion }: { reduceMotion: boolean }) {
             strokeDasharray="3 4"
           />
         ))}
-        {reduceMotion
+        {reduceMotion || !inView
           ? CONNECTOR_DOTS.map(([cx, cy]) => (
               <g key={`${cx}-${cy}`}>
                 <circle cx={cx} cy={cy} r="5" fill="currentColor" fillOpacity={0.09} />
@@ -432,10 +435,10 @@ function PanelShell({
 }) {
   return (
     <div
-      className="absolute top-3 flex flex-col rounded-2xl border border-foreground/5 bg-[#F5F5F5BF] p-[5px] dark:bg-surface-1/75"
+      className="absolute top-3 flex flex-col rounded-2xl border border-foreground/5 bg-frame-surface p-[5px]"
       style={{ left, width }}
     >
-      <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2">
+      <div className="flex flex-col overflow-hidden rounded-[11px] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2">
         {children}
       </div>
     </div>
@@ -479,7 +482,7 @@ function RedlinesVisual({ reduceMotion }: { reduceMotion: boolean }) {
         </div>
 
         <div
-          role="tablist"
+          role="group"
           aria-label="Example documents"
           className="flex items-end border-b border-border bg-muted px-2 pt-1.5 dark:border-edge-2 dark:bg-surface-3"
         >
@@ -489,18 +492,17 @@ function RedlinesVisual({ reduceMotion }: { reduceMotion: boolean }) {
               <button
                 key={item.name}
                 type="button"
-                role="tab"
-                aria-selected={active}
+                aria-pressed={active}
                 onClick={() => {
                   setActiveTab(index);
                   setStartTick(tick);
                 }}
-                className="relative flex translate-y-px cursor-pointer items-center gap-[5px] px-2.5 pb-1.5 pt-[5px] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="relative flex min-h-6 translate-y-px cursor-pointer items-center gap-[5px] px-2.5 pb-1.5 pt-[5px] outline-none transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
               >
                 {active && (
                   <motion.span
                     layoutId="redline-active-tab"
-                    transition={{ type: "spring", duration: 0.35, bounce: 0 }}
+                    transition={{ type: "spring", duration: 0.22, bounce: 0 }}
                     className="absolute inset-0 rounded-t-sm border-x border-t border-border bg-card dark:border-edge-2 dark:bg-surface-2"
                   />
                 )}
@@ -558,18 +560,19 @@ function RedlinesVisual({ reduceMotion }: { reduceMotion: boolean }) {
                   >
                     {index + 1}
                   </span>
-                  <div className={cn("flex flex-1 gap-1 transition-[padding] duration-300", line.indent && "pl-2")}>
+                  <div className={cn("flex flex-1 gap-1 transition-transform duration-300", line.indent && "translate-x-2")}>
                     {[0, 1, 2, 3].map((barIndex) => {
                       const bar = line.bars[barIndex];
                       const tone =
                         bar?.tone === "strong" || (bar && kind) ? bar.tone : undefined;
                       return (
-                        <motion.span
+                        <span
                           key={barIndex}
-                          initial={false}
-                          animate={{ width: `${bar?.width ?? 0}%`, opacity: bar ? 1 : 0 }}
-                          transition={swap}
-                          className="relative h-[5px] overflow-hidden rounded-sm bg-stroke-strong"
+                          style={{ width: `${bar?.width ?? 0}%` }}
+                          className={cn(
+                            "relative h-[5px] overflow-hidden rounded-sm bg-stroke-strong transition-opacity duration-300",
+                            bar ? "opacity-100" : "opacity-0",
+                          )}
                         >
                           <motion.span
                             className={cn(
@@ -580,7 +583,7 @@ function RedlinesVisual({ reduceMotion }: { reduceMotion: boolean }) {
                             animate={{ scaleX: tone ? 1 : 0 }}
                             transition={{ duration: 0.45, ease: EASE_OUT }}
                           />
-                        </motion.span>
+                        </span>
                       );
                     })}
                   </div>
@@ -618,8 +621,8 @@ const MAIL_ROWS: {
   attachment?: boolean;
 }[] = [
   {
-    initials: "SC",
-    name: "Sarah Chen",
+    initials: "SP",
+    name: "Sara Patel",
     time: "9:42",
     subject: "Re: Pouch label v6 for approval",
     preview: "Approved, see my notes in v5.",
@@ -661,7 +664,7 @@ const MAIL_ROWS: {
 const INCOMING_MAIL: typeof MAIL_ROWS = [
   {
     initials: "RK",
-    name: "Ravi Kumar",
+    name: "Ravi Kulkarni",
     time: "Now",
     subject: "Re: FW: Label v6 FINAL_final.pdf",
     preview: "Is this the one going to print?",
@@ -842,15 +845,20 @@ export default function ProblemSection() {
             className="relative flex flex-col gap-5 overflow-hidden rounded-tile bg-tile pt-6 sm:gap-8 sm:pt-8"
           >
             <DotsBackdrop className="top-24 opacity-40" />
-            <motion.div {...reveal(index * 0.06)} className="relative flex flex-col gap-1.5 px-5 sm:px-8">
-              <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">
+            <motion.div {...reveal(index * 0.06)} className="relative flex flex-col gap-1.5 px-5 sm:px-8 lg:px-10">
+              <h3 className="text-balance font-ui text-[16px] font-medium leading-[1.375] text-foreground">
                 {title}
               </h3>
-              <p className="max-w-[330px] font-ui text-[14px] leading-[22px] text-muted-foreground">
+              <p className="max-w-[330px] text-pretty font-ui text-[14px] leading-[1.55] text-muted-foreground">
                 {body}
               </p>
             </motion.div>
-            <ScaledCanvas width={436} height={300} className="w-full">
+            <ScaledCanvas
+              width={436}
+              height={300}
+              aria-hidden={Visual !== RedlinesVisual ? true : undefined}
+              className="w-full"
+            >
               <Visual reduceMotion={reduceMotion} />
             </ScaledCanvas>
           </article>

@@ -20,8 +20,9 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
   return (
     <article className="contents">
       <TileRow
-        as="header"
-        centerClassName="relative overflow-hidden px-5 py-7 sm:px-10 sm:py-12 lg:px-12 lg:pt-[52px] lg:pb-[56px]"
+        as="section"
+        aria-labelledby="article-title"
+        centerClassName="relative overflow-hidden px-5 py-7 sm:px-8 sm:py-12 lg:px-10 lg:pt-[52px] lg:pb-[56px]"
       >
         <div
           aria-hidden="true"
@@ -39,7 +40,7 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
         <div className="relative flex flex-col gap-6 lg:gap-8">
           <Link
             href="/resources/blogs"
-            className="inline-flex w-fit items-center gap-1.5 font-ui text-body-m font-medium leading-5 text-muted-foreground transition-colors duration-150 hover:text-foreground"
+            className="inline-flex w-fit items-center gap-1.5 rounded-sm font-ui text-body-m font-medium leading-5 text-muted-foreground outline-none transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Icon icon={ArrowLeft02Icon} size={15} strokeWidth={1.8} />
             All articles
@@ -47,14 +48,14 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
 
           <div className="flex max-w-[820px] flex-col gap-4 lg:gap-5">
             <div className="flex flex-wrap items-center gap-3 font-ui text-body-m leading-5 text-muted-foreground">
-              <span className="inline-flex h-6 items-center rounded-md bg-muted px-2.5 font-ui text-body-s font-medium leading-4 text-foreground dark:bg-surface-4">
+              <span className="inline-flex h-6 items-center rounded-sm bg-muted px-2 font-ui text-body-s font-medium leading-4 text-foreground dark:bg-surface-4">
                 {post.category}
               </span>
               <span
                 aria-hidden="true"
                 className="h-3.5 w-px shrink-0 bg-border dark:bg-edge-3"
               />
-              <span>{formattedDate}</span>
+              <time dateTime={post.date}>{formattedDate}</time>
               <span
                 aria-hidden="true"
                 className="size-[3px] shrink-0 rounded-full bg-faint-foreground"
@@ -62,11 +63,14 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
               <span>{post.readTime}</span>
             </div>
 
-            <h1 className="font-sans text-[30px] font-medium leading-[34px] tracking-[-0.04em] text-foreground text-balance sm:text-[40px] sm:leading-[46px] lg:text-[48px] lg:leading-[54px]">
+            <h1
+              id="article-title"
+              className="text-balance font-sans text-[30px] font-medium leading-[1.13] tracking-[-0.04em] text-foreground sm:text-[40px] lg:text-[48px] lg:leading-[1.12]"
+            >
               {post.title}
             </h1>
 
-            <p className="max-w-[680px] font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-lead sm:leading-[29px]">
+            <p className="max-w-[680px] text-pretty font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-lead sm:leading-[29px]">
               {post.description}
             </p>
           </div>
@@ -114,7 +118,7 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
           <BlogArticleSidebar items={toc} />
         </div>
 
-        <div className="rounded-tile bg-tile px-5 pt-7 pb-9 sm:px-10 sm:py-10 lg:py-12 lg:pb-16 lg:pl-[72px] lg:pr-16">
+        <div className="rounded-tile bg-tile px-5 pt-7 pb-9 sm:px-8 sm:py-10 lg:py-12 lg:pb-16 lg:pl-[72px] lg:pr-16">
           <div className="max-w-[660px]">
             <div className="[&>*:first-child]:mt-0">
               <Body components={blogMdxComponents} />
@@ -123,7 +127,7 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
             <footer className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-separator pt-7">
               <Link
                 href="/resources/blogs"
-                className="inline-flex items-center gap-1.5 font-ui text-body-m font-medium text-foreground transition-colors duration-150 hover:text-primary dark:hover:text-primary-text"
+                className="inline-flex items-center gap-1.5 rounded-sm font-ui text-body-m font-medium text-foreground outline-none transition-colors duration-150 hover:text-primary focus-visible:ring-2 focus-visible:ring-ring dark:hover:text-primary-text"
               >
                 <Icon icon={ArrowLeft02Icon} size={15} strokeWidth={1.8} />
                 Back to all articles
@@ -133,9 +137,12 @@ export function BlogPostArticle({ post }: { post: BlogPost }) {
                 <span className="inline-flex h-6 items-center rounded-sm bg-muted px-2 font-ui text-body-s font-medium leading-4 text-foreground dark:bg-surface-4">
                   {post.category}
                 </span>
-                <span className="font-ui text-body-s text-muted-foreground">
+                <time
+                  dateTime={post.date}
+                  className="font-ui text-body-s text-muted-foreground"
+                >
                   {formattedDate}
-                </span>
+                </time>
               </div>
 
               <CopyArticleLinkButton className="lg:hidden" />

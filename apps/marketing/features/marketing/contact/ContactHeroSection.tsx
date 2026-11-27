@@ -99,6 +99,13 @@ export default function ContactHeroSection({
   const [submitted, setSubmitted] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
   const hasToggledStepRef = React.useRef(false);
+  const copyTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   const focusHeadingOnTransition = React.useCallback(
     (node: HTMLHeadingElement | null) => {
@@ -150,14 +157,15 @@ export default function ContactHeroSection({
     try {
       await navigator.clipboard.writeText(summary);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
     }
   };
 
   const inputClassName =
-    "h-10 rounded-md border border-foreground/[0.12] bg-card px-3 font-ui text-[14px] leading-5 text-foreground placeholder:text-faint-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 dark:border-edge-3 dark:bg-surface-3 dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]";
+    "h-10 rounded-md border border-foreground/[0.12] bg-card px-3 font-ui text-base leading-5 text-foreground placeholder:text-faint-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 sm:text-[14px] dark:border-edge-3 dark:bg-surface-3 dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]";
 
   return (
     <MotionConfig reducedMotion="user">
@@ -169,7 +177,7 @@ export default function ContactHeroSection({
         splitCenter
         centerClassName="grid grid-cols-1 gap-px lg:grid-cols-2"
       >
-        <div className="relative flex min-w-0 flex-col justify-between gap-10 overflow-hidden rounded-tile bg-tile px-6 pb-8 pt-12 sm:px-10 sm:pb-10 sm:pt-16 lg:gap-14 lg:px-12 lg:pb-12 lg:pt-[88px]">
+        <div className="relative flex min-w-0 flex-col justify-between gap-10 overflow-hidden rounded-tile bg-tile px-5 pb-8 pt-12 sm:px-8 sm:pb-10 sm:pt-16 lg:gap-14 lg:px-10 lg:pb-12 lg:pt-[88px]">
           <div
             aria-hidden="true"
             className="tile-dots pointer-events-none absolute left-0 top-0 h-[360px] w-full overflow-hidden lg:h-[560px]"
@@ -186,7 +194,7 @@ export default function ContactHeroSection({
           <div className="relative flex flex-col gap-4 sm:gap-5">
             <h1
               id="contact-hero-heading"
-              className="hero-enter font-sans text-[34px] font-medium leading-[38px] tracking-[-0.04em] text-foreground sm:text-[48px] sm:leading-[52px] xl:text-[60px] xl:leading-[64px]"
+              className="hero-enter text-balance font-sans text-[34px] font-medium leading-[1.1] tracking-[-0.04em] text-foreground sm:text-[48px] xl:text-[60px] xl:leading-[1.07]"
               style={
                 {
                   "--hero-delay": "0ms",
@@ -197,11 +205,11 @@ export default function ContactHeroSection({
             >
               Talk to the team
               <br />
-              <span className="text-foreground/40">behind Uprevit</span>
+              <span className="text-foreground/55">behind Uprevit</span>
             </h1>
 
             <p
-              className="hero-enter max-w-[460px] font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]"
+              className="hero-enter max-w-[460px] text-pretty font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]"
               style={
                 {
                   "--hero-delay": "70ms",
@@ -229,7 +237,7 @@ export default function ContactHeroSection({
           />
         </div>
 
-        <div className="flex min-w-0 flex-col rounded-tile bg-tile p-4 sm:p-8 lg:p-7 xl:p-12">
+        <div className="flex min-w-0 flex-col rounded-tile bg-tile p-5 sm:p-8 lg:p-10">
           <div className="flex flex-col rounded-2xl bg-card p-6 shadow-[0_0_0_1px_rgba(23,23,23,0.06),0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.04)] sm:p-8 lg:p-6 xl:p-8 dark:bg-surface-2 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.24),0_8px_24px_-8px_rgba(0,0,0,0.32)]">
             <AnimatePresence mode="wait" initial={false}>
               {submitted ? (
@@ -282,8 +290,8 @@ export default function ContactHeroSection({
                       </dd>
                     </div>
                     <div className="flex justify-between gap-4">
-                      <dt className="text-muted-foreground">Email</dt>
-                      <dd className="truncate font-medium text-foreground">
+                      <dt className="shrink-0 text-muted-foreground">Email</dt>
+                      <dd className="break-all text-right font-medium text-foreground">
                         {values.email}
                       </dd>
                     </div>
@@ -301,7 +309,7 @@ export default function ContactHeroSection({
                     <a
                       href={buildMailtoHref(selectedTopicLabel, values)}
                       data-attr="contact-form-open-email"
-                      className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-sm border border-primary-700 bg-primary px-4 font-ui text-body-m font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] dark:hover:bg-primary-hover"
+                      className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-sm border border-primary-700 bg-primary px-4 font-ui text-body-m font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
                     >
                       <span>Open in email client</span>
                       <Icon
@@ -313,7 +321,7 @@ export default function ContactHeroSection({
                     <button
                       type="button"
                       onClick={handleCopySummary}
-                      className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-border bg-card px-3.5 font-ui text-body-m font-medium leading-[18px] text-foreground transition-colors duration-150 hover:border-stroke-strong hover:bg-subtle focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] dark:border-edge-3 dark:bg-surface-3 dark:hover:bg-surface-4"
+                      className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-border bg-card px-3.5 font-ui text-body-m font-medium leading-[18px] text-foreground transition-[color,background-color,border-color,transform] duration-150 hover:border-stroke-strong hover:bg-subtle focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:border-edge-3 dark:bg-surface-3 dark:hover:bg-surface-4"
                     >
                       <Icon
                         icon={copied ? Tick02Icon : Copy01Icon}
@@ -323,6 +331,9 @@ export default function ContactHeroSection({
                       <span>{copied ? "Copied" : "Copy note"}</span>
                     </button>
                   </div>
+                  <span role="status" aria-live="polite" className="sr-only">
+                    {copied ? "Note copied to clipboard." : ""}
+                  </span>
 
                   <div className="border-t border-separator pt-4 dark:border-edge-1">
                     <button
@@ -373,7 +384,7 @@ export default function ContactHeroSection({
                         id="contact-firstName"
                         name="firstName"
                         autoComplete="given-name"
-                        placeholder="Maria"
+                        placeholder="Alex"
                         value={values.firstName}
                         onChange={(e) =>
                           handleFieldChange("firstName", e.target.value)
@@ -389,7 +400,6 @@ export default function ContactHeroSection({
                       {errors.firstName && (
                         <p
                           id="contact-firstName-error"
-                          role="alert"
                           className="font-ui text-label text-destructive"
                         >
                           {errors.firstName}
@@ -408,7 +418,7 @@ export default function ContactHeroSection({
                         id="contact-lastName"
                         name="lastName"
                         autoComplete="family-name"
-                        placeholder="Lindqvist"
+                        placeholder="Rivera"
                         value={values.lastName}
                         onChange={(e) =>
                           handleFieldChange("lastName", e.target.value)
@@ -422,7 +432,6 @@ export default function ContactHeroSection({
                       {errors.lastName && (
                         <p
                           id="contact-lastName-error"
-                          role="alert"
                           className="font-ui text-label text-destructive"
                         >
                           {errors.lastName}
@@ -444,7 +453,7 @@ export default function ContactHeroSection({
                         name="email"
                         type="email"
                         autoComplete="email"
-                        placeholder="maria@northwind.health"
+                        placeholder="alex@northwind.health"
                         value={values.email}
                         onChange={(e) =>
                           handleFieldChange("email", e.target.value)
@@ -458,7 +467,6 @@ export default function ContactHeroSection({
                       {errors.email && (
                         <p
                           id="contact-email-error"
-                          role="alert"
                           className="font-ui text-label text-destructive"
                         >
                           {errors.email}
@@ -491,7 +499,6 @@ export default function ContactHeroSection({
                       {errors.company && (
                         <p
                           id="contact-company-error"
-                          role="alert"
                           className="font-ui text-label text-destructive"
                         >
                           {errors.company}
@@ -504,37 +511,41 @@ export default function ContactHeroSection({
                     <legend className="font-ui text-body-m font-medium leading-5 text-foreground">
                       What can we help with?
                     </legend>
-                    <div
-                      role="radiogroup"
-                      aria-label="What can we help with?"
-                      className="flex flex-wrap gap-2 pt-0.5"
-                    >
+                    <div className="flex flex-wrap gap-2 pt-0.5">
                       {TOPICS.map((topic) => {
                         const isSelected = selectedTopic === topic.id;
                         return (
-                          <button
+                          <label
                             key={topic.id}
-                            type="button"
-                            role="radio"
-                            aria-checked={isSelected}
-                            onClick={() => onSelectTopic(topic.id)}
-                            className={cn(
-                              "inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border px-3 font-ui text-body-m leading-5 outline-none transition-[background-color,border-color,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]",
-                              isSelected
-                                ? "border-primary-300 bg-primary-50 font-medium text-primary-700 dark:border-[#8F40FF80] dark:bg-primary-soft dark:text-primary-text"
-                                : "border-stroke-strong bg-card text-foreground hover:bg-subtle dark:border-edge-3 dark:bg-surface-3 dark:hover:bg-surface-4",
-                            )}
+                            className="relative inline-flex cursor-pointer"
                           >
-                            {isSelected && (
-                              <Icon
-                                icon={Tick02Icon}
-                                size={14}
-                                strokeWidth={2}
-                                className="shrink-0"
-                              />
-                            )}
-                            <span>{topic.label}</span>
-                          </button>
+                            <input
+                              type="radio"
+                              name="contact-topic"
+                              value={topic.id}
+                              checked={isSelected}
+                              onChange={() => onSelectTopic(topic.id)}
+                              className="peer sr-only"
+                            />
+                            <span
+                              className={cn(
+                                "inline-flex h-8 items-center gap-1.5 rounded-md border px-3 font-ui text-body-m leading-5 transition-[background-color,border-color,color,transform] duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-ring active:scale-[0.97]",
+                                isSelected
+                                  ? "border-primary-300 bg-primary-50 font-medium text-primary-700 dark:border-[#8F40FF80] dark:bg-primary-soft dark:text-primary-text"
+                                  : "border-stroke-strong bg-card text-foreground hover:bg-subtle dark:border-edge-3 dark:bg-surface-3 dark:hover:bg-surface-4",
+                              )}
+                            >
+                              {isSelected && (
+                                <Icon
+                                  icon={Tick02Icon}
+                                  size={14}
+                                  strokeWidth={2}
+                                  className="shrink-0"
+                                />
+                              )}
+                              <span>{topic.label}</span>
+                            </span>
+                          </label>
                         );
                       })}
                     </div>
@@ -561,13 +572,14 @@ export default function ContactHeroSection({
                       onChange={(e) =>
                         handleFieldChange("message", e.target.value)
                       }
-                      className="min-h-[112px] resize-none rounded-md border border-foreground/[0.12] bg-card px-3 py-2.5 font-ui text-[14px] leading-[22px] text-foreground placeholder:text-faint-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 dark:border-edge-3 dark:bg-surface-3 dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]"
+                      className="min-h-[112px] resize-none rounded-md border border-foreground/[0.12] bg-card px-3 py-2.5 font-ui text-base leading-[22px] text-foreground placeholder:text-faint-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 sm:text-[14px] dark:border-edge-3 dark:bg-surface-3 dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]"
                     />
                   </div>
 
                   <div className="flex flex-col-reverse items-stretch justify-between gap-4 border-t border-separator pt-5 sm:flex-row sm:items-center sm:gap-6 dark:border-edge-1">
                     <p className="max-w-[300px] font-ui text-body-s leading-5 text-muted-foreground">
-                      By sending this you agree to our{" "}
+                      Prepares a draft for your email app. By contacting us you
+                      agree to our{" "}
                       <Link
                         href="/privacy-policy"
                         className="text-foreground underline underline-offset-2 transition-opacity hover:opacity-80"
@@ -580,9 +592,9 @@ export default function ContactHeroSection({
                     <button
                       type="submit"
                       data-attr="contact-form-submit"
-                      className="group/cta inline-flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-4 font-ui text-body-m font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:w-auto sm:rounded-sm dark:hover:bg-primary-hover"
+                      className="group/cta inline-flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-4 font-ui text-body-m font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:w-auto sm:rounded-sm"
                     >
-                      <span>Send message</span>
+                      <span>Prepare email</span>
                       <Icon
                         icon={ArrowRight02Icon}
                         size={14}

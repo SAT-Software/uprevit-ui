@@ -78,7 +78,7 @@ function ContactEmblem({ reduceMotion }: { reduceMotion: boolean }) {
     <div
       ref={ref}
       aria-hidden="true"
-      className="relative -mx-6 flex h-[140px] shrink-0 items-center justify-center overflow-hidden sm:-mx-10"
+      className="relative -mx-6 flex h-[188px] shrink-0 items-center justify-center overflow-hidden sm:-mx-10"
     >
       <span className="absolute inset-x-0 top-1/2 h-0 -translate-y-1/2 border-t border-dashed border-foreground/[0.14] dark:border-file-line" />
       <span className="absolute left-1/2 top-1/2 size-[160px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-stroke-strong dark:border-edge-3" />
@@ -166,10 +166,10 @@ export default function FAQSection({
         >
           <div className="order-2 flex min-w-0 flex-row items-center justify-between gap-4 rounded-tile bg-tile p-5 sm:px-8 sm:py-6 lg:order-1 lg:flex-col lg:items-stretch lg:justify-between lg:gap-10 lg:p-10">
             <div className="flex flex-col gap-1 lg:gap-1.5">
-              <h3 className="font-ui text-[14px] font-medium leading-5 text-foreground lg:text-[16px] lg:leading-[22px]">
+              <h3 className="text-balance font-ui text-[14px] font-medium leading-[1.4] text-foreground lg:text-[16px]">
                 {contactTitle}
               </h3>
-              <p className="max-w-[320px] font-ui text-[13px] leading-[19px] text-muted-foreground lg:text-[14px] lg:leading-[22px]">
+              <p className="max-w-[320px] text-pretty font-ui text-[13px] leading-[1.5] text-muted-foreground lg:text-[14px]">
                 {contactBody}
               </p>
             </div>
@@ -182,7 +182,7 @@ export default function FAQSection({
               <Link
                 href={contactCtaHref}
                 data-attr={contactCtaAttr}
-                className="group/cta inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-card px-3.5 font-ui text-[14px] font-medium leading-[18px] text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)] outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:border-stroke-strong hover:bg-subtle focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] lg:h-10 lg:rounded-sm lg:border-primary-700 lg:bg-primary lg:bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] lg:px-4 lg:text-primary-foreground lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] lg:hover:border-primary-700 lg:hover:bg-[#8A33FF] lg:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] lg:active:bg-primary-700 dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3 dark:lg:border-primary-700 dark:lg:bg-primary dark:lg:hover:bg-primary-hover"
+                className="group/cta inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-card px-3.5 font-ui text-[14px] font-medium leading-[18px] text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)] outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] [@media(hover:hover)_and_(pointer:fine)]:hover:border-stroke-strong [@media(hover:hover)_and_(pointer:fine)]:hover:bg-subtle lg:h-10 lg:rounded-sm lg:border-primary-700 lg:bg-primary lg:bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] lg:px-4 lg:text-primary-foreground lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] lg:active:bg-primary-700 lg:[@media(hover:hover)_and_(pointer:fine)]:hover:border-primary-700 lg:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover lg:[@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] dark:border-edge-2 dark:bg-surface-2 dark:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-3 dark:lg:border-primary-700 dark:lg:bg-primary dark:lg:[@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover"
               >
                 <span>{contactCtaLabel}</span>
                 {showCtaArrow && (

@@ -566,7 +566,7 @@ function WorkspacePreviewCard({
                   Sara P.
                 </span>
                 <span className="w-[90px]">
-                  <StatusBadge tone="review" className="px-1.5 py-0.5 text-[9.5px] leading-3">
+                  <StatusBadge tone="review" size="xs">
                     In review
                   </StatusBadge>
                 </span>
@@ -615,9 +615,9 @@ export default function CTASection({
     dataAttr: "cta-book-demo",
   },
   secondaryCta = {
-    label: "Contact us",
-    href: "/contact",
-    dataAttr: "cta-contact-us",
+    label: "View pricing",
+    href: "/pricing",
+    dataAttr: "cta-view-pricing",
   },
   onPrimaryClick,
 }: CTASectionProps) {
@@ -626,7 +626,7 @@ export default function CTASection({
       <TileRow
         as="section"
         aria-labelledby="cta-heading"
-        className="md:min-h-[380px] lg:h-[440px]"
+        className="md:min-h-[380px] lg:min-h-[440px]"
         centerClassName="relative overflow-hidden bg-[#0E0E0E] shadow-[0_1px_0_#0E0E0E]"
       >
         <BrandBlindsBackdrop anchorX={0.72} anchorY={0.35} />
@@ -661,10 +661,12 @@ export default function CTASection({
           />
         </div>
 
-        <WorkspacePreviewCard
-          spec={ACME_WORKSPACE}
-          className="absolute left-[460px] top-[188px] hidden h-[462px] w-[960px] shadow-[0_0_0_1px_rgba(0,0,0,0.18),0_0_0_6px_rgba(255,255,255,0.22),0_0_0_7px_rgba(255,255,255,0.45),0_-24px_48px_-12px_rgba(0,0,0,0.5)] md:block lg:left-[620px] lg:top-[148px]"
-        />
+        <div aria-hidden="true" className="pointer-events-none hidden md:block">
+          <WorkspacePreviewCard
+            spec={ACME_WORKSPACE}
+            className="absolute left-[460px] top-[188px] h-[462px] w-[960px] shadow-[0_0_0_1px_rgba(0,0,0,0.18),0_0_0_6px_rgba(255,255,255,0.22),0_0_0_7px_rgba(255,255,255,0.45),0_-24px_48px_-12px_rgba(0,0,0,0.5)] lg:left-[620px] lg:top-[148px]"
+          />
+        </div>
 
         <div
           aria-hidden="true"
@@ -676,18 +678,18 @@ export default function CTASection({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
           transition={{ duration: 0.45, ease: EASE_OUT }}
-          className="relative z-10 flex h-full max-w-[640px] flex-col justify-center gap-6 px-6 pb-[208px] pt-11 sm:gap-7 sm:px-10 md:py-12 lg:py-0 lg:pl-[72px] lg:pr-0"
+          className="relative z-10 flex h-full max-w-[640px] flex-col justify-center gap-6 px-5 pb-[208px] pt-11 sm:gap-7 sm:px-8 md:py-12 lg:py-12 lg:ps-10 lg:pe-0"
         >
           <h2
             id="cta-heading"
-            className="font-sans text-[28px] font-medium leading-[32px] tracking-[-0.04em] text-white sm:text-[36px] sm:leading-[1.15] sm:tracking-[-0.035em] lg:text-[40px] lg:leading-[46px]"
+            className="text-balance font-sans text-[28px] font-medium leading-[1.15] tracking-[-0.04em] text-white sm:text-[36px] sm:tracking-[-0.035em] lg:text-[40px]"
           >
             {title}
             <br />
             <span className="text-white/65">{mutedTitle}</span>
           </h2>
 
-          <p className="max-w-[460px] font-ui text-[14px] leading-[21px] text-white/80 sm:text-[16px] sm:leading-6">
+          <p className="max-w-[460px] text-pretty font-ui text-[14px] leading-[1.5] text-white/80 sm:text-[16px]">
             {description}
           </p>
 
@@ -697,7 +699,7 @@ export default function CTASection({
                 type="button"
                 onClick={onPrimaryClick}
                 data-attr={primaryCta.dataAttr}
-                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm dark:hover:bg-primary-hover"
+                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm [@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)]"
               >
                 {primaryCta.label}
               </button>
@@ -705,7 +707,7 @@ export default function CTASection({
               <Link
                 href={primaryCta.href}
                 data-attr={primaryCta.dataAttr}
-                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm dark:hover:bg-primary-hover"
+                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-[14px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] active:scale-[0.97] active:bg-primary-700 sm:h-10 sm:w-auto sm:rounded-sm [@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)]"
               >
                 {primaryCta.label}
               </Link>
@@ -714,7 +716,7 @@ export default function CTASection({
             <Link
               href={secondaryCta.href}
               data-attr={secondaryCta.dataAttr}
-              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-[#17171714] bg-white px-4 font-ui text-[14px] font-medium leading-[18px] text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#F5F5F5] focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.97] sm:h-10 sm:w-auto sm:rounded-sm"
+              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-[#17171714] bg-white px-4 font-ui text-[14px] font-medium leading-[18px] text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E] active:scale-[0.97] sm:h-10 sm:w-auto sm:rounded-sm [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[#F5F5F5]"
             >
               {secondaryCta.label}
             </Link>

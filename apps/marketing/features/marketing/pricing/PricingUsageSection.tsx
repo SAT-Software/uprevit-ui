@@ -9,7 +9,7 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const USAGE_CARDS = [
   {
     eyebrow: "Stored files",
-    tag: "MONTHLY",
+    tag: "Monthly",
     description:
       "Source files, artwork and attachments kept in your workspace. Measured once on your billing date.",
     rows: [
@@ -19,7 +19,7 @@ const USAGE_CARDS = [
   },
   {
     eyebrow: "Exports",
-    tag: "METERED",
+    tag: "Metered",
     description:
       "Each completed PDF or XLSX product dossier or report export. Pay only when you generate them.",
     rows: [
@@ -29,7 +29,7 @@ const USAGE_CARDS = [
   },
   {
     eyebrow: "Role-based seats",
-    tag: "PER ROLE",
+    tag: "Per role",
     description:
       "Not everyone needs a full seat. Approvers cost half a User seat; billing-only Managers are free.",
     rows: [
@@ -64,18 +64,18 @@ export default function PricingUsageSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.45, ease: EASE_OUT, delay: index * 0.05 }}
-              className="flex min-w-0 flex-col justify-between gap-8 rounded-tile bg-tile p-6 sm:gap-10 sm:p-8"
+              className="flex min-w-0 flex-col justify-between gap-8 rounded-tile bg-tile px-5 py-6 sm:gap-10 sm:p-8 lg:p-10"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-ui text-label font-medium uppercase leading-4 tracking-label text-faint-foreground">
                     {card.eyebrow}
                   </h3>
-                  <span className="inline-flex shrink-0 items-center rounded-sm border border-stroke-primary bg-muted px-2 py-[3px] font-mono text-caption leading-[14px] text-muted-foreground dark:border-edge-2 dark:bg-surface-2">
+                  <span className="inline-flex shrink-0 items-center rounded-sm border border-stroke-primary bg-muted px-2 py-[3px] font-mono text-caption uppercase leading-[14px] text-muted-foreground dark:border-edge-2 dark:bg-surface-2">
                     {card.tag}
                   </span>
                 </div>
-                <p className="font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
+                <p className="text-pretty font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
                   {card.description}
                 </p>
               </div>
@@ -93,7 +93,7 @@ export default function PricingUsageSection() {
                     <dt className="font-ui text-body-m leading-5 text-muted-foreground">
                       {row.label}
                     </dt>
-                    <dd className="text-right font-sans text-[19px] font-medium leading-7 tracking-[-0.02em] text-foreground sm:text-[21px] lg:text-[18px] xl:text-[21px]">
+                    <dd className="text-right font-sans text-[19px] font-medium leading-7 tracking-[-0.02em] text-foreground tabular-nums sm:text-[21px] lg:text-[18px] xl:text-[21px]">
                       {row.value}
                     </dd>
                   </div>

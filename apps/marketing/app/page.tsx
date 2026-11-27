@@ -18,7 +18,7 @@ export default function Home() {
     <TileGrid>
       <MarketingHeader inTileGrid />
       <TileSpacerRow />
-      <main className="contents">
+      <main id="main-content" className="contents">
         <HeroSection />
         <TileSpacerRow />
         <StandardsSection />

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion, type Transition } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 export function DottedConnector({
   d,
@@ -26,6 +27,7 @@ export function DottedConnector({
 }) {
   const rawId = React.useId();
   const maskId = `dotted-connector-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <>
@@ -54,18 +56,20 @@ export function DottedConnector({
           initial={false}
           animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }}
           transition={
-            active
-              ? {
-                  pathLength: transition,
-                  opacity: {
-                    duration: 0.05,
-                    delay: typeof transition === "object" && "delay" in transition ? transition.delay : 0,
-                  },
-                }
-              : {
-                  pathLength: transition,
-                  opacity: { duration: 0.22 },
-                }
+            reduceMotion
+              ? { duration: 0 }
+              : active
+                ? {
+                    pathLength: transition,
+                    opacity: {
+                      duration: 0.05,
+                      delay: typeof transition === "object" && "delay" in transition ? transition.delay : 0,
+                    },
+                  }
+                : {
+                    pathLength: transition,
+                    opacity: { duration: 0.22 },
+                  }
           }
         />
       </mask>
