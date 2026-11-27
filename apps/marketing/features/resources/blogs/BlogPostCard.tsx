@@ -11,6 +11,7 @@ export interface BlogPostSummary {
   author: string;
   category: string;
   cover: string;
+  featured?: boolean;
 }
 
 function PostMeta({

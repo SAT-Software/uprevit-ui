@@ -19,7 +19,7 @@ export function BlogsFeed({ posts }: { posts: BlogPostSummary[] }) {
     return [ALL_CATEGORY, ...unique];
   }, [posts]);
 
-  const featuredPost = posts[0];
+  const featuredPost = posts.find((post) => post.featured) ?? posts[0];
 
   const matchingPosts = React.useMemo(() => {
     if (activeCategory === ALL_CATEGORY) return posts;

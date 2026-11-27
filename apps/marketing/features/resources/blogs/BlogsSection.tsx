@@ -14,6 +14,7 @@ export default function BlogsSection() {
     author: post.author,
     category: post.category,
     cover: post.cover,
+    featured: post.featured,
   }));
 
   return (
