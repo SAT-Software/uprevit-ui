@@ -491,8 +491,7 @@ function WorkbookControlsCard({ reduceMotion }: { reduceMotion: boolean }) {
       </div>
 
       <div
-        role="status"
-        aria-live="polite"
+        aria-hidden="true"
         className="relative mt-4 flex w-full max-w-[300px] flex-col items-center"
       >
         <div className="relative h-[5px] w-full">
@@ -524,6 +523,9 @@ function WorkbookControlsCard({ reduceMotion }: { reduceMotion: boolean }) {
           </AnimatePresence>
         </div>
       </div>
+      <span role="status" aria-live="polite" className="sr-only">
+        {selected !== null ? `${WORKBOOK_CONTROLS[selected].title}: ${WORKBOOK_CONTROLS[selected].detail}` : ""}
+      </span>
     </div>
   );
 }

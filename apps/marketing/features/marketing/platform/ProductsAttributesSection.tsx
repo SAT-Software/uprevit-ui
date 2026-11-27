@@ -418,7 +418,8 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
   const activeSymbol = ((step % ISO_SYMBOLS.length) + ISO_SYMBOLS.length) % ISO_SYMBOLS.length;
   const activeComp = Math.floor(activeSymbol / 2) % COMPONENT_CARDS.length;
   const symbol = ISO_SYMBOLS[activeSymbol];
-  const wheelAngle = reduceMotion ? 0 : -step * 60;
+  const wheelAngle = -step * 60;
+  const [announcement, setAnnouncement] = React.useState("");
 
   const measureRef = React.useRef<HTMLSpanElement>(null);
   const [pillW, setPillW] = React.useState(156);
@@ -429,7 +430,11 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
     setPillW(Math.ceil(el.offsetWidth));
   }, [activeSymbol]);
 
-  const jumpToSymbol = (targetIndex: number) => {
+  const jumpToSymbol = (targetIndex: number, announce = false) => {
+    const target = ISO_SYMBOLS[targetIndex];
+    if (announce && target) {
+      setAnnouncement(`${target.code} ${target.label}`);
+    }
     const diff = ((targetIndex - activeSymbol + 9) % ISO_SYMBOLS.length) - 3;
     if (diff === 0) return;
     setStep((v) => v + diff);
@@ -543,7 +548,7 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
               key={comp.title}
               type="button"
               aria-pressed={isActive}
-              onClick={() => jumpToSymbol(comp.symbolIndex)}
+              onClick={() => jumpToSymbol(comp.symbolIndex, true)}
               onMouseEnter={() => jumpToSymbol(comp.symbolIndex)}
               className={cn(
                 "flex h-[64px] w-full cursor-pointer items-center rounded-[14px] border p-1 text-left transition-[color,background-color,border-color,transform] duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]",
@@ -587,7 +592,7 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
       >
         <motion.div
           animate={{ rotate: wheelAngle }}
-          transition={ARC_SPRING}
+          transition={reduceMotion ? { duration: 0 } : ARC_SPRING}
           className="absolute"
           style={{
             left: ARC_CX - 268 - ARC_R,
@@ -615,14 +620,14 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
                 aria-pressed={isCenter}
                 aria-hidden={!isVisible}
                 tabIndex={isVisible ? 0 : -1}
-                onClick={() => jumpToSymbol(idx)}
+                onClick={() => jumpToSymbol(idx, true)}
                 initial={false}
                 animate={{
                   rotate: -wheelAngle,
                   scale: isCenter ? 1.08 : isAdjacent ? 0.94 : 0.78,
                   opacity: isCenter ? 1 : isAdjacent ? 0.72 : 0,
                 }}
-                transition={ARC_SPRING}
+                transition={reduceMotion ? { duration: 0 } : ARC_SPRING}
                 style={{
                   left: cx - 31,
                   top: cy - 31,
@@ -654,8 +659,7 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
 
       {/* Infotip pill anchored cleanly to the right of the prominent center icon */}
       <div
-        role="status"
-        aria-live="polite"
+        aria-hidden="true"
         className="pointer-events-none absolute left-[358px] top-1/2 z-20 flex -translate-y-1/2 items-center"
       >
         <svg
@@ -688,6 +692,9 @@ function LabelComponentsSymbols({ reduceMotion }: { reduceMotion: boolean }) {
           </AnimatePresence>
         </motion.div>
       </div>
+      <span role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </span>
     </ScaledCanvas>
   );
 }
@@ -945,8 +952,7 @@ function SpecsWorkbookTile({ reduceMotion }: { reduceMotion: boolean }) {
         </div>
 
         <div
-          role="status"
-          aria-live="polite"
+          aria-hidden="true"
           className="flex h-[28px] items-center gap-2 rounded-md bg-tooltip px-3 text-tooltip-foreground shadow-[0_8px_18px_-6px_rgba(0,0,0,0.35)]"
         >
           <AnimatePresence initial={false} mode="popLayout">
@@ -963,6 +969,9 @@ function SpecsWorkbookTile({ reduceMotion }: { reduceMotion: boolean }) {
             </motion.span>
           </AnimatePresence>
         </div>
+        <span role="status" aria-live="polite" className="sr-only">
+          {picked ? `${cellRef} ${noteText}` : ""}
+        </span>
       </div>
     </ScaledCanvas>
   );

@@ -147,17 +147,19 @@ const FILES: {
     )),
   },
   {
-    id: "catalog-csv",
-    ext: ".csv",
+    id: "catalog-xlsx",
+    ext: ".xlsx",
     top: 241,
     doneAt: 1.6,
     sheet: [true, false, false, false, false].map((head, row) => (
       <div key={row} className="flex gap-0.5">
-        {[10, 8, 9].map((w) => (
+        {[0, 1, 2].map((cell) => (
           <span
-            key={w}
-            className={cn("h-[3px] rounded-full", head ? "bg-teal/40" : "bg-border")}
-            style={{ width: w }}
+            key={cell}
+            className={cn(
+              "h-[5px] flex-1 rounded-[1px]",
+              head ? "bg-info/30" : "bg-file-line",
+            )}
           />
         ))}
       </div>
@@ -183,17 +185,19 @@ const FILES: {
     )),
   },
   {
-    id: "params-csv",
-    ext: ".csv",
+    id: "params-xlsx",
+    ext: ".xlsx",
     top: 477,
     doneAt: 4.0,
     sheet: [true, false, false, false, false].map((head, row) => (
       <div key={row} className="flex gap-0.5">
-        {[8, 12, 7].map((w) => (
+        {[0, 1, 2].map((cell) => (
           <span
-            key={w}
-            className={cn("h-[3px] rounded-full", head ? "bg-teal/40" : "bg-border")}
-            style={{ width: w }}
+            key={cell}
+            className={cn(
+              "h-[5px] flex-1 rounded-[1px]",
+              head ? "bg-teal/35" : "bg-file-line",
+            )}
           />
         ))}
       </div>

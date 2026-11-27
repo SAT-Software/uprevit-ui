@@ -172,7 +172,8 @@ function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
 
   const active = ((rotationStep % ROLES.length) + ROLES.length) % ROLES.length;
   const activeRole = ROLES[active];
-  const wheelAngle = reduceMotion ? 0 : -rotationStep * 90;
+  const wheelAngle = -rotationStep * 90;
+  const [announcement, setAnnouncement] = React.useState("");
 
   React.useLayoutEffect(() => {
     const el = measureRef.current;
@@ -181,6 +182,10 @@ function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
   }, [active]);
 
   const handleSelectRole = (targetIndex: number) => {
+    const target = ROLES[targetIndex];
+    if (target) {
+      setAnnouncement(`${target.label}: ${target.description}`);
+    }
     const diff = ((targetIndex - active + 5) % ROLES.length) - 1;
     if (diff === 0) return;
     setRotationStep((value) => value + diff);
@@ -202,8 +207,7 @@ function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
       className="[mask-image:linear-gradient(#000_92%,transparent_100%)]"
     >
       <div
-        role="status"
-        aria-live="polite"
+        aria-hidden="true"
         className="absolute inset-x-0 top-1.5 flex flex-col items-center"
       >
         <span
@@ -308,7 +312,7 @@ function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
         <motion.div
           initial={false}
           animate={{ rotate: wheelAngle }}
-          transition={WHEEL_SPRING}
+          transition={reduceMotion ? { duration: 0 } : WHEEL_SPRING}
           className="absolute left-[118px] top-[50px] size-[200px]"
         >
           {ROLES.map((role, index) => {
@@ -323,7 +327,7 @@ function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
                 <motion.div
                   initial={false}
                   animate={{ rotate: -wheelAngle }}
-                  transition={WHEEL_SPRING}
+                  transition={reduceMotion ? { duration: 0 } : WHEEL_SPRING}
                   className="relative size-full"
                 >
                   <motion.button
@@ -374,6 +378,9 @@ function RotatingRoleWheel({ reduceMotion }: { reduceMotion: boolean }) {
             );
           })}
         </motion.div>
+        <span role="status" aria-live="polite" className="sr-only">
+          {announcement}
+        </span>
       </div>
     </ScaledCanvas>
   );

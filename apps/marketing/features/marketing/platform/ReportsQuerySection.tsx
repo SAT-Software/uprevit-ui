@@ -318,11 +318,7 @@ function PortfolioQueryBuilder({ reduceMotion }: { reduceMotion: boolean }) {
             ))}
           </div>
 
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex h-10 items-center justify-between border-t border-separator bg-subtle/60 px-4 font-ui text-[11px] text-muted-foreground dark:border-edge-1 dark:bg-surface-3/30"
-          >
+          <div className="flex h-10 items-center justify-between border-t border-separator bg-subtle/60 px-4 font-ui text-[11px] text-muted-foreground dark:border-edge-1 dark:bg-surface-3/30">
             <span className="flex items-center gap-1.5 tabular-nums">
               <Icon icon={LayoutTable01Icon} size={13} strokeWidth={1.8} />
               <strong className="font-semibold text-foreground">
@@ -333,6 +329,9 @@ function PortfolioQueryBuilder({ reduceMotion }: { reduceMotion: boolean }) {
             <span className="flex items-center gap-1.5 font-mono text-[10.5px] tabular-nums">
               <Icon icon={DashboardSpeed01Icon} size={13} strokeWidth={1.8} />
               {showResults ? "24 ms" : "—"}
+            </span>
+            <span role="status" aria-live="polite" className="sr-only">
+              {runNonce > 0 && showResults ? "38 matching products found in 24 ms." : ""}
             </span>
           </div>
         </div>

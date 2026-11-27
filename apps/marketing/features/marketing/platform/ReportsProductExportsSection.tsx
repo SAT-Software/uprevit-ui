@@ -71,7 +71,8 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
 
   const activeIdx = ((step % DOSSIER_TABS.length) + DOSSIER_TABS.length) % DOSSIER_TABS.length;
   const activeTab = DOSSIER_TABS[activeIdx];
-  const wheelAngle = reduceMotion ? 0 : -step * STEP_DEG;
+  const wheelAngle = -step * STEP_DEG;
+  const [announcement, setAnnouncement] = React.useState("");
 
   const measureRef = React.useRef<HTMLSpanElement>(null);
   const [pillW, setPillW] = React.useState<number | null>(null);
@@ -83,14 +84,16 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
   }, [activeIdx]);
 
   const jumpTo = (targetIdx: number) => {
+    const target = DOSSIER_TABS[targetIdx];
+    if (target) {
+      setAnnouncement(`${target.code}: ${target.label}`);
+    }
     const half = Math.floor(DOSSIER_TABS.length / 2);
     const diff =
       (((targetIdx - activeIdx + DOSSIER_TABS.length + half) % DOSSIER_TABS.length) - half);
     if (diff === 0) return;
     setStep((v) => v + diff);
   };
-
-  const activeSpokeIdx = reduceMotion ? activeIdx : 0;
 
   return (
     <ScaledCanvas
@@ -110,8 +113,7 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
       }}
     >
       <div
-        role="status"
-        aria-live="polite"
+        aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-[14px] z-20 flex flex-col items-center"
       >
         <span
@@ -181,14 +183,14 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
         >
           {WHEEL_SPOKES.map((spoke, idx) => (
             <DottedConnector
-              key={idx === activeSpokeIdx ? `${spoke.key}-${step}` : spoke.key}
+              key={idx === 0 ? `${spoke.key}-${step}` : spoke.key}
               d={spoke.d}
-              active={idx === activeSpokeIdx}
+              active={idx === 0}
               canvasWidth={272}
               canvasHeight={272}
               baseOpacity={0.18}
               activeOpacity={0.82}
-              transition={{ duration: 0.42, delay: idx === activeSpokeIdx ? 0.1 : 0, ease: PULSE_EASE }}
+              transition={{ duration: 0.42, delay: idx === 0 ? 0.1 : 0, ease: PULSE_EASE }}
             />
           ))}
 
@@ -231,7 +233,7 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
         <motion.div
           initial={false}
           animate={{ rotate: wheelAngle }}
-          transition={WHEEL_SPRING}
+          transition={reduceMotion ? { duration: 0 } : WHEEL_SPRING}
           className="absolute inset-0"
         >
           {DOSSIER_TABS.map((tab, idx) => {
@@ -250,7 +252,7 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
                 <motion.div
                   initial={false}
                   animate={{ rotate: -wheelAngle }}
-                  transition={WHEEL_SPRING}
+                  transition={reduceMotion ? { duration: 0 } : WHEEL_SPRING}
                   className="relative size-full"
                 >
                   <motion.button
@@ -290,6 +292,9 @@ function PdfDossierWheel({ reduceMotion }: { reduceMotion: boolean }) {
           })}
         </motion.div>
       </div>
+      <span role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </span>
     </ScaledCanvas>
   );
 }

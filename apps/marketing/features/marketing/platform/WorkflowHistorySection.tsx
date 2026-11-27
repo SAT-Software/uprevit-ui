@@ -412,17 +412,16 @@ function AdvancedWorkflowSearchCard({ reduceMotion }: { reduceMotion: boolean })
             )}
           </div>
 
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex flex-col gap-2 border-t border-separator px-4 py-3 dark:border-edge-1"
-          >
+          <div className="flex flex-col gap-2 border-t border-separator px-4 py-3 dark:border-edge-1">
             <div className="flex items-baseline gap-1.5 font-ui text-[11.5px] text-muted-foreground tabular-nums">
               <strong className="font-semibold text-foreground">
                 <RollingCount value={matchingCount} reduceMotion={reduceMotion} />
               </strong>
               <span>of {totalWorkflows} workflows</span>
             </div>
+            <span role="status" aria-live="polite" className="sr-only">
+              {manualIds !== null ? `${matchingCount} of ${totalWorkflows} workflows matching` : ""}
+            </span>
             <div className="h-1 w-full overflow-hidden rounded-full bg-separator dark:bg-edge-2">
               <motion.div
                 initial={false}

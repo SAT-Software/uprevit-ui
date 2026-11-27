@@ -20,7 +20,7 @@ const PRODUCTS_FAQS: FAQItem[] = [
     id: "format",
     question: "What file format does Bulk Import accept?",
     answer:
-      "Upload Excel (.xlsx) or CSV workbooks formatted with the Uprevit import template—covering product metadata, custom fields, compliance standards, languages, and label components.",
+      "Upload Excel (.xlsx) workbooks formatted with the Uprevit import template—covering product metadata, custom fields, compliance standards, languages, and label components.",
   },
   {
     id: "overwrite",

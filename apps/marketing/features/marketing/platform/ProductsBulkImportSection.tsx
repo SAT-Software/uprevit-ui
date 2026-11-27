@@ -124,31 +124,37 @@ const SOURCE_FILES: {
     )),
   },
   {
-    id: "languages-csv",
-    ext: ".csv",
+    id: "languages-xlsx",
+    ext: ".xlsx",
     top: 262,
     wave: 2,
     enterDelay: 0.05,
     uploadDur: 0.9,
     sheet: [true, false, false, false].map((head, row) => (
       <div key={row} className="flex gap-0.5">
-        {[10, 8, 9].map((w) => (
-          <span key={w} className={cn("h-[3px] rounded-full", head ? "bg-teal/40" : "bg-border")} style={{ width: w }} />
+        {[0, 1, 2].map((cell) => (
+          <span
+            key={cell}
+            className={cn("h-[4.5px] flex-1 rounded-[1px]", head ? "bg-teal/35" : "bg-file-line")}
+          />
         ))}
       </div>
     )),
   },
   {
-    id: "symbols-csv",
-    ext: ".csv",
+    id: "symbols-xlsx",
+    ext: ".xlsx",
     top: 368,
     wave: 2,
     enterDelay: 0.18,
     uploadDur: 1.0,
     sheet: [true, false, false, false].map((head, row) => (
       <div key={row} className="flex gap-0.5">
-        {[8, 11, 7].map((w) => (
-          <span key={w} className={cn("h-[3px] rounded-full", head ? "bg-teal/40" : "bg-border")} style={{ width: w }} />
+        {[0, 1, 2].map((cell) => (
+          <span
+            key={cell}
+            className={cn("h-[4.5px] flex-1 rounded-[1px]", head ? "bg-success/25" : "bg-file-line")}
+          />
         ))}
       </div>
     )),

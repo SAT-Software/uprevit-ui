@@ -128,6 +128,7 @@ function LifecycleDiagram({ reduceMotion }: { reduceMotion: boolean }) {
       minScale={0.58}
       panX={centerX}
       panBelow={820}
+      scrollable
     >
       {/* Subtle vertical column guide lines */}
       {STATES.map((st) => (
@@ -257,8 +258,7 @@ function LifecycleDiagram({ reduceMotion }: { reduceMotion: boolean }) {
       </span>
 
       <motion.div
-        role="status"
-        aria-live="polite"
+        aria-hidden="true"
         initial={false}
         animate={{ x: clampedX }}
         transition={SPRING}
@@ -301,6 +301,11 @@ function LifecycleDiagram({ reduceMotion }: { reduceMotion: boolean }) {
           </AnimatePresence>
         </motion.div>
       </motion.div>
+      <span role="status" aria-live="polite" className="sr-only">
+        {selected !== null
+          ? `${STATES[selected].label} (${STATES[selected].version}): ${STATES[selected].caption}`
+          : ""}
+      </span>
     </ScaledCanvas>
   );
 }
