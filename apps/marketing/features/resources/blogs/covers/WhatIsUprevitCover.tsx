@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useInView } from "motion/react";
 import { cn } from "@uprevit/ui/lib/utils";
 import {
   StatusBadge,
@@ -98,7 +99,7 @@ function MiniFileTile({
       </div>
       <span
         className={cn(
-          "absolute -left-2.5 bottom-[7px] rounded-[5px] border px-[5px] py-0.5 font-ui text-[9px] font-medium leading-[11px] text-white shadow-[0_1px_2px_rgba(0,0,0,0.12)]",
+          "absolute -left-2.5 bottom-[7px] rounded-[5px] border px-[5px] py-0.5 font-ui text-[9px] font-medium leading-[11px] text-white shadow-[0_1px_2px_rgba(0,0,0,0.12)] dark:text-surface-0",
           badgeClassName,
         )}
       >
@@ -130,6 +131,7 @@ function StandardIconTile({
 export function WhatIsUprevitCover() {
   const reduceMotion = usePrefersReducedMotion();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(containerRef, { margin: "-40px" });
   const [scale, setScale] = React.useState(1);
 
   React.useEffect(() => {
@@ -177,7 +179,7 @@ export function WhatIsUprevitCover() {
             />
           ))}
 
-          {reduceMotion
+          {reduceMotion || !inView
             ? STATIC_DOTS.map(([cx, cy]) => (
                 <g key={`s-${cx}-${cy}`}>
                   <circle
@@ -303,8 +305,8 @@ export function WhatIsUprevitCover() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="font-mono text-[9px] leading-3 tracking-[0.08em] text-faint-foreground">
-                SYMBOLS
+              <span className="font-mono text-[9px] uppercase leading-3 tracking-[0.08em] text-faint-foreground">
+                Symbols
               </span>
               <div className="flex gap-1.5">
                 {["REF", "LOT", "CE", "UDI"].map((symbol) => (
@@ -327,11 +329,11 @@ export function WhatIsUprevitCover() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Components</span>
-                <span className="font-medium text-foreground">12 labels</span>
+                <span className="font-medium text-foreground tabular-nums">12 labels</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Specifications</span>
-                <span className="font-medium text-foreground">3 sheets</span>
+                <span className="font-medium text-foreground tabular-nums">3 sheets</span>
               </div>
             </div>
 
@@ -341,9 +343,11 @@ export function WhatIsUprevitCover() {
                   <StatusBadge
                     key={status.label}
                     tone={status.tone}
+                    size="sm"
                     className="blog-cover-status absolute left-0 top-0"
                     style={{
                       animationDelay: `${-((3 - index) % 3) * 3}s`,
+                      animationPlayState: inView && !reduceMotion ? "running" : "paused",
                       opacity: index === STATUSES.length - 1 ? 1 : 0,
                     }}
                   >
@@ -351,7 +355,7 @@ export function WhatIsUprevitCover() {
                   </StatusBadge>
                 ))}
               </div>
-              <span className="font-mono text-[11px] leading-[14px] text-muted-foreground">
+              <span className="font-mono text-[11px] leading-[14px] text-muted-foreground tabular-nums">
                 v3.0
               </span>
             </div>

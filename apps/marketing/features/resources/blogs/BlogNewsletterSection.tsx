@@ -108,16 +108,16 @@ function NewsletterInboxVisual({
       <div
         ref={containerRef}
         aria-hidden="true"
-        className="relative hidden h-[380px] w-[560px] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_20%,#FFFFFF_0%,#FCFCFC_55%,#F7F7F7_100%)] shadow-[0_0_0_1px_rgba(23,23,23,0.05)] lg:flex dark:bg-[radial-gradient(circle_at_50%_20%,#1C1C1C_0%,#151515_55%,#111111_100%)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(255,255,255,0.06)]"
+        className="relative hidden h-[380px] w-[560px] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_20%,#FFFFFF_0%,#FCFCFC_55%,#F7F7F7_100%)] shadow-[0_0_0_1px_rgba(23,23,23,0.05)] xl:flex dark:bg-[radial-gradient(circle_at_50%_20%,#1C1C1C_0%,#151515_55%,#111111_100%)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(255,255,255,0.06)]"
       >
-        <div className="absolute left-[30px] top-6 flex w-[500px] rounded-[22px] border border-[#1717170D] bg-[#F5F5F5BF] p-1.5 dark:border-separator dark:bg-white/[0.02]">
+        <div className="absolute left-[30px] top-6 flex w-[500px] rounded-[22px] border border-[#1717170D] bg-frame-surface p-1.5 dark:border-separator dark:bg-white/[0.02]">
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:border-edge-2 dark:bg-surface-2 dark:shadow-[0_10px_28px_-10px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between gap-3 border-b border-separator px-[18px] py-3.5">
               <div className="flex min-w-0 items-center gap-2">
                 <span className="font-ui text-[14px] font-semibold leading-[18px] text-foreground">
                   Inbox
                 </span>
-                <span className="inline-flex h-5 shrink-0 items-center rounded-full bg-primary-50 px-[7px] font-ui text-[11px] font-medium leading-[14px] text-primary-700 dark:bg-primary-soft dark:text-primary-text">
+                <span className="inline-flex h-5 shrink-0 items-center rounded-full bg-primary-soft px-[7px] font-ui text-[11px] font-medium leading-[14px] text-primary-700 tabular-nums dark:text-primary-text">
                   {unreadCount} new
                 </span>
                 {recipientEmail !== "you@company.com" && (
@@ -246,6 +246,7 @@ export function BlogNewsletterSection({
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
     null,
   );
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const displayEmail = (submittedEmail || email).trim() || "you@company.com";
 
@@ -254,10 +255,12 @@ export function BlogNewsletterSection({
     const trimmed = email.trim();
     if (!trimmed) {
       setError("Enter your work email.");
+      inputRef.current?.focus();
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setError("Enter a valid email address.");
+      inputRef.current?.focus();
       return;
     }
     setError(null);
@@ -268,99 +271,100 @@ export function BlogNewsletterSection({
     <TileRow
       as="section"
       aria-labelledby="blog-newsletter-heading"
-      centerClassName="flex flex-col items-stretch justify-between gap-8 px-5 pt-10 pb-8 sm:px-10 sm:py-10 lg:flex-row lg:items-center lg:gap-12 lg:p-12"
+      centerClassName="flex flex-col items-stretch justify-between gap-8 px-5 pt-10 pb-8 sm:px-8 sm:py-10 lg:px-10 xl:flex-row xl:items-center xl:gap-12 xl:py-12"
     >
-      <div className="flex flex-1 flex-col gap-4 lg:gap-7 lg:pl-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-7">
         <div className="flex max-w-[520px] flex-col gap-2">
           <h2
             id="blog-newsletter-heading"
-            className="font-sans text-[22px] font-medium leading-[27px] tracking-[-0.03em] text-foreground sm:text-[28px] sm:leading-[34px] lg:text-[32px] lg:leading-[38px] lg:tracking-heading"
+            className="text-balance font-sans text-[22px] font-medium leading-[1.2] tracking-[-0.03em] text-foreground sm:text-[28px] lg:text-[32px] lg:tracking-heading"
           >
             Get new posts by email
           </h2>
-          <p className="font-ui text-body-m leading-[21px] text-muted-foreground lg:text-body-l lg:leading-[26px]">
+          <p className="text-pretty font-ui text-body-m leading-[21px] text-muted-foreground lg:text-body-l lg:leading-[26px]">
             One short email when a new post goes live. No sales emails, and you
             can leave any time.
           </p>
         </div>
 
-        {submittedEmail ? (
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex max-w-[460px] flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:border-edge-2 dark:bg-surface-2"
-          >
-            <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-success-soft text-success-strong dark:text-success">
-                <Icon icon={Tick02Icon} size={12} strokeWidth={2.4} />
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <p className="font-ui text-body-m font-medium leading-5 text-foreground">
-                  Confirm subscription for {submittedEmail}
-                </p>
-                <p className="font-ui text-body-s leading-[18px] text-muted-foreground">
-                  Send a one-line email to join our mailing list.
-                </p>
+        <div role="status" aria-live="polite">
+          {submittedEmail ? (
+            <div className="flex max-w-[460px] flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:border-edge-2 dark:bg-surface-2">
+              <div className="flex items-start gap-2.5">
+                <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-success-soft text-success-strong dark:text-success">
+                  <Icon icon={Tick02Icon} size={12} strokeWidth={2.4} />
+                </span>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <p className="break-all font-ui text-body-m font-medium leading-5 text-foreground">
+                    Confirm subscription for {submittedEmail}
+                  </p>
+                  <p className="font-ui text-body-s leading-[18px] text-muted-foreground">
+                    Send a one-line email to join our mailing list.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href={buildSubscribeMailto(submittedEmail)}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-primary-700 bg-primary px-3.5 font-ui text-body-s font-medium text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,transform] duration-150 hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
+                >
+                  Open email to subscribe
+                  <Icon icon={ArrowUpRight01Icon} size={14} strokeWidth={1.8} />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmittedEmail(null);
+                    setEmail("");
+                  }}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-ui text-body-s font-medium text-muted-foreground outline-none transition-[color,transform] duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:border-edge-2 dark:bg-surface-3"
+                >
+                  Use another email
+                </button>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <a
-                href={buildSubscribeMailto(submittedEmail)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-md border border-primary-700 bg-primary px-3.5 font-ui text-body-s font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-colors hover:bg-[#8A33FF] dark:hover:bg-primary-hover"
+          ) : (
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2">
+              <label
+                htmlFor="blog-newsletter-email"
+                className="font-ui text-body-s font-medium text-foreground"
               >
-                Open email to subscribe
-                <Icon icon={ArrowUpRight01Icon} size={14} strokeWidth={1.8} />
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  setSubmittedEmail(null);
-                  setEmail("");
-                }}
-                className="inline-flex h-9 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-ui text-body-s font-medium text-muted-foreground transition-colors hover:text-foreground dark:border-edge-2 dark:bg-surface-3"
-              >
-                Use another email
-              </button>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2">
-            <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:items-center sm:gap-2 sm:pt-0">
-              <label htmlFor="blog-newsletter-email" className="sr-only">
                 Work email
               </label>
-              <input
-                id="blog-newsletter-email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder="you@company.com"
-                aria-invalid={Boolean(error)}
-                aria-describedby={error ? "blog-newsletter-error" : undefined}
-                className="h-11 w-full rounded-lg border border-stroke-strong bg-card px-3.5 font-ui text-[15px] leading-5 text-foreground placeholder:text-placeholder shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 sm:w-[300px] dark:border-edge-3 dark:bg-surface-3 dark:text-foreground dark:placeholder:text-faint-foreground dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]"
-              />
-              <button
-                type="submit"
-                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-primary-700 bg-primary px-5 font-ui text-[15px] font-medium leading-[18px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-[#8A33FF] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_8px_20px_-6px_rgba(127,34,254,0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] sm:w-auto dark:hover:bg-primary-hover"
-              >
-                Subscribe
-              </button>
-            </div>
-            {error && (
-              <p
-                id="blog-newsletter-error"
-                role="alert"
-                className="font-ui text-body-s text-destructive"
-              >
-                {error}
-              </p>
-            )}
-          </form>
-        )}
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-2">
+                <input
+                  ref={inputRef}
+                  id="blog-newsletter-email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="you@company.com"
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "blog-newsletter-error" : undefined}
+                  className="h-11 w-full rounded-lg border border-stroke-strong bg-card px-3.5 font-ui text-base leading-5 text-foreground placeholder:text-placeholder shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 sm:flex-1 sm:max-w-[300px] sm:text-[15px] dark:border-edge-3 dark:bg-surface-3 dark:text-foreground dark:placeholder:text-faint-foreground dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center rounded-lg border border-primary-700 bg-primary px-5 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_8px_20px_-6px_rgba(127,34,254,0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] sm:w-auto"
+                >
+                  Subscribe by email
+                </button>
+              </div>
+              {error && (
+                <p
+                  id="blog-newsletter-error"
+                  className="font-ui text-body-s text-destructive"
+                >
+                  {error}
+                </p>
+              )}
+            </form>
+          )}
+        </div>
       </div>
 
       <NewsletterInboxVisual

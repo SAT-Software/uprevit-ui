@@ -61,13 +61,13 @@ export default function ContactNextStepsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.45, ease: EASE_OUT, delay: index * 0.05 }}
-              className="flex min-w-0 flex-col justify-between gap-8 rounded-tile bg-tile p-6 sm:gap-10 sm:p-8"
+              className="flex min-w-0 flex-col justify-between gap-8 rounded-tile bg-tile px-5 py-6 sm:gap-10 sm:p-8 lg:p-10"
             >
               <div className="flex flex-col gap-1.5">
                 <h3 className="font-ui text-[16px] font-medium leading-[22px] text-foreground">
                   {step.title}
                 </h3>
-                <p className="font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
+                <p className="text-pretty font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
                   {step.description}
                 </p>
               </div>
@@ -85,7 +85,7 @@ export default function ContactNextStepsSection() {
                     <dt className="font-ui text-body-m leading-5 text-muted-foreground">
                       {row.label}
                     </dt>
-                    <dd className="text-right font-sans text-[20px] font-medium leading-7 tracking-[-0.02em] text-foreground sm:text-[22px] lg:text-[18px] xl:text-[22px]">
+                    <dd className="text-right font-sans text-[20px] font-medium leading-7 tracking-[-0.02em] text-foreground tabular-nums sm:text-[22px] lg:text-[18px] xl:text-[22px]">
                       {row.value}
                     </dd>
                   </div>

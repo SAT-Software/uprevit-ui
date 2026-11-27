@@ -50,8 +50,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <TileGrid>
       <MarketingHeader inTileGrid />
-      <TileSpacerRow className="hidden sm:grid" />
-      <main className="contents">
+      <TileSpacerRow />
+      <main id="main-content" className="contents">
         <JsonLd
           data={{
             "@context": "https://schema.org",
@@ -78,9 +78,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             dataAttr: "blog-article-cta-book-demo",
           }}
           secondaryCta={{
-            label: "Learn more",
-            href: "/#product-preview",
-            dataAttr: "blog-article-cta-learn-more",
+            label: "Explore the platform",
+            href: "/platform/overview",
+            dataAttr: "blog-article-cta-platform",
           }}
         />
       </main>

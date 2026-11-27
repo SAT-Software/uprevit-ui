@@ -26,7 +26,7 @@ export default function PricingAddOnsSection() {
           only if you turn them on.
         </SectionHeader>
 
-        <TileRow centerClassName="flex flex-col items-stretch justify-between gap-4 overflow-hidden px-6 pt-7 sm:px-8 sm:pt-8 lg:flex-row lg:items-center lg:gap-12 lg:pl-8 lg:pr-0 lg:pt-6">
+        <TileRow centerClassName="flex flex-col items-stretch justify-between gap-4 overflow-hidden px-5 pt-7 sm:px-8 sm:pt-8 lg:flex-row lg:items-center lg:gap-12 lg:pl-10 lg:pr-0 lg:pt-6">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -37,7 +37,7 @@ export default function PricingAddOnsSection() {
             <h3 className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground sm:text-[24px] sm:leading-[30px]">
               Single sign-on (SSO)
             </h3>
-            <p className="max-w-[560px] font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
+            <p className="max-w-[560px] text-pretty font-ui text-[14px] leading-[21px] text-muted-foreground sm:text-[15px] sm:leading-[22px]">
               Sign in through your identity provider with SAML or OIDC, so
               access follows your company&apos;s accounts.
             </p>
@@ -45,7 +45,7 @@ export default function PricingAddOnsSection() {
               {SSO_PROTOCOLS.map((protocol) => (
                 <span
                   key={protocol}
-                  className="inline-flex h-[30px] items-center rounded-md border border-foreground/[0.09] bg-card px-2.5 font-ui text-body-m leading-[18px] text-foreground dark:border-foreground/[0.09] dark:bg-surface-2"
+                  className="inline-flex h-[30px] items-center rounded-md border border-stroke-primary bg-card px-2.5 font-ui text-body-m leading-[18px] text-foreground dark:border-edge-2 dark:bg-surface-2"
                 >
                   {protocol}
                 </span>

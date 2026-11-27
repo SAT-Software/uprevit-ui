@@ -28,7 +28,8 @@ export function ResourceComingSoonSection({
     <>
       <TileRow
         as="section"
-        centerClassName="relative overflow-hidden px-5 pt-12 pb-9 sm:px-10 sm:pt-16 sm:pb-12 lg:px-12 lg:pt-[88px] lg:pb-16"
+        aria-labelledby="resource-coming-soon-title"
+        centerClassName="relative overflow-hidden px-5 pt-12 pb-9 sm:px-8 sm:pt-16 sm:pb-12 lg:px-10 lg:pt-[88px] lg:pb-16"
       >
         <div
           aria-hidden="true"
@@ -46,19 +47,22 @@ export function ResourceComingSoonSection({
         <div className="relative flex flex-col gap-5">
           <Link
             href="/resources"
-            className="inline-flex w-fit items-center gap-1.5 font-ui text-body-m font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex w-fit items-center gap-1.5 rounded-sm font-ui text-body-m font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Icon icon={ArrowLeft02Icon} size={15} strokeWidth={1.8} />
             All resources
           </Link>
 
-          <h1 className="font-sans text-[30px] font-medium leading-[33px] tracking-[-0.04em] text-foreground sm:text-[46px] sm:leading-[52px] lg:text-[60px] lg:leading-[64px]">
+          <h1
+            id="resource-coming-soon-title"
+            className="text-balance font-sans text-[30px] font-medium leading-[1.1] tracking-[-0.04em] text-foreground sm:text-[46px] lg:text-[60px] lg:leading-[1.07]"
+          >
             {title}
             <br />
-            <span className="text-foreground/40">{mutedTitle}</span>
+            <span className="text-foreground/55">{mutedTitle}</span>
           </h1>
 
-          <p className="max-w-[560px] font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]">
+          <p className="max-w-[560px] text-pretty font-ui text-[15px] leading-[23px] text-muted-foreground sm:text-[17px] sm:leading-[27px] lg:text-lead lg:leading-[30px]">
             {description}
           </p>
         </div>
@@ -66,7 +70,8 @@ export function ResourceComingSoonSection({
 
       <TileRow
         as="section"
-        centerClassName="flex flex-col items-start justify-between gap-8 px-5 py-10 sm:px-10 sm:py-12 lg:flex-row lg:items-center lg:px-12 lg:py-14"
+        aria-labelledby="resource-coming-soon-status"
+        centerClassName="flex flex-col items-start justify-between gap-8 px-5 py-10 sm:px-8 sm:py-12 lg:flex-row lg:items-center lg:px-10 lg:py-14"
       >
         <div className="flex max-w-[600px] flex-col gap-5">
           <div className="flex items-center gap-3">
@@ -77,13 +82,16 @@ export function ResourceComingSoonSection({
               <span className="font-mono text-caption uppercase tracking-label text-faint-foreground">
                 {badge}
               </span>
-              <span className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground">
+              <h2
+                id="resource-coming-soon-status"
+                className="font-sans text-[22px] font-medium leading-7 tracking-[-0.02em] text-foreground"
+              >
                 Coming soon
-              </span>
+              </h2>
             </div>
           </div>
 
-          <p className="font-ui text-body-l leading-[26px] text-muted-foreground">
+          <p className="text-pretty font-ui text-body-l leading-[26px] text-muted-foreground">
             We are putting together practical, standards-aligned references for
             medical device labeling teams. Here is what will be included:
           </p>
@@ -92,7 +100,7 @@ export function ResourceComingSoonSection({
             {plannedItems.map((item) => (
               <li
                 key={item}
-                className="inline-flex h-7 items-center rounded-sm border border-border bg-card px-2.5 font-ui text-body-s font-medium text-foreground dark:border-edge-2 dark:bg-surface-2"
+                className="inline-flex h-6 items-center rounded-sm bg-muted px-2 font-ui text-body-s font-medium text-foreground dark:bg-surface-4"
               >
                 {item}
               </li>
@@ -103,14 +111,14 @@ export function ResourceComingSoonSection({
         <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
           <Link
             href="/resources/blogs"
-            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md border border-primary-700 bg-primary px-4 font-ui text-body-m font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-colors hover:bg-[#8A33FF] dark:hover:bg-primary-hover"
+            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md border border-primary-700 bg-primary px-4 font-ui text-body-m font-medium text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,transform] duration-150 hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
           >
             Read the blog
             <Icon icon={ArrowRight02Icon} size={14} strokeWidth={1.8} />
           </Link>
           <Link
             href="/contact"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-stroke-strong bg-card px-4 font-ui text-body-m font-medium text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-surface-hover dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-stroke-strong bg-card px-4 font-ui text-body-m font-medium text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[background-color,transform] duration-150 hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:border-edge-2 dark:bg-surface-2 dark:hover:bg-surface-3"
           >
             Request early access
           </Link>

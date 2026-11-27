@@ -16,8 +16,8 @@ export default function ToolkitsPage() {
   return (
     <TileGrid>
       <MarketingHeader inTileGrid />
-      <TileSpacerRow className="hidden sm:grid" />
-      <main className="contents">
+      <TileSpacerRow />
+      <main id="main-content" className="contents">
         <ToolkitsPlaceholder />
         <CTASection
           title="See your own labels"
@@ -29,9 +29,9 @@ export default function ToolkitsPage() {
             dataAttr: "toolkits-cta-book-demo",
           }}
           secondaryCta={{
-            label: "Learn more",
-            href: "/#product-preview",
-            dataAttr: "toolkits-cta-learn-more",
+            label: "Explore the platform",
+            href: "/platform/overview",
+            dataAttr: "toolkits-cta-platform",
           }}
         />
       </main>

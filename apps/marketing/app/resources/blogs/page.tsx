@@ -15,8 +15,8 @@ export default function BlogsPage() {
   return (
     <TileGrid>
       <MarketingHeader inTileGrid />
-      <TileSpacerRow className="hidden sm:grid" />
-      <main className="contents">
+      <TileSpacerRow />
+      <main id="main-content" className="contents">
         <BlogsSection />
         <CTASection
           title="See your own labels"
@@ -28,9 +28,9 @@ export default function BlogsPage() {
             dataAttr: "blog-cta-book-demo",
           }}
           secondaryCta={{
-            label: "Learn more",
-            href: "/#product-preview",
-            dataAttr: "blog-cta-learn-more",
+            label: "Explore the platform",
+            href: "/platform/overview",
+            dataAttr: "blog-cta-platform",
           }}
         />
       </main>
