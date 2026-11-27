@@ -17,7 +17,7 @@ This guide provides instructions and conventions for agents operating in the upr
 - Create github issue which will be closed by the PR that you are creating, and follow the same guidelines as PRs.
 - Add as much metadata information you can add for the PR and issue like type, labels, Develpment etc.
 - Don't write unnecessary comments in code
-- `workflow-plan/` holds local-only planning files. It is deliberately not in `.gitignore` so it stays searchable, but never commit or push it. Stage by path, not `git add -A` / `git add .`.
+- `workflow-plan/` holds local-only planning files and is gitignored; never commit or push it. Stage by path, not `git add -A` / `git add .`.
 
 
 
@@ -36,7 +36,3 @@ This guide provides instructions and conventions for agents operating in the upr
   - Wait on `/auth/callback` until the app redirects to the dashboard; navigating away earlier drops the session.
 - Data migration scripts: always `--dry-run` first, check the counts/output, then do the real run on the dev environment only.
 - app is pre-customer, so back-and-forth is fine, but do it properly.
-
-## TODOs
-
-- **Dashboard activity stats historical attribution (backend):** `src/utils/dashboardActivityStats.ts` currently attributes product activity to the product's *current* department/project and drops archived products from those counts. For true 30-day history, denormalize parent IDs onto audit events at write time (or read historical parents from audit scope) so archive/move does not rewrite earlier activity. Deferred from release `0.6.0` (Greptile PR #161).
