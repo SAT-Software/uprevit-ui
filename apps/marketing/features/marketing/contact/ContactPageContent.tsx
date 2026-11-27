@@ -13,7 +13,6 @@ import type { ContactTopicId } from "./ContactNoteRouting";
 const VALID_TOPICS = new Set<ContactTopicId>([
   "demo",
   "pricing",
-  "security",
   "support",
 ]);
 
@@ -40,7 +39,7 @@ const CONTACT_FAQS: FAQItem[] = [
     id: "security-questionnaire",
     question: "Can you complete our vendor security questionnaire?",
     answer:
-      "Yes. Select Security review in the form above or send your questionnaire directly to contact@uprevit.com and we will share our security overview and complete your review package.",
+      "Yes. Send your questionnaire to contact@uprevit.com and we will share our security overview and complete your review package.",
   },
   {
     id: "outside-us-eu",

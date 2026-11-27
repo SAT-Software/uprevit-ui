@@ -11,6 +11,7 @@ export const blog = defineCollections({
     author: z.string(),
     category: z.string(),
     cover: z.string(),
+    featured: z.boolean().optional(),
   }),
 });
 

@@ -167,11 +167,11 @@ export default function PricingPlansSection() {
           </div>
 
           <Link
-            href="/contact?topic=pricing"
-            data-attr="pricing-talk-to-us"
+            href="/contact?topic=demo"
+            data-attr="pricing-book-demo"
             className="inline-flex h-[42px] w-full shrink-0 items-center justify-center rounded-lg border border-primary-700 bg-primary bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(0,0,0,0.04)_100%)] px-4 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(106,18,220,0.25)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_20px_-6px_rgba(127,34,254,0.6)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700"
           >
-            Talk to us
+            Book a demo
           </Link>
 
           <div className="flex flex-col gap-3 border-t border-separator pt-6 dark:border-edge-1">

@@ -2,15 +2,17 @@
 
 import * as React from "react";
 import { motion, useInView } from "motion/react";
-import { Mail01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Mail01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { DottedConnector } from "@/features/marketing/landing-page/DottedConnector";
 import { ScaledCanvas } from "@/features/marketing/landing-page/ScaledCanvas";
 
-export type ContactTopicId = "demo" | "pricing" | "security" | "support";
+export type ContactTopicId = "demo" | "pricing" | "support";
 
 const PULSE_EASE = [0.45, 0, 0.25, 1] as const;
+
+type Point = readonly [number, number];
 
 interface RouteChipSpec {
   id: ContactTopicId;
@@ -19,9 +21,7 @@ interface RouteChipSpec {
   anchorX: number;
   anchorY: number;
   anchorEdge: "bottom" | "top";
-  spoke: string;
-  pulseFrom: readonly [number, number];
-  pulseTo: readonly [number, number];
+  curve: readonly [Point, Point, Point, Point];
 }
 
 const ROUTE_CHIPS: RouteChipSpec[] = [
@@ -32,44 +32,58 @@ const ROUTE_CHIPS: RouteChipSpec[] = [
     anchorX: 104,
     anchorY: 112,
     anchorEdge: "bottom",
-    spoke: "M188 161L104 112",
-    pulseFrom: [188, 161],
-    pulseTo: [104, 112],
+    curve: [
+      [188.8, 162],
+      [162.8, 147],
+      [104, 152],
+      [104, 112],
+    ],
   },
   {
     id: "pricing",
     label: "Pricing",
     dotClass: "bg-success",
-    anchorX: 338,
-    anchorY: 104,
+    anchorX: 336,
+    anchorY: 112,
     anchorEdge: "bottom",
-    spoke: "M251 160L338 104",
-    pulseFrom: [251, 160],
-    pulseTo: [338, 104],
+    curve: [
+      [251.2, 162],
+      [277.2, 147],
+      [336, 152],
+      [336, 112],
+    ],
   },
   {
     id: "support",
     label: "Support",
     dotClass: "bg-info",
-    anchorX: 98,
-    anchorY: 252,
+    anchorX: 220,
+    anchorY: 276,
     anchorEdge: "top",
-    spoke: "M188 199L98 252",
-    pulseFrom: [188, 199],
-    pulseTo: [98, 252],
-  },
-  {
-    id: "security",
-    label: "Security review",
-    dotClass: "bg-foreground/70",
-    anchorX: 334,
-    anchorY: 246,
-    anchorEdge: "top",
-    spoke: "M252 199L334 246",
-    pulseFrom: [252, 199],
-    pulseTo: [334, 246],
+    curve: [
+      [220, 216],
+      [220, 236],
+      [220, 256],
+      [220, 276],
+    ],
   },
 ];
+
+const toPath = ([p0, p1, p2, p3]: RouteChipSpec["curve"]) =>
+  `M${p0.join(" ")}C${p1.join(" ")} ${p2.join(" ")} ${p3.join(" ")}`;
+
+const pointAt = ([p0, p1, p2, p3]: RouteChipSpec["curve"], t: number) => {
+  const m = 1 - t;
+  return [0, 1].map(
+    (i) =>
+      m * m * m * p0[i] + 3 * m * m * t * p1[i] + 3 * m * t * t * p2[i] + t * t * t * p3[i],
+  );
+};
+
+const PULSE_STEPS = Array.from(
+  { length: 17 },
+  (_, i) => (1 - Math.cos((Math.PI * i) / 16)) / 2,
+);
 
 const PULSE_OFFSETS = ["0s", "-1.8s"];
 
@@ -84,18 +98,30 @@ export function ContactNoteRouting({
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-40px" });
-  const [pulseCount, setPulseCount] = React.useState(0);
+  const topicIndex = Math.max(
+    0,
+    ROUTE_CHIPS.findIndex((chip) => chip.id === selectedTopic),
+  );
+  const [pulse, setPulse] = React.useState({ index: topicIndex, count: 0 });
+  const [prevTopic, setPrevTopic] = React.useState(selectedTopic);
+
+  if (prevTopic !== selectedTopic) {
+    setPrevTopic(selectedTopic);
+    setPulse((prev) => ({ index: topicIndex, count: prev.count + 1 }));
+  }
 
   React.useEffect(() => {
     if (reduceMotion || !inView) return;
     const id = setInterval(() => {
-      setPulseCount((count) => count + 1);
-    }, 3200);
+      setPulse((prev) => ({
+        index: (prev.index + 1) % ROUTE_CHIPS.length,
+        count: prev.count + 1,
+      }));
+    }, 2400);
     return () => clearInterval(id);
-  }, [inView, reduceMotion]);
+  }, [inView, reduceMotion, selectedTopic]);
 
-  const activeChip =
-    ROUTE_CHIPS.find((chip) => chip.id === selectedTopic) ?? ROUTE_CHIPS[0];
+  const activeChip = ROUTE_CHIPS[pulse.index];
 
   return (
     <div
@@ -147,11 +173,11 @@ export function ContactNoteRouting({
           className="pointer-events-none absolute inset-0 text-foreground"
         >
           {ROUTE_CHIPS.map((chip) => {
-            const isActive = chip.id === selectedTopic;
+            const isActive = chip.id === activeChip.id;
             return (
               <g key={chip.id}>
                 <DottedConnector
-                  d={chip.spoke}
+                  d={toPath(chip.curve)}
                   active={isActive}
                   canvasWidth={440}
                   canvasHeight={360}
@@ -163,8 +189,8 @@ export function ContactNoteRouting({
                   }}
                 />
                 <circle
-                  cx={chip.pulseFrom[0]}
-                  cy={chip.pulseFrom[1]}
+                  cx={chip.curve[0][0]}
+                  cy={chip.curve[0][1]}
                   r="3"
                   strokeWidth="1.2"
                   className={cn(
@@ -173,8 +199,8 @@ export function ContactNoteRouting({
                   )}
                 />
                 <circle
-                  cx={chip.pulseTo[0]}
-                  cy={chip.pulseTo[1]}
+                  cx={chip.curve[3][0]}
+                  cy={chip.curve[3][1]}
                   r="3"
                   strokeWidth="1.2"
                   className={cn(
@@ -188,16 +214,17 @@ export function ContactNoteRouting({
 
           {!reduceMotion && inView && (
             <motion.g
-              key={`${activeChip.id}-${pulseCount}`}
-              initial={{ x: 0, y: 0, opacity: 0 }}
+              key={pulse.count}
+              initial={{ opacity: 0 }}
               animate={{
-                x: activeChip.pulseTo[0] - activeChip.pulseFrom[0],
-                y: activeChip.pulseTo[1] - activeChip.pulseFrom[1],
+                x: PULSE_STEPS.map((t) => pointAt(activeChip.curve, t)[0]),
+                y: PULSE_STEPS.map((t) => pointAt(activeChip.curve, t)[1]),
                 opacity: [0, 1, 1, 0],
               }}
               transition={{
-                x: { duration: 0.72, delay: 0.12, ease: PULSE_EASE },
-                y: { duration: 0.72, delay: 0.12, ease: PULSE_EASE },
+                duration: 0.72,
+                delay: 0.12,
+                ease: "linear",
                 opacity: {
                   duration: 0.72,
                   delay: 0.12,
@@ -206,19 +233,8 @@ export function ContactNoteRouting({
                 },
               }}
             >
-              <circle
-                cx={activeChip.pulseFrom[0]}
-                cy={activeChip.pulseFrom[1]}
-                r="4.5"
-                fill="currentColor"
-                fillOpacity={0.1}
-              />
-              <circle
-                cx={activeChip.pulseFrom[0]}
-                cy={activeChip.pulseFrom[1]}
-                r="2.2"
-                fill="currentColor"
-              />
+              <circle r="4.5" fill="currentColor" fillOpacity={0.1} />
+              <circle r="2.2" fill="currentColor" />
             </motion.g>
           )}
         </svg>
@@ -230,46 +246,37 @@ export function ContactNoteRouting({
             strokeWidth={1.5}
             className="text-foreground"
           />
-          <motion.span
-            key={selectedTopic}
-            initial={reduceMotion ? false : { scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.24, bounce: 0 }}
-            className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-success text-white shadow-[0_0_0_2px_#FFFFFF,0_4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_0_2px_#141414,0_4px_6px_-1px_rgba(0,0,0,0.3)]"
-          >
-            <Icon icon={Tick02Icon} size={12} strokeWidth={2.5} />
-          </motion.span>
         </div>
 
         {ROUTE_CHIPS.map((chip) => {
-          const isActive = chip.id === selectedTopic;
-          const top = chip.anchorEdge === "bottom" ? chip.anchorY - 28 : chip.anchorY;
+          const isSelected = chip.id === selectedTopic;
+          const top = chip.anchorEdge === "bottom" ? chip.anchorY - 24 : chip.anchorY;
           return (
             <div
               key={chip.id}
-              className="absolute -translate-x-1/2"
+              className="absolute flex -translate-x-1/2"
               style={{ left: chip.anchorX, top }}
             >
               <motion.button
                 type="button"
                 onClick={() => onSelectTopic(chip.id)}
-                aria-pressed={isActive}
+                aria-pressed={isSelected}
                 animate={
                   reduceMotion
                     ? undefined
-                    : { scale: isActive ? 1.04 : 1, y: isActive ? -1 : 0 }
+                    : { scale: isSelected ? 1.04 : 1, y: isSelected ? -1 : 0 }
                 }
                 transition={{ type: "spring", duration: 0.22, bounce: 0 }}
                 className={cn(
-                  "inline-flex h-7 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[6px] bg-card px-2.5 font-ui text-body-s leading-4 outline-none transition-[box-shadow,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:bg-surface-2",
-                  isActive
+                  "inline-flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md bg-card px-2 font-ui text-xs leading-4 outline-none transition-[box-shadow,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:bg-surface-2",
+                  isSelected
                     ? "font-medium text-foreground shadow-[inset_0_0_0_1px_rgba(23,23,23,0.22),0_4px_12px_-4px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24),0_4px_12px_-4px_rgba(0,0,0,0.35)]"
                     : "text-muted-foreground shadow-[inset_0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.03)] hover:text-foreground dark:shadow-[inset_0_0_0_1px_var(--edge-3)]",
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className={cn("size-[5.5px] shrink-0 rounded-full", chip.dotClass)}
+                  className={cn("size-[5px] shrink-0 rounded-full", chip.dotClass)}
                 />
                 <span>{chip.label}</span>
               </motion.button>
