@@ -44,6 +44,7 @@ applications:
         build:
           commands:
             - nvm use 24
+            - env | sed -nE '/^(API_PROXY_TARGET)=/p' >> apps/marketing/.env.production
             - pnpm run build:marketing
       artifacts:
         baseDirectory: apps/marketing/.next

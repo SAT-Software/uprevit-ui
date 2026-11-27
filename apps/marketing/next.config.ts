@@ -7,6 +7,11 @@ const posthogAssetsHost = posthogHost.replace(".i.posthog.com", "-assets.i.posth
 
 const isDev = process.env.NODE_ENV === "development";
 const marketingCdnOrigin = new URL(process.env.NEXT_PUBLIC_MARKETING_CDN_URL!).origin;
+const apiProxyTarget = (
+  process.env.API_PROXY_TARGET ||
+  process.env.NEXT_PUBLIC_API_PROXY_TARGET ||
+  (isDev ? "https://weh8ywxicg.execute-api.us-east-1.amazonaws.com/Prod" : "")
+).replace(/\/+$/, "");
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -14,14 +19,14 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${marketingCdnOrigin}`,
   "font-src 'self' data:",
-  "connect-src 'self' https://*.posthog.com",
+  "connect-src 'self' https://*.posthog.com https://challenges.cloudflare.com",
   `media-src 'self' blob: ${marketingCdnOrigin}`,
   "worker-src 'self' blob:",
-  "frame-src 'none'",
+  "frame-src https://challenges.cloudflare.com",
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
@@ -51,6 +56,9 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      ...(apiProxyTarget
+        ? [{ source: "/api/contact", destination: `${apiProxyTarget}/contact` }]
+        : []),
       { source: "/ingest/static/:path*", destination: `${posthogAssetsHost}/static/:path*` },
       { source: "/ingest/array/:path*", destination: `${posthogAssetsHost}/array/:path*` },
       { source: "/ingest/:path*", destination: `${posthogHost}/:path*` },
