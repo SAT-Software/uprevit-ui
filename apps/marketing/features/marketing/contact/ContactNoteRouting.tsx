@@ -249,7 +249,7 @@ export function ContactNoteRouting({
         </div>
 
         {ROUTE_CHIPS.map((chip) => {
-          const isActive = chip.id === activeChip.id;
+          const isSelected = chip.id === selectedTopic;
           const top = chip.anchorEdge === "bottom" ? chip.anchorY - 24 : chip.anchorY;
           return (
             <div
@@ -260,16 +260,16 @@ export function ContactNoteRouting({
               <motion.button
                 type="button"
                 onClick={() => onSelectTopic(chip.id)}
-                aria-pressed={isActive}
+                aria-pressed={isSelected}
                 animate={
                   reduceMotion
                     ? undefined
-                    : { scale: isActive ? 1.04 : 1, y: isActive ? -1 : 0 }
+                    : { scale: isSelected ? 1.04 : 1, y: isSelected ? -1 : 0 }
                 }
                 transition={{ type: "spring", duration: 0.22, bounce: 0 }}
                 className={cn(
                   "inline-flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md bg-card px-2 font-ui text-xs leading-4 outline-none transition-[box-shadow,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:bg-surface-2",
-                  isActive
+                  isSelected
                     ? "font-medium text-foreground shadow-[inset_0_0_0_1px_rgba(23,23,23,0.22),0_4px_12px_-4px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24),0_4px_12px_-4px_rgba(0,0,0,0.35)]"
                     : "text-muted-foreground shadow-[inset_0_0_0_1px_var(--border),0_1px_2px_rgb(0_0_0/0.03)] hover:text-foreground dark:shadow-[inset_0_0_0_1px_var(--edge-3)]",
                 )}
