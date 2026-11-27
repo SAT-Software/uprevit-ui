@@ -28,8 +28,11 @@ export function ScrollProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const scrollTo = useCallback((key: string) => {
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     sectionsRef.current[key]?.current?.scrollIntoView({
-      behavior: "smooth",
+      behavior: prefersReduced ? "auto" : "smooth",
     });
   }, []);
 

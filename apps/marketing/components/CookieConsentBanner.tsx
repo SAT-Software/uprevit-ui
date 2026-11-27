@@ -35,16 +35,16 @@ export function CookieConsentBanner() {
     <div
       role="region"
       aria-label="Cookie consent"
-      className="fixed inset-x-4 bottom-4 z-100 mx-auto flex max-w-xl flex-col gap-3 rounded-xl border border-border bg-background p-4 shadow-bottom-lg sm:flex-row sm:items-center"
+      className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-100 mx-auto flex max-w-xl flex-col gap-3 rounded-xl border border-border bg-background p-4 shadow-bottom-lg sm:flex-row sm:items-center"
     >
-      <p className="text-sm text-muted-foreground">
-        We use cookies to understand how visitors use our site. If you decline,
+      <p className="text-pretty text-sm text-muted-foreground">
+        We use cookies to understand how you use our site. If you decline,
         we only count anonymous visits.{" "}
         <Link
           href="/privacy-policy"
-          className="underline underline-offset-4 hover:text-foreground"
+          className="rounded-xs underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
-          Privacy Policy
+          Privacy policy
         </Link>
       </p>
       <div className="flex shrink-0 gap-2">

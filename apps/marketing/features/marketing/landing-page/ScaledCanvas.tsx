@@ -9,6 +9,7 @@ export function ScaledCanvas({
   minScale = 0,
   panX,
   panBelow,
+  scrollable = false,
   className,
   children,
   ...props
@@ -18,6 +19,7 @@ export function ScaledCanvas({
   minScale?: number;
   panX?: number;
   panBelow?: number;
+  scrollable?: boolean;
   className?: string;
   children: React.ReactNode;
 } & Omit<React.ComponentPropsWithRef<"div">, "children">) {
@@ -50,26 +52,47 @@ export function ScaledCanvas({
     ? Math.min(0, Math.max(containerWidth - scaledWidth, containerWidth / 2 - focusX * scale))
     : (containerWidth - scaledWidth) / 2;
 
+  const useScroll = scrollable && isOverflowing;
+
   return (
     <div
       {...props}
       ref={ref}
-      className={cn("relative overflow-hidden", className)}
+      className={cn(
+        "relative",
+        useScroll ? "overflow-x-auto overflow-y-hidden" : "overflow-hidden",
+        className,
+      )}
       style={{ height: height * scale, ...props.style }}
     >
       <div
         className={cn(
-          "absolute left-0 top-0 origin-top-left",
-          panX !== undefined &&
+          useScroll ? "relative shrink-0" : "absolute left-0 top-0",
+          "origin-top-left",
+          !useScroll &&
+            panX !== undefined &&
             "transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
         )}
-        style={{
-          width,
-          height,
-          transform: `translate3d(${tx}px, 0, 0) scale(${scale})`,
-        }}
+        style={
+          useScroll
+            ? { width: scaledWidth, height: height * scale }
+            : {
+                width,
+                height,
+                transform: `translate3d(${tx}px, 0, 0) scale(${scale})`,
+              }
+        }
       >
-        {children}
+        {useScroll ? (
+          <div
+            className="absolute left-0 top-0 origin-top-left"
+            style={{ width, height, transform: `scale(${scale})` }}
+          >
+            {children}
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </div>
   );
