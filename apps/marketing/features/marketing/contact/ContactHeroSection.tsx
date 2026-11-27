@@ -26,7 +26,6 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const TOPICS: { id: ContactTopicId; label: string }[] = [
   { id: "demo", label: "Book a demo" },
   { id: "pricing", label: "Pricing" },
-  { id: "security", label: "Security review" },
   { id: "support", label: "Support" },
 ];
 
@@ -511,7 +510,7 @@ export default function ContactHeroSection({
                     <legend className="font-ui text-body-m font-medium leading-5 text-foreground">
                       What can we help with?
                     </legend>
-                    <div className="flex flex-wrap gap-2 pt-0.5">
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
                       {TOPICS.map((topic) => {
                         const isSelected = selectedTopic === topic.id;
                         return (
@@ -529,21 +528,13 @@ export default function ContactHeroSection({
                             />
                             <span
                               className={cn(
-                                "inline-flex h-8 items-center gap-1.5 rounded-md border px-3 font-ui text-body-m leading-5 transition-[background-color,border-color,color,transform] duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-ring active:scale-[0.97]",
+                                "inline-flex h-6 items-center rounded-md border px-2 font-ui text-xs leading-4 transition-[background-color,border-color,color,transform] duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-ring active:scale-[0.97]",
                                 isSelected
-                                  ? "border-primary-300 bg-primary-50 font-medium text-primary-700 dark:border-[#8F40FF80] dark:bg-primary-soft dark:text-primary-text"
+                                  ? "border-foreground bg-foreground font-medium text-background"
                                   : "border-stroke-strong bg-card text-foreground hover:bg-subtle dark:border-edge-3 dark:bg-surface-3 dark:hover:bg-surface-4",
                               )}
                             >
-                              {isSelected && (
-                                <Icon
-                                  icon={Tick02Icon}
-                                  size={14}
-                                  strokeWidth={2}
-                                  className="shrink-0"
-                                />
-                              )}
-                              <span>{topic.label}</span>
+                              {topic.label}
                             </span>
                           </label>
                         );
