@@ -38,6 +38,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["*.trycloudflare.com"],
   skipTrailingSlashRedirect: true,
   transpilePackages: ["@uprevit/ui"],
   images: {
