@@ -58,7 +58,7 @@ export default function BlogsSection() {
       <BlogsFeed posts={summaries} />
 
       <TileSpacerRow />
-      <BlogNewsletterSection latestPost={summaries[0]} />
+      <BlogNewsletterSection posts={summaries} />
       <TileSpacerRow />
     </>
   );

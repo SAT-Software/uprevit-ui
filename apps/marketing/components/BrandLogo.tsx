@@ -101,25 +101,31 @@ export function BrandMark({
 
 export interface BrandWordmarkProps extends SVGProps<SVGSVGElement> {
   appearance?: BrandLogoAppearance;
+  letterColor?: string;
+  chevronColor?: string;
 }
 
 export function BrandWordmark({
   className,
   appearance = "auto",
+  letterColor,
+  chevronColor,
   ...props
 }: BrandWordmarkProps) {
   const letterFill =
-    appearance === "light"
+    letterColor ??
+    (appearance === "light"
       ? "var(--logo-ink-light)"
       : appearance === "dark"
         ? "var(--logo-ink-dark)"
-        : "currentColor";
+        : "currentColor");
   const chevronFill =
-    appearance === "light"
+    chevronColor ??
+    (appearance === "light"
       ? "var(--logo-chevron-light)"
       : appearance === "dark"
         ? "var(--logo-chevron-dark)"
-        : "var(--logo-chevron)";
+        : "var(--logo-chevron)");
 
   return (
     <svg

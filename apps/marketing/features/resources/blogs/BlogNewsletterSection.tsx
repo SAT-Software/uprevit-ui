@@ -62,11 +62,22 @@ const INCOMING_MAIL: InboxMailRow = {
   unread: true,
 };
 
+function postToMailRow(post: BlogPostSummary, time: string): InboxMailRow {
+  return {
+    id: post.slug,
+    sender: "Uprevit Blog",
+    time,
+    subject: post.title,
+    preview: post.description,
+    unread: true,
+  };
+}
+
 function NewsletterInboxVisual({
-  latestPost,
+  posts,
   recipientEmail,
 }: {
-  latestPost?: BlogPostSummary;
+  posts: BlogPostSummary[];
   recipientEmail: string;
 }) {
   const reduceMotion = usePrefersReducedMotion();
@@ -80,23 +91,26 @@ function NewsletterInboxVisual({
     return () => clearInterval(id);
   }, [reduceMotion, inView]);
 
-  const latestRow: InboxMailRow = {
-    id: "latest-post",
-    sender: "Uprevit Blog",
-    time: "Now",
-    subject:
-      latestPost?.title ??
-      "What is Uprevit? One place to manage medical device labeling",
-    preview:
-      latestPost?.description ??
-      "Labeling data usually lives in spreadsheets and email threads...",
-    unread: true,
-  };
+  const firstPost = posts.at(-1);
+  const latestPost = posts[0];
+  const firstRow = firstPost
+    ? postToMailRow(
+        firstPost,
+        new Date(firstPost.date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC",
+        }),
+      )
+    : undefined;
+  const incomingRow =
+    latestPost && latestPost !== firstPost
+      ? postToMailRow(latestPost, "Just now")
+      : INCOMING_MAIL;
 
-  const showIncoming = !reduceMotion && tick % 2 === 1;
-  const rows = showIncoming
-    ? [INCOMING_MAIL, latestRow, ...ARCHIVE_MAILS]
-    : [latestRow, ...ARCHIVE_MAILS];
+  const showIncoming = reduceMotion || tick % 2 === 1;
+  const baseRows = firstRow ? [firstRow, ...ARCHIVE_MAILS] : ARCHIVE_MAILS;
+  const rows = showIncoming ? [incomingRow, ...baseRows] : baseRows;
   const unreadCount = rows.filter((row) => row.unread).length;
 
   return (
@@ -233,9 +247,9 @@ function NewsletterInboxVisual({
 }
 
 export function BlogNewsletterSection({
-  latestPost,
+  posts,
 }: {
-  latestPost?: BlogPostSummary;
+  posts: BlogPostSummary[];
 }) {
   const [email, setEmail] = React.useState("");
   const [website, setWebsite] = React.useState("");
@@ -495,7 +509,7 @@ export function BlogNewsletterSection({
       </div>
 
       <NewsletterInboxVisual
-        latestPost={latestPost}
+        posts={posts}
         recipientEmail={displayEmail}
       />
     </TileRow>

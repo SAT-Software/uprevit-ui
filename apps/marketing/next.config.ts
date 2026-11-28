@@ -6,7 +6,6 @@ const posthogHost =
 const posthogAssetsHost = posthogHost.replace(".i.posthog.com", "-assets.i.posthog.com");
 
 const isDev = process.env.NODE_ENV === "development";
-const marketingCdnOrigin = new URL(process.env.NEXT_PUBLIC_MARKETING_CDN_URL!).origin;
 const apiProxyTarget = (
   process.env.API_PROXY_TARGET ||
   process.env.NEXT_PUBLIC_API_PROXY_TARGET ||
@@ -21,10 +20,10 @@ const contentSecurityPolicy = [
   "form-action 'self'",
   `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${marketingCdnOrigin}`,
+  "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self' https://*.posthog.com https://challenges.cloudflare.com",
-  `media-src 'self' blob: ${marketingCdnOrigin}`,
+  "media-src 'self' blob:",
   "worker-src 'self' blob:",
   "frame-src https://challenges.cloudflare.com",
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
@@ -46,11 +45,6 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["*.trycloudflare.com"],
   skipTrailingSlashRedirect: true,
   transpilePackages: ["@uprevit/ui"],
-  images: {
-    remotePatterns: [
-      new URL(`${process.env.NEXT_PUBLIC_MARKETING_CDN_URL}/**`),
-    ],
-  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

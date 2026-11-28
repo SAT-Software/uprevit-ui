@@ -65,7 +65,7 @@ export default function PlatformReportsExportsPage() {
             dataAttr: "reports-hero-book-demo",
           }}
           secondaryCta={{
-            label: "See pricing",
+            label: "View pricing",
             href: "/pricing",
             dataAttr: "reports-hero-pricing",
           }}

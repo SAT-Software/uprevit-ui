@@ -613,6 +613,209 @@
     }
   }
 
+  .error-loop-404,
+  .error-loop-500 {
+    animation-delay: var(--error-delay, 600ms);
+    animation-fill-mode: both;
+    animation-iteration-count: infinite;
+  }
+
+  .error-loop-404 {
+    animation-duration: 3600ms;
+  }
+
+  .error-loop-500 {
+    animation-duration: 4200ms;
+  }
+
+  .error-404-dot {
+    animation-name: error-404-dot;
+    animation-timing-function: linear;
+  }
+
+  .error-404-wall {
+    animation-name: error-404-wall;
+  }
+
+  .error-404-ripple {
+    animation-name: error-404-ripple;
+  }
+
+  .error-404-knock {
+    animation-name: error-404-knock;
+  }
+
+  .error-500-dot {
+    animation-name: error-500-dot;
+    animation-timing-function: linear;
+  }
+
+  .error-500-crashed {
+    animation-name: error-500-crashed;
+  }
+
+  .error-500-shake {
+    animation-name: error-500-shake;
+  }
+
+  .error-500-pulse {
+    animation-name: error-500-pulse;
+  }
+
+  @keyframes error-404-dot {
+    0% {
+      opacity: 0;
+      transform: translateX(var(--error-from));
+    }
+    4% {
+      opacity: 1;
+    }
+    35% {
+      opacity: 1;
+    }
+    36%,
+    100% {
+      opacity: 0;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes error-404-wall {
+    0%,
+    35% {
+      opacity: 0.35;
+      animation-timing-function: var(--ease-out);
+    }
+    39% {
+      opacity: 1;
+      animation-timing-function: ease-in-out;
+    }
+    72%,
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes error-404-ripple {
+    0%,
+    36% {
+      opacity: 0;
+      scale: 0.7;
+      animation-timing-function: var(--ease-out);
+    }
+    46% {
+      opacity: var(--error-peak);
+      scale: 1;
+      animation-timing-function: ease-in-out;
+    }
+    82%,
+    100% {
+      opacity: 0;
+      scale: 1.12;
+    }
+  }
+
+  @keyframes error-404-knock {
+    0%,
+    36% {
+      transform: translateX(0);
+      animation-timing-function: var(--ease-out);
+    }
+    40% {
+      transform: translateX(4px);
+      animation-timing-function: var(--ease-out);
+    }
+    52%,
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes error-500-dot {
+    0% {
+      opacity: 0;
+      transform: translateX(-340px);
+      color: var(--foreground);
+    }
+    3% {
+      opacity: 1;
+    }
+    43.5% {
+      color: var(--foreground);
+    }
+    44.5% {
+      color: var(--destructive);
+    }
+    52% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    53.5%,
+    100% {
+      opacity: 0;
+      transform: translateX(0);
+      color: var(--destructive);
+    }
+  }
+
+  @keyframes error-500-crashed {
+    0%,
+    52.5% {
+      opacity: 0;
+      animation-timing-function: var(--ease-out);
+    }
+    55.5%,
+    80% {
+      opacity: 1;
+      animation-timing-function: ease-in-out;
+    }
+    92%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes error-500-shake {
+    0%,
+    52.5% {
+      transform: translateX(0);
+    }
+    55% {
+      transform: translateX(-3px);
+    }
+    58% {
+      transform: translateX(3px);
+    }
+    61% {
+      transform: translateX(-1.5px);
+    }
+    64%,
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes error-500-pulse {
+    0%,
+    52.5% {
+      opacity: 0;
+      scale: var(--error-start);
+      animation-timing-function: var(--ease-out);
+    }
+    56% {
+      opacity: var(--error-peak);
+    }
+    68% {
+      scale: 1;
+      animation-timing-function: ease-in-out;
+    }
+    92%,
+    100% {
+      opacity: 0;
+      scale: 1.12;
+    }
+  }
+
   .typing-dot {
     animation: typing-dot 1.4s ease-in-out infinite;
   }
@@ -674,7 +877,9 @@
     }
 
     .typing-dot,
-    .faq-pulse-ring {
+    .faq-pulse-ring,
+    .error-loop-404,
+    .error-loop-500 {
       animation: none;
     }
   }
