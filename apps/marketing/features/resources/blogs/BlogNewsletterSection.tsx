@@ -108,7 +108,7 @@ function NewsletterInboxVisual({
       ? postToMailRow(latestPost, "Just now")
       : INCOMING_MAIL;
 
-  const showIncoming = !reduceMotion && tick % 2 === 1;
+  const showIncoming = reduceMotion || tick % 2 === 1;
   const baseRows = firstRow ? [firstRow, ...ARCHIVE_MAILS] : ARCHIVE_MAILS;
   const rows = showIncoming ? [incomingRow, ...baseRows] : baseRows;
   const unreadCount = rows.filter((row) => row.unread).length;
