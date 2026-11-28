@@ -23,11 +23,14 @@ export async function generateMetadata({
   const post = getBlogPost((await params).slug);
   if (!post) return {};
 
-  const metadata = pageMetadata(
-    post.title,
-    post.description,
-    `/resources/blogs/${post.slug}`,
-  );
+  const path = `/resources/blogs/${post.slug}`;
+  const metadata = pageMetadata(post.title, post.description, path);
+  const images = {
+    url: `${path}/opengraph-image`,
+    width: 1200,
+    height: 630,
+    alt: post.title,
+  };
 
   return {
     ...metadata,
@@ -37,6 +40,13 @@ export async function generateMetadata({
       type: "article",
       publishedTime: post.date,
       authors: [post.author],
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images,
     },
   };
 }
@@ -64,7 +74,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             dateModified: post.date,
             author: { "@id": `${siteUrl}/#organization` },
             publisher: { "@id": `${siteUrl}/#organization` },
-            image: `${siteUrl}/og-image.png`,
+            image: `${url}/opengraph-image`,
           }}
         />
         <BlogPostArticle post={post} />
