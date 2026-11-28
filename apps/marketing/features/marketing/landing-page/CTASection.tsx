@@ -611,7 +611,7 @@ export default function CTASection({
   description = "See your product data, reviews and redlines in one place, in a demo built around your own products.",
   primaryCta = {
     label: "Book a demo",
-    href: "/contact",
+    href: "/contact?topic=demo",
     dataAttr: "cta-book-demo",
   },
   secondaryCta = {

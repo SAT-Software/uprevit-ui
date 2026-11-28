@@ -32,7 +32,7 @@ export default function PlatformHeroSection({
     dataAttr: "platform-hero-book-demo",
   },
   secondaryCta = {
-    label: "See pricing",
+    label: "View pricing",
     href: "/pricing",
     dataAttr: "platform-hero-see-pricing",
   },

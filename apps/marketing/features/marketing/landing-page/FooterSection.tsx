@@ -14,7 +14,10 @@ const FOOTER_COLUMNS: {
     title: "Product",
     links: [
       { label: "Platform overview", href: "/platform/overview" },
-      { label: "Automatic redlines", href: "/platform/redlining" },
+      { label: "Products & bulk import", href: "/platform/products" },
+      { label: "Version control", href: "/platform/version-control" },
+      { label: "Redlining", href: "/platform/redlining" },
+      { label: "Approval workflows", href: "/platform/approval-workflows" },
       { label: "Reports & exports", href: "/platform/reports-exports" },
       { label: "Pricing", href: "/pricing" },
     ],

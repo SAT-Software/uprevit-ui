@@ -70,7 +70,6 @@ const PLATFORM_MENU_COLUMNS: [PlatformMenuItem[], PlatformMenuItem[]] = [
       description: "Cross-functional sign-off across RA, QA and Packaging",
       href: "/platform/approval-workflows",
       icon: UserCheck01Icon,
-      badge: "New",
     },
     {
       title: "Reports & exports",
@@ -335,7 +334,7 @@ export default function MarketingHeader({
 
         <div className="flex items-center gap-2">
           <Link
-            href="/contact"
+            href="/contact?topic=demo"
             data-attr="header-book-demo"
             className="hidden h-[30px] items-center gap-1.5 rounded-sm border border-primary-700 bg-primary px-3 font-ui text-[12.5px] font-medium leading-4 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] active:bg-primary-700 sm:inline-flex [@media(hover:hover)_and_(pointer:fine)]:hover:bg-primary-hover [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_16px_-6px_rgba(127,34,254,0.55)]"
           >
@@ -419,7 +418,7 @@ export default function MarketingHeader({
 
                   <div className="border-t border-separator pt-4">
                     <Link
-                      href="/contact"
+                      href="/contact?topic=demo"
                       onClick={() => setIsMobileNavOpen(false)}
                       className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-primary-700 bg-primary px-4 font-ui text-body-m font-medium text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
                     >
