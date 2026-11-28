@@ -392,7 +392,7 @@ export function BlogNewsletterSection({
                       {submittedEmail}
                     </span>{" "}
                     isn&apos;t subscribed yet, we sent a confirmation link. Click
-                    it within 24 hours to start receiving new posts.
+                    it within 72 hours to start receiving new posts.
                   </p>
                 </div>
               </div>
