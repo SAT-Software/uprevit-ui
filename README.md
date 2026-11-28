@@ -140,10 +140,6 @@ Notes:
 - `API_PROXY_TARGET` should point at the backend base URL, not a frontend route.
 - Keep real deployed values in Amplify branch environment settings, not in git.
 
-### Marketing App
-
-The marketing app needs `NEXT_PUBLIC_MARKETING_CDN_URL`, the CloudFront domain that serves the landing page demo video. Set it in `apps/marketing/.env.local` and keep the placeholder in `apps/marketing/.env.example`.
-
 ## Local Backend Integration
 
 The product app proxies `/api/*` requests to the backend using `API_PROXY_TARGET`.
