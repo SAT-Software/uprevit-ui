@@ -2,19 +2,23 @@
 
 import * as React from "react";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
-import {
-  ArrowUpRight01Icon,
-  Search01Icon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
+import { Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@uprevit/ui/components/common/Icon";
 import { cn } from "@uprevit/ui/lib/utils";
 import { BrandMark } from "@/components/BrandLogo";
 import { TileRow } from "@/components/TileGrid";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import type { BlogPostSummary } from "./BlogPostCard";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+const NEWSLETTER_TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_NEWSLETTER_TURNSTILE_SITE_KEY?.trim() ?? "";
+const TURNSTILE_LOAD_ERROR_MESSAGE =
+  "Verification failed to load. Please refresh the page and try again.";
+const TURNSTILE_WAITING_MESSAGE =
+  "Please wait a moment for the verification check to finish and try again.";
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 interface InboxMailRow {
   id: string;
@@ -57,14 +61,6 @@ const INCOMING_MAIL: InboxMailRow = {
   preview: "A plain walk-through of Annex I §23 updates for your next pack...",
   unread: true,
 };
-
-function buildSubscribeMailto(email: string) {
-  const params = new URLSearchParams({
-    subject: "Subscribe to Uprevit blog updates",
-    body: `Please add ${email} to the Uprevit blog newsletter.`,
-  });
-  return `mailto:contact@uprevit.com?${params.toString().replace(/\+/g, "%20")}`;
-}
 
 function NewsletterInboxVisual({
   latestPost,
@@ -242,34 +238,126 @@ export function BlogNewsletterSection({
   latestPost?: BlogPostSummary;
 }) {
   const [email, setEmail] = React.useState("");
+  const [website, setWebsite] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
     null,
   );
+  const [turnstileToken, setTurnstileToken] = React.useState("");
+  const [turnstileError, setTurnstileError] = React.useState(false);
+  const [turnstileResetCount, setTurnstileResetCount] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const displayEmail = (submittedEmail || email).trim() || "you@company.com";
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleTurnstileToken = React.useCallback((token: string) => {
+    setTurnstileToken(token);
+    setTurnstileError(false);
+    setError((prev) =>
+      prev === TURNSTILE_WAITING_MESSAGE ||
+      prev === TURNSTILE_LOAD_ERROR_MESSAGE
+        ? null
+        : prev,
+    );
+  }, []);
+
+  const handleTurnstileExpire = React.useCallback(() => {
+    setTurnstileToken("");
+  }, []);
+
+  const handleTurnstileError = React.useCallback(() => {
+    setTurnstileToken("");
+    setTurnstileError(true);
+  }, []);
+
+  const resetTurnstile = () => {
+    if (!NEWSLETTER_TURNSTILE_SITE_KEY) return;
+    setTurnstileToken("");
+    setTurnstileResetCount((count) => count + 1);
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submitting) return;
+
     const trimmed = email.trim();
     if (!trimmed) {
       setError("Enter your work email.");
       inputRef.current?.focus();
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    if (trimmed.length > 254 || !EMAIL_REGEX.test(trimmed)) {
       setError("Enter a valid email address.");
       inputRef.current?.focus();
       return;
     }
+
+    if (NEWSLETTER_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError(
+        turnstileError
+          ? TURNSTILE_LOAD_ERROR_MESSAGE
+          : TURNSTILE_WAITING_MESSAGE,
+      );
+      return;
+    }
+
     setError(null);
-    setSubmittedEmail(trimmed);
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmed,
+          website,
+          turnstileToken,
+          source: "blog",
+        }),
+      });
+
+      const data = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        errors?: Record<string, string>;
+      };
+
+      if (!response.ok) {
+        if (data.errors?.email) {
+          setError(data.errors.email);
+        } else if (response.status === 429) {
+          setError(
+            data.message ||
+              "Too many requests recently. Please try again in a few minutes.",
+          );
+        } else {
+          setError(
+            data.message ||
+              "We couldn't process your subscription right now. Please try again later.",
+          );
+        }
+        resetTurnstile();
+        return;
+      }
+
+      setSubmittedEmail(trimmed);
+      setEmail("");
+      setWebsite("");
+      resetTurnstile();
+    } catch {
+      setError(
+        "Unable to reach our server right now. Please check your connection and try again.",
+      );
+      resetTurnstile();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <TileRow
       as="section"
+      id="blog-newsletter"
       aria-labelledby="blog-newsletter-heading"
       centerClassName="flex flex-col items-stretch justify-between gap-8 px-5 pt-10 pb-8 sm:px-8 sm:py-10 lg:px-10 xl:flex-row xl:items-center xl:gap-12 xl:py-12"
     >
@@ -296,26 +384,24 @@ export function BlogNewsletterSection({
                 </span>
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <p className="break-all font-ui text-body-m font-medium leading-5 text-foreground">
-                    Confirm subscription for {submittedEmail}
+                    Check your inbox to confirm
                   </p>
                   <p className="font-ui text-body-s leading-[18px] text-muted-foreground">
-                    Send a one-line email to join our mailing list.
+                    If{" "}
+                    <span className="font-medium text-foreground">
+                      {submittedEmail}
+                    </span>{" "}
+                    isn&apos;t subscribed yet, we sent a confirmation link. Click
+                    it within 72 hours to start receiving new posts.
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <a
-                  href={buildSubscribeMailto(submittedEmail)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-primary-700 bg-primary px-3.5 font-ui text-body-s font-medium text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,transform] duration-150 hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
-                >
-                  Open email to subscribe
-                  <Icon icon={ArrowUpRight01Icon} size={14} strokeWidth={1.8} />
-                </a>
                 <button
                   type="button"
                   onClick={() => {
                     setSubmittedEmail(null);
-                    setEmail("");
+                    setError(null);
                   }}
                   className="inline-flex h-9 cursor-pointer items-center rounded-md border border-border bg-card px-3 font-ui text-body-s font-medium text-muted-foreground outline-none transition-[color,transform] duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] dark:border-edge-2 dark:bg-surface-3"
                 >
@@ -324,7 +410,27 @@ export function BlogNewsletterSection({
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2">
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className="flex flex-col gap-2.5"
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none fixed -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0"
+              >
+                <label htmlFor="blog-newsletter-website">Website</label>
+                <input
+                  id="blog-newsletter-website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                />
+              </div>
+
               <label
                 htmlFor="blog-newsletter-email"
                 className="font-ui text-body-s font-medium text-foreground"
@@ -337,6 +443,8 @@ export function BlogNewsletterSection({
                   id="blog-newsletter-email"
                   type="email"
                   autoComplete="email"
+                  maxLength={254}
+                  disabled={submitting}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -345,18 +453,37 @@ export function BlogNewsletterSection({
                   placeholder="you@company.com"
                   aria-invalid={Boolean(error)}
                   aria-describedby={error ? "blog-newsletter-error" : undefined}
-                  className="h-11 w-full rounded-lg border border-stroke-strong bg-card px-3.5 font-ui text-base leading-5 text-foreground placeholder:text-placeholder shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 sm:flex-1 sm:max-w-[300px] sm:text-[15px] dark:border-edge-3 dark:bg-surface-3 dark:text-foreground dark:placeholder:text-faint-foreground dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]"
+                  className="h-11 w-full rounded-lg border border-stroke-strong bg-card px-3.5 font-ui text-base leading-5 text-foreground placeholder:text-placeholder shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 disabled:opacity-65 sm:flex-1 sm:max-w-[300px] sm:text-[15px] dark:border-edge-3 dark:bg-surface-3 dark:text-foreground dark:placeholder:text-faint-foreground dark:shadow-[0_1px_2px_rgba(0,0,0,0.24)]"
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center rounded-lg border border-primary-700 bg-primary px-5 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_8px_20px_-6px_rgba(127,34,254,0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] sm:w-auto"
+                  disabled={submitting}
+                  aria-busy={submitting}
+                  data-attr="blog-newsletter-submit"
+                  className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary-700 bg-primary px-5 font-ui text-[15px] font-medium leading-[18px] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] outline-none transition-[background-color,box-shadow,transform,opacity] duration-150 ease-out hover:bg-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_8px_20px_-6px_rgba(127,34,254,0.55)] focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-65 sm:w-auto"
                 >
-                  Subscribe by email
+                  {submitting && (
+                    <span
+                      aria-hidden="true"
+                      className="size-3.5 animate-spin rounded-full border-2 border-primary-foreground/35 border-t-primary-foreground"
+                    />
+                  )}
+                  <span>{submitting ? "Subscribing…" : "Subscribe"}</span>
                 </button>
               </div>
+
+              <TurnstileWidget
+                siteKey={NEWSLETTER_TURNSTILE_SITE_KEY}
+                resetCount={turnstileResetCount}
+                onToken={handleTurnstileToken}
+                onExpire={handleTurnstileExpire}
+                onError={handleTurnstileError}
+              />
+
               {error && (
                 <p
                   id="blog-newsletter-error"
+                  role="alert"
                   className="font-ui text-body-s text-destructive"
                 >
                   {error}
