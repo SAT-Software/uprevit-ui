@@ -57,7 +57,21 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       ...(apiProxyTarget
-        ? [{ source: "/api/contact", destination: `${apiProxyTarget}/contact` }]
+        ? [
+            { source: "/api/contact", destination: `${apiProxyTarget}/contact` },
+            {
+              source: "/api/newsletter/subscribe",
+              destination: `${apiProxyTarget}/newsletter/subscribe`,
+            },
+            {
+              source: "/api/newsletter/confirm",
+              destination: `${apiProxyTarget}/newsletter/confirm`,
+            },
+            {
+              source: "/api/newsletter/unsubscribe",
+              destination: `${apiProxyTarget}/newsletter/unsubscribe`,
+            },
+          ]
         : []),
       { source: "/ingest/static/:path*", destination: `${posthogAssetsHost}/static/:path*` },
       { source: "/ingest/array/:path*", destination: `${posthogAssetsHost}/array/:path*` },
