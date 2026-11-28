@@ -36,3 +36,4 @@ This guide provides instructions and conventions for agents operating in the upr
   - Wait on `/auth/callback` until the app redirects to the dashboard; navigating away earlier drops the session.
 - Data migration scripts: always `--dry-run` first, check the counts/output, then do the real run on the dev environment only.
 - app is pre-customer, so back-and-forth is fine, but do it properly.
+- Never leave temporary test routes or debug pages (e.g. a page that throws on purpose) in the app; they break `pnpm build`. Remove them before handing back.
